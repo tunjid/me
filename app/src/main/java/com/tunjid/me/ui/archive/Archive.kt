@@ -16,7 +16,13 @@
 
 package com.tunjid.me.ui.archive
 
-import java.util.*
+import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 enum class ArchiveKind(val type: String) {
     Articles("articles"),
@@ -24,25 +30,37 @@ enum class ArchiveKind(val type: String) {
     Talks("talks"),
 }
 
-interface ArchiveLike {
-    val key: String
-    val link: String
-    val title: String
-    val body: String
-    val description: String
-    val thumbnail: String?
-    val author: User
-    val created: Date
-    val spanCount: Int?
-    val tags: Array<String>
-    val categories: Array<String>
-    val kind: ArchiveKind
-}
+@Serializable
+data class Archive(
+    val key: String,
+    val link: String,
+    val title: String,
+    val body: String,
+    val description: String,
+    val thumbnail: String?,
+    val author: User,
+    @Serializable(LocalDateTimeSerializer::class)
+    val created: LocalDateTime,
+    val spanCount: Int?,
+    val tags: List<String>,
+    val categories: List<String>,
+    val kind: ArchiveKind,
+)
 
-interface User {
-    val id: String
-    val firstName: String
-    val lastName: String
-    val fullName: String
-    val imageUrl: String
-};
+@Serializable
+data class User(
+    val id: String,
+    val firstName: String,
+    val lastName: String,
+    val fullName: String,
+    val imageUrl: String,
+)
+
+private object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
+    override val descriptor = PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
+    override fun serialize(encoder: Encoder, value: LocalDateTime) =
+        encoder.encodeString(value.toString())
+
+    override fun deserialize(decoder: Decoder): LocalDateTime =
+        LocalDateTime.parse(decoder.decodeString())
+}
