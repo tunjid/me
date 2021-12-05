@@ -22,6 +22,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.0.4'
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -35,5 +41,16 @@ dependencies {
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.0'
+    implementation 'androidx.activity:activity-compose:1.4.0'
+    implementation 'androidx.compose.material:material:1.0.5'
+    implementation 'androidx.compose.animation:animation:1.0.5'
     implementation 'com.google.android.material:material:1.4.0'
+    implementation 'com.google.android.material:material:1.4.0'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0")
+
+    implementation("com.tunjid.mutator:core:0.0.0-alpha01")
+    implementation("com.tunjid.mutator:coroutines:0.0.0-alpha01")
+    implementation("com.tunjid.tiler:tiler:0.0.0-alpha01")
 }
