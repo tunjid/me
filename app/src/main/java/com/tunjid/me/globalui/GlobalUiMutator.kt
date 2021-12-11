@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package com.tunjid.me
+package com.tunjid.me.globalui
 
-import android.app.Application
+import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.Mutator
+import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.StateFlow
 
-class App : Application() {
-
-    val appDeps by lazy {
-        createAppDependencies(scope = CoroutineScope(SupervisorJob() + Dispatchers.Main))
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        appDeps
-    }
-
-
-}
+fun globalUiMutator(scope: CoroutineScope): Mutator<Mutation<UiState>, StateFlow<UiState>> =
+    stateFlowMutator(
+        scope = scope,
+        initialState = UiState(),
+        transform = { it }
+    )
