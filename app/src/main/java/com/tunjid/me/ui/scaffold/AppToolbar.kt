@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.AppDependencies
+import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.globalui.ToolbarItem
 import com.tunjid.me.globalui.ToolbarState
 import com.tunjid.me.ui.mapState
@@ -73,7 +73,7 @@ internal fun ActionMenu(stateFlow: StateFlow<List<ToolbarItem>>) {
 
 @Composable
 fun ToolbarIcon(item: ToolbarItem) {
-    val uiStateHolder = AppDependencies.current.globalUiMutator
+    val uiStateHolder = LocalAppDependencies.current.globalUiMutator
     val scope = rememberCoroutineScope()
 
     val clicks by uiStateHolder.state

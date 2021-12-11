@@ -16,7 +16,8 @@
 
 package com.tunjid.me.data.archive
 
-import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toInstant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -24,6 +25,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
+@Serializable(ArchiveKindSerializer::class)
 enum class ArchiveKind(val type: String) {
     Articles("articles"),
     Projects("projects"),
@@ -40,8 +42,7 @@ data class Archive(
     val thumbnail: String?,
     val author: User,
     @Serializable(LocalDateTimeSerializer::class)
-    val created: LocalDateTime,
-    val spanCount: Int?,
+    val created: Instant,
     val tags: List<String>,
     val categories: List<String>,
     val kind: ArchiveKind,
@@ -56,11 +57,23 @@ data class User(
     val imageUrl: String,
 )
 
-private object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
+private object LocalDateTimeSerializer : KSerializer<Instant> {
     override val descriptor = PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
-    override fun serialize(encoder: Encoder, value: LocalDateTime) =
+    override fun serialize(encoder: Encoder, value: Instant) =
         encoder.encodeString(value.toString())
 
-    override fun deserialize(decoder: Decoder): LocalDateTime =
-        LocalDateTime.parse(decoder.decodeString())
+    override fun deserialize(decoder: Decoder): Instant = decoder.decodeString().toInstant()
+}
+
+private object ArchiveKindSerializer : KSerializer<ArchiveKind> {
+    override val descriptor = PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
+    override fun serialize(encoder: Encoder, value: ArchiveKind) =
+        encoder.encodeString(value.type)
+
+    override fun deserialize(decoder: Decoder): ArchiveKind = when (decoder.decodeString()) {
+        ArchiveKind.Articles.type -> ArchiveKind.Articles
+        ArchiveKind.Projects.type -> ArchiveKind.Projects
+        ArchiveKind.Talks.type -> ArchiveKind.Talks
+        else -> throw IllegalArgumentException("Unknown kind")
+    }
 }

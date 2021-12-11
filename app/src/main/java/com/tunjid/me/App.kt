@@ -32,5 +32,4 @@ class App : Application() {
         appDeps
     }
 
-
 }

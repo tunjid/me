@@ -21,7 +21,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.AppDependencies
+import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.globalui.UiState
 import com.tunjid.mutator.Mutation
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +47,7 @@ private data class MutableFunction<T>(var backing: (T) -> Unit = {}) : (T) -> Un
 
 @Composable
 fun InitialUiState(state: UiState) {
-    val uiStateHolder = AppDependencies.current.globalUiMutator
+    val uiStateHolder = LocalAppDependencies.current.globalUiMutator
 
     val toolbarMenuClickListener = remember {
         MutableFunction(state.toolbarMenuClickListener)

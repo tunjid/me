@@ -18,14 +18,16 @@ package com.tunjid.me.nav
 
 import androidx.compose.runtime.Composable
 
-interface Route {
+interface Route<T> {
+    val id: String
+
     @Composable
     fun Render()
 }
 
 data class StackNav(
     val name: String,
-    val routes: List<Route> = listOf()
+    val routes: List<Route<*>> = listOf()
 )
 
 data class MultiStackNav(
@@ -33,7 +35,6 @@ data class MultiStackNav(
     val stacks: List<StackNav> = listOf()
 )
 
-
-
+val MultiStackNav.routes get() = stacks.map(StackNav::routes).flatten()
 
 val MultiStackNav.current get() = stacks.getOrNull(currentIndex)?.routes?.last()

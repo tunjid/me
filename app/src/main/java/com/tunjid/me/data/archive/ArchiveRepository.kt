@@ -28,6 +28,15 @@ class RestArchiveRepository(
     private val api: Api
 ) : ArchiveRepository {
     override fun archives(query: ArchiveQuery): Flow<List<Archive>> = flow {
+        val a = api.fetchArchives(
+            kind = query.kind,
+            options = listOfNotNull(
+                "offset" to query.offset.toString(),
+                "limit" to query.limit.toString(),
+                query.filter?.let { "month" to it.month.toString() },
+                query.filter?.let { "year" to it.year.toString() },
+            ).toMap()
+        )
         emit(
             api.fetchArchives(
                 kind = query.kind,

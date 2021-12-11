@@ -32,6 +32,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
+typealias ArchiveMutator = Mutator<Action, StateFlow<State>>
+
 data class State(
     val archives: List<Archive> = listOf()
 )

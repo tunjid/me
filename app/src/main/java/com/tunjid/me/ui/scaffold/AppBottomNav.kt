@@ -17,7 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import com.tunjid.me.AppDependencies
+import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.globalui.BottomNavPositionalState
 import com.tunjid.me.ui.countIf
 import com.tunjid.me.ui.uiSizes
@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 internal fun BoxScope.AppBottomNav(
     stateFlow: StateFlow<BottomNavPositionalState>
 ) {
-    val navStateHolder = AppDependencies.current.navMutator
+    val navStateHolder = LocalAppDependencies.current.navMutator
     val nav by navStateHolder.state.collectAsState()
     val state by stateFlow.collectAsState()
 
