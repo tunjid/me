@@ -16,7 +16,9 @@
 
 package com.tunjid.me.ui.archive
 
-import com.tunjid.me.data.Api
+import com.tunjid.me.data.archive.Archive
+import com.tunjid.me.data.archive.ArchiveQuery
+import com.tunjid.me.data.archive.ArchiveRepository
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -28,30 +30,19 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 data class State(
     val archives: List<Archive> = listOf()
 )
 
-data class ArchiveQuery(
-    val year: Int?,
-    val month: Int?
-)
-
 sealed class Action {
-    data class Load(
-        val kind: ArchiveKind,
-        val before: ArchiveQuery,
-        val offset: Int,
-        val limit: Int = 20
-    ) : Action()
+    data class Fetch(val query: ArchiveQuery) : Action()
 }
 
 fun archiveMutator(
     scope: CoroutineScope,
-    api: Api
+    repo: ArchiveRepository
 ): Mutator<Action, StateFlow<State>> = stateFlowMutator(
     scope = scope,
     initialState = State(),
@@ -59,8 +50,9 @@ fun archiveMutator(
     transform = { actions ->
         actions.toMutationStream {
             when (val action = type()) {
-                is Action.Load -> action.flow
-                    .toArchives(api = api)
+                is Action.Fetch -> action.flow
+                    .map { it.query }
+                    .toArchives(repo = repo)
                     .map { archives ->
                         Mutation { copy(archives = archives) }
                     }
@@ -69,21 +61,14 @@ fun archiveMutator(
     }
 )
 
-private fun Flow<Action.Load>.toArchives(api: Api) =
-    map { Tile.Request.On<Action.Load, List<Archive>>(it) }
-        .flattenWith(tiledList(
-            flattener = Tile.Flattener.PivotSorted(
-                comparator = compareBy(Action.Load::offset),
-            ),
-            fetcher = { load ->
-                flowOf(
-                    api.fetchArchives(
-                        kind = load.kind,
-                        options = mapOf(
-                            "offset" to load.offset.toString()
-                        )
-                    )
-                )
-            }
-        ))
+private fun Flow<ArchiveQuery>.toArchives(repo: ArchiveRepository) =
+    map { Tile.Request.On<ArchiveQuery, List<Archive>>(it) }
+        .flattenWith(
+            tiledList(
+                flattener = Tile.Flattener.PivotSorted(
+                    comparator = compareBy(ArchiveQuery::offset),
+                ),
+                fetcher = repo::archives
+            )
+        )
         .map { it.flatten() }

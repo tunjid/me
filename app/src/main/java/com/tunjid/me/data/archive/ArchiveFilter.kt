@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.data
+package com.tunjid.me.data.archive
 
-import com.tunjid.me.data.archive.Archive
-import com.tunjid.me.data.archive.ArchiveKind
-import retrofit2.http.GET
-import retrofit2.http.Path
-import retrofit2.http.QueryMap
-
-interface Api {
-    @GET("api/{kind}")
-    suspend fun fetchArchives(
-        @Path("kind") kind: ArchiveKind,
-        @QueryMap options: Map<String, String> = mapOf()
-    ): List<Archive>
-}
+data class ArchiveFilter(
+    val year: Int?,
+    val month: Int?
+)

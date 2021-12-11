@@ -16,12 +16,46 @@
 
 package com.tunjid.me.ui.archive
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.sp
+import com.tunjid.me.data.archive.Archive
+import com.tunjid.me.data.archive.ArchiveQuery
 import com.tunjid.me.nav.Route
 
-data class ArchiveRoute(val kind: ArchiveKind): Route {
+data class ArchiveRoute(val query: ArchiveQuery) : Route {
     @Composable
     override fun Render() {
 
+    }
+}
+
+@ExperimentalMaterialApi
+@Composable
+private fun ArchiveCard(archive: Archive) {
+    Card(
+        onClick = { /*TODO*/ },
+        content = {
+            Column {
+                ArchiveBlurb(archive = archive)
+            }
+        }
+    )
+}
+
+@Composable
+private fun ArchiveBlurb(archive: Archive) {
+    Column {
+        Text(
+            text = archive.title,
+            fontSize = 17.sp,
+        )
+        Text(
+            text = archive.description,
+            fontSize = 14.sp,
+        )
     }
 }

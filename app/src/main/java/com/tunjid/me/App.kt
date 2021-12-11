@@ -21,7 +21,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.globalui.UiState
 import com.tunjid.me.nav.MultiStackNav
 import com.tunjid.me.nav.StackNav
-import com.tunjid.me.ui.archive.ArchiveKind
+import com.tunjid.me.data.archive.ArchiveKind
+import com.tunjid.me.data.archive.ArchiveQuery
 import com.tunjid.me.ui.archive.ArchiveRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
@@ -51,7 +52,7 @@ class App : Application() {
                     stacks = ArchiveKind.values().map { kind ->
                         StackNav(
                             name = kind.type,
-                            routes = listOf(ArchiveRoute(kind = kind))
+                            routes = listOf(ArchiveRoute(query = ArchiveQuery(kind = kind)))
                         )
                     }
                 ),

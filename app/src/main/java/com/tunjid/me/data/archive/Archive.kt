@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.ui.archive
+package com.tunjid.me.data.archive
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.KSerializer
