@@ -65,7 +65,7 @@ data class ArchiveRoute(val query: ArchiveQuery) : Route<ArchiveMutator> {
         )
 
         val mutator = LocalAppDependencies.current.routeDependencies(this)
-        val state by mutator.state.collectAsState()
+        val state by mutator.state.collectAsState(mutator.state.value)
 
         val listState = rememberLazyListState()
         LazyColumn(state = listState) {
@@ -76,7 +76,7 @@ data class ArchiveRoute(val query: ArchiveQuery) : Route<ArchiveMutator> {
             )
         }
 
-        LaunchedEffect(true) {
+        LaunchedEffect(query.kind) {
             mutator.accept(Action.Fetch(query = query))
         }
     }

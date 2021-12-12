@@ -45,7 +45,7 @@ sealed class Action {
 fun archiveMutator(
     scope: CoroutineScope,
     repo: ArchiveRepository
-): Mutator<Action, StateFlow<State>> = stateFlowMutator(
+): Mutator<Action, StateFlow<State>> = stateFlowMutator<Action, State>(
     scope = scope,
     initialState = State(),
     started = SharingStarted.WhileSubscribed(2000),
