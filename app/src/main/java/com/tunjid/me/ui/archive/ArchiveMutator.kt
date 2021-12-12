@@ -30,7 +30,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.scan
 
 typealias ArchiveMutator = Mutator<Action, StateFlow<State>>
 
@@ -53,7 +56,6 @@ fun archiveMutator(
         actions.toMutationStream {
             when (val action = type()) {
                 is Action.Fetch -> action.flow
-                    .map { it.query }
                     .toArchives(repo = repo)
                     .map { archives ->
                         Mutation { copy(archives = archives) }
@@ -63,14 +65,37 @@ fun archiveMutator(
     }
 )
 
-private fun Flow<ArchiveQuery>.toArchives(repo: ArchiveRepository) =
-    map { Tile.Request.On<ArchiveQuery, List<Archive>>(it) }
-        .flattenWith(
-            tiledList(
-                flattener = Tile.Flattener.PivotSorted(
-                    comparator = compareBy(ArchiveQuery::offset),
-                ),
-                fetcher = repo::archives
-            )
-        )
+private fun ArchiveRepository.archiveTiler() = tiledList(
+    flattener = Tile.Flattener.PivotSorted(
+        comparator = compareBy(ArchiveQuery::offset),
+    ),
+    fetcher = this::archives
+)
+
+private fun Flow<Action.Fetch>.toArchives(repo: ArchiveRepository): Flow<List<Archive>> =
+    queryChanges()
+        .flatMapLatest { (oldPages, newPages) ->
+            oldPages
+                .filterNot { newPages.contains(it) }
+                .map { Tile.Request.Off<ArchiveQuery, List<Archive>>(it) }
+                .plus(newPages.map { Tile.Request.On(it) })
+                .asFlow()
+        }
+        .flattenWith(repo.archiveTiler())
         .map { it.flatten() }
+
+private fun Flow<Action.Fetch>.queryChanges(): Flow<Pair<List<ArchiveQuery>, List<ArchiveQuery>>> =
+    map { (query) ->
+        listOf(
+            query.copy(offset = query.offset - query.limit),
+            query.copy(offset = query.offset + query.limit),
+            query
+        )
+            .filter { it.offset >= 0 }
+    }
+        .scan(Pair(listOf(), listOf())) { pair, new ->
+            pair.copy(
+                first = pair.second,
+                second = new
+            )
+        }

@@ -61,5 +61,5 @@ dependencies {
 
     implementation("com.tunjid.mutator:core:0.0.0-alpha02")
     implementation("com.tunjid.mutator:coroutines:0.0.0-alpha02")
-    implementation("com.tunjid.tiler:tiler:0.0.0-alpha01")
+    implementation("com.tunjid.tiler:tiler:0.0.0-alpha02")
 }
