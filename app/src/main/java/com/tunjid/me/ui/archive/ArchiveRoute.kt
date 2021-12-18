@@ -196,7 +196,7 @@ private fun ArchiveCard(archiveItem: ArchiveItem) {
                 Spacer(Modifier.height(8.dp))
                 ArchiveTags(
                     categories = archiveItem.archive.categories,
-                    published = archiveItem.archive.created
+                    published = archiveItem.prettyDate
                 )
                 Spacer(Modifier.height(8.dp))
                 ArchiveBlurb(archiveItem = archiveItem)
@@ -207,7 +207,7 @@ private fun ArchiveCard(archiveItem: ArchiveItem) {
 }
 
 @Composable
-private fun ArchiveTags(categories: List<String>, published: Instant) {
+private fun ArchiveTags(categories: List<String>, published: String) {
     Row(
         modifier = Modifier.padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,

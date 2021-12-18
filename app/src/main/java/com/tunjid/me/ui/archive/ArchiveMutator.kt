@@ -28,8 +28,15 @@ import com.tunjid.tiler.flattenWith
 import com.tunjid.tiler.tiledList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
+import kotlinx.datetime.toJavaInstant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 typealias ArchiveMutator = Mutator<Action, StateFlow<State>>
+
+private val publishedDateFormatter = DateTimeFormatter
+    .ofPattern("MMM dd yyyy")
+    .withZone(ZoneId.systemDefault())
 
 data class State(
     val route: ArchiveRoute,
@@ -42,7 +49,10 @@ data class ArchiveItem(
     val query: ArchiveQuery,
 )
 
-val ArchiveItem.key get() = archive.key
+val ArchiveItem.key: String get() = archive.key
+
+val ArchiveItem.prettyDate: String get() = publishedDateFormatter.format(archive.created.toJavaInstant())
+
 
 sealed class Action {
     data class Fetch(val query: ArchiveQuery) : Action()
