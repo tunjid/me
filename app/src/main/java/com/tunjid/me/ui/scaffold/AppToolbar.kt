@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,6 +66,8 @@ internal fun BoxScope.AppToolbar(stateFlow: StateFlow<ToolbarState>) {
             modifier = Modifier
                 .padding(horizontal = 16.dp),
             text = state.toolbarTitle.toString(),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             fontSize = 18.sp,
             color = MaterialTheme.colors.onPrimary
         )

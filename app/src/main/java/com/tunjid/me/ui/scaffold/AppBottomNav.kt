@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,10 +65,13 @@ internal fun BoxScope.AppBottomNav(
             .align(Alignment.BottomCenter)
             .offset(y = with(LocalDensity.current) { bottomNavPositionAnimation.value.toDp() })
             .fillMaxWidth()
-            .wrapContentHeight()
+            .wrapContentHeight(),
+        backgroundColor = MaterialTheme.colors.primary,
     ) {
 
-        BottomNavigation {
+        BottomNavigation(
+            backgroundColor = MaterialTheme.colors.primary,
+        ) {
             nav.stacks
                 .map { it.name }
                 .forEachIndexed { index, name ->
