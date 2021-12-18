@@ -121,6 +121,7 @@ fun createAppDependencies(scope: CoroutineScope) = object : AppDeps {
                 mutator = archiveDetailMutator(
                     scope = routeScope,
                     archive = route.archive,
+                    repo = archiveRepository
                 )
             )
         }

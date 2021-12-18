@@ -106,7 +106,7 @@ private fun ArchiveRepository.archiveTiler() = tiledList(
         comparator = compareBy(ArchiveQuery::offset),
     ),
     fetcher = { query ->
-        archives(query).map { archives ->
+        monitorArchives(query).map { archives ->
             archives.map { archive ->
                 ArchiveItem(
                     archive = archive,

@@ -21,13 +21,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 interface ArchiveRepository {
-    fun archives(query: ArchiveQuery): Flow<List<Archive>>
+    fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
+    fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive>
 }
 
 class RestArchiveRepository(
     private val api: Api
 ) : ArchiveRepository {
-    override fun archives(query: ArchiveQuery): Flow<List<Archive>> = flow {
+
+    override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> = flow {
         emit(
             api.fetchArchives(
                 kind = query.kind,
@@ -39,5 +41,9 @@ class RestArchiveRepository(
                 ).toMap()
             )
         )
+    }
+
+    override fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive> = flow {
+        emit(api.fetchArchive(kind = kind, id = id))
     }
 }

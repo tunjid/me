@@ -28,4 +28,10 @@ interface Api {
         @Path("kind") kind: ArchiveKind,
         @QueryMap options: Map<String, String> = mapOf()
     ): List<Archive>
+
+    @GET("api/{kind}/{id}")
+    suspend fun fetchArchive(
+        @Path("kind") kind: ArchiveKind,
+        @Path("id") id: String,
+    ): Archive
 }

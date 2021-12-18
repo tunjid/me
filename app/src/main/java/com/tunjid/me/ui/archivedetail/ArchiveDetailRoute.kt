@@ -17,6 +17,8 @@
 package com.tunjid.me.ui.archivedetail
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,9 +47,12 @@ data class ArchiveDetailRoute(val archive: Archive) : Route<ArchiveDetailMutator
 @Composable
 private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
     val state by mutator.state.collectAsState()
+    val scrollState = rememberScrollState()
 
     RichText(
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(state = scrollState)
     ) {
         Markdown(
             content = state.archive.body

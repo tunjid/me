@@ -18,15 +18,17 @@ package com.tunjid.me.ui.archivedetail
 
 
 import com.tunjid.me.data.archive.Archive
+import com.tunjid.me.data.archive.ArchiveRepository
+import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.map
 
 data class State(
-    val archive: Archive
+    val archive: Archive,
 )
 
 typealias ArchiveDetailMutator = Mutator<Unit, StateFlow<State>>
@@ -34,9 +36,18 @@ typealias ArchiveDetailMutator = Mutator<Unit, StateFlow<State>>
 fun archiveDetailMutator(
     scope: CoroutineScope,
     archive: Archive,
+    repo: ArchiveRepository
 ): ArchiveDetailMutator = stateFlowMutator(
     scope = scope,
     initialState = State(archive = archive),
     started = SharingStarted.WhileSubscribed(2000),
-    transform = { emptyFlow() }
+    transform = {
+        repo.monitorArchive(
+            kind = archive.kind,
+            id = archive.key
+        )
+            .map { fetchedArchive ->
+                Mutation { copy(archive = fetchedArchive) }
+            }
+    }
 )
