@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,8 +23,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -65,7 +67,6 @@ data class ScrollState(
     val queryOffset: Int = 0,
     val isDownward: Boolean = true,
 )
-
 
 private fun ScrollState.updateDirection(new: ScrollState) = new.copy(
     queryOffset = new.queryOffset,
@@ -228,6 +229,7 @@ private fun ArchiveTags(categories: List<String>, published: String) {
                         .wrapContentSize()
                         .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
                     onClick = {},
+                    colors = buttonColors(backgroundColor = MaterialTheme.colors.secondary),
                     shape = RoundedCornerShape(20.dp),
                     contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
                 ) {

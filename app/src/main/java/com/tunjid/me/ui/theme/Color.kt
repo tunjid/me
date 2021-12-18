@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.data
+package com.tunjid.me.ui.theme
 
-import com.tunjid.me.data.archive.Archive
-import com.tunjid.me.data.archive.ArchiveKind
-import retrofit2.http.GET
-import retrofit2.http.Path
-import retrofit2.http.QueryMap
+import androidx.compose.ui.graphics.Color
 
-interface Api {
-    @GET("api/{kind}")
-    suspend fun fetchArchives(
-        @Path("kind") kind: ArchiveKind,
-        @QueryMap options: Map<String, String> = mapOf()
-    ): List<Archive>
+val AppBlue = Color(0xFF083042)
+val AppDarkerBlue = Color(0xFF00071c)
+val AppGreen = Color(0xFF4cdb85)
+val AppDarkerGreen = Color(0xFF00a857)
 
-    @GET("api/{kind}/{id}")
-    suspend fun fetchArchive(
-        @Path("kind") kind: ArchiveKind,
-        @Path("id") id: String,
-    ): Archive
-}

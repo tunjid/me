@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.data
+package com.tunjid.me.ui.theme
 
-import com.tunjid.me.data.archive.Archive
-import com.tunjid.me.data.archive.ArchiveKind
-import retrofit2.http.GET
-import retrofit2.http.Path
-import retrofit2.http.QueryMap
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Shapes
+import androidx.compose.ui.unit.dp
 
-interface Api {
-    @GET("api/{kind}")
-    suspend fun fetchArchives(
-        @Path("kind") kind: ArchiveKind,
-        @QueryMap options: Map<String, String> = mapOf()
-    ): List<Archive>
-
-    @GET("api/{kind}/{id}")
-    suspend fun fetchArchive(
-        @Path("kind") kind: ArchiveKind,
-        @Path("id") id: String,
-    ): Archive
-}
+val Shapes = Shapes(
+    small = RoundedCornerShape(4.dp),
+    medium = RoundedCornerShape(4.dp),
+    large = RoundedCornerShape(0.dp)
+)
