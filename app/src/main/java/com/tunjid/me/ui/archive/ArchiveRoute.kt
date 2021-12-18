@@ -47,13 +47,15 @@ import com.tunjid.me.data.archive.ArchiveQuery
 import com.tunjid.me.data.archive.User
 import com.tunjid.me.globalui.UiState
 import com.tunjid.me.nav.Route
+import com.tunjid.me.nav.push
 import com.tunjid.me.ui.InitialUiState
+import com.tunjid.me.ui.archivedetail.ArchiveDetailRoute
+import com.tunjid.mutator.accept
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.scan
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -90,7 +92,7 @@ data class ArchiveRoute(val query: ArchiveQuery) : Route<ArchiveMutator> {
 @Composable
 @ExperimentalMaterialApi
 private fun ArchiveScreen(mutator: ArchiveMutator) {
-    val state by mutator.state.collectAsState(mutator.state.value)
+    val state by mutator.state.collectAsState()
     val query = state.route.query
 
     InitialUiState(
@@ -176,11 +178,15 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
 @Composable
 @ExperimentalMaterialApi
 private fun ArchiveCard(archiveItem: ArchiveItem) {
+    val navMutator = LocalAppDependencies.current.navMutator
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        onClick = { /*TODO*/ },
+        onClick = {
+            navMutator.accept { push(ArchiveDetailRoute(archive = archiveItem.archive)) }
+        },
         content = {
             Column {
                 Image(

@@ -61,6 +61,8 @@ dependencies {
     implementation("io.coil-kt:coil:1.4.0")
     implementation("io.coil-kt:coil-compose:1.4.0")
 
+    implementation "com.halilibo.compose-richtext:richtext-commonmark:0.10.0"
+
     implementation("com.tunjid.mutator:core:0.0.0-alpha02")
     implementation("com.tunjid.mutator:coroutines:0.0.0-alpha02")
     implementation("com.tunjid.tiler:tiler:0.0.0-alpha02")

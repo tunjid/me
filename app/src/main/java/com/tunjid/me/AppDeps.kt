@@ -29,6 +29,8 @@ import com.tunjid.me.nav.navMutator
 import com.tunjid.me.nav.routes
 import com.tunjid.me.ui.archive.ArchiveRoute
 import com.tunjid.me.ui.archive.archiveMutator
+import com.tunjid.me.ui.archivedetail.ArchiveDetailRoute
+import com.tunjid.me.ui.archivedetail.archiveDetailMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import kotlinx.coroutines.CoroutineScope
@@ -109,6 +111,16 @@ fun createAppDependencies(scope: CoroutineScope) = object : AppDeps {
                     scope = routeScope,
                     route = route,
                     repo = archiveRepository
+                )
+            )
+        }
+        is ArchiveDetailRoute -> routeMutatorFactory.getOrPut(route) {
+            val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+            ScopeHolder(
+                scope = routeScope,
+                mutator = archiveDetailMutator(
+                    scope = routeScope,
+                    archive = route.archive,
                 )
             )
         }

@@ -30,9 +30,31 @@ data class StackNav(
     val routes: List<Route<*>> = listOf()
 )
 
+fun StackNav.push(route: Route<*>) = copy(
+    routes = routes + route
+)
+
+fun StackNav.pop() = copy(
+    routes = routes.dropLast(1)
+)
+
 data class MultiStackNav(
     val currentIndex: Int = -1,
     val stacks: List<StackNav> = listOf()
+)
+
+fun MultiStackNav.push(route: Route<*>) = copy(
+    stacks = stacks.mapIndexed { index, stack ->
+        if (index == currentIndex) stack.push(route = route)
+        else stack
+    }
+)
+
+fun MultiStackNav.pop() = copy(
+    stacks = stacks.mapIndexed { index, stack ->
+        if (index == currentIndex) stack.pop()
+        else stack
+    }
 )
 
 val MultiStackNav.routes get() = stacks.map(StackNav::routes).flatten()
