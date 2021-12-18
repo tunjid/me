@@ -22,10 +22,14 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.lifecycle.lifecycleScope
+import com.tunjid.me.globalui.insetMutations
 import com.tunjid.me.nav.pop
 import com.tunjid.me.ui.scaffold.Root
 import com.tunjid.me.ui.theme.AppTheme
 import com.tunjid.mutator.accept
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +45,12 @@ class MainActivity : AppCompatActivity() {
                 Surface(color = MaterialTheme.colors.background) {
                     Root(appDeps = app.appDeps)
                 }
+            }
+        }
+
+        lifecycleScope.launch {
+            insetMutations().collect {
+                app.appDeps.globalUiMutator.accept(it)
             }
         }
     }
