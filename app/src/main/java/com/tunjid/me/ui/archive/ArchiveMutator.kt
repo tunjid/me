@@ -27,40 +27,66 @@ import com.tunjid.tiler.Tile
 import com.tunjid.tiler.flattenWith
 import com.tunjid.tiler.tiledList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.*
 
 typealias ArchiveMutator = Mutator<Action, StateFlow<State>>
 
 data class State(
-    val archives: List<Archive> = listOf()
+    val route: ArchiveRoute,
+    val listStateSummary: ListState = ListState(),
+    val items: List<ArchiveItem> = listOf()
 )
+
+data class ArchiveItem(
+    val archive: Archive,
+    val query: ArchiveQuery,
+)
+
+val ArchiveItem.key get() = archive.key
 
 sealed class Action {
     data class Fetch(val query: ArchiveQuery) : Action()
+    data class UpdateListState(val listState: ListState) : Action()
 }
+
+data class ListState(
+    val firstVisibleItemIndex: Int = 0,
+    val firstVisibleItemScrollOffset: Int = 0
+)
 
 fun archiveMutator(
     scope: CoroutineScope,
+    route: ArchiveRoute,
     repo: ArchiveRepository
-): Mutator<Action, StateFlow<State>> = stateFlowMutator<Action, State>(
+): Mutator<Action, StateFlow<State>> = stateFlowMutator(
     scope = scope,
-    initialState = State(),
+    initialState = State(route = route),
     started = SharingStarted.WhileSubscribed(2000),
     transform = { actions ->
         actions.toMutationStream {
             when (val action = type()) {
                 is Action.Fetch -> action.flow
-                    .toArchives(repo = repo)
+                    .toArchiveItems(repo = repo)
+                    // Debounce loads where archives are empty
+                    .debounce { archives -> if (archives.isEmpty()) 5000 else 0 }
                     .map { archives ->
-                        Mutation { copy(archives = archives) }
+                        Mutation { copy(items = archives) }
                     }
+                is Action.UpdateListState -> action.flow.map { (listState) ->
+                    println("Updating ls in ${route.query.kind} to ${listState.firstVisibleItemScrollOffset}")
+                    Mutation<State> { copy(listStateSummary = listState) }
+                }
             }
+                .map {
+                    Mutation {
+                        val b = this
+                        val a = it.mutate(this)
+                        println("Before for ${route.query.kind}; F = ${b.listStateSummary.firstVisibleItemIndex}; O = ${b.listStateSummary.firstVisibleItemScrollOffset}; S = ${b.items.size}")
+                        println("After for ${route.query.kind}; F = ${a.listStateSummary.firstVisibleItemIndex}; O = ${a.listStateSummary.firstVisibleItemScrollOffset}; S = ${a.items.size}")
+
+                        a
+                    }
+                }
         }
     }
 )
@@ -69,15 +95,24 @@ private fun ArchiveRepository.archiveTiler() = tiledList(
     flattener = Tile.Flattener.PivotSorted(
         comparator = compareBy(ArchiveQuery::offset),
     ),
-    fetcher = this::archives
+    fetcher = { query ->
+        archives(query).map { archives ->
+            archives.map { archive ->
+                ArchiveItem(
+                    archive = archive,
+                    query = query
+                )
+            }
+        }
+    }
 )
 
-private fun Flow<Action.Fetch>.toArchives(repo: ArchiveRepository): Flow<List<Archive>> =
+private fun Flow<Action.Fetch>.toArchiveItems(repo: ArchiveRepository): Flow<List<ArchiveItem>> =
     queryChanges()
         .flatMapLatest { (oldPages, newPages) ->
             oldPages
                 .filterNot { newPages.contains(it) }
-                .map { Tile.Request.Off<ArchiveQuery, List<Archive>>(it) }
+                .map { Tile.Request.Off<ArchiveQuery, List<ArchiveItem>>(it) }
                 .plus(newPages.map { Tile.Request.On(it) })
                 .asFlow()
         }

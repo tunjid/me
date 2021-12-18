@@ -27,9 +27,11 @@ import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -46,8 +48,31 @@ import com.tunjid.me.data.archive.User
 import com.tunjid.me.globalui.UiState
 import com.tunjid.me.nav.Route
 import com.tunjid.me.ui.InitialUiState
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.scan
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlin.math.abs
+import kotlin.math.max
+
+data class ScrollState(
+    val scrollOffset: Int = 0,
+    val dy: Int = 0,
+    val queryOffset: Int = 0,
+    val isDownward: Boolean = true,
+)
+
+
+private fun ScrollState.updateDirection(new: ScrollState) = new.copy(
+    queryOffset = new.queryOffset,
+    dy = new.scrollOffset - scrollOffset,
+    isDownward = when {
+        abs(new.scrollOffset - scrollOffset) > 10 -> isDownward
+        else -> new.scrollOffset > scrollOffset
+    }
+)
 
 data class ArchiveRoute(val query: ArchiveQuery) : Route<ArchiveMutator> {
     override val id: String
@@ -56,35 +81,101 @@ data class ArchiveRoute(val query: ArchiveQuery) : Route<ArchiveMutator> {
     @Composable
     @ExperimentalMaterialApi
     override fun Render() {
-
-        InitialUiState(
-            UiState(
-                toolbarTitle = query.kind.type,
-                showsBottomNav = true
-            )
+        ArchiveScreen(
+            mutator = LocalAppDependencies.current.routeDependencies(this)
         )
+    }
+}
 
-        val mutator = LocalAppDependencies.current.routeDependencies(this)
-        val state by mutator.state.collectAsState(mutator.state.value)
+@Composable
+@ExperimentalMaterialApi
+private fun ArchiveScreen(mutator: ArchiveMutator) {
+    val state by mutator.state.collectAsState(mutator.state.value)
+    val query = state.route.query
 
-        val listState = rememberLazyListState()
-        LazyColumn(state = listState) {
-            items(
-                items = state.archives,
-                key = Archive::key,
-                itemContent = { ArchiveCard(it) }
+    InitialUiState(
+        UiState(
+            toolbarTitle = query.kind.type,
+            showsBottomNav = true
+        )
+    )
+
+    val items = state.items
+    val listStateSummary = state.listStateSummary
+
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = listStateSummary.firstVisibleItemIndex,
+        initialFirstVisibleItemScrollOffset = listStateSummary.firstVisibleItemScrollOffset
+    )
+
+
+    LazyColumn(state = listState) {
+        items(
+            items = items,
+            key = ArchiveItem::key,
+            itemContent = { ArchiveCard(it) }
+        )
+    }
+
+    LaunchedEffect(listState, items) {
+        snapshotFlow {
+            ScrollState(
+                scrollOffset = listState.firstVisibleItemScrollOffset,
+                queryOffset = max(
+                    items.getOrNull(listState.firstVisibleItemIndex)
+                        ?.query
+                        ?.offset
+                        ?: 0,
+                    items.getOrNull(
+                        listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    )
+                        ?.query
+                        ?.offset
+                        ?: 0
+                )
             )
-        }
 
-        LaunchedEffect(query.kind) {
-            mutator.accept(Action.Fetch(query = query))
+        }
+            .scan(ScrollState(), ScrollState::updateDirection)
+            .filter { abs(it.dy) > 4 }
+            .distinctUntilChangedBy(ScrollState::queryOffset)
+            .collect {
+                mutator.accept(
+                    Action.Fetch(
+                        ArchiveQuery(
+                            kind = query.kind,
+                            filter = query.filter,
+                            offset = it.queryOffset
+                        )
+                    )
+                )
+            }
+    }
+
+    LaunchedEffect(query.kind) {
+        println("In ${query.kind}; s: ${state.items.size}; l: ${state.listStateSummary}")
+
+        mutator.accept(Action.Fetch(query = query))
+    }
+
+    DisposableEffect(query.kind) {
+        onDispose {
+            println("ybyvb")
+            mutator.accept(
+                Action.UpdateListState(
+                    ListState(
+                        firstVisibleItemIndex = listState.firstVisibleItemIndex,
+                        firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
+                    )
+                )
+            )
         }
     }
 }
 
 @Composable
 @ExperimentalMaterialApi
-private fun ArchiveCard(archive: Archive) {
+private fun ArchiveCard(archiveItem: ArchiveItem) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -93,7 +184,7 @@ private fun ArchiveCard(archive: Archive) {
         content = {
             Column {
                 Image(
-                    painter = rememberImagePainter(archive.thumbnail) {
+                    painter = rememberImagePainter(archiveItem.archive.thumbnail) {
                         scale(Scale.FILL)
                     },
                     contentScale = ContentScale.Crop,
@@ -103,9 +194,12 @@ private fun ArchiveCard(archive: Archive) {
                         .height(200.dp)
                 )
                 Spacer(Modifier.height(8.dp))
-                ArchiveTags(categories = archive.categories, published = archive.created)
+                ArchiveTags(
+                    categories = archiveItem.archive.categories,
+                    published = archiveItem.archive.created
+                )
                 Spacer(Modifier.height(8.dp))
-                ArchiveBlurb(archive = archive)
+                ArchiveBlurb(archiveItem = archiveItem)
                 Spacer(Modifier.height(8.dp))
             }
         }
@@ -150,45 +244,48 @@ private fun ArchiveTags(categories: List<String>, published: Instant) {
 }
 
 @Composable
-private fun ArchiveBlurb(archive: Archive) {
+private fun ArchiveBlurb(archiveItem: ArchiveItem) {
     Column(
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
         Text(
-            text = archive.title,
+            text = archiveItem.archive.title,
             fontSize = 18.sp,
         )
         Spacer(modifier = Modifier.padding(vertical = 2.dp))
         Text(
-            text = archive.description,
+            text = archiveItem.archive.description,
             fontSize = 15.sp,
         )
     }
 }
 
-private val sampleArchive = Archive(
-    key = "",
-    link = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",
-    title = "I'm an Archive",
-    body = "Hello",
-    description = "Hi",
-    thumbnail = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",
-    author = User(
-        id = "i",
-        firstName = "TJ",
-        lastName = "D",
-        fullName = "TJ D",
-        imageUrl = "",
-    ),
-    created = Clock.System.now(),
-    tags = listOf(),
-    categories = listOf("Android", "Kotlin"),
-    kind = ArchiveKind.Articles,
+private val sampleArchiveItem = ArchiveItem(
+    query = ArchiveQuery(kind = ArchiveKind.Articles),
+    archive = Archive(
+        key = "",
+        link = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",
+        title = "I'm an Archive",
+        body = "Hello",
+        description = "Hi",
+        thumbnail = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",
+        author = User(
+            id = "i",
+            firstName = "TJ",
+            lastName = "D",
+            fullName = "TJ D",
+            imageUrl = "",
+        ),
+        created = Clock.System.now(),
+        tags = listOf(),
+        categories = listOf("Android", "Kotlin"),
+        kind = ArchiveKind.Articles,
+    )
 )
 
 @Preview
 @Composable
 @ExperimentalMaterialApi
 fun Test() {
-    ArchiveCard(archive = sampleArchive)
+    ArchiveCard(archiveItem = sampleArchiveItem)
 }
