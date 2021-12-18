@@ -56,14 +56,15 @@ fun InitialUiState(state: UiState) {
         MutableFunction(state.altToolbarMenuClickListener)
     }
 
+    uiStateHolder.accept(Mutation {
+        state.copy(
+            systemUI = systemUI,
+            toolbarMenuClickListener = toolbarMenuClickListener,
+            altToolbarMenuClickListener = altToolbarMenuClickListener
+        )
+    })
+
     DisposableEffect(true) {
-        uiStateHolder.accept(Mutation {
-            state.copy(
-                systemUI = systemUI,
-                toolbarMenuClickListener = toolbarMenuClickListener,
-                altToolbarMenuClickListener = altToolbarMenuClickListener
-            )
-        })
         onDispose {
             toolbarMenuClickListener.backing = {}
             altToolbarMenuClickListener.backing = {}

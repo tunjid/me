@@ -98,7 +98,8 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
 
     InitialUiState(
         UiState(
-            toolbarTitle = query.kind.type,
+            toolbarShows = true,
+            toolbarTitle = query.kind.name,
             showsBottomNav = true
         )
     )

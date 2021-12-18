@@ -32,7 +32,7 @@ fun navMutator(scope: CoroutineScope): Mutator<Mutation<MultiStackNav>, StateFlo
             currentIndex = 0,
             stacks = ArchiveKind.values().map { kind ->
                 StackNav(
-                    name = kind.type,
+                    name = kind.name,
                     routes = listOf(ArchiveRoute(query = ArchiveQuery(kind = kind)))
                 )
             }

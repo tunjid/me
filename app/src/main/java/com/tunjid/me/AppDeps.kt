@@ -37,6 +37,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -131,10 +132,17 @@ fun createAppDependencies(scope: CoroutineScope) = object : AppDeps {
 
 val LocalAppDependencies = staticCompositionLocalOf<AppDeps> {
     object : AppDeps {
-        override val navMutator: Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
-            get() = TODO("Stub!")
-        override val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>>
-            get() = TODO("Stub!")
+        override val navMutator: Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> =
+            object : Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> {
+                override val accept: (Mutation<MultiStackNav>) -> Unit = {}
+                override val state: StateFlow<MultiStackNav> = MutableStateFlow(MultiStackNav())
+
+            }
+        override val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>> =
+            object : Mutator<Mutation<UiState>, StateFlow<UiState>> {
+                override val accept: (Mutation<UiState>) -> Unit = {}
+                override val state: StateFlow<UiState> = MutableStateFlow(UiState())
+            }
 
         override fun <T> routeDependencies(route: Route<T>): T =
             TODO("Not yet implemented")

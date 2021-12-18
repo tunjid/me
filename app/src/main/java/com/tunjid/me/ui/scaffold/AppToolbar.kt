@@ -19,6 +19,7 @@ package com.tunjid.me.ui.scaffold
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -33,11 +34,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.globalui.ToolbarItem
 import com.tunjid.me.globalui.ToolbarState
 import com.tunjid.me.ui.mapState
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -61,6 +65,7 @@ internal fun BoxScope.AppToolbar(stateFlow: StateFlow<ToolbarState>) {
             modifier = Modifier
                 .padding(horizontal = 16.dp),
             text = state.toolbarTitle.toString(),
+            fontSize = 18.sp,
             color = MaterialTheme.colors.onPrimary
         )
         ActionMenu(
@@ -123,5 +128,24 @@ fun ToolbarIcon(item: ToolbarItem) {
                 tint = MaterialTheme.colors.onPrimary
             )
         }
+    }
+}
+
+@Preview
+@Composable
+@ExperimentalMaterialApi
+fun Test() {
+    Box {
+        AppToolbar(
+            stateFlow = MutableStateFlow(
+                ToolbarState(
+                    statusBarSize = 0,
+                    visible = true,
+                    overlaps = true,
+                    toolbarTitle = "HI",
+                    items = listOf(),
+                )
+            )
+        )
     }
 }
