@@ -24,12 +24,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.Markdown
-import com.halilibo.richtext.ui.RichText
-import com.halilibo.richtext.ui.RichTextStyle
-import com.halilibo.richtext.ui.resolveDefaults
+import com.halilibo.richtext.ui.material.MaterialRichText
 import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.data.archive.Archive
 import com.tunjid.me.globalui.UiState
@@ -62,26 +59,10 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
         )
     )
 
-    RichText(
+    MaterialRichText(
         modifier = Modifier
             .padding(16.dp)
             .verticalScroll(state = scrollState),
-        style = RichTextStyle()
-            .resolveDefaults()
-            .run {
-                copy(
-                    stringStyle = stringStyle?.copy(
-                        boldStyle = stringStyle?.boldStyle?.copy(color = Color.White),
-                        italicStyle = stringStyle?.italicStyle?.copy(color = Color.White),
-                        underlineStyle = stringStyle?.underlineStyle?.copy(color = Color.White),
-                        strikethroughStyle = stringStyle?.strikethroughStyle?.copy(color = Color.White),
-                        subscriptStyle = stringStyle?.subscriptStyle?.copy(color = Color.White),
-                        superscriptStyle = stringStyle?.superscriptStyle?.copy(color = Color.White),
-                        codeStyle = stringStyle?.codeStyle?.copy(color = Color.White),
-                        linkStyle = stringStyle?.linkStyle?.copy(color = Color.White),
-                    )
-                )
-            },
     ) {
         Markdown(
             content = state.archive.body
