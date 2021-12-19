@@ -20,5 +20,5 @@ data class ArchiveQuery(
     val kind: ArchiveKind,
     val filter: ArchiveFilter? = null,
     val offset: Int = 0,
-    val limit: Int = 10
+    val limit: Int = 6
 )

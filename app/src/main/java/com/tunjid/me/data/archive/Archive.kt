@@ -16,6 +16,7 @@
 
 package com.tunjid.me.data.archive
 
+import androidx.compose.material.icons.Icons
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.KSerializer
@@ -27,9 +28,9 @@ import kotlinx.serialization.encoding.Encoder
 
 @Serializable(ArchiveKindSerializer::class)
 enum class ArchiveKind(val type: String) {
-    Articles("articles"),
-    Projects("projects"),
-    Talks("talks"),
+    Articles(type = "articles"),
+    Projects(type = "projects"),
+    Talks(type = "talks"),
 }
 
 @Serializable
