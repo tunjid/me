@@ -16,16 +16,19 @@
 
 package com.tunjid.me.ui.archivedetail
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material.MaterialRichText
@@ -35,13 +38,13 @@ import com.tunjid.me.globalui.InsetFlags
 import com.tunjid.me.globalui.UiState
 import com.tunjid.me.nav.Route
 import com.tunjid.me.ui.InitialUiState
+import com.tunjid.me.ui.mapState
 
 data class ArchiveDetailRoute(val archive: Archive) : Route<ArchiveDetailMutator> {
     override val id: String
         get() = archive.key
 
     @Composable
-    @ExperimentalMaterialApi
     override fun Render() {
         ArchiveDetailScreen(
             mutator = LocalAppDependencies.current.routeDependencies(this)
@@ -51,6 +54,14 @@ data class ArchiveDetailRoute(val archive: Archive) : Route<ArchiveDetailMutator
 
 @Composable
 private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
+    val scope = rememberCoroutineScope()
+    val navBarSize by LocalAppDependencies.current.globalUiMutator.state.mapState(
+        scope = scope,
+        mapper = { it.systemUI.static.navBarSize }
+    )
+        .collectAsState()
+    val navBarSizeDp = with(LocalDensity.current) { navBarSize.toDp() }
+
     val state by mutator.state.collectAsState()
     val scrollState = rememberScrollState()
 
@@ -64,13 +75,18 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
         )
     )
 
-    MaterialRichText(
+    Column(
         modifier = Modifier
-            .padding(16.dp)
             .verticalScroll(state = scrollState),
     ) {
-        Markdown(
-            content = state.archive.body
-        )
+        Spacer(modifier = Modifier.padding(8.dp))
+        MaterialRichText(
+            modifier = Modifier.padding(horizontal = 8.dp)
+        ) {
+            Markdown(
+                content = state.archive.body
+            )
+        }
+        Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))
     }
 }
