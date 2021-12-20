@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -100,7 +101,8 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
         UiState(
             toolbarShows = true,
             toolbarTitle = query.kind.name,
-            showsBottomNav = true
+            showsBottomNav = true,
+            statusBarColor = MaterialTheme.colors.primary.toArgb(),
         )
     )
 
@@ -121,6 +123,7 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
         )
     }
 
+    // Endless scrolling
     LaunchedEffect(listState, items) {
         snapshotFlow {
             ScrollState(
@@ -156,15 +159,14 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
             }
     }
 
+    // Initial load
     LaunchedEffect(query.kind) {
-        println("In ${query.kind}; s: ${state.items.size}; l: ${state.listStateSummary}")
-
         mutator.accept(Action.Fetch(query = query))
     }
 
+    // Scroll state preservation
     DisposableEffect(query.kind) {
         onDispose {
-            println("ybyvb")
             mutator.accept(
                 Action.UpdateListState(
                     ListState(
@@ -246,7 +248,7 @@ private fun ArchiveTags(categories: List<String>, published: String) {
 
         Text(
             modifier = Modifier.wrapContentWidth(),
-            text = published.toString(),
+            text = published,
             fontSize = 12.sp,
         )
     }

@@ -20,15 +20,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material.MaterialRichText
 import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.data.archive.Archive
+import com.tunjid.me.globalui.InsetFlags
 import com.tunjid.me.globalui.UiState
 import com.tunjid.me.nav.Route
 import com.tunjid.me.ui.InitialUiState
@@ -55,7 +58,8 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
         UiState(
             toolbarShows = true,
             toolbarTitle = state.archive.title,
-            showsBottomNav = false
+            showsBottomNav = false,
+            insetFlags = InsetFlags.NO_BOTTOM,
         )
     )
 

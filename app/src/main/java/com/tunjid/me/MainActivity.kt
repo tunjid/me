@@ -29,6 +29,8 @@ import com.tunjid.me.ui.scaffold.Root
 import com.tunjid.me.ui.theme.AppTheme
 import com.tunjid.mutator.accept
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -52,6 +54,15 @@ class MainActivity : AppCompatActivity() {
             insetMutations().collect {
                 app.appDeps.globalUiMutator.accept(it)
             }
+        }
+        lifecycleScope.launch {
+            app.appDeps.globalUiMutator.state
+                .map { it.statusBarColor to it.navBarColor }
+                .distinctUntilChanged()
+                .collect { (statusBarColor, navBarColor) ->
+                    window.statusBarColor = statusBarColor
+                    window.navigationBarColor = navBarColor
+                }
         }
     }
 }

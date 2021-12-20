@@ -17,8 +17,12 @@
 package com.tunjid.me.ui.scaffold
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.BottomAppBar
@@ -36,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.globalui.BottomNavPositionalState
-import com.tunjid.me.ui.countIf
 import com.tunjid.me.ui.uiSizes
 import com.tunjid.mutator.accept
 import kotlinx.coroutines.flow.StateFlow
@@ -50,40 +53,53 @@ internal fun BoxScope.AppBottomNav(
     val state by stateFlow.collectAsState()
 
     val bottomNavPositionAnimation = remember { Animatable(0f) }
-    val navBarClearance = state.navBarSize countIf state.insetDescriptor.hasBottomInset
     val bottomNavPosition = when {
-        state.bottomNavVisible -> -navBarClearance.toFloat()
-        else -> with(LocalDensity.current) { uiSizes.bottomNavSize.toPx() }
+        state.bottomNavVisible -> 0f
+        else -> with(LocalDensity.current) { uiSizes.bottomNavSize.toPx() + state.navBarSize }
     }
 
     LaunchedEffect(bottomNavPosition) {
         bottomNavPositionAnimation.animateTo(bottomNavPosition)
     }
 
-    BottomAppBar(
+    Column(
         modifier = Modifier
             .align(Alignment.BottomCenter)
             .offset(y = with(LocalDensity.current) { bottomNavPositionAnimation.value.toDp() })
             .fillMaxWidth()
             .wrapContentHeight(),
-        backgroundColor = MaterialTheme.colors.primary,
     ) {
-
-        BottomNavigation(
+        BottomAppBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
             backgroundColor = MaterialTheme.colors.primary,
         ) {
-            nav.stacks
-                .map { it.name }
-                .forEachIndexed { index, name ->
-                    BottomNavigationItem(
-                        icon = { },
-                        label = { Text(name) },
-                        selected = index == nav.currentIndex,
-                        onClick = {
-                            navStateHolder.accept { copy(currentIndex = index) }
-                        }
-                    )
-                }
+
+            BottomNavigation(
+                backgroundColor = MaterialTheme.colors.primary,
+            ) {
+                nav.stacks
+                    .map { it.name }
+                    .forEachIndexed { index, name ->
+                        BottomNavigationItem(
+                            icon = { },
+                            label = { Text(name) },
+                            selected = index == nav.currentIndex,
+                            onClick = {
+                                navStateHolder.accept { copy(currentIndex = index) }
+                            }
+                        )
+                    }
+            }
         }
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(with(LocalDensity.current) {
+                    state.navBarSize.toDp()
+                })
+                .background(color = MaterialTheme.colors.primary)
+        )
     }
 }

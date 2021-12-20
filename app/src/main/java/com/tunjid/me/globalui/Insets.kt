@@ -66,6 +66,7 @@ private fun Window.assumeControl() {
         attributes = windowAttributes
     }
     WindowCompat.setDecorFitsSystemWindows(this, false)
+//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) isNavigationBarContrastEnforced = false
     navigationBarColor = Color.TRANSPARENT
     statusBarColor = Color.TRANSPARENT
 }

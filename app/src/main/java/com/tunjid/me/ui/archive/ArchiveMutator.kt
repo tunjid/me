@@ -83,20 +83,9 @@ fun archiveMutator(
                         Mutation { copy(items = archives) }
                     }
                 is Action.UpdateListState -> action.flow.map { (listState) ->
-                    println("Updating ls in ${route.query.kind} to ${listState.firstVisibleItemScrollOffset}")
-                    Mutation<State> { copy(listStateSummary = listState) }
+                    Mutation { copy(listStateSummary = listState) }
                 }
             }
-                .map {
-                    Mutation {
-                        val b = this
-                        val a = it.mutate(this)
-                        println("Before for ${route.query.kind}; F = ${b.listStateSummary.firstVisibleItemIndex}; O = ${b.listStateSummary.firstVisibleItemScrollOffset}; S = ${b.items.size}")
-                        println("After for ${route.query.kind}; F = ${a.listStateSummary.firstVisibleItemIndex}; O = ${a.listStateSummary.firstVisibleItemScrollOffset}; S = ${a.items.size}")
-
-                        a
-                    }
-                }
         }
     }
 )
