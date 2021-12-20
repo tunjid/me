@@ -17,7 +17,18 @@
 package com.tunjid.me.ui.archive
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -83,7 +94,6 @@ data class ArchiveRoute(val query: ArchiveQuery) : Route<ArchiveMutator> {
         get() = query.toString()
 
     @Composable
-    @ExperimentalMaterialApi
     override fun Render() {
         ArchiveScreen(
             mutator = LocalAppDependencies.current.routeDependencies(this)

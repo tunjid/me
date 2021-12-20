@@ -16,7 +16,11 @@
 
 package com.tunjid.me.nav
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 
 interface Route<T> {
     val id: String
@@ -38,6 +42,8 @@ fun StackNav.pop() = copy(
     routes = routes.dropLast(1)
 )
 
+val StackNav.canGoUp get() = routes.size > 1
+
 data class MultiStackNav(
     val currentIndex: Int = -1,
     val stacks: List<StackNav> = listOf()
@@ -57,6 +63,24 @@ fun MultiStackNav.pop() = copy(
     }
 )
 
+val MultiStackNav.canGoUp get() = stacks.getOrNull(currentIndex)?.canGoUp == true
+
 val MultiStackNav.routes get() = stacks.map(StackNav::routes).flatten()
 
 val MultiStackNav.current get() = stacks.getOrNull(currentIndex)?.routes?.last()
+
+object Route404:Route<Unit>{
+    override val id: String
+        get() = "404"
+
+    @Composable
+    override fun Render() {
+        Box {
+            Text(
+                modifier = Modifier
+                    .padding(),
+                text = "404"
+            )
+        }
+    }
+}

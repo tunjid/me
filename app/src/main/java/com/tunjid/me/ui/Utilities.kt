@@ -18,7 +18,10 @@ package com.tunjid.me.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.LocalAppDependencies
@@ -30,7 +33,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 fun <T, R> StateFlow<T>.mapState(scope: CoroutineScope, mapper: (T) -> R) =
     map { mapper(it) }
@@ -43,6 +47,15 @@ fun <T, R> StateFlow<T>.mapState(scope: CoroutineScope, mapper: (T) -> R) =
 
 private data class MutableFunction<T>(var backing: (T) -> Unit = {}) : (T) -> Unit {
     override fun invoke(item: T) = backing(item)
+}
+
+@Composable
+fun <T, R> StateFlow<T>.collectAsState(
+    context: CoroutineContext = EmptyCoroutineContext,
+    mapper: (T) -> R
+): State<R> {
+    val scope = rememberCoroutineScope()
+    return mapState(scope = scope, mapper = mapper).collectAsState(context = context)
 }
 
 @Composable

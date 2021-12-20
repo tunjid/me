@@ -50,7 +50,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 
-
 interface AppDeps {
     val navMutator: Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
     val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>>
@@ -130,21 +129,25 @@ fun createAppDependencies(scope: CoroutineScope) = object : AppDeps {
     }.mutator as T
 }
 
-val LocalAppDependencies = staticCompositionLocalOf<AppDeps> {
-    object : AppDeps {
-        override val navMutator: Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> =
-            object : Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> {
-                override val accept: (Mutation<MultiStackNav>) -> Unit = {}
-                override val state: StateFlow<MultiStackNav> = MutableStateFlow(MultiStackNav())
+val LocalAppDependencies = staticCompositionLocalOf {
+    stubAppDeps()
+}
 
-            }
-        override val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>> =
-            object : Mutator<Mutation<UiState>, StateFlow<UiState>> {
-                override val accept: (Mutation<UiState>) -> Unit = {}
-                override val state: StateFlow<UiState> = MutableStateFlow(UiState())
-            }
+fun stubAppDeps(
+    nav: MultiStackNav = MultiStackNav(),
+    globalUI: UiState = UiState()
+): AppDeps = object : AppDeps {
+    override val navMutator: Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> =
+        object : Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> {
+            override val accept: (Mutation<MultiStackNav>) -> Unit = {}
+            override val state: StateFlow<MultiStackNav> = MutableStateFlow(nav)
+        }
+    override val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>> =
+        object : Mutator<Mutation<UiState>, StateFlow<UiState>> {
+            override val accept: (Mutation<UiState>) -> Unit = {}
+            override val state: StateFlow<UiState> = MutableStateFlow(globalUI)
+        }
 
-        override fun <T> routeDependencies(route: Route<T>): T =
-            TODO("Not yet implemented")
-    }
+    override fun <T> routeDependencies(route: Route<T>): T =
+        TODO("Not yet implemented")
 }
