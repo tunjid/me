@@ -32,7 +32,7 @@ private val DarkColorPalette = darkColors(
 )
 
 private val LightColorPalette = lightColors(
-    primary = AppDarkerBlue,
+    primary = AppBlue,
     primaryVariant = AppDarkerBlue,
     secondary = AppDarkerGreen,
     onPrimary = Color.White,

@@ -27,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material.MaterialRichText
 import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.data.archive.Archive
@@ -60,6 +59,7 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             toolbarTitle = state.archive.title,
             showsBottomNav = false,
             insetFlags = InsetFlags.NO_BOTTOM,
+            statusBarColor = MaterialTheme.colors.primary.toArgb(),
         )
     )
 
