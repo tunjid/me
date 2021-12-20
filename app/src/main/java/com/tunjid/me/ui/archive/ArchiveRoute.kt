@@ -18,6 +18,7 @@ package com.tunjid.me.ui.archive
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -26,7 +27,9 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,6 +39,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -57,13 +61,17 @@ import coil.size.Scale
 import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.data.archive.Archive
 import com.tunjid.me.data.archive.ArchiveKind
+import com.tunjid.me.data.archive.ArchiveKind.Articles
 import com.tunjid.me.data.archive.ArchiveQuery
 import com.tunjid.me.data.archive.User
 import com.tunjid.me.globalui.UiState
 import com.tunjid.me.nav.Route
 import com.tunjid.me.nav.push
 import com.tunjid.me.ui.InitialUiState
+import com.tunjid.me.ui.archive.ArchiveItem.Loading
+import com.tunjid.me.ui.archive.ArchiveItem.Result
 import com.tunjid.me.ui.archivedetail.ArchiveDetailRoute
+import com.tunjid.me.ui.asNoOpStateFlowMutator
 import com.tunjid.mutator.accept
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -129,7 +137,12 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
         items(
             items = items,
             key = ArchiveItem::key,
-            itemContent = { ArchiveCard(it) }
+            itemContent = { item ->
+                when (item) {
+                    Loading -> ProgressBar()
+                    is Result -> ArchiveCard(item)
+                }
+            }
         )
     }
 
@@ -139,13 +152,13 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
             ScrollState(
                 scrollOffset = listState.firstVisibleItemScrollOffset,
                 queryOffset = max(
-                    items.getOrNull(listState.firstVisibleItemIndex)
+                    (items.getOrNull(listState.firstVisibleItemIndex) as? Result)
                         ?.query
                         ?.offset
                         ?: 0,
-                    items.getOrNull(
+                    (items.getOrNull(
                         listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    )
+                    ) as? Result)
                         ?.query
                         ?.offset
                         ?: 0
@@ -190,8 +203,24 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
 }
 
 @Composable
+private fun ProgressBar() {
+    Box(
+        modifier = Modifier
+            .padding(vertical = 24.dp)
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .size(60.dp)
+                .align(Alignment.Center)
+        )
+    }
+}
+
+@Composable
 @ExperimentalMaterialApi
-private fun ArchiveCard(archiveItem: ArchiveItem) {
+private fun ArchiveCard(archiveItem: Result) {
     val navMutator = LocalAppDependencies.current.navMutator
 
     Card(
@@ -265,7 +294,7 @@ private fun ArchiveTags(categories: List<String>, published: String) {
 }
 
 @Composable
-private fun ArchiveBlurb(archiveItem: ArchiveItem) {
+private fun ArchiveBlurb(archiveItem: Result) {
     Column(
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
@@ -281,7 +310,7 @@ private fun ArchiveBlurb(archiveItem: ArchiveItem) {
     }
 }
 
-private val sampleArchiveItem = ArchiveItem(
+private val sampleArchiveItem = Result(
     query = ArchiveQuery(kind = ArchiveKind.Articles),
     archive = Archive(
         key = "",
@@ -306,7 +335,17 @@ private val sampleArchiveItem = ArchiveItem(
 
 @Preview
 @Composable
-@ExperimentalMaterialApi
-fun Test() {
+fun PreviewArchiveCard() {
     ArchiveCard(archiveItem = sampleArchiveItem)
+}
+
+@Preview
+@Composable
+fun PreviewLoadingState() {
+    ArchiveScreen(
+        mutator = State(
+            route = ArchiveRoute(query = ArchiveQuery(kind = Articles)),
+            items = listOf(Loading)
+        ).asNoOpStateFlowMutator()
+    )
 }

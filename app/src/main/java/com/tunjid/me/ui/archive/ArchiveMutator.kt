@@ -19,11 +19,14 @@ package com.tunjid.me.ui.archive
 import com.tunjid.me.data.archive.Archive
 import com.tunjid.me.data.archive.ArchiveQuery
 import com.tunjid.me.data.archive.ArchiveRepository
+import com.tunjid.me.ui.archive.ArchiveItem.Loading
+import com.tunjid.me.ui.archive.ArchiveItem.Result
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.tiler.Tile
+import com.tunjid.tiler.Tile.Input
 import com.tunjid.tiler.flattenWith
 import com.tunjid.tiler.tiledList
 import kotlinx.coroutines.CoroutineScope
@@ -41,18 +44,25 @@ private val publishedDateFormatter = DateTimeFormatter
 data class State(
     val route: ArchiveRoute,
     val listStateSummary: ListState = ListState(),
-    val items: List<ArchiveItem> = listOf()
+    val items: List<ArchiveItem> = listOf(Loading)
 )
 
-data class ArchiveItem(
-    val archive: Archive,
-    val query: ArchiveQuery,
-)
+sealed class ArchiveItem {
+    data class Result(
+        val archive: Archive,
+        val query: ArchiveQuery,
+    ) : ArchiveItem()
 
-val ArchiveItem.key: String get() = archive.key
+    object Loading : ArchiveItem()
+}
 
-val ArchiveItem.prettyDate: String get() = publishedDateFormatter.format(archive.created.toJavaInstant())
+val ArchiveItem.key: String
+    get() = when (this) {
+        Loading -> "Loading"
+        is Result -> archive.key
+    }
 
+val Result.prettyDate: String get() = publishedDateFormatter.format(archive.created.toJavaInstant())
 
 sealed class Action {
     data class Fetch(val query: ArchiveQuery) : Action()
@@ -90,21 +100,22 @@ fun archiveMutator(
     }
 )
 
-private fun ArchiveRepository.archiveTiler() = tiledList(
-    flattener = Tile.Flattener.PivotSorted(
-        comparator = compareBy(ArchiveQuery::offset),
-    ),
-    fetcher = { query ->
-        monitorArchives(query).map { archives ->
-            archives.map { archive ->
-                ArchiveItem(
-                    archive = archive,
-                    query = query
-                )
+private fun ArchiveRepository.archiveTiler(): (Flow<Input<ArchiveQuery, List<ArchiveItem>>>) -> Flow<List<List<ArchiveItem>>> =
+    tiledList(
+        flattener = Tile.Flattener.PivotSorted(
+            comparator = compareBy(ArchiveQuery::offset),
+        ),
+        fetcher = { query ->
+            monitorArchives(query).map { archives ->
+                archives.map { archive ->
+                    Result(
+                        archive = archive,
+                        query = query
+                    )
+                }
             }
         }
-    }
-)
+    )
 
 private fun Flow<Action.Fetch>.toArchiveItems(repo: ArchiveRepository): Flow<List<ArchiveItem>> =
     queryChanges()

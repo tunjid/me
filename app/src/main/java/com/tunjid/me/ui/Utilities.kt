@@ -27,7 +27,9 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.globalui.UiState
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.Mutator
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -102,3 +104,8 @@ val uiSizes = UISizes(
 infix fun Dp.countIf(condition: Boolean) = if (condition) this else 0.dp
 
 infix fun Int.countIf(condition: Boolean) = if (condition) this else 0
+
+fun <T : Any, R : Any> T.asNoOpStateFlowMutator() = object : Mutator<R, StateFlow<T>> {
+    override val accept: (R) -> Unit = {}
+    override val state: StateFlow<T> = MutableStateFlow(this@asNoOpStateFlowMutator)
+}
