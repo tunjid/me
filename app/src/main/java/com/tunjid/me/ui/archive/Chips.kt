@@ -38,13 +38,14 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun Chips(
+    modifier: Modifier = Modifier,
     name: String? = null,
     color: Color,
     chips: List<String>,
     onClick: ((String) -> Unit)? = null
 ) {
     Row(
-        modifier = Modifier.wrapContentWidth(),
+        modifier = modifier,
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -84,6 +85,7 @@ fun Chip(
         Text(
             text = text,
             fontSize = 12.sp,
+            maxLines = 1
         )
     }
     Spacer(Modifier.width(8.dp))

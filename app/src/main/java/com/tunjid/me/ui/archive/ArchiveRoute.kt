@@ -210,11 +210,13 @@ private fun ArchiveFilters(filter: ArchiveContentFilter) {
             Modifier.padding(8.dp)
         ) {
             Chips(
+                modifier = Modifier.fillMaxWidth(),
                 name = "Categories:",
                 chips = filter.categories,
                 color = MaterialTheme.colors.primaryVariant
             )
             Chips(
+                modifier = Modifier.fillMaxWidth(),
                 name = "Tags:",
                 chips = filter.tags,
                 color = MaterialTheme.colors.secondary
@@ -311,6 +313,7 @@ private fun ArchiveCategories(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Chips(
+            modifier = Modifier.weight(0.8f),
             chips = categories,
             color = MaterialTheme.colors.primaryVariant,
             onClick = onCategoryClicked
