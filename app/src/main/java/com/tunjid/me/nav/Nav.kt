@@ -34,7 +34,7 @@ data class StackNav(
     val routes: List<Route<*>> = listOf()
 )
 
-fun StackNav.push(route: Route<*>) = copy(
+fun StackNav.push(route: Route<*>) = if (routes.lastOrNull() == route) this else copy(
     routes = routes + route
 )
 
@@ -69,7 +69,7 @@ val MultiStackNav.routes get() = stacks.map(StackNav::routes).flatten()
 
 val MultiStackNav.current get() = stacks.getOrNull(currentIndex)?.routes?.last()
 
-object Route404:Route<Unit>{
+object Route404 : Route<Unit> {
     override val id: String
         get() = "404"
 

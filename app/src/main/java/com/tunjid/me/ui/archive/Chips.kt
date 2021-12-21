@@ -48,11 +48,14 @@ fun Chips(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (name != null) Text(
-            modifier = Modifier.wrapContentWidth(),
-            text = name,
-            fontSize = 12.sp,
-        )
+        if (name != null) {
+            Text(
+                modifier = Modifier.wrapContentWidth(),
+                text = name,
+                fontSize = 12.sp,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
         chips.forEach { text ->
             Chip(
                 text = text,
@@ -83,5 +86,5 @@ fun Chip(
             fontSize = 12.sp,
         )
     }
-    Spacer(Modifier.width(4.dp))
+    Spacer(Modifier.width(8.dp))
 }

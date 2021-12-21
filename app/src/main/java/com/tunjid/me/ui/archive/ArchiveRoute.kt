@@ -34,6 +34,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -49,7 +50,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
-import coil.size.Scale
+import coil.size.Scale.FILL
 import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.data.archive.Archive
 import com.tunjid.me.data.archive.ArchiveContentFilter
@@ -198,17 +199,27 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
 
 @Composable
 private fun ArchiveFilters(filter: ArchiveContentFilter) {
-    Column() {
-        Chips(
-            name = "Tags",
-            chips = filter.tags,
-            color = MaterialTheme.colors.primaryVariant
-        )
-        Chips(
-            name = "Categories",
-            chips = filter.categories,
-            color = MaterialTheme.colors.secondary
-        )
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        shape = MaterialTheme.shapes.medium,
+        elevation = 1.dp,
+    ) {
+        Column(
+            Modifier.padding(8.dp)
+        ) {
+            Chips(
+                name = "Categories:",
+                chips = filter.categories,
+                color = MaterialTheme.colors.primaryVariant
+            )
+            Chips(
+                name = "Tags:",
+                chips = filter.tags,
+                color = MaterialTheme.colors.secondary
+            )
+        }
     }
 }
 
@@ -242,36 +253,14 @@ private fun ArchiveCard(archiveItem: Result) {
         },
         content = {
             Column {
-                Image(
-                    painter = rememberImagePainter(archiveItem.archive.thumbnail) {
-                        scale(Scale.FILL)
-                    },
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                )
+                ArchiveThumbnail(archiveItem)
                 Spacer(Modifier.height(8.dp))
                 ArchiveCategories(
                     categories = archiveItem.archive.categories,
                     published = archiveItem.prettyDate,
                     onCategoryClicked = { category ->
                         navMutator.accept {
-                            push(
-                                ArchiveRoute(
-                                    query = archiveItem.query.copy(
-                                        contentFilter = ArchiveContentFilter(
-                                            categories = when(val filter = archiveItem.query.contentFilter) {
-                                                null -> listOf(category)
-                                                else -> filter.categories.plus(
-                                                    category
-                                                ).distinct()
-                                            }
-                                        )
-                                    )
-                                )
-                            )
+                            push(archiveItem.query.routeFilteredByCategory(category))
                         }
                     }
                 )
@@ -280,6 +269,34 @@ private fun ArchiveCard(archiveItem: Result) {
                 Spacer(Modifier.height(8.dp))
             }
         }
+    )
+}
+
+private fun ArchiveQuery.routeFilteredByCategory(category: String) = ArchiveRoute(
+    query = copy(
+        contentFilter = ArchiveContentFilter(
+            categories = when (val filter =
+                contentFilter) {
+                null -> listOf(category)
+                else -> filter.categories.plus(
+                    category
+                ).distinct()
+            }
+        )
+    )
+)
+
+@Composable
+private fun ArchiveThumbnail(archiveItem: Result) {
+    Image(
+        painter = rememberImagePainter(archiveItem.archive.thumbnail) {
+            scale(FILL)
+        },
+        contentScale = ContentScale.Crop,
+        contentDescription = null,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
     )
 }
 
