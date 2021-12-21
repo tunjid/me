@@ -29,12 +29,33 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.flowlayout.FlowRow
+import com.google.accompanist.flowlayout.SizeMode
+import com.tunjid.me.data.archive.ArchiveKind.Articles
+import com.tunjid.me.data.archive.ArchiveQuery
+import com.tunjid.me.ui.archive.ArchiveItem.Loading
+import com.tunjid.me.ui.asNoOpStateFlowMutator
+
+sealed class ChipAction {
+    data class Added(val text: String) : ChipAction()
+    data class Changed(val text: String) : ChipAction()
+    data class Removed(val text: String) : ChipAction()
+}
+
+data class ChipEditInfo(
+    val currentText: String,
+    val onChipChanged: (ChipAction) -> Unit,
+)
 
 @Composable
 fun Chips(
@@ -42,7 +63,8 @@ fun Chips(
     name: String? = null,
     color: Color,
     chips: List<String>,
-    onClick: ((String) -> Unit)? = null
+    onClick: ((String) -> Unit)? = null,
+    editInfo: ChipEditInfo? = null
 ) {
     Row(
         modifier = modifier,
@@ -57,12 +79,28 @@ fun Chips(
             )
             Spacer(modifier = Modifier.width(8.dp))
         }
-        chips.forEach { text ->
-            Chip(
-                text = text,
-                color = color,
-                onClick = onClick
-            )
+        FlowRow(
+            mainAxisSize = SizeMode.Wrap,
+            crossAxisSpacing = 0.dp
+        ) {
+            chips.forEach { text ->
+                Chip(
+                    text = text,
+                    color = color,
+                    onClick = onClick,
+                    editInfo = editInfo,
+                )
+            }
+            if (editInfo != null) {
+                TextField(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .defaultMinSize(minWidth = 40.dp),
+                    maxLines = 1,
+                    value = editInfo.currentText,
+                    onValueChange = { editInfo.onChipChanged(ChipAction.Changed(it)) },
+                )
+            }
         }
     }
 }
@@ -71,7 +109,8 @@ fun Chips(
 fun Chip(
     text: String,
     color: Color = MaterialTheme.colors.secondary,
-    onClick: ((String) -> Unit)? = null
+    onClick: ((String) -> Unit)? = null,
+    editInfo: ChipEditInfo? = null
 ) {
     Button(
         modifier = Modifier
@@ -88,5 +127,50 @@ fun Chip(
             maxLines = 1
         )
     }
-    Spacer(Modifier.width(8.dp))
+    Spacer(Modifier.width(4.dp))
+}
+
+@Preview
+@Composable
+private fun PreviewStaticChips() {
+    Chips(
+        color = Color.Blue,
+        chips = listOf(
+            "abc",
+            "def",
+            "ghi",
+            "jkl",
+            "mno",
+            "pqr",
+            "stu",
+            "vwx",
+            "yz",
+            "123",
+            "456",
+            "thi is a long one"
+        )
+    )
+}
+
+@Preview
+@Composable
+private fun PreviewEditableChips() {
+    Chips(
+        color = Color.Blue,
+        chips = listOf(
+            "abc",
+            "def",
+            "ghi",
+            "jkl",
+            "mno",
+            "pqr",
+            "stu",
+            "vwx",
+            "yz",
+            "123",
+            "456",
+            "thi is a long one"
+        ),
+        editInfo = ChipEditInfo(currentText = "Test", onChipChanged = {})
+    )
 }

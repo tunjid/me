@@ -17,6 +17,8 @@
 package com.tunjid.me.ui.archive
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,6 +46,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
@@ -310,15 +314,15 @@ private fun ArchiveCategories(
 ) {
     Row(
         modifier = Modifier.padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
     ) {
         Chips(
-            modifier = Modifier.weight(0.8f),
+            modifier = Modifier.weight(1F),
             chips = categories,
             color = MaterialTheme.colors.primaryVariant,
             onClick = onCategoryClicked
         )
-        Spacer(Modifier.weight(1f))
         Text(
             modifier = Modifier.wrapContentWidth(),
             text = published,
@@ -369,13 +373,13 @@ private val sampleArchiveItem = Result(
 
 @Preview
 @Composable
-fun PreviewArchiveCard() {
+private fun PreviewArchiveCard() {
     ArchiveCard(archiveItem = sampleArchiveItem)
 }
 
 @Preview
 @Composable
-fun PreviewLoadingState() {
+private fun PreviewLoadingState() {
     ArchiveScreen(
         mutator = State(
             route = ArchiveRoute(query = ArchiveQuery(kind = Articles)),

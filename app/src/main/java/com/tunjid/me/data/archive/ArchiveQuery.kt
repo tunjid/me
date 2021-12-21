@@ -16,12 +16,14 @@
 
 package com.tunjid.me.data.archive
 
+const val DefaultQueryLimit = 6
+
 data class ArchiveQuery(
     val kind: ArchiveKind,
     val temporalFilter: ArchiveTemporalFilter? = null,
     val contentFilter: ArchiveContentFilter? = null,
     val offset: Int = 0,
-    val limit: Int = 6
+    val limit: Int = DefaultQueryLimit
 )
 
 data class ArchiveTemporalFilter(
