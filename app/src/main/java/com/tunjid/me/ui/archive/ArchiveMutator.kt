@@ -17,8 +17,10 @@
 package com.tunjid.me.ui.archive
 
 import com.tunjid.me.data.archive.Archive
+import com.tunjid.me.data.archive.ArchiveContentFilter
 import com.tunjid.me.data.archive.ArchiveQuery
 import com.tunjid.me.data.archive.ArchiveRepository
+import com.tunjid.me.ui.archive.ArchiveItem.ContentFilter
 import com.tunjid.me.ui.archive.ArchiveItem.Loading
 import com.tunjid.me.ui.archive.ArchiveItem.Result
 import com.tunjid.mutator.Mutation
@@ -43,11 +45,16 @@ private val publishedDateFormatter = DateTimeFormatter
 
 data class State(
     val route: ArchiveRoute,
+    val activeQuery: ArchiveQuery,
     val listStateSummary: ListState = ListState(),
     val items: List<ArchiveItem> = listOf(Loading)
 )
 
 sealed class ArchiveItem {
+    data class ContentFilter(
+        val filter: ArchiveContentFilter,
+    ) : ArchiveItem()
+
     data class Result(
         val archive: Archive,
         val query: ArchiveQuery,
@@ -60,6 +67,7 @@ val ArchiveItem.key: String
     get() = when (this) {
         Loading -> "Loading"
         is Result -> archive.key
+        is ContentFilter -> "Content filter"
     }
 
 val Result.prettyDate: String get() = publishedDateFormatter.format(archive.created.toJavaInstant())
@@ -80,7 +88,14 @@ fun archiveMutator(
     repo: ArchiveRepository
 ): Mutator<Action, StateFlow<State>> = stateFlowMutator(
     scope = scope,
-    initialState = State(route = route),
+    initialState = State(
+        route = route,
+        activeQuery = route.query,
+        items = listOfNotNull(
+            route.query.contentFilter?.let(ArchiveItem::ContentFilter),
+            Loading
+        )
+    ),
     started = SharingStarted.WhileSubscribed(2000),
     transform = { actions ->
         actions.toMutationStream {
@@ -90,7 +105,14 @@ fun archiveMutator(
                     // Debounce loads where archives are empty
                     .debounce { archives -> if (archives.isEmpty()) 5000 else 0 }
                     .map { archives ->
-                        Mutation { copy(items = archives) }
+                        Mutation {
+                            copy(
+                                items = when (val filter = activeQuery.contentFilter) {
+                                    null -> archives
+                                    else -> listOf(ContentFilter(filter)) + archives
+                                }
+                            )
+                        }
                     }
                 is Action.UpdateListState -> action.flow.map { (listState) ->
                     Mutation { copy(listStateSummary = listState) }

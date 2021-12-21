@@ -20,13 +20,16 @@ import com.tunjid.me.data.archive.Archive
 import com.tunjid.me.data.archive.ArchiveKind
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 import retrofit2.http.QueryMap
 
 interface Api {
     @GET("api/{kind}")
     suspend fun fetchArchives(
         @Path("kind") kind: ArchiveKind,
-        @QueryMap options: Map<String, String> = mapOf()
+        @QueryMap options: Map<String, String> = mapOf(),
+        @Query("tag") tags: List<String> = listOf(),
+        @Query("category") categories: List<String> = listOf(),
     ): List<Archive>
 
     @GET("api/{kind}/{id}")

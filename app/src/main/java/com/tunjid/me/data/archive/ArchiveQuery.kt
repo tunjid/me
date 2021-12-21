@@ -18,7 +18,18 @@ package com.tunjid.me.data.archive
 
 data class ArchiveQuery(
     val kind: ArchiveKind,
-    val filter: ArchiveFilter? = null,
+    val temporalFilter: ArchiveTemporalFilter? = null,
+    val contentFilter: ArchiveContentFilter? = null,
     val offset: Int = 0,
     val limit: Int = 6
+)
+
+data class ArchiveTemporalFilter(
+    val year: Int?,
+    val month: Int?
+)
+
+data class ArchiveContentFilter(
+    val tags: List<String> = listOf(),
+    val categories: List<String> = listOf(),
 )

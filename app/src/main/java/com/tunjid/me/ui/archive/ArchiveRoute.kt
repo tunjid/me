@@ -17,27 +17,19 @@
 package com.tunjid.me.ui.archive
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
@@ -60,7 +52,7 @@ import coil.compose.rememberImagePainter
 import coil.size.Scale
 import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.data.archive.Archive
-import com.tunjid.me.data.archive.ArchiveKind
+import com.tunjid.me.data.archive.ArchiveContentFilter
 import com.tunjid.me.data.archive.ArchiveKind.Articles
 import com.tunjid.me.data.archive.ArchiveQuery
 import com.tunjid.me.data.archive.User
@@ -68,6 +60,7 @@ import com.tunjid.me.globalui.UiState
 import com.tunjid.me.nav.Route
 import com.tunjid.me.nav.push
 import com.tunjid.me.ui.InitialUiState
+import com.tunjid.me.ui.archive.ArchiveItem.ContentFilter
 import com.tunjid.me.ui.archive.ArchiveItem.Loading
 import com.tunjid.me.ui.archive.ArchiveItem.Result
 import com.tunjid.me.ui.archivedetail.ArchiveDetailRoute
@@ -140,7 +133,8 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
             itemContent = { item ->
                 when (item) {
                     Loading -> ProgressBar()
-                    is Result -> ArchiveCard(item)
+                    is Result -> ArchiveCard(archiveItem = item)
+                    is ContentFilter -> ArchiveFilters(filter = item.filter)
                 }
             }
         )
@@ -174,7 +168,7 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
                     Action.Fetch(
                         ArchiveQuery(
                             kind = query.kind,
-                            filter = query.filter,
+                            temporalFilter = query.temporalFilter,
                             offset = it.queryOffset
                         )
                     )
@@ -183,12 +177,12 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
     }
 
     // Initial load
-    LaunchedEffect(query.kind) {
+    LaunchedEffect(query) {
         mutator.accept(Action.Fetch(query = query))
     }
 
     // Scroll state preservation
-    DisposableEffect(query.kind) {
+    DisposableEffect(query) {
         onDispose {
             mutator.accept(
                 Action.UpdateListState(
@@ -199,6 +193,22 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
                 )
             )
         }
+    }
+}
+
+@Composable
+private fun ArchiveFilters(filter: ArchiveContentFilter) {
+    Column() {
+        Chips(
+            name = "Tags",
+            chips = filter.tags,
+            color = MaterialTheme.colors.primaryVariant
+        )
+        Chips(
+            name = "Categories",
+            chips = filter.categories,
+            color = MaterialTheme.colors.secondary
+        )
     }
 }
 
@@ -243,9 +253,27 @@ private fun ArchiveCard(archiveItem: Result) {
                         .height(200.dp)
                 )
                 Spacer(Modifier.height(8.dp))
-                ArchiveTags(
+                ArchiveCategories(
                     categories = archiveItem.archive.categories,
-                    published = archiveItem.prettyDate
+                    published = archiveItem.prettyDate,
+                    onCategoryClicked = { category ->
+                        navMutator.accept {
+                            push(
+                                ArchiveRoute(
+                                    query = archiveItem.query.copy(
+                                        contentFilter = ArchiveContentFilter(
+                                            categories = when(val filter = archiveItem.query.contentFilter) {
+                                                null -> listOf(category)
+                                                else -> filter.categories.plus(
+                                                    category
+                                                ).distinct()
+                                            }
+                                        )
+                                    )
+                                )
+                            )
+                        }
+                    }
                 )
                 Spacer(Modifier.height(8.dp))
                 ArchiveBlurb(archiveItem = archiveItem)
@@ -256,35 +284,21 @@ private fun ArchiveCard(archiveItem: Result) {
 }
 
 @Composable
-private fun ArchiveTags(categories: List<String>, published: String) {
+private fun ArchiveCategories(
+    categories: List<String>,
+    published: String,
+    onCategoryClicked: (String) -> Unit
+) {
     Row(
         modifier = Modifier.padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier = Modifier.wrapContentWidth(),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            categories.forEach { tag ->
-                Button(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
-                    onClick = {},
-                    colors = buttonColors(backgroundColor = MaterialTheme.colors.secondary),
-                    shape = RoundedCornerShape(20.dp),
-                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = tag,
-                        fontSize = 12.sp,
-                    )
-                }
-                Spacer(Modifier.width(4.dp))
-            }
-        }
+        Chips(
+            chips = categories,
+            color = MaterialTheme.colors.primaryVariant,
+            onClick = onCategoryClicked
+        )
         Spacer(Modifier.weight(1f))
-
         Text(
             modifier = Modifier.wrapContentWidth(),
             text = published,
@@ -311,7 +325,7 @@ private fun ArchiveBlurb(archiveItem: Result) {
 }
 
 private val sampleArchiveItem = Result(
-    query = ArchiveQuery(kind = ArchiveKind.Articles),
+    query = ArchiveQuery(kind = Articles),
     archive = Archive(
         key = "",
         link = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",
@@ -329,7 +343,7 @@ private val sampleArchiveItem = Result(
         created = Clock.System.now(),
         tags = listOf(),
         categories = listOf("Android", "Kotlin"),
-        kind = ArchiveKind.Articles,
+        kind = Articles,
     )
 )
 
@@ -345,6 +359,7 @@ fun PreviewLoadingState() {
     ArchiveScreen(
         mutator = State(
             route = ArchiveRoute(query = ArchiveQuery(kind = Articles)),
+            activeQuery = ArchiveQuery(kind = Articles),
             items = listOf(Loading)
         ).asNoOpStateFlowMutator()
     )

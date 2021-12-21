@@ -19,6 +19,7 @@ package com.tunjid.me.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val AppBlue = Color(0xFF083042)
+val AppLighterBlue = Color(0xFF4381F0)
 val AppDarkerBlue = Color(0xFF00071c)
 val AppGreen = Color(0xFF4cdb85)
 val AppDarkerGreen = Color(0xFF00a857)

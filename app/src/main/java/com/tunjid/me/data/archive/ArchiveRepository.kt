@@ -36,9 +36,11 @@ class RestArchiveRepository(
                 options = listOfNotNull(
                     "offset" to query.offset.toString(),
                     "limit" to query.limit.toString(),
-                    query.filter?.let { "month" to it.month.toString() },
-                    query.filter?.let { "year" to it.year.toString() },
-                ).toMap()
+                    query.temporalFilter?.let { "month" to it.month.toString() },
+                    query.temporalFilter?.let { "year" to it.year.toString() },
+                ).toMap(),
+                tags = query.contentFilter?.tags ?: listOf(),
+                categories = query.contentFilter?.categories ?: listOf(),
             )
         )
     }
