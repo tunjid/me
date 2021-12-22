@@ -69,6 +69,11 @@ private data class Queries(
     val inMemory: List<ArchiveQuery> = listOf(),
 )
 
+private data class FetchInfo(
+    val sourceQuery: Action.Fetch,
+    val archives: List<ArchiveItem>
+)
+
 sealed class ArchiveItem {
     data class Result(
         val archive: Archive,
@@ -127,10 +132,25 @@ fun archiveMutator(
             when (val action = type()) {
                 is Action.Fetch -> action.flow
                     .toArchiveItems(repo = repo)
-                    // Debounce loads where archives are empty
-                    .debounce { archives -> if (archives.isEmpty()) 5000 else 0 }
-                    .map { archives ->
-                        Mutation { copy(items = archives) }
+                    .map { (fetchAction, archives) ->
+                        Mutation {
+                            val items = when {
+                                archives.isEmpty() -> items
+                                else -> archives
+                            }
+                                .filter { item ->
+                                    when (item) {
+                                        ArchiveItem.Loading -> true
+                                        is ArchiveItem.Result -> item.query.contentFilter == fetchAction.query.contentFilter
+                                    }
+                                }
+                            copy(
+                                items = items,
+                                filterState = filterState.copy(
+                                    filter = fetchAction.query.contentFilter ?: filterState.filter
+                                )
+                            )
+                        }
                     }
                 is Action.UpdateListState -> action.flow.map { (listState) ->
                     Mutation { copy(listStateSummary = listState) }
@@ -165,6 +185,7 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Input<ArchiveQuery, List<Arc
     tiledList(
         flattener = Tile.Flattener.PivotSorted(
             comparator = compareBy(ArchiveQuery::offset),
+            limiter = { pages -> pages.size > 4 }
         ),
         fetcher = { query ->
             monitorArchives(query).map { archives ->
@@ -178,9 +199,10 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Input<ArchiveQuery, List<Arc
         }
     )
 
-private fun Flow<Action.Fetch>.toArchiveItems(repo: ArchiveRepository): Flow<List<ArchiveItem>> =
-    queryChanges()
-        .flatMapLatest { (oldPages, newPages, evictions) ->
+private fun Flow<Action.Fetch>.toArchiveItems(repo: ArchiveRepository): Flow<FetchInfo> =
+    combine(
+        this,
+        queryChanges().flatMapLatest { (oldPages, newPages, evictions) ->
             val toTurnOn = newPages
                 .map { Tile.Request.On<ArchiveQuery, List<ArchiveItem>>(it) }
 
@@ -193,8 +215,10 @@ private fun Flow<Action.Fetch>.toArchiveItems(repo: ArchiveRepository): Flow<Lis
 
             (toTurnOn + toTurnOff + toEvict).asFlow()
         }
-        .flattenWith(repo.archiveTiler())
-        .map { it.flatten() }
+            .flattenWith(repo.archiveTiler())
+            .map { it.flatten() },
+        ::FetchInfo
+    )
 
 private fun Flow<Action.Fetch>.queryChanges(): Flow<Queries> =
     map { (query, shouldReset) ->
@@ -207,7 +231,7 @@ private fun Flow<Action.Fetch>.queryChanges(): Flow<Queries> =
     }
         .scan(Queries()) { existingQueries, (shouldReset, new) ->
             val currentlyInMemory = (existingQueries.inMemory + new).distinct()
-            val toEvict = if (shouldReset) currentlyInMemory else when (val min =
+            val toEvict = if (shouldReset) existingQueries.inMemory else when (val min =
                 new.minByOrNull(ArchiveQuery::offset)) {
                 null -> listOf()
                 // Evict items more than 3 offset pages behind the min current query
@@ -216,7 +240,7 @@ private fun Flow<Action.Fetch>.queryChanges(): Flow<Queries> =
                 }
             }
             existingQueries.copy(
-                oldQueries = existingQueries.newQueries,
+                oldQueries = if (shouldReset) listOf() else existingQueries.newQueries,
                 newQueries = new,
                 inMemory = currentlyInMemory - toEvict.toSet(),
                 toEvict = toEvict
