@@ -37,10 +37,6 @@ import java.time.format.DateTimeFormatter
 
 typealias ArchiveMutator = Mutator<Action, StateFlow<State>>
 
-private val publishedDateFormatter = DateTimeFormatter
-    .ofPattern("MMM dd yyyy")
-    .withZone(ZoneId.systemDefault())
-
 enum class FilterType {
     Tag, Category
 }
@@ -51,45 +47,6 @@ data class State(
     val listStateSummary: ListState = ListState(),
     val items: List<ArchiveItem> = listOf(ArchiveItem.Loading)
 )
-
-data class FilterState(
-    val expanded: Boolean = false,
-    val filter: ArchiveContentFilter = ArchiveContentFilter(),
-    val categoryText: String = "",
-    val tagText: String = "",
-)
-
-/**
- * A summary of the loading queries in the app
- */
-private data class Queries(
-    val oldQueries: List<ArchiveQuery> = listOf(),
-    val newQueries: List<ArchiveQuery> = listOf(),
-    val toEvict: List<ArchiveQuery> = listOf(),
-    val inMemory: List<ArchiveQuery> = listOf(),
-)
-
-private data class FetchInfo(
-    val sourceQuery: Action.Fetch,
-    val archives: List<ArchiveItem>
-)
-
-sealed class ArchiveItem {
-    data class Result(
-        val archive: Archive,
-        val query: ArchiveQuery,
-    ) : ArchiveItem()
-
-    object Loading : ArchiveItem()
-}
-
-val ArchiveItem.key: String
-    get() = when (this) {
-        ArchiveItem.Loading -> "Loading"
-        is ArchiveItem.Result -> archive.key
-    }
-
-val ArchiveItem.Result.prettyDate: String get() = publishedDateFormatter.format(archive.created.toJavaInstant())
 
 sealed class Action {
     data class Fetch(
@@ -106,9 +63,47 @@ sealed class Action {
     object ToggleFilter : Action()
 }
 
+sealed class ArchiveItem {
+    data class Result(
+        val archive: Archive,
+        val query: ArchiveQuery,
+    ) : ArchiveItem()
+    object Loading : ArchiveItem()
+}
+
+val ArchiveItem.key: String
+    get() = when (this) {
+        ArchiveItem.Loading -> "Loading"
+        is ArchiveItem.Result -> archive.key
+    }
+
+val ArchiveItem.Result.prettyDate: String get() = publishedDateFormatter.format(archive.created.toJavaInstant())
+
+data class FilterState(
+    val expanded: Boolean = false,
+    val filter: ArchiveContentFilter = ArchiveContentFilter(),
+    val categoryText: String = "",
+    val tagText: String = "",
+)
+
 data class ListState(
     val firstVisibleItemIndex: Int = 0,
     val firstVisibleItemScrollOffset: Int = 0
+)
+
+/**
+ * A summary of the loading queries in the app
+ */
+private data class Queries(
+    val oldQueries: List<ArchiveQuery> = listOf(),
+    val newQueries: List<ArchiveQuery> = listOf(),
+    val toEvict: List<ArchiveQuery> = listOf(),
+    val inMemory: List<ArchiveQuery> = listOf(),
+)
+
+private data class FetchInfo(
+    val sourceQuery: Action.Fetch,
+    val archives: List<ArchiveItem>
 )
 
 fun archiveMutator(
@@ -201,7 +196,7 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Input<ArchiveQuery, List<Arc
 
 private fun Flow<Action.Fetch>.toArchiveItems(repo: ArchiveRepository): Flow<FetchInfo> =
     combine(
-        this,
+        this@toArchiveItems,
         queryChanges().flatMapLatest { (oldPages, newPages, evictions) ->
             val toTurnOn = newPages
                 .map { Tile.Request.On<ArchiveQuery, List<ArchiveItem>>(it) }
@@ -246,3 +241,7 @@ private fun Flow<Action.Fetch>.queryChanges(): Flow<Queries> =
                 toEvict = toEvict
             )
         }
+
+private val publishedDateFormatter = DateTimeFormatter
+    .ofPattern("MMM dd yyyy")
+    .withZone(ZoneId.systemDefault())
