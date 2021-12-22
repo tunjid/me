@@ -17,7 +17,6 @@
 package com.tunjid.me.ui.archive
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +35,6 @@ import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -46,8 +44,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,9 +61,6 @@ import com.tunjid.me.globalui.UiState
 import com.tunjid.me.nav.Route
 import com.tunjid.me.nav.push
 import com.tunjid.me.ui.InitialUiState
-import com.tunjid.me.ui.archive.ArchiveItem.ContentFilter
-import com.tunjid.me.ui.archive.ArchiveItem.Loading
-import com.tunjid.me.ui.archive.ArchiveItem.Result
 import com.tunjid.me.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.ui.asNoOpStateFlowMutator
 import com.tunjid.mutator.accept
@@ -123,6 +116,7 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
     )
 
     val items = state.items
+    val filter = state.filterState
     val listStateSummary = state.listStateSummary
 
     val listState = rememberLazyListState(
@@ -130,19 +124,26 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
         initialFirstVisibleItemScrollOffset = listStateSummary.firstVisibleItemScrollOffset
     )
 
-
-    LazyColumn(state = listState) {
-        items(
-            items = items,
-            key = ArchiveItem::key,
-            itemContent = { item ->
-                when (item) {
-                    Loading -> ProgressBar()
-                    is Result -> ArchiveCard(archiveItem = item)
-                    is ContentFilter -> ArchiveFilters(filter = item.filter)
-                }
-            }
+    Column {
+        ArchiveFilters(
+            item = filter,
+            onChanged = mutator.accept
         )
+        LazyColumn(state = listState) {
+            items(
+                items = items,
+                key = ArchiveItem::key,
+                itemContent = { item ->
+                    when (item) {
+                        ArchiveItem.Loading -> ProgressBar()
+                        is ArchiveItem.Result -> ArchiveCard(
+                            archiveItem = item,
+                            onAction = mutator.accept
+                        )
+                    }
+                }
+            )
+        }
     }
 
     // Endless scrolling
@@ -151,19 +152,18 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
             ScrollState(
                 scrollOffset = listState.firstVisibleItemScrollOffset,
                 queryOffset = max(
-                    (items.getOrNull(listState.firstVisibleItemIndex) as? Result)
+                    (items.getOrNull(listState.firstVisibleItemIndex) as? ArchiveItem.Result)
                         ?.query
                         ?.offset
                         ?: 0,
                     (items.getOrNull(
                         listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    ) as? Result)
+                    ) as? ArchiveItem.Result)
                         ?.query
                         ?.offset
                         ?: 0
                 )
             )
-
         }
             .scan(ScrollState(), ScrollState::updateDirection)
             .filter { abs(it.dy) > 4 }
@@ -174,6 +174,7 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
                         ArchiveQuery(
                             kind = query.kind,
                             temporalFilter = query.temporalFilter,
+                            contentFilter = state.filterState.filter,
                             offset = it.queryOffset
                         )
                     )
@@ -202,34 +203,6 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
 }
 
 @Composable
-private fun ArchiveFilters(filter: ArchiveContentFilter) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        shape = MaterialTheme.shapes.medium,
-        elevation = 1.dp,
-    ) {
-        Column(
-            Modifier.padding(8.dp)
-        ) {
-            Chips(
-                modifier = Modifier.fillMaxWidth(),
-                name = "Categories:",
-                chips = filter.categories,
-                color = MaterialTheme.colors.primaryVariant
-            )
-            Chips(
-                modifier = Modifier.fillMaxWidth(),
-                name = "Tags:",
-                chips = filter.tags,
-                color = MaterialTheme.colors.secondary
-            )
-        }
-    }
-}
-
-@Composable
 private fun ProgressBar() {
     Box(
         modifier = Modifier
@@ -247,7 +220,10 @@ private fun ProgressBar() {
 
 @Composable
 @ExperimentalMaterialApi
-private fun ArchiveCard(archiveItem: Result) {
+private fun ArchiveCard(
+    archiveItem: ArchiveItem.Result,
+    onAction: (Action) -> Unit
+) {
     val navMutator = LocalAppDependencies.current.navMutator
 
     Card(
@@ -265,9 +241,7 @@ private fun ArchiveCard(archiveItem: Result) {
                     categories = archiveItem.archive.categories,
                     published = archiveItem.prettyDate,
                     onCategoryClicked = { category ->
-                        navMutator.accept {
-                            push(archiveItem.query.routeFilteredByCategory(category))
-                        }
+// TODO  Change query params
                     }
                 )
                 Spacer(Modifier.height(8.dp))
@@ -293,7 +267,7 @@ private fun ArchiveQuery.routeFilteredByCategory(category: String) = ArchiveRout
 )
 
 @Composable
-private fun ArchiveThumbnail(archiveItem: Result) {
+private fun ArchiveThumbnail(archiveItem: ArchiveItem.Result) {
     Image(
         painter = rememberImagePainter(archiveItem.archive.thumbnail) {
             scale(FILL)
@@ -315,7 +289,7 @@ private fun ArchiveCategories(
     Row(
         modifier = Modifier.padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Chips(
             modifier = Modifier.weight(1F),
@@ -332,7 +306,7 @@ private fun ArchiveCategories(
 }
 
 @Composable
-private fun ArchiveBlurb(archiveItem: Result) {
+private fun ArchiveBlurb(archiveItem: ArchiveItem.Result) {
     Column(
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
@@ -348,7 +322,7 @@ private fun ArchiveBlurb(archiveItem: Result) {
     }
 }
 
-private val sampleArchiveItem = Result(
+private val sampleArchiveItem = ArchiveItem.Result(
     query = ArchiveQuery(kind = Articles),
     archive = Archive(
         key = "",
@@ -374,7 +348,7 @@ private val sampleArchiveItem = Result(
 @Preview
 @Composable
 private fun PreviewArchiveCard() {
-    ArchiveCard(archiveItem = sampleArchiveItem)
+    ArchiveCard(archiveItem = sampleArchiveItem) {}
 }
 
 @Preview
@@ -383,8 +357,7 @@ private fun PreviewLoadingState() {
     ArchiveScreen(
         mutator = State(
             route = ArchiveRoute(query = ArchiveQuery(kind = Articles)),
-            activeQuery = ArchiveQuery(kind = Articles),
-            items = listOf(Loading)
+            items = listOf(ArchiveItem.Loading)
         ).asNoOpStateFlowMutator()
     )
 }

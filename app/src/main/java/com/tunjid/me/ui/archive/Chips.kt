@@ -16,6 +16,7 @@
 
 package com.tunjid.me.ui.archive
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,29 +26,28 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.SizeMode
-import com.tunjid.me.data.archive.ArchiveKind.Articles
-import com.tunjid.me.data.archive.ArchiveQuery
-import com.tunjid.me.ui.archive.ArchiveItem.Loading
-import com.tunjid.me.ui.asNoOpStateFlowMutator
 
 sealed class ChipAction {
-    data class Added(val text: String) : ChipAction()
+    object Added : ChipAction()
     data class Changed(val text: String) : ChipAction()
     data class Removed(val text: String) : ChipAction()
 }
@@ -95,10 +95,19 @@ fun Chips(
                 TextField(
                     modifier = Modifier
                         .wrapContentWidth()
-                        .defaultMinSize(minWidth = 40.dp),
+                        .defaultMinSize(minWidth = 40.dp, minHeight = 48.dp),
                     maxLines = 1,
                     value = editInfo.currentText,
                     onValueChange = { editInfo.onChipChanged(ChipAction.Changed(it)) },
+                    keyboardActions = KeyboardActions(
+                        onDone = { editInfo.onChipChanged(ChipAction.Added) }
+                    ),
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    )
                 )
             }
         }
@@ -125,6 +134,11 @@ fun Chip(
             text = text,
             fontSize = 12.sp,
             maxLines = 1
+        )
+        if (editInfo != null) Icon(
+            modifier = Modifier.clickable { editInfo.onChipChanged(ChipAction.Removed(text)) },
+            imageVector = Icons.Filled.Close,
+            contentDescription = "Close"
         )
     }
     Spacer(Modifier.width(4.dp))

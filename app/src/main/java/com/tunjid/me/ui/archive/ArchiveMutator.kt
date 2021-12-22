@@ -20,9 +20,6 @@ import com.tunjid.me.data.archive.Archive
 import com.tunjid.me.data.archive.ArchiveContentFilter
 import com.tunjid.me.data.archive.ArchiveQuery
 import com.tunjid.me.data.archive.ArchiveRepository
-import com.tunjid.me.ui.archive.ArchiveItem.ContentFilter
-import com.tunjid.me.ui.archive.ArchiveItem.Loading
-import com.tunjid.me.ui.archive.ArchiveItem.Result
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -43,18 +40,25 @@ private val publishedDateFormatter = DateTimeFormatter
     .ofPattern("MMM dd yyyy")
     .withZone(ZoneId.systemDefault())
 
+enum class FilterType {
+    Tag, Category
+}
+
 data class State(
     val route: ArchiveRoute,
-    val activeQuery: ArchiveQuery,
+    val filterState: FilterState = FilterState(),
     val listStateSummary: ListState = ListState(),
-    val items: List<ArchiveItem> = listOf(Loading)
+    val items: List<ArchiveItem> = listOf(ArchiveItem.Loading)
+)
+
+data class FilterState(
+    val expanded: Boolean = false,
+    val filter: ArchiveContentFilter = ArchiveContentFilter(),
+    val categoryText: String = "",
+    val tagText: String = "",
 )
 
 sealed class ArchiveItem {
-    data class ContentFilter(
-        val filter: ArchiveContentFilter,
-    ) : ArchiveItem()
-
     data class Result(
         val archive: Archive,
         val query: ArchiveQuery,
@@ -65,16 +69,25 @@ sealed class ArchiveItem {
 
 val ArchiveItem.key: String
     get() = when (this) {
-        Loading -> "Loading"
-        is Result -> archive.key
-        is ContentFilter -> "Content filter"
+        ArchiveItem.Loading -> "Loading"
+        is ArchiveItem.Result -> archive.key
     }
 
-val Result.prettyDate: String get() = publishedDateFormatter.format(archive.created.toJavaInstant())
+val ArchiveItem.Result.prettyDate: String get() = publishedDateFormatter.format(archive.created.toJavaInstant())
 
 sealed class Action {
-    data class Fetch(val query: ArchiveQuery) : Action()
+    data class Fetch(
+        val query: ArchiveQuery,
+        val reset: Boolean = false
+    ) : Action()
+
     data class UpdateListState(val listState: ListState) : Action()
+    data class FilterChanged(
+        val type: FilterType,
+        val text: String
+    ) : Action()
+
+    object ToggleFilter : Action()
 }
 
 data class ListState(
@@ -90,10 +103,11 @@ fun archiveMutator(
     scope = scope,
     initialState = State(
         route = route,
-        activeQuery = route.query,
-        items = listOfNotNull(
-            route.query.contentFilter?.let(ArchiveItem::ContentFilter),
-            Loading
+        filterState = FilterState(
+            filter = ArchiveContentFilter(
+                tags = route.query.contentFilter?.tags ?: listOf(),
+                categories = route.query.contentFilter?.categories ?: listOf()
+            ),
         )
     ),
     started = SharingStarted.WhileSubscribed(2000),
@@ -105,17 +119,31 @@ fun archiveMutator(
                     // Debounce loads where archives are empty
                     .debounce { archives -> if (archives.isEmpty()) 5000 else 0 }
                     .map { archives ->
-                        Mutation {
-                            copy(
-                                items = when (val filter = activeQuery.contentFilter) {
-                                    null -> archives
-                                    else -> listOf(ContentFilter(filter)) + archives
-                                }
-                            )
-                        }
+                        Mutation { copy(items = archives) }
                     }
                 is Action.UpdateListState -> action.flow.map { (listState) ->
                     Mutation { copy(listStateSummary = listState) }
+                }
+                is Action.FilterChanged -> action.flow.map { (type, text) ->
+                    Mutation {
+                        copy(
+                            filterState = filterState.copy(
+                                categoryText = when {
+                                    type === FilterType.Category -> text
+                                    else -> filterState.categoryText
+                                },
+                                tagText = when {
+                                    type === FilterType.Tag -> text
+                                    else -> filterState.tagText
+                                },
+                            )
+                        )
+                    }
+                }
+                Action.ToggleFilter -> action.flow.map {
+                    Mutation {
+                        copy(filterState = filterState.copy(expanded = !filterState.expanded))
+                    }
                 }
             }
         }
@@ -130,7 +158,7 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Input<ArchiveQuery, List<Arc
         fetcher = { query ->
             monitorArchives(query).map { archives ->
                 archives.map { archive ->
-                    Result(
+                    ArchiveItem.Result(
                         archive = archive,
                         query = query
                     )
