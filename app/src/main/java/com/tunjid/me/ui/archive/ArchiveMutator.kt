@@ -20,6 +20,7 @@ import com.tunjid.me.data.archive.Archive
 import com.tunjid.me.data.archive.ArchiveContentFilter
 import com.tunjid.me.data.archive.ArchiveQuery
 import com.tunjid.me.data.archive.ArchiveRepository
+import com.tunjid.me.data.archive.DefaultQueryLimit
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -56,6 +57,16 @@ data class FilterState(
     val filter: ArchiveContentFilter = ArchiveContentFilter(),
     val categoryText: String = "",
     val tagText: String = "",
+)
+
+/**
+ * A summary of the loading queries in the app
+ */
+private data class Queries(
+    val oldQueries: List<ArchiveQuery> = listOf(),
+    val newQueries: List<ArchiveQuery> = listOf(),
+    val toEvict: List<ArchiveQuery> = listOf(),
+    val inMemory: List<ArchiveQuery> = listOf(),
 )
 
 sealed class ArchiveItem {
@@ -179,18 +190,29 @@ private fun Flow<Action.Fetch>.toArchiveItems(repo: ArchiveRepository): Flow<Lis
         .flattenWith(repo.archiveTiler())
         .map { it.flatten() }
 
-private fun Flow<Action.Fetch>.queryChanges(): Flow<Pair<List<ArchiveQuery>, List<ArchiveQuery>>> =
-    map { (query) ->
-        listOf(
+private fun Flow<Action.Fetch>.queryChanges(): Flow<Queries> =
+    map { (query, shouldReset) ->
+        shouldReset to listOf(
             query.copy(offset = query.offset - query.limit),
             query.copy(offset = query.offset + query.limit),
             query
         )
             .filter { it.offset >= 0 }
     }
-        .scan(Pair(listOf(), listOf())) { pair, new ->
-            pair.copy(
-                first = pair.second,
-                second = new
-            )
+        .scan(Queries()) { existingQueries, (shouldReset, new) ->
+            val currentlyInMemory = (existingQueries.inMemory + new)
+            val toEvict = if (shouldReset) currentlyInMemory else when (val min =
+                new.minByOrNull(ArchiveQuery::offset)) {
+                null -> listOf()
+                // Evict items more than 6 offsets pages behind the min current query
+                else -> currentlyInMemory.filter { it.offset - min.offset > -(DefaultQueryLimit * 6) }
+            }
+            existingQueries.copy(
+                oldQueries = existingQueries.newQueries,
+                newQueries = new,
+                inMemory = currentlyInMemory - toEvict,
+                toEvict = toEvict
+            ).apply {
+                println(this)
+            }
         }
