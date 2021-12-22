@@ -68,6 +68,7 @@ sealed class ArchiveItem {
         val archive: Archive,
         val query: ArchiveQuery,
     ) : ArchiveItem()
+
     object Loading : ArchiveItem()
 }
 
@@ -142,6 +143,7 @@ fun archiveMutator(
                             copy(
                                 items = items,
                                 filterState = filterState.copy(
+                                    expanded = if (fetchAction.reset) true else filterState.expanded,
                                     filter = fetchAction.query.contentFilter ?: filterState.filter
                                 )
                             )
