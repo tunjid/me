@@ -101,7 +101,7 @@ private data class Queries(
     val inMemory: List<ArchiveQuery> = listOf(),
 )
 
-private data class FetchInfo(
+private data class FetchResult(
     val sourceQuery: Action.Fetch,
     val archives: List<ArchiveItem>
 )
@@ -126,7 +126,7 @@ fun archiveMutator(
         actions.toMutationStream {
             when (val action = type()) {
                 is Action.Fetch -> action.flow
-                    .toArchiveItems(repo = repo)
+                    .toFetchResult(repo = repo)
                     .map { (fetchAction, archives) ->
                         Mutation {
                             val items = when {
@@ -194,9 +194,9 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Input<ArchiveQuery, List<Arc
         }
     )
 
-private fun Flow<Action.Fetch>.toArchiveItems(repo: ArchiveRepository): Flow<FetchInfo> =
+private fun Flow<Action.Fetch>.toFetchResult(repo: ArchiveRepository): Flow<FetchResult> =
     combine(
-        this@toArchiveItems,
+        this@toFetchResult,
         queryChanges().flatMapLatest { (oldPages, newPages, evictions) ->
             val toTurnOn = newPages
                 .map { Tile.Request.On<ArchiveQuery, List<ArchiveItem>>(it) }
@@ -212,7 +212,7 @@ private fun Flow<Action.Fetch>.toArchiveItems(repo: ArchiveRepository): Flow<Fet
         }
             .flattenWith(repo.archiveTiler())
             .map { it.flatten() },
-        ::FetchInfo
+        ::FetchResult
     )
 
 private fun Flow<Action.Fetch>.queryChanges(): Flow<Queries> =
