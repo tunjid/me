@@ -200,19 +200,19 @@ private fun Flow<Action.Fetch>.queryChanges(): Flow<Queries> =
             .filter { it.offset >= 0 }
     }
         .scan(Queries()) { existingQueries, (shouldReset, new) ->
-            val currentlyInMemory = (existingQueries.inMemory + new)
+            val currentlyInMemory = (existingQueries.inMemory + new).distinct()
             val toEvict = if (shouldReset) currentlyInMemory else when (val min =
                 new.minByOrNull(ArchiveQuery::offset)) {
                 null -> listOf()
-                // Evict items more than 6 offsets pages behind the min current query
-                else -> currentlyInMemory.filter { it.offset - min.offset > -(DefaultQueryLimit * 6) }
+                // Evict items more than 3 offset pages behind the min current query
+                else -> currentlyInMemory.filter {
+                    it.offset - min.offset < -(DefaultQueryLimit * 3)
+                }
             }
             existingQueries.copy(
                 oldQueries = existingQueries.newQueries,
                 newQueries = new,
-                inMemory = currentlyInMemory - toEvict,
+                inMemory = currentlyInMemory - toEvict.toSet(),
                 toEvict = toEvict
-            ).apply {
-                println(this)
-            }
+            )
         }
