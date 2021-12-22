@@ -241,7 +241,16 @@ private fun ArchiveCard(
                     categories = archiveItem.archive.categories,
                     published = archiveItem.prettyDate,
                     onCategoryClicked = { category ->
-// TODO  Change query params
+                        val query = archiveItem.query
+                        val contentFilter = (query.contentFilter ?: ArchiveContentFilter())
+                        onAction(Action.Fetch(
+                            query = query.copy(
+                                contentFilter = contentFilter.copy(
+                                    categories = (contentFilter.categories + category).distinct()
+                                )
+                            ),
+                            reset = true
+                        ))
                     }
                 )
                 Spacer(Modifier.height(8.dp))
@@ -251,20 +260,6 @@ private fun ArchiveCard(
         }
     )
 }
-
-private fun ArchiveQuery.routeFilteredByCategory(category: String) = ArchiveRoute(
-    query = copy(
-        contentFilter = ArchiveContentFilter(
-            categories = when (val filter =
-                contentFilter) {
-                null -> listOf(category)
-                else -> filter.categories.plus(
-                    category
-                ).distinct()
-            }
-        )
-    )
-)
 
 @Composable
 private fun ArchiveThumbnail(archiveItem: ArchiveItem.Result) {

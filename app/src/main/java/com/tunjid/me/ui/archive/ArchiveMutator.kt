@@ -180,12 +180,18 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Input<ArchiveQuery, List<Arc
 
 private fun Flow<Action.Fetch>.toArchiveItems(repo: ArchiveRepository): Flow<List<ArchiveItem>> =
     queryChanges()
-        .flatMapLatest { (oldPages, newPages) ->
-            oldPages
+        .flatMapLatest { (oldPages, newPages, evictions) ->
+            val toTurnOn = newPages
+                .map { Tile.Request.On<ArchiveQuery, List<ArchiveItem>>(it) }
+
+            val toTurnOff = oldPages
                 .filterNot { newPages.contains(it) }
                 .map { Tile.Request.Off<ArchiveQuery, List<ArchiveItem>>(it) }
-                .plus(newPages.map { Tile.Request.On(it) })
-                .asFlow()
+
+            val toEvict = evictions
+                .map { Tile.Request.Evict<ArchiveQuery, List<ArchiveItem>>(it) }
+
+            (toTurnOn + toTurnOff + toEvict).asFlow()
         }
         .flattenWith(repo.archiveTiler())
         .map { it.flatten() }
