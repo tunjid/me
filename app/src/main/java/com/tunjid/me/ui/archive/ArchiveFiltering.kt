@@ -18,7 +18,6 @@ package com.tunjid.me.ui.archive
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -33,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,7 +39,7 @@ import com.tunjid.me.ui.archive.Action.ToggleFilter
 
 @Composable
 fun ArchiveFilters(
-    item: FilterState,
+    item: QueryState,
     onChanged: (Action) -> Unit
 ) {
     val isExpanded = item.expanded
@@ -91,7 +89,7 @@ fun ArchiveFilters(
 @Composable
 private fun FilterChips(
     modifier: Modifier,
-    state: FilterState,
+    state: QueryState,
     onChanged: (Action) -> Unit
 ) {
     Column(
@@ -100,7 +98,7 @@ private fun FilterChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
-            chips = state.filter.categories,
+            chips = state.rootQuery.contentFilter.categories,
             color = MaterialTheme.colors.primaryVariant,
             editInfo = ChipEditInfo(
                 currentText = state.categoryText,
@@ -110,7 +108,7 @@ private fun FilterChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
-            chips = state.filter.tags,
+            chips = state.rootQuery.contentFilter.tags,
             color = MaterialTheme.colors.secondary,
             editInfo = ChipEditInfo(
                 currentText = state.tagText,

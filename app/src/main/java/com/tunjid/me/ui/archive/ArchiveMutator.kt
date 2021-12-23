@@ -17,7 +17,6 @@
 package com.tunjid.me.ui.archive
 
 import com.tunjid.me.data.archive.Archive
-import com.tunjid.me.data.archive.ArchiveContentFilter
 import com.tunjid.me.data.archive.ArchiveQuery
 import com.tunjid.me.data.archive.ArchiveRepository
 import com.tunjid.me.data.archive.DefaultQueryLimit
@@ -38,8 +37,7 @@ import java.time.format.DateTimeFormatter
 typealias ArchiveMutator = Mutator<Action, StateFlow<State>>
 
 data class State(
-    val route: ArchiveRoute,
-    val filterState: FilterState = FilterState(),
+    val queryState: QueryState,
     val listStateSummary: ListState = ListState(),
     val items: List<ArchiveItem> = listOf(ArchiveItem.Loading)
 )
@@ -81,9 +79,9 @@ enum class FilterType {
     Tag, Category
 }
 
-data class FilterState(
+data class QueryState(
     val expanded: Boolean = false,
-    val filter: ArchiveContentFilter = ArchiveContentFilter(),
+    val rootQuery: ArchiveQuery,
     val categoryText: String = "",
     val tagText: String = "",
 )
@@ -119,12 +117,8 @@ fun archiveMutator(
 ): Mutator<Action, StateFlow<State>> = stateFlowMutator(
     scope = scope,
     initialState = State(
-        route = route,
-        filterState = FilterState(
-            filter = ArchiveContentFilter(
-                tags = route.query.contentFilter.tags,
-                categories = route.query.contentFilter.categories
-            ),
+        queryState = QueryState(
+            rootQuery = route.query,
         )
     ),
     started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 2000),
@@ -140,22 +134,23 @@ fun archiveMutator(
     }
 )
 
-private fun Flow<Action.UpdateListState>.updateListStateMutations(): Flow<Mutation<State>> = map { (listState) ->
-    Mutation { copy(listStateSummary = listState) }
-}
+private fun Flow<Action.UpdateListState>.updateListStateMutations(): Flow<Mutation<State>> =
+    map { (listState) ->
+        Mutation { copy(listStateSummary = listState) }
+    }
 
 private fun Flow<Action.FilterChanged>.filterChangedMutations(): Flow<Mutation<State>> =
     map { (type, text) ->
         Mutation {
             copy(
-                filterState = filterState.copy(
+                queryState = queryState.copy(
                     categoryText = when {
                         type === FilterType.Category -> text
-                        else -> filterState.categoryText
+                        else -> queryState.categoryText
                     },
                     tagText = when {
                         type === FilterType.Tag -> text
-                        else -> filterState.tagText
+                        else -> queryState.tagText
                     },
                 )
             )
@@ -164,7 +159,7 @@ private fun Flow<Action.FilterChanged>.filterChangedMutations(): Flow<Mutation<S
 
 private fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<State>> = map {
     Mutation {
-        copy(filterState = filterState.copy(expanded = !filterState.expanded))
+        copy(queryState = queryState.copy(expanded = !queryState.expanded))
     }
 }
 
@@ -192,9 +187,17 @@ private fun Flow<Action.Fetch>.fetchMutations(repo: ArchiveRepository): Flow<Mut
                     }
                 copy(
                     items = items,
-                    filterState = filterState.copy(
-                        expanded = if (fetchAction.reset) true else filterState.expanded,
-                        filter = fetchAction.query.contentFilter
+                    queryState = queryState.copy(
+                        rootQuery = when {
+                            fetchAction.reset -> queryState.rootQuery.copy(
+                                contentFilter = fetchAction.query.contentFilter
+                            )
+                            else -> queryState.rootQuery
+                        },
+                        expanded = when {
+                            fetchAction.reset -> true
+                            else -> queryState.expanded
+                        }
                     )
                 )
             }

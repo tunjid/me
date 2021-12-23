@@ -53,7 +53,6 @@ import coil.compose.rememberImagePainter
 import coil.size.Scale.FILL
 import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.data.archive.Archive
-import com.tunjid.me.data.archive.ArchiveContentFilter
 import com.tunjid.me.data.archive.ArchiveKind.Articles
 import com.tunjid.me.data.archive.ArchiveQuery
 import com.tunjid.me.data.archive.User
@@ -104,7 +103,7 @@ data class ArchiveRoute(val query: ArchiveQuery) : Route<ArchiveMutator> {
 @ExperimentalMaterialApi
 private fun ArchiveScreen(mutator: ArchiveMutator) {
     val state by mutator.state.collectAsState()
-    val query = state.route.query
+    val query = state.queryState.rootQuery
 
     InitialUiState(
         UiState(
@@ -116,7 +115,7 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
     )
 
     val items = state.items
-    val filter = state.filterState
+    val filter = state.queryState
     val listStateSummary = state.listStateSummary
 
     val listState = rememberLazyListState(
@@ -174,7 +173,7 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
                         ArchiveQuery(
                             kind = query.kind,
                             temporalFilter = query.temporalFilter,
-                            contentFilter = state.filterState.filter,
+                            contentFilter = state.queryState.rootQuery.contentFilter,
                             offset = it.queryOffset
                         )
                     )
@@ -242,7 +241,7 @@ private fun ArchiveCard(
                     published = archiveItem.prettyDate,
                     onCategoryClicked = { category ->
                         val query = archiveItem.query
-                        val contentFilter = (query.contentFilter ?: ArchiveContentFilter())
+                        val contentFilter = query.contentFilter
                         onAction(Action.Fetch(
                             query = query.copy(
                                 contentFilter = contentFilter.copy(
@@ -351,7 +350,7 @@ private fun PreviewArchiveCard() {
 private fun PreviewLoadingState() {
     ArchiveScreen(
         mutator = State(
-            route = ArchiveRoute(query = ArchiveQuery(kind = Articles)),
+            queryState = QueryState(rootQuery = ArchiveQuery(kind = Articles)),
             items = listOf(ArchiveItem.Loading)
         ).asNoOpStateFlowMutator()
     )
