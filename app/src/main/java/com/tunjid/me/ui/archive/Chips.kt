@@ -17,16 +17,10 @@
 package com.tunjid.me.ui.archive
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
@@ -41,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.SemanticsProperties.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -100,14 +95,16 @@ fun Chips(
                     maxLines = 1,
                     value = editInfo.currentText,
                     onValueChange = { editInfo.onChipChanged(ChipAction.Changed(it)) },
+                    keyboardOptions = KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Done),
                     keyboardActions = KeyboardActions(
-                        onDone = { editInfo.onChipChanged(ChipAction.Added) }
+                        onDone = { editInfo.onChipChanged(ChipAction.Added) },
                     ),
                     colors = TextFieldDefaults.textFieldColors(
                         backgroundColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent
+                        disabledIndicatorColor = Color.Transparent,
+                        cursorColor = MaterialTheme.colors.onSurface,
                     )
                 )
             }
