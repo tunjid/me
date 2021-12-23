@@ -37,10 +37,6 @@ import java.time.format.DateTimeFormatter
 
 typealias ArchiveMutator = Mutator<Action, StateFlow<State>>
 
-enum class FilterType {
-    Tag, Category
-}
-
 data class State(
     val route: ArchiveRoute,
     val filterState: FilterState = FilterState(),
@@ -80,6 +76,10 @@ val ArchiveItem.key: String
     }
 
 val ArchiveItem.Result.prettyDate: String get() = publishedDateFormatter.format(archive.created.toJavaInstant())
+
+enum class FilterType {
+    Tag, Category
+}
 
 data class FilterState(
     val expanded: Boolean = false,
@@ -222,7 +222,7 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Input<ArchiveQuery, List<Arc
 private fun Flow<Action.Fetch>.toFetchResult(repo: ArchiveRepository): Flow<FetchResult> =
     combine(
         flow = this@toFetchResult,
-        flow2 = queryChanges().flatMapLatest { (previousQueries, currentQueries, evictions) ->
+        flow2 = fetchMetadata().flatMapLatest { (previousQueries, currentQueries, evictions) ->
             val toTurnOn = currentQueries
                 .map { Tile.Request.On<ArchiveQuery, List<ArchiveItem>>(it) }
 
@@ -239,7 +239,7 @@ private fun Flow<Action.Fetch>.toFetchResult(repo: ArchiveRepository): Flow<Fetc
         transform = ::FetchResult
     )
 
-private fun Flow<Action.Fetch>.queryChanges(): Flow<FetchMetadata> =
+private fun Flow<Action.Fetch>.fetchMetadata(): Flow<FetchMetadata> =
     map { (query, shouldReset) ->
         shouldReset to listOf(
             query.copy(offset = query.offset - query.limit),
