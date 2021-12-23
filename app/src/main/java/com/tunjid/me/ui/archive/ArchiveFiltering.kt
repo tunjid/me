@@ -60,10 +60,24 @@ fun ArchiveFilters(
         elevation = 1.dp,
     ) {
 
-        Row(
+        Column(
             modifier = Modifier,
-            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
+            Row(
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 48.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    text = "Filters",
+                    textAlign = TextAlign.Center,
+                    fontSize = 18.sp,
+                )
+                DropDownButton(isExpanded, onChanged)
+            }
             AnimatedVisibility(visible = isExpanded) {
                 FilterChips(
                     modifier = Modifier
@@ -72,24 +86,6 @@ fun ArchiveFilters(
                     state = item,
                     onChanged = onChanged
                 )
-            }
-
-            Row(
-                modifier = Modifier
-                    .defaultMinSize(minHeight = 48.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                AnimatedVisibility(visible = !isExpanded) {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        text = "Filters",
-                        textAlign = TextAlign.Center,
-                        fontSize = 18.sp,
-                    )
-                }
-                DropDownButton(isExpanded, onChanged)
             }
         }
     }
