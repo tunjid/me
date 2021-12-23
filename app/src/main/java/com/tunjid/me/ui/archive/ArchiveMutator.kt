@@ -55,6 +55,7 @@ sealed class Action {
     ) : Action()
 
     data class UpdateListState(val listState: ListState) : Action()
+
     data class FilterChanged(
         val type: FilterType,
         val text: String
@@ -117,12 +118,12 @@ fun archiveMutator(
         route = route,
         filterState = FilterState(
             filter = ArchiveContentFilter(
-                tags = route.query.contentFilter?.tags ?: listOf(),
-                categories = route.query.contentFilter?.categories ?: listOf()
+                tags = route.query.contentFilter.tags,
+                categories = route.query.contentFilter.categories
             ),
         )
     ),
-    started = SharingStarted.WhileSubscribed(2000),
+    started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 2000),
     transform = { actions ->
         actions.toMutationStream {
             when (val action = type()) {
@@ -134,6 +135,8 @@ fun archiveMutator(
                                 archives.isEmpty() -> items
                                 else -> archives
                             }
+                                // Filtering is cheap because at most 4 * [DefaultQueryLimit] items
+                                // are ever sent to the UI
                                 .filter { item ->
                                     when (item) {
                                         ArchiveItem.Loading -> true
@@ -144,7 +147,7 @@ fun archiveMutator(
                                 items = items,
                                 filterState = filterState.copy(
                                     expanded = if (fetchAction.reset) true else filterState.expanded,
-                                    filter = fetchAction.query.contentFilter ?: filterState.filter
+                                    filter = fetchAction.query.contentFilter
                                 )
                             )
                         }
@@ -182,6 +185,7 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Input<ArchiveQuery, List<Arc
     tiledList(
         flattener = Tile.Flattener.PivotSorted(
             comparator = compareBy(ArchiveQuery::offset),
+            // Limit results to at most 4 pages at once
             limiter = { pages -> pages.size > 4 }
         ),
         fetcher = { query ->

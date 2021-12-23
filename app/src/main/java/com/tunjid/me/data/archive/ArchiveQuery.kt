@@ -21,7 +21,7 @@ const val DefaultQueryLimit = 6
 data class ArchiveQuery(
     val kind: ArchiveKind,
     val temporalFilter: ArchiveTemporalFilter? = null,
-    val contentFilter: ArchiveContentFilter? = null,
+    val contentFilter: ArchiveContentFilter = ArchiveContentFilter(),
     val offset: Int = 0,
     val limit: Int = DefaultQueryLimit
 )
