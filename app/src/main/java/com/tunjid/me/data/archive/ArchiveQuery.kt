@@ -16,6 +16,13 @@
 
 package com.tunjid.me.data.archive
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
 const val DefaultQueryLimit = 6
 
 data class ArchiveQuery(
@@ -32,6 +39,55 @@ data class ArchiveTemporalFilter(
 )
 
 data class ArchiveContentFilter(
-    val tags: List<String> = listOf(),
-    val categories: List<String> = listOf(),
+    val tags: List<Descriptor.Tag> = listOf(),
+    val categories: List<Descriptor.Category> = listOf(),
 )
+
+@Serializable
+sealed class Descriptor {
+    abstract val value: String
+
+    @Serializable(CategorySerializer::class)
+    data class Category(override val value: String) : Descriptor()
+
+    @Serializable(TagSerializer::class)
+    data class Tag(override val value: String) : Descriptor()
+}
+
+operator fun ArchiveQuery.plus(descriptor: Descriptor) = amend(descriptor, List<Descriptor>::plus)
+
+operator fun ArchiveQuery.minus(descriptor: Descriptor) = amend(descriptor, List<Descriptor>::minus)
+
+private fun ArchiveQuery.amend(descriptor: Descriptor, operator: (List<Descriptor>, Descriptor) -> List<Descriptor>) = copy(
+    contentFilter = contentFilter.copy(
+        categories = when (descriptor) {
+            is Descriptor.Category -> operator(contentFilter.categories, descriptor)
+                .distinct()
+                .filterIsInstance<Descriptor.Category>()
+            else -> contentFilter.categories
+        },
+        tags = when (descriptor) {
+            is Descriptor.Tag -> operator(contentFilter.tags, descriptor)
+                .distinct()
+                .filterIsInstance<Descriptor.Tag>()
+            else -> contentFilter.tags
+        }
+    )
+)
+
+private class CategorySerializer(
+    backing: KSerializer<Descriptor.Category> = descriptorSerializer(Descriptor::Category)
+) : KSerializer<Descriptor.Category> by backing
+
+private class TagSerializer(
+    backing: KSerializer<Descriptor.Tag> = descriptorSerializer(Descriptor::Tag)
+) : KSerializer<Descriptor.Tag> by backing
+
+private fun <T : Descriptor> descriptorSerializer(creator: (String) -> T) =
+    object : KSerializer<T> {
+        override val descriptor = PrimitiveSerialDescriptor("Descriptor", PrimitiveKind.STRING)
+        override fun serialize(encoder: Encoder, value: T) =
+            encoder.encodeString(value.value).also { println("Serializing") }
+
+        override fun deserialize(decoder: Decoder): T = creator(decoder.decodeString())
+    }

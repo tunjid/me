@@ -20,6 +20,7 @@ import com.tunjid.me.data.archive.Archive
 import com.tunjid.me.data.archive.ArchiveQuery
 import com.tunjid.me.data.archive.ArchiveRepository
 import com.tunjid.me.data.archive.DefaultQueryLimit
+import com.tunjid.me.data.archive.Descriptor
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -51,8 +52,7 @@ sealed class Action {
     data class UpdateListState(val listState: ListState) : Action()
 
     data class FilterChanged(
-        val type: FilterType,
-        val text: String
+        val descriptor: Descriptor
     ) : Action()
 
     object ToggleFilter : Action()
@@ -75,15 +75,11 @@ val ArchiveItem.key: String
 
 val ArchiveItem.Result.prettyDate: String get() = publishedDateFormatter.format(archive.created.toJavaInstant())
 
-enum class FilterType {
-    Tag, Category
-}
-
 data class QueryState(
     val expanded: Boolean = false,
     val rootQuery: ArchiveQuery,
-    val categoryText: String = "",
-    val tagText: String = "",
+    val categoryText: Descriptor.Category = Descriptor.Category(""),
+    val tagText: Descriptor.Tag = Descriptor.Tag(""),
 )
 
 data class ListState(
@@ -140,16 +136,16 @@ private fun Flow<Action.UpdateListState>.updateListStateMutations(): Flow<Mutati
     }
 
 private fun Flow<Action.FilterChanged>.filterChangedMutations(): Flow<Mutation<State>> =
-    map { (type, text) ->
+    map { (descriptor) ->
         Mutation {
             copy(
                 queryState = queryState.copy(
-                    categoryText = when {
-                        type === FilterType.Category -> text
+                    categoryText = when(descriptor) {
+                        is Descriptor.Category -> descriptor
                         else -> queryState.categoryText
                     },
-                    tagText = when {
-                        type === FilterType.Tag -> text
+                    tagText = when(descriptor) {
+                        is Descriptor.Tag -> descriptor
                         else -> queryState.tagText
                     },
                 )

@@ -55,7 +55,9 @@ import com.tunjid.me.LocalAppDependencies
 import com.tunjid.me.data.archive.Archive
 import com.tunjid.me.data.archive.ArchiveKind.Articles
 import com.tunjid.me.data.archive.ArchiveQuery
+import com.tunjid.me.data.archive.Descriptor
 import com.tunjid.me.data.archive.User
+import com.tunjid.me.data.archive.plus
 import com.tunjid.me.globalui.UiState
 import com.tunjid.me.nav.Route
 import com.tunjid.me.nav.push
@@ -241,13 +243,8 @@ private fun ArchiveCard(
                     published = archiveItem.prettyDate,
                     onCategoryClicked = { category ->
                         val query = archiveItem.query
-                        val contentFilter = query.contentFilter
                         onAction(Action.Fetch(
-                            query = query.copy(
-                                contentFilter = contentFilter.copy(
-                                    categories = (contentFilter.categories + category).distinct()
-                                )
-                            ),
+                            query = query.copy(offset = 0) + Descriptor.Category(category),
                             reset = true
                         ))
                     }

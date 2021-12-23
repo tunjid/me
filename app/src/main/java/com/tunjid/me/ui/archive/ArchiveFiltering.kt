@@ -18,7 +18,13 @@ package com.tunjid.me.ui.archive
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
@@ -35,6 +41,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tunjid.me.data.archive.Descriptor
+import com.tunjid.me.data.archive.minus
+import com.tunjid.me.data.archive.plus
 import com.tunjid.me.ui.archive.Action.ToggleFilter
 
 @Composable
@@ -98,21 +107,31 @@ private fun FilterChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
-            chips = state.rootQuery.contentFilter.categories,
+            chips = state.rootQuery.contentFilter.categories.map(Descriptor.Category::value),
             color = MaterialTheme.colors.primaryVariant,
             editInfo = ChipEditInfo(
-                currentText = state.categoryText,
-                onChipChanged = FilterType.Category.onChipFilterChanged(onChanged)
+                currentText = state.categoryText.value,
+                onChipChanged = onChipFilterChanged(
+                    state = state,
+                    reader = QueryState::categoryText,
+                    writer = Descriptor::Category,
+                    onChanged = onChanged
+                )
             )
         )
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
-            chips = state.rootQuery.contentFilter.tags,
+            chips = state.rootQuery.contentFilter.tags.map(Descriptor.Tag::value),
             color = MaterialTheme.colors.secondary,
             editInfo = ChipEditInfo(
-                currentText = state.tagText,
-                onChipChanged = FilterType.Tag.onChipFilterChanged(onChanged)
+                currentText = state.tagText.value,
+                onChipChanged = onChipFilterChanged(
+                    state = state,
+                    reader = QueryState::tagText,
+                    writer = Descriptor::Tag,
+                    onChanged = onChanged
+                )
             )
         )
     }
@@ -136,12 +155,25 @@ private fun DropDownButton(
         })
 }
 
-private fun FilterType.onChipFilterChanged(
-    onChanged: (Action.FilterChanged) -> Unit
+private fun onChipFilterChanged(
+    state: QueryState,
+    reader: (QueryState) -> Descriptor,
+    writer: (String) -> Descriptor,
+    onChanged: (Action) -> Unit
 ): (ChipAction) -> Unit = {
     when (it) {
-        ChipAction.Added -> Unit
-        is ChipAction.Changed -> onChanged(Action.FilterChanged(type = this, text = it.text))
-        is ChipAction.Removed -> Unit
+        ChipAction.Added -> onChanged(
+            Action.Fetch(
+                query = state.rootQuery + reader(state),
+                reset = true
+            )
+        )
+        is ChipAction.Changed -> onChanged(Action.FilterChanged(writer(it.text)))
+        is ChipAction.Removed -> onChanged(
+            Action.Fetch(
+                query = state.rootQuery - writer(it.text),
+                reset = true
+            )
+        )
     }
 }

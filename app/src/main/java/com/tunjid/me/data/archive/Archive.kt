@@ -16,7 +16,6 @@
 
 package com.tunjid.me.data.archive
 
-import androidx.compose.material.icons.Icons
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.KSerializer
@@ -69,7 +68,7 @@ private object LocalDateTimeSerializer : KSerializer<Instant> {
 private object ArchiveKindSerializer : KSerializer<ArchiveKind> {
     override val descriptor = PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
     override fun serialize(encoder: Encoder, value: ArchiveKind) =
-        encoder.encodeString(value.type)
+        encoder.encodeString(value.type).also { println("Serilizing kind") }
 
     override fun deserialize(decoder: Decoder): ArchiveKind = when (decoder.decodeString()) {
         ArchiveKind.Articles.type -> ArchiveKind.Articles
