@@ -18,6 +18,7 @@ package com.tunjid.me.ui.archive
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import com.tunjid.me.data.archive.Descriptor
 import com.tunjid.me.data.archive.minus
 import com.tunjid.me.data.archive.plus
-import com.tunjid.me.ui.archive.Action.ToggleFilter
 
 @Composable
 fun ArchiveFilters(
@@ -66,7 +66,8 @@ fun ArchiveFilters(
             Row(
                 modifier = Modifier
                     .defaultMinSize(minHeight = 48.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .clickable { onChanged(Action.ToggleFilter) },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -143,7 +144,7 @@ private fun DropDownButton(
         modifier = Modifier
             .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
             .rotate(rotation),
-        onClick = { onChanged(ToggleFilter) },
+        onClick = { onChanged(Action.ToggleFilter) },
         shape = RoundedCornerShape(40.dp),
         contentPadding = PaddingValues(4.dp),
         content = {
