@@ -37,7 +37,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     buildFeatures {
@@ -64,33 +67,34 @@ android {
 }
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
+    coreLibraryDesugaring(libs.android.desugarJdkLibs)
 
-    implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.appcompat:appcompat:1.4.0")
-    implementation("androidx.activity:activity-compose:1.4.0")
-    implementation("androidx.compose.material:material:1.0.5")
-    implementation("androidx.compose.animation:animation:1.0.5")
-    implementation("androidx.compose.ui:ui-tooling:1.0.5")
+    implementation libs.accompanist.flowlayout
 
-    implementation("com.google.android.material:material:1.4.0")
-    implementation("com.google.android.material:material:1.4.0")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.20.3")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.compose.ui.tooling)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1")
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.datetime)
+    implementation(libs.kotlinx.serialization.json)
 
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
-    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0")
+    implementation(libs.google.material)
 
-    implementation("io.coil-kt:coil:1.4.0")
-    implementation("io.coil-kt:coil-compose:1.4.0")
+    implementation(libs.retrofit)
+    implementation(libs.okhttp.logging)
+    implementation(libs.jakewharton.retrofit.serializationconverter)
 
-    implementation("com.halilibo.compose-richtext:richtext-commonmark:0.10.0")
-    implementation("com.halilibo.compose-richtext:richtext-ui-material:0.10.0")
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
 
-    implementation("com.tunjid.mutator:core:0.0.0-alpha02")
-    implementation("com.tunjid.mutator:coroutines:0.0.0-alpha02")
-    implementation("com.tunjid.tiler:tiler:0.0.0-alpha02")
+    implementation(libs.richtext.commonmark)
+    implementation(libs.richtext.material)
+
+    implementation(libs.tunjid.mutator.core)
+    implementation(libs.tunjid.mutator.coroutines)
+    implementation(libs.tunjid.tiler)
 }
