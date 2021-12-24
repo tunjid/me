@@ -18,7 +18,6 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     kotlin("plugin.serialization") version "1.5.31"
-
 }
 
 android {
