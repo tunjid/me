@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-        jcenter() // Warning: this repository is going to shut down soon
-    }
+import org.gradle.kotlin.dsl.`kotlin-dsl`
+
+plugins {
+    `kotlin-dsl`
 }
-rootProject.name = "Me"
-include ':app'
+
+repositories {
+    jcenter()
+}
