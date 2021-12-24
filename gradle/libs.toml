@@ -1,0 +1,84 @@
+[versions]
+accompanist = "0.21.4-beta"
+androidDesugarJdkLibs = "1.1.5"
+androidGradlePlugin = "7.0.3"
+androidxAppCompat = "1.7.0"
+androidxCompose = "1.7.0"
+androidxCore = "1.7.0"
+kotlin = "1.6.0"
+kotlinxCoroutines = "1.6.0"
+kotlinxDatetime = "0.3.1"
+kotlinxSerializationJson = "1.3.1"
+
+implementation("androidx.appcompat:appcompat:1.4.0")
+implementation("androidx.activity:activity-compose:1.4.0")
+implementation("androidx.compose.material:material:1.0.5")
+implementation("androidx.compose.animation:animation:1.0.5")
+implementation("androidx.compose.ui:ui-tooling:1.0.5")
+
+implementation("com.google.android.material:material:1.4.0")
+implementation("com.google.android.material:material:1.4.0")
+implementation("com.google.accompanist:accompanist-flowlayout:0.20.3")
+
+implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
+implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1")
+
+implementation("com.squareup.retrofit2:retrofit:2.9.0")
+implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0")
+
+implementation("io.coil-kt:coil:1.4.0")
+implementation("io.coil-kt:coil-compose:1.4.0")
+
+implementation("com.halilibo.compose-richtext:richtext-commonmark:0.10.0")
+implementation("com.halilibo.compose-richtext:richtext-ui-material:0.10.0")
+
+implementation("com.tunjid.mutator:core:0.0.0-alpha02")
+implementation("com.tunjid.mutator:coroutines:0.0.0-alpha02")
+implementation("com.tunjid.tiler:tiler:0.0.0-alpha02")
+
+[libraries]
+accompanist-flowlayout = { group="com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
+android-desugarJdkLibs = { group="com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJdkLibs" }
+android-graglePlugin = { group="com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
+androidx-activity-compose = { group="androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+androidx-appcompat = { group="androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
+androidx-compose-foundation-layout = { group="androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+androidx-compose-material = { group="androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+androidx-compose-runtime = { group="androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+androidx-compose-ui-tooling = { group="androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+androidx-compose-ui-util = { group="androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+kotlin-gradlePlugin = { group="androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+kotlin-serializationPlugin = { group="androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+kotlin-coroutines-android = { group="androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+kotlin-coroutines-test = { group="androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+kotlin-datetime = { group="androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+kotlin-serialization-json = { group="androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+
+implementation("androidx.core:core-ktx:1.7.0")
+implementation("androidx.appcompat:appcompat:1.4.0")
+implementation("androidx.activity:activity-compose:1.4.0")
+implementation("androidx.compose.material:material:1.0.5")
+implementation("androidx.compose.animation:animation:1.0.5")
+implementation("androidx.compose.ui:ui-tooling:1.0.5")
+
+implementation("com.google.android.material:material:1.4.0")
+implementation("com.google.android.material:material:1.4.0")
+implementation("com.google.accompanist:accompanist-flowlayout:0.20.3")
+
+implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.1")
+implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1")
+
+implementation("com.squareup.retrofit2:retrofit:2.9.0")
+implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0")
+
+implementation("io.coil-kt:coil:1.4.0")
+implementation("io.coil-kt:coil-compose:1.4.0")
+
+implementation("com.halilibo.compose-richtext:richtext-commonmark:0.10.0")
+implementation("com.halilibo.compose-richtext:richtext-ui-material:0.10.0")
+
+implementation("com.tunjid.mutator:core:0.0.0-alpha02")
+implementation("com.tunjid.mutator:coroutines:0.0.0-alpha02")
+implementation("com.tunjid.tiler:tiler:0.0.0-alpha02")
