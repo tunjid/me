@@ -3,14 +3,15 @@ accompanist = "0.21.4-beta"
 androidDesugarJdkLibs = "1.1.5"
 androidGradlePlugin = "7.0.3"
 androidxActivity = "1.4.0"
-androidxAppCompat = "1.7.0"
-androidxCompose = "1.7.0"
+androidxAppCompat = "1.4.0"
+androidxCompose = "1.0.5"
 androidxCore = "1.7.0"
 coil = "1.4.0"
 androidxEspresso = "3.3.0"
 androidxTest = "1.4.0"
 androidxTestExt = "1.1.2"
 jakeWhartonRetrofit = "0.8.0"
+junit4 = "4.13.2"
 kotlin = "1.6.0"
 kotlinxCoroutines = "1.6.0"
 kotlinxDatetime = "0.3.1"
@@ -41,7 +42,7 @@ androidx-test-core = { group = "androidx.test", name = "core", version.ref = "an
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTest" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidxTestExt" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }
-coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+coil-core = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
 jakewharton-retrofit-serializationconverter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "jakeWhartonRetrofit" }
@@ -55,7 +56,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 retrofit= { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 richtext-commonmark= { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "richtext" }
-richtext-material= { group = "com.halilibo.compose-richtext", name = "richtext:richtext-ui-material", version.ref = "richtext" }
+richtext-material= { group = "com.halilibo.compose-richtext", name = "richtext-ui-material", version.ref = "richtext" }
 tunjid-mutator-core = { group = "com.tunjid.mutator", name = "core", version.ref = "tunjidMutator" }
 tunjid-mutator-coroutines = { group = "com.tunjid.mutator", name = "coroutines", version.ref = "tunjidMutator" }
 tunjid-tiler = { group = "com.tunjid.tiler", name = "tiler", version.ref = "tunjidTiler" }

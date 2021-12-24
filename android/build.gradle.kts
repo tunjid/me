@@ -68,7 +68,7 @@ android {
 dependencies {
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
 
-    implementation libs.accompanist.flowlayout
+    implementation(libs.accompanist.flowlayout)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -87,7 +87,7 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.jakewharton.retrofit.serializationconverter)
 
-    implementation(libs.coil)
+    implementation(libs.coil.core)
     implementation(libs.coil.compose)
 
     implementation(libs.richtext.commonmark)

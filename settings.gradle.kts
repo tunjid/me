@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+enableFeaturePreview("VERSION_CATALOGS")
+//dependencyResolutionManagement {
+//    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+//    repositories {
+//        google()
+//        mavenCentral()
+//    }
+//}
 rootProject.name = "Me"
-include(":app")
+include(":android")
