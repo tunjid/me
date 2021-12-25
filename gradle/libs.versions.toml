@@ -1,7 +1,7 @@
 [versions]
 accompanist = "0.21.4-beta"
 androidDesugarJdkLibs = "1.1.5"
-androidGradlePlugin = "7.0.3"
+androidGradlePlugin = "7.0.4"
 androidxActivity = "1.4.0"
 androidxAppCompat = "1.4.0"
 androidxCompose = "1.0.5"
