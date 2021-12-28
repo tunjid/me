@@ -25,7 +25,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
@@ -36,9 +35,10 @@ import com.tunjid.me.common.LocalAppDependencies
 import com.tunjid.me.common.data.archive.Archive
 import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.UiState
+import com.tunjid.me.common.globalui.navBarSize
 import com.tunjid.me.common.nav.Route
 import com.tunjid.me.common.ui.InitialUiState
-import com.tunjid.me.common.ui.mapState
+import com.tunjid.me.common.ui.mappedCollectAsState
 
 data class ArchiveDetailRoute(val archive: Archive) : Route<ArchiveDetailMutator> {
     override val id: String
@@ -54,12 +54,9 @@ data class ArchiveDetailRoute(val archive: Archive) : Route<ArchiveDetailMutator
 
 @Composable
 private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
-    val scope = rememberCoroutineScope()
-    val navBarSize by LocalAppDependencies.current.globalUiMutator.state.mapState(
-        scope = scope,
-        mapper = { it.systemUI.static.navBarSize }
+    val navBarSize by LocalAppDependencies.current.globalUiMutator.state.mappedCollectAsState(
+        mapper = UiState::navBarSize
     )
-        .collectAsState()
     val navBarSizeDp = with(LocalDensity.current) { navBarSize.toDp() }
 
     val state by mutator.state.collectAsState()

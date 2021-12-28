@@ -147,6 +147,10 @@ internal val UiState.fragmentContainerState
         navBarSize = systemUI.static.navBarSize
     )
 
+val UiState.navBarSize get() = systemUI.static.navBarSize
+
+val UiState.statusBarSize get() = systemUI.static.statusBarSize
+
 /**
  * Interface for [UiState] state slices that are aware of the keyboard. Useful for
  * keyboard visibility changes for bottom aligned views like Floating Action Buttons and Snack Bars

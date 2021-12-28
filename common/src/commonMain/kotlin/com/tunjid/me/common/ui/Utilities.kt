@@ -39,19 +39,6 @@ import kotlinx.datetime.Instant
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-fun <T, R> StateFlow<T>.mapState(scope: CoroutineScope, mapper: (T) -> R) =
-    map { mapper(it) }
-        .distinctUntilChanged()
-        .stateIn(
-            scope = scope,
-            initialValue = mapper(value),
-            started = SharingStarted.WhileSubscribed(2000),
-        )
-
-private data class MutableFunction<T>(var backing: (T) -> Unit = {}) : (T) -> Unit {
-    override fun invoke(item: T) = backing(item)
-}
-
 @Composable
 fun <T, R> StateFlow<T>.mappedCollectAsState(
     context: CoroutineContext = EmptyCoroutineContext,
@@ -109,4 +96,17 @@ infix fun Int.countIf(condition: Boolean) = if (condition) this else 0
 fun <T : Any, R : Any> T.asNoOpStateFlowMutator() = object : Mutator<R, StateFlow<T>> {
     override val accept: (R) -> Unit = {}
     override val state: StateFlow<T> = MutableStateFlow(this@asNoOpStateFlowMutator)
+}
+
+private fun <T, R> StateFlow<T>.mapState(scope: CoroutineScope, mapper: (T) -> R) =
+    map { mapper(it) }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = scope,
+            initialValue = mapper(value),
+            started = SharingStarted.WhileSubscribed(2000),
+        )
+
+private data class MutableFunction<T>(var backing: (T) -> Unit = {}) : (T) -> Unit {
+    override fun invoke(item: T) = backing(item)
 }
