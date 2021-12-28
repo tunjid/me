@@ -40,9 +40,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import com.tunjid.me.common.LocalAppDependencies
-import com.tunjid.me.common.data.archive.ArchiveKind
-import com.tunjid.me.common.data.archive.icon
 import com.tunjid.me.common.globalui.BottomNavPositionalState
+import com.tunjid.me.common.nav.navItems
 import com.tunjid.me.common.ui.uiSizes
 import com.tunjid.mutator.accept
 import kotlinx.coroutines.flow.StateFlow
@@ -82,21 +81,19 @@ internal fun BoxScope.AppBottomNav(
             BottomNavigation(
                 backgroundColor = MaterialTheme.colors.primary,
             ) {
-                nav.stacks
-                    .map { it.name }
-                    .forEachIndexed { index, name ->
-                        val kind = ArchiveKind.values().firstOrNull { it.name == name }
+                nav.navItems
+                    .forEach { navItem ->
                         BottomNavigationItem(
                             icon = {
-                                if (kind != null) Icon(
-                                    imageVector = kind.icon,
-                                    contentDescription = name
+                                Icon(
+                                    imageVector = navItem.icon,
+                                    contentDescription = navItem.name
                                 )
                             },
-                            label = { Text(name) },
-                            selected = index == nav.currentIndex,
+                            label = { Text(navItem.name) },
+                            selected = navItem.selected,
                             onClick = {
-                                navStateHolder.accept { copy(currentIndex = index) }
+                                navStateHolder.accept { copy(currentIndex = navItem.index) }
                             }
                         )
                     }
