@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +40,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import com.tunjid.me.common.LocalAppDependencies
+import com.tunjid.me.common.data.archive.ArchiveKind
+import com.tunjid.me.common.data.archive.icon
 import com.tunjid.me.common.globalui.BottomNavPositionalState
 import com.tunjid.me.common.ui.uiSizes
 import com.tunjid.mutator.accept
@@ -82,8 +85,14 @@ internal fun BoxScope.AppBottomNav(
                 nav.stacks
                     .map { it.name }
                     .forEachIndexed { index, name ->
+                        val kind = ArchiveKind.values().firstOrNull { it.name == name }
                         BottomNavigationItem(
-                            icon = { },
+                            icon = {
+                                if (kind != null) Icon(
+                                    imageVector = kind.icon,
+                                    contentDescription = name
+                                )
+                            },
                             label = { Text(name) },
                             selected = index == nav.currentIndex,
                             onClick = {
