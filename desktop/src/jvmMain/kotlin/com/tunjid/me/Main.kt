@@ -22,7 +22,7 @@ fun main() {
         Window(
             onCloseRequest = ::exitApplication,
             state = windowState,
-            title = "Todo"
+            title = "Me as a composition"
         ) {
             AppTheme {
                 Surface(color = MaterialTheme.colors.background) {
