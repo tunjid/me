@@ -39,20 +39,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import com.tunjid.me.common.LocalAppDependencies
-import com.tunjid.me.common.globalui.BottomNavPositionalState
+import com.tunjid.me.common.globalui.GlobalUiMutator
+import com.tunjid.me.common.globalui.UiState
+import com.tunjid.me.common.globalui.bottomNavPositionalState
+import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItems
+import com.tunjid.me.common.ui.mappedCollectAsState
 import com.tunjid.me.common.ui.uiSizes
 import com.tunjid.mutator.accept
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 internal fun BoxScope.AppBottomNav(
-    stateFlow: StateFlow<BottomNavPositionalState>
+    globalUiMutator: GlobalUiMutator,
+    navMutator: NavMutator,
 ) {
-    val navStateHolder = LocalAppDependencies.current.navMutator
-    val nav by navStateHolder.state.collectAsState()
-    val state by stateFlow.collectAsState()
+    val nav by navMutator.state.collectAsState()
+    val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::bottomNavPositionalState)
 
     val bottomNavPositionAnimation = remember { Animatable(0f) }
     val bottomNavPosition = when {
@@ -93,7 +95,7 @@ internal fun BoxScope.AppBottomNav(
                             label = { Text(navItem.name) },
                             selected = navItem.selected,
                             onClick = {
-                                navStateHolder.accept { copy(currentIndex = navItem.index) }
+                                navMutator.accept { copy(currentIndex = navItem.index) }
                             }
                         )
                     }

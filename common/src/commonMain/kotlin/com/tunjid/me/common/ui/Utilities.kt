@@ -53,7 +53,7 @@ private data class MutableFunction<T>(var backing: (T) -> Unit = {}) : (T) -> Un
 }
 
 @Composable
-fun <T, R> StateFlow<T>.collectAsState(
+fun <T, R> StateFlow<T>.mappedCollectAsState(
     context: CoroutineContext = EmptyCoroutineContext,
     mapper: (T) -> R
 ): State<R> {

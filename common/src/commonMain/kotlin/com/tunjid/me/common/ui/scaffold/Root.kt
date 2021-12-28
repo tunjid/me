@@ -20,49 +20,39 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.tunjid.me.common.LocalAppDependencies
 import com.tunjid.me.common.AppDeps
-import com.tunjid.me.common.globalui.UiState
-import com.tunjid.me.common.globalui.bottomNavPositionalState
-import com.tunjid.me.common.globalui.fragmentContainerState
-import com.tunjid.me.common.globalui.toolbarState
-import com.tunjid.me.common.ui.mapState
+import com.tunjid.me.common.LocalAppDependencies
+import com.tunjid.me.common.nav.MultiStackNav
+import com.tunjid.me.common.nav.Route404
+import com.tunjid.me.common.nav.current
+import com.tunjid.me.common.ui.mappedCollectAsState
 
 @Composable
 fun Root(appDeps: AppDeps) {
     CompositionLocalProvider(LocalAppDependencies provides appDeps) {
-        val rootScope = rememberCoroutineScope()
-        val uiStateFlow = LocalAppDependencies.current.globalUiMutator.state
-        val navStateFlow = LocalAppDependencies.current.navMutator.state
+        val globalUiMutator = LocalAppDependencies.current.globalUiMutator
+        val navMutator = LocalAppDependencies.current.navMutator
+
+        val route by navMutator.state.mappedCollectAsState(mapper = MultiStackNav::current)
 
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
             AppToolbar(
-                stateFlow = uiStateFlow.mapState(
-                    scope = rootScope,
-                    mapper = UiState::toolbarState
-                )
+                globalUiMutator = globalUiMutator,
+                navMutator = navMutator,
             )
-
             AppRouteContainer(
-                stateFlow = uiStateFlow.mapState(
-                    scope = rootScope,
-                    mapper = UiState::fragmentContainerState
-                ),
+                globalUiMutator = globalUiMutator,
                 content = {
-                    AppNavRouter(
-                        navStateFlow = navStateFlow
-                    )
+                    (route ?: Route404).Render()
                 }
             )
             AppBottomNav(
-                stateFlow = uiStateFlow.mapState(
-                    scope = rootScope,
-                    mapper = UiState::bottomNavPositionalState
-                )
+                globalUiMutator = globalUiMutator,
+                navMutator = navMutator,
             )
         }
     }

@@ -30,8 +30,6 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,23 +39,26 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.LocalAppDependencies
+import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.ToolbarItem
-import com.tunjid.me.common.globalui.ToolbarState
 import com.tunjid.me.common.globalui.UiState
+import com.tunjid.me.common.globalui.toolbarState
 import com.tunjid.me.common.nav.MultiStackNav
+import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.Route404
 import com.tunjid.me.common.nav.StackNav
 import com.tunjid.me.common.nav.canGoUp
 import com.tunjid.me.common.nav.pop
-import com.tunjid.me.common.stubAppDeps
-import com.tunjid.me.common.ui.collectAsState
+import com.tunjid.me.common.ui.asNoOpStateFlowMutator
+import com.tunjid.me.common.ui.mappedCollectAsState
 import com.tunjid.mutator.accept
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-internal fun BoxScope.AppToolbar(stateFlow: StateFlow<ToolbarState>) {
-    val state by stateFlow.collectAsState()
+internal fun BoxScope.AppToolbar(
+    globalUiMutator: GlobalUiMutator,
+    navMutator: NavMutator,
+) {
+    val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::toolbarState)
     val items = state.items
     val title = state.toolbarTitle
     val alpha: Float by animateFloatAsState(if (state.visible) 1f else 0f)
@@ -73,7 +74,7 @@ internal fun BoxScope.AppToolbar(stateFlow: StateFlow<ToolbarState>) {
             .align(Alignment.TopCenter)
             .fillMaxWidth(),
     ) {
-        UpButton()
+        UpButton(navMutator = navMutator)
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -86,9 +87,10 @@ internal fun BoxScope.AppToolbar(stateFlow: StateFlow<ToolbarState>) {
 }
 
 @Composable
-private fun UpButton() {
-    val navMutator = LocalAppDependencies.current.navMutator
-    val canGoUp by navMutator.state.collectAsState(mapper = MultiStackNav::canGoUp)
+private fun UpButton(
+    navMutator: NavMutator,
+) {
+    val canGoUp by navMutator.state.mappedCollectAsState(mapper = MultiStackNav::canGoUp)
 
     AnimatedVisibility(visible = canGoUp) {
         Button(
@@ -151,7 +153,7 @@ fun ToolbarIcon(item: ToolbarItem) {
     val uiStateHolder = LocalAppDependencies.current.globalUiMutator
 
     val clicks by uiStateHolder.state
-        .collectAsState(mapper = UiState::toolbarMenuClickListener)
+        .mappedCollectAsState(mapper = UiState::toolbarMenuClickListener)
 
     when (val vector = item.imageVector) {
         null -> TextButton(
@@ -184,26 +186,16 @@ fun ToolbarIcon(item: ToolbarItem) {
 //@Preview
 @Composable
 fun Test() {
-    CompositionLocalProvider(
-        LocalAppDependencies provides stubAppDeps(
-            nav = MultiStackNav(
+    Box {
+        AppToolbar(
+            globalUiMutator = UiState(
+                toolbarTitle = "Hi",
+                toolbarShows = true
+            ).asNoOpStateFlowMutator(),
+            navMutator = MultiStackNav(
                 currentIndex = 0,
                 stacks = listOf(StackNav(name = "Preview", routes = listOf(Route404, Route404)))
-            )
+            ).asNoOpStateFlowMutator(),
         )
-    ) {
-        Box {
-            AppToolbar(
-                stateFlow = MutableStateFlow(
-                    ToolbarState(
-                        statusBarSize = 0,
-                        visible = true,
-                        overlaps = true,
-                        toolbarTitle = "HI",
-                        items = listOf(),
-                    )
-                )
-            )
-        }
     }
 }

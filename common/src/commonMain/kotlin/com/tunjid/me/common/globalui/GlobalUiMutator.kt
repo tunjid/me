@@ -22,7 +22,9 @@ import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
-fun globalUiMutator(scope: CoroutineScope): Mutator<Mutation<UiState>, StateFlow<UiState>> =
+typealias GlobalUiMutator = Mutator<Mutation<UiState>, StateFlow<UiState>>
+
+fun globalUiMutator(scope: CoroutineScope): GlobalUiMutator =
     stateFlowMutator(
         scope = scope,
         initialState = UiState(),

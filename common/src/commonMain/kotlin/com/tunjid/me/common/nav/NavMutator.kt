@@ -27,6 +27,8 @@ import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
+typealias NavMutator = Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
+
 object Paned {
     interface Control<T> : Route<T> {
         fun controls(route: Route<*>): Boolean
@@ -52,7 +54,7 @@ val MultiStackNav.navItems
             NavItem(
                 name = name,
                 icon = kind.icon,
-                index = currentIndex,
+                index = index,
                 selected = currentIndex == index,
             )
         }
@@ -68,7 +70,7 @@ val MultiStackNav.railRoute: Route<*>?
         else null
     }
 
-fun navMutator(scope: CoroutineScope): Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> =
+fun navMutator(scope: CoroutineScope): NavMutator =
     stateFlowMutator(
         scope = scope,
         initialState = MultiStackNav(

@@ -22,24 +22,25 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.max
-import com.tunjid.me.common.globalui.FragmentContainerPositionalState
+import com.tunjid.me.common.globalui.GlobalUiMutator
+import com.tunjid.me.common.globalui.UiState
+import com.tunjid.me.common.globalui.fragmentContainerState
 import com.tunjid.me.common.globalui.keyboardSize
 import com.tunjid.me.common.ui.countIf
+import com.tunjid.me.common.ui.mappedCollectAsState
 import com.tunjid.me.common.ui.uiSizes
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 internal fun AppRouteContainer(
-    stateFlow: StateFlow<FragmentContainerPositionalState>,
+    globalUiMutator: GlobalUiMutator,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val state by stateFlow.collectAsState()
+    val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::fragmentContainerState)
 
     val topClearanceAnimation = remember { Animatable(0f) }
     val bottomClearanceAnimation = remember { Animatable(0f) }
