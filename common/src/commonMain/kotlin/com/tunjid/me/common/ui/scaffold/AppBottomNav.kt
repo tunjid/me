@@ -44,8 +44,8 @@ import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.bottomNavPositionalState
 import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItems
+import com.tunjid.me.common.ui.UiSizes
 import com.tunjid.me.common.ui.mappedCollectAsState
-import com.tunjid.me.common.ui.uiSizes
 import com.tunjid.mutator.accept
 
 @Composable
@@ -59,7 +59,7 @@ internal fun BoxScope.AppBottomNav(
     val bottomNavPositionAnimation = remember { Animatable(0f) }
     val bottomNavPosition = when {
         state.bottomNavVisible -> 0f
-        else -> with(LocalDensity.current) { uiSizes.bottomNavSize.toPx() + state.navBarSize }
+        else -> with(LocalDensity.current) { UiSizes.bottomNavSize.toPx() + state.navBarSize }
     }
 
     LaunchedEffect(bottomNavPosition) {

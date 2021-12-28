@@ -75,19 +75,14 @@ fun InitialUiState(state: UiState) {
     }
 }
 
-data class UISizes(
-    val toolbarSize: Dp,
-    val bottomNavSize: Dp,
-    val snackbarPadding: Dp,
-    val navBarHeightThreshold: Dp
-)
-
-val uiSizes = UISizes(
-    toolbarSize = 56.dp,
-    bottomNavSize = 56.dp,
-    snackbarPadding = 8.dp,
-    navBarHeightThreshold = 80.dp
-)
+object UiSizes {
+    val toolbarSize = 56.dp
+    val navRailWidth = 60.dp
+    val navRailContentWidth = 200.dp
+    val bottomNavSize = 56.dp
+    val snackbarPadding = 8.dp
+    val navBarHeightThreshold = 80.dp
+}
 
 infix fun Dp.countIf(condition: Boolean) = if (condition) this else 0.dp
 

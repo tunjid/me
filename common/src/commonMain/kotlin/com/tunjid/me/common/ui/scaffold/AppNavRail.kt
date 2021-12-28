@@ -29,19 +29,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.common.LocalAppDependencies
+import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.nav.NavItem
+import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItems
 import com.tunjid.me.common.nav.railRoute
+import com.tunjid.me.common.ui.UiSizes
 
 @Composable
-fun AppNavRail() {
-    val navStateHolder = LocalAppDependencies.current.navMutator
-    val navState by navStateHolder.state.collectAsState()
+fun AppNavRail(
+    globalUiMutator: GlobalUiMutator,
+    navMutator: NavMutator,
+) {
+    val navState by navMutator.state.collectAsState()
 
     Row {
         Column(
-            modifier = Modifier.width(60.dp),
+            modifier = Modifier.width(UiSizes.navRailWidth),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -50,7 +54,7 @@ fun AppNavRail() {
             }
         }
         Box(
-            modifier = Modifier.width(200.dp)
+            modifier = Modifier.width(UiSizes.navRailContentWidth)
         ) {
             navState.railRoute?.Render()
         }
