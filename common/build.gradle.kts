@@ -58,6 +58,7 @@ kotlin {
         }
         all {
             languageSettings.useExperimentalAnnotation("androidx.compose.animation.ExperimentalAnimationApi")
+            languageSettings.useExperimentalAnnotation("androidx.compose.foundation.ExperimentalFoundationApi")
             languageSettings.useExperimentalAnnotation("androidx.compose.material.ExperimentalMaterialApi")
             languageSettings.useExperimentalAnnotation("kotlinx.serialization.ExperimentalSerializationApi")
             languageSettings.useExperimentalAnnotation("kotlinx.coroutines.ExperimentalCoroutinesApi")
