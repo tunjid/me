@@ -1,9 +1,8 @@
-import org.jetbrains.compose.compose
-
 plugins {
     id("com.android.library")
     kotlin("multiplatform")
     id("org.jetbrains.compose")
+    kotlin("plugin.serialization") version "1.6.10"
 }
 
 kotlin {
@@ -12,10 +11,52 @@ kotlin {
     sourceSets {
         named("commonMain") {
             dependencies {
-                implementation(libs.androidx.compose.runtime)
-                implementation(libs.androidx.compose.animation)
-                implementation(libs.androidx.compose.material)
+                implementation(libs.compose.ui.tooling)
+                implementation(libs.compose.ui.util)
+
+                implementation(libs.compose.runtime)
+                implementation(libs.compose.animation)
+                implementation(libs.compose.material)
+                implementation(libs.compose.foundation.layout)
+
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.kotlinx.serialization.json)
+
+                implementation(libs.ktor.core)
+                implementation(libs.ktor.client.logging)
+                implementation(libs.ktor.client.serialization)
+
+                implementation(libs.richtext.commonmark)
+                implementation(libs.richtext.material)
+
+                implementation(libs.tunjid.tiler)
+                implementation(libs.tunjid.mutator.core.common)
+                implementation(libs.tunjid.mutator.coroutines.common)
             }
+        }
+        named("androidMain") {
+            dependencies {
+                implementation(libs.accompanist.flowlayout)
+
+                implementation(libs.androidx.core.ktx)
+                implementation(libs.androidx.appcompat)
+
+                implementation(libs.coil.compose)
+
+                implementation(libs.kotlinx.coroutines.android)
+
+                implementation(libs.ktor.client.android)
+                implementation(libs.tunjid.mutator.core.jvm)
+                implementation(libs.tunjid.mutator.coroutines.jvm)
+            }
+        }
+        all {
+            languageSettings.useExperimentalAnnotation("androidx.compose.animation.ExperimentalAnimationApi")
+            languageSettings.useExperimentalAnnotation("androidx.compose.material.ExperimentalMaterialApi")
+            languageSettings.useExperimentalAnnotation("kotlinx.serialization.ExperimentalSerializationApi")
+            languageSettings.useExperimentalAnnotation("kotlinx.coroutines.ExperimentalCoroutinesApi")
+            languageSettings.useExperimentalAnnotation("kotlinx.coroutines.FlowPreview")
         }
     }
 }

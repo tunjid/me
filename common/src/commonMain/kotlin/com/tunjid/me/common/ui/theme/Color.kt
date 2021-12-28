@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package com.tunjid.me
+package com.tunjid.me.common.ui.theme
 
-import android.app.Application
-import com.tunjid.me.common.createAppDependencies
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import androidx.compose.ui.graphics.Color
 
-class App : Application() {
+val AppBlue = Color(0xFF083042)
+val AppLighterBlue = Color(0xFF4381F0)
+val AppDarkerBlue = Color(0xFF00071c)
+val AppGreen = Color(0xFF4cdb85)
+val AppDarkerGreen = Color(0xFF00a857)
 
-    val appDeps by lazy {
-        createAppDependencies(scope = CoroutineScope(SupervisorJob() + Dispatchers.Main))
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        appDeps
-    }
-
-}

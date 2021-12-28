@@ -17,7 +17,7 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    kotlin("plugin.serialization") version "1.5.31"
+    kotlin("plugin.serialization") version "1.6.10"
 }
 
 android {
@@ -46,7 +46,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.0.4"
+        kotlinCompilerExtensionVersion = "1.1.0-rc02"
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -68,14 +68,18 @@ android {
 dependencies {
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
 
+    implementation(project(":common"))
+
     implementation(libs.accompanist.flowlayout)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.compose.material)
-    implementation(libs.androidx.compose.animation)
-    implementation(libs.androidx.compose.ui.tooling)
+
+    implementation(libs.compose.foundation.layout)
+    implementation(libs.compose.material)
+    implementation(libs.compose.animation)
+    implementation(libs.compose.ui.tooling)
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.datetime)
@@ -83,8 +87,6 @@ dependencies {
 
     implementation(libs.google.material)
 
-    implementation(libs.retrofit)
-    implementation(libs.okhttp.logging)
     implementation(libs.jakewharton.retrofit.serializationconverter)
 
     implementation(libs.coil.core)
@@ -93,7 +95,7 @@ dependencies {
     implementation(libs.richtext.commonmark)
     implementation(libs.richtext.material)
 
-    implementation(libs.tunjid.mutator.core)
-    implementation(libs.tunjid.mutator.coroutines)
+    implementation(libs.tunjid.mutator.core.jvm)
+    implementation(libs.tunjid.mutator.coroutines.jvm)
     implementation(libs.tunjid.tiler)
 }

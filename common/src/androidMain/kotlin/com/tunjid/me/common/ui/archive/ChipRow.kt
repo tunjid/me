@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package com.tunjid.me
+package com.tunjid.me.common.ui.archive
 
-import android.app.Application
-import com.tunjid.me.common.createAppDependencies
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
+import com.google.accompanist.flowlayout.FlowRow
+import com.google.accompanist.flowlayout.SizeMode
 
-class App : Application() {
-
-    val appDeps by lazy {
-        createAppDependencies(scope = CoroutineScope(SupervisorJob() + Dispatchers.Main))
+@Composable
+actual fun ChipRow(content: @Composable () -> Unit) {
+    FlowRow(
+        mainAxisSize = SizeMode.Wrap,
+        crossAxisSpacing = 0.dp
+    ) {
+        content()
     }
-
-    override fun onCreate() {
-        super.onCreate()
-        appDeps
-    }
-
 }

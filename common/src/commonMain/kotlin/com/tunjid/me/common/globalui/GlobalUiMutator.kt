@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package com.tunjid.me
+package com.tunjid.me.common.globalui
 
-import android.app.Application
-import com.tunjid.me.common.createAppDependencies
+import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.Mutator
+import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.StateFlow
 
-class App : Application() {
-
-    val appDeps by lazy {
-        createAppDependencies(scope = CoroutineScope(SupervisorJob() + Dispatchers.Main))
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        appDeps
-    }
-
-}
+fun globalUiMutator(scope: CoroutineScope): Mutator<Mutation<UiState>, StateFlow<UiState>> =
+    stateFlowMutator(
+        scope = scope,
+        initialState = UiState(),
+        transform = { it }
+    )

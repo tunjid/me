@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package com.tunjid.me
+package com.tunjid.me.common.ui.archive
 
-import android.app.Application
-import com.tunjid.me.common.createAppDependencies
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
+import coil.compose.rememberImagePainter
+import coil.size.Scale
 
-class App : Application() {
-
-    val appDeps by lazy {
-        createAppDependencies(scope = CoroutineScope(SupervisorJob() + Dispatchers.Main))
+@Composable
+actual fun archivePainter(imageUrl: String?): Painter =
+    rememberImagePainter(imageUrl) {
+        scale(Scale.FILL)
     }
-
-    override fun onCreate() {
-        super.onCreate()
-        appDeps
-    }
-
-}
