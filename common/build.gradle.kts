@@ -51,6 +51,11 @@ kotlin {
                 implementation(libs.tunjid.mutator.coroutines.jvm)
             }
         }
+        named("desktopMain") {
+            dependencies {
+                implementation(libs.ktor.client.java)
+            }
+        }
         all {
             languageSettings.useExperimentalAnnotation("androidx.compose.animation.ExperimentalAnimationApi")
             languageSettings.useExperimentalAnnotation("androidx.compose.material.ExperimentalMaterialApi")

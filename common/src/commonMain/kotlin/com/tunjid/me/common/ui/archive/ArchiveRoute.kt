@@ -230,10 +230,12 @@ private fun ArchiveCard(
                     published = archiveItem.prettyDate,
                     onCategoryClicked = { category ->
                         val query = archiveItem.query
-                        onAction(Action.Fetch(
-                            query = query.copy(offset = 0) + Descriptor.Category(category),
-                            reset = true
-                        ))
+                        onAction(
+                            Action.Fetch(
+                                query = query.copy(offset = 0) + Descriptor.Category(category),
+                                reset = true
+                            )
+                        )
                     }
                 )
                 Spacer(Modifier.height(8.dp))
@@ -246,14 +248,18 @@ private fun ArchiveCard(
 
 @Composable
 private fun ArchiveThumbnail(imageUrl: String?) {
-    Image(
-        painter = archivePainter(imageUrl),
+    val modifier = Modifier
+        .fillMaxWidth()
+        .height(200.dp)
+    val painter = archivePainter(imageUrl)
+
+    if (painter != null) Image(
+        painter = painter,
         contentScale = ContentScale.Crop,
         contentDescription = null,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
+        modifier = modifier
     )
+    else Box(modifier = modifier)
 }
 
 @Composable
@@ -322,7 +328,7 @@ private val sampleArchiveItem = ArchiveItem.Result(
 )
 
 @Composable
-expect fun archivePainter(imageUrl: String?): Painter
+expect fun archivePainter(imageUrl: String?): Painter?
 
 //@Preview
 @Composable

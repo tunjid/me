@@ -22,7 +22,7 @@ import coil.compose.rememberImagePainter
 import coil.size.Scale
 
 @Composable
-actual fun archivePainter(imageUrl: String?): Painter =
+actual fun archivePainter(imageUrl: String?): Painter? =
     rememberImagePainter(imageUrl) {
         scale(Scale.FILL)
     }

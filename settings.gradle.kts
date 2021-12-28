@@ -44,4 +44,8 @@ pluginManagement {
 }
 
 rootProject.name = "Me"
-include(":common", ":android")
+include(
+    ":common",
+    ":android",
+    ":desktop",
+)

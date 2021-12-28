@@ -16,8 +16,15 @@
 
 package com.tunjid.me.common.ui.archive
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 
 @Composable
 actual fun ChipRow(content: @Composable () -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.Start
+    ) {
+        content()
+    }
 }

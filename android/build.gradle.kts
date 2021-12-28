@@ -87,8 +87,6 @@ dependencies {
 
     implementation(libs.google.material)
 
-    implementation(libs.jakewharton.retrofit.serializationconverter)
-
     implementation(libs.coil.core)
     implementation(libs.coil.compose)
 

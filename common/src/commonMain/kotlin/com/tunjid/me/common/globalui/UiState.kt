@@ -16,9 +16,10 @@
 
 package com.tunjid.me.common.globalui
 
-import android.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class ToolbarItem(
@@ -37,12 +38,12 @@ data class UiState(
     val fabShows: Boolean = false,
     val fabExtended: Boolean = true,
     val fabText: CharSequence = "",
-    val backgroundColor: Int = Color.TRANSPARENT,
+    val backgroundColor: Int = Color.Transparent.toArgb(),
     val snackbarText: CharSequence = "",
-    val navBarColor: Int = Color.TRANSPARENT,
+    val navBarColor: Int = Color.Transparent.toArgb(),
     val lightStatusBar: Boolean = false,
     val showsBottomNav: Boolean? = null,
-    val statusBarColor: Int = Color.TRANSPARENT,
+    val statusBarColor: Int = Color.Transparent.toArgb(),
     val insetFlags: InsetDescriptor = InsetFlags.ALL,
     val isImmersive: Boolean = false,
     val systemUI: SystemUI = NoOpSystemUI,

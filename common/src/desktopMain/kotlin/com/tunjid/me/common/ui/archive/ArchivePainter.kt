@@ -17,9 +17,39 @@
 package com.tunjid.me.common.ui.archive
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.loadImageBitmap
+import io.ktor.client.*
+import io.ktor.client.request.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayInputStream
 
 @Composable
-actual fun archivePainter(imageUrl: String?): Painter {
-    TODO("Not yet implemented")
+actual fun archivePainter(imageUrl: String?): Painter? {
+    val image: ImageBitmap? by produceState<ImageBitmap?>(null) {
+        value = withContext(Dispatchers.IO) {
+            try {
+                if (imageUrl != null) urlStream(imageUrl)
+                    .buffered()
+                    .use(::loadImageBitmap)
+                else null
+            } catch (e: Exception) {
+                // instead of printing to console, you can also write this to log,
+                // or show some error placeholder
+                e.printStackTrace()
+                null
+            }
+        }
+    }
+
+    return image?.let { BitmapPainter(it) }
+}
+
+private suspend fun urlStream(url: String) = HttpClient().use {
+    ByteArrayInputStream(it.get(url))
 }
