@@ -30,7 +30,7 @@ import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.routeContainerState
 import com.tunjid.me.common.globalui.keyboardSize
 import com.tunjid.me.common.nav.NavMutator
-import com.tunjid.me.common.nav.railRoute
+import com.tunjid.me.common.nav.navRailRoute
 import com.tunjid.me.common.ui.UiSizes
 import com.tunjid.me.common.ui.countIf
 import com.tunjid.me.common.ui.mappedCollectAsState
@@ -61,7 +61,7 @@ internal fun AppRouteContainer(
 
     val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
 
-    val hasNavContent by navMutator.state.mappedCollectAsState { it.railRoute != null }
+    val hasNavContent by navMutator.state.mappedCollectAsState { it.navRailRoute != null }
     val navRailVisible = state.navRailVisible
     val navRailSize = UiSizes.navRailWidth countIf navRailVisible
     val navRailContentWidth = UiSizes.navRailContentWidth countIf (hasNavContent && navRailVisible)

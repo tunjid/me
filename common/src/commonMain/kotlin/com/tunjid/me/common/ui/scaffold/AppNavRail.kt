@@ -39,7 +39,7 @@ import com.tunjid.me.common.globalui.routeContainerState
 import com.tunjid.me.common.nav.NavItem
 import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItems
-import com.tunjid.me.common.nav.railRoute
+import com.tunjid.me.common.nav.navRailRoute
 import com.tunjid.me.common.ui.UiSizes
 import com.tunjid.me.common.ui.countIf
 import com.tunjid.me.common.ui.mappedCollectAsState
@@ -53,7 +53,7 @@ fun AppNavRail(
     val navState by navMutator.state.collectAsState()
     val containerState by globalUiMutator.state.mappedCollectAsState(mapper = UiState::routeContainerState)
 
-    val hasRailRoute by navMutator.state.mappedCollectAsState { it.railRoute != null }
+    val hasRailRoute by navMutator.state.mappedCollectAsState { it.navRailRoute != null }
     val navRailVisible by globalUiMutator.state.mappedCollectAsState(mapper = UiState::navRailVisible)
 
     val statusBarSize = with(LocalDensity.current) {
@@ -90,7 +90,7 @@ fun AppNavRail(
             Box(
                 modifier = Modifier.width(navRailContentWidth)
             ) {
-                if (navRailVisible) navState.railRoute?.Render()
+                if (navRailVisible) navState.navRailRoute?.Render()
             }
         }
     }

@@ -113,7 +113,9 @@ fun createAppDependencies(
                 mutator = archiveMutator(
                     scope = routeScope,
                     route = route,
-                    repo = archiveRepository
+                    repo = archiveRepository,
+                    navMutator = navMutator,
+                    globalUiMutator = globalUiMutator
                 )
             )
         }

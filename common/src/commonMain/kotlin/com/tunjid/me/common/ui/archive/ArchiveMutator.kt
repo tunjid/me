@@ -21,6 +21,10 @@ import com.tunjid.me.common.data.archive.ArchiveQuery
 import com.tunjid.me.common.data.archive.ArchiveRepository
 import com.tunjid.me.common.data.archive.DefaultQueryLimit
 import com.tunjid.me.common.data.archive.Descriptor
+import com.tunjid.me.common.globalui.GlobalUiMutator
+import com.tunjid.me.common.globalui.navRailVisible
+import com.tunjid.me.common.nav.NavMutator
+import com.tunjid.me.common.nav.navRailRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -37,6 +41,7 @@ import kotlinx.datetime.toLocalDateTime
 typealias ArchiveMutator = Mutator<Action, StateFlow<State>>
 
 data class State(
+    val isInNavRail: Boolean = false,
     val queryState: QueryState,
     val listStateSummary: ListState = ListState(),
     val items: List<ArchiveItem> = listOf(ArchiveItem.Loading)
@@ -112,7 +117,9 @@ private val FetchResult.hasNoResults get() = queriedArchives.isEmpty()
 fun archiveMutator(
     scope: CoroutineScope,
     route: ArchiveRoute,
-    repo: ArchiveRepository
+    repo: ArchiveRepository,
+    navMutator: NavMutator,
+    globalUiMutator: GlobalUiMutator,
 ): Mutator<Action, StateFlow<State>> = stateFlowMutator(
     scope = scope,
     initialState = State(
@@ -122,16 +129,30 @@ fun archiveMutator(
     ),
     started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 2000),
     transform = { actions ->
-        actions.toMutationStream {
-            when (val action = type()) {
-                is Action.Fetch -> action.flow.fetchMutations(repo = repo)
-                is Action.UpdateListState -> action.flow.updateListStateMutations()
-                is Action.FilterChanged -> action.flow.filterChangedMutations()
-                is Action.ToggleFilter -> action.flow.filterToggleMutations()
+        merge(
+            navRailStatusMutations(navMutator, globalUiMutator),
+            actions.toMutationStream {
+                when (val action = type()) {
+                    is Action.Fetch -> action.flow.fetchMutations(repo = repo)
+                    is Action.UpdateListState -> action.flow.updateListStateMutations()
+                    is Action.FilterChanged -> action.flow.filterChangedMutations()
+                    is Action.ToggleFilter -> action.flow.filterToggleMutations()
+                }
             }
-        }
+        )
     }
 )
+
+private fun navRailStatusMutations(
+    navMutator: NavMutator,
+    globalUiMutator: GlobalUiMutator
+) = combine(navMutator.state, globalUiMutator.state) { navState, uiState ->
+    navState.navRailRoute is ArchiveRoute && uiState.navRailVisible
+}
+    .distinctUntilChanged()
+    .map {
+        Mutation<State> { copy(isInNavRail = it) }
+    }
 
 private fun Flow<Action.UpdateListState>.updateListStateMutations(): Flow<Mutation<State>> =
     map { (listState) ->

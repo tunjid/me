@@ -61,7 +61,7 @@ val MultiStackNav.navItems
             )
         }
 
-val MultiStackNav.railRoute: Route?
+val MultiStackNav.navRailRoute: Route?
     get() {
         if (currentIndex < 0) return null
         val stackRoutes = stacks.getOrNull(currentIndex)?.routes ?: return null

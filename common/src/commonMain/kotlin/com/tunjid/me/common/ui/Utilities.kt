@@ -80,7 +80,7 @@ fun InitialUiState(state: UiState) {
 object UiSizes {
     val toolbarSize = 56.dp
     val navRailWidth = 72.dp
-    val navRailContentWidth = 200.dp
+    val navRailContentWidth = 400.dp
     val bottomNavSize = 56.dp
     val snackbarPadding = 8.dp
     val navBarHeightThreshold = 80.dp

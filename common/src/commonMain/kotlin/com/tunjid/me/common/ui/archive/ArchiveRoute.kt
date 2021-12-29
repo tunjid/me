@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -49,9 +48,12 @@ import com.tunjid.me.common.data.archive.plus
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
+import com.tunjid.me.common.nav.MultiStackNav
+import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.Paned
 import com.tunjid.me.common.nav.Route
 import com.tunjid.me.common.nav.push
+import com.tunjid.me.common.nav.swap
 import com.tunjid.me.common.ui.InitialUiState
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.asNoOpStateFlowMutator
@@ -89,17 +91,20 @@ data class ArchiveRoute(val query: ArchiveQuery) : AppRoute<ArchiveMutator>,
     @Composable
     override fun Render() {
         ArchiveScreen(
-            mutator = LocalAppDependencies.current.routeDependencies(this)
+            mutator = LocalAppDependencies.current.routeDependencies(this),
+            navMutator = LocalAppDependencies.current.navMutator
         )
     }
 }
 
 @Composable
-@ExperimentalMaterialApi
-private fun ArchiveScreen(mutator: ArchiveMutator) {
+private fun ArchiveScreen(
+    mutator: ArchiveMutator,
+    navMutator: NavMutator
+) {
     val state by mutator.state.collectAsState()
+    val isInNavRail = state.isInNavRail
     val query = state.queryState.rootQuery
-
     InitialUiState(
         UiState(
             toolbarShows = true,
@@ -132,7 +137,12 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
                         ArchiveItem.Loading -> ProgressBar()
                         is ArchiveItem.Result -> ArchiveCard(
                             archiveItem = item,
-                            onAction = mutator.accept
+                            onAction = mutator.accept,
+                            onNavAction = { route ->
+                                navMutator.accept {
+                                    if (isInNavRail) swap(route) else push(route)
+                                }
+                            }
                         )
                     }
                 }
@@ -213,19 +223,17 @@ private fun ProgressBar() {
 }
 
 @Composable
-@ExperimentalMaterialApi
 private fun ArchiveCard(
     archiveItem: ArchiveItem.Result,
-    onAction: (Action) -> Unit
+    onAction: (Action) -> Unit,
+    onNavAction: (Route) -> Unit
 ) {
-    val navMutator = LocalAppDependencies.current.navMutator
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         onClick = {
-            navMutator.accept { push(ArchiveDetailRoute(archive = archiveItem.archive)) }
+            onNavAction(ArchiveDetailRoute(archive = archiveItem.archive))
         },
         content = {
             Column {
@@ -339,7 +347,7 @@ expect fun archivePainter(imageUrl: String?): Painter?
 //@Preview
 @Composable
 private fun PreviewArchiveCard() {
-    ArchiveCard(archiveItem = sampleArchiveItem) {}
+    ArchiveCard(archiveItem = sampleArchiveItem, {}) {}
 }
 
 //@Preview
@@ -349,6 +357,8 @@ private fun PreviewLoadingState() {
         mutator = State(
             queryState = QueryState(rootQuery = ArchiveQuery(kind = Articles)),
             items = listOf(ArchiveItem.Loading)
-        ).asNoOpStateFlowMutator()
+        ).asNoOpStateFlowMutator(),
+        navMutator = MultiStackNav()
+            .asNoOpStateFlowMutator()
     )
 }
