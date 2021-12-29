@@ -48,6 +48,7 @@ import com.tunjid.me.common.data.archive.User
 import com.tunjid.me.common.data.archive.plus
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
+import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.nav.Paned
 import com.tunjid.me.common.nav.Route
 import com.tunjid.me.common.nav.push
@@ -78,11 +79,12 @@ private fun ScrollState.updateDirection(new: ScrollState) = new.copy(
     }
 )
 
-data class ArchiveRoute(val query: ArchiveQuery) : Route<ArchiveMutator>, Paned.Control<ArchiveMutator> {
+data class ArchiveRoute(val query: ArchiveQuery) : AppRoute<ArchiveMutator>,
+    Paned.Control<ArchiveMutator> {
     override val id: String
         get() = query.toString()
 
-    override fun controls(route: Route<*>): Boolean = route is ArchiveDetailRoute
+    override fun controls(route: Route): Boolean = route is ArchiveDetailRoute
 
     @Composable
     override fun Render() {

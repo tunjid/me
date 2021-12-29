@@ -37,11 +37,11 @@ import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.navBarSize
-import com.tunjid.me.common.nav.Route
+import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.InitialUiState
 import com.tunjid.me.common.ui.mappedCollectAsState
 
-data class ArchiveDetailRoute(val archive: Archive) : Route<ArchiveDetailMutator> {
+data class ArchiveDetailRoute(val archive: Archive) : AppRoute<ArchiveDetailMutator> {
     override val id: String
         get() = archive.key
 

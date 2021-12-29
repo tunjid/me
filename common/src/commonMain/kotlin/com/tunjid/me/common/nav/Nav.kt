@@ -22,7 +22,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-interface Route<T> {
+interface Route {
     val id: String
 
     @Composable
@@ -31,14 +31,14 @@ interface Route<T> {
 
 data class StackNav(
     val name: String,
-    val routes: List<Route<*>> = listOf()
+    val routes: List<Route> = listOf()
 )
 
-fun StackNav.swap(route: Route<*>) = if (routes.lastOrNull() == route) this else copy(
+fun StackNav.swap(route: Route) = if (routes.lastOrNull() == route) this else copy(
     routes = routes.dropLast(1) + route
 )
 
-fun StackNav.push(route: Route<*>) = if (routes.lastOrNull() == route) this else copy(
+fun StackNav.push(route: Route) = if (routes.lastOrNull() == route) this else copy(
     routes = routes + route
 )
 
@@ -53,9 +53,9 @@ data class MultiStackNav(
     val stacks: List<StackNav> = listOf()
 )
 
-fun MultiStackNav.swap(route: Route<*>) = atCurrentIndex { swap(route) }
+fun MultiStackNav.swap(route: Route) = atCurrentIndex { swap(route) }
 
-fun MultiStackNav.push(route: Route<*>) = atCurrentIndex { push(route) }
+fun MultiStackNav.push(route: Route) = atCurrentIndex { push(route) }
 
 fun MultiStackNav.pop() = atCurrentIndex(StackNav::pop)
 
@@ -72,7 +72,7 @@ val MultiStackNav.routes get() = stacks.map(StackNav::routes).flatten()
 
 val MultiStackNav.current get() = stacks.getOrNull(currentIndex)?.routes?.last()
 
-object Route404 : Route<Unit> {
+object Route404 : Route {
     override val id: String
         get() = "404"
 

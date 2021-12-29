@@ -29,13 +29,15 @@ import kotlinx.coroutines.flow.StateFlow
 
 typealias NavMutator = Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
 
+interface AppRoute<T> : Route
+
 object Paned {
-    interface Control<T> : Route<T> {
-        fun controls(route: Route<*>): Boolean
+    interface Control<T> : Route {
+        fun controls(route: Route): Boolean
     }
 
     interface Detail {
-        fun isControlledBy(route: Route<*>): Boolean
+        fun isControlledBy(route: Route): Boolean
     }
 }
 
@@ -59,14 +61,14 @@ val MultiStackNav.navItems
             )
         }
 
-val MultiStackNav.railRoute: Route<*>?
+val MultiStackNav.railRoute: Route?
     get() {
         if (currentIndex < 0) return null
         val stackRoutes = stacks.getOrNull(currentIndex)?.routes ?: return null
         val previous = stackRoutes.getOrNull(stackRoutes.lastIndex - 1) ?: return null
         val current = current ?: return null
 
-        return if (previous is Paned.Control && previous.controls(current)) previous
+        return if (previous is Paned.Control<*> && previous.controls(current)) previous
         else null
     }
 

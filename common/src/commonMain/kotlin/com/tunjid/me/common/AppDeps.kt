@@ -22,8 +22,8 @@ import com.tunjid.me.common.data.archive.ArchiveRepository
 import com.tunjid.me.common.data.archive.RestArchiveRepository
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.globalUiMutator
+import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.nav.MultiStackNav
-import com.tunjid.me.common.nav.Route
 import com.tunjid.me.common.nav.navMutator
 import com.tunjid.me.common.nav.routes
 import com.tunjid.me.common.ui.archive.ArchiveRoute
@@ -52,7 +52,7 @@ import kotlinx.serialization.json.Json
 interface AppDeps {
     val navMutator: Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
     val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>>
-    fun <T> routeDependencies(route: Route<T>): T
+    fun <T> routeDependencies(route: AppRoute<T>): T
 }
 
 private data class ScopeHolder(
@@ -64,7 +64,7 @@ fun createAppDependencies(
     scope: CoroutineScope,
     initialUiState: UiState = UiState()
 ) = object : AppDeps {
-    val routeMutatorFactory = mutableMapOf<Route<*>, ScopeHolder>()
+    val routeMutatorFactory = mutableMapOf<AppRoute<*>, ScopeHolder>()
 
     val api: Api = Api(HttpClient {
         install(JsonFeature) {
@@ -90,9 +90,9 @@ fun createAppDependencies(
     init {
         scope.launch {
             navMutator.state
-                .map { it.routes }
+                .map { it.routes.filterIsInstance<AppRoute<*>>() }
                 .distinctUntilChanged()
-                .scan(listOf<Route<*>>() to listOf<Route<*>>()) { pair, newRoutes ->
+                .scan(listOf<AppRoute<*>>() to listOf<AppRoute<*>>()) { pair, newRoutes ->
                     pair.copy(first = pair.second, second = newRoutes)
                 }
                 .distinctUntilChanged()
@@ -105,7 +105,7 @@ fun createAppDependencies(
         }
     }
 
-    override fun <T> routeDependencies(route: Route<T>): T = when (route) {
+    override fun <T> routeDependencies(route: AppRoute<T>): T = when (route) {
         is ArchiveRoute -> routeMutatorFactory.getOrPut(route) {
             val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
             ScopeHolder(
@@ -151,6 +151,6 @@ fun stubAppDeps(
             override val state: StateFlow<UiState> = MutableStateFlow(globalUI)
         }
 
-    override fun <T> routeDependencies(route: Route<T>): T =
+    override fun <T> routeDependencies(route: AppRoute<T>): T =
         TODO("Not yet implemented")
 }
