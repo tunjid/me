@@ -34,6 +34,10 @@ data class StackNav(
     val routes: List<Route<*>> = listOf()
 )
 
+fun StackNav.swap(route: Route<*>) = if (routes.lastOrNull() == route) this else copy(
+    routes = routes.dropLast(1) + route
+)
+
 fun StackNav.push(route: Route<*>) = if (routes.lastOrNull() == route) this else copy(
     routes = routes + route
 )
@@ -49,16 +53,15 @@ data class MultiStackNav(
     val stacks: List<StackNav> = listOf()
 )
 
-fun MultiStackNav.push(route: Route<*>) = copy(
-    stacks = stacks.mapIndexed { index, stack ->
-        if (index == currentIndex) stack.push(route = route)
-        else stack
-    }
-)
+fun MultiStackNav.swap(route: Route<*>) = atCurrentIndex { swap(route) }
 
-fun MultiStackNav.pop() = copy(
+fun MultiStackNav.push(route: Route<*>) = atCurrentIndex { push(route) }
+
+fun MultiStackNav.pop() = atCurrentIndex(StackNav::pop)
+
+private fun MultiStackNav.atCurrentIndex(operation: StackNav.() ->  StackNav) = copy(
     stacks = stacks.mapIndexed { index, stack ->
-        if (index == currentIndex) stack.pop()
+        if (index == currentIndex) operation(stack)
         else stack
     }
 )
