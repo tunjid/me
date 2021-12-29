@@ -5,6 +5,7 @@ androidGradlePlugin = "7.0.4"
 androidxActivity = "1.4.0"
 androidxAppCompat = "1.4.0"
 androidxCore = "1.7.0"
+androidxWindow = "1.0.0-rc01"
 compose = "1.0.1"
 coil = "1.4.0"
 androidxEspresso = "3.3.0"
@@ -31,6 +32,7 @@ android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", ver
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
+androidx-window = { group = "androidx.window", name = "window", version.ref = "androidxWindow" }
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTest" }
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTest" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidxTestExt" }

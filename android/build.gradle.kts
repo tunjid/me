@@ -75,6 +75,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.window)
 
     implementation(libs.compose.foundation.layout)
     implementation(libs.compose.material)
