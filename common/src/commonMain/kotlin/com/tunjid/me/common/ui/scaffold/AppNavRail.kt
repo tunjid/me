@@ -17,27 +17,28 @@
 package com.tunjid.me.common.ui.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.UiState
+import com.tunjid.me.common.globalui.routeContainerState
 import com.tunjid.me.common.globalui.navRailVisible
 import com.tunjid.me.common.nav.NavItem
 import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItems
 import com.tunjid.me.common.nav.railRoute
 import com.tunjid.me.common.ui.UiSizes
+import com.tunjid.me.common.ui.countIf
 import com.tunjid.me.common.ui.mappedCollectAsState
 
 @Composable
@@ -46,9 +47,17 @@ fun AppNavRail(
     navMutator: NavMutator,
 ) {
     val navState by navMutator.state.collectAsState()
+    val containerState by globalUiMutator.state.mappedCollectAsState(mapper = UiState::routeContainerState)
+
     val hasRailRoute by navMutator.state.mappedCollectAsState { it.railRoute != null }
     val navRailVisible by globalUiMutator.state.mappedCollectAsState(mapper = UiState::navRailVisible)
 
+    val statusBarSize = with(LocalDensity.current) {
+        containerState.statusBarSize.toDp()
+    } countIf containerState.insetDescriptor.hasTopInset
+    val toolbarHeight = UiSizes.toolbarSize countIf !containerState.toolbarOverlaps
+
+    val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
     val navRailWidth by animateDpAsState(
         targetValue = if (navRailVisible) UiSizes.navRailWidth
         else 0.dp
@@ -58,20 +67,28 @@ fun AppNavRail(
         else 0.dp
     )
 
-    Row {
-        Column(
-            modifier = Modifier.width(navRailWidth),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            navState.navItems.forEach { navItem ->
-                NavRailItem(navItem)
+    Surface(
+        modifier = Modifier
+            .padding(top = topClearance)
+            .fillMaxHeight(),
+        color = MaterialTheme.colors.primary
+    ) {
+        Row {
+            Column(
+                modifier = Modifier.width(navRailWidth),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+                navState.navItems.forEach { navItem ->
+                    NavRailItem(navItem)
+                }
             }
-        }
-        Box(
-            modifier = Modifier.width(navRailContentWidth)
-        ) {
-            if (navRailVisible) navState.railRoute?.Render()
+            Box(
+                modifier = Modifier.width(navRailContentWidth)
+            ) {
+                if (navRailVisible) navState.railRoute?.Render()
+            }
         }
     }
 }
@@ -83,4 +100,5 @@ private fun NavRailItem(navItem: NavItem) {
         contentDescription = navItem.name
     )
     Text(text = navItem.name)
+    Spacer(modifier = Modifier.height(24.dp))
 }

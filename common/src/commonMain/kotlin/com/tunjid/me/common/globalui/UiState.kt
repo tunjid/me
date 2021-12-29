@@ -94,7 +94,7 @@ internal data class FabPositionalState(
     override val insetDescriptor: InsetDescriptor
 ) : KeyboardAware
 
-internal data class FragmentContainerPositionalState(
+internal data class RouteContainerPositionalState(
     val statusBarSize: Int,
     val toolbarOverlaps: Boolean,
     val navRailVisible: Boolean,
@@ -151,8 +151,8 @@ internal val UiState.bottomNavPositionalState
         insetDescriptor = insetFlags
     )
 
-internal val UiState.fragmentContainerState
-    get() = FragmentContainerPositionalState(
+internal val UiState.routeContainerState
+    get() = RouteContainerPositionalState(
         statusBarSize = systemUI.static.statusBarSize,
         insetDescriptor = insetFlags,
         toolbarOverlaps = toolbarOverlaps,

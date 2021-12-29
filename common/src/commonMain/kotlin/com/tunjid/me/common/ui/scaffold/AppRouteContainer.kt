@@ -27,7 +27,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.max
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.UiState
-import com.tunjid.me.common.globalui.fragmentContainerState
+import com.tunjid.me.common.globalui.routeContainerState
 import com.tunjid.me.common.globalui.keyboardSize
 import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.railRoute
@@ -41,7 +41,7 @@ internal fun AppRouteContainer(
     navMutator: NavMutator,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::fragmentContainerState)
+    val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::routeContainerState)
 
     val bottomNavHeight = UiSizes.bottomNavSize countIf state.bottomNavVisible
     val insetClearance = max(
