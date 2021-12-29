@@ -46,6 +46,7 @@ import com.tunjid.me.common.data.archive.ArchiveQuery
 import com.tunjid.me.common.data.archive.Descriptor
 import com.tunjid.me.common.data.archive.User
 import com.tunjid.me.common.data.archive.plus
+import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.Route
 import com.tunjid.me.common.nav.push
@@ -98,7 +99,7 @@ private fun ArchiveScreen(mutator: ArchiveMutator) {
         UiState(
             toolbarShows = true,
             toolbarTitle = query.kind.name,
-            showsBottomNav = true,
+            navVisibility = NavVisibility.Visible,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
         )
     )

@@ -34,6 +34,7 @@ import com.halilibo.richtext.ui.material.MaterialRichText
 import com.tunjid.me.common.LocalAppDependencies
 import com.tunjid.me.common.data.archive.Archive
 import com.tunjid.me.common.globalui.InsetFlags
+import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.navBarSize
 import com.tunjid.me.common.nav.Route
@@ -66,7 +67,7 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
         UiState(
             toolbarShows = true,
             toolbarTitle = state.archive.title,
-            showsBottomNav = false,
+            navVisibility = NavVisibility.GoneIfBottomNav,
             insetFlags = InsetFlags.NO_BOTTOM,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
         )

@@ -60,7 +60,9 @@ fun InitialUiState(state: UiState) {
     }
 
     uiStateHolder.accept(Mutation {
+        // Preserve things that should not be overwritten
         state.copy(
+            navMode = navMode,
             systemUI = systemUI,
             toolbarMenuClickListener = toolbarMenuClickListener,
             altToolbarMenuClickListener = altToolbarMenuClickListener

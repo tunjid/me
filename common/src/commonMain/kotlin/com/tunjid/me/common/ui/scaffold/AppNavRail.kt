@@ -16,6 +16,7 @@
 
 package com.tunjid.me.common.ui.scaffold
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,11 +31,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.globalui.GlobalUiMutator
+import com.tunjid.me.common.globalui.UiState
+import com.tunjid.me.common.globalui.navRailVisible
 import com.tunjid.me.common.nav.NavItem
 import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItems
 import com.tunjid.me.common.nav.railRoute
 import com.tunjid.me.common.ui.UiSizes
+import com.tunjid.me.common.ui.mappedCollectAsState
 
 @Composable
 fun AppNavRail(
@@ -42,10 +46,21 @@ fun AppNavRail(
     navMutator: NavMutator,
 ) {
     val navState by navMutator.state.collectAsState()
+    val hasRailRoute by navMutator.state.mappedCollectAsState { it.railRoute != null }
+    val navRailVisible by globalUiMutator.state.mappedCollectAsState(mapper = UiState::navRailVisible)
+
+    val navRailWidth by animateDpAsState(
+        targetValue = if (navRailVisible) UiSizes.navRailWidth
+        else 0.dp
+    )
+    val navRailContentWidth by animateDpAsState(
+        targetValue = if (navRailVisible && hasRailRoute) UiSizes.navRailContentWidth
+        else 0.dp
+    )
 
     Row {
         Column(
-            modifier = Modifier.width(UiSizes.navRailWidth),
+            modifier = Modifier.width(navRailWidth),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -54,9 +69,9 @@ fun AppNavRail(
             }
         }
         Box(
-            modifier = Modifier.width(UiSizes.navRailContentWidth)
+            modifier = Modifier.width(navRailContentWidth)
         ) {
-            navState.railRoute?.Render()
+            if (navRailVisible) navState.railRoute?.Render()
         }
     }
 }

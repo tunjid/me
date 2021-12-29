@@ -60,7 +60,10 @@ private data class ScopeHolder(
     val mutator: Any
 )
 
-fun createAppDependencies(scope: CoroutineScope) = object : AppDeps {
+fun createAppDependencies(
+    scope: CoroutineScope,
+    initialUiState: UiState = UiState()
+) = object : AppDeps {
     val routeMutatorFactory = mutableMapOf<Route<*>, ScopeHolder>()
 
     val api: Api = Api(HttpClient {
@@ -82,7 +85,7 @@ fun createAppDependencies(scope: CoroutineScope) = object : AppDeps {
         navMutator(scope = scope)
 
     override val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>> =
-        globalUiMutator(scope = scope)
+        globalUiMutator(scope = scope, initialState = initialUiState)
 
     init {
         scope.launch {

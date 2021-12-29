@@ -24,9 +24,9 @@ import kotlinx.coroutines.flow.StateFlow
 
 typealias GlobalUiMutator = Mutator<Mutation<UiState>, StateFlow<UiState>>
 
-fun globalUiMutator(scope: CoroutineScope): GlobalUiMutator =
+fun globalUiMutator(scope: CoroutineScope, initialState: UiState = UiState()): GlobalUiMutator =
     stateFlowMutator(
         scope = scope,
-        initialState = UiState(),
+        initialState = initialState,
         transform = { it }
     )

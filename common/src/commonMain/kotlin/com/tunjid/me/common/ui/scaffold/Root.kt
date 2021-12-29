@@ -40,12 +40,17 @@ fun Root(appDeps: AppDeps) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
+            AppNavRail(
+                globalUiMutator = globalUiMutator,
+                navMutator = navMutator,
+            )
             AppToolbar(
                 globalUiMutator = globalUiMutator,
                 navMutator = navMutator,
             )
             AppRouteContainer(
                 globalUiMutator = globalUiMutator,
+                navMutator = navMutator,
                 content = {
                     (route ?: Route404).Render()
                 }

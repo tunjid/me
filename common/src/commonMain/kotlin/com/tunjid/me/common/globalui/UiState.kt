@@ -29,6 +29,17 @@ data class ToolbarItem(
     val contentDescription: String? = null,
 )
 
+sealed class NavMode {
+    object BottomNav : NavMode()
+    object NavRail : NavMode()
+}
+
+sealed class NavVisibility {
+    object Visible : NavVisibility()
+    object Gone : NavVisibility()
+    object GoneIfBottomNav : NavVisibility()
+}
+
 data class UiState(
     val toolbarItems: List<ToolbarItem> = listOf(),
     val toolbarShows: Boolean = false,
@@ -42,7 +53,8 @@ data class UiState(
     val snackbarText: CharSequence = "",
     val navBarColor: Int = Color.Transparent.toArgb(),
     val lightStatusBar: Boolean = false,
-    val showsBottomNav: Boolean? = null,
+    val navMode: NavMode = NavMode.BottomNav,
+    val navVisibility: NavVisibility = NavVisibility.Visible,
     val statusBarColor: Int = Color.Transparent.toArgb(),
     val insetFlags: InsetDescriptor = InsetFlags.ALL,
     val isImmersive: Boolean = false,
@@ -61,6 +73,7 @@ internal data class ToolbarState(
     val statusBarSize: Int,
     val visible: Boolean,
     val overlaps: Boolean,
+    val navRailVisible: Boolean,
     val toolbarTitle: CharSequence,
     val items: List<ToolbarItem>,
 )
@@ -84,6 +97,7 @@ internal data class FabPositionalState(
 internal data class FragmentContainerPositionalState(
     val statusBarSize: Int,
     val toolbarOverlaps: Boolean,
+    val navRailVisible: Boolean,
     val bottomNavVisible: Boolean,
     override val ime: Ingress,
     override val navBarSize: Int,
@@ -96,21 +110,21 @@ internal data class BottomNavPositionalState(
     val navBarSize: Int
 )
 
-
 internal val UiState.toolbarState
     get() = ToolbarState(
         items = toolbarItems,
         toolbarTitle = toolbarTitle,
         visible = toolbarShows,
         overlaps = toolbarOverlaps,
-        statusBarSize = systemUI.static.statusBarSize,
+        navRailVisible = navRailVisible,
+        statusBarSize = statusBarSize,
     )
 
 internal val UiState.fabState
     get() = FabPositionalState(
         fabVisible = fabShows,
         snackbarHeight = systemUI.dynamic.snackbarHeight,
-        bottomNavVisible = showsBottomNav == true,
+        bottomNavVisible = bottomNavVisible,
         ime = systemUI.dynamic.ime,
         navBarSize = systemUI.static.navBarSize,
         insetDescriptor = insetFlags
@@ -118,7 +132,7 @@ internal val UiState.fabState
 
 internal val UiState.snackbarPositionalState
     get() = SnackbarPositionalState(
-        bottomNavVisible = showsBottomNav == true,
+        bottomNavVisible = bottomNavVisible,
         ime = systemUI.dynamic.ime,
         navBarSize = systemUI.static.navBarSize,
         insetDescriptor = insetFlags
@@ -132,7 +146,7 @@ internal val UiState.toolbarPosition
 
 internal val UiState.bottomNavPositionalState
     get() = BottomNavPositionalState(
-        bottomNavVisible = showsBottomNav == true,
+        bottomNavVisible = bottomNavVisible,
         navBarSize = systemUI.static.navBarSize,
         insetDescriptor = insetFlags
     )
@@ -142,7 +156,8 @@ internal val UiState.fragmentContainerState
         statusBarSize = systemUI.static.statusBarSize,
         insetDescriptor = insetFlags,
         toolbarOverlaps = toolbarOverlaps,
-        bottomNavVisible = showsBottomNav == true,
+        bottomNavVisible = bottomNavVisible,
+        navRailVisible = navRailVisible,
         ime = systemUI.dynamic.ime,
         navBarSize = systemUI.static.navBarSize
     )
@@ -150,6 +165,18 @@ internal val UiState.fragmentContainerState
 val UiState.navBarSize get() = systemUI.static.navBarSize
 
 val UiState.statusBarSize get() = systemUI.static.statusBarSize
+
+val UiState.bottomNavVisible get() = navMode is NavMode.BottomNav && when(navVisibility) {
+    NavVisibility.Visible -> true
+    NavVisibility.Gone,
+    NavVisibility.GoneIfBottomNav -> false
+}
+
+val UiState.navRailVisible get() = navMode is NavMode.NavRail && when(navVisibility) {
+    NavVisibility.Visible,
+    NavVisibility.GoneIfBottomNav -> true
+    NavVisibility.Gone -> false
+}
 
 /**
  * Interface for [UiState] state slices that are aware of the keyboard. Useful for

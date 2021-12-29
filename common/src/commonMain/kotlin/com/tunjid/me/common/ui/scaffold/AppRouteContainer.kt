@@ -16,14 +16,12 @@
 
 package com.tunjid.me.common.ui.scaffold
 
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.max
@@ -31,21 +29,21 @@ import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.fragmentContainerState
 import com.tunjid.me.common.globalui.keyboardSize
+import com.tunjid.me.common.nav.NavMutator
+import com.tunjid.me.common.nav.railRoute
+import com.tunjid.me.common.ui.UiSizes
 import com.tunjid.me.common.ui.countIf
 import com.tunjid.me.common.ui.mappedCollectAsState
-import com.tunjid.me.common.ui.uiSizes
 
 @Composable
 internal fun AppRouteContainer(
     globalUiMutator: GlobalUiMutator,
+    navMutator: NavMutator,
     content: @Composable BoxScope.() -> Unit
 ) {
     val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::fragmentContainerState)
 
-    val topClearanceAnimation = remember { Animatable(0f) }
-    val bottomClearanceAnimation = remember { Animatable(0f) }
-
-    val bottomNavHeight = uiSizes.bottomNavSize countIf state.bottomNavVisible
+    val bottomNavHeight = UiSizes.bottomNavSize countIf state.bottomNavVisible
     val insetClearance = max(
         a = bottomNavHeight,
         b = with(LocalDensity.current) { state.keyboardSize.toDp() }
@@ -54,27 +52,26 @@ internal fun AppRouteContainer(
         state.navBarSize.toDp()
     } countIf state.insetDescriptor.hasBottomInset
 
-    val totalBottomClearance =
-        with(LocalDensity.current) { (insetClearance + navBarClearance).toPx() }
-
-    LaunchedEffect(totalBottomClearance) {
-        bottomClearanceAnimation.animateTo(totalBottomClearance)
-    }
+    val bottomClearance by animateDpAsState(targetValue = insetClearance + navBarClearance)
 
     val statusBarSize = with(LocalDensity.current) {
         state.statusBarSize.toDp()
     } countIf state.insetDescriptor.hasTopInset
-    val toolbarHeight = uiSizes.toolbarSize countIf !state.toolbarOverlaps
+    val toolbarHeight = UiSizes.toolbarSize countIf !state.toolbarOverlaps
 
-    val topClearance = with(LocalDensity.current) { (statusBarSize + toolbarHeight).toPx() }
-    LaunchedEffect(topClearance) {
-        topClearanceAnimation.animateTo(topClearance)
-    }
+    val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
+
+    val hasNavContent by navMutator.state.mappedCollectAsState { it.railRoute != null }
+    val navRailSize = UiSizes.navRailWidth countIf state.navRailVisible
+    val navRailContentWidth = UiSizes.navRailContentWidth countIf hasNavContent
+
+    val startClearance by animateDpAsState(targetValue = navRailSize + navRailContentWidth)
 
     Box(
         modifier = Modifier.padding(
-            top = with(LocalDensity.current) { topClearanceAnimation.value.toDp() },
-            bottom = with(LocalDensity.current) { bottomClearanceAnimation.value.toDp() }
+            start = startClearance,
+            top = topClearance,
+            bottom = bottomClearance
         ),
         content = content
     )
