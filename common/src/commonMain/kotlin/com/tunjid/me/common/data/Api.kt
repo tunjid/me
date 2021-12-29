@@ -18,9 +18,9 @@ package com.tunjid.me.common.data
 
 import com.tunjid.me.common.data.archive.Archive
 import com.tunjid.me.common.data.archive.ArchiveKind
+import com.tunjid.me.common.data.archive.Descriptor
 import io.ktor.client.*
 import io.ktor.client.request.*
-import io.ktor.http.*
 
 
 class Api(
@@ -30,13 +30,16 @@ class Api(
     suspend fun fetchArchives(
         kind: ArchiveKind,
         options: Map<String, String> = mapOf(),
-        tags: List<String> = listOf(),
-        categories: List<String> = listOf(),
+        tags: List<Descriptor.Tag> = listOf(),
+        categories: List<Descriptor.Category> = listOf(),
     ): List<Archive> = client.get("$baseUrl/api/${kind.type}") {
         options.forEach { (key, value) -> parameter(key, value) }
-        if (tags.isNotEmpty()) parameter("tag", tags)
-        if (categories.isNotEmpty()) parameter("category", categories)
-
+        if (tags.isNotEmpty()) tags.map(Descriptor.Tag::value).forEach {
+            parameter("tag", it)
+        }
+        if (categories.isNotEmpty()) categories.map(Descriptor.Category::value).forEach {
+            parameter("category", it)
+        }
     }
 
     suspend fun fetchArchive(

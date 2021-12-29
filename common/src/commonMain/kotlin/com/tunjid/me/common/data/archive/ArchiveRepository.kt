@@ -39,8 +39,8 @@ class RestArchiveRepository(
                     query.temporalFilter?.let { "month" to it.month.toString() },
                     query.temporalFilter?.let { "year" to it.year.toString() },
                 ).toMap(),
-                tags = query.contentFilter.tags.map(Descriptor.Tag::value),
-                categories = query.contentFilter.categories.map(Descriptor.Category::value),
+                tags = query.contentFilter.tags,
+                categories = query.contentFilter.categories,
             )
         )
     }
