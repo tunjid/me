@@ -98,14 +98,14 @@ private fun UpButton(
                 .wrapContentSize()
                 .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
             onClick = { navMutator.accept { pop() } },
+            elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
             // Uses ButtonDefaults.ContentPadding by default
             contentPadding = PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
                 top = 16.dp,
                 bottom = 16.dp,
-
-                )
+            )
         ) {
             // Inner content including an icon and a text label
             Icon(

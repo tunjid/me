@@ -18,6 +18,8 @@ package com.tunjid.me.common.ui.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -29,10 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.UiState
-import com.tunjid.me.common.globalui.routeContainerState
 import com.tunjid.me.common.globalui.navRailVisible
+import com.tunjid.me.common.globalui.routeContainerState
 import com.tunjid.me.common.nav.NavItem
 import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItems
@@ -40,6 +43,7 @@ import com.tunjid.me.common.nav.railRoute
 import com.tunjid.me.common.ui.UiSizes
 import com.tunjid.me.common.ui.countIf
 import com.tunjid.me.common.ui.mappedCollectAsState
+import com.tunjid.mutator.accept
 
 @Composable
 fun AppNavRail(
@@ -76,12 +80,11 @@ fun AppNavRail(
         Row {
             Column(
                 modifier = Modifier.width(navRailWidth),
-                verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
                 navState.navItems.forEach { navItem ->
-                    NavRailItem(navItem)
+                    NavRailItem(item = navItem, navMutator = navMutator)
                 }
             }
             Box(
@@ -94,11 +97,32 @@ fun AppNavRail(
 }
 
 @Composable
-private fun NavRailItem(navItem: NavItem) {
-    Icon(
-        imageVector = navItem.icon,
-        contentDescription = navItem.name
-    )
-    Text(text = navItem.name)
+private fun NavRailItem(
+    item: NavItem,
+    navMutator: NavMutator,
+) {
+    Button(
+        elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
+        contentPadding = PaddingValues(
+            start = 8.dp,
+            end = 8.dp,
+            top = 16.dp,
+            bottom = 16.dp,
+        ),
+        onClick = {
+            navMutator.accept { copy(currentIndex = item.index) }
+        }
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = item.icon,
+                contentDescription = item.name
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = item.name, fontSize = 12.sp)
+        }
+    }
     Spacer(modifier = Modifier.height(24.dp))
 }
