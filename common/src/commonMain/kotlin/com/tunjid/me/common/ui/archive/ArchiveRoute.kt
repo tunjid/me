@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tunjid.me.common.AppAction
 import com.tunjid.me.common.LocalAppDependencies
 import com.tunjid.me.common.data.archive.Archive
 import com.tunjid.me.common.data.archive.ArchiveKind.Articles
@@ -48,16 +49,11 @@ import com.tunjid.me.common.data.archive.plus
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.nav.MultiStackNav
-import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.Paned
 import com.tunjid.me.common.nav.Route
-import com.tunjid.me.common.nav.push
-import com.tunjid.me.common.nav.swap
 import com.tunjid.me.common.ui.InitialUiState
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.asNoOpStateFlowMutator
-import com.tunjid.mutator.accept
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.scan
@@ -92,7 +88,6 @@ data class ArchiveRoute(val query: ArchiveQuery) : AppRoute<ArchiveMutator>,
     override fun Render() {
         ArchiveScreen(
             mutator = LocalAppDependencies.current.routeDependencies(this),
-            navMutator = LocalAppDependencies.current.appMutator.component1()
         )
     }
 }
@@ -100,7 +95,6 @@ data class ArchiveRoute(val query: ArchiveQuery) : AppRoute<ArchiveMutator>,
 @Composable
 private fun ArchiveScreen(
     mutator: ArchiveMutator,
-    navMutator: NavMutator
 ) {
     val state by mutator.state.collectAsState()
     val isInNavRail = state.isInNavRail
@@ -139,9 +133,14 @@ private fun ArchiveScreen(
                             archiveItem = item,
                             onAction = mutator.accept,
                             onNavAction = { route ->
-                                navMutator.accept {
-                                    if (isInNavRail) swap(route) else push(route)
-                                }
+                                mutator.accept(
+                                    Action.Navigate(
+                                        when {
+                                            isInNavRail -> AppAction.Nav.Swap(route)
+                                            else -> AppAction.Nav.Push(route)
+                                        }
+                                    )
+                                )
                             }
                         )
                     }
@@ -357,8 +356,6 @@ private fun PreviewLoadingState() {
         mutator = State(
             queryState = QueryState(rootQuery = ArchiveQuery(kind = Articles)),
             items = listOf(ArchiveItem.Loading)
-        ).asNoOpStateFlowMutator(),
-        navMutator = MultiStackNav()
-            .asNoOpStateFlowMutator()
+        ).asNoOpStateFlowMutator()
     )
 }

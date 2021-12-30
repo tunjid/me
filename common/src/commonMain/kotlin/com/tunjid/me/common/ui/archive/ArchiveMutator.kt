@@ -16,7 +16,9 @@
 
 package com.tunjid.me.common.ui.archive
 
+import com.tunjid.me.common.AppAction
 import com.tunjid.me.common.AppMutator
+import com.tunjid.me.common.consumeWith
 import com.tunjid.me.common.data.archive.Archive
 import com.tunjid.me.common.data.archive.ArchiveQuery
 import com.tunjid.me.common.data.archive.ArchiveRepository
@@ -56,6 +58,10 @@ sealed class Action {
 
     data class FilterChanged(
         val descriptor: Descriptor
+    ) : Action()
+
+    data class Navigate(
+        val navAction: AppAction.Nav
     ) : Action()
 
     object ToggleFilter : Action()
@@ -132,6 +138,7 @@ fun archiveMutator(
             actions.toMutationStream {
                 when (val action = type()) {
                     is Action.Fetch -> action.flow.fetchMutations(repo = repo)
+                    is Action.Navigate -> action.flow.map { it.navAction }.consumeWith(appMutator)
                     is Action.UpdateListState -> action.flow.updateListStateMutations()
                     is Action.FilterChanged -> action.flow.filterChangedMutations()
                     is Action.ToggleFilter -> action.flow.filterToggleMutations()

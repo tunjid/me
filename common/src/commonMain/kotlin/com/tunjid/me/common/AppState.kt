@@ -20,39 +20,49 @@ import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.MultiStackNav
 import com.tunjid.me.common.nav.NavMutator
+import com.tunjid.me.common.nav.Route
+import com.tunjid.me.common.nav.pop
+import com.tunjid.me.common.nav.push
+import com.tunjid.me.common.nav.swap
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 
-interface AppMutator : Mutator<AppAction<*>, StateFlow<AppState>>{
-    val  navMutator: NavMutator
+interface AppMutator : Mutator<AppAction, StateFlow<AppState>> {
+    val navMutator: NavMutator
     val globalUiMutator: GlobalUiMutator
     operator fun component1(): NavMutator = navMutator
     operator fun component2(): GlobalUiMutator = globalUiMutator
 }
+
+fun <State : Any> Flow<AppAction>.consumeWith(
+    appMutator: AppMutator
+): Flow<Mutation<State>> =
+    map { appMutator.accept(it) }
+        .flatMapLatest { emptyFlow() }
 
 data class AppState(
     val nav: MultiStackNav,
     val ui: UiState
 )
 
-sealed class AppAction<T : Any>(mutation: T.() -> T) {
-    val mutation: Mutation<T> = Mutation(mutation)
+sealed class AppAction {
+    sealed class Nav: AppAction() {
+        data class Push(val route: Route) :Nav()
+        data class Swap(val route: Route) :Nav()
+        object Pop  :Nav()
+    }
+}
 
-    class NavMutation(
-        mutation: MultiStackNav.() -> MultiStackNav
-    ) : AppAction<MultiStackNav>(mutation)
-
-    class UiMutation(
-        mutation: UiState.() -> UiState
-    ) : AppAction<UiState>(mutation)
-
+private val AppAction.Nav.mutation: Mutation<MultiStackNav> get() = Mutation {
+    when(val action = this@mutation) {
+        is AppAction.Nav.Push -> push(action.route)
+        is AppAction.Nav.Swap -> swap(action.route)
+        AppAction.Nav.Pop -> pop()
+    }
 }
 
 fun appMutator(
@@ -65,10 +75,9 @@ fun appMutator(
 
     override val globalUiMutator = globalUiMutator
 
-    override val accept: (AppAction<*>) -> Unit = { action ->
+    override val accept: (AppAction) -> Unit = { action ->
         when (action) {
-            is AppAction.NavMutation -> navMutator.accept(action.mutation)
-            is AppAction.UiMutation -> globalUiMutator.accept(action.mutation)
+            is AppAction.Nav -> navMutator.accept(action.mutation)
         }
     }
     override val state: StateFlow<AppState> = combine(
