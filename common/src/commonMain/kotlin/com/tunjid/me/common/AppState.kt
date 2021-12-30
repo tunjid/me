@@ -24,19 +24,29 @@ import com.tunjid.me.common.nav.Route
 import com.tunjid.me.common.nav.pop
 import com.tunjid.me.common.nav.push
 import com.tunjid.me.common.nav.swap
+import com.tunjid.me.common.ui.asNoOpStateFlowMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.*
 
 interface AppMutator : Mutator<AppAction, StateFlow<AppState>> {
     val navMutator: NavMutator
     val globalUiMutator: GlobalUiMutator
-    operator fun component1(): NavMutator = navMutator
-    operator fun component2(): GlobalUiMutator = globalUiMutator
 }
+
+operator fun AppMutator.component1(): NavMutator = navMutator
+operator fun AppMutator.component2(): GlobalUiMutator = globalUiMutator
+
+val AppState.asAppMutator: AppMutator
+    get() {
+        val appState = this
+        val baseMutator: Mutator<AppAction, StateFlow<AppState>> = appState.asNoOpStateFlowMutator()
+        return object : AppMutator, Mutator<AppAction, StateFlow<AppState>> by baseMutator {
+            override val navMutator: NavMutator = appState.nav.asNoOpStateFlowMutator()
+            override val globalUiMutator: GlobalUiMutator = appState.ui.asNoOpStateFlowMutator()
+        }
+    }
 
 fun <State : Any> Flow<AppAction>.consumeWith(
     appMutator: AppMutator
@@ -50,23 +60,24 @@ data class AppState(
 )
 
 sealed class AppAction {
-    sealed class Nav: AppAction() {
-        data class Push(val route: Route) :Nav()
-        data class Swap(val route: Route) :Nav()
-        object Pop  :Nav()
+    sealed class Nav : AppAction() {
+        data class Push(val route: Route) : Nav()
+        data class Swap(val route: Route) : Nav()
+        object Pop : Nav()
     }
 }
 
-private val AppAction.Nav.mutation: Mutation<MultiStackNav> get() = Mutation {
-    when(val action = this@mutation) {
-        is AppAction.Nav.Push -> push(action.route)
-        is AppAction.Nav.Swap -> swap(action.route)
-        AppAction.Nav.Pop -> pop()
+private val AppAction.Nav.mutation: Mutation<MultiStackNav>
+    get() = Mutation {
+        when (val action = this@mutation) {
+            is AppAction.Nav.Push -> push(action.route)
+            is AppAction.Nav.Swap -> swap(action.route)
+            AppAction.Nav.Pop -> pop()
+        }
     }
-}
 
 fun appMutator(
-    scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+    scope: CoroutineScope,
     globalUiMutator: GlobalUiMutator,
     navMutator: NavMutator
 ): AppMutator = object : AppMutator {

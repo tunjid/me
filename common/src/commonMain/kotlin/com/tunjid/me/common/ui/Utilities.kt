@@ -49,7 +49,7 @@ fun <T, R> StateFlow<T>.mappedCollectAsState(
 
 @Composable
 fun InitialUiState(state: UiState) {
-    val (_, uiMutator) = LocalAppDependencies.current.appMutator
+    val uiMutator = LocalAppDependencies.current.appMutator.globalUiMutator
 
     val toolbarMenuClickListener = remember {
         MutableFunction(state.toolbarMenuClickListener)

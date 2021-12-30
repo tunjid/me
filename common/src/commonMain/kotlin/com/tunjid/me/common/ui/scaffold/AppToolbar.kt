@@ -39,7 +39,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.AppMutator
+import com.tunjid.me.common.AppState
 import com.tunjid.me.common.appMutator
+import com.tunjid.me.common.asAppMutator
+import com.tunjid.me.common.component1
+import com.tunjid.me.common.component2
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.ToolbarItem
 import com.tunjid.me.common.globalui.UiState
@@ -198,16 +202,16 @@ private fun ToolbarIcon(
 fun Test() {
     Box {
         AppToolbar(
-            appMutator = appMutator(
-                globalUiMutator = UiState(
+            appMutator = AppState(
+                ui = UiState(
                     toolbarTitle = "Hi",
                     toolbarShows = true
-                ).asNoOpStateFlowMutator(),
-                navMutator = MultiStackNav(
+                ),
+                nav = MultiStackNav(
                     currentIndex = 0,
                     stacks = listOf(StackNav(name = "Preview", routes = listOf(Route404, Route404)))
-                ).asNoOpStateFlowMutator()
-            ),
+                )
+            ).asAppMutator,
         )
     }
 }

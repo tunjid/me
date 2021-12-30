@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.tunjid.me.common.AppDeps
 import com.tunjid.me.common.LocalAppDependencies
+import com.tunjid.me.common.component1
 import com.tunjid.me.common.nav.MultiStackNav
 import com.tunjid.me.common.nav.Route404
 import com.tunjid.me.common.nav.current
@@ -33,7 +34,7 @@ import com.tunjid.me.common.ui.mappedCollectAsState
 fun Root(appDeps: AppDeps) {
     CompositionLocalProvider(LocalAppDependencies provides appDeps) {
         val appMutator = LocalAppDependencies.current.appMutator
-        val (navMutator, globalUiMutator) = appMutator
+        val (navMutator) = appMutator
 
         val route by navMutator.state.mappedCollectAsState(mapper = MultiStackNav::current)
 

@@ -30,7 +30,6 @@ import com.tunjid.me.common.ui.archive.ArchiveRoute
 import com.tunjid.me.common.ui.archive.archiveMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
-import com.tunjid.me.common.ui.asNoOpStateFlowMutator
 import io.ktor.client.*
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.*
@@ -139,10 +138,10 @@ fun stubAppDeps(
     globalUI: UiState = UiState()
 ): AppDeps = object : AppDeps {
 
-    override val appMutator: AppMutator = appMutator(
-        globalUiMutator = globalUI.asNoOpStateFlowMutator(),
-        navMutator = nav.asNoOpStateFlowMutator()
-    )
+    override val appMutator: AppMutator = AppState(
+        ui = globalUI,
+        nav = nav
+    ).asAppMutator
 
     override fun <T> routeDependencies(route: AppRoute<T>): T =
         TODO("Not yet implemented")
