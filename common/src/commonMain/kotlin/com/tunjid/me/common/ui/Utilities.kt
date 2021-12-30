@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.datetime.Instant
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -50,7 +49,7 @@ fun <T, R> StateFlow<T>.mappedCollectAsState(
 
 @Composable
 fun InitialUiState(state: UiState) {
-    val uiStateHolder = LocalAppDependencies.current.globalUiMutator
+    val (_, uiMutator) = LocalAppDependencies.current.appMutator
 
     val toolbarMenuClickListener = remember {
         MutableFunction(state.toolbarMenuClickListener)
@@ -59,7 +58,7 @@ fun InitialUiState(state: UiState) {
         MutableFunction(state.altToolbarMenuClickListener)
     }
 
-    uiStateHolder.accept(Mutation {
+    uiMutator.accept(Mutation {
         // Preserve things that should not be overwritten
         state.copy(
             navMode = navMode,
@@ -90,7 +89,7 @@ infix fun Dp.countIf(condition: Boolean) = if (condition) this else 0.dp
 
 infix fun Int.countIf(condition: Boolean) = if (condition) this else 0
 
-fun <T : Any, R : Any> T.asNoOpStateFlowMutator() = object : Mutator<R, StateFlow<T>> {
+fun <R : Any, T : Any> T.asNoOpStateFlowMutator() = object : Mutator<R, StateFlow<T>> {
     override val accept: (R) -> Unit = {}
     override val state: StateFlow<T> = MutableStateFlow(this@asNoOpStateFlowMutator)
 }

@@ -36,10 +36,8 @@ import com.tunjid.me.common.data.archive.Archive
 import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
-import com.tunjid.me.common.globalui.navBarSize
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.InitialUiState
-import com.tunjid.me.common.ui.mappedCollectAsState
 
 data class ArchiveDetailRoute(val archive: Archive) : AppRoute<ArchiveDetailMutator> {
     override val id: String
@@ -55,13 +53,9 @@ data class ArchiveDetailRoute(val archive: Archive) : AppRoute<ArchiveDetailMuta
 
 @Composable
 private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
-    val navBarSize by LocalAppDependencies.current.globalUiMutator.state.mappedCollectAsState(
-        mapper = UiState::navBarSize
-    )
-    val navBarSizeDp = with(LocalDensity.current) { navBarSize.toDp() }
-
     val state by mutator.state.collectAsState()
     val scrollState = rememberScrollState()
+    val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
 
     InitialUiState(
         UiState(

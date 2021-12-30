@@ -32,8 +32,8 @@ import com.tunjid.me.common.ui.mappedCollectAsState
 @Composable
 fun Root(appDeps: AppDeps) {
     CompositionLocalProvider(LocalAppDependencies provides appDeps) {
-        val globalUiMutator = LocalAppDependencies.current.globalUiMutator
-        val navMutator = LocalAppDependencies.current.navMutator
+        val appMutator = LocalAppDependencies.current.appMutator
+        val (navMutator, globalUiMutator) = appMutator
 
         val route by navMutator.state.mappedCollectAsState(mapper = MultiStackNav::current)
 
@@ -41,23 +41,19 @@ fun Root(appDeps: AppDeps) {
             modifier = Modifier.fillMaxSize()
         ) {
             AppNavRail(
-                globalUiMutator = globalUiMutator,
-                navMutator = navMutator,
+                appMutator = appMutator,
             )
             AppToolbar(
-                globalUiMutator = globalUiMutator,
-                navMutator = navMutator,
+                appMutator = appMutator,
             )
             AppRouteContainer(
-                globalUiMutator = globalUiMutator,
-                navMutator = navMutator,
+                appMutator = appMutator,
                 content = {
                     (route ?: Route404).Render()
                 }
             )
             AppBottomNav(
-                globalUiMutator = globalUiMutator,
-                navMutator = navMutator,
+                appMutator = appMutator,
             )
         }
     }

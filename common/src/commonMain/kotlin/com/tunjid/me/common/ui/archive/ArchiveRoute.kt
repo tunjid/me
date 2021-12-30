@@ -92,7 +92,7 @@ data class ArchiveRoute(val query: ArchiveQuery) : AppRoute<ArchiveMutator>,
     override fun Render() {
         ArchiveScreen(
             mutator = LocalAppDependencies.current.routeDependencies(this),
-            navMutator = LocalAppDependencies.current.navMutator
+            navMutator = LocalAppDependencies.current.appMutator.component1()
         )
     }
 }
@@ -105,7 +105,7 @@ private fun ArchiveScreen(
     val state by mutator.state.collectAsState()
     val isInNavRail = state.isInNavRail
     val query = state.queryState.rootQuery
-    InitialUiState(
+    if (!isInNavRail) InitialUiState(
         UiState(
             toolbarShows = true,
             toolbarTitle = query.kind.name,

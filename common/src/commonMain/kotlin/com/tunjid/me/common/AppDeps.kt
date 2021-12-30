@@ -30,8 +30,7 @@ import com.tunjid.me.common.ui.archive.ArchiveRoute
 import com.tunjid.me.common.ui.archive.archiveMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
-import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.Mutator
+import com.tunjid.me.common.ui.asNoOpStateFlowMutator
 import io.ktor.client.*
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.*
@@ -41,8 +40,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
@@ -50,8 +47,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 interface AppDeps {
-    val navMutator: Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
-    val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>>
+    val appMutator: AppMutator
     fun <T> routeDependencies(route: AppRoute<T>): T
 }
 
@@ -81,16 +77,16 @@ fun createAppDependencies(
 
     val archiveRepository: ArchiveRepository = RestArchiveRepository(api = api)
 
-    override val navMutator: Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> =
-        navMutator(scope = scope)
-
-    override val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>> =
-        globalUiMutator(scope = scope, initialState = initialUiState)
+    override val appMutator: AppMutator = appMutator(
+        scope = scope,
+        navMutator = navMutator(scope = scope),
+        globalUiMutator = globalUiMutator(scope = scope, initialState = initialUiState)
+    )
 
     init {
         scope.launch {
-            navMutator.state
-                .map { it.routes.filterIsInstance<AppRoute<*>>() }
+            appMutator.state
+                .map { it.nav.routes.filterIsInstance<AppRoute<*>>() }
                 .distinctUntilChanged()
                 .scan(listOf<AppRoute<*>>() to listOf<AppRoute<*>>()) { pair, newRoutes ->
                     pair.copy(first = pair.second, second = newRoutes)
@@ -114,8 +110,7 @@ fun createAppDependencies(
                     scope = routeScope,
                     route = route,
                     repo = archiveRepository,
-                    navMutator = navMutator,
-                    globalUiMutator = globalUiMutator
+                    appMutator = appMutator,
                 )
             )
         }
@@ -126,7 +121,8 @@ fun createAppDependencies(
                 mutator = archiveDetailMutator(
                     scope = routeScope,
                     archive = route.archive,
-                    repo = archiveRepository
+                    repo = archiveRepository,
+                    appMutator = appMutator,
                 )
             )
         }
@@ -142,16 +138,11 @@ fun stubAppDeps(
     nav: MultiStackNav = MultiStackNav(),
     globalUI: UiState = UiState()
 ): AppDeps = object : AppDeps {
-    override val navMutator: Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> =
-        object : Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> {
-            override val accept: (Mutation<MultiStackNav>) -> Unit = {}
-            override val state: StateFlow<MultiStackNav> = MutableStateFlow(nav)
-        }
-    override val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>> =
-        object : Mutator<Mutation<UiState>, StateFlow<UiState>> {
-            override val accept: (Mutation<UiState>) -> Unit = {}
-            override val state: StateFlow<UiState> = MutableStateFlow(globalUI)
-        }
+
+    override val appMutator: AppMutator = appMutator(
+        globalUiMutator = globalUI.asNoOpStateFlowMutator(),
+        navMutator = nav.asNoOpStateFlowMutator()
+    )
 
     override fun <T> routeDependencies(route: AppRoute<T>): T =
         TODO("Not yet implemented")

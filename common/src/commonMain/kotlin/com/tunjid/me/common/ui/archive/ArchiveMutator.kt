@@ -16,14 +16,13 @@
 
 package com.tunjid.me.common.ui.archive
 
+import com.tunjid.me.common.AppMutator
 import com.tunjid.me.common.data.archive.Archive
 import com.tunjid.me.common.data.archive.ArchiveQuery
 import com.tunjid.me.common.data.archive.ArchiveRepository
 import com.tunjid.me.common.data.archive.DefaultQueryLimit
 import com.tunjid.me.common.data.archive.Descriptor
-import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.navRailVisible
-import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navRailRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
@@ -118,8 +117,7 @@ fun archiveMutator(
     scope: CoroutineScope,
     route: ArchiveRoute,
     repo: ArchiveRepository,
-    navMutator: NavMutator,
-    globalUiMutator: GlobalUiMutator,
+    appMutator: AppMutator,
 ): Mutator<Action, StateFlow<State>> = stateFlowMutator(
     scope = scope,
     initialState = State(
@@ -130,7 +128,7 @@ fun archiveMutator(
     started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 2000),
     transform = { actions ->
         merge(
-            navRailStatusMutations(navMutator, globalUiMutator),
+            appMutator.navRailStatusMutations(),
             actions.toMutationStream {
                 when (val action = type()) {
                     is Action.Fetch -> action.flow.fetchMutations(repo = repo)
@@ -143,11 +141,8 @@ fun archiveMutator(
     }
 )
 
-private fun navRailStatusMutations(
-    navMutator: NavMutator,
-    globalUiMutator: GlobalUiMutator
-) = combine(navMutator.state, globalUiMutator.state) { navState, uiState ->
-    navState.navRailRoute is ArchiveRoute && uiState.navRailVisible
+private fun AppMutator.navRailStatusMutations() = state.map { appState ->
+    appState.nav.navRailRoute is ArchiveRoute && appState.ui.navRailVisible
 }
     .distinctUntilChanged()
     .map {

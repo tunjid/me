@@ -39,10 +39,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import com.tunjid.me.common.globalui.GlobalUiMutator
+import com.tunjid.me.common.AppMutator
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.bottomNavPositionalState
-import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItems
 import com.tunjid.me.common.ui.UiSizes
 import com.tunjid.me.common.ui.mappedCollectAsState
@@ -50,9 +49,9 @@ import com.tunjid.mutator.accept
 
 @Composable
 internal fun BoxScope.AppBottomNav(
-    globalUiMutator: GlobalUiMutator,
-    navMutator: NavMutator,
+    appMutator: AppMutator,
 ) {
+    val (navMutator, globalUiMutator) = appMutator
     val nav by navMutator.state.collectAsState()
     val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::bottomNavPositionalState)
 

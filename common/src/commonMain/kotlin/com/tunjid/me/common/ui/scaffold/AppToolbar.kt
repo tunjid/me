@@ -38,7 +38,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.common.LocalAppDependencies
+import com.tunjid.me.common.AppMutator
+import com.tunjid.me.common.appMutator
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.ToolbarItem
 import com.tunjid.me.common.globalui.UiState
@@ -55,9 +56,9 @@ import com.tunjid.mutator.accept
 
 @Composable
 internal fun BoxScope.AppToolbar(
-    globalUiMutator: GlobalUiMutator,
-    navMutator: NavMutator,
+    appMutator: AppMutator,
 ) {
+    val (navMutator, globalUiMutator) = appMutator
     val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::toolbarState)
     val items = state.items
     val title = state.toolbarTitle
@@ -81,7 +82,7 @@ internal fun BoxScope.AppToolbar(
             modifier = Modifier
         ) {
             Title(title)
-            ActionMenu(items = items)
+            ActionMenu(items = items, globalUiMutator = globalUiMutator)
         }
     }
 }
@@ -135,7 +136,10 @@ private fun Title(title: CharSequence) {
 }
 
 @Composable
-internal fun ActionMenu(items: List<ToolbarItem>) {
+internal fun ActionMenu(
+    items: List<ToolbarItem>,
+    globalUiMutator: GlobalUiMutator
+) {
     val icons = when {
         items.size < 3 -> items
         else -> items.take(2)
@@ -144,15 +148,21 @@ internal fun ActionMenu(items: List<ToolbarItem>) {
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        icons.forEach { ToolbarIcon(it) }
+        icons.forEach {
+            ToolbarIcon(
+                item = it,
+                globalUiMutator = globalUiMutator
+            )
+        }
     }
 }
 
 @Composable
-fun ToolbarIcon(item: ToolbarItem) {
-    val uiStateHolder = LocalAppDependencies.current.globalUiMutator
-
-    val clicks by uiStateHolder.state
+private fun ToolbarIcon(
+    item: ToolbarItem,
+    globalUiMutator: GlobalUiMutator
+) {
+    val clicks by globalUiMutator.state
         .mappedCollectAsState(mapper = UiState::toolbarMenuClickListener)
 
     when (val vector = item.imageVector) {
@@ -188,14 +198,16 @@ fun ToolbarIcon(item: ToolbarItem) {
 fun Test() {
     Box {
         AppToolbar(
-            globalUiMutator = UiState(
-                toolbarTitle = "Hi",
-                toolbarShows = true
-            ).asNoOpStateFlowMutator(),
-            navMutator = MultiStackNav(
-                currentIndex = 0,
-                stacks = listOf(StackNav(name = "Preview", routes = listOf(Route404, Route404)))
-            ).asNoOpStateFlowMutator(),
+            appMutator = appMutator(
+                globalUiMutator = UiState(
+                    toolbarTitle = "Hi",
+                    toolbarShows = true
+                ).asNoOpStateFlowMutator(),
+                navMutator = MultiStackNav(
+                    currentIndex = 0,
+                    stacks = listOf(StackNav(name = "Preview", routes = listOf(Route404, Route404)))
+                ).asNoOpStateFlowMutator()
+            ),
         )
     }
 }

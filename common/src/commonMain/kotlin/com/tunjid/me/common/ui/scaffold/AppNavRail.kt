@@ -32,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.common.globalui.GlobalUiMutator
+import com.tunjid.me.common.AppMutator
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.navRailVisible
 import com.tunjid.me.common.globalui.routeContainerState
@@ -47,9 +47,10 @@ import com.tunjid.mutator.accept
 
 @Composable
 fun AppNavRail(
-    globalUiMutator: GlobalUiMutator,
-    navMutator: NavMutator,
+    appMutator: AppMutator,
 ) {
+    val (navMutator, globalUiMutator) = appMutator
+
     val navState by navMutator.state.collectAsState()
     val containerState by globalUiMutator.state.mappedCollectAsState(mapper = UiState::routeContainerState)
 
