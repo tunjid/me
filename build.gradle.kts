@@ -21,13 +21,11 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-//        val libs = project.extensions.getByType<VersionCatalogsExtension>().named("libs") as org.gradle.accessors.dm.LibrariesForLibs
-//        classpath(libs.android.gradlePlugin)
-//        classpath(libs.kotlin.gradlePlugin)
-//        classpath(libs.kotlin.serializationPlugin)
+        val libs = project.extensions.getByType<VersionCatalogsExtension>()
+            .named("libs") as org.gradle.accessors.dm.LibrariesForLibs
+        classpath(libs.android.gradlePlugin)
+        classpath(libs.kotlin.gradlePlugin)
 
-        classpath("com.android.tools.build:gradle:7.0.4")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -37,7 +35,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        mavenLocal()
     }
 }
 
