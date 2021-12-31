@@ -16,7 +16,11 @@
 
 package com.tunjid.me
 
+import android.app.Activity
 import android.app.Application
+import android.os.Bundle
+import com.tunjid.me.common.AppAction
+import com.tunjid.me.common.AppMutator
 import com.tunjid.me.common.createAppDependencies
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +34,34 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        appDeps
+        monitorAppForegroundStatus(appDeps.appMutator)
     }
 
+    private fun monitorAppForegroundStatus(appMutator: AppMutator) {
+        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
+            private fun updateStatus(isInForeground: Boolean) =
+                appMutator.accept(AppAction.AppStatus(isInForeground = isInForeground))
+
+            override fun onActivityCreated(p0: Activity, p1: Bundle?) =
+                updateStatus(isInForeground = true)
+
+            override fun onActivityStarted(p0: Activity) =
+                updateStatus(isInForeground = true)
+
+            override fun onActivityResumed(p0: Activity) =
+                updateStatus(isInForeground = true)
+
+            override fun onActivityPaused(p0: Activity) =
+                updateStatus(isInForeground = false)
+
+
+            override fun onActivityStopped(p0: Activity) =
+                updateStatus(isInForeground = false)
+
+            override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle) = Unit
+
+            override fun onActivityDestroyed(p0: Activity) =
+                updateStatus(isInForeground = false)
+        })
+    }
 }

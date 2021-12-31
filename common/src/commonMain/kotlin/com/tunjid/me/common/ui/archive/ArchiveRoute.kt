@@ -136,8 +136,8 @@ private fun ArchiveScreen(
                                 mutator.accept(
                                     Action.Navigate(
                                         when {
-                                            isInNavRail -> AppAction.Nav.Swap(route)
-                                            else -> AppAction.Nav.Push(route)
+                                            isInNavRail -> AppAction.Nav.swap(route)
+                                            else -> AppAction.Nav.push(route)
                                         }
                                     )
                                 )

@@ -25,6 +25,7 @@ import com.tunjid.me.common.data.archive.ArchiveRepository
 import com.tunjid.me.common.data.archive.DefaultQueryLimit
 import com.tunjid.me.common.data.archive.Descriptor
 import com.tunjid.me.common.globalui.navRailVisible
+import com.tunjid.me.common.monitorWhenActive
 import com.tunjid.me.common.nav.navRailRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
@@ -133,7 +134,7 @@ fun archiveMutator(
     ),
     started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 2000),
     transform = { actions ->
-        merge(
+        appMutator.monitorWhenActive(merge(
             appMutator.navRailStatusMutations(),
             actions.toMutationStream {
                 when (val action = type()) {
@@ -144,7 +145,7 @@ fun archiveMutator(
                     is Action.ToggleFilter -> action.flow.filterToggleMutations()
                 }
             }
-        )
+        ))
     }
 )
 

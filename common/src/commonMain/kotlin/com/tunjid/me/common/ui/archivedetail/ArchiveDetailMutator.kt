@@ -21,6 +21,7 @@ import com.tunjid.me.common.AppMutator
 import com.tunjid.me.common.data.archive.Archive
 import com.tunjid.me.common.data.archive.ArchiveRepository
 import com.tunjid.me.common.globalui.navBarSize
+import com.tunjid.me.common.monitorWhenActive
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -50,7 +51,7 @@ fun archiveDetailMutator(
     ),
     started = SharingStarted.WhileSubscribed(2000),
     transform = {
-        merge(
+        appMutator.monitorWhenActive(merge(
             appMutator.globalUiMutator.state
                 .map { it.navBarSize }
                 .map {
@@ -63,6 +64,6 @@ fun archiveDetailMutator(
                 .map { fetchedArchive ->
                     Mutation { copy(archive = fetchedArchive) }
                 }
-        )
+        ))
     }
 )
