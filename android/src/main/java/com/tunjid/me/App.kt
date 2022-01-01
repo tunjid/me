@@ -28,13 +28,13 @@ import kotlinx.coroutines.SupervisorJob
 
 class App : Application() {
 
-    val appDeps by lazy {
+    val appDependencies by lazy {
         createAppDependencies(scope = CoroutineScope(SupervisorJob() + Dispatchers.Main))
     }
 
     override fun onCreate() {
         super.onCreate()
-        monitorAppForegroundStatus(appDeps.appMutator)
+        monitorAppForegroundStatus(appDependencies.appMutator)
     }
 
     private fun monitorAppForegroundStatus(appMutator: AppMutator) {

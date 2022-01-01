@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val app = applicationContext as App
-        val (navMutator, globalUiMutator) = app.appDeps.appMutator
+        val (navMutator, globalUiMutator) = app.appDependencies.appMutator
 
         onBackPressedDispatcher.addCallback(this) {
             navMutator.accept { pop() }
@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             AppTheme {
                 Surface(color = MaterialTheme.colors.background) {
-                    Root(appDeps = app.appDeps)
+                    Root(dependencies = app.appDependencies)
                 }
                 adaptNavigation(globalUiMutator = globalUiMutator)
             }

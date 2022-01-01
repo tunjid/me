@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
-interface AppDeps {
+interface AppDependencies {
     val appMutator: AppMutator
     fun <T> routeDependencies(route: AppRoute<T>): T
 }
@@ -58,7 +58,7 @@ private data class ScopeHolder(
 fun createAppDependencies(
     scope: CoroutineScope,
     initialUiState: UiState = UiState()
-) = object : AppDeps {
+) = object : AppDependencies {
     val routeMutatorFactory = mutableMapOf<AppRoute<*>, ScopeHolder>()
 
     val api: Api = Api(HttpClient {
@@ -136,7 +136,7 @@ val LocalAppDependencies = staticCompositionLocalOf {
 fun stubAppDeps(
     nav: MultiStackNav = MultiStackNav(),
     globalUI: UiState = UiState()
-): AppDeps = object : AppDeps {
+): AppDependencies = object : AppDependencies {
 
     override val appMutator: AppMutator = AppState(
         ui = globalUI,

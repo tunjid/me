@@ -16,7 +16,7 @@ import kotlinx.coroutines.SupervisorJob
 
 fun main() {
     application {
-        val appDeps = createAppDependencies(
+        val appDependencies = createAppDependencies(
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
             initialUiState = UiState(navMode = NavMode.NavRail)
         )
@@ -29,7 +29,7 @@ fun main() {
         ) {
             AppTheme {
                 Surface(color = MaterialTheme.colors.background) {
-                    Root(appDeps = appDeps)
+                    Root(dependencies = appDependencies)
                 }
             }
         }
