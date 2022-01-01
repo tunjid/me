@@ -45,6 +45,7 @@ import com.tunjid.me.common.component2
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.bottomNavPositionalState
 import com.tunjid.me.common.nav.navItems
+import com.tunjid.me.common.nav.switch
 import com.tunjid.me.common.ui.UiSizes
 import com.tunjid.me.common.ui.mappedCollectAsState
 import com.tunjid.mutator.accept
@@ -96,7 +97,7 @@ internal fun BoxScope.AppBottomNav(
                             label = { Text(navItem.name) },
                             selected = navItem.selected,
                             onClick = {
-                                navMutator.accept { copy(currentIndex = navItem.index) }
+                                navMutator.accept { switch(toIndex = navItem.index) }
                             }
                         )
                     }

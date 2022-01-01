@@ -42,6 +42,7 @@ import com.tunjid.me.common.nav.NavItem
 import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItems
 import com.tunjid.me.common.nav.navRailRoute
+import com.tunjid.me.common.nav.switch
 import com.tunjid.me.common.ui.UiSizes
 import com.tunjid.me.common.ui.countIf
 import com.tunjid.me.common.ui.mappedCollectAsState
@@ -113,7 +114,7 @@ private fun NavRailItem(
             bottom = 16.dp,
         ),
         onClick = {
-            navMutator.accept { copy(currentIndex = item.index) }
+            navMutator.accept { switch(toIndex = item.index) }
         }
     ) {
         Column(
