@@ -31,6 +31,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
+import com.tunjid.me.common.component1
+import com.tunjid.me.common.component2
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.NavMode
 import com.tunjid.me.common.globalui.insetMutations
@@ -46,9 +48,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val app = applicationContext as App
+        val (navMutator, globalUiMutator) = app.appDeps.appMutator
 
         onBackPressedDispatcher.addCallback(this) {
-            app.appDeps.navMutator.accept { pop() }
+            navMutator.accept { pop() }
         }
 
         setContent {
@@ -56,17 +59,15 @@ class MainActivity : AppCompatActivity() {
                 Surface(color = MaterialTheme.colors.background) {
                     Root(appDeps = app.appDeps)
                 }
-                adaptNavigation(globalUiMutator = app.appDeps.globalUiMutator)
+                adaptNavigation(globalUiMutator = globalUiMutator)
             }
         }
 
         lifecycleScope.launch {
-            insetMutations().collect {
-                app.appDeps.globalUiMutator.accept(it)
-            }
+            insetMutations().collect(globalUiMutator.accept)
         }
         lifecycleScope.launch {
-            app.appDeps.globalUiMutator.state
+            globalUiMutator.state
                 .map { it.statusBarColor to it.navBarColor }
                 .distinctUntilChanged()
                 .collect { (statusBarColor, navBarColor) ->
