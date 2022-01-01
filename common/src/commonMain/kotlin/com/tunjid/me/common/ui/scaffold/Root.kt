@@ -16,6 +16,7 @@
 
 package com.tunjid.me.common.ui.scaffold
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -50,7 +51,10 @@ fun Root(appDeps: AppDeps) {
             AppRouteContainer(
                 appMutator = appMutator,
                 content = {
-                    (route ?: Route404).Render()
+                    Crossfade(
+                        targetState = route ?: Route404,
+                        content = { it.Render() }
+                    )
                 }
             )
             AppBottomNav(
