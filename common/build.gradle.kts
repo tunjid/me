@@ -47,6 +47,7 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.android)
 
                 implementation(libs.ktor.client.android)
+
                 implementation(libs.tunjid.mutator.core.jvm)
                 implementation(libs.tunjid.mutator.coroutines.jvm)
             }

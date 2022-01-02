@@ -19,6 +19,10 @@ kotlin {
                 implementation(compose.desktop.currentOs)
 
                 implementation(libs.compose.material)
+                implementation(libs.kotlinx.coroutines.core)
+
+                implementation(libs.tunjid.mutator.core.jvm)
+                implementation(libs.tunjid.mutator.coroutines.jvm)
             }
         }
     }
