@@ -6,15 +6,15 @@ are production tested, and should not be taken as anything more than its face va
 
 ## Introduction
 
-"Me" is a playground for ideas that pop into my head around app architecture. This ideas typically
-center around state and it's production. A repository of "what ifs?". Some of the ideas explored
-include:
+"Me" is a Kotlin Multiplatform playground for ideas that pop into my head around app architecture.
+These ideas typically center around state and it's production; a repository of "what ifs?".
+Some of the ideas explored include:
 
 * Android insets and IME behavior driven by immutable state
-* Tiling as a way of loading paginated data
+* [Tiling](https://github.com/tunjid/Tiler) as a way of loading paginated data
 * Trees as a backing data structure for app navigation
-* `Mutators` as abstract data types for the production and mutation of state
-* Motional intelligence with global UI as implemented with Jetpack Compose
+* [`Mutators`](https://github.com/tunjid/Mutator) as abstract data types for the production and mutation of state
+* [Motional Intelligence](https://medium.com/androiddevelopers/motional-intelligence-build-smarter-animations-821af4d5f8c0)with global UI as implemented with Jetpack Compose
 
 I try to keep the code at a near production quality, but this often takes a back seat to
 convenience and whim. I'm a huge proponent of dependency injection, yet the repository uses manual
@@ -23,6 +23,10 @@ or anonymous class just because.
 
 Again, the work presented here are the ideas of an immutable state zealot. It's far from objective,
 I just be doing anything tbh. Caveat emptor.
+
+## Running
+Desktop: `./gradlew :desktop:run`
+Android: `./gradlew :android:assembleDebug` or run the Android target in Android Studio
 
 ## License
     Copyright 2021 Google LLC
