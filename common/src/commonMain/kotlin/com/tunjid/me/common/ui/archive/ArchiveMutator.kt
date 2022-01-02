@@ -70,7 +70,7 @@ sealed class Action {
 
     data class GridSize(val size: Int) : Action()
 
-    object ToggleFilter : Action()
+    data class ToggleFilter(val isExpanded: Boolean? = null) : Action()
 }
 
 sealed class ArchiveItem {
@@ -186,11 +186,13 @@ private fun Flow<Action.FilterChanged>.filterChangedMutations(): Flow<Mutation<S
         }
     }
 
-private fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<State>> = map {
-    Mutation {
-        copy(queryState = queryState.copy(expanded = !queryState.expanded))
-    }
-}
+private fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<State>> =
+    distinctUntilChanged()
+        .map { (isExpanded) ->
+            Mutation {
+                copy(queryState = queryState.copy(expanded = isExpanded ?: !queryState.expanded))
+            }
+        }
 
 private fun Flow<Action.GridSize>.gridSizeMutations(): Flow<Mutation<State>> = map {
     Mutation {

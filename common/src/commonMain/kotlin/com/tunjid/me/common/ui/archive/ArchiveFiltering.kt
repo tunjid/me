@@ -67,7 +67,7 @@ fun ArchiveFilters(
                 modifier = Modifier
                     .defaultMinSize(minHeight = 48.dp)
                     .fillMaxWidth()
-                    .clickable { onChanged(Action.ToggleFilter) },
+                    .clickable { onChanged(Action.ToggleFilter()) },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -144,7 +144,7 @@ private fun DropDownButton(
         modifier = Modifier
             .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
             .rotate(rotation),
-        onClick = { onChanged(Action.ToggleFilter) },
+        onClick = { onChanged(Action.ToggleFilter()) },
         shape = RoundedCornerShape(40.dp),
         contentPadding = PaddingValues(4.dp),
         content = {

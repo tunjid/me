@@ -165,6 +165,7 @@ private fun ArchiveScreen(
             .filter { abs(it.dy) > 4 }
             .distinctUntilChangedBy(ScrollState::queryOffset)
             .collect {
+                mutator.accept(Action.ToggleFilter(isExpanded = false))
                 mutator.accept(
                     Action.Fetch(
                         ArchiveQuery(
