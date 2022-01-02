@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -200,17 +201,24 @@ private fun ArchiveScreen(
 }
 
 @Composable
-private fun ProgressBar() {
+private fun ProgressBar(isCircular: Boolean) {
     Box(
         modifier = Modifier
             .padding(vertical = 24.dp)
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
-        CircularProgressIndicator(
+        if (isCircular) CircularProgressIndicator(
             modifier = Modifier
                 .size(60.dp)
-                .align(Alignment.Center)
+                .align(Alignment.Center),
+            color = MaterialTheme.colors.onSurface
+        )
+        else LinearProgressIndicator(
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .align(Alignment.Center),
+            color = MaterialTheme.colors.onSurface
         )
     }
 }
@@ -236,7 +244,7 @@ private fun ArchiveRow(
     ) {
         items.forEach { item ->
             when (item) {
-                ArchiveItem.Loading -> ProgressBar()
+                is ArchiveItem.Loading -> ProgressBar(isCircular = item.isCircular)
                 is ArchiveItem.Result -> ArchiveCard(
                     archiveItem = item,
                     onAction = onAction,
@@ -394,7 +402,12 @@ private fun PreviewLoadingState() {
     ArchiveScreen(
         mutator = State(
             queryState = QueryState(rootQuery = ArchiveQuery(kind = Articles)),
-            items = listOf(ArchiveItem.Loading)
+            items = listOf(
+                ArchiveItem.Loading(
+                    isCircular = true,
+                    query = ArchiveQuery(kind = Articles)
+                )
+            )
         ).asNoOpStateFlowMutator()
     )
 }

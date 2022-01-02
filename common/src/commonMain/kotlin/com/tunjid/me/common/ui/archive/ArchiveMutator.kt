@@ -47,10 +47,43 @@ data class State(
     val isInNavRail: Boolean = false,
     val queryState: QueryState,
     val listStateSummary: ListState = ListState(),
-    val items: List<ArchiveItem> = listOf(ArchiveItem.Loading)
+    val items: List<ArchiveItem> = listOf()
 )
 
-val State.chunkedItems get() = items.chunked(if (isInNavRail) 1 else gridSize)
+// TODO: Remove this when LazyVerticalGrid supports item keys and span size lookups
+/**
+ * Chunks the items fetched to be laid out in a grid. Loading items are in singleton list
+ * since the must span an entire row
+ */
+val State.chunkedItems: List<List<ArchiveItem>>
+    get() {
+        val result = mutableListOf<List<ArchiveItem>>()
+        var chunk = mutableListOf<ArchiveItem>()
+        val iterator = items.iterator()
+        while (iterator.hasNext()) {
+            when (val next = iterator.next()) {
+                is ArchiveItem.Result -> {
+                    if (chunk.size < gridSize) chunk.add(next)
+                    else {
+                        result.add(chunk)
+                        chunk = mutableListOf(next)
+                    }
+                }
+                // Loading spinners take up the full span
+                is ArchiveItem.Loading -> when (val lastChunk = result.lastOrNull()) {
+                    null -> result.add(listOf(next))
+                    else -> when (lastChunk.firstOrNull()) {
+                        // Don't show two consecutive loading indicators
+                        is ArchiveItem.Loading -> Unit
+                        is ArchiveItem.Result,
+                        null -> result.add(listOf(next))
+                    }
+                }
+            }
+        }
+        if (chunk.isNotEmpty()) result.add(chunk)
+        return result
+    }
 
 sealed class Action {
     data class Fetch(
@@ -79,12 +112,15 @@ sealed class ArchiveItem {
         val query: ArchiveQuery,
     ) : ArchiveItem()
 
-    object Loading : ArchiveItem()
+    data class Loading(
+        val isCircular: Boolean,
+        val query: ArchiveQuery,
+    ) : ArchiveItem()
 }
 
 val ArchiveItem.key: String
     get() = when (this) {
-        ArchiveItem.Loading -> "Loading"
+        is ArchiveItem.Loading -> query.toString()
         is ArchiveItem.Result -> archive.key
     }
 
@@ -123,7 +159,10 @@ private data class FetchResult(
 
 private val FetchResult.flattenedArchives get() = queriedArchives.flatten()
 
-private val FetchResult.hasNoResults get() = queriedArchives.isEmpty()
+private val FetchResult.hasNoResults
+    get() = queriedArchives.isEmpty() || queriedArchives.all {
+        it.all { items -> items is ArchiveItem.Loading }
+    }
 
 fun archiveMutator(
     scope: CoroutineScope,
@@ -133,6 +172,12 @@ fun archiveMutator(
 ): Mutator<Action, StateFlow<State>> = stateFlowMutator(
     scope = scope,
     initialState = State(
+        items = listOf(
+            ArchiveItem.Loading(
+                isCircular = true,
+                query = route.query
+            )
+        ),
         queryState = QueryState(
             rootQuery = route.query,
         )
@@ -208,7 +253,12 @@ private fun Flow<Action.Fetch>.fetchMutations(repo: ArchiveRepository): Flow<Mut
                 val items = when {
                     fetchResult.hasNoResults -> when {
                         // Fetch action is reset, show a loading spinner
-                        fetchAction.reset -> listOf(ArchiveItem.Loading)
+                        fetchAction.reset -> listOf(
+                            ArchiveItem.Loading(
+                                isCircular = true,
+                                query = fetchAction.query
+                            )
+                        )
                         // The mutator was just resubscribed to, show existing items
                         else -> items
                     }
@@ -218,7 +268,7 @@ private fun Flow<Action.Fetch>.fetchMutations(repo: ArchiveRepository): Flow<Mut
                     // are ever sent to the UI
                     .filter { item ->
                         when (item) {
-                            ArchiveItem.Loading -> true
+                            is ArchiveItem.Loading -> true
                             is ArchiveItem.Result -> item.query.contentFilter == fetchAction.query.contentFilter
                         }
                     }
@@ -248,7 +298,7 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Input<ArchiveQuery, List<Arc
             limiter = { pages -> pages.size > 4 }
         ),
         fetcher = { query ->
-            monitorArchives(query).map { archives ->
+            monitorArchives(query).map<List<Archive>, List<ArchiveItem>> { archives ->
                 archives.map { archive ->
                     ArchiveItem.Result(
                         archive = archive,
@@ -256,6 +306,9 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Input<ArchiveQuery, List<Arc
                     )
                 }
             }
+                .onStart {
+                    emit(listOf(ArchiveItem.Loading(isCircular = false, query = query)))
+                }
         }
     )
 
