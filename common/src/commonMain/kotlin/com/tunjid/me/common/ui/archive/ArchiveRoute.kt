@@ -36,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.AppAction
@@ -60,6 +62,7 @@ import kotlinx.coroutines.flow.scan
 import kotlinx.datetime.Clock
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 data class ScrollState(
     val scrollOffset: Int = 0,
@@ -108,8 +111,8 @@ private fun ArchiveScreen(
         )
     )
 
-    val items = state.items
     val filter = state.queryState
+    val chunkedItems = state.chunkedItems
     val listStateSummary = state.listStateSummary
 
     val listState = rememberLazyListState(
@@ -122,46 +125,36 @@ private fun ArchiveScreen(
             item = filter,
             onChanged = mutator.accept
         )
+        // TODO: Replace the chunking logic with a lazy grid once that has support for keys
         LazyColumn(state = listState) {
             items(
-                items = items,
-                key = ArchiveItem::key,
-                itemContent = { item ->
-                    when (item) {
-                        ArchiveItem.Loading -> ProgressBar()
-                        is ArchiveItem.Result -> ArchiveCard(
-                            archiveItem = item,
-                            onAction = mutator.accept,
-                            onNavAction = { route ->
-                                mutator.accept(
-                                    Action.Navigate(
-                                        when {
-                                            isInNavRail -> AppAction.Nav.swap(route)
-                                            else -> AppAction.Nav.push(route)
-                                        }
-                                    )
-                                )
-                            }
-                        )
-                    }
+                items = chunkedItems,
+                key = { it.first().key },
+                itemContent = { chunk ->
+                    ArchiveRow(
+                        isInNavRail = isInNavRail,
+                        items = chunk,
+                        onAction = mutator.accept
+                    )
                 }
             )
         }
     }
 
     // Endless scrolling
-    LaunchedEffect(listState, items) {
+    LaunchedEffect(listState, chunkedItems) {
         snapshotFlow {
             ScrollState(
                 scrollOffset = listState.firstVisibleItemScrollOffset,
                 queryOffset = max(
-                    (items.getOrNull(listState.firstVisibleItemIndex) as? ArchiveItem.Result)
+                    (chunkedItems.getOrNull(listState.firstVisibleItemIndex)
+                        ?.lastOrNull() as? ArchiveItem.Result)
                         ?.query
                         ?.offset
                         ?: 0,
-                    (items.getOrNull(
+                    (chunkedItems.getOrNull(
                         listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    ) as? ArchiveItem.Result)
+                    )?.lastOrNull() as? ArchiveItem.Result)
                         ?.query
                         ?.offset
                         ?: 0
@@ -222,14 +215,55 @@ private fun ProgressBar() {
 }
 
 @Composable
-private fun ArchiveCard(
+private fun ArchiveRow(
+    isInNavRail: Boolean,
+    items: List<ArchiveItem>,
+    onAction: (Action) -> Unit
+) {
+    val minCardWidthPx = with(LocalDensity.current) {
+        350.dp.toPx()
+    }
+    Row(
+        modifier = Modifier
+            .wrapContentHeight()
+            .wrapContentWidth()
+            .onGloballyPositioned {
+                onAction(Action.GridSize(
+                    size = max(1, (it.size.width / minCardWidthPx).roundToInt()))
+                )
+            }
+    ) {
+        items.forEach { item ->
+            when (item) {
+                ArchiveItem.Loading -> ProgressBar()
+                is ArchiveItem.Result -> ArchiveCard(
+                    archiveItem = item,
+                    onAction = onAction,
+                    onNavAction = { route ->
+                        onAction(
+                            Action.Navigate(
+                                when {
+                                    isInNavRail -> AppAction.Nav.swap(route)
+                                    else -> AppAction.Nav.push(route)
+                                }
+                            )
+                        )
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RowScope.ArchiveCard(
     archiveItem: ArchiveItem.Result,
     onAction: (Action) -> Unit,
     onNavAction: (Route) -> Unit
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .weight(1F)
             .padding(16.dp),
         onClick = {
             onNavAction(ArchiveDetailRoute(archive = archiveItem.archive))
@@ -346,7 +380,11 @@ expect fun archivePainter(imageUrl: String?): Painter?
 //@Preview
 @Composable
 private fun PreviewArchiveCard() {
-    ArchiveCard(archiveItem = sampleArchiveItem, {}) {}
+    ArchiveRow(
+        isInNavRail = false,
+        items = listOf(sampleArchiveItem),
+        onAction = { }
+    )
 }
 
 //@Preview

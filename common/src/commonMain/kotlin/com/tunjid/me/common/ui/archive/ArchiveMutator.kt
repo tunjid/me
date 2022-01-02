@@ -43,11 +43,14 @@ import kotlinx.datetime.toLocalDateTime
 typealias ArchiveMutator = Mutator<Action, StateFlow<State>>
 
 data class State(
+    val gridSize: Int = 1,
     val isInNavRail: Boolean = false,
     val queryState: QueryState,
     val listStateSummary: ListState = ListState(),
     val items: List<ArchiveItem> = listOf(ArchiveItem.Loading)
 )
+
+val State.chunkedItems get() = items.chunked(if (isInNavRail) 1 else gridSize)
 
 sealed class Action {
     data class Fetch(
@@ -64,6 +67,8 @@ sealed class Action {
     data class Navigate(
         val navAction: AppAction.Nav
     ) : Action()
+
+    data class GridSize(val size: Int) : Action()
 
     object ToggleFilter : Action()
 }
@@ -143,6 +148,7 @@ fun archiveMutator(
                     is Action.UpdateListState -> action.flow.updateListStateMutations()
                     is Action.FilterChanged -> action.flow.filterChangedMutations()
                     is Action.ToggleFilter -> action.flow.filterToggleMutations()
+                    is Action.GridSize -> action.flow.gridSizeMutations()
                 }
             }
         ))
@@ -183,6 +189,12 @@ private fun Flow<Action.FilterChanged>.filterChangedMutations(): Flow<Mutation<S
 private fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<State>> = map {
     Mutation {
         copy(queryState = queryState.copy(expanded = !queryState.expanded))
+    }
+}
+
+private fun Flow<Action.GridSize>.gridSizeMutations(): Flow<Mutation<State>> = map {
+    Mutation {
+        copy(gridSize = it.size)
     }
 }
 
