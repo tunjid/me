@@ -16,6 +16,10 @@ Some of the ideas explored include:
 * [`Mutators`](https://github.com/tunjid/Mutator) as abstract data types for the production and mutation of state
 * [Motional Intelligence](https://medium.com/androiddevelopers/motional-intelligence-build-smarter-animations-821af4d5f8c0)with global UI as implemented with Jetpack Compose
 
+
+![Demo image](https://github.com/tunjid/me/blob/main/misc/demo.gif)
+
+
 I try to keep the code at a near production quality, but this often takes a back seat to
 convenience and whim. I'm a huge proponent of dependency injection, yet the repository uses manual
 service location. Also outside data classes, virtually everything else is implemented as a function,
