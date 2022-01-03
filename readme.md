@@ -19,6 +19,7 @@ Some of the ideas explored include:
 
 ![Demo image](https://github.com/tunjid/me/blob/main/misc/demo.gif)
 
+The API consumed is that of my personal website. The source can be found [here](https://github.com/tunjid/tunji-web-deux).
 
 I try to keep the code at a near production quality, but this often takes a back seat to
 convenience and whim. I'm a huge proponent of dependency injection, yet the repository uses manual
