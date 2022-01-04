@@ -32,6 +32,23 @@ interface Node {
 }
 
 /**
+ * Recursively traverses each node in the tree with [this] as a parent
+ */
+fun Node.traverse(visit: (Node) -> Unit) {
+    if (children.isEmpty()) return visit(this)
+    children.forEach { it.traverse(visit) }
+}
+
+/**
+ * Returns a [List] of all [Node]s in the tree with [this] as a parent
+ */
+fun Node.flatten(): List<Node> {
+    val result = mutableListOf<Node>()
+    traverse(result::add)
+    return result
+}
+
+/**
  * A navigation node that represents a navigation destination on the screen. The UI representing
  * the screen is emitted via the [Render] function.
  */
