@@ -14,12 +14,19 @@ Some of the ideas explored include:
 * [Tiling](https://github.com/tunjid/Tiler) as a way of loading paginated data
 * Trees as a backing data structure for app navigation
 * [`Mutators`](https://github.com/tunjid/Mutator) as abstract data types for the production and mutation of state
-* [Motional Intelligence](https://medium.com/androiddevelopers/motional-intelligence-build-smarter-animations-821af4d5f8c0)with global UI as implemented with Jetpack Compose
+* [Motional Intelligence](https://medium.com/androiddevelopers/motional-intelligence-build-smarter-animations-821af4d5f8c0) with global UI as implemented with Jetpack Compose
 
 
 ![Demo image](https://github.com/tunjid/me/blob/main/misc/demo.gif)
 
 The API consumed is that of my personal website. The source can be found [here](https://github.com/tunjid/tunji-web-deux).
+
+## Arch
+
+### Navigation
+Each destination in the app is represented by an `AppRoute` that exposes a single `@Composable`
+`Render()` function. The backing data structure for navigation a the tree like `StackNav` and
+`MultiStackNav` classes.
 
 I try to keep the code at a near production quality, but this often takes a back seat to
 convenience and whim. I'm a huge proponent of dependency injection, yet the repository uses manual
