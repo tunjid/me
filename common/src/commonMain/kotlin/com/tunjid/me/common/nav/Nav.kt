@@ -22,25 +22,26 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-data class StackNav(
-    val name: String,
-    val routes: List<Route> = listOf()
-)
+interface Route {
+    val id: String
 
-fun StackNav.swap(route: Route) = if (routes.lastOrNull() == route) this else copy(
-    routes = routes.dropLast(1) + route
-)
+    @Composable
+    fun Render()
+}
 
-fun StackNav.push(route: Route) = if (routes.lastOrNull() == route) this else copy(
-    routes = routes + route
-)
+object Route404 : Route {
+    override val id: String
+        get() = "404"
 
-/**
- * Pops the top route off if the stack is larger than 1, otherwise, it no ops
- * TODO: Make the no op behavior optional
- */
-fun StackNav.pop() = if (routes.size == 1) this else copy(
-    routes = routes.dropLast(1)
-)
+    @Composable
+    override fun Render() {
+        Box {
+            Text(
+                modifier = Modifier
+                    .padding(),
+                text = "404"
+            )
+        }
+    }
+}
 
-val StackNav.canGoUp get() = routes.size > 1
