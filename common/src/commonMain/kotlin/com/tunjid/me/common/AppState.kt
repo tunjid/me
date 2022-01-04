@@ -86,7 +86,7 @@ fun <T> AppMutator.monitorWhenActive(flow: Flow<T>): Flow<T> =
 fun <State : Any> Flow<AppAction>.consumeWith(
     appMutator: AppMutator
 ): Flow<Mutation<State>> =
-    map(appMutator.accept)
+    map { appMutator.accept(it) }
         .flatMapLatest { emptyFlow() }
 
 private val NavKind.mutation: Mutation<MultiStackNav>

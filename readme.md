@@ -24,9 +24,81 @@ The API consumed is that of my personal website. The source can be found [here](
 ## Arch
 
 ### Navigation
+
 Each destination in the app is represented by an `AppRoute` that exposes a single `@Composable`
-`Render()` function. The backing data structure for navigation a the tree like `StackNav` and
-`MultiStackNav` classes.
+`Render()` function. The backing data structures for navigation a the tree like `StackNav` and
+`MultiStackNav` immutable classes. The root of the app is a `MultiStackNav` and navigation is
+controlled by a `NavMutator` defined as:
+
+```
+typealias NavMutator = Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
+```
+
+### Global UI
+
+The app utilizes a single bottom nav, toolbar and a shared global UI state as defined by the
+`UiState` class. This is what allows for the app to have responsive navigation while accounting
+for visual semantic differences between Android and desktop. Android for example uses the
+`WindowManager` API to drive it's responsiveness whereas desktop just watches it's `Window` size.
+The definition for the `GlobalUiMutator` is:
+
+```
+typealias GlobalUiMutator = Mutator<Mutation<UiState>, StateFlow<UiState>>
+```
+
+### State restoration and process death
+
+LOL, I'm sorry what?? Imma get back to you on that one bruh.
+
+### Lifecycles and component scoping
+
+Lifecycles are one of the most important concepts on Android, however Jetpack Compose itself is
+pretty binary; a `Composable` is either in composition or not. Trying to expand this simplicity to
+Android; the app may either be in the foreground or not. Therefore, the state of the app so far
+can be represented as:
+
+```
+data class AppState(
+    val nav: MultiStackNav,
+    val ui: UiState,
+    val isInForeground: Boolean = true
+)
+```
+
+With the above managing the lifecycle of components scoped to navigation destinations becomes as
+easy as:
+```
+private data class ScopeHolder(
+    val scope: CoroutineScope,
+    val mutator: Any
+)
+
+object: AppDependencies {
+    init {
+        scope.launch {
+            appMutator.state
+                .map { it.nav.routes.filterIsInstance<AppRoute<*>>() }
+                .distinctUntilChanged()
+                .scan(listOf<AppRoute<*>>() to listOf<AppRoute<*>>()) { pair, newRoutes ->
+                    pair.copy(first = pair.second, second = newRoutes)
+                }
+                .distinctUntilChanged()
+                .collect { (oldRoutes, newRoutes) ->
+                    oldRoutes.minus(newRoutes.toSet()).forEach { route ->
+                        val holder = routeMutatorFactory.remove(route)
+                        holder?.scope?.cancel()
+                    }
+                }
+        }
+    }
+}
+```
+By watching the changes to the available routes in the `MultiStackNav` class, the scopes for
+`Mutators` for routes that have been removed can be cancelled.
+
+Each navigation destination can also be informed when the app is in the background via the
+`isInForeground` field on `AppState`. It's `Mutator` can then opt to terminate it's backing flow
+if necessary.
 
 I try to keep the code at a near production quality, but this often takes a back seat to
 convenience and whim. I'm a huge proponent of dependency injection, yet the repository uses manual
