@@ -208,6 +208,7 @@ fun Test() {
                     toolbarShows = true
                 ),
                 nav = MultiStackNav(
+                    name = "App",
                     currentIndex = 0,
                     stacks = listOf(StackNav(name = "Preview", routes = listOf(Route404, Route404)))
                 )

@@ -76,6 +76,7 @@ fun navMutator(scope: CoroutineScope): NavMutator =
     stateFlowMutator(
         scope = scope,
         initialState = MultiStackNav(
+            name = "App",
             currentIndex = 0,
             stacks = ArchiveKind.values().map { kind ->
                 StackNav(

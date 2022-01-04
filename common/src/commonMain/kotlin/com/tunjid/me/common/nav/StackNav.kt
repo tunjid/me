@@ -16,21 +16,27 @@
 
 package com.tunjid.me.common.nav
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-
+/**
+ * An immutable navigation [Node] whose children are represented with a stack like data structure
+ */
 data class StackNav(
     val name: String,
     val routes: List<Route> = listOf()
-)
+) : Node {
+    override val id: String get() = name
+    override val children: List<Node> get() = routes
+}
 
+/**
+ * Swaps the top of the stack with the specified [Route]
+ */
 fun StackNav.swap(route: Route) = if (routes.lastOrNull() == route) this else copy(
     routes = routes.dropLast(1) + route
 )
 
+/**
+ * Pushes the [route] unto the top of the navigation stack
+ */
 fun StackNav.push(route: Route) = if (routes.lastOrNull() == route) this else copy(
     routes = routes + route
 )
@@ -43,4 +49,7 @@ fun StackNav.pop() = if (routes.size == 1) this else copy(
     routes = routes.dropLast(1)
 )
 
+/**
+ * Indicates if there's a [Route] available to pop up to
+ */
 val StackNav.canGoUp get() = routes.size > 1

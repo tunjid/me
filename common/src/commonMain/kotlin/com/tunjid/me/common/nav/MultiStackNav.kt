@@ -16,11 +16,19 @@
 
 package com.tunjid.me.common.nav
 
+/**
+ * A compound immutable navigation [Node] whose [children] are comprised of independent [StackNav]
+ * instances
+ */
 data class MultiStackNav(
+    val name: String,
     val indexHistory: List<Int> = listOf(0),
     val currentIndex: Int = 0,
     val stacks: List<StackNav> = listOf()
-)
+) : Node {
+    override val id: String get() = name
+    override val children: List<Node> get() = stacks
+}
 
 /**
  * Switches out the [current] for [Route]
@@ -58,6 +66,9 @@ fun MultiStackNav.switch(toIndex: Int) = copy(
     indexHistory = (indexHistory - toIndex) + toIndex
 )
 
+/**
+ * Performs the given [operation] with the [StackNav] at [MultiStackNav.currentIndex]
+ */
 private fun MultiStackNav.atCurrentIndex(operation: StackNav.() -> StackNav) = copy(
     stacks = stacks.mapIndexed { index, stack ->
         if (index == currentIndex) operation(stack)
@@ -65,6 +76,9 @@ private fun MultiStackNav.atCurrentIndex(operation: StackNav.() -> StackNav) = c
     }
 )
 
+/**
+ * Indicates if the active [StackNav] can be popped up to a previous nav destination
+ */
 val MultiStackNav.canGoUp get() = stacks.getOrNull(currentIndex)?.canGoUp == true
 
 val MultiStackNav.routes get() = stacks.map(StackNav::routes).flatten()

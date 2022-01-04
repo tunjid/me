@@ -130,11 +130,11 @@ fun createAppDependencies(
 }
 
 val LocalAppDependencies = staticCompositionLocalOf {
-    stubAppDeps()
+    stubAppDependencies()
 }
 
-fun stubAppDeps(
-    nav: MultiStackNav = MultiStackNav(),
+fun stubAppDependencies(
+    nav: MultiStackNav = MultiStackNav(name = "App"),
     globalUI: UiState = UiState()
 ): AppDependencies = object : AppDependencies {
 

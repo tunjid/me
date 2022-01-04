@@ -22,9 +22,20 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-interface Route {
+/**
+ * A representation of a navigation node with child nodes [children]
+ */
+interface Node {
     val id: String
 
+    val children: List<Node> get() = listOf()
+}
+
+/**
+ * A navigation node that represents a navigation destination on the screen. The UI representing
+ * the screen is emitted via the [Render] function.
+ */
+interface Route : Node {
     @Composable
     fun Render()
 }
