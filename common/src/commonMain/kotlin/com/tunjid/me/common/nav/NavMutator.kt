@@ -34,8 +34,13 @@ import com.tunjid.treenav.Route
 import com.tunjid.treenav.StackNav
 import com.tunjid.treenav.canGoUp
 import com.tunjid.treenav.current
+import com.tunjid.treenav.minus
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.scan
 
 typealias NavMutator = Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
 
@@ -102,15 +107,27 @@ val MultiStackNav.navRailRoute: AppRoute<*>?
 fun navMutator(scope: CoroutineScope): NavMutator =
     stateFlowMutator(
         scope = scope,
-        initialState = MultiStackNav(
-            name = "App",
-            currentIndex = 0,
-            stacks = ArchiveKind.values().map { kind ->
-                StackNav(
-                    name = kind.name,
-                    routes = listOf(ArchiveRoute(query = ArchiveQuery(kind = kind)))
-                )
-            }
-        ),
+        initialState = startNav,
         transform = { it }
     )
+
+fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AppRoute<*>>> =
+    distinctUntilChanged()
+        .scan(initial = startNav to listOf<AppRoute<*>>()) { pair, newNav ->
+            pair.copy(
+                first = newNav,
+                second = (newNav - pair.first).filterIsInstance<AppRoute<*>>()
+            )
+        }
+        .map { it.second }
+
+private val startNav = MultiStackNav(
+    name = "App",
+    currentIndex = 0,
+    stacks = ArchiveKind.values().map { kind ->
+        StackNav(
+            name = kind.name,
+            routes = listOf(ArchiveRoute(query = ArchiveQuery(kind = kind)))
+        )
+    }
+)

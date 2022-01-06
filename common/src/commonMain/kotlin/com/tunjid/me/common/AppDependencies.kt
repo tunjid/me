@@ -24,13 +24,12 @@ import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.globalUiMutator
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.nav.navMutator
+import com.tunjid.me.common.nav.removedRoutes
 import com.tunjid.me.common.ui.archive.ArchiveRoute
 import com.tunjid.me.common.ui.archive.archiveMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
 import com.tunjid.treenav.MultiStackNav
-import com.tunjid.treenav.Order
-import com.tunjid.treenav.flatten
 import io.ktor.client.*
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.*
@@ -40,9 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
@@ -86,14 +83,10 @@ fun createAppDependencies(
     init {
         scope.launch {
             appMutator.state
-                .map { it.nav.flatten(Order.BreadthFirst).filterIsInstance<AppRoute<*>>() }
-                .distinctUntilChanged()
-                .scan(listOf<AppRoute<*>>() to listOf<AppRoute<*>>()) { pair, newRoutes ->
-                    pair.copy(first = pair.second, second = newRoutes)
-                }
-                .distinctUntilChanged()
-                .collect { (oldRoutes, newRoutes) ->
-                    oldRoutes.minus(newRoutes.toSet()).forEach { route ->
+                .map { it.nav }
+                .removedRoutes()
+                .collect { removedRoutes ->
+                    removedRoutes.forEach { route ->
                         val holder = routeMutatorFactory.remove(route)
                         holder?.scope?.cancel()
                     }
