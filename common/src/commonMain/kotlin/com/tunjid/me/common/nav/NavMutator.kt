@@ -47,6 +47,8 @@ typealias NavMutator = Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>
 interface AppRoute<T> : Route {
     @Composable
     fun Render()
+
+    fun navRailRoute(nav: MultiStackNav): AppRoute<*>? = null
 }
 
 object Route404 : AppRoute<Unit> {
@@ -62,12 +64,6 @@ object Route404 : AppRoute<Unit> {
                 text = "404"
             )
         }
-    }
-}
-
-object Paned {
-    interface Control<T> : AppRoute<T> {
-        fun controls(route: Route): Boolean
     }
 }
 
@@ -94,14 +90,9 @@ val MultiStackNav.navItems
         }
 
 val MultiStackNav.navRailRoute: AppRoute<*>?
-    get() {
-        if (currentIndex < 0) return null
-        val stackRoutes = stacks.getOrNull(currentIndex)?.routes ?: return null
-        val previous = stackRoutes.getOrNull(stackRoutes.lastIndex - 1) ?: return null
-        val current = current ?: return null
-
-        return if (previous is Paned.Control<*> && previous.controls(current)) previous
-        else null
+    get() = when (val current = current) {
+        is AppRoute<*> -> current.navRailRoute(this)
+        else -> null
     }
 
 fun navMutator(scope: CoroutineScope): NavMutator =

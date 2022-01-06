@@ -17,7 +17,18 @@
 package com.tunjid.me.common.ui.archive
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -52,7 +63,6 @@ import com.tunjid.me.common.data.archive.plus
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.nav.Paned
 import com.tunjid.me.common.ui.InitialUiState
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.asNoOpStateFlowMutator
@@ -81,12 +91,9 @@ private fun ScrollState.updateDirection(new: ScrollState) = new.copy(
     }
 )
 
-data class ArchiveRoute(val query: ArchiveQuery) : AppRoute<ArchiveMutator>,
-    Paned.Control<ArchiveMutator> {
+data class ArchiveRoute(val query: ArchiveQuery) : AppRoute<ArchiveMutator> {
     override val id: String
         get() = query.toString()
-
-    override fun controls(route: Route): Boolean = route is ArchiveDetailRoute
 
     @Composable
     override fun Render() {
@@ -237,8 +244,10 @@ private fun ArchiveRow(
             .wrapContentHeight()
             .wrapContentWidth()
             .onGloballyPositioned {
-                onAction(Action.GridSize(
-                    size = max(1, (it.size.width / minCardWidthPx).roundToInt()))
+                onAction(
+                    Action.GridSize(
+                        size = max(1, (it.size.width / minCardWidthPx).roundToInt())
+                    )
                 )
             }
     ) {

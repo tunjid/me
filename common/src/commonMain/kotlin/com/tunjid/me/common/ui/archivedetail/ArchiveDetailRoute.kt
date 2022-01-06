@@ -38,6 +38,8 @@ import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.InitialUiState
+import com.tunjid.me.common.ui.archive.ArchiveRoute
+import com.tunjid.treenav.MultiStackNav
 
 data class ArchiveDetailRoute(val archive: Archive) : AppRoute<ArchiveDetailMutator> {
     override val id: String
@@ -48,6 +50,12 @@ data class ArchiveDetailRoute(val archive: Archive) : AppRoute<ArchiveDetailMuta
         ArchiveDetailScreen(
             mutator = LocalAppDependencies.current.routeDependencies(this)
         )
+    }
+
+    override fun navRailRoute(nav: MultiStackNav): AppRoute<*>? {
+        val activeStack = nav.stacks.getOrNull(nav.currentIndex) ?: return null
+        val previous = activeStack.routes.getOrNull(activeStack.routes.lastIndex - 1)
+        return if (previous is ArchiveRoute) previous else null
     }
 }
 

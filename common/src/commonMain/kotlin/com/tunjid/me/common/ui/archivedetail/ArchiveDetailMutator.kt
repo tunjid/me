@@ -51,7 +51,7 @@ fun archiveDetailMutator(
     ),
     started = SharingStarted.WhileSubscribed(2000),
     transform = {
-        appMutator.monitorWhenActive(merge(
+        merge<Mutation<State>>(
             appMutator.globalUiMutator.state
                 .map { it.navBarSize }
                 .map {
@@ -64,6 +64,6 @@ fun archiveDetailMutator(
                 .map { fetchedArchive ->
                     Mutation { copy(archive = fetchedArchive) }
                 }
-        ))
+        ).monitorWhenActive(appMutator)
     }
 )

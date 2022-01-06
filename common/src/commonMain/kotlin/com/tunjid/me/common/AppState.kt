@@ -75,11 +75,12 @@ val AppState.asAppMutator: AppMutator
         }
     }
 
-fun <T> AppMutator.monitorWhenActive(flow: Flow<T>): Flow<T> =
-    state.map { it.isInForeground }
+fun <T> Flow<T>.monitorWhenActive(mutator: AppMutator) =
+    mutator.state
+        .map { it.isInForeground }
         .distinctUntilChanged()
         .flatMapLatest { isInForeground ->
-            if (isInForeground) flow
+            if (isInForeground) this
             else emptyFlow()
         }
 

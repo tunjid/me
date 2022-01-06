@@ -169,7 +169,7 @@ fun archiveMutator(
     route: ArchiveRoute,
     repo: ArchiveRepository,
     appMutator: AppMutator,
-): Mutator<Action, StateFlow<State>> = stateFlowMutator(
+): ArchiveMutator = stateFlowMutator(
     scope = scope,
     initialState = State(
         items = listOf(
@@ -184,7 +184,7 @@ fun archiveMutator(
     ),
     started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 2000),
     transform = { actions ->
-        appMutator.monitorWhenActive(merge(
+        merge(
             appMutator.navRailStatusMutations(),
             actions.toMutationStream {
                 when (val action = type()) {
@@ -196,7 +196,7 @@ fun archiveMutator(
                     is Action.GridSize -> action.flow.gridSizeMutations()
                 }
             }
-        ))
+        ).monitorWhenActive(appMutator)
     }
 )
 
@@ -231,9 +231,25 @@ private fun Flow<Action.FilterChanged>.filterChangedMutations(): Flow<Mutation<S
         }
     }
 
+/**
+ * Every toggle isExpanded == null should be processed, however every specific request to
+ * expand or collapse, should be distinct until changed.
+ */
 private fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<State>> =
-    distinctUntilChanged()
-        .map { (isExpanded) ->
+    map { it.isExpanded }
+        .scan(listOf<Boolean?>()) { emissions, isExpanded -> (emissions + isExpanded).takeLast(2) }
+        .transformWhile { emissions ->
+            when {
+                emissions.isEmpty() -> Unit
+                emissions.size == 1 -> emit(emissions.first())
+                else -> {
+                    val (previous, current) = emissions
+                    if (current == null || current != previous) emit(current)
+                }
+            }
+            true
+        }
+        .map { isExpanded ->
             Mutation {
                 copy(queryState = queryState.copy(expanded = isExpanded ?: !queryState.expanded))
             }
