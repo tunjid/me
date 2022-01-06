@@ -16,6 +16,11 @@
 
 package com.tunjid.me.common.nav
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.tunjid.me.common.data.archive.ArchiveKind
 import com.tunjid.me.common.data.archive.ArchiveQuery
@@ -24,20 +29,40 @@ import com.tunjid.me.common.ui.archive.ArchiveRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.Route
+import com.tunjid.treenav.StackNav
+import com.tunjid.treenav.canGoUp
+import com.tunjid.treenav.current
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 typealias NavMutator = Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
 
-interface AppRoute<T> : Route
+interface AppRoute<T> : Route {
+    @Composable
+    fun Render()
+}
+
+object Route404 : AppRoute<Unit> {
+    override val id: String
+        get() = "404"
+
+    @Composable
+    override fun Render() {
+        Box {
+            Text(
+                modifier = Modifier
+                    .padding(),
+                text = "404"
+            )
+        }
+    }
+}
 
 object Paned {
-    interface Control<T> : Route {
+    interface Control<T> : AppRoute<T> {
         fun controls(route: Route): Boolean
-    }
-
-    interface Detail {
-        fun isControlledBy(route: Route): Boolean
     }
 }
 
@@ -47,6 +72,8 @@ data class NavItem(
     val index: Int,
     val selected: Boolean
 )
+
+val MultiStackNav.canGoUp get() = stacks.getOrNull(currentIndex)?.canGoUp == true
 
 val MultiStackNav.navItems
     get() = stacks
@@ -61,7 +88,7 @@ val MultiStackNav.navItems
             )
         }
 
-val MultiStackNav.navRailRoute: Route?
+val MultiStackNav.navRailRoute: AppRoute<*>?
     get() {
         if (currentIndex < 0) return null
         val stackRoutes = stacks.getOrNull(currentIndex)?.routes ?: return null

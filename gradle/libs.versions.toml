@@ -24,6 +24,7 @@ retrofit = "2.9.0"
 richtext = "0.10.0"
 tunjidMutator = "0.0.0-alpha03"
 tunjidTiler = "0.0.0-alpha03"
+tunjidTreeNav = "0.0.0-alpha01"
 
 [libraries]
 accompanist-flowlayout = { group="com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
@@ -72,3 +73,4 @@ tunjid-mutator-core-jvm = { group = "com.tunjid.mutator", name = "core-jvm", ver
 tunjid-mutator-coroutines-common = { group = "com.tunjid.mutator", name = "coroutines", version.ref = "tunjidMutator" }
 tunjid-mutator-coroutines-jvm = { group = "com.tunjid.mutator", name = "coroutines-jvm", version.ref = "tunjidMutator" }
 tunjid-tiler = { group = "com.tunjid.tiler", name = "tiler", version.ref = "tunjidTiler" }
+tunjid-treenav = { group = "com.tunjid.treenav", name = "treenav", version.ref = "tunjidTreeNav" }

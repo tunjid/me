@@ -23,13 +23,14 @@ import com.tunjid.me.common.data.archive.RestArchiveRepository
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.globalUiMutator
 import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.nav.MultiStackNav
 import com.tunjid.me.common.nav.navMutator
-import com.tunjid.me.common.nav.routes
 import com.tunjid.me.common.ui.archive.ArchiveRoute
 import com.tunjid.me.common.ui.archive.archiveMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.Order
+import com.tunjid.treenav.flatten
 import io.ktor.client.*
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.*
@@ -85,7 +86,7 @@ fun createAppDependencies(
     init {
         scope.launch {
             appMutator.state
-                .map { it.nav.routes.filterIsInstance<AppRoute<*>>() }
+                .map { it.nav.flatten(Order.BreadthFirst).filterIsInstance<AppRoute<*>>() }
                 .distinctUntilChanged()
                 .scan(listOf<AppRoute<*>>() to listOf<AppRoute<*>>()) { pair, newRoutes ->
                     pair.copy(first = pair.second, second = newRoutes)

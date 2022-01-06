@@ -26,10 +26,11 @@ import androidx.compose.ui.Modifier
 import com.tunjid.me.common.AppDependencies
 import com.tunjid.me.common.LocalAppDependencies
 import com.tunjid.me.common.component1
-import com.tunjid.me.common.nav.MultiStackNav
+import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.nav.Route404
-import com.tunjid.me.common.nav.current
 import com.tunjid.me.common.ui.mappedCollectAsState
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.current
 
 /**
  * Root scaffold for the app
@@ -55,7 +56,7 @@ fun Root(dependencies: AppDependencies) {
                 appMutator = appMutator,
                 content = {
                     Crossfade(
-                        targetState = route ?: Route404,
+                        targetState = route as? AppRoute<*> ?: Route404,
                         content = { it.Render() }
                     )
                 }

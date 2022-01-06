@@ -42,11 +42,11 @@ import com.tunjid.me.common.nav.NavItem
 import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItems
 import com.tunjid.me.common.nav.navRailRoute
-import com.tunjid.me.common.nav.switch
 import com.tunjid.me.common.ui.UiSizes
 import com.tunjid.me.common.ui.countIf
 import com.tunjid.me.common.ui.mappedCollectAsState
 import com.tunjid.mutator.accept
+import com.tunjid.treenav.switch
 
 @Composable
 fun AppNavRail(

@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.AppMutator
 import com.tunjid.me.common.AppState
-import com.tunjid.me.common.appMutator
 import com.tunjid.me.common.asAppMutator
 import com.tunjid.me.common.component1
 import com.tunjid.me.common.component2
@@ -48,15 +47,14 @@ import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.ToolbarItem
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.toolbarState
-import com.tunjid.me.common.nav.MultiStackNav
 import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.Route404
-import com.tunjid.me.common.nav.StackNav
 import com.tunjid.me.common.nav.canGoUp
-import com.tunjid.me.common.nav.pop
-import com.tunjid.me.common.ui.asNoOpStateFlowMutator
 import com.tunjid.me.common.ui.mappedCollectAsState
 import com.tunjid.mutator.accept
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.StackNav
+import com.tunjid.treenav.pop
 
 @Composable
 internal fun BoxScope.AppToolbar(

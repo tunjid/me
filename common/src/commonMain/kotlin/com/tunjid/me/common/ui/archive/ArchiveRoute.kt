@@ -53,10 +53,10 @@ import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.nav.Paned
-import com.tunjid.me.common.nav.Route
 import com.tunjid.me.common.ui.InitialUiState
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.asNoOpStateFlowMutator
+import com.tunjid.treenav.Route
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.scan

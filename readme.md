@@ -12,7 +12,7 @@ Some of the ideas explored include:
 
 * Android insets and IME behavior driven by immutable state
 * [Tiling](https://github.com/tunjid/Tiler) as a way of loading paginated data
-* Trees as a backing data structure for app navigation
+* [Trees](https://github.com/tunjid/treeNav) as a backing data structure for app navigation
 * [`Mutators`](https://github.com/tunjid/Mutator) as abstract data types for the production and mutation of state
 * [Motional Intelligence](https://medium.com/androiddevelopers/motional-intelligence-build-smarter-animations-821af4d5f8c0) with global UI as implemented with Jetpack Compose
 

@@ -31,6 +31,7 @@ kotlin {
                 implementation(libs.richtext.material)
 
                 implementation(libs.tunjid.tiler)
+                implementation(libs.tunjid.treenav)
                 implementation(libs.tunjid.mutator.core.common)
                 implementation(libs.tunjid.mutator.coroutines.common)
             }

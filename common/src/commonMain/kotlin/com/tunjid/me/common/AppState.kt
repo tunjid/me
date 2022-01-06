@@ -18,12 +18,12 @@ package com.tunjid.me.common
 
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.UiState
-import com.tunjid.me.common.nav.MultiStackNav
 import com.tunjid.me.common.nav.NavMutator
-import com.tunjid.me.common.nav.Route
-import com.tunjid.me.common.nav.pop
-import com.tunjid.me.common.nav.push
-import com.tunjid.me.common.nav.swap
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.Route
+import com.tunjid.treenav.pop
+import com.tunjid.treenav.push
+import com.tunjid.treenav.swap
 import com.tunjid.me.common.ui.asNoOpStateFlowMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator

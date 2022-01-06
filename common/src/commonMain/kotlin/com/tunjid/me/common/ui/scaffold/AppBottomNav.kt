@@ -45,10 +45,10 @@ import com.tunjid.me.common.component2
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.bottomNavPositionalState
 import com.tunjid.me.common.nav.navItems
-import com.tunjid.me.common.nav.switch
 import com.tunjid.me.common.ui.UiSizes
 import com.tunjid.me.common.ui.mappedCollectAsState
 import com.tunjid.mutator.accept
+import com.tunjid.treenav.switch
 
 @Composable
 internal fun BoxScope.AppBottomNav(
