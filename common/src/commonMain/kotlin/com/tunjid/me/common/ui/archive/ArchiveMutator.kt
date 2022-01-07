@@ -255,11 +255,13 @@ private fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<Sta
             }
         }
 
-private fun Flow<Action.GridSize>.gridSizeMutations(): Flow<Mutation<State>> = map {
-    Mutation {
-        copy(gridSize = it.size)
-    }
-}
+private fun Flow<Action.GridSize>.gridSizeMutations(): Flow<Mutation<State>> =
+    distinctUntilChanged()
+        .map {
+            Mutation {
+                copy(gridSize = it.size)
+            }
+        }
 
 private fun Flow<Action.Fetch>.fetchMutations(repo: ArchiveRepository): Flow<Mutation<State>> =
     toFetchResult(repo = repo)
