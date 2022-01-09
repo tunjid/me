@@ -372,7 +372,7 @@ private fun ArchiveBlurb(archiveItem: ArchiveItem.Result) {
 private val sampleArchiveItem = ArchiveItem.Result(
     query = ArchiveQuery(kind = Articles),
     archive = Archive(
-        key = "",
+        id = "",
         link = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",
         title = "I'm an Archive",
         body = "Hello",

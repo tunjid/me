@@ -34,6 +34,7 @@ pluginManagement {
         val kotlinVersion = "1.6.10"
         val agpVersion = "7.0.4"
         val composeVersion = "1.0.1"
+        val sqlDelightVersion = "1.5.3"
 
         kotlin("jvm").version(kotlinVersion)
         kotlin("multiplatform").version(kotlinVersion)
@@ -44,6 +45,8 @@ pluginManagement {
         id("com.android.application").version(agpVersion)
         id("com.android.library").version(agpVersion)
         id("org.jetbrains.compose").version(composeVersion)
+
+        id("com.squareup.sqldelight").version(sqlDelightVersion)
     }
 }
 

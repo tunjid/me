@@ -22,6 +22,8 @@ import android.os.Bundle
 import com.tunjid.me.common.AppAction
 import com.tunjid.me.common.AppMutator
 import com.tunjid.me.common.createAppDependencies
+import com.tunjid.me.common.data.AppDatabase
+import com.tunjid.me.common.data.DatabaseDriverFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,7 +31,10 @@ import kotlinx.coroutines.SupervisorJob
 class App : Application() {
 
     val appDependencies by lazy {
-        createAppDependencies(scope = CoroutineScope(SupervisorJob() + Dispatchers.Main))
+        createAppDependencies(
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+            database = AppDatabase.invoke(DatabaseDriverFactory(this).createDriver())
+        )
     }
 
     override fun onCreate() {

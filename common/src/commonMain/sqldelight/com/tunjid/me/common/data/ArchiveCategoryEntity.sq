@@ -1,0 +1,17 @@
+CREATE TABLE IF NOT EXISTS archiveCategory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    archive_id TEXT NOT NULL,
+    category TEXT NOT NULL,
+    FOREIGN KEY(archive_id) REFERENCES archiveEntity(id)
+);
+
+CREATE UNIQUE INDEX archiveCategory_category ON archiveCategory(category);
+
+find:
+SELECT category
+FROM archiveCategory
+WHERE archive_id = :archive_id;
+
+upsert:
+INSERT OR IGNORE INTO archiveCategory (archive_id, category)
+VALUES (:archive_id, :category);

@@ -26,7 +26,8 @@ android {
 
     defaultConfig {
         applicationId = "com.tunjid.me"
-        minSdk = 21
+        // Could have been 21, but I need sqlite 3.24.0 for upserts
+        minSdk = 30
         targetSdk = 31
         versionCode = 1
         versionName = "1.0"

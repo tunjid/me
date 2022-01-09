@@ -121,7 +121,7 @@ sealed class ArchiveItem {
 val ArchiveItem.key: String
     get() = when (this) {
         is ArchiveItem.Loading -> query.toString()
-        is ArchiveItem.Result -> archive.key
+        is ArchiveItem.Result -> archive.id
     }
 
 val ArchiveItem.Result.prettyDate: String

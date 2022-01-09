@@ -1,0 +1,37 @@
+CREATE TABLE IF NOT EXISTS archiveEntity (
+    id TEXT PRIMARY KEY,
+    link TEXT NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    description TEXT NOT NULL,
+    thumbnail TEXT,
+    author TEXT NOT NULL,
+    created INTEGER NOT NULL,
+    kind TEXT NOT NULL,
+    FOREIGN KEY(author) REFERENCES userEntity(id)
+);
+
+get:
+SELECT *
+FROM archiveEntity
+WHERE id = :id;
+
+find:
+SELECT *
+FROM archiveEntity
+WHERE kind = :kind
+LIMIT :limit
+OFFSET :offset;
+
+upsert:
+INSERT INTO archiveEntity (id, link, title, description, body, thumbnail, author, created, kind)
+VALUES (:id, :link, :title, :description, :body, :thumbnail, :author, :created, :kind)
+ON CONFLICT(id) DO UPDATE SET
+    link=excluded.link,
+    title=excluded.title,
+    description=excluded.description,
+    body=excluded.body,
+    thumbnail=excluded.thumbnail,
+    author=excluded.author,
+    created=excluded.created,
+    created=excluded.created;

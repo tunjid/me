@@ -1,0 +1,17 @@
+CREATE TABLE IF NOT EXISTS archiveTag (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    archive_id TEXT NOT NULL,
+    tag TEXT NOT NULL,
+    FOREIGN KEY(archive_id) REFERENCES archiveEntity(id)
+);
+
+CREATE UNIQUE INDEX archiveTag_tag ON archiveTag(tag);
+
+find:
+SELECT tag
+FROM archiveTag
+WHERE archive_id = :archive_id;
+
+upsert:
+INSERT OR IGNORE INTO archiveTag (archive_id, tag)
+VALUES (:archive_id, :tag);

@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS userEntity (
+    id TEXT PRIMARY KEY,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    full_name TEXT NOT NULL,
+    image_url TEXT NOT NULL
+);
+
+find:
+SELECT *
+FROM userEntity
+WHERE id = :id;
+
+upsert:
+INSERT INTO userEntity (id, first_name, last_name, full_name, image_url)
+VALUES (:id, :first_name, :last_name, :full_name, :image_url)
+ON CONFLICT(id) DO UPDATE SET
+    first_name=excluded.first_name,
+    last_name=excluded.last_name,
+    full_name=excluded.full_name,
+    image_url=excluded.image_url;

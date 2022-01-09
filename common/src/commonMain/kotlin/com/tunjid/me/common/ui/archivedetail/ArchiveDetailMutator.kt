@@ -59,7 +59,7 @@ fun archiveDetailMutator(
                 },
             repo.monitorArchive(
                 kind = archive.kind,
-                id = archive.key
+                id = archive.id
             )
                 .map { fetchedArchive ->
                     Mutation { copy(archive = fetchedArchive) }

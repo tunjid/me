@@ -18,8 +18,10 @@ package com.tunjid.me.common
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.common.data.Api
+import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.archive.ArchiveRepository
-import com.tunjid.me.common.data.archive.RestArchiveRepository
+import com.tunjid.me.common.data.archive.ReactiveArchiveRepository
+import com.tunjid.me.common.data.databaseDispatcher
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.globalUiMutator
 import com.tunjid.me.common.nav.AppRoute
@@ -44,6 +46,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 interface AppDependencies {
+    val appDatabase: AppDatabase
     val appMutator: AppMutator
     fun <T> routeDependencies(route: AppRoute<T>): T
 }
@@ -55,7 +58,8 @@ private data class ScopeHolder(
 
 fun createAppDependencies(
     scope: CoroutineScope,
-    initialUiState: UiState = UiState()
+    initialUiState: UiState = UiState(),
+    database: AppDatabase,
 ) = object : AppDependencies {
     val routeMutatorFactory = mutableMapOf<AppRoute<*>, ScopeHolder>()
 
@@ -72,7 +76,13 @@ fun createAppDependencies(
         }
     })
 
-    val archiveRepository: ArchiveRepository = RestArchiveRepository(api = api)
+    val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
+        api = api,
+        database = database,
+        dispatcher = databaseDispatcher()
+    )
+
+    override val appDatabase: AppDatabase = database
 
     override val appMutator: AppMutator = appMutator(
         scope = scope,
@@ -131,6 +141,8 @@ fun stubAppDependencies(
     nav: MultiStackNav = MultiStackNav(name = "App"),
     globalUI: UiState = UiState()
 ): AppDependencies = object : AppDependencies {
+    override val appDatabase: AppDatabase
+        get() = TODO("Not yet implemented")
 
     override val appMutator: AppMutator = AppState(
         ui = globalUI,

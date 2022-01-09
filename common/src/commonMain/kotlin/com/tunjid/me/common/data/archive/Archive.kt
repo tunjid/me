@@ -19,6 +19,7 @@ package com.tunjid.me.common.data.archive
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -34,7 +35,8 @@ enum class ArchiveKind(val type: String) {
 
 @Serializable
 data class Archive(
-    val key: String,
+    @SerialName("_id")
+    val id: String,
     val link: String,
     val title: String,
     val body: String,
@@ -50,6 +52,7 @@ data class Archive(
 
 @Serializable
 data class User(
+    @SerialName("_id")
     val id: String,
     val firstName: String,
     val lastName: String,

@@ -43,7 +43,7 @@ import com.tunjid.treenav.MultiStackNav
 
 data class ArchiveDetailRoute(val archive: Archive) : AppRoute<ArchiveDetailMutator> {
     override val id: String
-        get() = archive.key
+        get() = archive.id
 
     @Composable
     override fun Render() {

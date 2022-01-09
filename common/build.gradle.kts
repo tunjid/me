@@ -3,6 +3,7 @@ plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
     kotlin("plugin.serialization") version "1.6.10"
+    id("com.squareup.sqldelight")
 }
 
 kotlin {
@@ -30,6 +31,8 @@ kotlin {
                 implementation(libs.richtext.commonmark)
                 implementation(libs.richtext.material)
 
+                implementation(libs.square.sqldelight.coroutines.extensions)
+
                 implementation(libs.tunjid.tiler)
                 implementation(libs.tunjid.treenav)
                 implementation(libs.tunjid.mutator.core.common)
@@ -51,6 +54,8 @@ kotlin {
 
                 implementation(libs.ktor.client.android)
 
+                implementation(libs.square.sqldelight.driver.android)
+
                 implementation(libs.tunjid.mutator.core.jvm)
                 implementation(libs.tunjid.mutator.coroutines.jvm)
             }
@@ -58,6 +63,8 @@ kotlin {
         named("desktopMain") {
             dependencies {
                 implementation(libs.ktor.client.java)
+
+                implementation(libs.square.sqldelight.driver.jvm)
             }
         }
         all {
@@ -73,11 +80,20 @@ kotlin {
     }
 }
 
+sqldelight {
+    database("AppDatabase") {
+        dialect = "sqlite:3.25"
+        packageName = "com.tunjid.me.common.data"
+        schemaOutputDirectory = file("build/dbs")
+    }
+}
+
 android {
     compileSdk = 31
 
     defaultConfig {
-        minSdk = 21
+        // Could have been 21, but I need sqlite 3.24.0 for upserts
+        minSdk = 30
         targetSdk = 31
     }
 

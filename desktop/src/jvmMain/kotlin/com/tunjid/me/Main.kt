@@ -9,6 +9,8 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.tunjid.me.common.createAppDependencies
+import com.tunjid.me.common.data.AppDatabase
+import com.tunjid.me.common.data.DatabaseDriverFactory
 import com.tunjid.me.common.globalui.NavMode
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.ui.scaffold.Root
@@ -26,7 +28,8 @@ fun main() {
     application {
         val appDependencies = createAppDependencies(
             scope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
-            initialUiState = UiState(navMode = NavMode.NavRail)
+            initialUiState = UiState(navMode = NavMode.NavRail),
+            database = AppDatabase.invoke(DatabaseDriverFactory().createDriver())
         )
         val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>> =
             appDependencies.appMutator.globalUiMutator
