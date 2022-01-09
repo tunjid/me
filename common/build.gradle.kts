@@ -38,6 +38,8 @@ kotlin {
         }
         named("androidMain") {
             dependencies {
+                implementation(libs.arkivanov.essenty.parcelable)
+
                 implementation(libs.accompanist.flowlayout)
 
                 implementation(libs.androidx.core.ktx)

@@ -17,7 +17,8 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    kotlin("plugin.serialization") version "1.6.10"
+    kotlin("plugin.serialization")
+    id("kotlin-parcelize")
 }
 
 android {

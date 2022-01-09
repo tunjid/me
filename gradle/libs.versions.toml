@@ -6,6 +6,7 @@ androidxActivity = "1.4.0"
 androidxAppCompat = "1.4.0"
 androidxCore = "1.7.0"
 androidxWindow = "1.0.0-rc01"
+arkivanovEssenty = "0.2.2"
 compose = "1.0.1"
 coil = "1.4.0"
 androidxEspresso = "3.3.0"
@@ -22,6 +23,7 @@ googleMaterial = "1.4.0"
 okhttp = "4.9.3"
 retrofit = "2.9.0"
 richtext = "0.10.0"
+sqldelight = "1.5.3"
 tunjidMutator = "0.0.0-alpha03"
 tunjidTiler = "0.0.0-alpha03"
 tunjidTreeNav = "0.0.0-alpha01"
@@ -38,6 +40,7 @@ androidx-test-core = { group = "androidx.test", name = "core", version.ref = "an
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTest" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidxTestExt" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }
+arkivanov-essenty-parcelable = { group = "com.arkivanov.essenty", name = "parcelable", version.ref = "arkivanovEssenty" }
 coil-core = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 compose-animation = { group = "org.jetbrains.compose.animation", name = "animation", version.ref = "compose" }
@@ -68,6 +71,9 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 retrofit= { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 richtext-commonmark= { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "richtext" }
 richtext-material= { group = "com.halilibo.compose-richtext", name = "richtext-ui-material", version.ref = "richtext" }
+square-sqldelight-driver-android = { group = "com.squareup.sqldelight", name = "android-driver", version.ref = "sqldelight" }
+square-sqldelight-driver-jvm = { group = "com.squareup.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
+square-sqldelight-coroutines-extensions = { group = "com.squareup.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
 tunjid-mutator-core-common = { group = "com.tunjid.mutator", name = "core", version.ref = "tunjidMutator" }
 tunjid-mutator-core-jvm = { group = "com.tunjid.mutator", name = "core-jvm", version.ref = "tunjidMutator" }
 tunjid-mutator-coroutines-common = { group = "com.tunjid.mutator", name = "coroutines", version.ref = "tunjidMutator" }
