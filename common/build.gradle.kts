@@ -59,12 +59,14 @@ kotlin {
             }
         }
         all {
-            languageSettings.useExperimentalAnnotation("androidx.compose.animation.ExperimentalAnimationApi")
-            languageSettings.useExperimentalAnnotation("androidx.compose.foundation.ExperimentalFoundationApi")
-            languageSettings.useExperimentalAnnotation("androidx.compose.material.ExperimentalMaterialApi")
-            languageSettings.useExperimentalAnnotation("kotlinx.serialization.ExperimentalSerializationApi")
-            languageSettings.useExperimentalAnnotation("kotlinx.coroutines.ExperimentalCoroutinesApi")
-            languageSettings.useExperimentalAnnotation("kotlinx.coroutines.FlowPreview")
+            languageSettings.apply {
+                optIn("androidx.compose.animation.ExperimentalAnimationApi")
+                optIn("androidx.compose.foundation.ExperimentalFoundationApi")
+                optIn("androidx.compose.material.ExperimentalMaterialApi")
+                optIn("kotlinx.serialization.ExperimentalSerializationApi")
+                optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
+                optIn("kotlinx.coroutines.FlowPreview")
+            }
         }
     }
 }
