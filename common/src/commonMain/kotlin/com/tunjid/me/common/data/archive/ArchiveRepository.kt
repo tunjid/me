@@ -16,34 +16,30 @@
 
 package com.tunjid.me.common.data.archive
 
-import com.squareup.sqldelight.Transacter
-import com.squareup.sqldelight.TransactionWithoutReturn
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.tunjid.me.common.data.Api
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.common.data.ArchiveEntity
-import com.tunjid.me.common.data.UserEntity
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.onEach
 
 interface ArchiveRepository {
     fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
     fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive>
 }
 
+/**
+ * An implementation of [ArchiveRepository] that uses reactive pull. The long term goal
+ * is to have a oub sub infrastructure such that when an entity changes on the server, the
+ * app is notified and it pull it in.
+ */
 class ReactiveArchiveRepository(
     private val api: Api,
     database: AppDatabase,
     dispatcher: CoroutineDispatcher,
 ) : ArchiveRepository {
 
+    // TODO: This should be an interface that is passed in so it can be mocked in tests
     private val localArchiveRepository = LocalArchiveRepository(
         database,
         dispatcher
@@ -51,21 +47,32 @@ class ReactiveArchiveRepository(
 
     override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
         localArchiveRepository.monitorArchives(query)
-            .transformWhile { archives ->
-                emit(archives)
-                // Oof nothing in the DB, fetch it!
-                if (archives.isEmpty()) localArchiveRepository.saveArchives(
-                    archives = fetchArchives(query)
-                )
-                true
+            .onEach { archives ->
+                // Oof nothing in the DB, fetch it as a side effect!
+                if (archives.isEmpty()) try {
+                    localArchiveRepository.saveArchives(
+                        archives = fetchArchives(query)
+                    )
+                } catch (e: Throwable) {
+                    // TODO: exponential back off
+                    e.printStackTrace()
+                }
             }
 
-    override fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive> = flow {
-        emit(api.fetchArchive(kind = kind, id = id))
-    }
-
-    private suspend fun fetchArchive(kind: ArchiveKind, id: String): Archive =
-        api.fetchArchive(kind = kind, id = id)
+    override fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive> =
+        localArchiveRepository.monitorArchive(kind = kind, id = id)
+            .onEach { archive ->
+                // Oof nothing in the DB, fetch it as a side effect!
+                if (archive == null) try {
+                    localArchiveRepository.saveArchive(
+                        api.fetchArchive(kind = kind, id = id)
+                    )
+                } catch (e: Throwable) {
+                    // TODO: exponential back off
+                    e.printStackTrace()
+                }
+            }
+            .filterNotNull()
 
     private suspend fun fetchArchives(query: ArchiveQuery): List<Archive> =
         api.fetchArchives(
@@ -79,153 +86,4 @@ class ReactiveArchiveRepository(
             tags = query.contentFilter.tags,
             categories = query.contentFilter.categories,
         )
-}
-
-private class LocalArchiveRepository(
-    database: AppDatabase,
-    private val dispatcher: CoroutineDispatcher,
-) : ArchiveRepository {
-
-    private val archiveQueries = database.archiveEntityQueries
-    private val archiveTagQueries = database.archiveTagEntityQueries
-    private val archiveCategoryQueries = database.archiveCategoryEntityQueries
-    private val archiveAuthorQueries = database.userEntityQueries
-
-    override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
-        archiveQueries.find(
-            kind = query.kind.type,
-            limit = query.limit.toLong(),
-            offset = query.offset.toLong()
-        )
-            .asFlow()
-            .mapToList(context = dispatcher)
-            .flatMapLatest { archiveEntities -> archiveEntities.toArchivesFlow }
-            .onEach { println("BIG OUT. Size: ${it.size} for ${query.offset}") }
-
-    override fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive> =
-        archiveQueries.get(id = id)
-            .asFlow()
-            .mapToOne(context = dispatcher)
-            .flatMapLatest { it.toArchiveFlow }
-
-    suspend fun saveArchives(
-        archives: List<Archive>
-    ) = archiveAuthorQueries.suspendingTransaction(context = dispatcher) {
-        archives
-            .map { archive ->
-                val userEntity = archive.author.toEntity
-                val archiveEntity = archive.toEntity
-
-                archiveAuthorQueries.upsert(
-                    id = userEntity.id,
-                    first_name = userEntity.first_name,
-                    last_name = userEntity.last_name,
-                    full_name = userEntity.full_name,
-                    image_url = userEntity.image_url
-                )
-                archiveQueries.upsert(
-                    id = archiveEntity.id,
-                    title = archiveEntity.title,
-                    description = archiveEntity.description,
-                    thumbnail = archiveEntity.thumbnail,
-                    body = archiveEntity.body,
-                    created = archiveEntity.created,
-                    link = archiveEntity.link,
-                    author = userEntity.id,
-                    kind = archiveEntity.kind,
-                )
-                archive.tags.forEach { tag ->
-                    archiveTagQueries.upsert(
-                        archive_id = archiveEntity.id,
-                        tag = tag,
-                    )
-                }
-                archive.categories.forEach { category ->
-                    archiveCategoryQueries.upsert(
-                        archive_id = archiveEntity.id,
-                        category = category,
-                    )
-                }
-            }
-    }
-
-    private val List<ArchiveEntity>.toArchivesFlow: Flow<List<Archive>>
-        get() = if (isEmpty()) flowOf(listOf()) else combine(
-            flows = map { it.toArchiveFlow },
-            transform = Array<Archive>::toList
-        )
-
-    private val ArchiveEntity.toArchiveFlow: Flow<Archive>
-        get() = let { archiveEntity ->
-            combine(
-                flow = archiveTagQueries.find(archive_id = archiveEntity.id)
-                    .asFlow()
-                    .mapToList(context = dispatcher),
-                flow2 = archiveCategoryQueries.find(archive_id = archiveEntity.id)
-                    .asFlow()
-                    .mapToList(context = dispatcher),
-                flow3 = archiveAuthorQueries.find(id = archiveEntity.author)
-                    .asFlow()
-                    .mapToOne(context = dispatcher),
-            ) { tags, categories, author ->
-                Archive(
-                    id = archiveEntity.id,
-                    link = archiveEntity.link,
-                    title = archiveEntity.title,
-                    description = archiveEntity.description,
-                    thumbnail = archiveEntity.thumbnail,
-                    kind = ArchiveKind.values().first { it.type == archiveEntity.kind },
-                    created = Instant.fromEpochMilliseconds(archiveEntity.created),
-                    body = archiveEntity.body,
-                    author = author.toUser,
-                    tags = tags,
-                    categories = categories,
-                )
-            }
-        }
-
-}
-
-private val UserEntity.toUser
-    get() = User(
-        id = id,
-        firstName = first_name,
-        lastName = last_name,
-        fullName = full_name,
-        imageUrl = image_url,
-    )
-
-private val User.toEntity
-    get() = UserEntity(
-        id = id,
-        first_name = firstName,
-        last_name = lastName,
-        full_name = fullName,
-        image_url = imageUrl,
-    )
-
-private val Archive.toEntity
-    get() = ArchiveEntity(
-        id = id,
-        body = body,
-        thumbnail = thumbnail,
-        description = description,
-        title = title,
-        author = author.id,
-        created = created.toEpochMilliseconds(),
-        kind = kind.type,
-        link = link
-    )
-
-private suspend fun Transacter.suspendingTransaction(
-    context: CoroutineContext,
-    body: TransactionWithoutReturn.() -> Unit
-) = withContext(context) {
-    suspendCoroutine<Boolean> { continuation ->
-        transaction {
-            afterRollback { continuation.resume(true) }
-            afterCommit { continuation.resume(false) }
-            body()
-        }
-    }
 }

@@ -16,11 +16,22 @@
 
 package com.tunjid.me.common.data
 
-import com.squareup.sqldelight.db.SqlDriver
-import kotlinx.coroutines.CoroutineDispatcher
+import com.squareup.sqldelight.Transacter
+import com.squareup.sqldelight.TransactionWithoutReturn
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
-expect class DatabaseDriverFactory {
-    fun createDriver(): SqlDriver
+internal suspend fun Transacter.suspendingTransaction(
+    context: CoroutineContext,
+    body: TransactionWithoutReturn.() -> Unit
+) = withContext(context) {
+    suspendCoroutine<Boolean> { continuation ->
+        transaction {
+            afterRollback { continuation.resume(true) }
+            afterCommit { continuation.resume(false) }
+            body()
+        }
+    }
 }
-
-expect fun databaseDispatcher(): CoroutineDispatcher

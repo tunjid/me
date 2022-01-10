@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS archiveEntity (
 get:
 SELECT *
 FROM archiveEntity
-WHERE id = :id;
+WHERE id = :id AND kind = :kind;
 
 find:
 SELECT *
