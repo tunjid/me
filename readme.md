@@ -48,7 +48,9 @@ typealias GlobalUiMutator = Mutator<Mutation<UiState>, StateFlow<UiState>>
 
 ### State restoration and process death
 
-LOL, I'm sorry what?? Imma get back to you on that one bruh.
+The project does not currently take this into consideration as this time.
+I'm still trying to figure this out in a scalable multiplatform way.
+
 
 ### Lifecycles and component scoping
 
