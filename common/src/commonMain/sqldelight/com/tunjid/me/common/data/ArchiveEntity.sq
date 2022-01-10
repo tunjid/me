@@ -20,6 +20,7 @@ find:
 SELECT *
 FROM archiveEntity
 WHERE kind = :kind
+ORDER BY created DESC
 LIMIT :limit
 OFFSET :offset;
 

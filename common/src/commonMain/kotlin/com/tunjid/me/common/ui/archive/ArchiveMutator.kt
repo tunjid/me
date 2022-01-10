@@ -107,14 +107,16 @@ sealed class Action {
 }
 
 sealed class ArchiveItem {
+    abstract val query: ArchiveQuery
+
     data class Result(
         val archive: Archive,
-        val query: ArchiveQuery,
+        override val query: ArchiveQuery,
     ) : ArchiveItem()
 
     data class Loading(
         val isCircular: Boolean,
-        val query: ArchiveQuery,
+        override val query: ArchiveQuery,
     ) : ArchiveItem()
 }
 
