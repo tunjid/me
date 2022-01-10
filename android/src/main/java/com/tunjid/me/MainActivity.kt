@@ -36,10 +36,10 @@ import com.tunjid.me.common.component2
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.NavMode
 import com.tunjid.me.common.globalui.insetMutations
-import com.tunjid.me.common.nav.pop
 import com.tunjid.me.common.ui.scaffold.Root
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.mutator.accept
+import com.tunjid.treenav.pop
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
                 Surface(color = MaterialTheme.colors.background) {
                     Root(dependencies = app.appDependencies)
                 }
-                adaptNavigation(globalUiMutator = globalUiMutator)
+                AdaptNavigation(globalUiMutator = globalUiMutator)
             }
         }
 
@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
 enum class WindowSizeClass { COMPACT, MEDIUM, EXPANDED }
 
 @Composable
-private fun MainActivity.adaptNavigation(globalUiMutator: GlobalUiMutator) {
+private fun MainActivity.AdaptNavigation(globalUiMutator: GlobalUiMutator) {
     val configuration = LocalConfiguration.current
     val windowMetrics = remember(configuration) {
         WindowMetricsCalculator.getOrCreate()

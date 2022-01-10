@@ -99,4 +99,5 @@ dependencies {
     implementation(libs.tunjid.mutator.core.jvm)
     implementation(libs.tunjid.mutator.coroutines.jvm)
     implementation(libs.tunjid.tiler)
+    implementation(libs.tunjid.treenav.jvm)
 }

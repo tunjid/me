@@ -34,7 +34,7 @@ kotlin {
                 implementation(libs.square.sqldelight.coroutines.extensions)
 
                 implementation(libs.tunjid.tiler)
-                implementation(libs.tunjid.treenav)
+                implementation(libs.tunjid.treenav.common)
                 implementation(libs.tunjid.mutator.core.common)
                 implementation(libs.tunjid.mutator.coroutines.common)
             }

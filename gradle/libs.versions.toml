@@ -79,4 +79,5 @@ tunjid-mutator-core-jvm = { group = "com.tunjid.mutator", name = "core-jvm", ver
 tunjid-mutator-coroutines-common = { group = "com.tunjid.mutator", name = "coroutines", version.ref = "tunjidMutator" }
 tunjid-mutator-coroutines-jvm = { group = "com.tunjid.mutator", name = "coroutines-jvm", version.ref = "tunjidMutator" }
 tunjid-tiler = { group = "com.tunjid.tiler", name = "tiler", version.ref = "tunjidTiler" }
-tunjid-treenav = { group = "com.tunjid.treenav", name = "treenav", version.ref = "tunjidTreeNav" }
+tunjid-treenav-common = { group = "com.tunjid.treenav", name = "treenav", version.ref = "tunjidTreeNav" }
+tunjid-treenav-jvm = { group = "com.tunjid.treenav", name = "treenav-jvm", version.ref = "tunjidTreeNav" }
