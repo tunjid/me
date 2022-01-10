@@ -17,18 +17,7 @@
 package com.tunjid.me.common.ui.archive
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -70,6 +59,7 @@ import com.tunjid.treenav.Route
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.datetime.Clock
 import kotlin.math.abs
 import kotlin.math.max
@@ -173,6 +163,7 @@ private fun ArchiveScreen(
             .filter { abs(it.dy) > 4 }
             .distinctUntilChangedBy(ScrollState::queryOffset)
             .collect {
+                mutator.accept(Action.UserScrolled)
                 mutator.accept(Action.ToggleFilter(isExpanded = false))
                 mutator.accept(
                     Action.Fetch(
@@ -190,6 +181,21 @@ private fun ArchiveScreen(
     // Initial load
     LaunchedEffect(query) {
         mutator.accept(Action.Fetch(query = query))
+    }
+
+    // Data is loaded in chunks, in case the lower section loads before the upper section
+    // scroll to the upper section
+    val size = state.items.size
+    val shouldScrollToTop = state.shouldScrollToTop
+    val startScrollPosition = state.listStateSummary.firstVisibleItemIndex
+
+    LaunchedEffect(shouldScrollToTop, startScrollPosition, size) {
+        snapshotFlow { Triple(shouldScrollToTop, startScrollPosition, size) }
+            .distinctUntilChangedBy { it.third }
+            .takeWhile { it.first }
+            .collect {
+                listState.scrollToItem(it.second)
+            }
     }
 
     // Scroll state preservation

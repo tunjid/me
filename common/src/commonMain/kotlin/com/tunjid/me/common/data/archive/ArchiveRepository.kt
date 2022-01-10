@@ -48,6 +48,7 @@ class ReactiveArchiveRepository(
     override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
         localArchiveRepository.monitorArchives(query)
             .onEach { archives ->
+                println("Fetched ${archives.size} for ${query.offset}")
                 // Oof nothing in the DB, fetch it as a side effect!
                 if (archives.isEmpty()) try {
                     localArchiveRepository.saveArchives(

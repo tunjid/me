@@ -44,6 +44,7 @@ typealias ArchiveMutator = Mutator<Action, StateFlow<State>>
 
 data class State(
     val gridSize: Int = 1,
+    val shouldScrollToTop: Boolean = true,
     val isInNavRail: Boolean = false,
     val queryState: QueryState,
     val listStateSummary: ListState = ListState(),
@@ -104,6 +105,8 @@ sealed class Action {
     data class GridSize(val size: Int) : Action()
 
     data class ToggleFilter(val isExpanded: Boolean? = null) : Action()
+
+    object UserScrolled : Action()
 }
 
 sealed class ArchiveItem {
@@ -195,6 +198,7 @@ fun archiveMutator(
                     is Action.UpdateListState -> action.flow.updateListStateMutations()
                     is Action.FilterChanged -> action.flow.filterChangedMutations()
                     is Action.ToggleFilter -> action.flow.filterToggleMutations()
+                    is Action.UserScrolled -> action.flow.resetScrollMutations()
                     is Action.GridSize -> action.flow.gridSizeMutations()
                 }
             }
@@ -262,6 +266,14 @@ private fun Flow<Action.GridSize>.gridSizeMutations(): Flow<Mutation<State>> =
         .map {
             Mutation {
                 copy(gridSize = it.size)
+            }
+        }
+
+private fun Flow<Action.UserScrolled>.resetScrollMutations(): Flow<Mutation<State>> =
+    distinctUntilChanged()
+        .map {
+            Mutation {
+                copy(shouldScrollToTop = false)
             }
         }
 
