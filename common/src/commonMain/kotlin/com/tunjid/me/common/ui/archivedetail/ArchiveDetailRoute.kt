@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material.MaterialRichText
 import com.tunjid.me.common.LocalAppDependencies
-import com.tunjid.me.common.data.archive.Archive
+import com.tunjid.me.common.data.archive.ArchiveKind
 import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
@@ -43,9 +43,12 @@ import com.tunjid.treenav.MultiStackNav
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ArchiveDetailRoute(val archive: Archive) : AppRoute<ArchiveDetailMutator> {
+data class ArchiveDetailRoute(
+    val kind: ArchiveKind,
+    val archiveId: String
+) : AppRoute<ArchiveDetailMutator> {
     override val id: String
-        get() = archive.id
+        get() = "archive-detail-$kind-$archiveId"
 
     @Composable
     override fun Render() {
@@ -70,12 +73,14 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
     InitialUiState(
         UiState(
             toolbarShows = true,
-            toolbarTitle = state.archive.title,
+            toolbarTitle = state.archive?.title ?: "Detail",
             navVisibility = NavVisibility.GoneIfBottomNav,
             insetFlags = InsetFlags.NO_BOTTOM,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
         )
     )
+
+    val archive = state.archive
 
     Column(
         modifier = Modifier
@@ -85,8 +90,8 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
         MaterialRichText(
             modifier = Modifier.padding(horizontal = 8.dp)
         ) {
-            Markdown(
-                content = state.archive.body
+          if(archive != null)  Markdown(
+                content = archive.body
             )
         }
         Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))

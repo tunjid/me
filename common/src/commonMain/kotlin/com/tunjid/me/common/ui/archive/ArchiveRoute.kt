@@ -292,7 +292,12 @@ private fun RowScope.ArchiveCard(
             .weight(1F)
             .padding(16.dp),
         onClick = {
-            onNavAction(ArchiveDetailRoute(archive = archiveItem.archive))
+            onNavAction(
+                ArchiveDetailRoute(
+                    kind = archiveItem.archive.kind,
+                    archiveId = archiveItem.archive.id
+                )
+            )
         },
         content = {
             Column {

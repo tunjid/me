@@ -19,11 +19,13 @@ package com.tunjid.me.common.ui.archivedetail
 
 import com.tunjid.me.common.AppMutator
 import com.tunjid.me.common.data.archive.Archive
+import com.tunjid.me.common.data.archive.ArchiveKind
 import com.tunjid.me.common.data.archive.ArchiveRepository
 import com.tunjid.me.common.globalui.navBarSize
 import com.tunjid.me.common.monitorWhenActive
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
+import com.tunjid.mutator.accept
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,21 +35,20 @@ import kotlinx.coroutines.flow.merge
 
 data class State(
     val navBarSize: Int,
-    val archive: Archive,
+    val archive: Archive? = null,
 )
 
 typealias ArchiveDetailMutator = Mutator<Unit, StateFlow<State>>
 
 fun archiveDetailMutator(
     scope: CoroutineScope,
-    archive: Archive,
+    route: ArchiveDetailRoute,
     repo: ArchiveRepository,
     appMutator: AppMutator,
 ): ArchiveDetailMutator = stateFlowMutator(
     scope = scope,
     initialState = State(
         navBarSize = appMutator.globalUiMutator.state.value.navBarSize,
-        archive = archive
     ),
     started = SharingStarted.WhileSubscribed(2000),
     transform = {
@@ -58,10 +59,13 @@ fun archiveDetailMutator(
                     Mutation { copy(navBarSize = it) }
                 },
             repo.monitorArchive(
-                kind = archive.kind,
-                id = archive.id
+                kind = route.kind,
+                id = route.archiveId
             )
                 .map { fetchedArchive ->
+                    appMutator.globalUiMutator.accept {
+                        copy(toolbarTitle = fetchedArchive.title)
+                    }
                     Mutation { copy(archive = fetchedArchive) }
                 }
         ).monitorWhenActive(appMutator)

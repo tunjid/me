@@ -129,7 +129,7 @@ fun createAppDependencies(
                 scope = routeScope,
                 mutator = archiveDetailMutator(
                     scope = routeScope,
-                    archive = route.archive,
+                    route = route,
                     repo = archiveRepository,
                     appMutator = appMutator,
                 )
