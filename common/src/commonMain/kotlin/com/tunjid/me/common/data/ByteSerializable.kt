@@ -19,6 +19,7 @@ package com.tunjid.me.common.data
 import com.tunjid.me.common.nav.ByteSerializableRoute
 import com.tunjid.me.common.ui.archive.ArchiveRoute
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
+import kotlinx.serialization.BinaryFormat
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
@@ -35,32 +36,18 @@ import kotlin.reflect.KClass
  */
 interface ByteSerializable {
     fun cleanUpForByteSerialization() = this
-
-    companion object {
-        inline fun <reified T : ByteSerializable> fromBytes(bytes: ByteArray) =
-            cbor.decodeFromByteArray<T>(bytes)
-    }
 }
-
-//interface ByteSerializer {
-//    fun <T : ByteSerializable> fromBytes(bytes: ByteArray): T
-//    fun <T : ByteSerializable> toBytes(serializable: T): ByteArray
-//}
 
 interface ByteSerializer {
-    fun <T : ByteSerializable> fromBytes(bytes: ByteArray, kClass: KClass<T>): T
-    fun <T : ByteSerializable> toBytes(serializable: T): ByteArray
+    val format: BinaryFormat
 }
 
-inline fun <reified T : ByteSerializable> T.bytes() =
-    cbor.encodeToByteArray(value = this)
+inline fun <reified T : ByteSerializable> ByteSerializer.fromBytes(bytes: ByteArray): T =
+    format.decodeFromByteArray(bytes)
 
+inline fun <reified T : ByteSerializable> ByteSerializer.toBytes(item: T): ByteArray =
+    format.encodeToByteArray(value = item)
 
-val cbor = Cbor {
-    serializersModule = SerializersModule {
-        polymorphic(ByteSerializableRoute::class) {
-            subclass(ArchiveRoute::class)
-            subclass(ArchiveDetailRoute::class)
-        }
-    }
-}
+class DelegatingByteSerializer(
+    override val format: BinaryFormat
+) : ByteSerializer

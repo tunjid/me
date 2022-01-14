@@ -48,9 +48,14 @@ typealias GlobalUiMutator = Mutator<Mutation<UiState>, StateFlow<UiState>>
 
 ### State restoration and process death
 
-The project does not currently take this into consideration as this time.
-I'm still trying to figure this out in a scalable multiplatform way.
+All types that need to be restored after process death implement the `ByteSerializable` interface.
+This allow them to de serialized compactly into a `ByteArray` which works excellently with
+Android's `Parcelable` type and a regular file system on Desktop. The bytes are read or written
+with a type called the `ByteSerializer`.
 
+Things restored after process death currently include:
+
+* App navigation
 
 ### Lifecycles and component scoping
 

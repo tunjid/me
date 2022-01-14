@@ -19,6 +19,8 @@ package com.tunjid.me.common
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.common.data.Api
 import com.tunjid.me.common.data.AppDatabase
+import com.tunjid.me.common.data.ByteSerializer
+import com.tunjid.me.common.data.DelegatingByteSerializer
 import com.tunjid.me.common.data.NetworkMonitor
 import com.tunjid.me.common.data.archive.ArchiveRepository
 import com.tunjid.me.common.data.archive.ReactiveArchiveRepository
@@ -26,6 +28,7 @@ import com.tunjid.me.common.data.databaseDispatcher
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.globalUiMutator
 import com.tunjid.me.common.nav.AppRoute
+import com.tunjid.me.common.nav.ByteSerializableRoute
 import com.tunjid.me.common.nav.navMutator
 import com.tunjid.me.common.nav.removedRoutes
 import com.tunjid.me.common.ui.archive.ArchiveRoute
@@ -44,12 +47,17 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 
 interface AppDependencies {
     val appDatabase: AppDatabase
     val appMutator: AppMutator
-    val networkMonitor : NetworkMonitor
+    val networkMonitor: NetworkMonitor
+    val byteSerializer: ByteSerializer
     fun <T> routeDependencies(route: AppRoute<T>): T
 }
 
@@ -62,7 +70,7 @@ fun createAppDependencies(
     appScope: CoroutineScope,
     initialUiState: UiState = UiState(),
     database: AppDatabase,
-    networkMonitor : NetworkMonitor
+    networkMonitor: NetworkMonitor
 ) = object : AppDependencies {
     val routeMutatorFactory = mutableMapOf<AppRoute<*>, ScopeHolder>()
 
@@ -94,6 +102,18 @@ fun createAppDependencies(
         scope = appScope,
         navMutator = navMutator(scope = appScope),
         globalUiMutator = globalUiMutator(scope = appScope, initialState = initialUiState)
+    )
+
+    // TODO: Pass this as an argument
+    override val byteSerializer: ByteSerializer = DelegatingByteSerializer(
+        format = Cbor {
+            serializersModule = SerializersModule {
+                polymorphic(ByteSerializableRoute::class) {
+                    subclass(ArchiveRoute::class)
+                    subclass(ArchiveDetailRoute::class)
+                }
+            }
+        }
     )
 
     init {
@@ -148,6 +168,9 @@ fun stubAppDependencies(
     globalUI: UiState = UiState()
 ): AppDependencies = object : AppDependencies {
     override val appDatabase: AppDatabase
+        get() = TODO("Not yet implemented")
+
+    override val byteSerializer: ByteSerializer
         get() = TODO("Not yet implemented")
 
     override val networkMonitor: NetworkMonitor
