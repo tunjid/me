@@ -1,0 +1,66 @@
+/*
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.tunjid.me.common.data
+
+import com.tunjid.me.common.nav.ByteSerializableRoute
+import com.tunjid.me.common.ui.archive.ArchiveRoute
+import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
+import kotlinx.serialization.cbor.Cbor
+import kotlinx.serialization.decodeFromByteArray
+import kotlinx.serialization.encodeToByteArray
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
+import kotlinx.serialization.serializer
+import kotlin.reflect.KClass
+
+/**
+ * A declaration for type that can be serialized as bytes.
+ * Currently does this using CBOR; Protobufs were evaluated but they're too terse an don't work
+ * very well for preserving information for lists or maps
+ */
+interface ByteSerializable {
+    fun cleanUpForByteSerialization() = this
+
+    companion object {
+        inline fun <reified T : ByteSerializable> fromBytes(bytes: ByteArray) =
+            cbor.decodeFromByteArray<T>(bytes)
+    }
+}
+
+//interface ByteSerializer {
+//    fun <T : ByteSerializable> fromBytes(bytes: ByteArray): T
+//    fun <T : ByteSerializable> toBytes(serializable: T): ByteArray
+//}
+
+interface ByteSerializer {
+    fun <T : ByteSerializable> fromBytes(bytes: ByteArray, kClass: KClass<T>): T
+    fun <T : ByteSerializable> toBytes(serializable: T): ByteArray
+}
+
+inline fun <reified T : ByteSerializable> T.bytes() =
+    cbor.encodeToByteArray(value = this)
+
+
+val cbor = Cbor {
+    serializersModule = SerializersModule {
+        polymorphic(ByteSerializableRoute::class) {
+            subclass(ArchiveRoute::class)
+            subclass(ArchiveDetailRoute::class)
+        }
+    }
+}

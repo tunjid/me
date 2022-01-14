@@ -68,7 +68,7 @@ private object LocalDateTimeSerializer : KSerializer<Instant> {
     override fun deserialize(decoder: Decoder): Instant = decoder.decodeString().toInstant()
 }
 
-private object ArchiveKindSerializer : KSerializer<ArchiveKind> {
+object ArchiveKindSerializer : KSerializer<ArchiveKind> {
     override val descriptor = PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
     override fun serialize(encoder: Encoder, value: ArchiveKind) =
         encoder.encodeString(value.type).also { println("Serilizing kind") }

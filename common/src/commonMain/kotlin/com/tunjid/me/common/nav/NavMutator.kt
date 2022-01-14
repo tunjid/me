@@ -22,6 +22,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.archive.ArchiveKind
 import com.tunjid.me.common.data.archive.ArchiveQuery
 import com.tunjid.me.common.data.archive.icon
@@ -41,16 +42,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
+import kotlinx.serialization.Serializable
+
+const val NavName = "App"
 
 typealias NavMutator = Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
 
-interface AppRoute<T> : Route {
+
+interface AppRoute<T> : ByteSerializableRoute {
     @Composable
     fun Render()
 
     fun navRailRoute(nav: MultiStackNav): AppRoute<*>? = null
 }
 
+@Serializable
 object Route404 : AppRoute<Unit> {
     override val id: String
         get() = "404"
@@ -113,7 +119,7 @@ fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AppRoute<*>>> =
         .map { it.second }
 
 private val startNav = MultiStackNav(
-    name = "App",
+    name = NavName,
     currentIndex = 0,
     stacks = ArchiveKind.values().map { kind ->
         StackNav(

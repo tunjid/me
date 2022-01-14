@@ -40,7 +40,9 @@ import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.InitialUiState
 import com.tunjid.me.common.ui.archive.ArchiveRoute
 import com.tunjid.treenav.MultiStackNav
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ArchiveDetailRoute(val archive: Archive) : AppRoute<ArchiveDetailMutator> {
     override val id: String
         get() = archive.id

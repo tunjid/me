@@ -25,6 +25,7 @@ import kotlinx.serialization.encoding.Encoder
 
 const val DefaultQueryLimit = 6
 
+@Serializable
 data class ArchiveQuery(
     val kind: ArchiveKind,
     val temporalFilter: ArchiveTemporalFilter? = null,
@@ -36,11 +37,13 @@ data class ArchiveQuery(
 val ArchiveQuery.hasContentFilter
     get() = contentFilter.categories.isNotEmpty() || contentFilter.tags.isNotEmpty()
 
+@Serializable
 data class ArchiveTemporalFilter(
     val year: Int?,
     val month: Int?
 )
 
+@Serializable
 data class ArchiveContentFilter(
     val tags: List<Descriptor.Tag> = listOf(),
     val categories: List<Descriptor.Category> = listOf(),

@@ -61,6 +61,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.datetime.Clock
+import kotlinx.serialization.Serializable
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -81,6 +82,7 @@ private fun ScrollState.updateDirection(new: ScrollState) = new.copy(
     }
 )
 
+@Serializable
 data class ArchiveRoute(val query: ArchiveQuery) : AppRoute<ArchiveMutator> {
     override val id: String
         get() = query.toString()
