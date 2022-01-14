@@ -22,18 +22,24 @@ import android.os.Bundle
 import com.tunjid.me.common.AppAction
 import com.tunjid.me.common.createAppDependencies
 import com.tunjid.me.common.data.AppDatabase
+import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.DatabaseDriverFactory
 import com.tunjid.me.common.data.NetworkMonitor
 import com.tunjid.me.common.data.fromBytes
 import com.tunjid.me.common.data.toBytes
+import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.nav.ByteSerializableNav
 import com.tunjid.me.common.nav.NavName
 import com.tunjid.me.common.nav.toByteSerializable
 import com.tunjid.me.common.nav.toMultiStackNav
+import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.accept
+import com.tunjid.treenav.Order
+import com.tunjid.treenav.flatten
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.StateFlow
 
 class App : Application() {
 
@@ -60,13 +66,23 @@ class App : Application() {
 
             override fun onActivityCreated(p0: Activity, bundle: Bundle?) {
                 updateStatus(isInForeground = true)
-                val serializedNav: ByteSerializableNav? = bundle
+                val serializedNav: ByteSerializableNav = bundle
                     ?.getByteArray(NavName)
-                    ?.let(byteSerializer::fromBytes)
+                    ?.let(byteSerializer::fromBytes) ?: return
 
-                if (serializedNav != null) appMutator.navMutator.accept {
-                    serializedNav.toMultiStackNav
-                }
+                val multiStackNav = serializedNav.toMultiStackNav
+
+                appMutator.accept(
+                    AppAction.RestoreSerializedStates(
+                        routeIdsToSerializedStates = multiStackNav.flatten(Order.BreadthFirst)
+                            .filterIsInstance<AppRoute<*>>()
+                            .fold(mutableMapOf()) { map, route ->
+                                bundle.getByteArray(route.id)?.let { map[route.id] = it }
+                                map
+                            }
+                    )
+                )
+                appMutator.navMutator.accept { multiStackNav }
             }
 
             override fun onActivityStarted(p0: Activity) =
@@ -82,10 +98,23 @@ class App : Application() {
                 updateStatus(isInForeground = false)
 
             override fun onActivitySaveInstanceState(p0: Activity, bundle: Bundle) {
+                val multiStackNav = appMutator.navMutator.state.value
                 bundle.putByteArray(
                     NavName,
-                    byteSerializer.toBytes(appMutator.navMutator.state.value.toByteSerializable)
+                    byteSerializer.toBytes(multiStackNav.toByteSerializable)
                 )
+                multiStackNav
+                    .flatten(order = Order.BreadthFirst)
+                    .filterIsInstance<AppRoute<*>>()
+                    .forEach { route ->
+                        val mutator = appDependencies.routeDependencies(route)
+                        val state = (mutator as? Mutator<*, *>)?.state ?: return@forEach
+                        val serializable = (state as? StateFlow<*>)?.value ?: return@forEach
+                        if (serializable is ByteSerializable) bundle.putByteArray(
+                            route.id,
+                            byteSerializer.toBytes(serializable)
+                        )
+                    }
             }
 
             override fun onActivityDestroyed(p0: Activity) =

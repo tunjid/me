@@ -19,23 +19,24 @@ package com.tunjid.me.common
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.NavMutator
-import com.tunjid.treenav.MultiStackNav
-import com.tunjid.treenav.Route
-import com.tunjid.treenav.pop
-import com.tunjid.treenav.push
-import com.tunjid.treenav.swap
 import com.tunjid.me.common.ui.asNoOpStateFlowMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.Route
+import com.tunjid.treenav.pop
+import com.tunjid.treenav.push
+import com.tunjid.treenav.swap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 
 data class AppState(
     val nav: MultiStackNav,
     val ui: UiState,
-    val isInForeground: Boolean = true
+    val isInForeground: Boolean = true,
+    val routeIdsToSerializedStates: Map<String, ByteArray> = mapOf()
 )
 
 sealed class AppAction {
@@ -46,7 +47,13 @@ sealed class AppAction {
         }
     }
 
-    data class AppStatus(val isInForeground: Boolean) : AppAction()
+    data class AppStatus(
+        val isInForeground: Boolean
+    ) : AppAction()
+
+    data class RestoreSerializedStates(
+        val routeIdsToSerializedStates: Map<String, ByteArray>
+    ) : AppAction()
 }
 
 sealed class NavKind {
@@ -136,6 +143,7 @@ private fun backingAppMutator(
                 when (val action = type()) {
                     is AppAction.Nav -> action.flow.consumeNavMutationsWith(navMutator)
                     is AppAction.AppStatus -> action.flow.foregroundMutations()
+                    is AppAction.RestoreSerializedStates -> action.flow.stateRestorationMutations()
                 }
             }
         )
@@ -150,6 +158,13 @@ private fun Flow<AppAction.Nav>.consumeNavMutationsWith(navMutator: NavMutator):
         }
 
 private fun Flow<AppAction.AppStatus>.foregroundMutations(): Flow<Mutation<AppState>> =
-    map {
-        Mutation { copy(isInForeground = it.isInForeground) }
-    }
+    distinctUntilChanged()
+        .map {
+            Mutation { copy(isInForeground = it.isInForeground) }
+        }
+
+private fun Flow<AppAction.RestoreSerializedStates>.stateRestorationMutations(): Flow<Mutation<AppState>> =
+    distinctUntilChanged()
+        .map {
+            Mutation { copy(routeIdsToSerializedStates = it.routeIdsToSerializedStates) }
+        }

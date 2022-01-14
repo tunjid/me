@@ -19,6 +19,7 @@ package com.tunjid.me.common.ui.archive
 import com.tunjid.me.common.AppAction
 import com.tunjid.me.common.AppMutator
 import com.tunjid.me.common.consumeWith
+import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.archive.Archive
 import com.tunjid.me.common.data.archive.ArchiveQuery
 import com.tunjid.me.common.data.archive.ArchiveRepository
@@ -39,17 +40,21 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 typealias ArchiveMutator = Mutator<Action, StateFlow<State>>
 
+@Serializable
 data class State(
     val gridSize: Int = 1,
     val shouldScrollToTop: Boolean = true,
     val isInNavRail: Boolean = false,
     val queryState: QueryState,
     val listStateSummary: ListState = ListState(),
+    @Transient
     val items: List<ArchiveItem> = listOf()
-)
+) : ByteSerializable
 
 // TODO: Remove this when LazyVerticalGrid supports item keys and span size lookups
 /**
@@ -135,6 +140,7 @@ val ArchiveItem.Result.prettyDate: String
         return "${dateTime.dayOfWeek} ${dateTime.monthNumber} ${dateTime.year}"
     }
 
+@Serializable
 data class QueryState(
     val expanded: Boolean = false,
     val rootQuery: ArchiveQuery,
@@ -142,6 +148,7 @@ data class QueryState(
     val tagText: Descriptor.Tag = Descriptor.Tag(""),
 )
 
+@Serializable
 data class ListState(
     val firstVisibleItemIndex: Int = 0,
     val firstVisibleItemScrollOffset: Int = 0
@@ -172,11 +179,12 @@ private val FetchResult.hasNoResults
 fun archiveMutator(
     scope: CoroutineScope,
     route: ArchiveRoute,
+    initialState: State? = null,
     repo: ArchiveRepository,
     appMutator: AppMutator,
 ): ArchiveMutator = stateFlowMutator(
     scope = scope,
-    initialState = State(
+    initialState = initialState ?: State(
         items = listOf(
             ArchiveItem.Loading(
                 isCircular = true,

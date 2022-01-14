@@ -18,8 +18,8 @@ package com.tunjid.me.common.ui.archivedetail
 
 
 import com.tunjid.me.common.AppMutator
+import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.archive.Archive
-import com.tunjid.me.common.data.archive.ArchiveKind
 import com.tunjid.me.common.data.archive.ArchiveRepository
 import com.tunjid.me.common.globalui.navBarSize
 import com.tunjid.me.common.monitorWhenActive
@@ -32,22 +32,28 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
+@Serializable
 data class State(
     val navBarSize: Int,
+    // Read this from the DB
+    @Transient
     val archive: Archive? = null,
-)
+) : ByteSerializable
 
 typealias ArchiveDetailMutator = Mutator<Unit, StateFlow<State>>
 
 fun archiveDetailMutator(
     scope: CoroutineScope,
     route: ArchiveDetailRoute,
+    initialState: State? = null,
     repo: ArchiveRepository,
     appMutator: AppMutator,
 ): ArchiveDetailMutator = stateFlowMutator(
     scope = scope,
-    initialState = State(
+    initialState = initialState ?: State(
         navBarSize = appMutator.globalUiMutator.state.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(2000),

@@ -17,14 +17,9 @@
 package com.tunjid.me.common
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.tunjid.me.common.data.Api
-import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.common.data.ByteSerializer
-import com.tunjid.me.common.data.DelegatingByteSerializer
-import com.tunjid.me.common.data.NetworkMonitor
+import com.tunjid.me.common.data.*
 import com.tunjid.me.common.data.archive.ArchiveRepository
 import com.tunjid.me.common.data.archive.ReactiveArchiveRepository
-import com.tunjid.me.common.data.databaseDispatcher
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.globalUiMutator
 import com.tunjid.me.common.nav.AppRoute
@@ -70,7 +65,7 @@ fun createAppDependencies(
     appScope: CoroutineScope,
     initialUiState: UiState = UiState(),
     database: AppDatabase,
-    networkMonitor: NetworkMonitor
+    networkMonitor: NetworkMonitor,
 ) = object : AppDependencies {
     val routeMutatorFactory = mutableMapOf<AppRoute<*>, ScopeHolder>()
 
@@ -137,6 +132,7 @@ fun createAppDependencies(
                 scope = routeScope,
                 mutator = archiveMutator(
                     scope = routeScope,
+                    initialState = route.restoredState(),
                     route = route,
                     repo = archiveRepository,
                     appMutator = appMutator,
@@ -149,6 +145,7 @@ fun createAppDependencies(
                 scope = routeScope,
                 mutator = archiveDetailMutator(
                     scope = routeScope,
+                    initialState = route.restoredState(),
                     route = route,
                     repo = archiveRepository,
                     appMutator = appMutator,
@@ -157,6 +154,9 @@ fun createAppDependencies(
         }
         else -> throw IllegalArgumentException("Unknown route")
     }.mutator as T
+
+    private inline fun <reified T : ByteSerializable> AppRoute<*>.restoredState(): T? =
+        appMutator.state.value.routeIdsToSerializedStates[id]?.let(byteSerializer::fromBytes)
 }
 
 val LocalAppDependencies = staticCompositionLocalOf {
