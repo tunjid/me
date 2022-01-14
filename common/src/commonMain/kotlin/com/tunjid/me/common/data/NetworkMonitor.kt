@@ -16,22 +16,11 @@
 
 package com.tunjid.me.common.data
 
-import com.squareup.sqldelight.Transacter
-import com.squareup.sqldelight.TransactionWithoutReturn
-import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.flow.Flow
 
-internal suspend fun Transacter.suspendingTransaction(
-    context: CoroutineContext,
-    body: TransactionWithoutReturn.() -> Unit
-) = withContext(context) {
-    suspendCoroutine<Boolean> { continuation ->
-        transaction {
-            afterRollback { continuation.resume(true) }
-            afterCommit { continuation.resume(false) }
-            body()
-        }
-    }
+/**
+ * A class that reports if theres a network connection
+ */
+expect class NetworkMonitor {
+    val isConnected: Flow<Boolean>
 }

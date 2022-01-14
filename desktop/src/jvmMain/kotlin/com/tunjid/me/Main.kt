@@ -11,6 +11,7 @@ import androidx.compose.ui.window.rememberWindowState
 import com.tunjid.me.common.createAppDependencies
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.DatabaseDriverFactory
+import com.tunjid.me.common.data.NetworkMonitor
 import com.tunjid.me.common.globalui.NavMode
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.ui.scaffold.Root
@@ -26,10 +27,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 fun main() {
     application {
+        val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
         val appDependencies = createAppDependencies(
-            scope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+            appScope = appScope,
             initialUiState = UiState(navMode = NavMode.NavRail),
-            database = AppDatabase.invoke(DatabaseDriverFactory().createDriver())
+            database = AppDatabase.invoke(DatabaseDriverFactory().createDriver()),
+            networkMonitor = NetworkMonitor(scope = appScope)
         )
         val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>> =
             appDependencies.appMutator.globalUiMutator

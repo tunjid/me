@@ -19,6 +19,7 @@ package com.tunjid.me.common
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.common.data.Api
 import com.tunjid.me.common.data.AppDatabase
+import com.tunjid.me.common.data.NetworkMonitor
 import com.tunjid.me.common.data.archive.ArchiveRepository
 import com.tunjid.me.common.data.archive.ReactiveArchiveRepository
 import com.tunjid.me.common.data.databaseDispatcher
@@ -48,6 +49,7 @@ import kotlinx.serialization.json.Json
 interface AppDependencies {
     val appDatabase: AppDatabase
     val appMutator: AppMutator
+    val networkMonitor : NetworkMonitor
     fun <T> routeDependencies(route: AppRoute<T>): T
 }
 
@@ -57,9 +59,10 @@ private data class ScopeHolder(
 )
 
 fun createAppDependencies(
-    scope: CoroutineScope,
+    appScope: CoroutineScope,
     initialUiState: UiState = UiState(),
     database: AppDatabase,
+    networkMonitor : NetworkMonitor
 ) = object : AppDependencies {
     val routeMutatorFactory = mutableMapOf<AppRoute<*>, ScopeHolder>()
 
@@ -79,19 +82,22 @@ fun createAppDependencies(
     val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
         api = api,
         database = database,
-        dispatcher = databaseDispatcher()
+        dispatcher = databaseDispatcher(),
+        networkMonitor = networkMonitor
     )
+
+    override val networkMonitor: NetworkMonitor = networkMonitor
 
     override val appDatabase: AppDatabase = database
 
     override val appMutator: AppMutator = appMutator(
-        scope = scope,
-        navMutator = navMutator(scope = scope),
-        globalUiMutator = globalUiMutator(scope = scope, initialState = initialUiState)
+        scope = appScope,
+        navMutator = navMutator(scope = appScope),
+        globalUiMutator = globalUiMutator(scope = appScope, initialState = initialUiState)
     )
 
     init {
-        scope.launch {
+        appScope.launch {
             appMutator.state
                 .map { it.nav }
                 .removedRoutes()
@@ -142,6 +148,9 @@ fun stubAppDependencies(
     globalUI: UiState = UiState()
 ): AppDependencies = object : AppDependencies {
     override val appDatabase: AppDatabase
+        get() = TODO("Not yet implemented")
+
+    override val networkMonitor: NetworkMonitor
         get() = TODO("Not yet implemented")
 
     override val appMutator: AppMutator = AppState(

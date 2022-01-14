@@ -24,6 +24,24 @@ ORDER BY created DESC
 LIMIT :limit
 OFFSET :offset;
 
+idsForQuery:
+SELECT DISTINCT archiveEntity.id
+FROM archiveEntity
+INNER JOIN archiveTag
+ON archiveEntity.id = archiveTag.archive_id
+INNER JOIN archiveCategory
+ON archiveEntity.id = archiveCategory.archive_id
+WHERE kind = :kind
+AND (archiveTag.tag IN :tagsOrCategories OR archiveCategory.category IN :tagsOrCategories)
+ORDER BY created DESC
+LIMIT :limit
+OFFSET :offset;
+
+archivesForIds:
+SELECT *
+FROM archiveEntity
+WHERE id IN :ids;
+
 upsert:
 INSERT INTO archiveEntity (id, link, title, description, body, thumbnail, author, created, kind)
 VALUES (:id, :link, :title, :description, :body, :thumbnail, :author, :created, :kind)

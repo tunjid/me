@@ -26,11 +26,12 @@ import com.tunjid.me.common.data.suspendingTransaction
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Instant
 
-internal class LocalArchiveRepository(
+internal class ArchiveDataStore(
     database: AppDatabase,
     private val dispatcher: CoroutineDispatcher,
 ) {
@@ -41,14 +42,12 @@ internal class LocalArchiveRepository(
     private val archiveAuthorQueries = database.userEntityQueries
 
     fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
-        archiveQueries.find(
-            kind = query.kind.type,
-            limit = query.limit.toLong(),
-            offset = query.offset.toLong()
-        )
-            .asFlow()
-            .mapToList(context = dispatcher)
-            .flatMapLatest { archiveEntities -> archivesFlow(archiveEntities) }
+        when {
+            query.hasContentFilter -> contentFilteredArchives(query)
+            else -> archives(query)
+        }
+            .flatMapLatest { archiveEntities -> archiveEntitiesToArchives(archiveEntities) }
+            .distinctUntilChanged()
 
     fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive?> =
         archiveQueries.get(
@@ -57,14 +56,13 @@ internal class LocalArchiveRepository(
         )
             .asFlow()
             .mapToOneOrNull(context = dispatcher)
-            .flatMapLatest { it?.let(::archiveFlow) ?: flowOf(null) }
+            .flatMapLatest { it?.let(::archiveEntityToArchive) ?: flowOf(null) }
+            .distinctUntilChanged()
 
-    suspend fun saveArchives(
-        archives: List<Archive>
-    ) = archiveAuthorQueries.suspendingTransaction(context = dispatcher) {
-        archives
-            .map(::saveArchive)
-    }
+    suspend fun saveArchives(archives: List<Archive>) =
+        archiveAuthorQueries.suspendingTransaction(context = dispatcher) {
+            archives.map(::saveArchive)
+        }
 
     fun saveArchive(archive: Archive) {
         val userEntity = archive.author.toEntity
@@ -102,13 +100,39 @@ internal class LocalArchiveRepository(
         }
     }
 
-    private fun archivesFlow(list: List<ArchiveEntity>): Flow<List<Archive>> =
+    private fun archives(query: ArchiveQuery): Flow<List<ArchiveEntity>> =
+        archiveQueries.find(
+            kind = query.kind.type,
+            limit = query.limit.toLong(),
+            offset = query.offset.toLong()
+        )
+            .asFlow()
+            .mapToList(context = dispatcher)
+
+    private fun contentFilteredArchives(query: ArchiveQuery): Flow<List<ArchiveEntity>> =
+        archiveQueries.idsForQuery(
+            kind = query.kind.type,
+            limit = query.limit.toLong(),
+            offset = query.offset.toLong(),
+            tagsOrCategories = query.contentFilter.tags.map(Descriptor.Tag::value)
+                .plus(query.contentFilter.categories.map(Descriptor.Category::value))
+                .distinct()
+        )
+            .asFlow()
+            .mapToList(context = this.dispatcher)
+            .flatMapLatest {
+                archiveQueries.archivesForIds(it)
+                    .asFlow()
+                    .mapToList(context = this.dispatcher)
+            }
+
+    private fun archiveEntitiesToArchives(list: List<ArchiveEntity>): Flow<List<Archive>> =
         if (list.isEmpty()) flowOf(listOf()) else combine(
-            flows = list.map(::archiveFlow),
+            flows = list.map(::archiveEntityToArchive),
             transform = Array<Archive>::toList
         )
 
-    private fun archiveFlow(archiveEntity: ArchiveEntity): Flow<Archive> =
+    private fun archiveEntityToArchive(archiveEntity: ArchiveEntity): Flow<Archive> =
         combine(
             flow = this.archiveTagQueries.find(archive_id = archiveEntity.id)
                 .asFlow()

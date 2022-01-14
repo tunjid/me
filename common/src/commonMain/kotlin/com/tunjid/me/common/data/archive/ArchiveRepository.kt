@@ -18,10 +18,17 @@ package com.tunjid.me.common.data.archive
 
 import com.tunjid.me.common.data.Api
 import com.tunjid.me.common.data.AppDatabase
+import com.tunjid.me.common.data.NetworkMonitor
+import com.tunjid.me.common.data.remoteFetcher
+import com.tunjid.tiler.Tile
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 
 interface ArchiveRepository {
     fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
@@ -36,43 +43,39 @@ interface ArchiveRepository {
 class ReactiveArchiveRepository(
     private val api: Api,
     database: AppDatabase,
+    networkMonitor: NetworkMonitor,
     dispatcher: CoroutineDispatcher,
 ) : ArchiveRepository {
 
     // TODO: This should be an interface that is passed in so it can be mocked in tests
-    private val localArchiveRepository = LocalArchiveRepository(
+    private val localArchiveRepository = ArchiveDataStore(
         database,
         dispatcher
     )
 
+    private val remoteArchivesFetcher = remoteFetcher(
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+        fetch = ::fetchArchives,
+        save = localArchiveRepository::saveArchives,
+        networkMonitor = networkMonitor
+    )
+
+    private val remoteArchiveFetcher = remoteFetcher(
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+        fetch = { (kind, id): Pair<ArchiveKind, String> -> api.fetchArchive(kind = kind, id = id)},
+        save = localArchiveRepository::saveArchive,
+        networkMonitor = networkMonitor
+    )
+
     override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
         localArchiveRepository.monitorArchives(query)
-            .onEach { archives ->
-                // Oof nothing in the DB, fetch it as a side effect!
-                // TODO: This never invalidates the cache. Fix this
-                if (archives.isEmpty()) try {
-                    localArchiveRepository.saveArchives(
-                        archives = fetchArchives(query)
-                    )
-                } catch (e: Throwable) {
-                    // TODO: exponential back off
-                    e.printStackTrace()
-                }
-            }
+            .onStart { remoteArchivesFetcher(Tile.Request.On(query)) }
+            .onCompletion { remoteArchivesFetcher(Tile.Request.Evict(query)) }
 
     override fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive> =
         localArchiveRepository.monitorArchive(kind = kind, id = id)
-            .onEach { archive ->
-                // Oof nothing in the DB, fetch it as a side effect!
-                if (archive == null) try {
-                    localArchiveRepository.saveArchive(
-                        api.fetchArchive(kind = kind, id = id)
-                    )
-                } catch (e: Throwable) {
-                    // TODO: exponential back off
-                    e.printStackTrace()
-                }
-            }
+            .onStart { remoteArchiveFetcher(Tile.Request.On(kind to id)) }
+            .onCompletion { remoteArchiveFetcher(Tile.Request.Evict(kind to id)) }
             .filterNotNull()
 
     private suspend fun fetchArchives(query: ArchiveQuery): List<Archive> =

@@ -33,6 +33,9 @@ data class ArchiveQuery(
     val limit: Int = DefaultQueryLimit
 )
 
+val ArchiveQuery.hasContentFilter
+    get() = contentFilter.categories.isNotEmpty() || contentFilter.tags.isNotEmpty()
+
 data class ArchiveTemporalFilter(
     val year: Int?,
     val month: Int?
@@ -58,7 +61,10 @@ operator fun ArchiveQuery.plus(descriptor: Descriptor) = amend(descriptor, List<
 
 operator fun ArchiveQuery.minus(descriptor: Descriptor) = amend(descriptor, List<Descriptor>::minus)
 
-private fun ArchiveQuery.amend(descriptor: Descriptor, operator: (List<Descriptor>, Descriptor) -> List<Descriptor>) = copy(
+private fun ArchiveQuery.amend(
+    descriptor: Descriptor,
+    operator: (List<Descriptor>, Descriptor) -> List<Descriptor>
+) = copy(
     contentFilter = contentFilter.copy(
         categories = when (descriptor) {
             is Descriptor.Category -> operator(contentFilter.categories, descriptor)
