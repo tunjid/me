@@ -143,7 +143,8 @@ val ArchiveItem.Result.prettyDate: String
 @Serializable
 data class QueryState(
     val expanded: Boolean = false,
-    val rootQuery: ArchiveQuery,
+    val startQuery: ArchiveQuery,
+    val currentQuery: ArchiveQuery,
     val categoryText: Descriptor.Category = Descriptor.Category(""),
     val tagText: Descriptor.Tag = Descriptor.Tag(""),
 )
@@ -192,7 +193,8 @@ fun archiveMutator(
             )
         ),
         queryState = QueryState(
-            rootQuery = route.query,
+            startQuery = route.query,
+            currentQuery = route.query,
         )
     ),
     started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 2000),
@@ -315,11 +317,12 @@ private fun Flow<Action.Fetch>.fetchMutations(repo: ArchiveRepository): Flow<Mut
                 copy(
                     items = items,
                     queryState = queryState.copy(
-                        rootQuery = when {
-                            fetchAction.reset -> queryState.rootQuery.copy(
+                        currentQuery = fetchResult.action.query,
+                        startQuery = when {
+                            fetchAction.reset -> queryState.startQuery.copy(
                                 contentFilter = fetchAction.query.contentFilter
                             )
-                            else -> queryState.rootQuery
+                            else -> queryState.startQuery
                         },
                         expanded = when {
                             fetchAction.reset -> true

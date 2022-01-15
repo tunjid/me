@@ -101,7 +101,7 @@ private fun ArchiveScreen(
 ) {
     val state by mutator.state.collectAsState()
     val isInNavRail = state.isInNavRail
-    val query = state.queryState.rootQuery
+    val query = state.queryState.startQuery
     if (!isInNavRail) InitialUiState(
         UiState(
             toolbarShows = true,
@@ -172,7 +172,7 @@ private fun ArchiveScreen(
                         ArchiveQuery(
                             kind = query.kind,
                             temporalFilter = query.temporalFilter,
-                            contentFilter = state.queryState.rootQuery.contentFilter,
+                            contentFilter = state.queryState.startQuery.contentFilter,
                             offset = it.queryOffset
                         )
                     )
@@ -182,7 +182,7 @@ private fun ArchiveScreen(
 
     // Initial load
     LaunchedEffect(query) {
-        mutator.accept(Action.Fetch(query = query))
+        mutator.accept(Action.Fetch(query = state.queryState.currentQuery))
     }
 
     // Data is loaded in chunks, in case the lower section loads before the upper section
@@ -423,7 +423,10 @@ private fun PreviewArchiveCard() {
 private fun PreviewLoadingState() {
     ArchiveScreen(
         mutator = State(
-            queryState = QueryState(rootQuery = ArchiveQuery(kind = Articles)),
+            queryState = QueryState(
+                startQuery = ArchiveQuery(kind = Articles),
+                currentQuery = ArchiveQuery(kind = Articles),
+            ),
             items = listOf(
                 ArchiveItem.Loading(
                     isCircular = true,
