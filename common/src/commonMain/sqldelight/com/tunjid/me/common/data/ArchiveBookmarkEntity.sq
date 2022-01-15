@@ -3,4 +3,4 @@ CREATE TABLE IF NOT EXISTS archiveBookmarkEntity (
     FOREIGN KEY(archive_id) REFERENCES archiveEntity(id)
 );
 
-CREATE UNIQUE INDEX archiveBookmarkEntity_archiveId ON archiveBookmarkEntity(archive_id);
+CREATE UNIQUE INDEX IF NOT EXISTS archiveBookmarkEntity_archiveId ON archiveBookmarkEntity(archive_id);

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS archiveCategory (
     FOREIGN KEY(archive_id) REFERENCES archiveEntity(id)
 );
 
-CREATE UNIQUE INDEX archiveCategory_category ON archiveCategory(category);
+CREATE UNIQUE INDEX IF NOT EXISTS archiveCategory_category ON archiveCategory(category);
 
 find:
 SELECT category

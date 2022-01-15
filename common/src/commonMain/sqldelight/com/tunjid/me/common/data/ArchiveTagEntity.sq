@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS archiveTag (
     FOREIGN KEY(archive_id) REFERENCES archiveEntity(id)
 );
 
-CREATE UNIQUE INDEX archiveTag_tag ON archiveTag(tag);
+CREATE UNIQUE INDEX IF NOT EXISTS archiveTag_tag ON archiveTag(tag);
 
 find:
 SELECT tag
