@@ -54,18 +54,17 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        watchActivityLifecycle()
-    }
 
-    private fun watchActivityLifecycle() {
         val appMutator = appDependencies.appMutator
         val byteSerializer = appDependencies.byteSerializer
+
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             private fun updateStatus(isInForeground: Boolean) =
                 appMutator.accept(AppAction.AppStatus(isInForeground = isInForeground))
 
             override fun onActivityCreated(p0: Activity, bundle: Bundle?) {
                 updateStatus(isInForeground = true)
+
                 val serializedNav: ByteSerializableNav = bundle
                     ?.getByteArray(NavName)
                     ?.let(byteSerializer::fromBytes) ?: return

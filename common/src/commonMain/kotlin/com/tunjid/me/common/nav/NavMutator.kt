@@ -22,7 +22,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.archive.ArchiveKind
 import com.tunjid.me.common.data.archive.ArchiveQuery
 import com.tunjid.me.common.data.archive.icon
@@ -31,7 +30,6 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.treenav.MultiStackNav
-import com.tunjid.treenav.Route
 import com.tunjid.treenav.StackNav
 import com.tunjid.treenav.canGoUp
 import com.tunjid.treenav.current
@@ -47,7 +45,6 @@ import kotlinx.serialization.Serializable
 const val NavName = "App"
 
 typealias NavMutator = Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
-
 
 interface AppRoute<T> : ByteSerializableRoute {
     @Composable

@@ -16,28 +16,21 @@
 
 package com.tunjid.me.common.data
 
-import com.tunjid.me.common.nav.ByteSerializableRoute
-import com.tunjid.me.common.ui.archive.ArchiveRoute
-import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import kotlinx.serialization.BinaryFormat
-import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
-import kotlinx.serialization.serializer
-import kotlin.reflect.KClass
 
 /**
  * A declaration for type that can be serialized as bytes.
  * Currently does this using CBOR; Protobufs were evaluated but they're too terse an don't work
  * very well for preserving information for lists or maps
  */
-interface ByteSerializable {
-    fun cleanUpForByteSerialization() = this
-}
+interface ByteSerializable
 
+/**
+ * Serializes a [ByteSerializable] to a [ByteArray] and deserializes a [ByteArray] back into
+ * its original type
+ */
 interface ByteSerializer {
     val format: BinaryFormat
 }

@@ -69,18 +69,7 @@ fun createAppDependencies(
 ) = object : AppDependencies {
     val routeMutatorFactory = mutableMapOf<AppRoute<*>, ScopeHolder>()
 
-    val api: Api = Api(HttpClient {
-        install(JsonFeature) {
-            accept(ContentType.Application.Json, ContentType.Text.Html)
-            serializer = KotlinxSerializer(json = Json { ignoreUnknownKeys = true })
-        }
-        install(Logging) {
-            level = LogLevel.INFO
-            logger = object : Logger {
-                override fun log(message: String) = println("Logger Ktor => $message")
-            }
-        }
-    })
+    val api: Api = Api(httpClient())
 
     val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
         api = api,
@@ -183,4 +172,17 @@ fun stubAppDependencies(
 
     override fun <T> routeDependencies(route: AppRoute<T>): T =
         TODO("Not yet implemented")
+}
+
+private fun httpClient() = HttpClient {
+    install(JsonFeature) {
+        accept(ContentType.Application.Json, ContentType.Text.Html)
+        serializer = KotlinxSerializer(json = Json { ignoreUnknownKeys = true })
+    }
+    install(Logging) {
+        level = LogLevel.INFO
+        logger = object : Logger {
+            override fun log(message: String) = println("Logger Ktor => $message")
+        }
+    }
 }
