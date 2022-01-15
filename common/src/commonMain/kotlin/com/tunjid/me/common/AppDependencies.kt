@@ -96,6 +96,10 @@ fun createAppDependencies(
                     subclass(ArchiveRoute::class)
                     subclass(ArchiveDetailRoute::class)
                 }
+                polymorphic(ByteSerializable::class) {
+                    subclass(com.tunjid.me.common.ui.archive.State::class)
+                    subclass(com.tunjid.me.common.ui.archivedetail.State::class)
+                }
             }
         }
     )
