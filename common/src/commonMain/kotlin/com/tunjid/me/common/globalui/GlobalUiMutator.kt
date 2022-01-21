@@ -28,5 +28,5 @@ fun globalUiMutator(scope: CoroutineScope, initialState: UiState = UiState()): G
     stateFlowMutator(
         scope = scope,
         initialState = initialState,
-        transform = { it }
+        actionTransform = { it }
     )

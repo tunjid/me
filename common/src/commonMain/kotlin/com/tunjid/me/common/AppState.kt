@@ -19,9 +19,9 @@ package com.tunjid.me.common
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.NavMutator
-import com.tunjid.me.common.ui.asNoOpStateFlowMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
+import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.treenav.MultiStackNav
@@ -131,7 +131,7 @@ private fun backingAppMutator(
         nav = navMutator.state.value,
         ui = globalUiMutator.state.value,
     ),
-    transform = { actions ->
+    actionTransform = { actions ->
         merge(
             navMutator.state.map {
                 Mutation { copy(nav = it) }

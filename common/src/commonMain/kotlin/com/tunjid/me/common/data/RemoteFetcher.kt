@@ -47,7 +47,7 @@ private class BackOffFetcher<Query, Item>(
 
     val requests = MutableSharedFlow<Tile.Request<Query, Item>>()
 
-    val queryTiler: (Flow<Tile.Input<Query, Item>>) -> Flow<List<Item>> =
+    val queryTiler: (Flow<Tile.Input.List<Query, Item>>) -> Flow<List<Item>> =
         tiledList { query ->
             networkMonitor
                 .isConnected

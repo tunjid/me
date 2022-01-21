@@ -57,7 +57,7 @@ fun archiveDetailMutator(
         navBarSize = appMutator.globalUiMutator.state.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(2000),
-    transform = {
+    actionTransform = {
         merge<Mutation<State>>(
             appMutator.globalUiMutator.state
                 .map { it.navBarSize }

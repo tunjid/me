@@ -102,7 +102,7 @@ fun navMutator(scope: CoroutineScope): NavMutator =
     stateFlowMutator(
         scope = scope,
         initialState = startNav,
-        transform = { it }
+        actionTransform = { it }
     )
 
 fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AppRoute<*>>> =

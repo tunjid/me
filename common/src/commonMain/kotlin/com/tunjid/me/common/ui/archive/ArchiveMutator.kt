@@ -34,8 +34,8 @@ import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.Tile.Input
-import com.tunjid.tiler.flattenWith
 import com.tunjid.tiler.tiledList
+import com.tunjid.tiler.toTiledList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.TimeZone
@@ -198,7 +198,7 @@ fun archiveMutator(
         )
     ),
     started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 2000),
-    transform = { actions ->
+    actionTransform = { actions ->
         merge(
             appMutator.navRailStatusMutations(),
             actions.toMutationStream {
@@ -333,13 +333,11 @@ private fun Flow<Action.Fetch>.fetchMutations(repo: ArchiveRepository): Flow<Mut
             }
         }
 
-private fun ArchiveRepository.archiveTiler(): (Flow<Input<ArchiveQuery, List<ArchiveItem>>>) -> Flow<List<List<ArchiveItem>>> =
+private fun ArchiveRepository.archiveTiler(): (Flow<Input.List<ArchiveQuery, List<ArchiveItem>>>) -> Flow<List<List<ArchiveItem>>> =
     tiledList(
-        flattener = Tile.Flattener.PivotSorted(
-            comparator = compareBy(ArchiveQuery::offset),
-            // Limit results to at most 4 pages at once
-            limiter = { pages -> pages.size > 4 }
-        ),
+        // Limit results to at most 4 pages at once
+        limiter = Tile.Limiter.List { pages -> pages.size > 4 },
+        order = Tile.Order.PivotSorted(comparator = compareBy(ArchiveQuery::offset)),
         fetcher = { query ->
             monitorArchives(query).map<List<Archive>, List<ArchiveItem>> { archives ->
                 archives.map { archive ->
@@ -371,7 +369,7 @@ private fun Flow<Action.Fetch>.toFetchResult(repo: ArchiveRepository): Flow<Fetc
 
             (toTurnOn + toTurnOff + toEvict).asFlow()
         }
-            .flattenWith(repo.archiveTiler()),
+            .toTiledList(repo.archiveTiler()),
         transform = ::FetchResult
     )
 

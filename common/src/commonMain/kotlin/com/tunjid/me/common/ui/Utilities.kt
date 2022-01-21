@@ -87,13 +87,6 @@ object UiSizes {
 
 infix fun Dp.countIf(condition: Boolean) = if (condition) this else 0.dp
 
-infix fun Int.countIf(condition: Boolean) = if (condition) this else 0
-
-fun <R : Any, T : Any> T.asNoOpStateFlowMutator() = object : Mutator<R, StateFlow<T>> {
-    override val accept: (R) -> Unit = {}
-    override val state: StateFlow<T> = MutableStateFlow(this@asNoOpStateFlowMutator)
-}
-
 private fun <T, R> StateFlow<T>.mapState(scope: CoroutineScope, mapper: (T) -> R) =
     map { mapper(it) }
         .distinctUntilChanged()

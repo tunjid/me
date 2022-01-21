@@ -24,8 +24,8 @@ okhttp = "4.9.3"
 retrofit = "2.9.0"
 richtext = "0.10.0"
 sqldelight = "1.5.3"
-tunjidMutator = "0.0.0-alpha03"
-tunjidTiler = "0.0.0-alpha03"
+tunjidMutator = "0.0.1"
+tunjidTiler = "0.0.1"
 tunjidTreeNav = "0.0.0-alpha01"
 
 [libraries]
