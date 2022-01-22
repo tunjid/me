@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.LinearProgressIndicator
@@ -34,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
@@ -318,6 +320,12 @@ private fun RowScope.ArchiveCard(
                 )
                 Spacer(Modifier.height(8.dp))
                 ArchiveBlurb(archiveItem = archiveItem)
+                Spacer(Modifier.height(24.dp))
+                ArchiveCardFooter(
+                    authorImageUrl = archiveItem.archive.author.imageUrl,
+                    authorName = archiveItem.archive.author.fullName,
+                    timeToRead = archiveItem.readTime
+                )
                 Spacer(Modifier.height(8.dp))
             }
         }
@@ -380,6 +388,51 @@ private fun ArchiveBlurb(archiveItem: ArchiveItem.Result) {
             fontSize = 15.sp,
         )
     }
+}
+
+@Composable
+private fun ArchiveCardFooter(
+    authorImageUrl: String?,
+    authorName: String,
+    timeToRead: String,
+) {
+    Row(
+        modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            val modifier = Modifier
+                .size(24.dp)
+            val painter = archivePainter(authorImageUrl)
+
+            if (painter != null) {
+                Image(
+                    painter = painter,
+                    contentScale = ContentScale.Crop,
+                    contentDescription = null,
+                    modifier = modifier.clip(CircleShape)
+
+                )
+                Spacer(Modifier.width(8.dp))
+            } else Box(modifier = modifier)
+
+            Text(
+                modifier = Modifier.wrapContentWidth(),
+                text = authorName,
+                fontSize = 16.sp,
+            )
+        }
+        Text(
+            modifier = Modifier.wrapContentWidth(),
+            text = timeToRead,
+            fontSize = 12.sp,
+        )
+    }
+
 }
 
 private val sampleArchiveItem = ArchiveItem.Result(

@@ -140,6 +140,8 @@ val ArchiveItem.Result.prettyDate: String
         return "${dateTime.dayOfWeek} ${dateTime.monthNumber} ${dateTime.year}"
     }
 
+val ArchiveItem.Result.readTime get() = "${archive.body.trim().split("/\\s+/").size / 250} min read"
+
 @Serializable
 data class QueryState(
     val expanded: Boolean = false,
