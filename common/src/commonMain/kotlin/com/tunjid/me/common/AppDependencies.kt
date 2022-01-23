@@ -27,6 +27,7 @@ import com.tunjid.me.common.nav.ByteSerializableRoute
 import com.tunjid.me.common.nav.navMutator
 import com.tunjid.me.common.nav.removedRoutes
 import com.tunjid.me.common.ui.archive.ArchiveRoute
+import com.tunjid.me.common.ui.archive.State
 import com.tunjid.me.common.ui.archive.archiveMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
@@ -66,21 +67,30 @@ fun createAppDependencies(
     initialUiState: UiState = UiState(),
     database: AppDatabase,
     networkMonitor: NetworkMonitor,
-) = object : AppDependencies {
+): AppDependencies = AppModule(
+    appDatabase = database,
+    networkMonitor = networkMonitor,
+    appScope = appScope,
+    initialUiState = initialUiState
+)
+
+private class AppModule(
+    override val appDatabase: AppDatabase,
+    override val networkMonitor: NetworkMonitor,
+    appScope: CoroutineScope,
+    initialUiState: UiState
+) : AppDependencies {
+
     val routeMutatorFactory = mutableMapOf<AppRoute<*>, ScopeHolder>()
 
     val api: Api = Api(httpClient())
 
     val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
         api = api,
-        database = database,
+        database = appDatabase,
         dispatcher = databaseDispatcher(),
         networkMonitor = networkMonitor
     )
-
-    override val networkMonitor: NetworkMonitor = networkMonitor
-
-    override val appDatabase: AppDatabase = database
 
     override val appMutator: AppMutator = appMutator(
         scope = appScope,
@@ -97,7 +107,7 @@ fun createAppDependencies(
                     subclass(ArchiveDetailRoute::class)
                 }
                 polymorphic(ByteSerializable::class) {
-                    subclass(com.tunjid.me.common.ui.archive.State::class)
+                    subclass(State::class)
                     subclass(com.tunjid.me.common.ui.archivedetail.State::class)
                 }
             }
