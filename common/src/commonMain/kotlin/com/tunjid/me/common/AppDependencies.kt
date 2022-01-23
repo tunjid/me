@@ -87,6 +87,7 @@ private class AppModule(
 
     val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
         api = api,
+        appScope = appScope,
         database = appDatabase,
         dispatcher = databaseDispatcher(),
         networkMonitor = networkMonitor

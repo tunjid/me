@@ -23,8 +23,6 @@ import com.tunjid.me.common.data.remoteFetcher
 import com.tunjid.tiler.Tile
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onCompletion
@@ -37,11 +35,12 @@ interface ArchiveRepository {
 
 /**
  * An implementation of [ArchiveRepository] that uses reactive pull. The long term goal
- * is to have a oub sub infrastructure such that when an entity changes on the server, the
+ * is to have a pub sub infrastructure such that when an entity changes on the server, the
  * app is notified and it pull it in.
  */
 class ReactiveArchiveRepository(
     private val api: Api,
+    appScope: CoroutineScope,
     database: AppDatabase,
     networkMonitor: NetworkMonitor,
     dispatcher: CoroutineDispatcher,
@@ -54,15 +53,15 @@ class ReactiveArchiveRepository(
     )
 
     private val remoteArchivesFetcher = remoteFetcher(
-        scope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+        scope = appScope,
         fetch = ::fetchArchives,
         save = localArchiveRepository::saveArchives,
         networkMonitor = networkMonitor
     )
 
     private val remoteArchiveFetcher = remoteFetcher(
-        scope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
-        fetch = { (kind, id): Pair<ArchiveKind, String> -> api.fetchArchive(kind = kind, id = id)},
+        scope = appScope,
+        fetch = { (kind, id): Pair<ArchiveKind, String> -> api.fetchArchive(kind = kind, id = id) },
         save = localArchiveRepository::saveArchive,
         networkMonitor = networkMonitor
     )
