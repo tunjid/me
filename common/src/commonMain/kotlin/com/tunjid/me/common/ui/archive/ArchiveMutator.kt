@@ -137,7 +137,7 @@ val ArchiveItem.key: String
 val ArchiveItem.Result.prettyDate: String
     get() {
         val dateTime = archive.created.toLocalDateTime(TimeZone.currentSystemDefault())
-        return "${dateTime.dayOfWeek} ${dateTime.monthNumber} ${dateTime.year}"
+        return "${dateTime.month.name} ${dateTime.monthNumber} ${dateTime.year}"
     }
 
 val ArchiveItem.Result.readTime get() = "${archive.body.trim().split("/\\s+/").size / 250} min read"

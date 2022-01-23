@@ -382,7 +382,7 @@ private fun ArchiveBlurb(archiveItem: ArchiveItem.Result) {
             text = archiveItem.archive.title,
             fontSize = 18.sp,
         )
-        Spacer(modifier = Modifier.padding(vertical = 2.dp))
+        Spacer(modifier = Modifier.padding(vertical = 8.dp))
         Text(
             text = archiveItem.archive.description,
             fontSize = 15.sp,
