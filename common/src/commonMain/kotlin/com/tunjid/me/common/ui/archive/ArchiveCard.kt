@@ -42,7 +42,6 @@ import com.tunjid.me.common.data.archive.Descriptor
 import com.tunjid.me.common.data.archive.User
 import com.tunjid.me.common.data.archive.plus
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
-import com.tunjid.treenav.Route
 import kotlinx.datetime.Clock
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -95,18 +94,9 @@ fun ArchiveRow(
             when (item) {
                 is ArchiveItem.Loading -> ProgressBar(isCircular = item.isCircular)
                 is ArchiveItem.Result -> ArchiveCard(
+                    isInNavRail = isInNavRail,
                     archiveItem = item,
-                    onAction = onAction,
-                    onNavAction = { route ->
-                        onAction(
-                            Action.Navigate(
-                                when {
-                                    isInNavRail -> AppAction.Nav.swap(route)
-                                    else -> AppAction.Nav.push(route)
-                                }
-                            )
-                        )
-                    }
+                    onAction = onAction
                 )
             }
         }
@@ -115,19 +105,25 @@ fun ArchiveRow(
 
 @Composable
 private fun RowScope.ArchiveCard(
+    isInNavRail: Boolean,
     archiveItem: ArchiveItem.Result,
-    onAction: (Action) -> Unit,
-    onNavAction: (Route) -> Unit
+    onAction: (Action) -> Unit
 ) {
     Card(
         modifier = Modifier
             .weight(1F)
             .padding(16.dp),
         onClick = {
-            onNavAction(
-                ArchiveDetailRoute(
-                    kind = archiveItem.archive.kind,
-                    archiveId = archiveItem.archive.id
+            val route = ArchiveDetailRoute(
+                kind = archiveItem.archive.kind,
+                archiveId = archiveItem.archive.id
+            )
+            onAction(
+                Action.Navigate(
+                    when {
+                        isInNavRail -> AppAction.Nav.swap(route)
+                        else -> AppAction.Nav.push(route)
+                    }
                 )
             )
         },
