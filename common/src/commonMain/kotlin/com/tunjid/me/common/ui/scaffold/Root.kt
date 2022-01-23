@@ -28,7 +28,7 @@ import com.tunjid.me.common.LocalAppDependencies
 import com.tunjid.me.common.component1
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.nav.Route404
-import com.tunjid.me.common.ui.mappedCollectAsState
+import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.current
 

@@ -50,7 +50,7 @@ import com.tunjid.me.common.globalui.toolbarState
 import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.Route404
 import com.tunjid.me.common.nav.canGoUp
-import com.tunjid.me.common.ui.mappedCollectAsState
+import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 import com.tunjid.mutator.accept
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.StackNav
