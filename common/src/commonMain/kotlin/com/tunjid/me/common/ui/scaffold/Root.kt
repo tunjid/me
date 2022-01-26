@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import com.tunjid.me.common.AppDependencies
 import com.tunjid.me.common.LocalAppDependencies
@@ -38,32 +39,36 @@ import com.tunjid.treenav.current
 @Composable
 fun Root(dependencies: AppDependencies) {
     CompositionLocalProvider(LocalAppDependencies provides dependencies) {
+        val saveableStateHolder = rememberSaveableStateHolder()
         val appMutator = LocalAppDependencies.current.appMutator
         val (navMutator) = appMutator
 
         val route by navMutator.state.mappedCollectAsState(mapper = MultiStackNav::current)
+        val renderedRoute = route as? AppRoute<*> ?: Route404
 
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            AppNavRail(
-                appMutator = appMutator,
-            )
-            AppToolbar(
-                appMutator = appMutator,
-            )
-            AppRouteContainer(
-                appMutator = appMutator,
-                content = {
-                    Crossfade(
-                        targetState = route as? AppRoute<*> ?: Route404,
-                        content = { it.Render() }
-                    )
-                }
-            )
-            AppBottomNav(
-                appMutator = appMutator,
-            )
+            saveableStateHolder.SaveableStateProvider(renderedRoute.id) {
+                AppNavRail(
+                    appMutator = appMutator,
+                )
+                AppToolbar(
+                    appMutator = appMutator,
+                )
+                AppRouteContainer(
+                    appMutator = appMutator,
+                    content = {
+                        Crossfade(
+                            targetState = renderedRoute,
+                            content = { it.Render() }
+                        )
+                    }
+                )
+                AppBottomNav(
+                    appMutator = appMutator,
+                )
+            }
         }
     }
 }

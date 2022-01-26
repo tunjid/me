@@ -51,7 +51,6 @@ data class State(
     val shouldScrollToTop: Boolean = true,
     val isInNavRail: Boolean = false,
     val queryState: QueryState,
-    val listStateSummary: ListState = ListState(),
     @Transient
     val items: List<ArchiveItem> = listOf()
 ) : ByteSerializable
@@ -97,8 +96,6 @@ sealed class Action {
         val reset: Boolean = false
     ) : Action()
 
-    data class UpdateListState(val listState: ListState) : Action()
-
     data class FilterChanged(
         val descriptor: Descriptor
     ) : Action()
@@ -130,8 +127,8 @@ sealed class ArchiveItem {
 
 val ArchiveItem.key: String
     get() = when (this) {
-        is ArchiveItem.Loading -> query.toString()
-        is ArchiveItem.Result -> archive.id
+        is ArchiveItem.Loading -> "header-$query"
+        is ArchiveItem.Result -> "result-${archive.id}"
     }
 
 val ArchiveItem.Result.prettyDate: String
@@ -207,7 +204,6 @@ fun archiveMutator(
                 when (val action = type()) {
                     is Action.Fetch -> action.flow.fetchMutations(repo = repo)
                     is Action.Navigate -> action.flow.map { it.navAction }.consumeWith(appMutator)
-                    is Action.UpdateListState -> action.flow.updateListStateMutations()
                     is Action.FilterChanged -> action.flow.filterChangedMutations()
                     is Action.ToggleFilter -> action.flow.filterToggleMutations()
                     is Action.UserScrolled -> action.flow.resetScrollMutations()
@@ -224,11 +220,6 @@ private fun AppMutator.navRailStatusMutations() = state.map { appState ->
     .distinctUntilChanged()
     .map {
         Mutation<State> { copy(isInNavRail = it) }
-    }
-
-private fun Flow<Action.UpdateListState>.updateListStateMutations(): Flow<Mutation<State>> =
-    map { (listState) ->
-        Mutation { copy(listStateSummary = listState) }
     }
 
 private fun Flow<Action.FilterChanged>.filterChangedMutations(): Flow<Mutation<State>> =

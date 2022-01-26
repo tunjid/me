@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,7 +38,6 @@ import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.scan
-import kotlinx.coroutines.flow.takeWhile
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
 import kotlin.math.max
@@ -92,12 +90,7 @@ private fun ArchiveScreen(
 
     val filter = state.queryState
     val chunkedItems = state.chunkedItems
-    val listStateSummary = state.listStateSummary
-
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = listStateSummary.firstVisibleItemIndex,
-        initialFirstVisibleItemScrollOffset = listStateSummary.firstVisibleItemScrollOffset
-    )
+    val listState = rememberLazyListState()
 
     Column {
         ArchiveFilters(
@@ -162,35 +155,6 @@ private fun ArchiveScreen(
     // Initial load
     LaunchedEffect(query) {
         mutator.accept(Action.Fetch(query = state.queryState.currentQuery))
-    }
-
-    // Data is loaded in chunks, in case the lower section loads before the upper section
-    // scroll to the upper section
-    val size = state.items.size
-    val shouldScrollToTop = state.shouldScrollToTop
-    val startScrollPosition = state.listStateSummary.firstVisibleItemIndex
-
-    LaunchedEffect(shouldScrollToTop, startScrollPosition, size) {
-        snapshotFlow { Triple(shouldScrollToTop, startScrollPosition, size) }
-            .distinctUntilChangedBy { it.third }
-            .takeWhile { it.first }
-            .collect {
-                listState.scrollToItem(it.second)
-            }
-    }
-
-    // Scroll state preservation
-    DisposableEffect(query) {
-        onDispose {
-            mutator.accept(
-                Action.UpdateListState(
-                    ListState(
-                        firstVisibleItemIndex = listState.firstVisibleItemIndex,
-                        firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset,
-                    )
-                )
-            )
-        }
     }
 }
 
