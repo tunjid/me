@@ -87,6 +87,7 @@ val State.chunkedItems: List<List<ArchiveItem>>
             }
         }
         if (chunk.isNotEmpty()) result.add(chunk)
+        println(items.map { it.query .offset}.distinct())
         return result
     }
 
@@ -356,7 +357,8 @@ private fun Flow<Action.Fetch>.toFetchResult(repo: ArchiveRepository): Flow<Fetc
 
             (toTurnOn + toTurnOff + toEvict).asFlow()
         }
-            .toTiledList(repo.archiveTiler()),
+            .toTiledList(repo.archiveTiler())
+            .debounce(150),
         transform = ::FetchResult
     )
 
