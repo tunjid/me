@@ -160,16 +160,14 @@ private fun onChipFilterChanged(
 ): (ChipAction) -> Unit = {
     when (it) {
         ChipAction.Added -> onChanged(
-            Action.Fetch(
+            Action.Fetch.Reset(
                 query = state.startQuery + reader(state),
-                reset = true
             )
         )
         is ChipAction.Changed -> onChanged(Action.FilterChanged(writer(it.text)))
         is ChipAction.Removed -> onChanged(
-            Action.Fetch(
+            Action.Fetch.Reset(
                 query = state.startQuery - writer(it.text),
-                reset = true
             )
         )
     }

@@ -87,29 +87,35 @@ val State.chunkedItems: List<List<ArchiveItem>>
             }
         }
         if (chunk.isNotEmpty()) result.add(chunk)
-        println(items.map { it.query .offset}.distinct())
         return result
     }
 
-sealed class Action {
-    data class Fetch(
-        val query: ArchiveQuery,
-        val reset: Boolean = false
-    ) : Action()
+sealed class Action(val key: String) {
+    sealed class Fetch : Action(key = "Fetch") {
+        abstract val query: ArchiveQuery
+
+        data class Reset(
+            override val query: ArchiveQuery
+        ) : Fetch()
+
+        data class LoadMore(
+            override val query: ArchiveQuery
+        ) : Fetch()
+    }
 
     data class FilterChanged(
         val descriptor: Descriptor
-    ) : Action()
+    ) : Action(key = "FilterChanged")
 
     data class Navigate(
         val navAction: AppAction.Nav
-    ) : Action()
+    ) : Action(key = "Navigate")
 
-    data class GridSize(val size: Int) : Action()
+    data class GridSize(val size: Int) : Action(key = "GridSize")
 
-    data class ToggleFilter(val isExpanded: Boolean? = null) : Action()
+    data class ToggleFilter(val isExpanded: Boolean? = null) : Action(key = "ToggleFilter")
 
-    object UserScrolled : Action()
+    object UserScrolled : Action(key = "UserScrolled")
 }
 
 sealed class ArchiveItem {
@@ -195,9 +201,9 @@ fun archiveMutator(
     actionTransform = { actions ->
         merge(
             appMutator.navRailStatusMutations(),
-            actions.toMutationStream {
+            actions.toMutationStream(keySelector = Action::key) {
                 when (val action = type()) {
-                    is Action.Fetch -> action.flow.fetchMutations(repo = repo)
+                    is Action.Fetch -> action.flow.fetchMutations(scope = scope, repo = repo)
                     is Action.Navigate -> action.flow.map { it.navAction }.consumeWith(appMutator)
                     is Action.FilterChanged -> action.flow.filterChangedMutations()
                     is Action.ToggleFilter -> action.flow.filterToggleMutations()
@@ -275,51 +281,56 @@ private fun Flow<Action.UserScrolled>.resetScrollMutations(): Flow<Mutation<Stat
             }
         }
 
-private fun Flow<Action.Fetch>.fetchMutations(repo: ArchiveRepository): Flow<Mutation<State>> =
-    toFetchResult(repo = repo)
-        .map { fetchResult ->
-            Mutation {
-                val fetchAction = fetchResult.action
-                val items = when {
-                    fetchResult.hasNoResults -> when {
-                        // Fetch action is reset, show a loading spinner
-                        fetchAction.reset -> listOf(
-                            ArchiveItem.Loading(
-                                isCircular = true,
-                                query = fetchAction.query
-                            )
+private fun Flow<Action.Fetch>.fetchMutations(
+    scope: CoroutineScope,
+    repo: ArchiveRepository
+): Flow<Mutation<State>> = toFetchResult(
+    scope = scope,
+    repo = repo
+)
+    .map { fetchResult ->
+        Mutation {
+            val fetchAction = fetchResult.action
+            val items = when {
+                fetchResult.hasNoResults -> when (fetchAction) {
+                    // Fetch action is reset, show a loading spinner
+                    is Action.Fetch.Reset -> listOf(
+                        ArchiveItem.Loading(
+                            isCircular = true,
+                            query = fetchAction.query
                         )
-                        // The mutator was just resubscribed to, show existing items
-                        else -> items
-                    }
-                    else -> fetchResult.flattenedArchives
-                }
-                    // Filtering is cheap because at most 4 * [DefaultQueryLimit] items
-                    // are ever sent to the UI
-                    .filter { item ->
-                        when (item) {
-                            is ArchiveItem.Loading -> true
-                            is ArchiveItem.Result -> item.query.contentFilter == fetchAction.query.contentFilter
-                        }
-                    }
-                copy(
-                    items = items,
-                    queryState = queryState.copy(
-                        currentQuery = fetchResult.action.query,
-                        startQuery = when {
-                            fetchAction.reset -> queryState.startQuery.copy(
-                                contentFilter = fetchAction.query.contentFilter
-                            )
-                            else -> queryState.startQuery
-                        },
-                        expanded = when {
-                            fetchAction.reset -> true
-                            else -> queryState.expanded
-                        }
                     )
-                )
+                    // The mutator was just resubscribed to, show existing items
+                    else -> items
+                }
+                else -> fetchResult.flattenedArchives
             }
+                // Filtering is cheap because at most 4 * [DefaultQueryLimit] items
+                // are ever sent to the UI
+                .filter { item ->
+                    when (item) {
+                        is ArchiveItem.Loading -> true
+                        is ArchiveItem.Result -> item.query.contentFilter == fetchAction.query.contentFilter
+                    }
+                }
+            copy(
+                items = items,
+                queryState = queryState.copy(
+                    currentQuery = fetchResult.action.query,
+                    startQuery = when (fetchAction) {
+                        is Action.Fetch.Reset -> queryState.startQuery.copy(
+                            contentFilter = fetchAction.query.contentFilter
+                        )
+                        else -> queryState.startQuery
+                    },
+                    expanded = when (fetchAction) {
+                        is Action.Fetch.Reset -> true
+                        else -> queryState.expanded
+                    }
+                )
+            )
         }
+    }
 
 private fun ArchiveRepository.archiveTiler(): (Flow<Input.List<ArchiveQuery, List<ArchiveItem>>>) -> Flow<List<List<ArchiveItem>>> =
     tiledList(
@@ -341,50 +352,63 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Input.List<ArchiveQuery, Lis
         }
     )
 
-private fun Flow<Action.Fetch>.toFetchResult(repo: ArchiveRepository): Flow<FetchResult> =
+private fun Flow<Action.Fetch>.toFetchResult(
+    scope: CoroutineScope,
+    repo: ArchiveRepository
+): Flow<FetchResult> = shareIn(
+    scope = scope,
+    started = SharingStarted.WhileSubscribed(),
+    replay = 1
+).let { sharedFlow ->
     combine(
-        flow = this@toFetchResult,
-        flow2 = fetchMetadata().flatMapLatest { (previousQueries, currentQueries, evictions) ->
-            val toTurnOn = currentQueries
-                .map { Tile.Request.On<ArchiveQuery, List<ArchiveItem>>(it) }
+        flow = sharedFlow,
+        flow2 = sharedFlow
+            .fetchMetadata()
+            .flatMapLatest { (previousQueries, currentQueries, evictions) ->
+                val toTurnOn = currentQueries
+                    .map { Tile.Request.On<ArchiveQuery, List<ArchiveItem>>(it) }
 
-            val toTurnOff = previousQueries
-                .filterNot { currentQueries.contains(it) }
-                .map { Tile.Request.Off<ArchiveQuery, List<ArchiveItem>>(it) }
+                val toTurnOff = previousQueries
+                    .filterNot { currentQueries.contains(it) }
+                    .map { Tile.Request.Off<ArchiveQuery, List<ArchiveItem>>(it) }
 
-            val toEvict = evictions
-                .map { Tile.Request.Evict<ArchiveQuery, List<ArchiveItem>>(it) }
+                val toEvict = evictions
+                    .map { Tile.Request.Evict<ArchiveQuery, List<ArchiveItem>>(it) }
 
-            (toTurnOn + toTurnOff + toEvict).asFlow()
-        }
+                (toTurnOn + toTurnOff + toEvict).asFlow()
+            }
             .toTiledList(repo.archiveTiler())
             .debounce(150),
         transform = ::FetchResult
     )
+}
 
 private fun Flow<Action.Fetch>.fetchMetadata(): Flow<FetchMetadata> =
-    map { (query, shouldReset) ->
-        shouldReset to listOf(
+    scan(FetchMetadata()) { existingQueries, fetchAction ->
+        val query = fetchAction.query
+        val shouldReset = fetchAction is Action.Fetch.Reset
+        val newQueries = listOf(
             query.copy(offset = query.offset - query.limit),
             query.copy(offset = query.offset + query.limit),
             query
         )
             .filter { it.offset >= 0 }
-    }
-        .scan(FetchMetadata()) { existingQueries, (shouldReset, currentQueries) ->
-            val currentlyInMemory = (existingQueries.inMemory + currentQueries).distinct()
-            val toEvict = if (shouldReset) existingQueries.inMemory else when (val min =
-                currentQueries.minByOrNull(ArchiveQuery::offset)) {
-                null -> listOf()
-                // Evict items more than 3 offset pages behind the min current query
-                else -> currentlyInMemory.filter {
-                    it.offset - min.offset < -(DefaultQueryLimit * 3)
-                }
+
+        val currentlyInMemory = (existingQueries.inMemory + newQueries).distinct()
+
+        // Evict all queries in memory if we're resetting, else trim for against memory pressure
+        val toEvict = if (shouldReset) existingQueries.inMemory else when (val min =
+            newQueries.minByOrNull(ArchiveQuery::offset)) {
+            null -> listOf()
+            // Evict items more than 3 offset pages behind the min current query
+            else -> currentlyInMemory.filter {
+                it.offset - min.offset < -(DefaultQueryLimit * 3)
             }
-            existingQueries.copy(
-                previousQueries = if (shouldReset) listOf() else existingQueries.currentQueries,
-                currentQueries = currentQueries,
-                inMemory = currentlyInMemory - toEvict.toSet(),
-                toEvict = toEvict
-            )
         }
+        existingQueries.copy(
+            previousQueries = if (shouldReset) listOf() else existingQueries.currentQueries,
+            currentQueries = newQueries,
+            inMemory = currentlyInMemory - toEvict.toSet(),
+            toEvict = toEvict
+        )
+    }

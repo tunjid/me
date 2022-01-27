@@ -140,7 +140,7 @@ private fun ArchiveScreen(
                 mutator.accept(Action.UserScrolled)
                 mutator.accept(Action.ToggleFilter(isExpanded = false))
                 mutator.accept(
-                    Action.Fetch(
+                    Action.Fetch.LoadMore(
                         ArchiveQuery(
                             kind = query.kind,
                             temporalFilter = query.temporalFilter,
@@ -154,7 +154,7 @@ private fun ArchiveScreen(
 
     // Initial load
     LaunchedEffect(query) {
-        mutator.accept(Action.Fetch(query = state.queryState.currentQuery))
+        mutator.accept(Action.Fetch.LoadMore(query = state.queryState.currentQuery))
     }
 }
 

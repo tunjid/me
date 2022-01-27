@@ -137,9 +137,8 @@ private fun RowScope.ArchiveCard(
                     onCategoryClicked = { category ->
                         val query = archiveItem.query
                         onAction(
-                            Action.Fetch(
+                            Action.Fetch.Reset(
                                 query = query.copy(offset = 0) + Descriptor.Category(category),
-                                reset = true
                             )
                         )
                     }
