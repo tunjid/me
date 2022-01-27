@@ -27,6 +27,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -51,6 +52,7 @@ import com.tunjid.treenav.switch
 @Composable
 fun AppNavRail(
     appMutator: AppMutator,
+    saveableStateHolder: SaveableStateHolder,
 ) {
     val (navMutator, globalUiMutator) = appMutator
 
@@ -94,7 +96,10 @@ fun AppNavRail(
             Box(
                 modifier = Modifier.width(navRailContentWidth)
             ) {
-                if (navRailVisible) navState.navRailRoute?.Render()
+                val route = navState.navRailRoute
+                saveableStateHolder.SaveableStateProvider(key = "nav-rail-${route?.id}") {
+                    if (navRailVisible) route?.Render()
+                }
             }
         }
     }

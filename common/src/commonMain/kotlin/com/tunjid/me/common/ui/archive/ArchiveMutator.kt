@@ -148,12 +148,6 @@ data class QueryState(
     val tagText: Descriptor.Tag = Descriptor.Tag(""),
 )
 
-@Serializable
-data class ListState(
-    val firstVisibleItemIndex: Int = 0,
-    val firstVisibleItemScrollOffset: Int = 0
-)
-
 /**
  * A summary of the loading queries in the app
  */

@@ -49,13 +49,14 @@ fun Root(dependencies: AppDependencies) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
+            AppNavRail(
+                appMutator = appMutator,
+                saveableStateHolder = saveableStateHolder,
+            )
+            AppToolbar(
+                appMutator = appMutator,
+            )
             saveableStateHolder.SaveableStateProvider(renderedRoute.id) {
-                AppNavRail(
-                    appMutator = appMutator,
-                )
-                AppToolbar(
-                    appMutator = appMutator,
-                )
                 AppRouteContainer(
                     appMutator = appMutator,
                     content = {
@@ -65,10 +66,10 @@ fun Root(dependencies: AppDependencies) {
                         )
                     }
                 )
-                AppBottomNav(
-                    appMutator = appMutator,
-                )
             }
+            AppBottomNav(
+                appMutator = appMutator,
+            )
         }
     }
 }
