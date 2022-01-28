@@ -62,7 +62,7 @@ private fun ScrollState.updateDirection(new: ScrollState) = new.copy(
 @Serializable
 data class ArchiveRoute(val query: ArchiveQuery) : AppRoute<ArchiveMutator> {
     override val id: String
-        get() = query.toString()
+        get() = "archive-route-${query.kind}"
 
     @Composable
     override fun Render() {

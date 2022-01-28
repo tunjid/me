@@ -17,16 +17,9 @@
 package com.tunjid.me.common
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.tunjid.me.common.data.Api
-import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.ByteSerializer
-import com.tunjid.me.common.data.DelegatingByteSerializer
-import com.tunjid.me.common.data.NetworkMonitor
+import com.tunjid.me.common.data.*
 import com.tunjid.me.common.data.archive.ArchiveRepository
 import com.tunjid.me.common.data.archive.ReactiveArchiveRepository
-import com.tunjid.me.common.data.databaseDispatcher
-import com.tunjid.me.common.data.fromBytes
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.globalUiMutator
 import com.tunjid.me.common.nav.AppRoute
@@ -39,13 +32,11 @@ import com.tunjid.me.common.ui.archive.archiveMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
 import com.tunjid.treenav.MultiStackNav
-import io.ktor.client.HttpClient
+import io.ktor.client.*
 import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.features.logging.LogLevel
-import io.ktor.client.features.logging.Logger
-import io.ktor.client.features.logging.Logging
-import io.ktor.http.ContentType
+import io.ktor.client.features.json.serializer.*
+import io.ktor.client.features.logging.*
+import io.ktor.http.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -168,8 +159,15 @@ private class AppModule(
         else -> throw IllegalArgumentException("Unknown route")
     }.mutator as T
 
-    private inline fun <reified T : ByteSerializable> AppRoute<*>.restoredState(): T? =
-        appMutator.state.value.routeIdsToSerializedStates[id]?.let(byteSerializer::fromBytes)
+    private inline fun <reified T : ByteSerializable> AppRoute<*>.restoredState(): T? {
+        return try {
+            // TODO: Figure out why this throws
+            val serialized = appMutator.state.value.routeIdsToSerializedStates[id]
+            serialized?.let(byteSerializer::fromBytes)
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
 
 val LocalAppDependencies = staticCompositionLocalOf {

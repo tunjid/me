@@ -34,9 +34,24 @@ import kotlinx.serialization.Serializable
 class SavedState(
     val navigation: ByteArray,
     val routeStates: Map<String, ByteArray>
-): ByteSerializable
+): ByteSerializable {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
 
-private const val NavKey = "com.tunjid.me.nav"
+        other as SavedState
+
+        if (!navigation.contentEquals(other.navigation)) return false
+        if (routeStates.keys != other.routeStates.keys) return false
+        return routeStates.values.map { it } != other.routeStates.values.map { it }
+    }
+
+    override fun hashCode(): Int {
+        var result = navigation.contentHashCode()
+        result = 31 * result + routeStates.hashCode()
+        return result
+    }
+}
 
 fun AppDependencies.saveState(): SavedState {
     val multiStackNav = appMutator.navMutator.state.value
@@ -58,11 +73,9 @@ fun AppDependencies.saveState(): SavedState {
 }
 
 fun AppDependencies.restore(savedState: SavedState) {
-    val serializedNav: ByteSerializableNav = byteSerializer.fromBytes(savedState.navigation)
-    val multiStackNav = serializedNav.toMultiStackNav
-
     appMutator.navMutator.accept {
-        multiStackNav
+        val serializedNav: ByteSerializableNav = byteSerializer.fromBytes(savedState.navigation)
+        serializedNav.toMultiStackNav
     }
     appMutator.accept(
         AppAction.RestoreSerializedStates(

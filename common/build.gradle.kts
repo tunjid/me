@@ -84,6 +84,11 @@ kotlin {
                 implementation(libs.square.sqldelight.driver.jvm)
             }
         }
+        named("commonTest") {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
         all {
             languageSettings.apply {
                 optIn("androidx.compose.animation.ExperimentalAnimationApi")
