@@ -47,7 +47,7 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 
 @Composable
-private fun ProgressBar(isCircular: Boolean) {
+fun ProgressBar(isCircular: Boolean) {
     Box(
         modifier = Modifier
             .padding(vertical = 24.dp)
@@ -70,48 +70,13 @@ private fun ProgressBar(isCircular: Boolean) {
 }
 
 @Composable
-fun ArchiveRow(
-    isInNavRail: Boolean,
-    items: List<ArchiveItem>,
-    onAction: (Action) -> Unit
-) {
-    val minCardWidthPx = with(LocalDensity.current) {
-        350.dp.toPx()
-    }
-    Row(
-        modifier = Modifier
-            .wrapContentHeight()
-            .wrapContentWidth()
-            .onGloballyPositioned {
-                onAction(
-                    Action.GridSize(
-                        size = max(1, (it.size.width / minCardWidthPx).roundToInt())
-                    )
-                )
-            }
-    ) {
-        items.forEach { item ->
-            when (item) {
-                is ArchiveItem.Loading -> ProgressBar(isCircular = item.isCircular)
-                is ArchiveItem.Result -> ArchiveCard(
-                    isInNavRail = isInNavRail,
-                    archiveItem = item,
-                    onAction = onAction
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun RowScope.ArchiveCard(
+fun ArchiveCard(
     isInNavRail: Boolean,
     archiveItem: ArchiveItem.Result,
     onAction: (Action) -> Unit
 ) {
     Card(
         modifier = Modifier
-            .weight(1F)
             .padding(16.dp),
         onClick = {
             val route = ArchiveDetailRoute(
@@ -285,13 +250,3 @@ private val sampleArchiveItem = ArchiveItem.Result(
 
 @Composable
 expect fun archivePainter(imageUrl: String?): Painter?
-
-//@Preview
-@Composable
-private fun PreviewArchiveCard() {
-    ArchiveRow(
-        isInNavRail = false,
-        items = listOf(sampleArchiveItem),
-        onAction = { }
-    )
-}

@@ -17,9 +17,11 @@
 package com.tunjid.me.common.ui.archive
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.GridItemSpan
+import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.LocalAppDependencies
 import com.tunjid.me.common.data.archive.ArchiveKind
 import com.tunjid.me.common.data.archive.ArchiveQuery
@@ -89,44 +92,58 @@ private fun ArchiveScreen(
     )
 
     val filter = state.queryState
-    val chunkedItems = state.chunkedItems
-    val listState = rememberLazyListState()
+    val items = state.items
+    val gridState = rememberLazyGridState()
 
     Column {
         ArchiveFilters(
             item = filter,
             onChanged = mutator.accept
         )
-        // TODO: Replace the chunking logic with a lazy grid once that has support for keys
-        LazyColumn(state = listState) {
-            items(
-                items = chunkedItems,
-                key = { it.first().key },
-                itemContent = { chunk ->
-                    ArchiveRow(
-                        isInNavRail = isInNavRail,
-                        items = chunk,
-                        onAction = mutator.accept
-                    )
-                }
-            )
-        }
+        LazyVerticalGrid(
+            state = gridState,
+            cells = GridCells.Adaptive(350.dp),
+            content = {
+                items(
+                    items = items,
+                    key = { it.key },
+                    span = { item ->
+                        mutator.accept(Action.GridSize(maxCurrentLineSpan))
+                        when (item) {
+                            is ArchiveItem.Result -> GridItemSpan(1)
+                            is ArchiveItem.Loading -> GridItemSpan(maxCurrentLineSpan)
+                        }
+                    },
+                    itemContent = { item ->
+                        when (item) {
+                            is ArchiveItem.Loading -> ProgressBar(isCircular = item.isCircular)
+                            is ArchiveItem.Result -> ArchiveCard(
+                                isInNavRail = isInNavRail,
+                                archiveItem = item,
+                                onAction = mutator.accept
+                            )
+                        }
+                    }
+                )
+            }
+        )
     }
 
     // Endless scrolling
-    LaunchedEffect(listState, chunkedItems) {
+    LaunchedEffect(gridState, items) {
         snapshotFlow {
             ScrollState(
-                scrollOffset = listState.firstVisibleItemScrollOffset,
+                scrollOffset = gridState.firstVisibleItemScrollOffset,
                 queryOffset = max(
-                    (chunkedItems.getOrNull(listState.firstVisibleItemIndex)
-                        ?.lastOrNull() as? ArchiveItem.Result)
+                    items.getOrNull(
+                        gridState.firstVisibleItemIndex
+                    )
                         ?.query
                         ?.offset
                         ?: 0,
-                    (chunkedItems.getOrNull(
-                        listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    )?.lastOrNull() as? ArchiveItem.Result)
+                    items.getOrNull(
+                        gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    )
                         ?.query
                         ?.offset
                         ?: 0

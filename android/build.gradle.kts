@@ -48,15 +48,15 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.1.0-rc02"
+        kotlinCompilerExtensionVersion = "1.2.0-alpha02"
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
         freeCompilerArgs = freeCompilerArgs + listOf(
             "-Xuse-experimental=androidx.compose.animation.ExperimentalAnimationApi",
             "-Xuse-experimental=androidx.compose.material.ExperimentalMaterialApi",
@@ -82,7 +82,16 @@ dependencies {
     implementation(libs.compose.foundation.layout)
     implementation(libs.compose.material)
     implementation(libs.compose.animation)
-    implementation(libs.compose.ui.tooling)
+    implementation(libs.compose.runtime)
+    implementation(libs.compose.ui.util)
+
+//    val composeVersion = "1.2.0-alpha02"
+//    implementation("androidx.compose.foundation:foundation:$composeVersion")
+//    implementation("androidx.compose.material:material:$composeVersion")
+//    implementation("androidx.compose.animation:animation:$composeVersion")
+//    implementation("androidx.compose.runtime:runtime:$composeVersion")
+//    implementation("androidx.compose.animation:animation:$composeVersion")
+
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.datetime)

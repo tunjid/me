@@ -55,41 +55,6 @@ data class State(
     val items: List<ArchiveItem> = listOf()
 ) : ByteSerializable
 
-// TODO: Remove this when LazyVerticalGrid supports item keys and span size lookups
-/**
- * Chunks the items fetched to be laid out in a grid. Loading items are in singleton list
- * since the must span an entire row
- */
-val State.chunkedItems: List<List<ArchiveItem>>
-    get() {
-        val result = mutableListOf<List<ArchiveItem>>()
-        var chunk = mutableListOf<ArchiveItem>()
-        val iterator = items.iterator()
-        while (iterator.hasNext()) {
-            when (val next = iterator.next()) {
-                is ArchiveItem.Result -> {
-                    if (chunk.size < gridSize) chunk.add(next)
-                    else {
-                        result.add(chunk)
-                        chunk = mutableListOf(next)
-                    }
-                }
-                // Loading spinners take up the full span
-                is ArchiveItem.Loading -> when (val lastChunk = result.lastOrNull()) {
-                    null -> result.add(listOf(next))
-                    else -> when (lastChunk.firstOrNull()) {
-                        // Don't show two consecutive loading indicators
-                        is ArchiveItem.Loading -> Unit
-                        is ArchiveItem.Result,
-                        null -> result.add(listOf(next))
-                    }
-                }
-            }
-        }
-        if (chunk.isNotEmpty()) result.add(chunk)
-        return result
-    }
-
 sealed class Action(val key: String) {
     sealed class Fetch : Action(key = "Fetch") {
         abstract val query: ArchiveQuery
