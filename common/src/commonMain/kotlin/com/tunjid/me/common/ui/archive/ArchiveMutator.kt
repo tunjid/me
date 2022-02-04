@@ -37,6 +37,7 @@ import com.tunjid.tiler.Tile.Input
 import com.tunjid.tiler.tiledList
 import com.tunjid.tiler.toTiledList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -51,6 +52,8 @@ data class State(
     val shouldScrollToTop: Boolean = true,
     val isInNavRail: Boolean = false,
     val queryState: QueryState,
+    @Transient
+    val lastVisibleKey: Any? = null,
     @Transient
     val items: List<ArchiveItem> = listOf()
 ) : ByteSerializable
@@ -80,7 +83,7 @@ sealed class Action(val key: String) {
 
     data class ToggleFilter(val isExpanded: Boolean? = null) : Action(key = "ToggleFilter")
 
-    object UserScrolled : Action(key = "UserScrolled")
+    data class LastVisibleKey(val itemKey: Any) : Action(key = "LastVisibleKey")
 }
 
 sealed class ArchiveItem {
@@ -97,11 +100,42 @@ sealed class ArchiveItem {
     ) : ArchiveItem()
 }
 
-val ArchiveItem.key: String
-    get() = when (this) {
-        is ArchiveItem.Loading -> "header-$query"
-        is ArchiveItem.Result -> "result-${archive.id}"
+private class ItemKey(
+    val key: String,
+    val query: ArchiveQuery
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as ItemKey
+
+        if (key != other.key) return false
+        if (query != other.query) return false
+
+        return true
     }
+
+    override fun hashCode(): Int {
+        var result = key.hashCode()
+        result = 31 * result + query.hashCode()
+        return result
+    }
+}
+
+val ArchiveItem.key: Any
+    get() = when (this) {
+        is ArchiveItem.Loading -> ItemKey(
+            key = "header-$query",
+            query = query
+        )
+        is ArchiveItem.Result -> ItemKey(
+            key = "result-${archive.id}",
+            query = query
+        )
+    }
+
+val Any.queryFromKey get() = if(this is ItemKey) this.query else null
 
 val ArchiveItem.Result.prettyDate: String
     get() {
@@ -135,7 +169,9 @@ private data class FetchResult(
     val queriedArchives: List<List<ArchiveItem>>
 )
 
-private val FetchResult.flattenedArchives get() = queriedArchives.flatten()
+private val FetchResult.flattenedArchives get() = queriedArchives
+    .flatten()
+    .distinctBy { it.key }
 
 private val FetchResult.hasNoResults
     get() = queriedArchives.isEmpty() || queriedArchives.all {
@@ -162,7 +198,7 @@ fun archiveMutator(
             currentQuery = route.query,
         )
     ),
-    started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 2000),
+    started = SharingStarted.WhileSubscribed(),
     actionTransform = { actions ->
         merge(
             appMutator.navRailStatusMutations(),
@@ -172,7 +208,7 @@ fun archiveMutator(
                     is Action.Navigate -> action.flow.map { it.navAction }.consumeWith(appMutator)
                     is Action.FilterChanged -> action.flow.filterChangedMutations()
                     is Action.ToggleFilter -> action.flow.filterToggleMutations()
-                    is Action.UserScrolled -> action.flow.resetScrollMutations()
+                    is Action.LastVisibleKey -> action.flow.resetScrollMutations()
                     is Action.GridSize -> action.flow.gridSizeMutations()
                 }
             }
@@ -238,11 +274,11 @@ private fun Flow<Action.GridSize>.gridSizeMutations(): Flow<Mutation<State>> =
             }
         }
 
-private fun Flow<Action.UserScrolled>.resetScrollMutations(): Flow<Mutation<State>> =
+private fun Flow<Action.LastVisibleKey>.resetScrollMutations(): Flow<Mutation<State>> =
     distinctUntilChanged()
         .map {
             Mutation {
-                copy(shouldScrollToTop = false)
+                copy(lastVisibleKey = it.itemKey)
             }
         }
 
@@ -304,6 +340,7 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Input.List<ArchiveQuery, Lis
         order = Tile.Order.PivotSorted(comparator = compareBy(ArchiveQuery::offset)),
         fetcher = { query ->
             monitorArchives(query).map<List<Archive>, List<ArchiveItem>> { archives ->
+                delay(3000)
                 archives.map { archive ->
                     ArchiveItem.Result(
                         archive = archive,

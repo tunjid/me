@@ -38,29 +38,10 @@ import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.utilities.InitialUiState
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
-import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.Serializable
-import kotlin.math.abs
-import kotlin.math.max
-
-private data class ScrollState(
-    val scrollOffset: Int = 0,
-    val dy: Int = 0,
-    val queryOffset: Int = 0,
-    val isDownward: Boolean = true,
-)
-
-private fun ScrollState.updateDirection(new: ScrollState) = new.copy(
-    queryOffset = new.queryOffset,
-    dy = new.scrollOffset - scrollOffset,
-    isDownward = when {
-        abs(new.scrollOffset - scrollOffset) > 10 -> isDownward
-        else -> new.scrollOffset > scrollOffset
-    }
-)
-
+import kotlin.math.min
 
 @Serializable
 data class ArchiveRoute(val query: ArchiveQuery) : AppRoute<ArchiveMutator> {
@@ -129,49 +110,40 @@ private fun ArchiveScreen(
         )
     }
 
-    // Endless scrolling
-    LaunchedEffect(gridState, items) {
-        snapshotFlow {
-            ScrollState(
-                scrollOffset = gridState.firstVisibleItemScrollOffset,
-                queryOffset = max(
-                    items.getOrNull(
-                        gridState.firstVisibleItemIndex
-                    )
-                        ?.query
-                        ?.offset
-                        ?: 0,
-                    items.getOrNull(
-                        gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    )
-                        ?.query
-                        ?.offset
-                        ?: 0
-                )
-            )
-        }
-            .scan(ScrollState(), ScrollState::updateDirection)
-            .filter { abs(it.dy) > 4 }
-            .distinctUntilChangedBy(ScrollState::queryOffset)
-            .collect {
-                mutator.accept(Action.UserScrolled)
-                mutator.accept(Action.ToggleFilter(isExpanded = false))
-                mutator.accept(
-                    Action.Fetch.LoadMore(
-                        ArchiveQuery(
-                            kind = query.kind,
-                            temporalFilter = query.temporalFilter,
-                            contentFilter = state.queryState.startQuery.contentFilter,
-                            offset = it.queryOffset
-                        )
-                    )
-                )
-            }
-    }
-
     // Initial load
     LaunchedEffect(query) {
         mutator.accept(Action.Fetch.LoadMore(query = state.queryState.currentQuery))
+    }
+
+    // Endless scrolling
+    LaunchedEffect(gridState) {
+        snapshotFlow { gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.key }
+            .filterNotNull()
+            .distinctUntilChanged()
+            .collect { firstVisibleKey ->
+                mutator.accept(Action.ToggleFilter(isExpanded = false))
+                mutator.accept(Action.LastVisibleKey(firstVisibleKey))
+                firstVisibleKey.queryFromKey?.let { query ->
+                    mutator.accept(
+                        Action.Fetch.LoadMore(query = query)
+                    )
+                }
+            }
+    }
+
+    // Keep list in sync between navbar and destination pages
+    LaunchedEffect(true) {
+        val key = state.lastVisibleKey ?: return@LaunchedEffect
+        // Item is on screen do nothing
+        if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) return@LaunchedEffect
+
+        val indexOfKey = items.indexOfFirst { it.key == key }
+        if (indexOfKey < 0) return@LaunchedEffect
+
+        gridState.scrollToItem(
+            index = min(indexOfKey + 1, gridState.layoutInfo.totalItemsCount - 1),
+            scrollOffset = 400
+        )
     }
 }
 

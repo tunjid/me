@@ -204,7 +204,9 @@ private fun httpClient() = HttpClient {
     install(Logging) {
         level = LogLevel.INFO
         logger = object : Logger {
-            override fun log(message: String) = println("Logger Ktor => $message")
+            override fun log(message: String) {
+//                println("Logger Ktor => $message")
+            }
         }
     }
 }
