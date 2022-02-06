@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS archiveEntity (
     description TEXT NOT NULL,
     thumbnail TEXT,
     author TEXT NOT NULL,
+    likes INTEGER NOT NULL DEFAULT 0,
     created INTEGER NOT NULL,
     kind TEXT NOT NULL,
     FOREIGN KEY(author) REFERENCES userEntity(id)
@@ -43,14 +44,15 @@ FROM archiveEntity
 WHERE id IN :ids;
 
 upsert:
-INSERT INTO archiveEntity (id, link, title, description, body, thumbnail, author, created, kind)
-VALUES (:id, :link, :title, :description, :body, :thumbnail, :author, :created, :kind)
+INSERT INTO archiveEntity (id, link, title, description, body, thumbnail, author, created, kind, likes)
+VALUES (:id, :link, :title, :description, :body, :thumbnail, :author, :created, :kind, :likes)
 ON CONFLICT(id) DO UPDATE SET
     link=excluded.link,
     title=excluded.title,
     description=excluded.description,
     body=excluded.body,
     thumbnail=excluded.thumbnail,
+    likes=excluded.likes,
     author=excluded.author,
     created=excluded.created,
     created=excluded.created;

@@ -83,6 +83,7 @@ internal class ArchiveDataStore(
             body = archiveEntity.body,
             created = archiveEntity.created,
             link = archiveEntity.link,
+            likes = archiveEntity.likes,
             author = userEntity.id,
             kind = archiveEntity.kind,
         )
@@ -150,6 +151,7 @@ internal class ArchiveDataStore(
                 title = archiveEntity.title,
                 description = archiveEntity.description,
                 thumbnail = archiveEntity.thumbnail,
+                likes = archiveEntity.likes,
                 kind = ArchiveKind.values().first { it.type == archiveEntity.kind },
                 created = Instant.fromEpochMilliseconds(archiveEntity.created),
                 body = archiveEntity.body,

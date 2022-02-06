@@ -24,7 +24,6 @@ import com.tunjid.tiler.Tile
 import com.tunjid.tiler.tiledList
 import com.tunjid.tiler.toTiledList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 
 data class FetchResult(
@@ -80,7 +79,7 @@ fun Flow<Action.Fetch>.toFetchResult(
  * Converts a query to fetch data to a window to monitor multiple queries concurrently
  */
 private fun Flow<Action.Fetch>.fetchMetadata(): Flow<FetchMetadata> =
-    distinctUntilChanged()
+distinctUntilChanged()
         .scan(FetchMetadata()) { existingQueries, fetchAction ->
         val query = fetchAction.query
         val shouldReset = fetchAction is Action.Fetch.Reset

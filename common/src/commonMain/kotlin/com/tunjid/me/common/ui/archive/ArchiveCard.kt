@@ -30,8 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.AppAction
@@ -43,8 +41,6 @@ import com.tunjid.me.common.data.archive.User
 import com.tunjid.me.common.data.archive.plus
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import kotlinx.datetime.Clock
-import kotlin.math.max
-import kotlin.math.roundToInt
 
 @Composable
 fun ProgressBar(isCircular: Boolean) {
@@ -114,7 +110,8 @@ fun ArchiveCard(
                 ArchiveCardFooter(
                     authorImageUrl = archiveItem.archive.author.imageUrl,
                     authorName = archiveItem.archive.author.fullName,
-                    timeToRead = archiveItem.readTime
+                    timeToRead = archiveItem.readTime,
+                    likeCount = archiveItem.archive.likes
                 )
                 Spacer(Modifier.height(8.dp))
             }
@@ -185,44 +182,43 @@ private fun ArchiveCardFooter(
     authorImageUrl: String?,
     authorName: String,
     timeToRead: String,
+    likeCount: Long,
 ) {
     Row(
         modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically,
+        val height = 40.dp
+        val modifier = Modifier
+            .size(height)
+        val painter = archivePainter(authorImageUrl)
+
+        if (painter != null) {
+            Image(
+                painter = painter,
+                contentScale = ContentScale.Crop,
+                contentDescription = null,
+                modifier = modifier.clip(CircleShape)
+            )
+            Spacer(Modifier.width(8.dp))
+        } else Box(modifier = modifier)
+        Column(
+            modifier = Modifier.height(height),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            val modifier = Modifier
-                .size(24.dp)
-            val painter = archivePainter(authorImageUrl)
-
-            if (painter != null) {
-                Image(
-                    painter = painter,
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                    modifier = modifier.clip(CircleShape)
-
-                )
-                Spacer(Modifier.width(8.dp))
-            } else Box(modifier = modifier)
-
             Text(
                 modifier = Modifier.wrapContentWidth(),
                 text = authorName,
                 fontSize = 16.sp,
             )
+            Text(
+                modifier = Modifier.wrapContentWidth(),
+                text = "$likeCount ❤️ • $timeToRead",
+                fontSize = 12.sp,
+            )
         }
-        Text(
-            modifier = Modifier.wrapContentWidth(),
-            text = timeToRead,
-            fontSize = 12.sp,
-        )
     }
-
 }
 
 private val sampleArchiveItem = ArchiveItem.Result(
@@ -245,6 +241,7 @@ private val sampleArchiveItem = ArchiveItem.Result(
         tags = listOf(),
         categories = listOf("Android", "Kotlin"),
         kind = Articles,
+        likes = 1L
     )
 )
 

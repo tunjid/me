@@ -43,6 +43,7 @@ data class Archive(
     val description: String,
     val thumbnail: String?,
     val author: User,
+    val likes: Long,
     @Serializable(LocalDateTimeSerializer::class)
     val created: Instant,
     val tags: List<String>,

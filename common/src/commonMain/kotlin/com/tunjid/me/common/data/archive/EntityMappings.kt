@@ -47,5 +47,6 @@ internal val Archive.toEntity
         author = author.id,
         created = created.toEpochMilliseconds(),
         kind = kind.type,
-        link = link
+        link = link,
+        likes = likes,
     )
