@@ -31,25 +31,17 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Instant
 
-interface ArchiveDatastore {
-    fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
-    fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive?>
-    suspend fun saveArchives(archives: List<Archive>)
-}
-
-suspend fun ArchiveDatastore.saveArchive(archive: Archive) = saveArchives(listOf(archive))
-
-internal class SqlArchiveDatastore(
+internal class ArchiveDataStore(
     database: AppDatabase,
     private val dispatcher: CoroutineDispatcher,
-) : ArchiveDatastore {
+) {
 
     private val archiveQueries = database.archiveEntityQueries
     private val archiveTagQueries = database.archiveTagEntityQueries
     private val archiveCategoryQueries = database.archiveCategoryEntityQueries
     private val archiveAuthorQueries = database.userEntityQueries
 
-    override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
+    fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
         when {
             query.hasContentFilter -> contentFilteredArchives(query)
             else -> archives(query)
@@ -57,7 +49,7 @@ internal class SqlArchiveDatastore(
             .flatMapLatest { archiveEntities -> archiveEntitiesToArchives(archiveEntities) }
             .distinctUntilChanged()
 
-    override fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive?> =
+    fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive?> =
         archiveQueries.get(
             id = id,
             kind = kind.type
@@ -67,13 +59,12 @@ internal class SqlArchiveDatastore(
             .flatMapLatest { it?.let(::archiveEntityToArchive) ?: flowOf(null) }
             .distinctUntilChanged()
 
-    override suspend fun saveArchives(archives: List<Archive>) {
+    suspend fun saveArchives(archives: List<Archive>) =
         archiveAuthorQueries.suspendingTransaction(context = dispatcher) {
             archives.map(::saveArchive)
         }
-    }
 
-    private fun saveArchive(archive: Archive) {
+    fun saveArchive(archive: Archive) {
         val userEntity = archive.author.toEntity
         val archiveEntity = archive.toEntity
 
