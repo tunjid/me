@@ -51,8 +51,9 @@ actual class NetworkMonitor(scope: CoroutineScope) {
         )
         .map {
             exponentialBackoff(
-                delayMillis = 1000,
-                maximumExponent = 5
+                initialDelay = 1_000,
+                maxDelay = 20_000,
+                default = false,
             ) {
                 HttpClient()
                     .use {

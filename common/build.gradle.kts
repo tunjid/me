@@ -58,7 +58,7 @@ kotlin {
         }
         named("androidMain") {
             dependencies {
-                implementation(libs.arkivanov.essenty.parcelable)
+                implementation(project(":serverEvents"))
 
                 implementation(libs.accompanist.flowlayout)
 
@@ -79,6 +79,9 @@ kotlin {
         }
         named("desktopMain") {
             dependencies {
+                implementation(project(":serverEvents"))
+                implementation(libs.socketio.client.jvm)
+
                 implementation(libs.ktor.client.java)
 
                 implementation(libs.square.sqldelight.driver.jvm)

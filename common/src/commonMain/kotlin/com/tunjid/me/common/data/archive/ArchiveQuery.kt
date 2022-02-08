@@ -96,7 +96,7 @@ private fun <T : Descriptor> descriptorSerializer(creator: (String) -> T) =
     object : KSerializer<T> {
         override val descriptor = PrimitiveSerialDescriptor("Descriptor", PrimitiveKind.STRING)
         override fun serialize(encoder: Encoder, value: T) =
-            encoder.encodeString(value.value).also { println("Serializing") }
+            encoder.encodeString(value.value)
 
         override fun deserialize(decoder: Decoder): T = creator(decoder.decodeString())
     }

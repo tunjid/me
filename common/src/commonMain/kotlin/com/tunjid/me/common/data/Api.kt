@@ -22,10 +22,11 @@ import com.tunjid.me.common.data.archive.Descriptor
 import io.ktor.client.*
 import io.ktor.client.request.*
 
+const val ApiUrl = "https://www.tunjid.com"
 
 class Api(
     private val client: HttpClient,
-    private val baseUrl: String = "https://www.tunjid.com"
+    private val baseUrl: String = ApiUrl
 ) {
     suspend fun fetchArchives(
         kind: ArchiveKind,

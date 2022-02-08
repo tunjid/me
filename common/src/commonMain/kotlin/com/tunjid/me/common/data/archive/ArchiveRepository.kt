@@ -17,11 +17,9 @@
 package com.tunjid.me.common.data.archive
 
 import com.tunjid.me.common.data.Api
-import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.NetworkMonitor
 import com.tunjid.me.common.data.remoteFetcher
 import com.tunjid.tiler.Tile
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
@@ -41,38 +39,31 @@ interface ArchiveRepository {
 class ReactiveArchiveRepository(
     private val api: Api,
     appScope: CoroutineScope,
-    database: AppDatabase,
     networkMonitor: NetworkMonitor,
-    dispatcher: CoroutineDispatcher,
+    private val datastore: ArchiveDatastore
 ) : ArchiveRepository {
-
-    // TODO: This should be an interface that is passed in so it can be mocked in tests
-    private val localArchiveRepository = ArchiveDataStore(
-        database,
-        dispatcher
-    )
 
     private val remoteArchivesFetcher = remoteFetcher(
         scope = appScope,
         fetch = ::fetchArchives,
-        save = localArchiveRepository::saveArchives,
+        save = datastore::saveArchives,
         networkMonitor = networkMonitor
     )
 
     private val remoteArchiveFetcher = remoteFetcher(
         scope = appScope,
         fetch = { (kind, id): Pair<ArchiveKind, String> -> api.fetchArchive(kind = kind, id = id) },
-        save = localArchiveRepository::saveArchive,
+        save = datastore::saveArchive,
         networkMonitor = networkMonitor
     )
 
     override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
-        localArchiveRepository.monitorArchives(query)
+        datastore.monitorArchives(query)
             .onStart { remoteArchivesFetcher(Tile.Request.On(query)) }
             .onCompletion { remoteArchivesFetcher(Tile.Request.Evict(query)) }
 
     override fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive> =
-        localArchiveRepository.monitorArchive(kind = kind, id = id)
+        datastore.monitorArchive(kind = kind, id = id)
             .onStart { remoteArchiveFetcher(Tile.Request.On(kind to id)) }
             .onCompletion { remoteArchiveFetcher(Tile.Request.Evict(kind to id)) }
             .filterNotNull()

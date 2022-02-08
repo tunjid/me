@@ -18,8 +18,12 @@ package com.tunjid.me.common
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.common.data.*
+import com.tunjid.me.common.data.archive.ArchiveDatastore
+import com.tunjid.me.common.data.archive.SqlArchiveDatastore
+import com.tunjid.me.common.data.archive.ArchiveKind
 import com.tunjid.me.common.data.archive.ArchiveRepository
 import com.tunjid.me.common.data.archive.ReactiveArchiveRepository
+import com.tunjid.me.common.data.archive.saveArchive
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.globalUiMutator
 import com.tunjid.me.common.nav.AppRoute
@@ -42,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.json.Json
@@ -54,6 +59,8 @@ interface AppDependencies {
     val appMutator: AppMutator
     val networkMonitor: NetworkMonitor
     val byteSerializer: ByteSerializer
+    val archiveRepository: ArchiveRepository
+    val archiveDatastore: ArchiveDatastore
     fun <T> routeDependencies(route: AppRoute<T>): T
 }
 
@@ -85,12 +92,16 @@ private class AppModule(
 
     val api: Api = Api(httpClient())
 
-    val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
-        api = api,
-        appScope = appScope,
+    override val archiveDatastore = SqlArchiveDatastore(
         database = appDatabase,
         dispatcher = databaseDispatcher(),
-        networkMonitor = networkMonitor
+    )
+
+    override val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
+        api = api,
+        appScope = appScope,
+        networkMonitor = networkMonitor,
+        datastore = archiveDatastore
     )
 
     override val appMutator: AppMutator = appMutator(
@@ -125,6 +136,31 @@ private class AppModule(
                         val holder = routeMutatorFactory.remove(route)
                         holder?.scope?.cancel()
                     }
+                }
+        }
+
+        appScope.launch {
+            modelEvents(
+                url = "$ApiUrl/",
+                dispatcher = databaseDispatcher()
+            )
+                .mapNotNull { event ->
+                    val kind = when (event.collection) {
+                        ArchiveKind.Articles.type -> ArchiveKind.Articles
+                        ArchiveKind.Talks.type -> ArchiveKind.Talks
+                        ArchiveKind.Projects.type -> ArchiveKind.Projects
+                        else -> null
+                    } ?: return@mapNotNull null
+
+                    exponentialBackoff(
+                        initialDelay = 1_000,
+                        maxDelay = 20_000,
+                        times = 5,
+                        default = null
+                    ) { api.fetchArchive(kind = kind, id = event.id) }
+                }
+                .collect {
+                    archiveDatastore.saveArchive(it)
                 }
         }
     }
@@ -182,6 +218,12 @@ fun stubAppDependencies(
         get() = TODO("Not yet implemented")
 
     override val byteSerializer: ByteSerializer
+        get() = TODO("Not yet implemented")
+
+    override val archiveRepository: ArchiveRepository
+        get() = TODO("Not yet implemented")
+
+    override val archiveDatastore: ArchiveDatastore
         get() = TODO("Not yet implemented")
 
     override val networkMonitor: NetworkMonitor

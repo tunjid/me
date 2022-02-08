@@ -18,10 +18,10 @@ package com.tunjid.me.common.data
 
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.tiledList
+import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlin.math.min
 
 /**
  * Fetches [Item] from [fetch] using [Query] and saves it with [save]
@@ -53,10 +53,11 @@ private class BackOffFetcher<Query, Item>(
                 .isConnected
                 .filter { it }
                 .distinctUntilChanged()
-                .map {
+                .mapNotNull {
                     exponentialBackoff(
-                        delayMillis = 1000,
-                        maximumExponent = 4
+                        initialDelay = 1_000,
+                        maxDelay = 20_000,
+                        default = null,
                     ) { fetch(query) }
                 }
                 .take(1)
@@ -71,25 +72,22 @@ private class BackOffFetcher<Query, Item>(
 }
 
 suspend fun <T> exponentialBackoff(
-    delayMillis: Long,
-    maximumExponent: Int = Int.MAX_VALUE,
-    body: suspend () -> T
+    times: Int = Int.MAX_VALUE,
+    initialDelay: Long = 100,
+    maxDelay: Long = 1000,
+    factor: Double = 2.0,
+    default: T,
+    block: suspend () -> T
 ): T {
-    var result: T? = null
-    var iteration = 0
-    while (result == null) {
-        if (iteration++ != 0) {
-            val exponent = min(iteration, maximumExponent)
-            val multiplier = (1 shl exponent).toLong()
-            delay(delayMillis * multiplier)
-        }
+    var currentDelay = initialDelay
+    repeat(times) {
         try {
-            result = body()
-        } catch (exception: Throwable) {
-            println("Error backing off")
-            exception.printStackTrace()
+            return block()
+        } catch (e: IOException) {
         }
+        delay(currentDelay)
+        currentDelay = (currentDelay * factor).toLong().coerceAtMost(maxDelay)
     }
-    return result
+    return default
 }
 

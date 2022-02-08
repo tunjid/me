@@ -55,4 +55,5 @@ include(
     ":common",
     ":android",
     ":desktop",
+    ":serverEvents"
 )
