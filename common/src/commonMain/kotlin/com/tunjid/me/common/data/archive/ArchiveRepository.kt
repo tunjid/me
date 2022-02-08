@@ -53,7 +53,7 @@ class ReactiveArchiveRepository(
     private val remoteArchiveFetcher = remoteFetcher(
         scope = appScope,
         fetch = { (kind, id): Pair<ArchiveKind, String> -> api.fetchArchive(kind = kind, id = id) },
-        save = datastore::saveArchive,
+        save = { datastore.saveArchives(listOf(it)) },
         networkMonitor = networkMonitor
     )
 

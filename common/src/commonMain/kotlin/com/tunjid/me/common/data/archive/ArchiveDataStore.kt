@@ -31,17 +31,23 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Instant
 
-internal class ArchiveDataStore(
+interface ArchiveDatastore {
+    fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
+    fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive?>
+    suspend fun saveArchives(archives: List<Archive>)
+}
+
+internal class SqlArchiveDatastore(
     database: AppDatabase,
     private val dispatcher: CoroutineDispatcher,
-) {
+): ArchiveDatastore {
 
     private val archiveQueries = database.archiveEntityQueries
     private val archiveTagQueries = database.archiveTagEntityQueries
     private val archiveCategoryQueries = database.archiveCategoryEntityQueries
     private val archiveAuthorQueries = database.userEntityQueries
 
-    fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
+    override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
         when {
             query.hasContentFilter -> contentFilteredArchives(query)
             else -> archives(query)
@@ -49,7 +55,7 @@ internal class ArchiveDataStore(
             .flatMapLatest { archiveEntities -> archiveEntitiesToArchives(archiveEntities) }
             .distinctUntilChanged()
 
-    fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive?> =
+    override fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive?> =
         archiveQueries.get(
             id = id,
             kind = kind.type
@@ -59,10 +65,11 @@ internal class ArchiveDataStore(
             .flatMapLatest { it?.let(::archiveEntityToArchive) ?: flowOf(null) }
             .distinctUntilChanged()
 
-    suspend fun saveArchives(archives: List<Archive>) =
+    override suspend fun saveArchives(archives: List<Archive>) {
         archiveAuthorQueries.suspendingTransaction(context = dispatcher) {
             archives.map(::saveArchive)
         }
+    }
 
     fun saveArchive(archive: Archive) {
         val userEntity = archive.author.toEntity
