@@ -33,14 +33,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.AppAction
-import com.tunjid.me.common.data.archive.Archive
-import com.tunjid.me.common.data.archive.ArchiveKind.Articles
-import com.tunjid.me.common.data.archive.ArchiveQuery
-import com.tunjid.me.common.data.archive.Descriptor
-import com.tunjid.me.common.data.archive.User
-import com.tunjid.me.common.data.archive.plus
+import com.tunjid.me.common.data.local.Archive
+import com.tunjid.me.common.data.local.ArchiveKind.Articles
+import com.tunjid.me.common.data.Model.ArchiveQuery
+import com.tunjid.me.common.data.Model.Descriptor
+import com.tunjid.me.common.data.local.User
+import com.tunjid.me.common.data.Model.plus
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
-import kotlinx.datetime.Clock
+import kotlinx.datetime.Clock.System
 
 @Composable
 fun ProgressBar(isCircular: Boolean) {
@@ -237,7 +237,7 @@ private val sampleArchiveItem = ArchiveItem.Result(
             fullName = "TJ D",
             imageUrl = "",
         ),
-        created = Clock.System.now(),
+        created = System.now(),
         tags = listOf(),
         categories = listOf("Android", "Kotlin"),
         kind = Articles,

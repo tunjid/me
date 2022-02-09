@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.archive
+package com.tunjid.me.common.data.repository
 
-import com.tunjid.me.common.data.Api
+import com.tunjid.me.common.data.Model.ArchiveQuery
+import com.tunjid.me.common.data.network.Api
 import com.tunjid.me.common.data.NetworkMonitor
+import com.tunjid.me.common.data.local.Archive
+import com.tunjid.me.common.data.local.ArchiveDatastore
+import com.tunjid.me.common.data.local.ArchiveKind
 import com.tunjid.me.common.data.remoteFetcher
 import com.tunjid.tiler.Tile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
 interface ArchiveRepository {

@@ -19,6 +19,7 @@ package com.tunjid.me.common.data.archive
 import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.materialPath
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.tunjid.me.common.data.local.ArchiveKind
 
 val ArchiveKind.icon: ImageVector
     get() = iconMap.getOrPut(this) {

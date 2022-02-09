@@ -19,8 +19,8 @@ package com.tunjid.me.common.ui.archivedetail
 
 import com.tunjid.me.common.AppMutator
 import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.archive.Archive
-import com.tunjid.me.common.data.archive.ArchiveRepository
+import com.tunjid.me.common.data.local.Archive
+import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.globalui.navBarSize
 import com.tunjid.me.common.monitorWhenActive
 import com.tunjid.mutator.Mutation

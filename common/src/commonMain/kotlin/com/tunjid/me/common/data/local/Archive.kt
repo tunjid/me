@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.archive
+package com.tunjid.me.common.data.local
 
+import com.tunjid.me.common.data.local.ArchiveKind.Articles
+import com.tunjid.me.common.data.local.ArchiveKind.Projects
+import com.tunjid.me.common.data.local.ArchiveKind.Talks
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.KSerializer
@@ -75,9 +78,9 @@ object ArchiveKindSerializer : KSerializer<ArchiveKind> {
         encoder.encodeString(value.type)
 
     override fun deserialize(decoder: Decoder): ArchiveKind = when (decoder.decodeString()) {
-        ArchiveKind.Articles.type -> ArchiveKind.Articles
-        ArchiveKind.Projects.type -> ArchiveKind.Projects
-        ArchiveKind.Talks.type -> ArchiveKind.Talks
+        Articles.type -> Articles
+        Projects.type -> Projects
+        Talks.type -> Talks
         else -> throw IllegalArgumentException("Unknown kind")
     }
 }

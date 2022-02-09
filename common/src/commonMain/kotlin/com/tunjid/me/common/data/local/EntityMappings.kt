@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.archive
+package com.tunjid.me.common.data.local
 
 import com.tunjid.me.common.data.ArchiveEntity
 import com.tunjid.me.common.data.UserEntity

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data
+package com.tunjid.me.common.data.network
 
-import com.tunjid.me.common.data.archive.Archive
-import com.tunjid.me.common.data.archive.ArchiveKind
-import com.tunjid.me.common.data.archive.Descriptor
+import com.tunjid.me.common.data.local.Archive
+import com.tunjid.me.common.data.local.ArchiveKind
+import com.tunjid.me.common.data.Model.Descriptor
 import io.ktor.client.*
 import io.ktor.client.request.*
 

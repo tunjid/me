@@ -31,8 +31,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.LocalAppDependencies
-import com.tunjid.me.common.data.archive.ArchiveKind
-import com.tunjid.me.common.data.archive.ArchiveQuery
+import com.tunjid.me.common.data.Model.ArchiveQuery
+import com.tunjid.me.common.data.local.ArchiveKind.Articles
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
@@ -153,13 +153,13 @@ private fun PreviewLoadingState() {
     ArchiveScreen(
         mutator = State(
             queryState = QueryState(
-                startQuery = ArchiveQuery(kind = ArchiveKind.Articles),
-                currentQuery = ArchiveQuery(kind = ArchiveKind.Articles),
+                startQuery = ArchiveQuery(kind = Articles),
+                currentQuery = ArchiveQuery(kind = Articles),
             ),
             items = listOf(
                 ArchiveItem.Loading(
                     isCircular = true,
-                    query = ArchiveQuery(kind = ArchiveKind.Articles)
+                    query = ArchiveQuery(kind = Articles)
                 )
             )
         ).asNoOpStateFlowMutator()

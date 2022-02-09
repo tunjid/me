@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.archive
+package com.tunjid.me.common.data.local
 
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -22,6 +22,10 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.ArchiveEntity
+import com.tunjid.me.common.data.Model.ArchiveQuery
+import com.tunjid.me.common.data.Model.Descriptor.Category
+import com.tunjid.me.common.data.Model.Descriptor.Tag
+import com.tunjid.me.common.data.Model.hasContentFilter
 import com.tunjid.me.common.data.suspendingTransaction
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -122,8 +126,8 @@ class SqlArchiveDatastore(
             kind = query.kind.type,
             limit = query.limit.toLong(),
             offset = query.offset.toLong(),
-            tagsOrCategories = query.contentFilter.tags.map(Descriptor.Tag::value)
-                .plus(query.contentFilter.categories.map(Descriptor.Category::value))
+            tagsOrCategories = query.contentFilter.tags.map(Tag::value)
+                .plus(query.contentFilter.categories.map(Category::value))
                 .distinct()
         )
             .asFlow()

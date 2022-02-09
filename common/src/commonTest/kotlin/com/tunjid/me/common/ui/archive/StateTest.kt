@@ -1,7 +1,7 @@
 import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.DelegatingByteSerializer
-import com.tunjid.me.common.data.archive.ArchiveKind
-import com.tunjid.me.common.data.archive.ArchiveQuery
+import com.tunjid.me.common.data.Model.ArchiveQuery
+import com.tunjid.me.common.data.local.ArchiveKind.Articles
 import com.tunjid.me.common.data.fromBytes
 import com.tunjid.me.common.data.toBytes
 import com.tunjid.me.common.nav.ByteSerializableRoute
@@ -54,8 +54,8 @@ class StateTest {
 
         val state = State(
             queryState = QueryState(
-                startQuery = ArchiveQuery(kind = ArchiveKind.Articles),
-                currentQuery = ArchiveQuery(kind = ArchiveKind.Articles)
+                startQuery = ArchiveQuery(kind = Articles),
+                currentQuery = ArchiveQuery(kind = Articles)
             )
         )
 

@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material.MaterialRichText
 import com.tunjid.me.common.LocalAppDependencies
-import com.tunjid.me.common.data.archive.ArchiveKind
+import com.tunjid.me.common.data.local.ArchiveKind
 import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState

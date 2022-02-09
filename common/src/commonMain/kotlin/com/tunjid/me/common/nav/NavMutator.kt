@@ -22,8 +22,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.tunjid.me.common.data.archive.ArchiveKind
-import com.tunjid.me.common.data.archive.ArchiveQuery
+import com.tunjid.me.common.data.local.ArchiveKind
+import com.tunjid.me.common.data.Model.ArchiveQuery
 import com.tunjid.me.common.data.archive.icon
 import com.tunjid.me.common.ui.archive.ArchiveRoute
 import com.tunjid.mutator.Mutation

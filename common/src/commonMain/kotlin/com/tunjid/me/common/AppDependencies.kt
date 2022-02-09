@@ -18,11 +18,13 @@ package com.tunjid.me.common
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.common.data.*
-import com.tunjid.me.common.data.archive.ArchiveDatastore
-import com.tunjid.me.common.data.archive.SqlArchiveDatastore
-import com.tunjid.me.common.data.archive.ArchiveKind
-import com.tunjid.me.common.data.archive.ArchiveRepository
-import com.tunjid.me.common.data.archive.ReactiveArchiveRepository
+import com.tunjid.me.common.data.local.ArchiveDatastore
+import com.tunjid.me.common.data.local.SqlArchiveDatastore
+import com.tunjid.me.common.data.local.ArchiveKind
+import com.tunjid.me.common.data.repository.ArchiveRepository
+import com.tunjid.me.common.data.repository.ReactiveArchiveRepository
+import com.tunjid.me.common.data.network.Api
+import com.tunjid.me.common.data.network.ApiUrl
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.globalUiMutator
 import com.tunjid.me.common.nav.AppRoute
@@ -36,6 +38,8 @@ import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
 import com.tunjid.treenav.MultiStackNav
 import io.ktor.client.*
+import io.ktor.client.features.cookies.AcceptAllCookiesStorage
+import io.ktor.client.features.cookies.HttpCookies
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.*
 import io.ktor.client.features.logging.*
@@ -241,6 +245,9 @@ private fun httpClient() = HttpClient {
     install(JsonFeature) {
         accept(ContentType.Application.Json, ContentType.Text.Html)
         serializer = KotlinxSerializer(json = Json { ignoreUnknownKeys = true })
+    }
+    install(HttpCookies) {
+        storage = AcceptAllCookiesStorage()
     }
     install(Logging) {
         level = LogLevel.INFO

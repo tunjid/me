@@ -18,9 +18,9 @@ package com.tunjid.me.common.ui.archive
 
 import com.tunjid.me.common.AppAction
 import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.archive.Archive
-import com.tunjid.me.common.data.archive.ArchiveQuery
-import com.tunjid.me.common.data.archive.Descriptor
+import com.tunjid.me.common.data.local.Archive
+import com.tunjid.me.common.data.Model.ArchiveQuery
+import com.tunjid.me.common.data.Model.Descriptor
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable

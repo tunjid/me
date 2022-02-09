@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.archive
+package com.tunjid.me.common.data.Model
 
+import com.tunjid.me.common.data.Model.Descriptor.Category
+import com.tunjid.me.common.data.Model.Descriptor.Tag
+import com.tunjid.me.common.data.local.ArchiveKind
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -45,8 +48,8 @@ data class ArchiveTemporalFilter(
 
 @Serializable
 data class ArchiveContentFilter(
-    val tags: List<Descriptor.Tag> = listOf(),
-    val categories: List<Descriptor.Category> = listOf(),
+    val tags: List<Tag> = listOf(),
+    val categories: List<Category> = listOf(),
 )
 
 @Serializable
@@ -70,27 +73,27 @@ private fun ArchiveQuery.amend(
 ) = copy(
     contentFilter = contentFilter.copy(
         categories = when (descriptor) {
-            is Descriptor.Category -> operator(contentFilter.categories, descriptor)
+            is Category -> operator(contentFilter.categories, descriptor)
                 .distinct()
-                .filterIsInstance<Descriptor.Category>()
+                .filterIsInstance<Category>()
             else -> contentFilter.categories
         },
         tags = when (descriptor) {
-            is Descriptor.Tag -> operator(contentFilter.tags, descriptor)
+            is Tag -> operator(contentFilter.tags, descriptor)
                 .distinct()
-                .filterIsInstance<Descriptor.Tag>()
+                .filterIsInstance<Tag>()
             else -> contentFilter.tags
         }
     )
 )
 
 private class CategorySerializer(
-    backing: KSerializer<Descriptor.Category> = descriptorSerializer(Descriptor::Category)
-) : KSerializer<Descriptor.Category> by backing
+    backing: KSerializer<Category> = descriptorSerializer(Descriptor::Category)
+) : KSerializer<Category> by backing
 
 private class TagSerializer(
-    backing: KSerializer<Descriptor.Tag> = descriptorSerializer(Descriptor::Tag)
-) : KSerializer<Descriptor.Tag> by backing
+    backing: KSerializer<Tag> = descriptorSerializer(Descriptor::Tag)
+) : KSerializer<Tag> by backing
 
 private fun <T : Descriptor> descriptorSerializer(creator: (String) -> T) =
     object : KSerializer<T> {
