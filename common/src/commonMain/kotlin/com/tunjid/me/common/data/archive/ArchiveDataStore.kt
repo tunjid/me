@@ -37,7 +37,7 @@ interface ArchiveDatastore {
     suspend fun saveArchives(archives: List<Archive>)
 }
 
-internal class SqlArchiveDatastore(
+class SqlArchiveDatastore(
     database: AppDatabase,
     private val dispatcher: CoroutineDispatcher,
 ): ArchiveDatastore {
