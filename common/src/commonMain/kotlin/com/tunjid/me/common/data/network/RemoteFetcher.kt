@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data
+package com.tunjid.me.common.data.network
 
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.tiledList

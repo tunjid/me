@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data
+package com.tunjid.me.common.data.network
 
+import com.tunjid.me.common.data.network.ModelEvent.Changed
+import com.tunjid.me.common.data.network.ModelEvent.Deleted
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 
@@ -38,8 +40,8 @@ fun List<Any>.toArchiveEvent(event: String): ModelEvent? {
     if (size < 2) return null
     val (collection, id) = this
     return if (collection is String && id is String) when (event) {
-        "modelChanged" -> ModelEvent.Changed(collection, id)
-        "modelDeleted" -> ModelEvent.Deleted(collection, id)
+        "modelChanged" -> Changed(collection, id)
+        "modelDeleted" -> Deleted(collection, id)
         else -> null
     }
     else null

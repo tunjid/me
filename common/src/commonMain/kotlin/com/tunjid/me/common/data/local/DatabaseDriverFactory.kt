@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data
+package com.tunjid.me.common.data.local
 
-import kotlinx.coroutines.flow.Flow
+import com.squareup.sqldelight.db.SqlDriver
+import kotlinx.coroutines.CoroutineDispatcher
 
-/**
- * A class that reports if theres a network connection
- */
-expect class NetworkMonitor {
-    val isConnected: Flow<Boolean>
+expect class DatabaseDriverFactory {
+    fun createDriver(): SqlDriver
 }
+
+expect fun databaseDispatcher(): CoroutineDispatcher

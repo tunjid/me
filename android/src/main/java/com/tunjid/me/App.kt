@@ -19,13 +19,12 @@ package com.tunjid.me
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import androidx.core.os.bundleOf
 import com.tunjid.me.common.AppAction
 import com.tunjid.me.common.SavedState
 import com.tunjid.me.common.createAppDependencies
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.common.data.DatabaseDriverFactory
-import com.tunjid.me.common.data.NetworkMonitor
+import com.tunjid.me.common.data.local.DatabaseDriverFactory
+import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.fromBytes
 import com.tunjid.me.common.data.toBytes
 import com.tunjid.me.common.restore

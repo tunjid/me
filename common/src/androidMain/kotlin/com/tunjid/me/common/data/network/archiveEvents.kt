@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data
+package com.tunjid.me.common.data.network
 
 import com.tunjid.serverevents.ServerEvent
 import com.tunjid.serverevents.serverEvents

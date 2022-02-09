@@ -21,10 +21,13 @@ import com.tunjid.me.common.data.*
 import com.tunjid.me.common.data.local.ArchiveDatastore
 import com.tunjid.me.common.data.local.SqlArchiveDatastore
 import com.tunjid.me.common.data.local.ArchiveKind
+import com.tunjid.me.common.data.local.databaseDispatcher
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.ReactiveArchiveRepository
 import com.tunjid.me.common.data.network.Api
 import com.tunjid.me.common.data.network.ApiUrl
+import com.tunjid.me.common.data.network.NetworkMonitor
+import com.tunjid.me.common.data.network.exponentialBackoff
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.globalUiMutator
 import com.tunjid.me.common.nav.AppRoute
@@ -143,7 +146,7 @@ private class AppModule(
         }
 
         appScope.launch {
-            modelEvents(
+            com.tunjid.me.common.data.network.modelEvents(
                 url = "$ApiUrl/",
                 dispatcher = databaseDispatcher()
             )

@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data
+package com.tunjid.me.common.data.network
 
-import android.content.Context
-import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.squareup.sqldelight.db.SqlDriver
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 
-actual fun databaseDispatcher(): CoroutineDispatcher = Dispatchers.IO
-
-actual class DatabaseDriverFactory(private val context: Context) {
-    actual fun createDriver(): SqlDriver = AndroidSqliteDriver(
-        schema = AppDatabase.Schema,
-        context = context,
-        name = "test.db"
-    )
+/**
+ * A class that reports if theres a network connection
+ */
+expect class NetworkMonitor {
+    val isConnected: Flow<Boolean>
 }

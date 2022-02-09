@@ -27,8 +27,8 @@ import androidx.compose.ui.window.rememberWindowState
 import com.tunjid.me.common.SavedState
 import com.tunjid.me.common.createAppDependencies
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.common.data.DatabaseDriverFactory
-import com.tunjid.me.common.data.NetworkMonitor
+import com.tunjid.me.common.data.local.DatabaseDriverFactory
+import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.fromBytes
 import com.tunjid.me.common.data.toBytes
 import com.tunjid.me.common.globalui.NavMode
@@ -48,8 +48,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
 
 fun main() {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)

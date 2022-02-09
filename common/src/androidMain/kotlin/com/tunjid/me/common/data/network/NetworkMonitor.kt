@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data
+package com.tunjid.me.common.data.network
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
-import android.net.NetworkRequest
+import android.net.NetworkRequest.Builder
 import androidx.core.content.getSystemService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
@@ -34,7 +35,7 @@ actual class NetworkMonitor(
     private val context: Context
 ) {
     actual val isConnected: Flow<Boolean> = callbackFlow<Boolean> {
-        val callback = object : ConnectivityManager.NetworkCallback() {
+        val callback = object : NetworkCallback() {
             override fun onAvailable(network: Network) {
                 if (!channel.isClosedForSend) channel.trySend(true)
             }
@@ -46,7 +47,7 @@ actual class NetworkMonitor(
 
         val connectivityManager = context.getSystemService<ConnectivityManager>()
         connectivityManager?.registerNetworkCallback(
-            NetworkRequest.Builder()
+            Builder()
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                 .build(),
             callback

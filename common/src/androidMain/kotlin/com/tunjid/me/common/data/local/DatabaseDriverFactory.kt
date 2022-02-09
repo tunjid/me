@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data
+package com.tunjid.me.common.data.local
 
+import android.content.Context
+import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
-import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
+import com.tunjid.me.common.data.AppDatabase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
 actual fun databaseDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
-actual class DatabaseDriverFactory {
-    actual fun createDriver(): SqlDriver {
-//        val databasePath = File(System.getProperty("java.io.tmpdir"), "ComposeTodoDatabase.db")
-//        val driver = JdbcSqliteDriver(url = "jdbc:sqlite:${databasePath.absolutePath}")
-
-        val driver: SqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
-        AppDatabase.Schema.create(driver)
-        return driver
-    }
+actual class DatabaseDriverFactory(private val context: Context) {
+    actual fun createDriver(): SqlDriver = AndroidSqliteDriver(
+        schema = AppDatabase.Schema,
+        context = context,
+        name = "test.db"
+    )
 }
