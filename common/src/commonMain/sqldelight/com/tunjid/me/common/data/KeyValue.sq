@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS keyData (
+    id TEXT PRIMARY KEY,
+    data TEXT
+);
+
+find:
+SELECT *
+FROM keyData
+WHERE id = :id;
+
+upsert:
+INSERT INTO keyData (id, data)
+VALUES (:id, :data)
+ON CONFLICT(id) DO UPDATE SET
+    data=excluded.data;
