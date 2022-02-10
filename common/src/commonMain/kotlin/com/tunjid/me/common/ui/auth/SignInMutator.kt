@@ -19,44 +19,13 @@ package com.tunjid.me.common.ui.auth
 
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.app.monitorWhenActive
-import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.repository.ArchiveRepository
+import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.serialization.Serializable
-
-
-@Serializable
-data class FormField(
-    val id: String,
-    val value: String
-)
-
-@Serializable
-data class State(
-    val fields: List<FormField> = listOf(
-        FormField(
-            id = "email",
-            value = "",
-        ),
-        FormField(
-            id = "password",
-            value = "",
-        )
-    )
-) : ByteSerializable
-
-sealed class Action {
-    data class FieldChanged(val field: FormField) : Action()
-}
+import kotlinx.coroutines.flow.*
 
 typealias SignInMutator = Mutator<Action, StateFlow<State>>
 
@@ -64,28 +33,52 @@ fun signInMutator(
     scope: CoroutineScope,
     route: SignInRoute,
     initialState: State? = null,
+    authRepository: AuthRepository,
     appMutator: AppMutator,
 ): SignInMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(2000),
     actionTransform = { actions ->
-        merge<Mutation<State>>(
-            emptyFlow(),
+        merge(
+            authRepository.isSignedIn.map { Mutation { copy(isSignedIn = it) } },
             actions.toMutationStream {
                 when (val action = type()) {
-                    is Action.FieldChanged -> action.flow.map { fieldChangedAction ->
-                        Mutation {
-                            copy(
-                                fields = fields.map { field ->
-                                    if (field.id == fieldChangedAction.field.id) fieldChangedAction.field
-                                    else field
-                                }
-                            )
-                        }
-                    }
+                    is Action.FieldChanged -> action.flow.formEditMutations()
+                    is Action.Submit -> action.flow.submissionMutations(authRepository)
                 }
             }
         ).monitorWhenActive(appMutator)
     }
 )
+
+private fun Flow<Action.FieldChanged>.formEditMutations(): Flow<Mutation<State>> =
+    map { fieldChangedAction ->
+        Mutation {
+            copy(
+                fields = fields.map { field ->
+                    if (field.id == fieldChangedAction.field.id) fieldChangedAction.field
+                    else field
+                }
+            )
+        }
+    }
+
+private fun Flow<Action.Submit>.submissionMutations(
+    authRepository: AuthRepository
+): Flow<Mutation<State>> =
+    debounce(200)
+        .flatMapLatest { (request) ->
+            merge(
+                flowOf(Mutation { copy(isSubmitting = true) }),
+                flow {
+                    try {
+                        authRepository.createSession(request = request)
+                    } catch (e: Exception) {
+                        // TODO: Show snack bar
+                        println("e class: ${e::class.simpleName}; e message: ${e.message}")
+                    }
+                    emit(Mutation<State> { copy(isSubmitting = false) })
+                }
+            )
+        }

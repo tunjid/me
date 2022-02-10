@@ -17,19 +17,25 @@
 package com.tunjid.me.common.app
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.tunjid.me.common.data.*
+import com.tunjid.me.common.data.AppDatabase
+import com.tunjid.me.common.data.ByteSerializable
+import com.tunjid.me.common.data.ByteSerializer
+import com.tunjid.me.common.data.DelegatingByteSerializer
+import com.tunjid.me.common.data.fromBytes
 import com.tunjid.me.common.data.local.ArchiveDao
 import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.local.SqlArchiveDao
 import com.tunjid.me.common.data.local.SqlSessionCookieDao
-import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.local.databaseDispatcher
-import com.tunjid.me.common.data.repository.ArchiveRepository
-import com.tunjid.me.common.data.repository.ReactiveArchiveRepository
+import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.network.Api
 import com.tunjid.me.common.data.network.ApiUrl
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.network.exponentialBackoff
+import com.tunjid.me.common.data.repository.ArchiveRepository
+import com.tunjid.me.common.data.repository.AuthRepository
+import com.tunjid.me.common.data.repository.ReactiveArchiveRepository
+import com.tunjid.me.common.data.repository.SessionCookieAuthRepository
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.globalUiMutator
 import com.tunjid.me.common.nav.AppRoute
@@ -37,7 +43,6 @@ import com.tunjid.me.common.nav.ByteSerializableRoute
 import com.tunjid.me.common.nav.navMutator
 import com.tunjid.me.common.nav.removedRoutes
 import com.tunjid.me.common.ui.archive.ArchiveRoute
-import com.tunjid.me.common.ui.archive.State
 import com.tunjid.me.common.ui.archive.archiveMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
@@ -61,6 +66,7 @@ interface AppDependencies {
     val networkMonitor: NetworkMonitor
     val byteSerializer: ByteSerializer
     val archiveRepository: ArchiveRepository
+    val authRepository: AuthRepository
     val archiveDao: ArchiveDao
     val sessionCookieDao: SessionCookieDao
     fun <T> routeDependencies(route: AppRoute<T>): T
@@ -83,6 +89,9 @@ fun createAppDependencies(
     initialUiState = initialUiState
 )
 
+/**
+ * Poor man's dependency injection module
+ */
 private class AppModule(
     override val appDatabase: AppDatabase,
     override val networkMonitor: NetworkMonitor,
@@ -111,6 +120,12 @@ private class AppModule(
         dao = archiveDao
     )
 
+    override val authRepository: AuthRepository =
+        SessionCookieAuthRepository(
+            api = api,
+            dao = sessionCookieDao
+        )
+
     override val appMutator: AppMutator = appMutator(
         scope = appScope,
         navMutator = navMutator(scope = appScope),
@@ -124,10 +139,12 @@ private class AppModule(
                 polymorphic(ByteSerializableRoute::class) {
                     subclass(ArchiveRoute::class)
                     subclass(ArchiveDetailRoute::class)
+                    subclass(SignInRoute::class)
                 }
                 polymorphic(ByteSerializable::class) {
-                    subclass(State::class)
+                    subclass(com.tunjid.me.common.ui.archive.State::class)
                     subclass(com.tunjid.me.common.ui.archivedetail.State::class)
+                    subclass(com.tunjid.me.common.ui.auth.State::class)
                 }
             }
         }
@@ -207,6 +224,7 @@ private class AppModule(
                     scope = routeScope,
                     initialState = route.restoredState(),
                     route = route,
+                    authRepository = authRepository,
                     appMutator = appMutator,
                 )
             )

@@ -90,7 +90,12 @@ private fun SignInScreen(mutator: SignInMutator) {
         }
         Spacer(modifier = Modifier.height(8.dp))
         Button(
-            onClick = {},
+            enabled = state.submitButtonEnabled,
+            onClick = {
+                mutator.accept(
+                    Action.Submit(request = state.sessionRequest)
+                )
+            },
             content = { Text(text = "Submit") }
         )
     }

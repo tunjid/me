@@ -20,8 +20,10 @@ import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.data.model.User
+import com.tunjid.me.common.data.model.SessionRequest
 import io.ktor.client.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 
 const val ApiUrl = "https://www.tunjid.com"
 
@@ -50,12 +52,9 @@ class Api(
     ): Archive = client.get("$baseUrl/api/${kind.type}/$id")
 
     suspend fun signIn(
-        email: String,
-        password: String,
+        sessionRequest: SessionRequest
     ): User = client.post("$baseUrl/api/sign-in") {
-        body = mapOf(
-            "email" to email,
-            "password" to password
-        )
+        header(HttpHeaders.ContentType, ContentType.Application.Json)
+        body = sessionRequest
     }
 }

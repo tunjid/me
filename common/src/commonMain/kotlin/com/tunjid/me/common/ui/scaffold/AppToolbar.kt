@@ -81,10 +81,13 @@ internal fun BoxScope.AppToolbar(
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Title(title)
-            ActionMenu(items = items, globalUiMutator = globalUiMutator)
+            Title(title = title)
+            ActionMenu(
+                items = items,
+                globalUiMutator = globalUiMutator
+            )
         }
     }
 }
@@ -121,8 +124,12 @@ private fun UpButton(
 }
 
 @Composable
-private fun Title(title: CharSequence) {
+private fun Title(
+    modifier: Modifier = Modifier,
+    title: CharSequence
+) {
     Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(modifier = Modifier.width(16.dp))

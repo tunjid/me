@@ -28,8 +28,9 @@ import kotlinx.serialization.json.Json
 fun httpClient(sessionCookieDao: SessionCookieDao) = HttpClient {
     install(JsonFeature) {
         accept(ContentType.Application.Json, ContentType.Text.Html)
-        serializer =
-            KotlinxSerializer(json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true })
+        serializer = KotlinxSerializer(
+            json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+        )
     }
     install(HttpCookies) {
         storage = SessionCookiesStorage(sessionCookieDao)
