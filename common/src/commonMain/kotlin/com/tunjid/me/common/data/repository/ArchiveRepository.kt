@@ -20,7 +20,7 @@ import com.tunjid.me.common.data.Model.ArchiveQuery
 import com.tunjid.me.common.data.network.Api
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.local.Archive
-import com.tunjid.me.common.data.local.ArchiveDatastore
+import com.tunjid.me.common.data.local.ArchiveDao
 import com.tunjid.me.common.data.local.ArchiveKind
 import com.tunjid.me.common.data.network.remoteFetcher
 import com.tunjid.tiler.Tile
@@ -44,30 +44,30 @@ class ReactiveArchiveRepository(
     private val api: Api,
     appScope: CoroutineScope,
     networkMonitor: NetworkMonitor,
-    private val datastore: ArchiveDatastore
+    private val dao: ArchiveDao
 ) : ArchiveRepository {
 
     private val remoteArchivesFetcher = remoteFetcher(
         scope = appScope,
         fetch = ::fetchArchives,
-        save = datastore::saveArchives,
+        save = dao::saveArchives,
         networkMonitor = networkMonitor
     )
 
     private val remoteArchiveFetcher = remoteFetcher(
         scope = appScope,
         fetch = { (kind, id): Pair<ArchiveKind, String> -> api.fetchArchive(kind = kind, id = id) },
-        save = { datastore.saveArchives(listOf(it)) },
+        save = { dao.saveArchives(listOf(it)) },
         networkMonitor = networkMonitor
     )
 
     override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
-        datastore.monitorArchives(query)
+        dao.monitorArchives(query)
             .onStart { remoteArchivesFetcher(Tile.Request.On(query)) }
             .onCompletion { remoteArchivesFetcher(Tile.Request.Evict(query)) }
 
     override fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive> =
-        datastore.monitorArchive(kind = kind, id = id)
+        dao.monitorArchive(kind = kind, id = id)
             .onStart { remoteArchiveFetcher(Tile.Request.On(kind to id)) }
             .onCompletion { remoteArchiveFetcher(Tile.Request.Evict(kind to id)) }
             .filterNotNull()

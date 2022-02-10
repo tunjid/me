@@ -18,8 +18,8 @@ package com.tunjid.me.common
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.common.data.*
-import com.tunjid.me.common.data.local.ArchiveDatastore
-import com.tunjid.me.common.data.local.SqlArchiveDatastore
+import com.tunjid.me.common.data.local.ArchiveDao
+import com.tunjid.me.common.data.local.SqlArchiveDao
 import com.tunjid.me.common.data.local.ArchiveKind
 import com.tunjid.me.common.data.local.databaseDispatcher
 import com.tunjid.me.common.data.repository.ArchiveRepository
@@ -66,7 +66,7 @@ interface AppDependencies {
     val networkMonitor: NetworkMonitor
     val byteSerializer: ByteSerializer
     val archiveRepository: ArchiveRepository
-    val archiveDatastore: ArchiveDatastore
+    val archiveDao: ArchiveDao
     fun <T> routeDependencies(route: AppRoute<T>): T
 }
 
@@ -98,7 +98,7 @@ private class AppModule(
 
     val api: Api = Api(httpClient())
 
-    override val archiveDatastore = SqlArchiveDatastore(
+    override val archiveDao = SqlArchiveDao(
         database = appDatabase,
         dispatcher = databaseDispatcher(),
     )
@@ -107,7 +107,7 @@ private class AppModule(
         api = api,
         appScope = appScope,
         networkMonitor = networkMonitor,
-        datastore = archiveDatastore
+        dao = archiveDao
     )
 
     override val appMutator: AppMutator = appMutator(
@@ -166,7 +166,7 @@ private class AppModule(
                     ) { api.fetchArchive(kind = kind, id = event.id) }
                 }
                 .collect {
-                    archiveDatastore.saveArchive(it)
+                    archiveDao.saveArchive(it)
                 }
         }
     }
@@ -229,7 +229,7 @@ fun stubAppDependencies(
     override val archiveRepository: ArchiveRepository
         get() = TODO("Not yet implemented")
 
-    override val archiveDatastore: ArchiveDatastore
+    override val archiveDao: ArchiveDao
         get() = TODO("Not yet implemented")
 
     override val networkMonitor: NetworkMonitor

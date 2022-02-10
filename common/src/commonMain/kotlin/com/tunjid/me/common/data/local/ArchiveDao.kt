@@ -35,16 +35,16 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Instant
 
-interface ArchiveDatastore {
+interface ArchiveDao {
     fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
     fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive?>
     suspend fun saveArchives(archives: List<Archive>)
 }
 
-class SqlArchiveDatastore(
+class SqlArchiveDao(
     database: AppDatabase,
     private val dispatcher: CoroutineDispatcher,
-): ArchiveDatastore {
+): ArchiveDao {
 
     private val archiveQueries = database.archiveEntityQueries
     private val archiveTagQueries = database.archiveTagEntityQueries
