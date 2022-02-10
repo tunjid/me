@@ -19,6 +19,7 @@ package com.tunjid.me.common.data.network
 import com.tunjid.me.common.data.local.Archive
 import com.tunjid.me.common.data.local.ArchiveKind
 import com.tunjid.me.common.data.Model.Descriptor
+import com.tunjid.me.common.data.local.User
 import io.ktor.client.*
 import io.ktor.client.request.*
 
@@ -47,4 +48,14 @@ class Api(
         kind: ArchiveKind,
         id: String,
     ): Archive = client.get("$baseUrl/api/${kind.type}/$id")
+
+    suspend fun signIn(
+        email: String,
+        password: String,
+    ): User = client.post("$baseUrl/api/sign-in") {
+        body = mapOf(
+            "email" to email,
+            "password" to password
+        )
+    }
 }
