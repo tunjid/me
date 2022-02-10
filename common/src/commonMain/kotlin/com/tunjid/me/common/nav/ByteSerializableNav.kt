@@ -18,7 +18,7 @@
 package com.tunjid.me.common.nav
 
 import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.local.ArchiveKind
+import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Route
 import com.tunjid.treenav.StackNav

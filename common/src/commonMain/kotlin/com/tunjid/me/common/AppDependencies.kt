@@ -20,7 +20,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.common.data.*
 import com.tunjid.me.common.data.local.ArchiveDao
 import com.tunjid.me.common.data.local.SqlArchiveDao
-import com.tunjid.me.common.data.local.ArchiveKind
+import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.local.databaseDispatcher
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.ReactiveArchiveRepository

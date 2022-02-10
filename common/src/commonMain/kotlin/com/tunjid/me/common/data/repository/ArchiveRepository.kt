@@ -16,12 +16,12 @@
 
 package com.tunjid.me.common.data.repository
 
-import com.tunjid.me.common.data.Model.ArchiveQuery
+import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.data.network.Api
 import com.tunjid.me.common.data.network.NetworkMonitor
-import com.tunjid.me.common.data.local.Archive
+import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.local.ArchiveDao
-import com.tunjid.me.common.data.local.ArchiveKind
+import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.network.remoteFetcher
 import com.tunjid.tiler.Tile
 import kotlinx.coroutines.CoroutineScope

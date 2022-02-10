@@ -33,12 +33,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.AppAction
-import com.tunjid.me.common.data.local.Archive
-import com.tunjid.me.common.data.local.ArchiveKind.Articles
-import com.tunjid.me.common.data.Model.ArchiveQuery
-import com.tunjid.me.common.data.Model.Descriptor
-import com.tunjid.me.common.data.local.User
-import com.tunjid.me.common.data.Model.plus
+import com.tunjid.me.common.data.model.Archive
+import com.tunjid.me.common.data.model.ArchiveKind.Articles
+import com.tunjid.me.common.data.model.ArchiveQuery
+import com.tunjid.me.common.data.model.Descriptor
+import com.tunjid.me.common.data.model.User
+import com.tunjid.me.common.data.model.plus
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import kotlinx.datetime.Clock.System
 

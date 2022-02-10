@@ -19,7 +19,7 @@ package com.tunjid.me.common.ui.archive
 import com.tunjid.me.common.AppMutator
 import com.tunjid.me.common.consumeWith
 import com.tunjid.me.common.data.repository.ArchiveRepository
-import com.tunjid.me.common.data.Model.Descriptor
+import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.globalui.navRailVisible
 import com.tunjid.me.common.monitorWhenActive
 import com.tunjid.me.common.nav.navRailRoute

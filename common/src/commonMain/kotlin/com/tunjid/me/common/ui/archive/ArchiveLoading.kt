@@ -16,10 +16,10 @@
 
 package com.tunjid.me.common.ui.archive
 
-import com.tunjid.me.common.data.local.Archive
-import com.tunjid.me.common.data.Model.ArchiveQuery
+import com.tunjid.me.common.data.model.Archive
+import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.data.repository.ArchiveRepository
-import com.tunjid.me.common.data.Model.DefaultQueryLimit
+import com.tunjid.me.common.data.model.DefaultQueryLimit
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.tiledList
 import com.tunjid.tiler.toTiledList

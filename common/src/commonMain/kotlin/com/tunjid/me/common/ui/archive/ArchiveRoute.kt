@@ -31,8 +31,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.LocalAppDependencies
-import com.tunjid.me.common.data.Model.ArchiveQuery
-import com.tunjid.me.common.data.local.ArchiveKind.Articles
+import com.tunjid.me.common.data.model.ArchiveQuery
+import com.tunjid.me.common.data.model.ArchiveKind.Articles
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute

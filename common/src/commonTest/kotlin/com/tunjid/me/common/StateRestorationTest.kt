@@ -1,8 +1,8 @@
 import com.tunjid.me.common.SavedState
 import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.DelegatingByteSerializer
-import com.tunjid.me.common.data.Model.ArchiveQuery
-import com.tunjid.me.common.data.local.ArchiveKind.Articles
+import com.tunjid.me.common.data.model.ArchiveQuery
+import com.tunjid.me.common.data.model.ArchiveKind.Articles
 import com.tunjid.me.common.data.fromBytes
 import com.tunjid.me.common.data.toBytes
 import com.tunjid.me.common.nav.ByteSerializableRoute

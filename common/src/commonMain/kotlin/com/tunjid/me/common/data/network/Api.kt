@@ -16,10 +16,10 @@
 
 package com.tunjid.me.common.data.network
 
-import com.tunjid.me.common.data.local.Archive
-import com.tunjid.me.common.data.local.ArchiveKind
-import com.tunjid.me.common.data.Model.Descriptor
-import com.tunjid.me.common.data.local.User
+import com.tunjid.me.common.data.model.Archive
+import com.tunjid.me.common.data.model.ArchiveKind
+import com.tunjid.me.common.data.model.Descriptor
+import com.tunjid.me.common.data.model.User
 import io.ktor.client.*
 import io.ktor.client.request.*
 

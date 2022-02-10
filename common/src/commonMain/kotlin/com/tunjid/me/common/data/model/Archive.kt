@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.local
+package com.tunjid.me.common.data.model
 
-import com.tunjid.me.common.data.local.ArchiveKind.Articles
-import com.tunjid.me.common.data.local.ArchiveKind.Projects
-import com.tunjid.me.common.data.local.ArchiveKind.Talks
+import com.tunjid.me.common.data.model.ArchiveKind.Articles
+import com.tunjid.me.common.data.model.ArchiveKind.Projects
+import com.tunjid.me.common.data.model.ArchiveKind.Talks
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.KSerializer

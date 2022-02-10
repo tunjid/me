@@ -17,6 +17,8 @@
 package com.tunjid.me.common.data.local
 
 import com.tunjid.me.common.data.ArchiveEntity
+import com.tunjid.me.common.data.model.Archive
+import com.tunjid.me.common.data.model.User
 import com.tunjid.me.common.data.UserEntity
 
 internal val UserEntity.toUser

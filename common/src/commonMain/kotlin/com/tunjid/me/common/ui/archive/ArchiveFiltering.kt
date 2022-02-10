@@ -42,9 +42,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.common.data.Model.Descriptor
-import com.tunjid.me.common.data.Model.minus
-import com.tunjid.me.common.data.Model.plus
+import com.tunjid.me.common.data.model.Descriptor
+import com.tunjid.me.common.data.model.minus
+import com.tunjid.me.common.data.model.plus
 
 @Composable
 fun ArchiveFilters(

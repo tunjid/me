@@ -22,10 +22,12 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.ArchiveEntity
-import com.tunjid.me.common.data.Model.ArchiveQuery
-import com.tunjid.me.common.data.Model.Descriptor.Category
-import com.tunjid.me.common.data.Model.Descriptor.Tag
-import com.tunjid.me.common.data.Model.hasContentFilter
+import com.tunjid.me.common.data.model.Archive
+import com.tunjid.me.common.data.model.ArchiveKind
+import com.tunjid.me.common.data.model.ArchiveQuery
+import com.tunjid.me.common.data.model.Descriptor.Category
+import com.tunjid.me.common.data.model.Descriptor.Tag
+import com.tunjid.me.common.data.model.hasContentFilter
 import com.tunjid.me.common.data.suspendingTransaction
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
