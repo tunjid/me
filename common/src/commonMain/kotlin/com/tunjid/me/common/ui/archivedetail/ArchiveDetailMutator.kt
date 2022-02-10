@@ -17,12 +17,12 @@
 package com.tunjid.me.common.ui.archivedetail
 
 
-import com.tunjid.me.common.AppMutator
+import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.globalui.navBarSize
-import com.tunjid.me.common.monitorWhenActive
+import com.tunjid.me.common.app.monitorWhenActive
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.accept

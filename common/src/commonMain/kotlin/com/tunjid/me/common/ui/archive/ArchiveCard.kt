@@ -32,7 +32,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.common.AppAction
+import com.tunjid.me.common.app.AppAction
 import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.model.ArchiveKind.Articles
 import com.tunjid.me.common.data.model.ArchiveQuery

@@ -19,9 +19,9 @@ package com.tunjid.me
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import com.tunjid.me.common.AppAction
+import com.tunjid.me.common.app.AppAction
 import com.tunjid.me.common.SavedState
-import com.tunjid.me.common.createAppDependencies
+import com.tunjid.me.common.app.createAppDependencies
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.local.DatabaseDriverFactory
 import com.tunjid.me.common.data.network.NetworkMonitor

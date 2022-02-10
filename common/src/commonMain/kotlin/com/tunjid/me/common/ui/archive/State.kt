@@ -16,7 +16,7 @@
 
 package com.tunjid.me.common.ui.archive
 
-import com.tunjid.me.common.AppAction
+import com.tunjid.me.common.app.AppAction
 import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.model.ArchiveQuery

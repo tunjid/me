@@ -16,6 +16,8 @@
 
 package com.tunjid.me.common
 
+import com.tunjid.me.common.app.AppAction
+import com.tunjid.me.common.app.AppDependencies
 import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.fromBytes
 import com.tunjid.me.common.data.toBytes

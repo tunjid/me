@@ -39,9 +39,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import com.tunjid.me.common.AppMutator
-import com.tunjid.me.common.component1
-import com.tunjid.me.common.component2
+import com.tunjid.me.common.app.AppMutator
+import com.tunjid.me.common.app.component1
+import com.tunjid.me.common.app.component2
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.bottomNavPositionalState
 import com.tunjid.me.common.nav.navItems

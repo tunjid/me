@@ -38,11 +38,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.common.AppMutator
-import com.tunjid.me.common.AppState
-import com.tunjid.me.common.asAppMutator
-import com.tunjid.me.common.component1
-import com.tunjid.me.common.component2
+import com.tunjid.me.common.app.AppMutator
+import com.tunjid.me.common.app.AppState
+import com.tunjid.me.common.app.asAppMutator
+import com.tunjid.me.common.app.component1
+import com.tunjid.me.common.app.component2
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.ToolbarItem
 import com.tunjid.me.common.globalui.UiState

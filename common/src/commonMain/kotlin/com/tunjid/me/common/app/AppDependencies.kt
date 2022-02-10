@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common
+package com.tunjid.me.common.app
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.common.data.*
 import com.tunjid.me.common.data.local.ArchiveDao
+import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.local.SqlArchiveDao
+import com.tunjid.me.common.data.local.SqlSessionCookieDao
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.local.databaseDispatcher
 import com.tunjid.me.common.data.repository.ArchiveRepository
@@ -39,14 +41,6 @@ import com.tunjid.me.common.ui.archive.State
 import com.tunjid.me.common.ui.archive.archiveMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
-import com.tunjid.treenav.MultiStackNav
-import io.ktor.client.*
-import io.ktor.client.features.cookies.AcceptAllCookiesStorage
-import io.ktor.client.features.cookies.HttpCookies
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.*
-import io.ktor.client.features.logging.*
-import io.ktor.http.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -55,7 +49,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.cbor.Cbor
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -67,6 +60,7 @@ interface AppDependencies {
     val byteSerializer: ByteSerializer
     val archiveRepository: ArchiveRepository
     val archiveDao: ArchiveDao
+    val sessionCookieDao: SessionCookieDao
     fun <T> routeDependencies(route: AppRoute<T>): T
 }
 
@@ -96,12 +90,17 @@ private class AppModule(
 
     val routeMutatorFactory = mutableMapOf<AppRoute<*>, ScopeHolder>()
 
-    val api: Api = Api(httpClient())
-
     override val archiveDao = SqlArchiveDao(
         database = appDatabase,
         dispatcher = databaseDispatcher(),
     )
+
+    override val sessionCookieDao: SessionCookieDao = SqlSessionCookieDao(
+        database = appDatabase,
+        dispatcher = databaseDispatcher(),
+    )
+
+    val api: Api = Api(httpClient(sessionCookieDao = sessionCookieDao))
 
     override val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
         api = api,
@@ -214,50 +213,4 @@ private class AppModule(
 
 val LocalAppDependencies = staticCompositionLocalOf {
     stubAppDependencies()
-}
-
-fun stubAppDependencies(
-    nav: MultiStackNav = MultiStackNav(name = "App"),
-    globalUI: UiState = UiState()
-): AppDependencies = object : AppDependencies {
-    override val appDatabase: AppDatabase
-        get() = TODO("Not yet implemented")
-
-    override val byteSerializer: ByteSerializer
-        get() = TODO("Not yet implemented")
-
-    override val archiveRepository: ArchiveRepository
-        get() = TODO("Not yet implemented")
-
-    override val archiveDao: ArchiveDao
-        get() = TODO("Not yet implemented")
-
-    override val networkMonitor: NetworkMonitor
-        get() = TODO("Not yet implemented")
-
-    override val appMutator: AppMutator = AppState(
-        ui = globalUI,
-        nav = nav
-    ).asAppMutator
-
-    override fun <T> routeDependencies(route: AppRoute<T>): T =
-        TODO("Not yet implemented")
-}
-
-private fun httpClient() = HttpClient {
-    install(JsonFeature) {
-        accept(ContentType.Application.Json, ContentType.Text.Html)
-        serializer = KotlinxSerializer(json = Json { ignoreUnknownKeys = true })
-    }
-    install(HttpCookies) {
-        storage = AcceptAllCookiesStorage()
-    }
-    install(Logging) {
-        level = LogLevel.INFO
-        logger = object : Logger {
-            override fun log(message: String) {
-//                println("Logger Ktor => $message")
-            }
-        }
-    }
 }

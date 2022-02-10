@@ -24,7 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.common.LocalAppDependencies
+import com.tunjid.me.common.app.LocalAppDependencies
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.mutator.Mutation
 import kotlinx.coroutines.CoroutineScope

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common
+package com.tunjid.me.common.app
 
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.UiState

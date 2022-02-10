@@ -31,8 +31,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
-import com.tunjid.me.common.component1
-import com.tunjid.me.common.component2
+import com.tunjid.me.common.app.component1
+import com.tunjid.me.common.app.component2
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.NavMode
 import com.tunjid.me.common.globalui.insetMutations
