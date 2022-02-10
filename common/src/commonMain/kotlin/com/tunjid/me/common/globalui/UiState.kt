@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class ToolbarItem(
-    val id: Int,
+    val id: String,
     val text: String,
     val imageVector: ImageVector? = null,
     val contentDescription: String? = null,

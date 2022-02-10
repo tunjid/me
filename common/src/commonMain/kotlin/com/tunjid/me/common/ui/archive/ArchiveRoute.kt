@@ -30,12 +30,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import com.tunjid.me.common.app.AppAction
 import com.tunjid.me.common.app.LocalAppDependencies
-import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.data.model.ArchiveKind.Articles
+import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.globalui.NavVisibility
+import com.tunjid.me.common.globalui.ToolbarItem
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
+import com.tunjid.me.common.ui.auth.SignInRoute
 import com.tunjid.me.common.ui.utilities.InitialUiState
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -56,6 +59,8 @@ data class ArchiveRoute(val query: ArchiveQuery) : AppRoute<ArchiveMutator> {
     }
 }
 
+private const val SignIn = "sign-in"
+
 @Composable
 private fun ArchiveScreen(
     mutator: ArchiveMutator,
@@ -67,6 +72,17 @@ private fun ArchiveScreen(
         UiState(
             toolbarShows = true,
             toolbarTitle = query.kind.name,
+            toolbarItems = listOf(
+                ToolbarItem(
+                    id = SignIn,
+                    text = "Sign In"
+                )
+            ),
+            toolbarMenuClickListener = { item ->
+                when (item.id) {
+                    SignIn -> mutator.accept(Action.Navigate(AppAction.Nav.push(SignInRoute)))
+                }
+            },
             navVisibility = NavVisibility.Visible,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
         )
