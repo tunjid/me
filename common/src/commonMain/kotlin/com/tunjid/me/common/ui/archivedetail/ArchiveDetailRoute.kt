@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -35,11 +36,15 @@ import com.tunjid.me.common.app.LocalAppDependencies
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
+import com.tunjid.me.common.globalui.ToolbarItem
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.ui.utilities.InitialUiState
 import com.tunjid.me.common.ui.archive.ArchiveRoute
+import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
+import com.tunjid.me.common.ui.utilities.InitialUiState
+import com.tunjid.mutator.accept
 import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -70,11 +75,22 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
 
+    val navMutator = LocalAppDependencies.current.appMutator.navMutator
     InitialUiState(
         UiState(
             toolbarShows = true,
             toolbarTitle = state.archive?.title ?: "Detail",
             navVisibility = NavVisibility.GoneIfBottomNav,
+            toolbarMenuClickListener = {
+                navMutator.accept {
+                    push(
+                        ArchiveEditRoute(
+                            kind = state.kind,
+                            archiveId = state.archive?.id
+                        )
+                    )
+                }
+            },
             insetFlags = InsetFlags.NO_BOTTOM,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
         )
@@ -90,10 +106,21 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
         MaterialRichText(
             modifier = Modifier.padding(horizontal = 8.dp)
         ) {
-          if(archive != null)  Markdown(
+            if (archive != null) Markdown(
                 content = archive.body
             )
         }
         Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))
+    }
+
+    val canEdit = state.canEdit
+    val uiMutator = LocalAppDependencies.current.appMutator.globalUiMutator
+
+    LaunchedEffect(canEdit) {
+        uiMutator.accept {
+            copy(toolbarItems = listOfNotNull(
+                ToolbarItem(id = "edit", text = "Edit").takeIf { canEdit }
+            ))
+        }
     }
 }

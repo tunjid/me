@@ -18,23 +18,20 @@ package com.tunjid.me.common.ui.archivedetail
 
 
 import com.tunjid.me.common.app.AppMutator
-import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.model.Archive
-import com.tunjid.me.common.data.repository.ArchiveRepository
-import com.tunjid.me.common.globalui.navBarSize
 import com.tunjid.me.common.app.monitorWhenActive
+import com.tunjid.me.common.data.model.ArchiveKind
+import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
+import com.tunjid.me.common.globalui.navBarSize
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
-import com.tunjid.mutator.accept
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 typealias ArchiveDetailMutator = Mutator<Unit, StateFlow<State>>
 
@@ -48,27 +45,36 @@ fun archiveDetailMutator(
 ): ArchiveDetailMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(
+        kind = route.kind,
         navBarSize = appMutator.globalUiMutator.state.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(2000),
     actionTransform = {
-        merge<Mutation<State>>(
-            appMutator.globalUiMutator.state
-                .map { it.navBarSize }
-                .map {
-                    Mutation { copy(navBarSize = it) }
-                },
-            authRepository.isSignedIn.map { Mutation { copy(isSignedIn = it) } },
-            archiveRepository.monitorArchive(
+        merge(
+            appMutator.navbarSizeMutations(),
+            authRepository.signedInUserStream.map { Mutation { copy(signedInUserId = it?.id) } },
+            archiveRepository.archiveLoadMutations(
                 kind = route.kind,
                 id = route.archiveId
             )
-                .map { fetchedArchive ->
-                    appMutator.globalUiMutator.accept {
-                        copy(toolbarTitle = fetchedArchive.title)
-                    }
-                    Mutation { copy(archive = fetchedArchive) }
-                }
         ).monitorWhenActive(appMutator)
     }
 )
+
+private fun AppMutator.navbarSizeMutations(): Flow<Mutation<State>> =
+    globalUiMutator.state
+        .map { it.navBarSize }
+        .map {
+            Mutation { copy(navBarSize = it) }
+        }
+
+private fun ArchiveRepository.archiveLoadMutations(
+    id: String,
+    kind: ArchiveKind
+): Flow<Mutation<State>> = monitorArchive(
+    kind = kind,
+    id = id
+)
+    .map { fetchedArchive ->
+        Mutation { copy(archive = fetchedArchive) }
+    }

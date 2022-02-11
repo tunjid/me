@@ -18,14 +18,18 @@ package com.tunjid.me.common.ui.archivedetail
 
 import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.model.Archive
+import com.tunjid.me.common.data.model.ArchiveKind
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Serializable
 data class State(
-    val isSignedIn: Boolean = false,
+    val signedInUserId: String? = null,
     val navBarSize: Int,
+    val kind: ArchiveKind,
     // Read this from the DB
     @Transient
     val archive: Archive? = null,
 ) : ByteSerializable
+
+val State.canEdit: Boolean get() = signedInUserId != null && signedInUserId == archive?.author?.id

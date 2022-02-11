@@ -20,12 +20,14 @@ import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.model.SessionRequest
 import com.tunjid.me.common.data.model.User
 import com.tunjid.me.common.data.network.NetworkService
+import com.tunjid.me.common.data.network.exponentialBackoff
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 interface AuthRepository {
     val isSignedIn: Flow<Boolean>
+    val signedInUserStream: Flow<User?>
     suspend fun createSession(request: SessionRequest): User
 }
 
@@ -37,6 +39,16 @@ class SessionCookieAuthRepository(
     override val isSignedIn: Flow<Boolean> =
         dao.sessionCookieStream.map { it != null }
             .distinctUntilChanged()
+
+    override val signedInUserStream: Flow<User?> =
+        isSignedIn.map {
+            println("signned in $it")
+            if (it) exponentialBackoff(
+                default = null,
+                block = { networkService.session() }
+            )
+            else null
+        }
 
     override suspend fun createSession(request: SessionRequest): User =
         networkService.signIn(request)

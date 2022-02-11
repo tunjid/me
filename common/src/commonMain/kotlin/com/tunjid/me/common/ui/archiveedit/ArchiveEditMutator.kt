@@ -18,25 +18,20 @@ package com.tunjid.me.common.ui.archiveedit
 
 
 import com.tunjid.me.common.app.AppMutator
-import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.model.Archive
-import com.tunjid.me.common.data.repository.ArchiveRepository
-import com.tunjid.me.common.globalui.navBarSize
 import com.tunjid.me.common.app.monitorWhenActive
+import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
+import com.tunjid.me.common.globalui.navBarSize
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
-import com.tunjid.mutator.accept
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
-typealias ArchiveEditMutator = Mutator<Unit, StateFlow<State>>
+typealias ArchiveEditMutator = Mutator<Action, StateFlow<State>>
 
 fun archiveEditMutator(
     scope: CoroutineScope,
@@ -59,16 +54,7 @@ fun archiveEditMutator(
                     Mutation { copy(navBarSize = it) }
                 },
             authRepository.isSignedIn.map { Mutation { copy(isSignedIn = it) } },
-            archiveRepository.monitorArchive(
-                kind = route.kind,
-                id = route.archiveId
-            )
-                .map { fetchedArchive ->
-                    appMutator.globalUiMutator.accept {
-                        copy(toolbarTitle = fetchedArchive.title)
-                    }
-                    Mutation { copy(archive = fetchedArchive) }
-                }
-        ).monitorWhenActive(appMutator)
+
+            ).monitorWhenActive(appMutator)
     }
 )

@@ -52,7 +52,7 @@ class NetworkService(
             this.networkErrorConverter = json::decodeFromString
         }
         install(Logging) {
-            level = LogLevel.NONE
+            level = LogLevel.INFO
             logger = object : Logger {
                 override fun log(message: String) {
                     println("Logger Ktor => $message")
@@ -87,4 +87,6 @@ class NetworkService(
         header(HttpHeaders.ContentType, ContentType.Application.Json)
         body = sessionRequest
     }
+
+    suspend fun session(): User = client.get("$baseUrl/api/session")
 }

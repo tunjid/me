@@ -20,40 +20,45 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.halilibo.richtext.markdown.Markdown
-import com.halilibo.richtext.ui.material.MaterialRichText
+import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.app.LocalAppDependencies
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.ui.utilities.InitialUiState
 import com.tunjid.me.common.ui.archive.ArchiveRoute
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailMutator
+import com.tunjid.me.common.ui.utilities.InitialUiState
 import com.tunjid.treenav.MultiStackNav
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ArchiveEditRoute(
     val kind: ArchiveKind,
-    val archiveId: String
-) : AppRoute<ArchiveDetailMutator> {
+    val archiveId: String?
+) : AppRoute<ArchiveEditMutator> {
     override val id: String
-        get() = "archive-detail-$kind-$archiveId"
+        get() = "archive-edit-$kind-$archiveId"
 
     @Composable
     override fun Render() {
-        ArchiveDetailScreen(
+        ArchiveEditScreen(
             mutator = LocalAppDependencies.current.routeDependencies(this)
         )
     }
@@ -66,7 +71,7 @@ data class ArchiveEditRoute(
 }
 
 @Composable
-private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
+private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
     val state by mutator.state.collectAsState()
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
@@ -74,27 +79,61 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
     InitialUiState(
         UiState(
             toolbarShows = true,
-            toolbarTitle = state.archive?.title ?: "Detail",
+            toolbarTitle = "Archive Edit",
             navVisibility = NavVisibility.GoneIfBottomNav,
             insetFlags = InsetFlags.NO_BOTTOM,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
         )
     )
 
-    val archive = state.archive
 
     Column(
         modifier = Modifier
             .verticalScroll(state = scrollState),
     ) {
         Spacer(modifier = Modifier.padding(8.dp))
-        MaterialRichText(
-            modifier = Modifier.padding(horizontal = 8.dp)
-        ) {
-          if(archive != null)  Markdown(
-                content = archive.body
-            )
-        }
+        TextField(
+            value = state.title,
+            maxLines = 2,
+            colors = Unstyled(),
+            textStyle = LocalTextStyle.current.copy(
+                color = MaterialTheme.colors.onSurface,
+                fontSize = 24.sp
+            ),
+            label = { Text(text = "Title") },
+            onValueChange = { mutator.accept(Action.TitleEdit(it)) }
+        )
+        Spacer(modifier = Modifier.padding(8.dp))
+        TextField(
+            value = state.title,
+            maxLines = 2,
+            colors = Unstyled(),
+            textStyle = LocalTextStyle.current.copy(
+                color = MaterialTheme.colors.onSurface,
+                fontSize = 18.sp
+            ),
+            label = { Text(text = "Title") },
+            onValueChange = { mutator.accept(Action.DescriptionEdit(it)) }
+        )
         Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))
+
+        BasicTextField(
+            value = state.title,
+            textStyle = LocalTextStyle.current.copy(
+                color = MaterialTheme.colors.onSurface,
+                fontSize = 24.sp
+            ),
+            onValueChange = { mutator.accept(Action.TitleEdit(it)) }
+        )
     }
 }
+
+
+@Composable
+private fun Unstyled() = TextFieldDefaults.textFieldColors(
+    backgroundColor = Color.Transparent,
+    focusedIndicatorColor = Color.Transparent,
+    unfocusedIndicatorColor = Color.Transparent,
+    disabledIndicatorColor = Color.Transparent,
+    cursorColor = MaterialTheme.colors.onSurface,
+)
