@@ -112,18 +112,20 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
                 color = MaterialTheme.colors.onSurface,
                 fontSize = 18.sp
             ),
-            label = { Text(text = "Title") },
+            label = { Text(text = "Description") },
             onValueChange = { mutator.accept(Action.DescriptionEdit(it)) }
         )
         Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))
 
-        BasicTextField(
+        TextField(
             value = state.title,
+            maxLines = 2,
+            colors = Unstyled(),
             textStyle = LocalTextStyle.current.copy(
                 color = MaterialTheme.colors.onSurface,
-                fontSize = 24.sp
             ),
-            onValueChange = { mutator.accept(Action.TitleEdit(it)) }
+            label = { Text(text = "Body") },
+            onValueChange = { mutator.accept(Action.DescriptionEdit(it)) }
         )
     }
 }

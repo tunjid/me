@@ -38,7 +38,10 @@ class NetworkService(
     sessionCookieDao: SessionCookieDao,
 ) {
     private val client = HttpClient {
-        val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+        val json = kotlinx.serialization.json.Json {
+            explicitNulls = false
+            ignoreUnknownKeys = true
+        }
 
         install(JsonFeature) {
             accept(ContentType.Application.Json, ContentType.Text.Html)
@@ -49,7 +52,7 @@ class NetworkService(
         }
         install(SessionCookieInvalidator) {
             this.sessionCookieDao = sessionCookieDao
-            this.networkErrorConverter = json::decodeFromString
+            this.networkErrorConverter = {  json.decodeFromString<NetworkError>(it) }
         }
         install(Logging) {
             level = LogLevel.INFO

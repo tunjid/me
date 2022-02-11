@@ -42,7 +42,6 @@ class SessionCookieAuthRepository(
 
     override val signedInUserStream: Flow<User?> =
         isSignedIn.map {
-            println("signned in $it")
             if (it) exponentialBackoff(
                 default = null,
                 block = { networkService.session() }

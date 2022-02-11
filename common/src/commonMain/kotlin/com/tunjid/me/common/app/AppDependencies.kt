@@ -46,6 +46,8 @@ import com.tunjid.me.common.ui.archive.ArchiveRoute
 import com.tunjid.me.common.ui.archive.archiveMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
+import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
+import com.tunjid.me.common.ui.archiveedit.archiveEditMutator
 import com.tunjid.me.common.ui.auth.SignInRoute
 import com.tunjid.me.common.ui.auth.signInMutator
 import kotlinx.coroutines.CoroutineScope
@@ -211,6 +213,20 @@ private class AppModule(
             ScopeHolder(
                 scope = routeScope,
                 mutator = archiveDetailMutator(
+                    scope = routeScope,
+                    initialState = route.restoredState(),
+                    route = route,
+                    archiveRepository = archiveRepository,
+                    authRepository = authRepository,
+                    appMutator = appMutator,
+                )
+            )
+        }
+        is ArchiveEditRoute -> routeMutatorFactory.getOrPut(route) {
+            val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+            ScopeHolder(
+                scope = routeScope,
+                mutator = archiveEditMutator(
                     scope = routeScope,
                     initialState = route.restoredState(),
                     route = route,

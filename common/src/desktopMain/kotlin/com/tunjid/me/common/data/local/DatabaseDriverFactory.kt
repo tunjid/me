@@ -21,15 +21,16 @@ import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import com.tunjid.me.common.data.AppDatabase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import java.io.File
 
 actual fun databaseDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
 actual class DatabaseDriverFactory {
     actual fun createDriver(): SqlDriver {
-//        val databasePath = File(System.getProperty("java.io.tmpdir"), "ComposeTodoDatabase.db")
-//        val driver = JdbcSqliteDriver(url = "jdbc:sqlite:${databasePath.absolutePath}")
+        val databasePath = File(System.getProperty("java.io.tmpdir"), "ComposeTodoDatabase.db")
+        val driver = JdbcSqliteDriver(url = "jdbc:sqlite:${databasePath.absolutePath}")
 
-        val driver: SqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+//        val driver: SqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         AppDatabase.Schema.create(driver)
         return driver
     }

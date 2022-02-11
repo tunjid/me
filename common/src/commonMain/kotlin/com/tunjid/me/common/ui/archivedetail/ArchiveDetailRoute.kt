@@ -74,13 +74,16 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
     val state by mutator.state.collectAsState()
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
-
+    val canEdit = state.canEdit
     val navMutator = LocalAppDependencies.current.appMutator.navMutator
     InitialUiState(
         UiState(
             toolbarShows = true,
             toolbarTitle = state.archive?.title ?: "Detail",
             navVisibility = NavVisibility.GoneIfBottomNav,
+            toolbarItems = listOfNotNull(
+                ToolbarItem(id = "edit", text = "Edit").takeIf { canEdit }
+            ),
             toolbarMenuClickListener = {
                 navMutator.accept {
                     push(
@@ -111,16 +114,5 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             )
         }
         Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))
-    }
-
-    val canEdit = state.canEdit
-    val uiMutator = LocalAppDependencies.current.appMutator.globalUiMutator
-
-    LaunchedEffect(canEdit) {
-        uiMutator.accept {
-            copy(toolbarItems = listOfNotNull(
-                ToolbarItem(id = "edit", text = "Edit").takeIf { canEdit }
-            ))
-        }
     }
 }

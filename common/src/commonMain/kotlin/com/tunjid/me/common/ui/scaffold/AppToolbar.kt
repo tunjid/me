@@ -79,12 +79,16 @@ internal fun BoxScope.AppToolbar(
     ) {
         UpButton(navMutator = navMutator)
         Row(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Title(title = title)
+            Title(
+                modifier = Modifier.weight(1f),
+                title = title
+            )
             ActionMenu(
+                modifier = Modifier.wrapContentSize(),
                 items = items,
                 globalUiMutator = globalUiMutator
             )
@@ -146,6 +150,7 @@ private fun Title(
 
 @Composable
 internal fun ActionMenu(
+    modifier: Modifier = Modifier,
     items: List<ToolbarItem>,
     globalUiMutator: GlobalUiMutator
 ) {
@@ -154,6 +159,7 @@ internal fun ActionMenu(
         else -> items.take(2)
     }
     Row(
+        modifier = modifier,
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
     ) {
