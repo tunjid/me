@@ -80,6 +80,14 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
             fabText = if (state.upsert.id == null) "Create" else "Save",
             fabIcon = Icons.Default.Done,
             fabExtended = true,
+            fabClickListener = {
+                mutator.accept(
+                    Action.Submit(
+                        kind = state.kind,
+                        upsert = state.upsert
+                    )
+                )
+            },
             navVisibility = NavVisibility.GoneIfBottomNav,
             insetFlags = InsetFlags.NO_BOTTOM,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),

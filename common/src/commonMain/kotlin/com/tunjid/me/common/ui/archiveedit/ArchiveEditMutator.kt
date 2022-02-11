@@ -47,6 +47,7 @@ fun archiveEditMutator(
 ): ArchiveEditMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(
+        kind = route.kind,
         upsert = ArchiveUpsert(id = route.archiveId),
         navBarSize = appMutator.globalUiMutator.state.value.navBarSize,
     ),

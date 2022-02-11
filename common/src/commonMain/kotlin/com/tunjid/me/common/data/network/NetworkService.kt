@@ -84,7 +84,7 @@ class NetworkService(
     suspend fun fetchArchive(
         kind: ArchiveKind,
         id: ArchiveId,
-    ): Archive = client.get("$baseUrl/api/${kind.type}/$id")
+    ): Archive = client.get("$baseUrl/api/${kind.type}/${id.value}")
 
     suspend fun upsertArchive(
         kind: ArchiveKind,
