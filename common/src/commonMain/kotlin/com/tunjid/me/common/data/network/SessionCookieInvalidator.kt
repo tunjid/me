@@ -65,7 +65,7 @@ internal class SessionCookieInvalidator(
                 if (!response.status.isSuccess())
                     try {
                         val error = converter(response.readText())
-                        if (error.errorCode == ApiErrorCodes.NotLoggedIn.code) {
+                        if (error.errorCode == NetworkErrorCodes.NotLoggedIn.code) {
                             sessionCookieDao.saveSessionCookie(sessionCookie = null)
                         }
                     } catch (_: Throwable) {

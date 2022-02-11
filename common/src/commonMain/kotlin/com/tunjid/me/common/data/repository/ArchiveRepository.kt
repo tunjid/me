@@ -17,7 +17,7 @@
 package com.tunjid.me.common.data.repository
 
 import com.tunjid.me.common.data.model.ArchiveQuery
-import com.tunjid.me.common.data.network.Api
+import com.tunjid.me.common.data.network.NetworkService
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.local.ArchiveDao
@@ -41,7 +41,7 @@ interface ArchiveRepository {
  * app is notified and it pull it in.
  */
 class ReactiveArchiveRepository(
-    private val api: Api,
+    private val networkService: NetworkService,
     appScope: CoroutineScope,
     networkMonitor: NetworkMonitor,
     private val dao: ArchiveDao
@@ -56,7 +56,7 @@ class ReactiveArchiveRepository(
 
     private val remoteArchiveFetcher = remoteFetcher(
         scope = appScope,
-        fetch = { (kind, id): Pair<ArchiveKind, String> -> api.fetchArchive(kind = kind, id = id) },
+        fetch = { (kind, id): Pair<ArchiveKind, String> -> networkService.fetchArchive(kind = kind, id = id) },
         save = { dao.saveArchives(listOf(it)) },
         networkMonitor = networkMonitor
     )
@@ -73,7 +73,7 @@ class ReactiveArchiveRepository(
             .filterNotNull()
 
     private suspend fun fetchArchives(query: ArchiveQuery): List<Archive> =
-        api.fetchArchives(
+        networkService.fetchArchives(
             kind = query.kind,
             options = listOfNotNull(
                 "offset" to query.offset.toString(),

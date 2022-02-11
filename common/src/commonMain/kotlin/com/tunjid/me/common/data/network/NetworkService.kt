@@ -33,7 +33,7 @@ import kotlinx.serialization.decodeFromString
 
 const val ApiUrl = "https://www.tunjid.com"
 
-class Api(
+class NetworkService(
     private val baseUrl: String = ApiUrl,
     sessionCookieDao: SessionCookieDao,
 ) {

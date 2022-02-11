@@ -28,7 +28,7 @@ import com.tunjid.me.common.data.local.SqlArchiveDao
 import com.tunjid.me.common.data.local.SqlSessionCookieDao
 import com.tunjid.me.common.data.local.databaseDispatcher
 import com.tunjid.me.common.data.model.ArchiveKind
-import com.tunjid.me.common.data.network.Api
+import com.tunjid.me.common.data.network.NetworkService
 import com.tunjid.me.common.data.network.ApiUrl
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.network.exponentialBackoff
@@ -111,12 +111,12 @@ private class AppModule(
         dispatcher = databaseDispatcher(),
     )
 
-    val api: Api = Api(
+    val networkService: NetworkService = NetworkService(
         sessionCookieDao = sessionCookieDao
     )
 
     override val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
-        api = api,
+        api = networkService,
         appScope = appScope,
         networkMonitor = networkMonitor,
         dao = archiveDao
@@ -124,7 +124,7 @@ private class AppModule(
 
     override val authRepository: AuthRepository =
         SessionCookieAuthRepository(
-            api = api,
+            api = networkService,
             dao = sessionCookieDao
         )
 
@@ -183,7 +183,7 @@ private class AppModule(
                         maxDelay = 20_000,
                         times = 5,
                         default = null
-                    ) { api.fetchArchive(kind = kind, id = event.id) }
+                    ) { networkService.fetchArchive(kind = kind, id = event.id) }
                 }
                 .collect {
                     archiveDao.saveArchive(it)

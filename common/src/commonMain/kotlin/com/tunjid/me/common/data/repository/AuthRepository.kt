@@ -19,7 +19,7 @@ package com.tunjid.me.common.data.repository
 import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.model.SessionRequest
 import com.tunjid.me.common.data.model.User
-import com.tunjid.me.common.data.network.Api
+import com.tunjid.me.common.data.network.NetworkService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -30,7 +30,7 @@ interface AuthRepository {
 }
 
 class SessionCookieAuthRepository(
-    private val api: Api,
+    private val networkService: NetworkService,
     dao: SessionCookieDao
 ) : AuthRepository {
 
@@ -39,5 +39,5 @@ class SessionCookieAuthRepository(
             .distinctUntilChanged()
 
     override suspend fun createSession(request: SessionRequest): User =
-        api.signIn(request)
+        networkService.signIn(request)
 }

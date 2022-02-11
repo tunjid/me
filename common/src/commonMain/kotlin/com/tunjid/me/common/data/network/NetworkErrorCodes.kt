@@ -17,7 +17,7 @@
 package com.tunjid.me.common.data.network
 
 
-enum class ApiErrorCodes(val code: String) {
+enum class NetworkErrorCodes(val code: String) {
     NotLoggedIn("not-logged-in"),
     ModelNotFound("model-not-found"),
     RateLimited("rate-limited"),
