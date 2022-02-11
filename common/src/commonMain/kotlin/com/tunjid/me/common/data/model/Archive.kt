@@ -49,8 +49,8 @@ data class Archive(
     val likes: Long,
     @Serializable(LocalDateTimeSerializer::class)
     val created: Instant,
-    val tags: List<String>,
-    val categories: List<String>,
+    val tags: List<Descriptor.Tag>,
+    val categories: List<Descriptor.Category>,
     val kind: ArchiveKind,
 )
 

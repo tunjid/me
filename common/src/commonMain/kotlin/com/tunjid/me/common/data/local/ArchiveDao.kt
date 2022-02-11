@@ -25,6 +25,7 @@ import com.tunjid.me.common.data.ArchiveEntity
 import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.model.ArchiveQuery
+import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.data.model.Descriptor.Category
 import com.tunjid.me.common.data.model.Descriptor.Tag
 import com.tunjid.me.common.data.model.hasContentFilter
@@ -103,13 +104,13 @@ class SqlArchiveDao(
         archive.tags.forEach { tag ->
             archiveTagQueries.upsert(
                 archive_id = archiveEntity.id,
-                tag = tag,
+                tag = tag.value,
             )
         }
         archive.categories.forEach { category ->
             archiveCategoryQueries.upsert(
                 archive_id = archiveEntity.id,
-                category = category,
+                category = category.value,
             )
         }
     }
@@ -169,8 +170,8 @@ class SqlArchiveDao(
                 created = Instant.fromEpochMilliseconds(archiveEntity.created),
                 body = archiveEntity.body,
                 author = author.toUser,
-                tags = tags,
-                categories = categories,
+                tags = tags.map(Descriptor::Tag),
+                categories = categories.map(Descriptor::Category),
             )
         }
 

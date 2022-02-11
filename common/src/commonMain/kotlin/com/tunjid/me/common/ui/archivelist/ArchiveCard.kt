@@ -100,7 +100,7 @@ fun ArchiveCard(
                         val query = archiveItem.query
                         onAction(
                             Action.Fetch.Reset(
-                                query = query.copy(offset = 0) + Descriptor.Category(category),
+                                query = query.copy(offset = 0) + category
                             )
                         )
                     }
@@ -138,9 +138,9 @@ private fun ArchiveThumbnail(imageUrl: String?) {
 
 @Composable
 private fun ArchiveCategories(
-    categories: List<String>,
+    categories: List<Descriptor.Category>,
     published: String,
-    onCategoryClicked: (String) -> Unit
+    onCategoryClicked: (Descriptor.Category) -> Unit
 ) {
     Row(
         modifier = Modifier.padding(horizontal = 8.dp),
@@ -149,9 +149,9 @@ private fun ArchiveCategories(
     ) {
         Chips(
             modifier = Modifier.weight(1F),
-            chips = categories,
+            chips = categories.map(Descriptor.Category::value),
             color = MaterialTheme.colors.primaryVariant,
-            onClick = onCategoryClicked
+            onClick = { onCategoryClicked(Descriptor.Category(it)) }
         )
         Text(
             modifier = Modifier.wrapContentWidth(),
@@ -240,7 +240,7 @@ private val sampleArchiveItem = ArchiveItem.Result(
         ),
         created = System.now(),
         tags = listOf(),
-        categories = listOf("Android", "Kotlin"),
+        categories = listOf("Android", "Kotlin").map(Descriptor::Category),
         kind = Articles,
         likes = 1L
     )

@@ -88,8 +88,8 @@ private fun ArchiveRepository.textBodyMutations(
             description = archive.description,
             body = archive.body,
             chipsState = ChipsState(
-                categories = archive.categories.map(Descriptor::Category),
-                tags = archive.tags.map(Descriptor::Tag),
+                categories = archive.categories,
+                tags = archive.tags,
             )
         )
     }

@@ -17,7 +17,6 @@
 package com.tunjid.me.common.ui.archiveedit
 
 import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.ui.common.ChipAction
 import com.tunjid.mutator.Mutation
