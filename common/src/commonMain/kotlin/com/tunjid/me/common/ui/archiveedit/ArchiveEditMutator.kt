@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archivedetail
+package com.tunjid.me.common.ui.archiveedit
 
 
 import com.tunjid.me.common.app.AppMutator
@@ -36,16 +36,16 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
-typealias ArchiveDetailMutator = Mutator<Unit, StateFlow<State>>
+typealias ArchiveEditMutator = Mutator<Unit, StateFlow<State>>
 
-fun archiveDetailMutator(
+fun archiveEditMutator(
     scope: CoroutineScope,
-    route: ArchiveDetailRoute,
+    route: ArchiveEditRoute,
     initialState: State? = null,
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
     appMutator: AppMutator,
-): ArchiveDetailMutator = stateFlowMutator(
+): ArchiveEditMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(
         navBarSize = appMutator.globalUiMutator.state.value.navBarSize,
