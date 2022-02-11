@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archive
+package com.tunjid.me.common.ui.archivelist
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -28,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,6 +39,8 @@ import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.data.model.User
 import com.tunjid.me.common.data.model.plus
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
+import com.tunjid.me.common.ui.common.Chips
+import com.tunjid.me.common.ui.common.RemoteImagePainter
 import kotlinx.datetime.Clock.System
 
 @Composable
@@ -124,7 +125,7 @@ private fun ArchiveThumbnail(imageUrl: String?) {
     val modifier = Modifier
         .fillMaxWidth()
         .height(200.dp)
-    val painter = archivePainter(imageUrl)
+    val painter = RemoteImagePainter(imageUrl)
 
     if (painter != null) Image(
         painter = painter,
@@ -192,7 +193,7 @@ private fun ArchiveCardFooter(
         val height = 40.dp
         val modifier = Modifier
             .size(height)
-        val painter = archivePainter(authorImageUrl)
+        val painter = RemoteImagePainter(authorImageUrl)
 
         if (painter != null) {
             Image(
@@ -244,6 +245,3 @@ private val sampleArchiveItem = ArchiveItem.Result(
         likes = 1L
     )
 )
-
-@Composable
-expect fun archivePainter(imageUrl: String?): Painter?

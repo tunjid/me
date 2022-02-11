@@ -7,9 +7,9 @@ import com.tunjid.me.common.data.fromBytes
 import com.tunjid.me.common.data.toBytes
 import com.tunjid.me.common.nav.ByteSerializableRoute
 import com.tunjid.me.common.nav.toByteSerializable
-import com.tunjid.me.common.ui.archive.ArchiveRoute
-import com.tunjid.me.common.ui.archive.QueryState
-import com.tunjid.me.common.ui.archive.State
+import com.tunjid.me.common.ui.archivelist.ArchiveRoute
+import com.tunjid.me.common.ui.archivelist.QueryState
+import com.tunjid.me.common.ui.archivelist.State
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.treenav.MultiStackNav
 import kotlinx.serialization.cbor.Cbor

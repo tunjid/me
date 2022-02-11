@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archive
+package com.tunjid.me.common.ui.archivelist
 
 import com.tunjid.me.common.app.AppAction
 import com.tunjid.me.common.data.ByteSerializable

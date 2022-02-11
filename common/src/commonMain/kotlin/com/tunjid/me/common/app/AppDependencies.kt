@@ -42,12 +42,13 @@ import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.nav.ByteSerializableRoute
 import com.tunjid.me.common.nav.navMutator
 import com.tunjid.me.common.nav.removedRoutes
-import com.tunjid.me.common.ui.archive.ArchiveRoute
-import com.tunjid.me.common.ui.archive.archiveMutator
+import com.tunjid.me.common.ui.archivelist.ArchiveRoute
+import com.tunjid.me.common.ui.archivelist.archiveMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.archiveedit.archiveEditMutator
+import com.tunjid.me.common.ui.archivelist.State
 import com.tunjid.me.common.ui.auth.SignInRoute
 import com.tunjid.me.common.ui.auth.signInMutator
 import kotlinx.coroutines.CoroutineScope
@@ -146,7 +147,7 @@ private class AppModule(
                     subclass(SignInRoute::class)
                 }
                 polymorphic(ByteSerializable::class) {
-                    subclass(com.tunjid.me.common.ui.archive.State::class)
+                    subclass(State::class)
                     subclass(com.tunjid.me.common.ui.archivedetail.State::class)
                     subclass(com.tunjid.me.common.ui.auth.State::class)
                 }

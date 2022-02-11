@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archive
+package com.tunjid.me.common.ui.archivelist
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.GridCells

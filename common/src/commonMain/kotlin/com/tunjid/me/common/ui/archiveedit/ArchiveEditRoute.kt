@@ -42,7 +42,7 @@ import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.ui.archive.ArchiveRoute
+import com.tunjid.me.common.ui.archivelist.ArchiveRoute
 import com.tunjid.me.common.ui.utilities.InitialUiState
 import com.tunjid.treenav.MultiStackNav
 import kotlinx.serialization.Serializable

@@ -22,6 +22,7 @@ import com.tunjid.me.common.data.local.ArchiveDao
 import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.repository.ArchiveRepository
+import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.treenav.MultiStackNav
@@ -37,6 +38,9 @@ fun stubAppDependencies(
         get() = TODO("Not yet implemented")
 
     override val archiveRepository: ArchiveRepository
+        get() = TODO("Not yet implemented")
+
+    override val authRepository: AuthRepository
         get() = TODO("Not yet implemented")
 
     override val archiveDao: ArchiveDao

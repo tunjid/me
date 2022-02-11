@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archive
+package com.tunjid.me.common.ui.common
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,7 +30,7 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayInputStream
 
 @Composable
-actual fun archivePainter(imageUrl: String?): Painter? {
+actual fun RemoteImagePainter(imageUrl: String?): Painter? {
     val image: ImageBitmap? by produceState<ImageBitmap?>(null) {
         value = withContext(Dispatchers.IO) {
             try {

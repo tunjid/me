@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archive
+package com.tunjid.me.common.ui.archivelist
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -45,6 +45,9 @@ import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.data.model.minus
 import com.tunjid.me.common.data.model.plus
+import com.tunjid.me.common.ui.common.ChipAction
+import com.tunjid.me.common.ui.common.ChipEditInfo
+import com.tunjid.me.common.ui.common.Chips
 
 @Composable
 fun ArchiveFilters(

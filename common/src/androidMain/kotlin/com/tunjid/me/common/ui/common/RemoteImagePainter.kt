@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archive
+package com.tunjid.me.common.ui.common
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
@@ -22,7 +22,7 @@ import coil.compose.rememberImagePainter
 import coil.size.Scale
 
 @Composable
-actual fun archivePainter(imageUrl: String?): Painter? =
+actual fun RemoteImagePainter(imageUrl: String?): Painter? =
     rememberImagePainter(imageUrl) {
         scale(Scale.FILL)
     }
