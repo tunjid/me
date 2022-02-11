@@ -17,6 +17,7 @@
 package com.tunjid.me.common.ui.archiveedit
 
 import com.tunjid.me.common.data.ByteSerializable
+import com.tunjid.me.common.data.model.ArchiveUpsert
 import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.ui.common.ChipAction
 import com.tunjid.mutator.Mutation
@@ -24,12 +25,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class State(
-    val archiveId: String? = null,
     val isSignedIn: Boolean = false,
     val navBarSize: Int,
-    val title: String = "",
-    val body: String = "",
-    val description: String = "",
+    val upsert: ArchiveUpsert = ArchiveUpsert(),
     val chipsState: ChipsState = ChipsState(),
 ) : ByteSerializable
 
@@ -51,9 +49,9 @@ sealed class Action(val key: String) {
 
         val mutation: Mutation<State>
             get() = when (this) {
-                is Title -> Mutation { copy(title = value) }
-                is Description -> Mutation { copy(description = value) }
-                is Body -> Mutation { copy(body = value) }
+                is Title -> Mutation { copy(upsert = upsert.copy(title = value)) }
+                is Description -> Mutation { copy(upsert = upsert.copy(description = value)) }
+                is Body -> Mutation { copy(upsert = upsert.copy(body = value)) }
             }
     }
 
@@ -65,8 +63,6 @@ sealed class Action(val key: String) {
 
 @Serializable
 data class ChipsState(
-    val categories: List<Descriptor.Category> = listOf(),
-    val tags: List<Descriptor.Tag> = listOf(),
     val categoryText: Descriptor.Category = Descriptor.Category(""),
     val tagText: Descriptor.Tag = Descriptor.Tag(""),
 )

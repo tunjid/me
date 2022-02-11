@@ -17,6 +17,7 @@
 package com.tunjid.me.common.data.repository
 
 import com.tunjid.me.common.data.local.SessionCookieDao
+import com.tunjid.me.common.data.model.Result
 import com.tunjid.me.common.data.model.SessionRequest
 import com.tunjid.me.common.data.model.User
 import com.tunjid.me.common.data.network.NetworkService
@@ -28,7 +29,7 @@ import kotlinx.coroutines.flow.map
 interface AuthRepository {
     val isSignedIn: Flow<Boolean>
     val signedInUserStream: Flow<User?>
-    suspend fun createSession(request: SessionRequest): User
+    suspend fun createSession(request: SessionRequest): Result
 }
 
 class SessionCookieAuthRepository(
@@ -49,6 +50,10 @@ class SessionCookieAuthRepository(
             else null
         }
 
-    override suspend fun createSession(request: SessionRequest): User =
+    override suspend fun createSession(request: SessionRequest): Result = try {
         networkService.signIn(request)
+        Result.Success
+    } catch (e: Throwable) {
+        Result.Error(e.message)
+    }
 }

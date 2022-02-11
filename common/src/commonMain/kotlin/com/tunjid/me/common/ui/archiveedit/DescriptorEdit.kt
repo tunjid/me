@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.tunjid.me.common.data.model.ArchiveUpsert
 import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.ui.common.ChipAction
 import com.tunjid.me.common.ui.common.ChipEditInfo
@@ -29,6 +30,7 @@ import com.tunjid.me.common.ui.common.Chips
 @Composable
 fun EditChips(
     modifier: Modifier,
+    upsert: ArchiveUpsert,
     state: ChipsState,
     onChanged: (Action) -> Unit
 ) {
@@ -38,7 +40,7 @@ fun EditChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
-            chips = state.categories.map(Descriptor.Category::value),
+            chips = upsert.categories.map(Descriptor.Category::value),
             color = MaterialTheme.colors.primaryVariant,
             editInfo = ChipEditInfo(
                 currentText = state.categoryText.value,
@@ -53,7 +55,7 @@ fun EditChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
-            chips = state.tags.map(Descriptor.Tag::value),
+            chips = upsert.tags.map(Descriptor.Tag::value),
             color = MaterialTheme.colors.secondary,
             editInfo = ChipEditInfo(
                 currentText = state.tagText.value,

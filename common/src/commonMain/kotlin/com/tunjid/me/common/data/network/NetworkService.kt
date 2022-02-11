@@ -19,6 +19,7 @@ package com.tunjid.me.common.data.network
 import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.model.ArchiveKind
+import com.tunjid.me.common.data.model.ArchiveUpsert
 import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.data.model.SessionRequest
 import com.tunjid.me.common.data.model.User
@@ -52,7 +53,7 @@ class NetworkService(
         }
         install(SessionCookieInvalidator) {
             this.sessionCookieDao = sessionCookieDao
-            this.networkErrorConverter = {  json.decodeFromString<NetworkError>(it) }
+            this.networkErrorConverter = { json.decodeFromString<NetworkError>(it) }
         }
         install(Logging) {
             level = LogLevel.INFO
@@ -83,6 +84,25 @@ class NetworkService(
         kind: ArchiveKind,
         id: String,
     ): Archive = client.get("$baseUrl/api/${kind.type}/$id")
+
+    suspend fun upsertArchive(
+        kind: ArchiveKind,
+        upsert: ArchiveUpsert,
+    ): Archive {
+        val id = upsert.id
+        val verb: suspend (
+            urlString: String,
+            block: HttpRequestBuilder.() -> Unit
+        ) -> Archive = if (id == null) client::post else client::put
+
+        return verb(
+            if (id == null) "$baseUrl/api/$kind"
+            else "$baseUrl/api/$kind/$id"
+        ) {
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+            body = upsert
+        }
+    }
 
     suspend fun signIn(
         sessionRequest: SessionRequest

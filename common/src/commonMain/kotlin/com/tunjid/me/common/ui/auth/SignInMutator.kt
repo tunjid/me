@@ -24,8 +24,6 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
-import io.ktor.client.features.*
-import io.ktor.client.statement.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 
@@ -71,26 +69,10 @@ private fun Flow<Action.Submit>.submissionMutations(
 ): Flow<Mutation<State>> =
     debounce(200)
         .flatMapLatest { (request) ->
-            merge(
-                flowOf(Mutation { copy(isSubmitting = true) }),
-                flow {
-                    try {
-                        authRepository.createSession(request = request)
-                    } catch (e: Exception) {
-                        // TODO: Show snack bar
-                        println("e class: ${e::class.simpleName}; e message: ${e.message}")
-
-                        if(e is ClientRequestException) {
-                            try {
-
-                                val message = e.response.readText()
-                                println("Message 222: $message")
-                            } catch (_: Throwable) {
-                            } finally {
-                            }
-                        }
-                    }
-                    emit(Mutation<State> { copy(isSubmitting = false) })
-                }
-            )
+            flow <Mutation<State>>{
+                emit(Mutation { copy(isSubmitting = true) })
+                // TODO: Show snack bar if error
+                authRepository.createSession(request = request)
+                emit(Mutation { copy(isSubmitting = false) })
+            }
         }

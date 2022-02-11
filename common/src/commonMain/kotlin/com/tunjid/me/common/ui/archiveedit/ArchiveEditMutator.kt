@@ -20,6 +20,7 @@ package com.tunjid.me.common.ui.archiveedit
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.app.monitorWhenActive
 import com.tunjid.me.common.data.model.ArchiveKind
+import com.tunjid.me.common.data.model.ArchiveUpsert
 import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
@@ -49,7 +50,7 @@ fun archiveEditMutator(
 ): ArchiveEditMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(
-        archiveId = route.archiveId,
+        upsert = ArchiveUpsert(id = route.archiveId),
         navBarSize = appMutator.globalUiMutator.state.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(2000),
@@ -84,10 +85,10 @@ private fun ArchiveRepository.textBodyMutations(
 ).map { archive ->
     Mutation {
         copy(
-            title = archive.title,
-            description = archive.description,
-            body = archive.body,
-            chipsState = ChipsState(
+            upsert = upsert.copy(
+                title = archive.title,
+                description = archive.description,
+                body = archive.body,
                 categories = archive.categories,
                 tags = archive.tags,
             )
@@ -102,41 +103,53 @@ private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
     map { (chipAction, descriptor) ->
         Mutation {
             if (descriptor.value.isBlank()) return@Mutation this
-
-            val updatedChipsState = when (chipAction) {
-                ChipAction.Added -> chipsState.copy(
-                    categories = when (descriptor) {
-                        is Descriptor.Category -> (chipsState.categories + descriptor).distinct()
-                        else -> chipsState.categories
-                    },
-                    categoryText = when (descriptor) {
-                        is Descriptor.Category -> Descriptor.Category(value = "")
-                        else -> chipsState.categoryText
-                    },
-                    tags = when (descriptor) {
-                        is Descriptor.Tag -> (chipsState.tags + descriptor).distinct()
-                        else -> chipsState.tags
-                    },
-                    tagText = when (descriptor) {
-                        is Descriptor.Tag -> Descriptor.Tag(value = "")
-                        else -> chipsState.tagText
-                    },
+            val (updatedUpsert, updatedChipsState) = when (chipAction) {
+                ChipAction.Added -> Pair(
+                    upsert.copy(
+                        categories = when (descriptor) {
+                            is Descriptor.Category -> (upsert.categories + descriptor).distinct()
+                            else -> upsert.categories
+                        },
+                        tags = when (descriptor) {
+                            is Descriptor.Tag -> (upsert.tags + descriptor).distinct()
+                            else -> upsert.tags
+                        },
+                    ),
+                    chipsState.copy(
+                        categoryText = when (descriptor) {
+                            is Descriptor.Category -> Descriptor.Category(value = "")
+                            else -> chipsState.categoryText
+                        },
+                        tagText = when (descriptor) {
+                            is Descriptor.Tag -> Descriptor.Tag(value = "")
+                            else -> chipsState.tagText
+                        },
+                    )
                 )
-                is ChipAction.Changed -> chipsState.copy(
-                    categoryText = when (descriptor) {
-                        is Descriptor.Category -> descriptor
-                        else -> chipsState.categoryText
-                    },
-                    tagText = when (descriptor) {
-                        is Descriptor.Tag -> descriptor
-                        else -> chipsState.tagText
-                    }
+                is ChipAction.Changed -> Pair(
+                    upsert,
+                    chipsState.copy(
+                        categoryText = when (descriptor) {
+                            is Descriptor.Category -> descriptor
+                            else -> chipsState.categoryText
+                        },
+                        tagText = when (descriptor) {
+                            is Descriptor.Tag -> descriptor
+                            else -> chipsState.tagText
+                        }
+                    )
                 )
-                is ChipAction.Removed -> chipsState.copy(
-                    categories = chipsState.categories.filter { it != descriptor },
-                    tags = chipsState.tags.filter { it != descriptor },
+                is ChipAction.Removed -> Pair(
+                    upsert.copy(
+                        categories = upsert.categories.filter { it != descriptor },
+                        tags = upsert.tags.filter { it != descriptor },
+                    ),
+                    chipsState
                 )
             }
-            copy(chipsState = updatedChipsState)
+            copy(
+                upsert = updatedUpsert,
+                chipsState = updatedChipsState
+            )
         }
     }

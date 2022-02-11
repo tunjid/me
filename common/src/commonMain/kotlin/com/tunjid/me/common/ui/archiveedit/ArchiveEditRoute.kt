@@ -73,6 +73,7 @@ data class ArchiveEditRoute(
 @Composable
 private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
     val state by mutator.state.collectAsState()
+    val upsert = state.upsert
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
 
@@ -93,7 +94,7 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
     ) {
         Spacer(modifier = Modifier.padding(8.dp))
         TextField(
-            value = state.title,
+            value = upsert.title,
             maxLines = 2,
             colors = Unstyled(),
             textStyle = LocalTextStyle.current.copy(
@@ -106,7 +107,7 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
         Spacer(modifier = Modifier.padding(8.dp))
 
         TextField(
-            value = state.description,
+            value = upsert.description,
             maxLines = 2,
             colors = Unstyled(),
             textStyle = LocalTextStyle.current.copy(
@@ -121,13 +122,14 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
         EditChips(
             modifier = Modifier.fillMaxWidth()
                 .padding(horizontal = 16.dp),
+            upsert = state.upsert,
             state = state.chipsState,
             onChanged = mutator.accept
         )
         Spacer(modifier = Modifier.padding(16.dp))
 
         TextField(
-            value = state.body,
+            value = upsert.body,
             colors = Unstyled(),
             textStyle = LocalTextStyle.current.copy(
                 color = MaterialTheme.colors.onSurface,

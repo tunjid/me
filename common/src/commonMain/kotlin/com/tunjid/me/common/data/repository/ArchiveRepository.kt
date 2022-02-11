@@ -16,12 +16,14 @@
 
 package com.tunjid.me.common.data.repository
 
-import com.tunjid.me.common.data.model.ArchiveQuery
-import com.tunjid.me.common.data.network.NetworkService
-import com.tunjid.me.common.data.network.NetworkMonitor
-import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.local.ArchiveDao
+import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.model.ArchiveKind
+import com.tunjid.me.common.data.model.ArchiveQuery
+import com.tunjid.me.common.data.model.ArchiveUpsert
+import com.tunjid.me.common.data.model.Result
+import com.tunjid.me.common.data.network.NetworkMonitor
+import com.tunjid.me.common.data.network.NetworkService
 import com.tunjid.me.common.data.network.remoteFetcher
 import com.tunjid.tiler.Tile
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 
 interface ArchiveRepository {
+    suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result
     fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
     fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive>
 }
@@ -56,10 +59,23 @@ class ReactiveArchiveRepository(
 
     private val remoteArchiveFetcher = remoteFetcher(
         scope = appScope,
-        fetch = { (kind, id): Pair<ArchiveKind, String> -> networkService.fetchArchive(kind = kind, id = id) },
+        fetch = { (kind, id): Pair<ArchiveKind, String> ->
+            networkService.fetchArchive(
+                kind = kind,
+                id = id
+            )
+        },
         save = { dao.saveArchives(listOf(it)) },
         networkMonitor = networkMonitor
     )
+
+    override suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result = try {
+        val archive = networkService.upsertArchive(kind, upsert)
+        dao.saveArchives(listOf(archive))
+        Result.Success
+    } catch (e: Throwable) {
+        Result.Error(e.message)
+    }
 
     override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
         dao.monitorArchives(query)
