@@ -23,6 +23,7 @@ import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.globalui.navBarSize
 import com.tunjid.me.common.app.monitorWhenActive
+import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.accept
@@ -37,6 +38,7 @@ import kotlinx.serialization.Transient
 
 @Serializable
 data class State(
+    val isSignedIn: Boolean = false,
     val navBarSize: Int,
     // Read this from the DB
     @Transient
@@ -49,7 +51,8 @@ fun archiveDetailMutator(
     scope: CoroutineScope,
     route: ArchiveDetailRoute,
     initialState: State? = null,
-    repo: ArchiveRepository,
+    archiveRepository: ArchiveRepository,
+    authRepository: AuthRepository,
     appMutator: AppMutator,
 ): ArchiveDetailMutator = stateFlowMutator(
     scope = scope,
@@ -64,7 +67,8 @@ fun archiveDetailMutator(
                 .map {
                     Mutation { copy(navBarSize = it) }
                 },
-            repo.monitorArchive(
+            authRepository.isSignedIn.map { Mutation { copy(isSignedIn = it) } },
+            archiveRepository.monitorArchive(
                 kind = route.kind,
                 id = route.archiveId
             )

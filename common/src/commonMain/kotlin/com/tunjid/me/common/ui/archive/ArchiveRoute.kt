@@ -40,6 +40,7 @@ import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.auth.SignInRoute
 import com.tunjid.me.common.ui.utilities.InitialUiState
+import com.tunjid.mutator.accept
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -68,16 +69,11 @@ private fun ArchiveScreen(
     val state by mutator.state.collectAsState()
     val isInNavRail = state.isInNavRail
     val query = state.queryState.startQuery
+    val isSignedIn = state.isSignedIn
     if (!isInNavRail) InitialUiState(
         UiState(
             toolbarShows = true,
             toolbarTitle = query.kind.name,
-            toolbarItems = listOf(
-                ToolbarItem(
-                    id = SignIn,
-                    text = "Sign In"
-                )
-            ),
             toolbarMenuClickListener = { item ->
                 when (item.id) {
                     SignIn -> mutator.accept(Action.Navigate(AppAction.Nav.push(SignInRoute)))
@@ -129,6 +125,16 @@ private fun ArchiveScreen(
     // Initial load
     LaunchedEffect(query) {
         mutator.accept(Action.Fetch.LoadMore(query = state.queryState.currentQuery))
+    }
+
+    val appMutator = LocalAppDependencies.current.appMutator
+    LaunchedEffect(isSignedIn) {
+        appMutator.globalUiMutator.accept {
+            copy(toolbarItems = listOfNotNull(
+                ToolbarItem(id = SignIn, text = "Sign In")
+                    .takeIf { isSignedIn }
+            ))
+        }
     }
 
     // Endless scrolling

@@ -200,7 +200,8 @@ private class AppModule(
                     scope = routeScope,
                     initialState = route.restoredState(),
                     route = route,
-                    repo = archiveRepository,
+                    archiveRepository = archiveRepository,
+                    authRepository = authRepository,
                     appMutator = appMutator,
                 )
             )
@@ -213,7 +214,8 @@ private class AppModule(
                     scope = routeScope,
                     initialState = route.restoredState(),
                     route = route,
-                    repo = archiveRepository,
+                    archiveRepository = archiveRepository,
+                    authRepository = authRepository,
                     appMutator = appMutator,
                 )
             )

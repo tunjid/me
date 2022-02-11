@@ -18,10 +18,11 @@ package com.tunjid.me.common.ui.archive
 
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.app.consumeWith
-import com.tunjid.me.common.data.repository.ArchiveRepository
-import com.tunjid.me.common.data.model.Descriptor
-import com.tunjid.me.common.globalui.navRailVisible
 import com.tunjid.me.common.app.monitorWhenActive
+import com.tunjid.me.common.data.model.Descriptor
+import com.tunjid.me.common.data.repository.ArchiveRepository
+import com.tunjid.me.common.data.repository.AuthRepository
+import com.tunjid.me.common.globalui.navRailVisible
 import com.tunjid.me.common.nav.navRailRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
@@ -39,7 +40,8 @@ fun archiveMutator(
     scope: CoroutineScope,
     route: ArchiveRoute,
     initialState: State? = null,
-    repo: ArchiveRepository,
+    archiveRepository: ArchiveRepository,
+    authRepository: AuthRepository,
     appMutator: AppMutator,
 ): ArchiveMutator = stateFlowMutator(
     scope = scope,
@@ -59,9 +61,13 @@ fun archiveMutator(
     actionTransform = { actions ->
         merge(
             appMutator.navRailStatusMutations(),
+            authRepository.isSignedIn.map { Mutation { copy(isSignedIn = it) } },
             actions.toMutationStream(keySelector = Action::key) {
                 when (val action = type()) {
-                    is Action.Fetch -> action.flow.fetchMutations(scope = scope, repo = repo)
+                    is Action.Fetch -> action.flow.fetchMutations(
+                        scope = scope,
+                        repo = archiveRepository
+                    )
                     is Action.Navigate -> action.flow.map { it.navAction }.consumeWith(appMutator)
                     is Action.FilterChanged -> action.flow.filterChangedMutations()
                     is Action.ToggleFilter -> action.flow.filterToggleMutations()
@@ -208,8 +214,8 @@ private fun Flow<Action.Fetch>.fetchMutations(
 
 private val FetchResult.flattenedArchives: List<ArchiveItem>
     get() = queriedArchives
-    .flatten()
-    .distinctBy { it.key }
+        .flatten()
+        .distinctBy { it.key }
 
 private val FetchResult.hasNoResults: Boolean
     get() = queriedArchives.isEmpty() || queriedArchives.all {

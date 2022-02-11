@@ -31,6 +31,7 @@ data class State(
     val gridSize: Int = 1,
     val shouldScrollToTop: Boolean = true,
     val isInNavRail: Boolean = false,
+    val isSignedIn: Boolean = false,
     val queryState: QueryState,
     @Transient
     val lastVisibleKey: Any? = null,
