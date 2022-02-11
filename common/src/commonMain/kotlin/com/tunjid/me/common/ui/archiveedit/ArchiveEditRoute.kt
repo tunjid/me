@@ -27,6 +27,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -73,6 +75,10 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
         UiState(
             toolbarShows = true,
             toolbarTitle = "Archive Edit",
+            fabShows = true,
+            fabText = if (state.upsert.id == null) "Create" else "Save",
+            fabIcon = Icons.Default.Done,
+            fabExtended = true,
             navVisibility = NavVisibility.GoneIfBottomNav,
             insetFlags = InsetFlags.NO_BOTTOM,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),

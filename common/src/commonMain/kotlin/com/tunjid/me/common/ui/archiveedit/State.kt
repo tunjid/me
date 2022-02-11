@@ -26,6 +26,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class State(
     val isSignedIn: Boolean = false,
+    val isSubmitting: Boolean = false,
     val navBarSize: Int,
     val upsert: ArchiveUpsert = ArchiveUpsert(),
     val chipsState: ChipsState = ChipsState(),

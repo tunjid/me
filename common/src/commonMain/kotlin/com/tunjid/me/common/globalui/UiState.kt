@@ -48,6 +48,7 @@ data class UiState(
     val fabIcon: ImageVector = Icons.Default.Done,
     val fabShows: Boolean = false,
     val fabExtended: Boolean = true,
+    val fabEnabled: Boolean = true,
     val fabText: String = "",
     val backgroundColor: Int = Color.Transparent.toArgb(),
     val snackbarText: CharSequence = "",
@@ -91,6 +92,7 @@ internal data class FabState(
     val snackbarHeight: Int,
     val icon: ImageVector,
     val extended: Boolean,
+    val enabled: Boolean,
     val text: String,
     override val ime: Ingress,
     override val navBarSize: Int,
@@ -131,6 +133,7 @@ internal val UiState.fabState
         icon = fabIcon,
         text = fabText,
         extended = fabExtended,
+        enabled = fabEnabled,
         ime = systemUI.dynamic.ime,
         navBarSize = systemUI.static.navBarSize,
         insetDescriptor = insetFlags
