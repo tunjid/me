@@ -21,16 +21,15 @@ import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.ByteSerializer
 import com.tunjid.me.common.data.DelegatingByteSerializer
-import com.tunjid.me.common.data.fromBytes
 import com.tunjid.me.common.data.local.ArchiveDao
 import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.local.SqlArchiveDao
 import com.tunjid.me.common.data.local.SqlSessionCookieDao
 import com.tunjid.me.common.data.local.databaseDispatcher
 import com.tunjid.me.common.data.model.ArchiveKind
-import com.tunjid.me.common.data.network.NetworkService
 import com.tunjid.me.common.data.network.ApiUrl
 import com.tunjid.me.common.data.network.NetworkMonitor
+import com.tunjid.me.common.data.network.NetworkService
 import com.tunjid.me.common.data.network.exponentialBackoff
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
@@ -41,21 +40,11 @@ import com.tunjid.me.common.globalui.globalUiMutator
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.nav.ByteSerializableRoute
 import com.tunjid.me.common.nav.navMutator
-import com.tunjid.me.common.nav.removedRoutes
-import com.tunjid.me.common.ui.archivelist.ArchiveRoute
-import com.tunjid.me.common.ui.archivelist.archiveMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
-import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
-import com.tunjid.me.common.ui.archiveedit.archiveEditMutator
-import com.tunjid.me.common.ui.archivelist.State
+import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.auth.SignInRoute
-import com.tunjid.me.common.ui.auth.signInMutator
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.cbor.Cbor
@@ -74,11 +63,6 @@ interface AppDependencies {
     val sessionCookieDao: SessionCookieDao
     fun <T> routeDependencies(route: AppRoute<T>): T
 }
-
-private data class ScopeHolder(
-    val scope: CoroutineScope,
-    val mutator: Any
-)
 
 fun createAppDependencies(
     appScope: CoroutineScope,
@@ -102,7 +86,10 @@ private class AppModule(
     initialUiState: UiState
 ) : AppDependencies {
 
-    val routeMutatorFactory = mutableMapOf<AppRoute<*>, ScopeHolder>()
+    val routeMutatorFactory = AppMutatorFactory(
+        appScope = appScope,
+        appDependencies = this
+    )
 
     override val archiveDao = SqlArchiveDao(
         database = appDatabase,
@@ -142,13 +129,15 @@ private class AppModule(
         format = Cbor {
             serializersModule = SerializersModule {
                 polymorphic(ByteSerializableRoute::class) {
-                    subclass(ArchiveRoute::class)
+                    subclass(ArchiveListRoute::class)
                     subclass(ArchiveDetailRoute::class)
+                    subclass(ArchiveEditRoute::class)
                     subclass(SignInRoute::class)
                 }
                 polymorphic(ByteSerializable::class) {
-                    subclass(State::class)
+                    subclass(com.tunjid.me.common.ui.archivelist.State::class)
                     subclass(com.tunjid.me.common.ui.archivedetail.State::class)
+                    subclass(com.tunjid.me.common.ui.archiveedit.State::class)
                     subclass(com.tunjid.me.common.ui.auth.State::class)
                 }
             }
@@ -156,18 +145,6 @@ private class AppModule(
     )
 
     init {
-        appScope.launch {
-            appMutator.state
-                .map { it.nav }
-                .removedRoutes()
-                .collect { removedRoutes ->
-                    removedRoutes.forEach { route ->
-                        val holder = routeMutatorFactory.remove(route)
-                        holder?.scope?.cancel()
-                    }
-                }
-        }
-
         appScope.launch {
             com.tunjid.me.common.data.network.modelEvents(
                 url = "$ApiUrl/",
@@ -194,74 +171,8 @@ private class AppModule(
         }
     }
 
-    override fun <T> routeDependencies(route: AppRoute<T>): T = when (route) {
-        is ArchiveRoute -> routeMutatorFactory.getOrPut(route) {
-            val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-            ScopeHolder(
-                scope = routeScope,
-                mutator = archiveMutator(
-                    scope = routeScope,
-                    initialState = route.restoredState(),
-                    route = route,
-                    archiveRepository = archiveRepository,
-                    authRepository = authRepository,
-                    appMutator = appMutator,
-                )
-            )
-        }
-        is ArchiveDetailRoute -> routeMutatorFactory.getOrPut(route) {
-            val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-            ScopeHolder(
-                scope = routeScope,
-                mutator = archiveDetailMutator(
-                    scope = routeScope,
-                    initialState = route.restoredState(),
-                    route = route,
-                    archiveRepository = archiveRepository,
-                    authRepository = authRepository,
-                    appMutator = appMutator,
-                )
-            )
-        }
-        is ArchiveEditRoute -> routeMutatorFactory.getOrPut(route) {
-            val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-            ScopeHolder(
-                scope = routeScope,
-                mutator = archiveEditMutator(
-                    scope = routeScope,
-                    initialState = route.restoredState(),
-                    route = route,
-                    archiveRepository = archiveRepository,
-                    authRepository = authRepository,
-                    appMutator = appMutator,
-                )
-            )
-        }
-        is SignInRoute -> routeMutatorFactory.getOrPut(route) {
-            val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-            ScopeHolder(
-                scope = routeScope,
-                mutator = signInMutator(
-                    scope = routeScope,
-                    initialState = route.restoredState(),
-                    route = route,
-                    authRepository = authRepository,
-                    appMutator = appMutator,
-                )
-            )
-        }
-        else -> throw IllegalArgumentException("Unknown route")
-    }.mutator as T
-
-    private inline fun <reified T : ByteSerializable> AppRoute<*>.restoredState(): T? {
-        return try {
-            // TODO: Figure out why this throws
-            val serialized = appMutator.state.value.routeIdsToSerializedStates[id]
-            serialized?.let(byteSerializer::fromBytes)
-        } catch (e: Exception) {
-            null
-        }
-    }
+    override fun <T> routeDependencies(route: AppRoute<T>): T =
+        routeMutatorFactory.routeMutator(route)
 }
 
 val LocalAppDependencies = staticCompositionLocalOf {

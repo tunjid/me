@@ -31,19 +31,19 @@ import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 
-typealias ArchiveMutator = Mutator<Action, StateFlow<State>>
+typealias ArchiveListMutator = Mutator<Action, StateFlow<State>>
 
 /**
- * Manages [State] for [ArchiveRoute]
+ * Manages [State] for [ArchiveListRoute]
  */
-fun archiveMutator(
+fun archiveListMutator(
     scope: CoroutineScope,
-    route: ArchiveRoute,
+    route: ArchiveListRoute,
     initialState: State? = null,
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
     appMutator: AppMutator,
-): ArchiveMutator = stateFlowMutator(
+): ArchiveListMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(
         items = listOf(
@@ -83,7 +83,7 @@ fun archiveMutator(
  * Updates [State] with whether or not it is in the nav rail
  */
 private fun AppMutator.navRailStatusMutations() = state.map { appState ->
-    appState.nav.navRailRoute is ArchiveRoute && appState.ui.navRailVisible
+    appState.nav.navRailRoute is ArchiveListRoute && appState.ui.navRailVisible
 }
     .distinctUntilChanged()
     .map {

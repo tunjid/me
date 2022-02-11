@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.data.archive.icon
-import com.tunjid.me.common.ui.archivelist.ArchiveRoute
+import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -121,7 +121,7 @@ private val startNav = MultiStackNav(
     stacks = ArchiveKind.values().map { kind ->
         StackNav(
             name = kind.name,
-            routes = listOf(ArchiveRoute(query = ArchiveQuery(kind = kind)))
+            routes = listOf(ArchiveListRoute(query = ArchiveQuery(kind = kind)))
         )
     }
 )

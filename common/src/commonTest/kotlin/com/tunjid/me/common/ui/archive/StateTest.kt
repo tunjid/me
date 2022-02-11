@@ -5,7 +5,7 @@ import com.tunjid.me.common.data.model.ArchiveKind.Articles
 import com.tunjid.me.common.data.fromBytes
 import com.tunjid.me.common.data.toBytes
 import com.tunjid.me.common.nav.ByteSerializableRoute
-import com.tunjid.me.common.ui.archivelist.ArchiveRoute
+import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.archivelist.QueryState
 import com.tunjid.me.common.ui.archivelist.State
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
@@ -41,7 +41,7 @@ class StateTest {
             format = Cbor {
                 serializersModule = SerializersModule {
                     polymorphic(ByteSerializableRoute::class) {
-                        subclass(ArchiveRoute::class)
+                        subclass(ArchiveListRoute::class)
                         subclass(ArchiveDetailRoute::class)
                     }
                     polymorphic(ByteSerializable::class) {

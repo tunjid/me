@@ -23,7 +23,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -39,7 +38,7 @@ import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.ToolbarItem
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.ui.archivelist.ArchiveRoute
+import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.utilities.InitialUiState
 import com.tunjid.mutator.accept
@@ -65,7 +64,7 @@ data class ArchiveDetailRoute(
     override fun navRailRoute(nav: MultiStackNav): AppRoute<*>? {
         val activeStack = nav.stacks.getOrNull(nav.currentIndex) ?: return null
         val previous = activeStack.routes.getOrNull(activeStack.routes.lastIndex - 1)
-        return if (previous is ArchiveRoute) previous else null
+        return if (previous is ArchiveListRoute) previous else null
     }
 }
 

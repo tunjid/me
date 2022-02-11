@@ -47,7 +47,7 @@ import kotlinx.serialization.Serializable
 import kotlin.math.min
 
 @Serializable
-data class ArchiveRoute(val query: ArchiveQuery) : AppRoute<ArchiveMutator> {
+data class ArchiveListRoute(val query: ArchiveQuery) : AppRoute<ArchiveListMutator> {
     override val id: String
         get() = "archive-route-${query.kind}"
 
@@ -63,7 +63,7 @@ private const val SignIn = "sign-in"
 
 @Composable
 private fun ArchiveScreen(
-    mutator: ArchiveMutator,
+    mutator: ArchiveListMutator,
 ) {
     val state by mutator.state.collectAsState()
     val isInNavRail = state.isInNavRail

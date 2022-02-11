@@ -7,7 +7,7 @@ import com.tunjid.me.common.data.fromBytes
 import com.tunjid.me.common.data.toBytes
 import com.tunjid.me.common.nav.ByteSerializableRoute
 import com.tunjid.me.common.nav.toByteSerializable
-import com.tunjid.me.common.ui.archivelist.ArchiveRoute
+import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.archivelist.QueryState
 import com.tunjid.me.common.ui.archivelist.State
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
@@ -43,7 +43,7 @@ class StateRestorationTest {
             format = Cbor {
                 serializersModule = SerializersModule {
                     polymorphic(ByteSerializableRoute::class) {
-                        subclass(ArchiveRoute::class)
+                        subclass(ArchiveListRoute::class)
                         subclass(ArchiveDetailRoute::class)
                     }
                     polymorphic(ByteSerializable::class) {
@@ -65,7 +65,7 @@ class StateRestorationTest {
         val savedState = SavedState(
             navigation = byteSerializer.toBytes(nav.toByteSerializable),
             routeStates = mapOf(
-                ArchiveRoute(
+                ArchiveListRoute(
                     state.queryState.currentQuery
                 ).id to byteSerializer.toBytes(state)
             )
