@@ -116,7 +116,7 @@ private class AppModule(
     )
 
     override val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
-        api = networkService,
+        networkService = networkService,
         appScope = appScope,
         networkMonitor = networkMonitor,
         dao = archiveDao
@@ -124,7 +124,7 @@ private class AppModule(
 
     override val authRepository: AuthRepository =
         SessionCookieAuthRepository(
-            api = networkService,
+            networkService = networkService,
             dao = sessionCookieDao
         )
 
