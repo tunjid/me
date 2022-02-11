@@ -35,6 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,7 +88,13 @@ fun Chips(
                 TextField(
                     modifier = Modifier
                         .wrapContentWidth()
-                        .defaultMinSize(minWidth = 40.dp, minHeight = 48.dp),
+                        .defaultMinSize(minWidth = 40.dp, minHeight = 48.dp)
+                        .onKeyEvent {
+                            if (it.key != Key.Enter) return@onKeyEvent false
+
+                            editInfo.onChipChanged(ChipAction.Added)
+                            true
+                        },
                     maxLines = 1,
                     value = editInfo.currentText,
                     onValueChange = { editInfo.onChipChanged(ChipAction.Changed(it)) },

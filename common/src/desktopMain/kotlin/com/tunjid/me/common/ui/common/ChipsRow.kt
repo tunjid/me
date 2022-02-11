@@ -16,13 +16,18 @@
 
 package com.tunjid.me.common.ui.common
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 
 @Composable
 actual fun ChipRow(content: @Composable () -> Unit) {
+    val scrollState = rememberScrollState()
     Row(
+        modifier = Modifier.horizontalScroll(scrollState),
         horizontalArrangement = Arrangement.Start
     ) {
         content()

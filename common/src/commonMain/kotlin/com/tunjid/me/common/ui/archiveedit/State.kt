@@ -17,6 +17,9 @@
 package com.tunjid.me.common.ui.archiveedit
 
 import com.tunjid.me.common.data.ByteSerializable
+import com.tunjid.me.common.data.model.ArchiveQuery
+import com.tunjid.me.common.data.model.Descriptor
+import com.tunjid.me.common.ui.common.ChipAction
 import com.tunjid.mutator.Mutation
 import kotlinx.serialization.Serializable
 
@@ -28,6 +31,7 @@ data class State(
     val title: String = "",
     val body: String = "",
     val description: String = "",
+    val chipsState: ChipsState = ChipsState(),
 ) : ByteSerializable
 
 sealed class Action(val key: String) {
@@ -54,5 +58,16 @@ sealed class Action(val key: String) {
             }
     }
 
-
+    data class ChipEdit(
+        val chipAction: ChipAction,
+        val descriptor: Descriptor,
+    ): Action("ChipEdit")
 }
+
+@Serializable
+data class ChipsState(
+    val categories: List<Descriptor.Category> = listOf(),
+    val tags: List<Descriptor.Tag> = listOf(),
+    val categoryText: Descriptor.Category = Descriptor.Category(""),
+    val tagText: Descriptor.Tag = Descriptor.Tag(""),
+)

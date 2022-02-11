@@ -18,6 +18,7 @@ package com.tunjid.me.common.ui.archiveedit
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -103,6 +104,7 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
             onValueChange = { mutator.accept(Action.TextEdit.Title(it)) }
         )
         Spacer(modifier = Modifier.padding(8.dp))
+
         TextField(
             value = state.description,
             maxLines = 2,
@@ -114,6 +116,15 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
             label = { Text(text = "Description", fontSize = 18.sp) },
             onValueChange = { mutator.accept(Action.TextEdit.Description(it)) }
         )
+        Spacer(modifier = Modifier.padding(8.dp))
+
+        EditChips(
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            state = state.chipsState,
+            onChanged = mutator.accept
+        )
+        Spacer(modifier = Modifier.padding(16.dp))
 
         TextField(
             value = state.body,
