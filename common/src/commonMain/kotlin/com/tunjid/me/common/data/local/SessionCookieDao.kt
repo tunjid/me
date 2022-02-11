@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.map
 
 interface SessionCookieDao {
     val sessionCookieStream: Flow<String?>
-    suspend fun saveSessionCookie(sessionCookie: String)
+    suspend fun saveSessionCookie(sessionCookie: String?)
 }
 
 
@@ -45,7 +45,7 @@ class SqlSessionCookieDao(
             .mapToOneOrNull(context = dispatcher)
             .map { it?.data_ }
 
-    override suspend fun saveSessionCookie(sessionCookie: String) {
+    override suspend fun saveSessionCookie(sessionCookie: String?) {
         keyValueQueries.suspendingTransaction(context = dispatcher) {
             keyValueQueries.upsert(
                 id = SessionCookieId,

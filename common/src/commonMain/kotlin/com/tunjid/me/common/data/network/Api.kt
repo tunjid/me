@@ -16,21 +16,51 @@
 
 package com.tunjid.me.common.data.network
 
+import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.model.Descriptor
-import com.tunjid.me.common.data.model.User
 import com.tunjid.me.common.data.model.SessionRequest
+import com.tunjid.me.common.data.model.User
 import io.ktor.client.*
+import io.ktor.client.features.cookies.*
+import io.ktor.client.features.json.*
+import io.ktor.client.features.json.serializer.*
+import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import kotlinx.serialization.decodeFromString
 
 const val ApiUrl = "https://www.tunjid.com"
 
 class Api(
-    private val client: HttpClient,
-    private val baseUrl: String = ApiUrl
+    private val baseUrl: String = ApiUrl,
+    sessionCookieDao: SessionCookieDao,
 ) {
+    private val client = HttpClient {
+        val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+
+        install(JsonFeature) {
+            accept(ContentType.Application.Json, ContentType.Text.Html)
+            serializer = KotlinxSerializer(json = json)
+        }
+        install(HttpCookies) {
+            storage = SessionCookiesStorage(sessionCookieDao)
+        }
+        install(SessionCookieInvalidator) {
+            this.sessionCookieDao = sessionCookieDao
+            this.networkErrorConverter = json::decodeFromString
+        }
+        install(Logging) {
+            level = LogLevel.NONE
+            logger = object : Logger {
+                override fun log(message: String) {
+                    println("Logger Ktor => $message")
+                }
+            }
+        }
+    }
+
     suspend fun fetchArchives(
         kind: ArchiveKind,
         options: Map<String, String> = mapOf(),

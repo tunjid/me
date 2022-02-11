@@ -24,6 +24,12 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
+import io.ktor.client.features.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.utils.io.*
+import io.ktor.utils.io.charsets.*
+import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 
@@ -77,6 +83,16 @@ private fun Flow<Action.Submit>.submissionMutations(
                     } catch (e: Exception) {
                         // TODO: Show snack bar
                         println("e class: ${e::class.simpleName}; e message: ${e.message}")
+
+                        if(e is ClientRequestException) {
+                            try {
+
+                                val message = e.response.readText()
+                                println("Message 222: $message")
+                            } catch (_: Throwable) {
+                            } finally {
+                            }
+                        }
                     }
                     emit(Mutation<State> { copy(isSubmitting = false) })
                 }

@@ -111,7 +111,9 @@ private class AppModule(
         dispatcher = databaseDispatcher(),
     )
 
-    val api: Api = Api(httpClient(sessionCookieDao = sessionCookieDao))
+    val api: Api = Api(
+        sessionCookieDao = sessionCookieDao
+    )
 
     override val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
         api = api,
