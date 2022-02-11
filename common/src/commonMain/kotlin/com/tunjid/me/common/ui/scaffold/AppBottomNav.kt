@@ -16,7 +16,7 @@
 
 package com.tunjid.me.common.ui.scaffold
 
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -32,13 +32,12 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.app.component1
 import com.tunjid.me.common.app.component2
@@ -58,20 +57,17 @@ internal fun BoxScope.AppBottomNav(
     val nav by navMutator.state.collectAsState()
     val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::bottomNavPositionalState)
 
-    val bottomNavPositionAnimation = remember { Animatable(0f) }
-    val bottomNavPosition = when {
-        state.bottomNavVisible -> 0f
-        else -> with(LocalDensity.current) { UiSizes.bottomNavSize.toPx() + state.navBarSize }
-    }
-
-    LaunchedEffect(bottomNavPosition) {
-        bottomNavPositionAnimation.animateTo(bottomNavPosition)
-    }
+    val bottomNavPosition by animateDpAsState(
+        when {
+            state.bottomNavVisible -> 0.dp
+            else -> UiSizes.bottomNavSize + with(LocalDensity.current) { state.navBarSize.toDp() }
+        }
+    )
 
     Column(
         modifier = Modifier
             .align(Alignment.BottomCenter)
-            .offset(y = with(LocalDensity.current) { bottomNavPositionAnimation.value.toDp() })
+            .offset(y = bottomNavPosition)
             .fillMaxWidth()
             .wrapContentHeight(),
     ) {

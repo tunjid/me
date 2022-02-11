@@ -48,7 +48,7 @@ data class UiState(
     val fabIcon: ImageVector = Icons.Default.Done,
     val fabShows: Boolean = false,
     val fabExtended: Boolean = true,
-    val fabText: CharSequence = "",
+    val fabText: String = "",
     val backgroundColor: Int = Color.Transparent.toArgb(),
     val snackbarText: CharSequence = "",
     val navBarColor: Int = Color.Transparent.toArgb(),
@@ -85,10 +85,13 @@ internal data class SnackbarPositionalState(
     override val insetDescriptor: InsetDescriptor
 ) : KeyboardAware
 
-internal data class FabPositionalState(
+internal data class FabState(
     val fabVisible: Boolean,
     val bottomNavVisible: Boolean,
     val snackbarHeight: Int,
+    val icon: ImageVector,
+    val extended: Boolean,
+    val text: String,
     override val ime: Ingress,
     override val navBarSize: Int,
     override val insetDescriptor: InsetDescriptor
@@ -121,10 +124,13 @@ internal val UiState.toolbarState
     )
 
 internal val UiState.fabState
-    get() = FabPositionalState(
+    get() = FabState(
         fabVisible = fabShows,
         snackbarHeight = systemUI.dynamic.snackbarHeight,
         bottomNavVisible = bottomNavVisible,
+        icon = fabIcon,
+        text = fabText,
+        extended = fabExtended,
         ime = systemUI.dynamic.ime,
         navBarSize = systemUI.static.navBarSize,
         insetDescriptor = insetFlags

@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,11 +37,10 @@ import com.tunjid.me.common.app.LocalAppDependencies
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
-import com.tunjid.me.common.globalui.ToolbarItem
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
+import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.utilities.InitialUiState
 import com.tunjid.mutator.accept
 import com.tunjid.treenav.MultiStackNav
@@ -80,10 +81,11 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             toolbarShows = true,
             toolbarTitle = state.archive?.title ?: "Detail",
             navVisibility = NavVisibility.GoneIfBottomNav,
-            toolbarItems = listOfNotNull(
-                ToolbarItem(id = "edit", text = "Edit").takeIf { canEdit }
-            ),
-            toolbarMenuClickListener = {
+            fabShows = canEdit,
+            fabExtended = true,
+            fabText = "Edit",
+            fabIcon = Icons.Default.Edit,
+            fabClickListener = {
                 navMutator.accept {
                     push(
                         ArchiveEditRoute(
