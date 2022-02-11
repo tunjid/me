@@ -19,12 +19,13 @@ package com.tunjid.me.common.ui.archivedetail
 import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.model.ArchiveKind
+import com.tunjid.me.common.data.model.UserId
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Serializable
 data class State(
-    val signedInUserId: String? = null,
+    val signedInUserId: UserId? = null,
     val navBarSize: Int,
     val kind: ArchiveKind,
     // Read this from the DB

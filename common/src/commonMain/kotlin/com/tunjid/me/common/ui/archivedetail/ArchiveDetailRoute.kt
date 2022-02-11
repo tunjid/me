@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material.MaterialRichText
 import com.tunjid.me.common.app.LocalAppDependencies
+import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
@@ -50,7 +51,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ArchiveDetailRoute(
     val kind: ArchiveKind,
-    val archiveId: String
+    val archiveId: ArchiveId
 ) : AppRoute<ArchiveDetailMutator> {
     override val id: String
         get() = "archive-detail-$kind-$archiveId"

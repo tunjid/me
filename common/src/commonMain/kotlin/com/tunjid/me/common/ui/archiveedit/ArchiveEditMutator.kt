@@ -19,9 +19,11 @@ package com.tunjid.me.common.ui.archiveedit
 
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.app.monitorWhenActive
+import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.model.ArchiveUpsert
 import com.tunjid.me.common.data.model.Descriptor
+import com.tunjid.me.common.data.model.Result
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.common.globalui.navBarSize
@@ -31,12 +33,7 @@ import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.*
 
 typealias ArchiveEditMutator = Mutator<Action, StateFlow<State>>
 
@@ -70,6 +67,9 @@ fun archiveEditMutator(
                 when (val action = type()) {
                     is Action.TextEdit -> action.flow.textEditMutations()
                     is Action.ChipEdit -> action.flow.chipEditMutations()
+                    is Action.Submit -> action.flow.submissionMutations(
+                        archiveRepository = archiveRepository
+                    )
                 }
             }
         ).monitorWhenActive(appMutator)
@@ -78,7 +78,7 @@ fun archiveEditMutator(
 
 private fun ArchiveRepository.textBodyMutations(
     kind: ArchiveKind,
-    archiveId: String
+    archiveId: ArchiveId
 ): Flow<Mutation<State>> = monitorArchive(
     kind = kind,
     id = archiveId
@@ -153,3 +153,24 @@ private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
             )
         }
     }
+
+private fun Flow<Action.Submit>.submissionMutations(
+    archiveRepository: ArchiveRepository
+): Flow<Mutation<State>> =
+    debounce(200)
+        .flatMapLatest { (kind, upsert) ->
+            flow<Mutation<State>> {
+                emit(Mutation { copy(isSubmitting = true) })
+                // TODO: Show snack bar if error
+                val result = archiveRepository.upsert(kind = kind, upsert = upsert)
+                emit(Mutation { copy(isSubmitting = false) })
+
+                // Start monitoring the created archive
+                if (upsert.id == null && result is Result.Success) emitAll(
+                    archiveRepository.textBodyMutations(
+                        kind = kind,
+                        archiveId = result.item
+                    )
+                )
+            }
+        }

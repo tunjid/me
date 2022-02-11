@@ -26,6 +26,7 @@ import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.local.SqlArchiveDao
 import com.tunjid.me.common.data.local.SqlSessionCookieDao
 import com.tunjid.me.common.data.local.databaseDispatcher
+import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.network.ApiUrl
 import com.tunjid.me.common.data.network.NetworkMonitor
@@ -163,7 +164,7 @@ private class AppModule(
                         maxDelay = 20_000,
                         times = 5,
                         default = null
-                    ) { networkService.fetchArchive(kind = kind, id = event.id) }
+                    ) { networkService.fetchArchive(kind = kind, id = ArchiveId(event.id)) }
                 }
                 .collect {
                     archiveDao.saveArchive(it)

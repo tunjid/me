@@ -17,6 +17,7 @@
 package com.tunjid.me.common.ui.archiveedit
 
 import com.tunjid.me.common.data.ByteSerializable
+import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.model.ArchiveUpsert
 import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.ui.common.ChipAction
@@ -60,6 +61,11 @@ sealed class Action(val key: String) {
         val chipAction: ChipAction,
         val descriptor: Descriptor,
     ): Action("ChipEdit")
+
+    data class Submit(
+        val kind: ArchiveKind,
+        val upsert: ArchiveUpsert
+    ): Action("Submit")
 }
 
 @Serializable

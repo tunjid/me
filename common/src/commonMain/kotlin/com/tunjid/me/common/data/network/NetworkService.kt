@@ -18,6 +18,7 @@ package com.tunjid.me.common.data.network
 
 import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.model.Archive
+import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.model.ArchiveUpsert
 import com.tunjid.me.common.data.model.Descriptor
@@ -82,7 +83,7 @@ class NetworkService(
 
     suspend fun fetchArchive(
         kind: ArchiveKind,
-        id: String,
+        id: ArchiveId,
     ): Archive = client.get("$baseUrl/api/${kind.type}/$id")
 
     suspend fun upsertArchive(

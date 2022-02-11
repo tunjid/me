@@ -39,7 +39,7 @@ enum class ArchiveKind(val type: String) {
 @Serializable
 data class Archive(
     @SerialName("_id")
-    val id: String,
+    val id: ArchiveId,
     val link: String,
     val title: String,
     val body: String,
@@ -57,7 +57,7 @@ data class Archive(
 @Serializable
 data class User(
     @SerialName("_id")
-    val id: String,
+    val id: UserId,
     val firstName: String,
     val lastName: String,
     val fullName: String,

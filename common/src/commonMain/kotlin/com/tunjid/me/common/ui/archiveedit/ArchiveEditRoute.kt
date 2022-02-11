@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.app.LocalAppDependencies
+import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
@@ -51,7 +52,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ArchiveEditRoute(
     val kind: ArchiveKind,
-    val archiveId: String?
+    val archiveId: ArchiveId?
 ) : AppRoute<ArchiveEditMutator> {
     override val id: String
         get() = "archive-edit-$kind-$archiveId"

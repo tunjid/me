@@ -18,9 +18,11 @@ package com.tunjid.me.common.data.repository
 
 import com.tunjid.me.common.data.local.ArchiveDao
 import com.tunjid.me.common.data.model.Archive
+import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.data.model.ArchiveUpsert
+import com.tunjid.me.common.data.model.UserId
 import com.tunjid.me.common.data.model.Result
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.network.NetworkService
@@ -33,9 +35,9 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 
 interface ArchiveRepository {
-    suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result
+    suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId>
     fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
-    fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive>
+    fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive>
 }
 
 /**
@@ -59,7 +61,7 @@ class ReactiveArchiveRepository(
 
     private val remoteArchiveFetcher = remoteFetcher(
         scope = appScope,
-        fetch = { (kind, id): Pair<ArchiveKind, String> ->
+        fetch = { (kind, id): Pair<ArchiveKind, ArchiveId> ->
             networkService.fetchArchive(
                 kind = kind,
                 id = id
@@ -69,10 +71,10 @@ class ReactiveArchiveRepository(
         networkMonitor = networkMonitor
     )
 
-    override suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result = try {
+    override suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId> = try {
         val archive = networkService.upsertArchive(kind, upsert)
         dao.saveArchives(listOf(archive))
-        Result.Success
+        Result.Success(archive.id)
     } catch (e: Throwable) {
         Result.Error(e.message)
     }
@@ -82,7 +84,7 @@ class ReactiveArchiveRepository(
             .onStart { remoteArchivesFetcher(Tile.Request.On(query)) }
             .onCompletion { remoteArchivesFetcher(Tile.Request.Evict(query)) }
 
-    override fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive> =
+    override fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive> =
         dao.monitorArchive(kind = kind, id = id)
             .onStart { remoteArchiveFetcher(Tile.Request.On(kind to id)) }
             .onCompletion { remoteArchiveFetcher(Tile.Request.Evict(kind to id)) }

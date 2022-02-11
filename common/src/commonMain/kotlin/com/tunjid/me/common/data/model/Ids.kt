@@ -17,13 +17,12 @@
 package com.tunjid.me.common.data.model
 
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmInline
 
 @Serializable
-data class ArchiveUpsert(
-    val id: ArchiveId? = null,
-    val title: String = "",
-    val body: String = "",
-    val description: String = "",
-    val tags: List<Descriptor.Tag> = listOf(),
-    val categories: List<Descriptor.Category> = listOf(),
-)
+@JvmInline
+value class UserId(val value: String)
+
+@Serializable
+@JvmInline
+value class ArchiveId(val value: String)

@@ -23,6 +23,7 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.ArchiveEntity
 import com.tunjid.me.common.data.model.Archive
+import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.data.model.Descriptor
@@ -40,7 +41,7 @@ import kotlinx.datetime.Instant
 
 interface ArchiveDao {
     fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
-    fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive?>
+    fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive?>
     suspend fun saveArchives(archives: List<Archive>)
 }
 
@@ -62,9 +63,9 @@ class SqlArchiveDao(
             .flatMapLatest { archiveEntities -> archiveEntitiesToArchives(archiveEntities) }
             .distinctUntilChanged()
 
-    override fun monitorArchive(kind: ArchiveKind, id: String): Flow<Archive?> =
+    override fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive?> =
         archiveQueries.get(
-            id = id,
+            id = id.value,
             kind = kind.type
         )
             .asFlow()
@@ -160,7 +161,7 @@ class SqlArchiveDao(
                 .mapToOne(context = this.dispatcher),
         ) { tags, categories, author ->
             Archive(
-                id = archiveEntity.id,
+                id = ArchiveId(archiveEntity.id),
                 link = archiveEntity.link,
                 title = archiveEntity.title,
                 description = archiveEntity.description,

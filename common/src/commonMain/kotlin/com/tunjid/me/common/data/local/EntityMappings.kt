@@ -20,10 +20,11 @@ import com.tunjid.me.common.data.ArchiveEntity
 import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.model.User
 import com.tunjid.me.common.data.UserEntity
+import com.tunjid.me.common.data.model.UserId
 
 internal val UserEntity.toUser
     get() = User(
-        id = id,
+        id = UserId(id),
         firstName = first_name,
         lastName = last_name,
         fullName = full_name,
@@ -32,7 +33,7 @@ internal val UserEntity.toUser
 
 internal val User.toEntity
     get() = UserEntity(
-        id = id,
+        id = id.value,
         first_name = firstName,
         last_name = lastName,
         full_name = fullName,
@@ -41,12 +42,12 @@ internal val User.toEntity
 
 internal val Archive.toEntity
     get() = ArchiveEntity(
-        id = id,
+        id = id.value,
         body = body,
         thumbnail = thumbnail,
         description = description,
         title = title,
-        author = author.id,
+        author = author.id.value,
         created = created.toEpochMilliseconds(),
         kind = kind.type,
         link = link,

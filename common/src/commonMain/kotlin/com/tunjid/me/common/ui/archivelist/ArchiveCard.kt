@@ -33,10 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.app.AppAction
 import com.tunjid.me.common.data.model.Archive
+import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind.Articles
 import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.data.model.User
+import com.tunjid.me.common.data.model.UserId
 import com.tunjid.me.common.data.model.plus
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.common.Chips
@@ -225,14 +227,14 @@ private fun ArchiveCardFooter(
 private val sampleArchiveItem = ArchiveItem.Result(
     query = ArchiveQuery(kind = Articles),
     archive = Archive(
-        id = "",
+        id = ArchiveId(""),
         link = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",
         title = "I'm an Archive",
         body = "Hello",
         description = "Hi",
         thumbnail = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",
         author = User(
-            id = "i",
+            id = UserId("i"),
             firstName = "TJ",
             lastName = "D",
             fullName = "TJ D",

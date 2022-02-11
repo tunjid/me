@@ -16,7 +16,7 @@
 
 package com.tunjid.me.common.data.model
 
-sealed class Result {
-    object Success: Result()
-    data class Error(val message: String?): Result()
+sealed class Result<T> {
+    data class Success<T>(val item: T): Result<T>()
+    data class Error<T>(val message: String?): Result<T>()
 }
