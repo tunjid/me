@@ -54,7 +54,7 @@ class NetworkService(
         }
         install(SessionCookieInvalidator) {
             this.sessionCookieDao = sessionCookieDao
-            this.networkErrorConverter = { json.decodeFromString<NetworkError>(it) }
+            this.networkErrorConverter = { json.decodeFromString(it) }
         }
         install(Logging) {
             level = LogLevel.INFO
@@ -91,17 +91,13 @@ class NetworkService(
         upsert: ArchiveUpsert,
     ): Archive {
         val id = upsert.id
-        val verb: suspend (
-            urlString: String,
-            block: HttpRequestBuilder.() -> Unit
-        ) -> Archive = if (id == null) client::post else client::put
-
-        return verb(
-            if (id == null) "$baseUrl/api/$kind"
-            else "$baseUrl/api/$kind/$id"
-        ) {
+        val requestBuilder: HttpRequestBuilder.() -> Unit = {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             body = upsert
+        }
+        return when (id) {
+            null -> client.post("$baseUrl/api/$kind", requestBuilder)
+            else -> client.put("$baseUrl/api/$kind/${id.value}", requestBuilder)
         }
     }
 

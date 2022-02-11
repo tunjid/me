@@ -100,7 +100,7 @@ fun Chips(
                     onValueChange = { editInfo.onChipChanged(ChipAction.Changed(it)) },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(
-                        onDone = { editInfo.onChipChanged(ChipAction.Added) },
+                        onAny = { editInfo.onChipChanged(ChipAction.Added) },
                     ),
                     colors = TextFieldDefaults.textFieldColors(
                         backgroundColor = Color.Transparent,

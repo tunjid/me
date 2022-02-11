@@ -72,8 +72,11 @@ class ReactiveArchiveRepository(
     )
 
     override suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId> = try {
+        println("REQ")
         val archive = networkService.upsertArchive(kind, upsert)
-        dao.saveArchives(listOf(archive))
+        println("FETCHED")
+//        dao.saveArchives(listOf(archive))
+        println("SAVED")
         Result.Success(archive.id)
     } catch (e: Throwable) {
         Result.Error(e.message)
