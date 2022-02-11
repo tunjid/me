@@ -23,6 +23,8 @@ import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,6 +40,7 @@ import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.ToolbarItem
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
+import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.auth.SignInRoute
 import com.tunjid.me.common.ui.utilities.InitialUiState
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
@@ -81,6 +84,22 @@ private fun ArchiveScreen(
                 when (item.id) {
                     SignIn -> mutator.accept(Action.Navigate(AppAction.Nav.push(SignInRoute)))
                 }
+            },
+            fabShows = isSignedIn,
+            fabExtended = true,
+            fabText = "Create",
+            fabIcon = Icons.Default.Add,
+            fabClickListener = {
+                mutator.accept(
+                    Action.Navigate(
+                        AppAction.Nav.push(
+                            ArchiveEditRoute(
+                                kind = state.queryState.currentQuery.kind,
+                                archiveId = null
+                            )
+                        )
+                    )
+                )
             },
             navVisibility = NavVisibility.Visible,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),

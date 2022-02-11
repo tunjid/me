@@ -18,6 +18,7 @@ package com.tunjid.me.common.ui.utilities
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -56,15 +57,22 @@ fun InitialUiState(state: UiState) {
         MutableFunction(state.altToolbarMenuClickListener)
     }
 
-    uiMutator.accept(Mutation {
-        // Preserve things that should not be overwritten
-        state.copy(
-            navMode = navMode,
-            systemUI = systemUI,
-            toolbarMenuClickListener = toolbarMenuClickListener,
-            altToolbarMenuClickListener = altToolbarMenuClickListener
-        )
-    })
+    val immutables = state.copy(
+        toolbarMenuClickListener = toolbarMenuClickListener,
+        altToolbarMenuClickListener = altToolbarMenuClickListener
+    )
+
+    LaunchedEffect(immutables) {
+        uiMutator.accept(Mutation {
+            // Preserve things that should not be overwritten
+            state.copy(
+                navMode = navMode,
+                systemUI = systemUI,
+                toolbarMenuClickListener = toolbarMenuClickListener,
+                altToolbarMenuClickListener = altToolbarMenuClickListener
+            )
+        })
+    }
 
     DisposableEffect(true) {
         onDispose {

@@ -43,9 +43,7 @@ import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.utilities.InitialUiState
-import com.tunjid.treenav.MultiStackNav
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -61,12 +59,6 @@ data class ArchiveEditRoute(
         ArchiveEditScreen(
             mutator = LocalAppDependencies.current.routeDependencies(this)
         )
-    }
-
-    override fun navRailRoute(nav: MultiStackNav): AppRoute<*>? {
-        val activeStack = nav.stacks.getOrNull(nav.currentIndex) ?: return null
-        val previous = activeStack.routes.getOrNull(activeStack.routes.lastIndex - 1)
-        return if (previous is ArchiveListRoute) previous else null
     }
 }
 
@@ -86,7 +78,6 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
         )
     )
-
 
     Column(
         modifier = Modifier
