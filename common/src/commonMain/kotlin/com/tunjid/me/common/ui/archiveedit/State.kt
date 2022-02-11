@@ -17,12 +17,12 @@
 package com.tunjid.me.common.ui.archiveedit
 
 import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.model.Archive
+import com.tunjid.mutator.Mutation
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 @Serializable
 data class State(
+    val archiveId: String? = null,
     val isSignedIn: Boolean = false,
     val navBarSize: Int,
     val title: String = "",
@@ -30,12 +30,29 @@ data class State(
     val description: String = "",
 ) : ByteSerializable
 
-sealed class Action {
-    data class TitleEdit(
-        val value: String
-    ): Action()
-    data class DescriptionEdit(
-        val value: String
-    ): Action()
+sealed class Action(val key: String) {
+    sealed class TextEdit : Action("TextEdit") {
+        abstract val value: String
+
+        data class Title(
+            override val value: String
+        ) : TextEdit()
+
+        data class Description(
+            override val value: String
+        ) : TextEdit()
+
+        data class Body(
+            override val value: String
+        ) : TextEdit()
+
+        val mutation: Mutation<State>
+            get() = when (this) {
+                is Title -> Mutation { copy(title = value) }
+                is Description -> Mutation { copy(description = value) }
+                is Body -> Mutation { copy(body = value) }
+            }
+    }
+
 
 }

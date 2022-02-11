@@ -19,15 +19,19 @@ package com.tunjid.me.common.ui.archiveedit
 
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.app.monitorWhenActive
+import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.common.globalui.navBarSize
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
+import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
@@ -43,18 +47,46 @@ fun archiveEditMutator(
 ): ArchiveEditMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(
+        archiveId = route.archiveId,
         navBarSize = appMutator.globalUiMutator.state.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(2000),
-    actionTransform = {
-        merge<Mutation<State>>(
+    actionTransform = { actions ->
+        merge(
             appMutator.globalUiMutator.state
                 .map { it.navBarSize }
-                .map {
-                    Mutation { copy(navBarSize = it) }
-                },
+                .map { Mutation { copy(navBarSize = it) } },
             authRepository.isSignedIn.map { Mutation { copy(isSignedIn = it) } },
-
-            ).monitorWhenActive(appMutator)
-    }
+            route.archiveId?.let {
+                archiveRepository.textBodyMutations(
+                    kind = route.kind,
+                    archiveId = it
+                )
+            } ?: emptyFlow(),
+            actions.toMutationStream(keySelector = Action::key) {
+                when (val action = type()) {
+                    is Action.TextEdit -> action.flow.textEditMutations()
+                }
+            }
+        ).monitorWhenActive(appMutator)
+    },
 )
+
+private fun ArchiveRepository.textBodyMutations(
+    kind: ArchiveKind,
+    archiveId: String
+): Flow<Mutation<State>> = monitorArchive(
+    kind = kind,
+    id = archiveId
+).map { archive ->
+    Mutation {
+        copy(
+            title = archive.title,
+            description = archive.description,
+            body = archive.body
+        )
+    }
+}
+
+private fun Flow<Action.TextEdit>.textEditMutations(): Flow<Mutation<State>> =
+    map { it.mutation }

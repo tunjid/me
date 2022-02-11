@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
@@ -34,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.app.LocalAppDependencies
@@ -43,7 +43,6 @@ import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.archive.ArchiveRoute
-import com.tunjid.me.common.ui.archivedetail.ArchiveDetailMutator
 import com.tunjid.me.common.ui.utilities.InitialUiState
 import com.tunjid.treenav.MultiStackNav
 import kotlinx.serialization.Serializable
@@ -100,36 +99,37 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
                 color = MaterialTheme.colors.onSurface,
                 fontSize = 24.sp
             ),
-            label = { Text(text = "Title") },
-            onValueChange = { mutator.accept(Action.TitleEdit(it)) }
+            label = { Text(text = "Title", fontSize = 24.sp) },
+            onValueChange = { mutator.accept(Action.TextEdit.Title(it)) }
         )
         Spacer(modifier = Modifier.padding(8.dp))
         TextField(
-            value = state.title,
+            value = state.description,
             maxLines = 2,
             colors = Unstyled(),
             textStyle = LocalTextStyle.current.copy(
                 color = MaterialTheme.colors.onSurface,
                 fontSize = 18.sp
             ),
-            label = { Text(text = "Description") },
-            onValueChange = { mutator.accept(Action.DescriptionEdit(it)) }
+            label = { Text(text = "Description", fontSize = 18.sp) },
+            onValueChange = { mutator.accept(Action.TextEdit.Description(it)) }
         )
-        Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))
 
         TextField(
-            value = state.title,
-            maxLines = 2,
+            value = state.body,
             colors = Unstyled(),
             textStyle = LocalTextStyle.current.copy(
                 color = MaterialTheme.colors.onSurface,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 16.sp,
+                lineHeight = 24.sp
             ),
             label = { Text(text = "Body") },
-            onValueChange = { mutator.accept(Action.DescriptionEdit(it)) }
+            onValueChange = { mutator.accept(Action.TextEdit.Body(it)) }
         )
+        Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))
     }
 }
-
 
 @Composable
 private fun Unstyled() = TextFieldDefaults.textFieldColors(
