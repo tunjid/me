@@ -17,7 +17,6 @@
 package com.tunjid.me.common.ui.archivelist
 
 import com.tunjid.me.common.app.AppMutator
-import com.tunjid.me.common.app.consumeWith
 import com.tunjid.me.common.app.monitorWhenActive
 import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.data.repository.ArchiveRepository
@@ -68,7 +67,6 @@ fun archiveListMutator(
                         scope = scope,
                         repo = archiveRepository
                     )
-                    is Action.Navigate -> action.flow.map { it.navAction }.consumeWith(appMutator)
                     is Action.FilterChanged -> action.flow.filterChangedMutations()
                     is Action.ToggleFilter -> action.flow.filterToggleMutations()
                     is Action.LastVisibleKey -> action.flow.resetScrollMutations()

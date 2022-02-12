@@ -25,19 +25,8 @@ import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.treenav.MultiStackNav
-import com.tunjid.treenav.Route
-import com.tunjid.treenav.pop
-import com.tunjid.treenav.push
-import com.tunjid.treenav.swap
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.*
 
 data class AppState(
     val nav: MultiStackNav,
@@ -47,13 +36,6 @@ data class AppState(
 )
 
 sealed class AppAction {
-    data class Nav(val kind: NavKind) : AppAction() {
-        companion object {
-            fun push(route: Route) = Nav(NavKind.Push(route))
-            fun swap(route: Route) = Nav(NavKind.Swap(route))
-        }
-    }
-
     data class AppStatus(
         val isInForeground: Boolean
     ) : AppAction()
@@ -61,12 +43,6 @@ sealed class AppAction {
     data class RestoreSerializedStates(
         val routeIdsToSerializedStates: Map<String, ByteArray>
     ) : AppAction()
-}
-
-sealed class NavKind {
-    data class Push(val route: Route) : NavKind()
-    data class Swap(val route: Route) : NavKind()
-    object Pop : NavKind()
 }
 
 private typealias BackingAppMutator = Mutator<AppAction, StateFlow<AppState>>
@@ -97,21 +73,6 @@ fun <T> Flow<T>.monitorWhenActive(mutator: AppMutator) =
             if (isInForeground) this
             else emptyFlow()
         }
-
-fun <State : Any> Flow<AppAction>.consumeWith(
-    appMutator: AppMutator
-): Flow<Mutation<State>> =
-    map { appMutator.accept(it) }
-        .flatMapLatest { emptyFlow() }
-
-private val NavKind.mutation: Mutation<MultiStackNav>
-    get() = Mutation {
-        when (val action = this@mutation) {
-            is NavKind.Push -> push(action.route)
-            is NavKind.Swap -> swap(action.route)
-            NavKind.Pop -> pop()
-        }
-    }
 
 fun appMutator(
     scope: CoroutineScope,
@@ -148,7 +109,6 @@ private fun backingAppMutator(
             },
             actions.toMutationStream {
                 when (val action = type()) {
-                    is AppAction.Nav -> action.flow.consumeNavMutationsWith(navMutator)
                     is AppAction.AppStatus -> action.flow.foregroundMutations()
                     is AppAction.RestoreSerializedStates -> action.flow.stateRestorationMutations()
                 }
@@ -156,13 +116,6 @@ private fun backingAppMutator(
         )
     }
 )
-
-private fun Flow<AppAction.Nav>.consumeNavMutationsWith(navMutator: NavMutator): Flow<Mutation<AppState>> =
-    map { it.kind.mutation }
-        .flatMapLatest {
-            navMutator.accept(it)
-            emptyFlow()
-        }
 
 private fun Flow<AppAction.AppStatus>.foregroundMutations(): Flow<Mutation<AppState>> =
     distinctUntilChanged()

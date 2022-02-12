@@ -16,7 +16,6 @@
 
 package com.tunjid.me.common.ui.archivelist
 
-import com.tunjid.me.common.app.AppAction
 import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.model.ArchiveQuery
@@ -55,10 +54,6 @@ sealed class Action(val key: String) {
     data class FilterChanged(
         val descriptor: Descriptor
     ) : Action(key = "FilterChanged")
-
-    data class Navigate(
-        val navAction: AppAction.Nav
-    ) : Action(key = "Navigate")
 
     data class GridSize(val size: Int) : Action(key = "GridSize")
 

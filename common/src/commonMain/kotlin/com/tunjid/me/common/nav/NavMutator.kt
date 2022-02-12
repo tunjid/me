@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.scan
 import kotlinx.serialization.Serializable
 
@@ -105,7 +106,12 @@ fun navMutator(scope: CoroutineScope): NavMutator =
     stateFlowMutator(
         scope = scope,
         initialState = startNav,
-        actionTransform = { it }
+        actionTransform = { it },
+        stateTransform = {
+            it.onEach {
+                println("size: ${it.stacks.size}")
+            }
+        }
     )
 
 fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AppRoute<*>>> =

@@ -31,7 +31,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.common.app.AppAction
 import com.tunjid.me.common.data.model.Archive
 import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind.Articles
@@ -40,6 +39,7 @@ import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.data.model.User
 import com.tunjid.me.common.data.model.UserId
 import com.tunjid.me.common.data.model.plus
+import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.common.Chips
 import com.tunjid.me.common.ui.common.RemoteImagePainter
@@ -70,24 +70,18 @@ fun ProgressBar(isCircular: Boolean) {
 
 @Composable
 fun ArchiveCard(
-    isInNavRail: Boolean,
     archiveItem: ArchiveItem.Result,
-    onAction: (Action) -> Unit
+    onRouteSelected: (AppRoute<*>) -> Unit,
+    onAction: (Action) -> Unit,
 ) {
     Card(
         modifier = Modifier
             .padding(16.dp),
         onClick = {
-            val route = ArchiveDetailRoute(
-                kind = archiveItem.archive.kind,
-                archiveId = archiveItem.archive.id
-            )
-            onAction(
-                Action.Navigate(
-                    when {
-                        isInNavRail -> AppAction.Nav.swap(route)
-                        else -> AppAction.Nav.push(route)
-                    }
+            onRouteSelected(
+                ArchiveDetailRoute(
+                    kind = archiveItem.archive.kind,
+                    archiveId = archiveItem.archive.id
                 )
             )
         },

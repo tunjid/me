@@ -32,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.common.app.AppAction
 import com.tunjid.me.common.app.LocalAppDependencies
 import com.tunjid.me.common.data.model.ArchiveKind.Articles
 import com.tunjid.me.common.data.model.ArchiveQuery
@@ -43,7 +42,10 @@ import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.signin.SignInRoute
 import com.tunjid.me.common.ui.utilities.InitialUiState
+import com.tunjid.mutator.accept
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
+import com.tunjid.treenav.push
+import com.tunjid.treenav.swap
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.Serializable
@@ -68,6 +70,7 @@ private const val SignIn = "sign-in"
 private fun ArchiveScreen(
     mutator: ArchiveListMutator,
 ) {
+    val navMutator = LocalAppDependencies.current.appMutator.navMutator
     val state by mutator.state.collectAsState()
     val isInNavRail = state.isInNavRail
     val query = state.queryState.startQuery
@@ -82,7 +85,7 @@ private fun ArchiveScreen(
             ),
             toolbarMenuClickListener = { item ->
                 when (item.id) {
-                    SignIn -> mutator.accept(Action.Navigate(AppAction.Nav.push(SignInRoute)))
+                    SignIn -> navMutator.accept { push(SignInRoute) }
                 }
             },
             fabShows = isSignedIn,
@@ -90,16 +93,14 @@ private fun ArchiveScreen(
             fabText = "Create",
             fabIcon = Icons.Default.Add,
             fabClickListener = {
-                mutator.accept(
-                    Action.Navigate(
-                        AppAction.Nav.push(
-                            ArchiveEditRoute(
-                                kind = state.queryState.currentQuery.kind,
-                                archiveId = null
-                            )
+                navMutator.accept {
+                    push(
+                        ArchiveEditRoute(
+                            kind = state.queryState.currentQuery.kind,
+                            archiveId = null
                         )
                     )
-                )
+                }
             },
             navVisibility = NavVisibility.Visible,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
@@ -133,9 +134,14 @@ private fun ArchiveScreen(
                         when (item) {
                             is ArchiveItem.Loading -> ProgressBar(isCircular = item.isCircular)
                             is ArchiveItem.Result -> ArchiveCard(
-                                isInNavRail = isInNavRail,
                                 archiveItem = item,
-                                onAction = mutator.accept
+                                onAction = mutator.accept,
+                                onRouteSelected = { route ->
+                                    navMutator.accept {
+                                        if (isInNavRail) swap(route = route)
+                                        else push(route = route)
+                                    }
+                                }
                             )
                         }
                     }
