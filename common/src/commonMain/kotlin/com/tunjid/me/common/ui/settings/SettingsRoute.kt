@@ -16,21 +16,21 @@
 
 package com.tunjid.me.common.ui.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.LocalAppDependencies
@@ -38,8 +38,9 @@ import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.ui.profile.Action
 import com.tunjid.me.common.ui.utilities.InitialUiState
+import com.tunjid.mutator.accept
+import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -59,6 +60,7 @@ object SettingsRoute : AppRoute<SettingsMutator> {
 private fun SettingsScreen(mutator: SettingsMutator) {
     val state by mutator.state.collectAsState()
     val scrollState = rememberScrollState()
+    val navMutator = LocalAppDependencies.current.appMutator.navMutator
 
     InitialUiState(
         UiState(
@@ -70,7 +72,6 @@ private fun SettingsScreen(mutator: SettingsMutator) {
         )
     )
 
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -78,12 +79,20 @@ private fun SettingsScreen(mutator: SettingsMutator) {
         horizontalAlignment = Alignment.Start,
     ) {
         state.routes.forEach { route ->
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(0.6f),
-                text = route.id,
+                    .fillMaxWidth()
+                    .clickable {
+                    navMutator.accept { push(route) }
+                },
+                content = {
+                    Text(
+                        modifier = Modifier.padding(16.dp),
+                        text = route.id,
+                    )
+                }
             )
         }
     }
 }
+

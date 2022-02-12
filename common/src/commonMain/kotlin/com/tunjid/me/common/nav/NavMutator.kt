@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -89,7 +89,7 @@ val MultiStackNav.navItems
             val kind = ArchiveKind.values().firstOrNull { it.name == name }
             NavItem(
                 name = name,
-                icon = kind?.icon ?: Icons.Default.Person,
+                icon = kind?.icon ?: Icons.Default.Settings,
                 index = index,
                 selected = currentIndex == index,
             )
