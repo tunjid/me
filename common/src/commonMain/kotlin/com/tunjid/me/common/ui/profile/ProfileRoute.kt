@@ -16,28 +16,34 @@
 
 package com.tunjid.me.common.ui.profile
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.LocalAppDependencies
 import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
+import com.tunjid.me.common.ui.common.RemoteImagePainter
 import com.tunjid.me.common.ui.utilities.InitialUiState
 import kotlinx.serialization.Serializable
 
@@ -69,4 +75,30 @@ private fun ProfileScreen(mutator: ProfileMutator) {
         )
     )
 
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(state = scrollState),
+        horizontalAlignment = Alignment.Start,
+    ) {
+        val user = state.signedInUser
+        val painter = if (user != null) RemoteImagePainter(user.imageUrl) else null
+
+        Spacer(modifier = Modifier.height(32.dp))
+        val modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .size(96.dp)
+
+        if (user != null && painter != null) Image(
+            painter = painter,
+            contentScale = ContentScale.Crop,
+            contentDescription = null,
+            modifier = modifier.clip(CircleShape)
+        ) else Image(
+            imageVector = Icons.Default.Person,
+            contentScale = ContentScale.Crop,
+            contentDescription = null,
+            modifier = modifier.clip(CircleShape)
+        )
+    }
 }

@@ -75,7 +75,7 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
     InitialUiState(
         UiState(
             toolbarShows = true,
-            toolbarTitle = "Archive Edit",
+            toolbarTitle = "${if (state.upsert.id == null) "Create" else "Edit"} ${state.kind.name}",
             fabShows = true,
             fabText = if (state.upsert.id == null) "Create" else "Save",
             fabIcon = Icons.Default.Done,

@@ -17,6 +17,7 @@
 package com.tunjid.me.common.ui.profile
 
 import com.tunjid.me.common.data.ByteSerializable
+import com.tunjid.me.common.data.model.User
 import com.tunjid.me.common.nav.ByteSerializableRoute
 import com.tunjid.me.common.ui.signin.SignInRoute
 import kotlinx.serialization.Serializable
@@ -25,9 +26,7 @@ import kotlinx.serialization.Transient
 @Serializable
 data class State(
     @Transient
-    val routes: List<ByteSerializableRoute> = listOf(
-        SignInRoute
-    )
+    val signedInUser: User? = null
 ) : ByteSerializable
 
 sealed class Action

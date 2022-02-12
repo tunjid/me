@@ -39,7 +39,7 @@ fun profileMutator(
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(2000),
     actionTransform = {
-        authRepository.isSignedIn.map { Mutation<State> { copy() } }
+        authRepository.signedInUserStream.map { Mutation<State> { copy(signedInUser = it) } }
             .monitorWhenActive(appMutator)
     }
 )
