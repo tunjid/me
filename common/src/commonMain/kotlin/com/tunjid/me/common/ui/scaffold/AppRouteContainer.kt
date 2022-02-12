@@ -36,6 +36,9 @@ import com.tunjid.me.common.ui.utilities.UiSizes
 import com.tunjid.me.common.ui.utilities.countIf
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 
+/**
+ * Motionally intelligent container for the hosting the main navigation routes
+ */
 @Composable
 internal fun AppRouteContainer(
     appMutator: AppMutator,

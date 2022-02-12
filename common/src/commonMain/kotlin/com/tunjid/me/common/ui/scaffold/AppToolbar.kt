@@ -56,6 +56,9 @@ import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.StackNav
 import com.tunjid.treenav.pop
 
+/**
+ * Motionally intelligent top toolbar shared amongst nav routes in the app
+ */
 @Composable
 internal fun BoxScope.AppToolbar(
     appMutator: AppMutator,

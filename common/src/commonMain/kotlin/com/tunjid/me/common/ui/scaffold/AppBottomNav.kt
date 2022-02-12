@@ -49,6 +49,9 @@ import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 import com.tunjid.mutator.accept
 import com.tunjid.treenav.switch
 
+/**
+ * Motionally intelligent bottom nav shared amongst nav routes in the app
+ */
 @Composable
 internal fun BoxScope.AppBottomNav(
     appMutator: AppMutator,

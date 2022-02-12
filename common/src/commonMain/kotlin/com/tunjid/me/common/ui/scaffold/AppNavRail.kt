@@ -49,6 +49,9 @@ import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 import com.tunjid.mutator.accept
 import com.tunjid.treenav.switch
 
+/**
+ * Motionally intelligent nav rail shared amongst nav routes in the app
+ */
 @Composable
 fun AppNavRail(
     appMutator: AppMutator,

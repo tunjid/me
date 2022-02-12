@@ -40,6 +40,10 @@ import com.tunjid.me.common.ui.utilities.UiSizes
 import com.tunjid.me.common.ui.utilities.countIf
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 
+/**
+ * Common motionally intelligent Floating Action button shared amongst nav routes in the app
+ *
+ */
 @Composable
 internal fun BoxScope.AppFab(
     appMutator: AppMutator,
@@ -48,7 +52,7 @@ internal fun BoxScope.AppFab(
     val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::fabState)
     val clicks by globalUiMutator.state.mappedCollectAsState(mapper = UiState::fabClickListener)
 
-    val fabPosition by animateDpAsState(
+    val position by animateDpAsState(
         when {
             !state.fabVisible -> UiSizes.bottomNavSize
             else -> {
@@ -64,7 +68,7 @@ internal fun BoxScope.AppFab(
     FloatingActionButton(
         modifier = Modifier
             .align(Alignment.BottomEnd)
-            .offset(x = (-16).dp, y = fabPosition)
+            .offset(x = (-16).dp, y = position)
             .wrapContentHeight(),
         onClick = { clicks(Unit) },
         content = {

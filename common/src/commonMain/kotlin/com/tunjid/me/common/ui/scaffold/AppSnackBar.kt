@@ -39,6 +39,9 @@ import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 import com.tunjid.mutator.accept
 import kotlinx.coroutines.delay
 
+/**
+ * Motionally intelligent Snackbar shared amongst nav routes in the app
+ */
 @Composable
 internal fun BoxScope.AppSnackBar(
     appMutator: AppMutator,
