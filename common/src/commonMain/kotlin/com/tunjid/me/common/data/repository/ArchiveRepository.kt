@@ -22,7 +22,6 @@ import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.data.model.ArchiveUpsert
-import com.tunjid.me.common.data.model.UserId
 import com.tunjid.me.common.data.model.Result
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.network.NetworkService
@@ -72,11 +71,8 @@ class ReactiveArchiveRepository(
     )
 
     override suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId> = try {
-        println("REQ")
         val archive = networkService.upsertArchive(kind, upsert)
-        println("FETCHED")
-//        dao.saveArchives(listOf(archive))
-        println("SAVED")
+        dao.saveArchives(listOf(archive))
         Result.Success(archive.id)
     } catch (e: Throwable) {
         Result.Error(e.message)
