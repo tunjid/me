@@ -59,11 +59,15 @@ fun InitialUiState(state: UiState) {
     val altToolbarMenuClickListener = remember {
         MutableFunction(state.altToolbarMenuClickListener)
     }
+    val snackbarMessageConsumer = remember {
+        MutableFunction(state.snackbarMessageConsumer)
+    }
 
     val immutables = state.copy(
         fabClickListener = fabClickListener,
         toolbarMenuClickListener = toolbarMenuClickListener,
         altToolbarMenuClickListener = altToolbarMenuClickListener,
+        snackbarMessageConsumer = snackbarMessageConsumer,
     )
 
     LaunchedEffect(immutables) {
@@ -74,7 +78,8 @@ fun InitialUiState(state: UiState) {
                 systemUI = systemUI,
                 fabClickListener = fabClickListener,
                 toolbarMenuClickListener = toolbarMenuClickListener,
-                altToolbarMenuClickListener = altToolbarMenuClickListener
+                altToolbarMenuClickListener = altToolbarMenuClickListener,
+                snackbarMessageConsumer = snackbarMessageConsumer,
             )
         })
     }

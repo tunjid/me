@@ -23,6 +23,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.tunjid.me.common.data.model.Message
+import com.tunjid.me.common.data.model.MessageQueue
 
 data class ToolbarItem(
     val id: String,
@@ -54,7 +56,7 @@ data class UiState(
     val fabText: String = "",
     val backgroundColor: Int = Color.Transparent.toArgb(),
     val snackbarOffset: Dp = 0.dp,
-    val snackbarMessages: List<String> = listOf(),
+    val snackbarMessages: MessageQueue = MessageQueue(),
     val navBarColor: Int = Color.Transparent.toArgb(),
     val lightStatusBar: Boolean = false,
     val navMode: NavMode = NavMode.BottomNav,
@@ -66,6 +68,7 @@ data class UiState(
     val fabClickListener: (Unit) -> Unit = emptyCallback(),
     val toolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),
     val altToolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),
+    val snackbarMessageConsumer: (Message) -> Unit = emptyCallback(),
 )
 
 private fun <T> emptyCallback(): (T) -> Unit = {}
@@ -175,17 +178,19 @@ val UiState.navBarSize get() = systemUI.static.navBarSize
 
 val UiState.statusBarSize get() = systemUI.static.statusBarSize
 
-val UiState.bottomNavVisible get() = navMode is NavMode.BottomNav && when(navVisibility) {
-    NavVisibility.Visible -> true
-    NavVisibility.Gone,
-    NavVisibility.GoneIfBottomNav -> false
-}
+val UiState.bottomNavVisible
+    get() = navMode is NavMode.BottomNav && when (navVisibility) {
+        NavVisibility.Visible -> true
+        NavVisibility.Gone,
+        NavVisibility.GoneIfBottomNav -> false
+    }
 
-val UiState.navRailVisible get() = navMode is NavMode.NavRail && when(navVisibility) {
-    NavVisibility.Visible,
-    NavVisibility.GoneIfBottomNav -> true
-    NavVisibility.Gone -> false
-}
+val UiState.navRailVisible
+    get() = navMode is NavMode.NavRail && when (navVisibility) {
+        NavVisibility.Visible,
+        NavVisibility.GoneIfBottomNav -> true
+        NavVisibility.Gone -> false
+    }
 
 /**
  * Interface for [UiState] state slices that are aware of the keyboard. Useful for

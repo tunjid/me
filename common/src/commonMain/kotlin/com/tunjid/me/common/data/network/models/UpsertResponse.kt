@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.profile
+package com.tunjid.me.common.data.network.models
 
-import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.model.User
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 @Serializable
-data class State(
-    @Transient
-    val signedInUser: User? = null
-) : ByteSerializable
-
-sealed class Action
+data class UpsertResponse(
+    @SerialName("_id")
+    val id: String
+)

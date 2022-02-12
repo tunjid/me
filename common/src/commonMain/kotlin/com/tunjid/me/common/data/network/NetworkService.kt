@@ -24,6 +24,7 @@ import com.tunjid.me.common.data.model.ArchiveUpsert
 import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.data.model.SessionRequest
 import com.tunjid.me.common.data.model.User
+import com.tunjid.me.common.data.network.models.UpsertResponse
 import io.ktor.client.*
 import io.ktor.client.features.cookies.*
 import io.ktor.client.features.json.*
@@ -89,7 +90,7 @@ class NetworkService(
     suspend fun upsertArchive(
         kind: ArchiveKind,
         upsert: ArchiveUpsert,
-    ): Archive {
+    ): UpsertResponse {
         val id = upsert.id
         val requestBuilder: HttpRequestBuilder.() -> Unit = {
             header(HttpHeaders.ContentType, ContentType.Application.Json)

@@ -36,6 +36,12 @@ enum class ArchiveKind(val type: String) {
     Talks(type = "talks"),
 }
 
+val ArchiveKind.singular get() = when(this) {
+    Articles -> "article"
+    Projects -> "project"
+    Talks -> "talks"
+}
+
 @Serializable
 data class Archive(
     @SerialName("_id")

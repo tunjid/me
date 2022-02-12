@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.AppMutator
+import com.tunjid.me.common.data.model.peek
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.ui.utilities.UiSizes
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState
@@ -49,9 +50,11 @@ internal fun BoxScope.AppSnackBar(
     val globalUiMutator = appMutator.globalUiMutator
 
     val queue by globalUiMutator.state.mappedCollectAsState(mapper = UiState::snackbarMessages)
-    var canShow by remember { mutableStateOf(true) }
-    val head = queue.firstOrNull().takeIf { canShow }
+    val messageConsumer by globalUiMutator.state.mappedCollectAsState(mapper = UiState::snackbarMessageConsumer)
 
+    var canShow by remember { mutableStateOf(true) }
+    val message = queue.peek()?.takeIf { canShow }
+    val head = message?.value
 
     val showing = head != null
     val position by animateDpAsState(if (showing) -(16).dp else UiSizes.snackbarPeek)
@@ -69,7 +72,7 @@ internal fun BoxScope.AppSnackBar(
         if (head != null) {
             delay(1000)
             canShow = false
-            globalUiMutator.accept { copy(snackbarMessages = snackbarMessages - head) }
+            messageConsumer(message)
         }
     }
 

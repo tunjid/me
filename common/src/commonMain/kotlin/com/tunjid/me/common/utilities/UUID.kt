@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.profile
+package com.tunjid.me.common.utilities
 
-import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.model.User
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
-
-@Serializable
-data class State(
-    @Transient
-    val signedInUser: User? = null
-) : ByteSerializable
-
-sealed class Action
+expect fun uuid(): String

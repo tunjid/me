@@ -19,11 +19,7 @@ package com.tunjid.me.common.ui.archiveedit
 
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.app.monitorWhenActive
-import com.tunjid.me.common.data.model.ArchiveId
-import com.tunjid.me.common.data.model.ArchiveKind
-import com.tunjid.me.common.data.model.ArchiveUpsert
-import com.tunjid.me.common.data.model.Descriptor
-import com.tunjid.me.common.data.model.Result
+import com.tunjid.me.common.data.model.*
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.common.globalui.navBarSize
@@ -58,21 +54,26 @@ fun archiveEditMutator(
                 .map { it.navBarSize }
                 .map { Mutation { copy(navBarSize = it) } },
             authRepository.isSignedIn.map { Mutation { copy(isSignedIn = it) } },
-            route.archiveId?.let {
-                archiveRepository.textBodyMutations(
-                    kind = route.kind,
-                    archiveId = it
-                )
-            } ?: emptyFlow(),
-            actions.toMutationStream(keySelector = Action::key) {
-                when (val action = type()) {
-                    is Action.TextEdit -> action.flow.textEditMutations()
-                    is Action.ChipEdit -> action.flow.chipEditMutations()
-                    is Action.Submit -> action.flow.submissionMutations(
-                        archiveRepository = archiveRepository
+            actions
+                // Start monitoring the archive from the get go
+                .onStart {
+                    if (route.archiveId != null) emit(
+                        Action.Load.InitialLoad(
+                            kind = route.kind,
+                            id = route.archiveId,
+                        )
                     )
                 }
-            }
+                .toMutationStream(keySelector = Action::key) {
+                    when (val action = type()) {
+                        is Action.TextEdit -> action.flow.textEditMutations()
+                        is Action.ChipEdit -> action.flow.chipEditMutations()
+                        is Action.MessageConsumed -> action.flow.messageConsumptionMutations()
+                        is Action.Load -> action.flow.loadMutations(
+                            archiveRepository = archiveRepository
+                        )
+                    }
+                }
         ).monitorWhenActive(appMutator)
     },
 )
@@ -155,23 +156,46 @@ private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
         }
     }
 
-private fun Flow<Action.Submit>.submissionMutations(
+private fun Flow<Action.MessageConsumed>.messageConsumptionMutations(): Flow<Mutation<State>> =
+    map { (message) ->
+        Mutation { copy(messages = messages - message) }
+    }
+
+/**
+ * Load actions make sure the content on the screen is always up to date, especially for
+ * archives that initially don't exist, and are then created.
+ */
+private fun Flow<Action.Load>.loadMutations(
     archiveRepository: ArchiveRepository
 ): Flow<Mutation<State>> =
     debounce(200)
-        .flatMapLatest { (kind, upsert) ->
-            flow<Mutation<State>> {
-                emit(Mutation { copy(isSubmitting = true) })
-                // TODO: Show snack bar if error
-                val result = archiveRepository.upsert(kind = kind, upsert = upsert)
-                emit(Mutation { copy(isSubmitting = false) })
-
-                // Start monitoring the created archive
-                if (upsert.id == null && result is Result.Success) emitAll(
-                    archiveRepository.textBodyMutations(
-                        kind = kind,
-                        archiveId = result.item
-                    )
+        .flatMapLatest { monitor ->
+            when (monitor) {
+                is Action.Load.InitialLoad -> archiveRepository.textBodyMutations(
+                    kind = monitor.kind,
+                    archiveId = monitor.id
                 )
+                is Action.Load.Submit -> flow<Mutation<State>> {
+                    val (kind, upsert) = monitor
+                    emit(Mutation { copy(isSubmitting = true) })
+
+                    val result = archiveRepository.upsert(kind = kind, upsert = upsert)
+
+                    val message = when (result) {
+                        is Result.Success -> if (upsert.id == null) "Created ${kind.singular}" else "Updated ${kind.singular}"
+                        is Result.Error -> result.message ?: "unknown error"
+                    }
+
+                    emit(Mutation { copy(isSubmitting = false, messages = messages + message) })
+
+                    // Start monitoring the created archive
+                    val id = upsert.id ?: (result as? Result.Success)?.item
+                    if (id != null) emitAll(
+                        archiveRepository.textBodyMutations(
+                            kind = kind,
+                            archiveId = id
+                        )
+                    )
+                }
             }
         }

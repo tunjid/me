@@ -82,11 +82,15 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
             fabExtended = true,
             fabClickListener = {
                 mutator.accept(
-                    Action.Submit(
+                    Action.Load.Submit(
                         kind = state.kind,
                         upsert = state.upsert
                     )
                 )
+            },
+            snackbarMessages = state.messages,
+            snackbarMessageConsumer = {
+                mutator.accept(Action.MessageConsumed(it))
             },
             navVisibility = NavVisibility.GoneIfBottomNav,
             insetFlags = InsetFlags.NO_BOTTOM,

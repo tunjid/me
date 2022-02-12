@@ -17,12 +17,16 @@
 package com.tunjid.me.common.ui.archiveedit
 
 import com.tunjid.me.common.data.ByteSerializable
+import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.model.ArchiveUpsert
 import com.tunjid.me.common.data.model.Descriptor
+import com.tunjid.me.common.data.model.Message
+import com.tunjid.me.common.data.model.MessageQueue
 import com.tunjid.me.common.ui.common.ChipAction
 import com.tunjid.mutator.Mutation
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class State(
@@ -32,6 +36,8 @@ data class State(
     val kind: ArchiveKind,
     val upsert: ArchiveUpsert = ArchiveUpsert(),
     val chipsState: ChipsState = ChipsState(),
+    @Transient
+    val messages: MessageQueue = MessageQueue(),
 ) : ByteSerializable
 
 sealed class Action(val key: String) {
@@ -58,15 +64,26 @@ sealed class Action(val key: String) {
             }
     }
 
+    data class MessageConsumed(
+        val message: Message
+    ) : Action("MessageConsumed")
+
     data class ChipEdit(
         val chipAction: ChipAction,
         val descriptor: Descriptor,
-    ): Action("ChipEdit")
+    ) : Action("ChipEdit")
 
-    data class Submit(
-        val kind: ArchiveKind,
-        val upsert: ArchiveUpsert
-    ): Action("Submit")
+    sealed class Load : Action("Load") {
+        data class InitialLoad(
+            val kind: ArchiveKind,
+            val id: ArchiveId
+        ) : Load()
+
+        data class Submit(
+            val kind: ArchiveKind,
+            val upsert: ArchiveUpsert
+        ) : Load()
+    }
 }
 
 @Serializable
