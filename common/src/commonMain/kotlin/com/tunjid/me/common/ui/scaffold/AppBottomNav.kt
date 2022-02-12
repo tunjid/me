@@ -39,8 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.AppMutator
-import com.tunjid.me.common.app.component1
-import com.tunjid.me.common.app.component2
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.bottomNavPositionalState
 import com.tunjid.me.common.nav.navItems
@@ -56,7 +54,9 @@ import com.tunjid.treenav.switch
 internal fun BoxScope.AppBottomNav(
     appMutator: AppMutator,
 ) {
-    val (navMutator, globalUiMutator) = appMutator
+    val navMutator = appMutator.navMutator
+    val globalUiMutator = appMutator.globalUiMutator
+
     val nav by navMutator.state.collectAsState()
     val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::bottomNavPositionalState)
 

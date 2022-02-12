@@ -52,9 +52,6 @@ interface AppMutator : BackingAppMutator {
     val globalUiMutator: GlobalUiMutator
 }
 
-operator fun AppMutator.component1(): NavMutator = navMutator
-operator fun AppMutator.component2(): GlobalUiMutator = globalUiMutator
-
 val AppState.asAppMutator: AppMutator
     get() {
         val appState = this

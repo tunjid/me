@@ -41,8 +41,6 @@ import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.app.AppState
 import com.tunjid.me.common.app.asAppMutator
-import com.tunjid.me.common.app.component1
-import com.tunjid.me.common.app.component2
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.ToolbarItem
 import com.tunjid.me.common.globalui.UiState
@@ -63,7 +61,9 @@ import com.tunjid.treenav.pop
 internal fun BoxScope.AppToolbar(
     appMutator: AppMutator,
 ) {
-    val (navMutator, globalUiMutator) = appMutator
+    val navMutator = appMutator.navMutator
+    val globalUiMutator = appMutator.globalUiMutator
+
     val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::toolbarState)
     val items = state.items
     val title = state.toolbarTitle

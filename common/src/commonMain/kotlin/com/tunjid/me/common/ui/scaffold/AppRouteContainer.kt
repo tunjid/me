@@ -26,8 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.max
 import com.tunjid.me.common.app.AppMutator
-import com.tunjid.me.common.app.component1
-import com.tunjid.me.common.app.component2
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.keyboardSize
 import com.tunjid.me.common.globalui.routeContainerState
@@ -44,7 +42,9 @@ internal fun AppRouteContainer(
     appMutator: AppMutator,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val (navMutator, globalUiMutator) = appMutator
+    val navMutator = appMutator.navMutator
+    val globalUiMutator = appMutator.globalUiMutator
+
     val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::routeContainerState)
 
     val bottomNavHeight = UiSizes.bottomNavSize countIf state.bottomNavVisible
