@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.auth
+package com.tunjid.me.common.ui.profile
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -42,61 +42,31 @@ import com.tunjid.me.common.ui.utilities.InitialUiState
 import kotlinx.serialization.Serializable
 
 @Serializable
-object SignInRoute : AppRoute<SignInMutator> {
+object ProfileRoute : AppRoute<ProfileMutator> {
     override val id: String
-        get() = "sign-in"
+        get() = "Profile"
 
     @Composable
     override fun Render() {
-        SignInScreen(
+        ProfileScreen(
             mutator = LocalAppDependencies.current.routeDependencies(this)
         )
     }
 }
 
 @Composable
-private fun SignInScreen(mutator: SignInMutator) {
+private fun ProfileScreen(mutator: ProfileMutator) {
     val state by mutator.state.collectAsState()
     val scrollState = rememberScrollState()
 
     InitialUiState(
         UiState(
             toolbarShows = true,
-            toolbarTitle = "Sign In",
+            toolbarTitle = "Profile",
             navVisibility = NavVisibility.Gone,
             insetFlags = InsetFlags.NO_BOTTOM,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
         )
     )
 
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(state = scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        state.fields.forEach { field ->
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth(0.6f),
-                value = field.value,
-                onValueChange = {
-                    mutator.accept(Action.FieldChanged(field = field.copy(value = it)))
-                },
-                label = { Text(text = field.id) }
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            enabled = state.submitButtonEnabled,
-            onClick = {
-                mutator.accept(
-                    Action.Submit(request = state.sessionRequest)
-                )
-            },
-            content = { Text(text = "Submit") }
-        )
-    }
 }

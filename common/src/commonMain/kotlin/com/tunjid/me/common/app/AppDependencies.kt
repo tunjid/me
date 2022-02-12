@@ -44,7 +44,9 @@ import com.tunjid.me.common.nav.navMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
-import com.tunjid.me.common.ui.auth.SignInRoute
+import com.tunjid.me.common.ui.profile.ProfileRoute
+import com.tunjid.me.common.ui.settings.SettingsRoute
+import com.tunjid.me.common.ui.signin.SignInRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -134,12 +136,16 @@ private class AppModule(
                     subclass(ArchiveDetailRoute::class)
                     subclass(ArchiveEditRoute::class)
                     subclass(SignInRoute::class)
+                    subclass(SettingsRoute::class)
+                    subclass(ProfileRoute::class)
                 }
                 polymorphic(ByteSerializable::class) {
                     subclass(com.tunjid.me.common.ui.archivelist.State::class)
                     subclass(com.tunjid.me.common.ui.archivedetail.State::class)
                     subclass(com.tunjid.me.common.ui.archiveedit.State::class)
-                    subclass(com.tunjid.me.common.ui.auth.State::class)
+                    subclass(com.tunjid.me.common.ui.settings.State::class)
+                    subclass(com.tunjid.me.common.ui.signin.State::class)
+                    subclass(com.tunjid.me.common.ui.profile.State::class)
                 }
             }
         }

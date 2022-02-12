@@ -26,8 +26,12 @@ import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.archiveedit.archiveEditMutator
 import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.archivelist.archiveListMutator
-import com.tunjid.me.common.ui.auth.SignInRoute
-import com.tunjid.me.common.ui.auth.signInMutator
+import com.tunjid.me.common.ui.profile.ProfileRoute
+import com.tunjid.me.common.ui.profile.profileMutator
+import com.tunjid.me.common.ui.signin.SignInRoute
+import com.tunjid.me.common.ui.settings.SettingsRoute
+import com.tunjid.me.common.ui.settings.settingsMutator
+import com.tunjid.me.common.ui.signin.signInMutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -104,6 +108,32 @@ class AppMutatorFactory(
                 ScopeHolder(
                     scope = routeScope,
                     mutator = signInMutator(
+                        scope = routeScope,
+                        initialState = route.restoredState(),
+                        route = route,
+                        authRepository = authRepository,
+                        appMutator = appMutator,
+                    )
+                )
+            }
+            is SettingsRoute -> routeMutatorCache.getOrPut(route) {
+                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+                ScopeHolder(
+                    scope = routeScope,
+                    mutator = settingsMutator(
+                        scope = routeScope,
+                        initialState = route.restoredState(),
+                        route = route,
+                        authRepository = authRepository,
+                        appMutator = appMutator,
+                    )
+                )
+            }
+            is ProfileRoute -> routeMutatorCache.getOrPut(route) {
+                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+                ScopeHolder(
+                    scope = routeScope,
+                    mutator = profileMutator(
                         scope = routeScope,
                         initialState = route.restoredState(),
                         route = route,

@@ -41,7 +41,7 @@ import com.tunjid.me.common.globalui.ToolbarItem
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
-import com.tunjid.me.common.ui.auth.SignInRoute
+import com.tunjid.me.common.ui.signin.SignInRoute
 import com.tunjid.me.common.ui.utilities.InitialUiState
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import kotlinx.coroutines.flow.distinctUntilChanged

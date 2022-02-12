@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.auth
+package com.tunjid.me.common.ui.signin
 
 
 import com.tunjid.me.common.app.AppMutator

@@ -19,13 +19,16 @@ package com.tunjid.me.common.nav
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.tunjid.me.common.data.archive.icon
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.model.ArchiveQuery
-import com.tunjid.me.common.data.archive.icon
 import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
+import com.tunjid.me.common.ui.settings.SettingsRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -83,10 +86,10 @@ val MultiStackNav.navItems
     get() = stacks
         .map { it.name }
         .mapIndexed { index, name ->
-            val kind = ArchiveKind.values().first { it.name == name }
+            val kind = ArchiveKind.values().firstOrNull { it.name == name }
             NavItem(
                 name = name,
-                icon = kind.icon,
+                icon = kind?.icon ?: Icons.Default.Person,
                 index = index,
                 selected = currentIndex == index,
             )
@@ -123,5 +126,8 @@ private val startNav = MultiStackNav(
             name = kind.name,
             routes = listOf(ArchiveListRoute(query = ArchiveQuery(kind = kind)))
         )
-    }
+    } + StackNav(
+        name = "Settings",
+        routes = listOf(SettingsRoute)
+    )
 )
