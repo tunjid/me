@@ -21,6 +21,8 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 data class ToolbarItem(
     val id: String,
@@ -51,7 +53,8 @@ data class UiState(
     val fabEnabled: Boolean = true,
     val fabText: String = "",
     val backgroundColor: Int = Color.Transparent.toArgb(),
-    val snackbarText: CharSequence = "",
+    val snackbarOffset: Dp = 0.dp,
+    val snackbarMessages: List<String> = listOf(),
     val navBarColor: Int = Color.Transparent.toArgb(),
     val lightStatusBar: Boolean = false,
     val navMode: NavMode = NavMode.BottomNav,
@@ -89,7 +92,7 @@ internal data class SnackbarPositionalState(
 internal data class FabState(
     val fabVisible: Boolean,
     val bottomNavVisible: Boolean,
-    val snackbarHeight: Int,
+    val snackbarOffset: Dp,
     val icon: ImageVector,
     val extended: Boolean,
     val enabled: Boolean,
@@ -128,7 +131,7 @@ internal val UiState.toolbarState
 internal val UiState.fabState
     get() = FabState(
         fabVisible = fabShows,
-        snackbarHeight = systemUI.dynamic.snackbarHeight,
+        snackbarOffset = snackbarOffset,
         bottomNavVisible = bottomNavVisible,
         icon = fabIcon,
         text = fabText,
@@ -149,9 +152,6 @@ internal val UiState.snackbarPositionalState
 
 internal val UiState.fabGlyphs
     get() = fabIcon to fabText
-
-internal val UiState.toolbarPosition
-    get() = systemUI.static.statusBarSize
 
 internal val UiState.bottomNavPositionalState
     get() = BottomNavPositionalState(

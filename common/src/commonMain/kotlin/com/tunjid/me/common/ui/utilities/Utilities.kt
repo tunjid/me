@@ -50,6 +50,9 @@ fun <T, R> StateFlow<T>.mappedCollectAsState(
 fun InitialUiState(state: UiState) {
     val uiMutator = LocalAppDependencies.current.appMutator.globalUiMutator
 
+    val fabClickListener = remember {
+        MutableFunction(state.fabClickListener)
+    }
     val toolbarMenuClickListener = remember {
         MutableFunction(state.toolbarMenuClickListener)
     }
@@ -58,8 +61,9 @@ fun InitialUiState(state: UiState) {
     }
 
     val immutables = state.copy(
+        fabClickListener = fabClickListener,
         toolbarMenuClickListener = toolbarMenuClickListener,
-        altToolbarMenuClickListener = altToolbarMenuClickListener
+        altToolbarMenuClickListener = altToolbarMenuClickListener,
     )
 
     LaunchedEffect(immutables) {
@@ -68,6 +72,7 @@ fun InitialUiState(state: UiState) {
             state.copy(
                 navMode = navMode,
                 systemUI = systemUI,
+                fabClickListener = fabClickListener,
                 toolbarMenuClickListener = toolbarMenuClickListener,
                 altToolbarMenuClickListener = altToolbarMenuClickListener
             )
@@ -76,6 +81,7 @@ fun InitialUiState(state: UiState) {
 
     DisposableEffect(true) {
         onDispose {
+            fabClickListener.backing = {}
             toolbarMenuClickListener.backing = {}
             altToolbarMenuClickListener.backing = {}
         }
@@ -87,8 +93,7 @@ object UiSizes {
     val navRailWidth = 72.dp
     val navRailContentWidth = 400.dp
     val bottomNavSize = 56.dp
-    val snackbarPadding = 8.dp
-    val navBarHeightThreshold = 80.dp
+    val snackbarPeek = 56.dp
 }
 
 infix fun Dp.countIf(condition: Boolean) = if (condition) this else 0.dp

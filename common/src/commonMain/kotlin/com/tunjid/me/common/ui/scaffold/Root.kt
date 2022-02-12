@@ -73,6 +73,9 @@ fun Root(dependencies: AppDependencies) {
             AppBottomNav(
                 appMutator = appMutator,
             )
+            AppSnackBar(
+                appMutator = appMutator,
+            )
         }
     }
 }

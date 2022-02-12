@@ -32,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.globalui.UiState
@@ -54,11 +53,9 @@ internal fun BoxScope.AppFab(
             !state.fabVisible -> UiSizes.bottomNavSize
             else -> {
                 var offset = 16.dp
-                offset += UiSizes.bottomNavSize countIf state.bottomNavVisible
-                if (state.snackbarHeight != 0) {
-                    offset += UiSizes.snackbarPadding
-                    offset += with(LocalDensity.current) { state.snackbarHeight.toDp() }
-                }
+                offset += state.snackbarOffset + UiSizes.bottomNavSize countIf state.bottomNavVisible
+                offset += state.snackbarOffset
+
                 -offset
             }
         }
