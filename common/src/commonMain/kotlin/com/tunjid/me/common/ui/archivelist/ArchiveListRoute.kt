@@ -36,12 +36,13 @@ import com.tunjid.me.common.app.LocalAppDependencies
 import com.tunjid.me.common.data.model.ArchiveKind.Articles
 import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.globalui.NavVisibility
+import com.tunjid.me.common.globalui.ScreenUiState
 import com.tunjid.me.common.globalui.ToolbarItem
 import com.tunjid.me.common.globalui.UiState
+import com.tunjid.me.common.globalui.currentUiState
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.signin.SignInRoute
-import com.tunjid.me.common.globalui.ScreenUiState
 import com.tunjid.mutator.accept
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.push
@@ -88,7 +89,7 @@ private fun ArchiveScreen(
                     SignIn -> navMutator.accept { push(SignInRoute) }
                 }
             },
-            fabShows = isSignedIn,
+            fabShows = if (state.hasFetchedAuthStatus) isSignedIn else currentUiState.fabShows,
             fabExtended = true,
             fabText = "Create",
             fabIcon = Icons.Default.Add,

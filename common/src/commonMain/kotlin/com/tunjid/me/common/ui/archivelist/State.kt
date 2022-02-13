@@ -30,6 +30,7 @@ data class State(
     val gridSize: Int = 1,
     val shouldScrollToTop: Boolean = true,
     val isInNavRail: Boolean = false,
+    val hasFetchedAuthStatus: Boolean = false,
     val isSignedIn: Boolean = false,
     val queryState: QueryState,
     @Transient

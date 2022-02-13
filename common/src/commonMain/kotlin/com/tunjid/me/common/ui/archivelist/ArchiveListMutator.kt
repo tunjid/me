@@ -60,7 +60,7 @@ fun archiveListMutator(
     actionTransform = { actions ->
         merge(
             appMutator.navRailStatusMutations(),
-            authRepository.isSignedIn.map { Mutation { copy(isSignedIn = it) } },
+            authRepository.authMutations(),
             actions.toMutationStream(keySelector = Action::key) {
                 when (val action = type()) {
                     is Action.Fetch -> action.flow.fetchMutations(
@@ -76,6 +76,16 @@ fun archiveListMutator(
         ).monitorWhenActive(appMutator)
     }
 )
+private fun AuthRepository.authMutations() : Flow<Mutation<State>> =
+    isSignedIn.map {
+        Mutation {
+            copy(
+                isSignedIn = it,
+                hasFetchedAuthStatus = true,
+            )
+        }
+    }
+
 
 /**
  * Updates [State] with whether or not it is in the nav rail
