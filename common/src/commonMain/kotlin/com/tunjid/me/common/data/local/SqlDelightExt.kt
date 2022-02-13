@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data
+package com.tunjid.me.common.data.local
 
 import com.squareup.sqldelight.Transacter
 import com.squareup.sqldelight.TransactionWithoutReturn

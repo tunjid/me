@@ -30,7 +30,6 @@ import com.tunjid.me.common.data.model.Descriptor
 import com.tunjid.me.common.data.model.Descriptor.Category
 import com.tunjid.me.common.data.model.Descriptor.Tag
 import com.tunjid.me.common.data.model.hasContentFilter
-import com.tunjid.me.common.data.suspendingTransaction
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine

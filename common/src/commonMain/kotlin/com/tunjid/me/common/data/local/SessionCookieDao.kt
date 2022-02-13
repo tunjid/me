@@ -19,7 +19,6 @@ package com.tunjid.me.common.data.local
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.common.data.suspendingTransaction
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
