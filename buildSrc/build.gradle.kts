@@ -16,10 +16,17 @@
 
 import org.gradle.kotlin.dsl.`kotlin-dsl`
 
-plugins {
-    `kotlin-dsl`
+repositories {
+    google()
+    mavenCentral()
+    gradlePluginPortal()
 }
 
-repositories {
-    jcenter()
+plugins {
+    `kotlin-dsl` version "2.1.7"
+}
+
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
+    implementation("com.android.tools.build:gradle:7.0.4")
 }
