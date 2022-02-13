@@ -36,7 +36,7 @@ import com.tunjid.me.common.globalui.NavMode
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.restore
 import com.tunjid.me.common.saveState
-import com.tunjid.me.common.ui.scaffold.Root
+import com.tunjid.me.common.globalui.scaffold.Root
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator

@@ -34,7 +34,7 @@ import androidx.window.layout.WindowMetricsCalculator
 import com.tunjid.me.common.globalui.GlobalUiMutator
 import com.tunjid.me.common.globalui.NavMode
 import com.tunjid.me.common.globalui.insetMutations
-import com.tunjid.me.common.ui.scaffold.Root
+import com.tunjid.me.common.globalui.scaffold.Root
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.mutator.accept
 import com.tunjid.treenav.pop
