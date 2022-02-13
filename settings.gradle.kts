@@ -52,7 +52,7 @@ pluginManagement {
 
 rootProject.name = "Me"
 include(
-    ":common",
+    ":common:all",
     ":android",
     ":desktop",
     ":serverEvents"
