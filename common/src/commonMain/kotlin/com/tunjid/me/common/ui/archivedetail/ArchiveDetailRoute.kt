@@ -33,7 +33,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material.MaterialRichText
-import com.tunjid.me.common.app.LocalAppDependencies
+import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.globalui.InsetFlags

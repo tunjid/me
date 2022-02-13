@@ -17,8 +17,8 @@
 package com.tunjid.me.common.ui.archiveedit
 
 
-import com.tunjid.me.common.app.AppMutator
-import com.tunjid.me.common.app.monitorWhenActive
+import com.tunjid.me.common.di.AppMutator
+import com.tunjid.me.common.di.monitorWhenActive
 import com.tunjid.me.common.data.model.*
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository

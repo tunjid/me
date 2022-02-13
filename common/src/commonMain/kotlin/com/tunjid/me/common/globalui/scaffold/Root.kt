@@ -24,8 +24,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
-import com.tunjid.me.common.app.AppDependencies
-import com.tunjid.me.common.app.LocalAppDependencies
+import com.tunjid.me.common.di.AppDependencies
+import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.nav.Route404
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState

@@ -43,7 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.common.app.AppMutator
+import com.tunjid.me.common.di.AppMutator
 import com.tunjid.me.common.globalui.UiSizes
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.slices.fabState

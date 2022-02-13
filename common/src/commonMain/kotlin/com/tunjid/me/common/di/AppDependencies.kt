@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.app
+package com.tunjid.me.common.di
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.common.data.AppDatabase

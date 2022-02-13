@@ -32,7 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.common.app.LocalAppDependencies
+import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.me.common.data.model.ArchiveKind.Articles
 import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.globalui.NavVisibility

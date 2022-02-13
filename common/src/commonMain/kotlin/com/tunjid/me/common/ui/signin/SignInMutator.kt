@@ -17,8 +17,8 @@
 package com.tunjid.me.common.ui.signin
 
 
-import com.tunjid.me.common.app.AppMutator
-import com.tunjid.me.common.app.monitorWhenActive
+import com.tunjid.me.common.di.AppMutator
+import com.tunjid.me.common.di.monitorWhenActive
 import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.common.ui.common.update
 import com.tunjid.mutator.Mutation

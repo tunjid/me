@@ -25,7 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.max
-import com.tunjid.me.common.app.AppMutator
+import com.tunjid.me.common.di.AppMutator
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.keyboardSize
 import com.tunjid.me.common.globalui.slices.routeContainerState

@@ -21,7 +21,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
-import com.tunjid.me.common.app.LocalAppDependencies
+import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.mutator.Mutation
 
 val currentUiState

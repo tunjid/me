@@ -34,7 +34,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.common.app.AppMutator
+import com.tunjid.me.common.di.AppMutator
 import com.tunjid.me.common.globalui.UiSizes
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.navRailVisible

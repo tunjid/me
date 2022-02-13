@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.app
+package com.tunjid.me.common.di
 
 import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.fromBytes

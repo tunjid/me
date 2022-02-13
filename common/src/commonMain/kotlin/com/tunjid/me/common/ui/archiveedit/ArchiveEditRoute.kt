@@ -39,7 +39,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.common.app.LocalAppDependencies
+import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.globalui.InsetFlags
