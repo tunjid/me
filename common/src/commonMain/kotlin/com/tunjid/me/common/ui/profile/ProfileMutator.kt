@@ -20,16 +20,23 @@ package com.tunjid.me.common.ui.profile
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.app.monitorWhenActive
 import com.tunjid.me.common.data.repository.AuthRepository
+import com.tunjid.me.common.ui.common.update
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
+import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 typealias ProfileMutator = Mutator<Action, StateFlow<State>>
 
 fun profileMutator(
     scope: CoroutineScope,
+    @Suppress("UNUSED_PARAMETER")
     route: ProfileRoute,
     initialState: State? = null,
     authRepository: AuthRepository,
@@ -38,8 +45,22 @@ fun profileMutator(
     scope = scope,
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(2000),
-    actionTransform = {
-        authRepository.signedInUserStream.map { Mutation<State> { copy(signedInUser = it) } }
+    actionTransform = { actions ->
+        merge(
+            authRepository.signedInUserStream.map { Mutation { copy(signedInUser = it) } },
+            actions.toMutationStream {
+                when (val action = type()) {
+                    is Action.FieldChanged -> action.flow.formEditMutations()
+                }
+            }
+        )
             .monitorWhenActive(appMutator)
     }
 )
+
+private fun Flow<Action.FieldChanged>.formEditMutations(): Flow<Mutation<State>> =
+    map { (updatedField) ->
+        Mutation {
+            copy(fields = fields.update(updatedField))
+        }
+    }

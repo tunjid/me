@@ -18,14 +18,8 @@ package com.tunjid.me.common.ui.signin
 
 import com.tunjid.me.common.data.ByteSerializable
 import com.tunjid.me.common.data.model.SessionRequest
+import com.tunjid.me.common.ui.common.FormField
 import kotlinx.serialization.Serializable
-
-
-@Serializable
-data class FormField(
-    val id: String,
-    val value: String
-)
 
 @Serializable
 data class State(

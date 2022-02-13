@@ -20,6 +20,7 @@ package com.tunjid.me.common.ui.signin
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.app.monitorWhenActive
 import com.tunjid.me.common.data.repository.AuthRepository
+import com.tunjid.me.common.ui.common.update
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -53,14 +54,9 @@ fun signInMutator(
 )
 
 private fun Flow<Action.FieldChanged>.formEditMutations(): Flow<Mutation<State>> =
-    map { fieldChangedAction ->
+    map { (updatedField) ->
         Mutation {
-            copy(
-                fields = fields.map { field ->
-                    if (field.id == fieldChangedAction.field.id) fieldChangedAction.field
-                    else field
-                }
-            )
+            copy(fields = fields.update(updatedField))
         }
     }
 
@@ -69,7 +65,7 @@ private fun Flow<Action.Submit>.submissionMutations(
 ): Flow<Mutation<State>> =
     debounce(200)
         .flatMapLatest { (request) ->
-            flow <Mutation<State>>{
+            flow<Mutation<State>> {
                 emit(Mutation { copy(isSubmitting = true) })
                 // TODO: Show snack bar if error
                 authRepository.createSession(request = request)

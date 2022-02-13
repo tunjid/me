@@ -45,6 +45,7 @@ import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.common.RemoteImagePainter
 import com.tunjid.me.common.globalui.ScreenUiState
+import com.tunjid.me.common.ui.common.FormField
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -79,7 +80,7 @@ private fun ProfileScreen(mutator: ProfileMutator) {
         modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(state = scrollState),
-        horizontalAlignment = Alignment.Start,
+        horizontalAlignment = Alignment.CenterHorizontallydd,
     ) {
         val user = state.signedInUser
         val painter = if (user != null) RemoteImagePainter(user.imageUrl) else null
@@ -100,5 +101,17 @@ private fun ProfileScreen(mutator: ProfileMutator) {
             contentDescription = null,
             modifier = modifier.clip(CircleShape)
         )
+
+        state.fields.forEach { field ->
+            Spacer(modifier = Modifier.height(8.dp))
+            FormField(
+                modifier = Modifier
+                    .fillMaxWidth(0.6f),
+                field = field,
+                onValueChange = {
+                    mutator.accept(Action.FieldChanged(field = field.copy(value = it)))
+                }
+            )
+        }
     }
 }

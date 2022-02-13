@@ -22,10 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,9 +33,10 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.LocalAppDependencies
 import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
+import com.tunjid.me.common.globalui.ScreenUiState
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.globalui.ScreenUiState
+import com.tunjid.me.common.ui.common.FormField
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -85,14 +83,13 @@ private fun SignInScreen(mutator: SignInMutator) {
     ) {
         state.fields.forEach { field ->
             Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            FormField(
                 modifier = Modifier
                     .fillMaxWidth(0.6f),
-                value = field.value,
+                field = field,
                 onValueChange = {
                     mutator.accept(Action.FieldChanged(field = field.copy(value = it)))
-                },
-                label = { Text(text = field.id) }
+                }
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
