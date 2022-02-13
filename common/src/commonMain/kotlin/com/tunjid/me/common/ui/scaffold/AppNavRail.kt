@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.navRailVisible
-import com.tunjid.me.common.globalui.routeContainerState
+import com.tunjid.me.common.globalui.slices.routeContainerState
 import com.tunjid.me.common.nav.NavItem
 import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItems

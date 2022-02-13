@@ -40,7 +40,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.globalui.UiState
-import com.tunjid.me.common.globalui.bottomNavPositionalState
+import com.tunjid.me.common.globalui.slices.bottomNavPositionalState
 import com.tunjid.me.common.nav.navItems
 import com.tunjid.me.common.globalui.UiSizes
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState

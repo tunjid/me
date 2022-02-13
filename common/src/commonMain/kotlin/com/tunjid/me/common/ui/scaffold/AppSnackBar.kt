@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.data.model.peek
 import com.tunjid.me.common.globalui.UiState
-import com.tunjid.me.common.globalui.snackbarPositionalState
+import com.tunjid.me.common.globalui.slices.snackbarPositionalState
 import com.tunjid.me.common.globalui.UiSizes
 import com.tunjid.me.common.ui.utilities.countIf
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState

@@ -25,13 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.data.model.Message
 import com.tunjid.me.common.data.model.MessageQueue
-
-data class ToolbarItem(
-    val id: String,
-    val text: String,
-    val imageVector: ImageVector? = null,
-    val contentDescription: String? = null,
-)
+import com.tunjid.me.common.globalui.slices.ToolbarItem
 
 sealed class NavMode {
     object BottomNav : NavMode()
@@ -72,107 +66,6 @@ data class UiState(
 )
 
 private fun <T> emptyCallback(): (T) -> Unit = {}
-
-// Internal state slices for memoizing animations.
-// They aggregate the parts of Global UI they react to
-
-internal data class ToolbarState(
-    val statusBarSize: Int,
-    val visible: Boolean,
-    val overlaps: Boolean,
-    val navRailVisible: Boolean,
-    val toolbarTitle: CharSequence,
-    val items: List<ToolbarItem>,
-)
-
-internal data class SnackbarPositionalState(
-    val bottomNavVisible: Boolean,
-    override val ime: Ingress,
-    override val navBarSize: Int,
-    override val insetDescriptor: InsetDescriptor
-) : KeyboardAware
-
-internal data class FabState(
-    val fabVisible: Boolean,
-    val bottomNavVisible: Boolean,
-    val snackbarOffset: Dp,
-    val icon: ImageVector,
-    val extended: Boolean,
-    val enabled: Boolean,
-    val text: String,
-    override val ime: Ingress,
-    override val navBarSize: Int,
-    override val insetDescriptor: InsetDescriptor
-) : KeyboardAware
-
-internal data class RouteContainerPositionalState(
-    val statusBarSize: Int,
-    val toolbarOverlaps: Boolean,
-    val navRailVisible: Boolean,
-    val bottomNavVisible: Boolean,
-    override val ime: Ingress,
-    override val navBarSize: Int,
-    override val insetDescriptor: InsetDescriptor
-) : KeyboardAware
-
-internal data class BottomNavPositionalState(
-    val insetDescriptor: InsetDescriptor,
-    val bottomNavVisible: Boolean,
-    val navBarSize: Int
-)
-
-internal val UiState.toolbarState
-    get() = ToolbarState(
-        items = toolbarItems,
-        toolbarTitle = toolbarTitle,
-        visible = toolbarShows,
-        overlaps = toolbarOverlaps,
-        navRailVisible = navRailVisible,
-        statusBarSize = statusBarSize,
-    )
-
-internal val UiState.fabState
-    get() = FabState(
-        fabVisible = fabShows,
-        snackbarOffset = snackbarOffset,
-        bottomNavVisible = bottomNavVisible,
-        icon = fabIcon,
-        text = fabText,
-        extended = fabExtended,
-        enabled = fabEnabled,
-        ime = systemUI.dynamic.ime,
-        navBarSize = systemUI.static.navBarSize,
-        insetDescriptor = insetFlags
-    )
-
-internal val UiState.snackbarPositionalState
-    get() = SnackbarPositionalState(
-        bottomNavVisible = bottomNavVisible,
-        ime = systemUI.dynamic.ime,
-        navBarSize = systemUI.static.navBarSize,
-        insetDescriptor = insetFlags
-    )
-
-internal val UiState.fabGlyphs
-    get() = fabIcon to fabText
-
-internal val UiState.bottomNavPositionalState
-    get() = BottomNavPositionalState(
-        bottomNavVisible = bottomNavVisible,
-        navBarSize = systemUI.static.navBarSize,
-        insetDescriptor = insetFlags
-    )
-
-internal val UiState.routeContainerState
-    get() = RouteContainerPositionalState(
-        statusBarSize = systemUI.static.statusBarSize,
-        insetDescriptor = insetFlags,
-        toolbarOverlaps = toolbarOverlaps,
-        bottomNavVisible = bottomNavVisible,
-        navRailVisible = navRailVisible,
-        ime = systemUI.dynamic.ime,
-        navBarSize = systemUI.static.navBarSize
-    )
 
 val UiState.navBarSize get() = systemUI.static.navBarSize
 

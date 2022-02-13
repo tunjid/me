@@ -37,7 +37,7 @@ import com.tunjid.me.common.data.model.ArchiveKind.Articles
 import com.tunjid.me.common.data.model.ArchiveQuery
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.ScreenUiState
-import com.tunjid.me.common.globalui.ToolbarItem
+import com.tunjid.me.common.globalui.slices.ToolbarItem
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.currentUiState
 import com.tunjid.me.common.nav.AppRoute
