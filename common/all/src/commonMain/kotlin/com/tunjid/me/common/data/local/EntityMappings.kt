@@ -17,21 +17,21 @@
 package com.tunjid.me.common.data.local
 
 import com.tunjid.me.common.data.ArchiveEntity
-import com.tunjid.me.common.data.model.Archive
-import com.tunjid.me.common.data.model.User
+import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.User
 import com.tunjid.me.common.data.UserEntity
-import com.tunjid.me.common.data.model.UserId
+import com.tunjid.me.core.model.UserId
 
 internal val UserEntity.toUser
-    get() = User(
-        id = UserId(id),
+    get() = com.tunjid.me.core.model.User(
+        id = com.tunjid.me.core.model.UserId(id),
         firstName = first_name,
         lastName = last_name,
         fullName = full_name,
         imageUrl = image_url,
     )
 
-internal val User.toEntity
+internal val com.tunjid.me.core.model.User.toEntity
     get() = UserEntity(
         id = id.value,
         first_name = firstName,
@@ -40,7 +40,7 @@ internal val User.toEntity
         image_url = imageUrl,
     )
 
-internal val Archive.toEntity
+internal val com.tunjid.me.core.model.Archive.toEntity
     get() = ArchiveEntity(
         id = id.value,
         body = body,

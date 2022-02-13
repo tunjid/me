@@ -26,6 +26,8 @@ kotlin {
     sourceSets {
         named("commonMain") {
             dependencies {
+                api(project(":common:core"))
+
                 implementation(libs.compose.ui.tooling)
                 implementation(libs.compose.ui.util)
 

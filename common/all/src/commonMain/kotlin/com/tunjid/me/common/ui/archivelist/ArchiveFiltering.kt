@@ -42,9 +42,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.common.data.model.Descriptor
-import com.tunjid.me.common.data.model.minus
-import com.tunjid.me.common.data.model.plus
+import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.minus
+import com.tunjid.me.core.model.plus
 import com.tunjid.me.common.ui.common.ChipAction
 import com.tunjid.me.common.ui.common.ChipEditInfo
 import com.tunjid.me.common.ui.common.Chips
@@ -107,14 +107,14 @@ private fun FilterChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
-            chips = state.startQuery.contentFilter.categories.map(Descriptor.Category::value),
+            chips = state.startQuery.contentFilter.categories.map(com.tunjid.me.core.model.Descriptor.Category::value),
             color = MaterialTheme.colors.primaryVariant,
             editInfo = ChipEditInfo(
                 currentText = state.categoryText.value,
                 onChipChanged = onChipFilterChanged(
                     state = state,
                     reader = QueryState::categoryText,
-                    writer = Descriptor::Category,
+                    writer = com.tunjid.me.core.model.Descriptor::Category,
                     onChanged = onChanged
                 )
             )
@@ -122,14 +122,14 @@ private fun FilterChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
-            chips = state.startQuery.contentFilter.tags.map(Descriptor.Tag::value),
+            chips = state.startQuery.contentFilter.tags.map(com.tunjid.me.core.model.Descriptor.Tag::value),
             color = MaterialTheme.colors.secondary,
             editInfo = ChipEditInfo(
                 currentText = state.tagText.value,
                 onChipChanged = onChipFilterChanged(
                     state = state,
                     reader = QueryState::tagText,
-                    writer = Descriptor::Tag,
+                    writer = com.tunjid.me.core.model.Descriptor::Tag,
                     onChanged = onChanged
                 )
             )
@@ -157,8 +157,8 @@ private fun DropDownButton(
 
 private fun onChipFilterChanged(
     state: QueryState,
-    reader: (QueryState) -> Descriptor,
-    writer: (String) -> Descriptor,
+    reader: (QueryState) -> com.tunjid.me.core.model.Descriptor,
+    writer: (String) -> com.tunjid.me.core.model.Descriptor,
     onChanged: (Action) -> Unit
 ): (ChipAction) -> Unit = {
     when (it) {

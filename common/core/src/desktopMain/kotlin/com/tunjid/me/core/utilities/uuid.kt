@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.model
+package com.tunjid.me.core.utilities
 
-import kotlinx.serialization.Serializable
+import java.util.*
 
-@Serializable
-data class SessionRequest(
-    val username: String,
-    val password: String
-)
+actual fun uuid(): String = UUID.randomUUID().toString()

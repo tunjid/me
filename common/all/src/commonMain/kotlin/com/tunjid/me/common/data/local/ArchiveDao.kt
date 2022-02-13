@@ -22,14 +22,14 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.ArchiveEntity
-import com.tunjid.me.common.data.model.Archive
-import com.tunjid.me.common.data.model.ArchiveId
-import com.tunjid.me.common.data.model.ArchiveKind
-import com.tunjid.me.common.data.model.ArchiveQuery
-import com.tunjid.me.common.data.model.Descriptor
-import com.tunjid.me.common.data.model.Descriptor.Category
-import com.tunjid.me.common.data.model.Descriptor.Tag
-import com.tunjid.me.common.data.model.hasContentFilter
+import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.Descriptor.Category
+import com.tunjid.me.core.model.Descriptor.Tag
+import com.tunjid.me.core.model.hasContentFilter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -39,9 +39,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Instant
 
 interface ArchiveDao {
-    fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
-    fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive?>
-    suspend fun saveArchives(archives: List<Archive>)
+    fun monitorArchives(query: com.tunjid.me.core.model.ArchiveQuery): Flow<List<com.tunjid.me.core.model.Archive>>
+    fun monitorArchive(kind: com.tunjid.me.core.model.ArchiveKind, id: com.tunjid.me.core.model.ArchiveId): Flow<com.tunjid.me.core.model.Archive?>
+    suspend fun saveArchives(archives: List<com.tunjid.me.core.model.Archive>)
 }
 
 class SqlArchiveDao(
@@ -54,7 +54,7 @@ class SqlArchiveDao(
     private val archiveCategoryQueries = database.archiveCategoryEntityQueries
     private val archiveAuthorQueries = database.userEntityQueries
 
-    override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
+    override fun monitorArchives(query: com.tunjid.me.core.model.ArchiveQuery): Flow<List<com.tunjid.me.core.model.Archive>> =
         when {
             query.hasContentFilter -> contentFilteredArchives(query)
             else -> archives(query)
@@ -62,7 +62,7 @@ class SqlArchiveDao(
             .flatMapLatest { archiveEntities -> archiveEntitiesToArchives(archiveEntities) }
             .distinctUntilChanged()
 
-    override fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive?> =
+    override fun monitorArchive(kind: com.tunjid.me.core.model.ArchiveKind, id: com.tunjid.me.core.model.ArchiveId): Flow<com.tunjid.me.core.model.Archive?> =
         archiveQueries.get(
             id = id.value,
             kind = kind.type
@@ -72,13 +72,13 @@ class SqlArchiveDao(
             .flatMapLatest { it?.let(::archiveEntityToArchive) ?: flowOf(null) }
             .distinctUntilChanged()
 
-    override suspend fun saveArchives(archives: List<Archive>) {
+    override suspend fun saveArchives(archives: List<com.tunjid.me.core.model.Archive>) {
         archiveAuthorQueries.suspendingTransaction(context = dispatcher) {
             archives.map(::saveArchive)
         }
     }
 
-    fun saveArchive(archive: Archive) {
+    fun saveArchive(archive: com.tunjid.me.core.model.Archive) {
         val userEntity = archive.author.toEntity
         val archiveEntity = archive.toEntity
 
@@ -115,7 +115,7 @@ class SqlArchiveDao(
         }
     }
 
-    private fun archives(query: ArchiveQuery): Flow<List<ArchiveEntity>> =
+    private fun archives(query: com.tunjid.me.core.model.ArchiveQuery): Flow<List<ArchiveEntity>> =
         archiveQueries.find(
             kind = query.kind.type,
             limit = query.limit.toLong(),
@@ -124,7 +124,7 @@ class SqlArchiveDao(
             .asFlow()
             .mapToList(context = dispatcher)
 
-    private fun contentFilteredArchives(query: ArchiveQuery): Flow<List<ArchiveEntity>> =
+    private fun contentFilteredArchives(query: com.tunjid.me.core.model.ArchiveQuery): Flow<List<ArchiveEntity>> =
         archiveQueries.idsForQuery(
             kind = query.kind.type,
             limit = query.limit.toLong(),
@@ -141,13 +141,13 @@ class SqlArchiveDao(
                     .mapToList(context = this.dispatcher)
             }
 
-    private fun archiveEntitiesToArchives(list: List<ArchiveEntity>): Flow<List<Archive>> =
+    private fun archiveEntitiesToArchives(list: List<ArchiveEntity>): Flow<List<com.tunjid.me.core.model.Archive>> =
         if (list.isEmpty()) flowOf(listOf()) else combine(
             flows = list.map(::archiveEntityToArchive),
-            transform = Array<Archive>::toList
+            transform = Array<com.tunjid.me.core.model.Archive>::toList
         )
 
-    private fun archiveEntityToArchive(archiveEntity: ArchiveEntity): Flow<Archive> =
+    private fun archiveEntityToArchive(archiveEntity: ArchiveEntity): Flow<com.tunjid.me.core.model.Archive> =
         combine(
             flow = this.archiveTagQueries.find(archive_id = archiveEntity.id)
                 .asFlow()
@@ -159,19 +159,20 @@ class SqlArchiveDao(
                 .asFlow()
                 .mapToOne(context = this.dispatcher),
         ) { tags, categories, author ->
-            Archive(
-                id = ArchiveId(archiveEntity.id),
+            com.tunjid.me.core.model.Archive(
+                id = com.tunjid.me.core.model.ArchiveId(archiveEntity.id),
                 link = archiveEntity.link,
                 title = archiveEntity.title,
                 description = archiveEntity.description,
                 thumbnail = archiveEntity.thumbnail,
                 likes = archiveEntity.likes,
-                kind = ArchiveKind.values().first { it.type == archiveEntity.kind },
+                kind = com.tunjid.me.core.model.ArchiveKind.values()
+                    .first { it.type == archiveEntity.kind },
                 created = Instant.fromEpochMilliseconds(archiveEntity.created),
                 body = archiveEntity.body,
                 author = author.toUser,
-                tags = tags.map(Descriptor::Tag),
-                categories = categories.map(Descriptor::Category),
+                tags = tags.map(com.tunjid.me.core.model.Descriptor::Tag),
+                categories = categories.map(com.tunjid.me.core.model.Descriptor::Category),
             )
         }
 

@@ -17,13 +17,13 @@
 package com.tunjid.me.common.data.network
 
 import com.tunjid.me.common.data.local.SessionCookieDao
-import com.tunjid.me.common.data.model.Archive
-import com.tunjid.me.common.data.model.ArchiveId
-import com.tunjid.me.common.data.model.ArchiveKind
-import com.tunjid.me.common.data.model.ArchiveUpsert
-import com.tunjid.me.common.data.model.Descriptor
-import com.tunjid.me.common.data.model.SessionRequest
-import com.tunjid.me.common.data.model.User
+import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveUpsert
+import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.SessionRequest
+import com.tunjid.me.core.model.User
 import com.tunjid.me.common.data.network.models.UpsertResponse
 import io.ktor.client.*
 import io.ktor.client.features.cookies.*
@@ -68,28 +68,28 @@ class NetworkService(
     }
 
     suspend fun fetchArchives(
-        kind: ArchiveKind,
+        kind: com.tunjid.me.core.model.ArchiveKind,
         options: Map<String, String> = mapOf(),
-        tags: List<Descriptor.Tag> = listOf(),
-        categories: List<Descriptor.Category> = listOf(),
-    ): List<Archive> = client.get("$baseUrl/api/${kind.type}") {
+        tags: List<com.tunjid.me.core.model.Descriptor.Tag> = listOf(),
+        categories: List<com.tunjid.me.core.model.Descriptor.Category> = listOf(),
+    ): List<com.tunjid.me.core.model.Archive> = client.get("$baseUrl/api/${kind.type}") {
         options.forEach { (key, value) -> parameter(key, value) }
-        if (tags.isNotEmpty()) tags.map(Descriptor.Tag::value).forEach {
+        if (tags.isNotEmpty()) tags.map(com.tunjid.me.core.model.Descriptor.Tag::value).forEach {
             parameter("tag", it)
         }
-        if (categories.isNotEmpty()) categories.map(Descriptor.Category::value).forEach {
+        if (categories.isNotEmpty()) categories.map(com.tunjid.me.core.model.Descriptor.Category::value).forEach {
             parameter("category", it)
         }
     }
 
     suspend fun fetchArchive(
-        kind: ArchiveKind,
-        id: ArchiveId,
-    ): Archive = client.get("$baseUrl/api/${kind.type}/${id.value}")
+        kind: com.tunjid.me.core.model.ArchiveKind,
+        id: com.tunjid.me.core.model.ArchiveId,
+    ): com.tunjid.me.core.model.Archive = client.get("$baseUrl/api/${kind.type}/${id.value}")
 
     suspend fun upsertArchive(
-        kind: ArchiveKind,
-        upsert: ArchiveUpsert,
+        kind: com.tunjid.me.core.model.ArchiveKind,
+        upsert: com.tunjid.me.core.model.ArchiveUpsert,
     ): UpsertResponse {
         val id = upsert.id
         val requestBuilder: HttpRequestBuilder.() -> Unit = {
@@ -103,11 +103,11 @@ class NetworkService(
     }
 
     suspend fun signIn(
-        sessionRequest: SessionRequest
-    ): User = client.post("$baseUrl/api/sign-in") {
+        sessionRequest: com.tunjid.me.core.model.SessionRequest
+    ): com.tunjid.me.core.model.User = client.post("$baseUrl/api/sign-in") {
         header(HttpHeaders.ContentType, ContentType.Application.Json)
         body = sessionRequest
     }
 
-    suspend fun session(): User = client.get("$baseUrl/api/session")
+    suspend fun session(): com.tunjid.me.core.model.User = client.get("$baseUrl/api/session")
 }

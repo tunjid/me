@@ -33,8 +33,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.di.LocalAppDependencies
-import com.tunjid.me.common.data.model.ArchiveKind.Articles
-import com.tunjid.me.common.data.model.ArchiveQuery
+import com.tunjid.me.core.model.ArchiveKind.Articles
+import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.ScreenUiState
 import com.tunjid.me.common.globalui.slices.ToolbarItem
@@ -53,7 +53,7 @@ import kotlinx.serialization.Serializable
 import kotlin.math.min
 
 @Serializable
-data class ArchiveListRoute(val query: ArchiveQuery) : AppRoute<ArchiveListMutator> {
+data class ArchiveListRoute(val query: com.tunjid.me.core.model.ArchiveQuery) : AppRoute<ArchiveListMutator> {
     override val id: String
         get() = "archive-route-${query.kind}"
 
@@ -194,13 +194,13 @@ private fun PreviewLoadingState() {
     ArchiveScreen(
         mutator = State(
             queryState = QueryState(
-                startQuery = ArchiveQuery(kind = Articles),
-                currentQuery = ArchiveQuery(kind = Articles),
+                startQuery = com.tunjid.me.core.model.ArchiveQuery(kind = Articles),
+                currentQuery = com.tunjid.me.core.model.ArchiveQuery(kind = Articles),
             ),
             items = listOf(
                 ArchiveItem.Loading(
                     isCircular = true,
-                    query = ArchiveQuery(kind = Articles)
+                    query = com.tunjid.me.core.model.ArchiveQuery(kind = Articles)
                 )
             )
         ).asNoOpStateFlowMutator()

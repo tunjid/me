@@ -17,7 +17,7 @@
 package com.tunjid.me.common.ui.signin
 
 import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.model.SessionRequest
+import com.tunjid.me.core.model.SessionRequest
 import com.tunjid.me.common.ui.common.FormField
 import kotlinx.serialization.Serializable
 
@@ -39,9 +39,9 @@ data class State(
 
 val State.submitButtonEnabled: Boolean get() = !isSignedIn && !isSubmitting
 
-val State.sessionRequest: SessionRequest
+val State.sessionRequest: com.tunjid.me.core.model.SessionRequest
     get() = fields.associateBy { it.id }.let { formMap ->
-        SessionRequest(
+        com.tunjid.me.core.model.SessionRequest(
             username = formMap.getValue("username").value,
             password = formMap.getValue("password").value,
         )
@@ -49,5 +49,5 @@ val State.sessionRequest: SessionRequest
 
 sealed class Action {
     data class FieldChanged(val field: FormField) : Action()
-    data class Submit(val request: SessionRequest) : Action()
+    data class Submit(val request: com.tunjid.me.core.model.SessionRequest) : Action()
 }

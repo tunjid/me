@@ -23,8 +23,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.common.data.model.Message
-import com.tunjid.me.common.data.model.MessageQueue
+import com.tunjid.me.core.model.Message
+import com.tunjid.me.core.model.MessageQueue
 import com.tunjid.me.common.globalui.slices.ToolbarItem
 
 sealed class NavMode {
@@ -50,7 +50,7 @@ data class UiState(
     val fabText: String = "",
     val backgroundColor: Int = Color.Transparent.toArgb(),
     val snackbarOffset: Dp = 0.dp,
-    val snackbarMessages: MessageQueue = MessageQueue(),
+    val snackbarMessages: com.tunjid.me.core.model.MessageQueue = com.tunjid.me.core.model.MessageQueue(),
     val navBarColor: Int = Color.Transparent.toArgb(),
     val lightStatusBar: Boolean = false,
     val navMode: NavMode = NavMode.BottomNav,
@@ -62,7 +62,7 @@ data class UiState(
     val fabClickListener: (Unit) -> Unit = emptyCallback(),
     val toolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),
     val altToolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),
-    val snackbarMessageConsumer: (Message) -> Unit = emptyCallback(),
+    val snackbarMessageConsumer: (com.tunjid.me.core.model.Message) -> Unit = emptyCallback(),
 )
 
 private fun <T> emptyCallback(): (T) -> Unit = {}

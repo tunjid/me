@@ -17,10 +17,10 @@
 package com.tunjid.me.common.data.repository
 
 import com.tunjid.me.common.data.local.SessionCookieDao
-import com.tunjid.me.common.data.model.UserId
-import com.tunjid.me.common.data.model.Result
-import com.tunjid.me.common.data.model.SessionRequest
-import com.tunjid.me.common.data.model.User
+import com.tunjid.me.core.model.UserId
+import com.tunjid.me.core.model.Result
+import com.tunjid.me.core.model.SessionRequest
+import com.tunjid.me.core.model.User
 import com.tunjid.me.common.data.network.NetworkService
 import com.tunjid.me.common.data.network.exponentialBackoff
 import kotlinx.coroutines.flow.Flow
@@ -29,8 +29,8 @@ import kotlinx.coroutines.flow.map
 
 interface AuthRepository {
     val isSignedIn: Flow<Boolean>
-    val signedInUserStream: Flow<User?>
-    suspend fun createSession(request: SessionRequest): Result<UserId>
+    val signedInUserStream: Flow<com.tunjid.me.core.model.User?>
+    suspend fun createSession(request: com.tunjid.me.core.model.SessionRequest): com.tunjid.me.core.model.Result<com.tunjid.me.core.model.UserId>
 }
 
 class SessionCookieAuthRepository(
@@ -42,7 +42,7 @@ class SessionCookieAuthRepository(
         dao.sessionCookieStream.map { it != null }
             .distinctUntilChanged()
 
-    override val signedInUserStream: Flow<User?> =
+    override val signedInUserStream: Flow<com.tunjid.me.core.model.User?> =
         isSignedIn.map {
             if (it) exponentialBackoff(
                 default = null,
@@ -51,10 +51,10 @@ class SessionCookieAuthRepository(
             else null
         }
 
-    override suspend fun createSession(request: SessionRequest): Result<UserId> = try {
+    override suspend fun createSession(request: com.tunjid.me.core.model.SessionRequest): com.tunjid.me.core.model.Result<com.tunjid.me.core.model.UserId> = try {
         val user = networkService.signIn(request)
-        Result.Success(user.id)
+        com.tunjid.me.core.model.Result.Success(user.id)
     } catch (e: Throwable) {
-        Result.Error(e.message)
+        com.tunjid.me.core.model.Result.Error(e.message)
     }
 }

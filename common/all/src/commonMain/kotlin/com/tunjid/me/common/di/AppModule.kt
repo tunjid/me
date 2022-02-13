@@ -24,8 +24,8 @@ import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.local.SqlArchiveDao
 import com.tunjid.me.common.data.local.SqlSessionCookieDao
 import com.tunjid.me.common.data.local.databaseDispatcher
-import com.tunjid.me.common.data.model.ArchiveId
-import com.tunjid.me.common.data.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.common.data.network.ApiUrl
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.network.NetworkService
@@ -146,9 +146,9 @@ private class AppModule(
             )
                 .mapNotNull { event ->
                     val kind = when (event.collection) {
-                        ArchiveKind.Articles.type -> ArchiveKind.Articles
-                        ArchiveKind.Talks.type -> ArchiveKind.Talks
-                        ArchiveKind.Projects.type -> ArchiveKind.Projects
+                        com.tunjid.me.core.model.ArchiveKind.Articles.type -> com.tunjid.me.core.model.ArchiveKind.Articles
+                        com.tunjid.me.core.model.ArchiveKind.Talks.type -> com.tunjid.me.core.model.ArchiveKind.Talks
+                        com.tunjid.me.core.model.ArchiveKind.Projects.type -> com.tunjid.me.core.model.ArchiveKind.Projects
                         else -> null
                     } ?: return@mapNotNull null
 
@@ -157,7 +157,10 @@ private class AppModule(
                         maxDelay = 20_000,
                         times = 5,
                         default = null
-                    ) { networkService.fetchArchive(kind = kind, id = ArchiveId(event.id)) }
+                    ) { networkService.fetchArchive(kind = kind, id = com.tunjid.me.core.model.ArchiveId(
+                        event.id
+                    )
+                    ) }
                 }
                 .collect {
                     archiveDao.saveArchive(it)

@@ -16,10 +16,10 @@
 
 package com.tunjid.me.common.ui.archivelist
 
-import com.tunjid.me.common.data.model.Archive
-import com.tunjid.me.common.data.model.ArchiveQuery
+import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.common.data.repository.ArchiveRepository
-import com.tunjid.me.common.data.model.DefaultQueryLimit
+import com.tunjid.me.core.model.DefaultQueryLimit
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.tiledList
 import com.tunjid.tiler.toTiledList
@@ -35,10 +35,10 @@ data class FetchResult(
  * A summary of the loading queries in the app
  */
 private data class FetchMetadata(
-    val previousQueries: List<ArchiveQuery> = listOf(),
-    val currentQueries: List<ArchiveQuery> = listOf(),
-    val toEvict: List<ArchiveQuery> = listOf(),
-    val inMemory: List<ArchiveQuery> = listOf(),
+    val previousQueries: List<com.tunjid.me.core.model.ArchiveQuery> = listOf(),
+    val currentQueries: List<com.tunjid.me.core.model.ArchiveQuery> = listOf(),
+    val toEvict: List<com.tunjid.me.core.model.ArchiveQuery> = listOf(),
+    val inMemory: List<com.tunjid.me.core.model.ArchiveQuery> = listOf(),
 )
 
 /**
@@ -58,14 +58,14 @@ fun Flow<Action.Fetch>.toFetchResult(
             .fetchMetadata()
             .flatMapLatest { (previousQueries, currentQueries, evictions) ->
                 val toTurnOn = currentQueries
-                    .map { Tile.Request.On<ArchiveQuery, List<ArchiveItem>>(it) }
+                    .map { Tile.Request.On<com.tunjid.me.core.model.ArchiveQuery, List<ArchiveItem>>(it) }
 
                 val toTurnOff = previousQueries
                     .filterNot { currentQueries.contains(it) }
-                    .map { Tile.Request.Off<ArchiveQuery, List<ArchiveItem>>(it) }
+                    .map { Tile.Request.Off<com.tunjid.me.core.model.ArchiveQuery, List<ArchiveItem>>(it) }
 
                 val toEvict = evictions
-                    .map { Tile.Request.Evict<ArchiveQuery, List<ArchiveItem>>(it) }
+                    .map { Tile.Request.Evict<com.tunjid.me.core.model.ArchiveQuery, List<ArchiveItem>>(it) }
 
                 (toTurnOn + toTurnOff + toEvict).asFlow()
             }
@@ -94,11 +94,11 @@ distinctUntilChanged()
 
         // Evict all queries in memory if we're resetting, else trim for against memory pressure
         val toEvict = if (shouldReset) existingQueries.inMemory else when (val min =
-            newQueries.minByOrNull(ArchiveQuery::offset)) {
+            newQueries.minByOrNull(com.tunjid.me.core.model.ArchiveQuery::offset)) {
             null -> listOf()
             // Evict items more than 3 offset pages behind the min current query
             else -> currentlyInMemory.filter {
-                it.offset - min.offset < -(DefaultQueryLimit * 3)
+                it.offset - min.offset < -(com.tunjid.me.core.model.DefaultQueryLimit * 3)
             }
         }
         existingQueries.copy(
@@ -109,13 +109,13 @@ distinctUntilChanged()
         )
     }
 
-private fun ArchiveRepository.archiveTiler(): (Flow<Tile.Input.List<ArchiveQuery, List<ArchiveItem>>>) -> Flow<List<List<ArchiveItem>>> =
+private fun ArchiveRepository.archiveTiler(): (Flow<Tile.Input.List<com.tunjid.me.core.model.ArchiveQuery, List<ArchiveItem>>>) -> Flow<List<List<ArchiveItem>>> =
     tiledList(
         // Limit results to at most 4 pages at once
         limiter = Tile.Limiter.List { pages -> pages.size > 4 },
-        order = Tile.Order.PivotSorted(comparator = compareBy(ArchiveQuery::offset)),
+        order = Tile.Order.PivotSorted(comparator = compareBy(com.tunjid.me.core.model.ArchiveQuery::offset)),
         fetcher = { query ->
-            monitorArchives(query).map<List<Archive>, List<ArchiveItem>> { archives ->
+            monitorArchives(query).map<List<com.tunjid.me.core.model.Archive>, List<ArchiveItem>> { archives ->
                 archives.map { archive ->
                     ArchiveItem.Result(
                         archive = archive,

@@ -17,12 +17,12 @@
 package com.tunjid.me.common.ui.archiveedit
 
 import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.model.ArchiveId
-import com.tunjid.me.common.data.model.ArchiveKind
-import com.tunjid.me.common.data.model.ArchiveUpsert
-import com.tunjid.me.common.data.model.Descriptor
-import com.tunjid.me.common.data.model.Message
-import com.tunjid.me.common.data.model.MessageQueue
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveUpsert
+import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.Message
+import com.tunjid.me.core.model.MessageQueue
 import com.tunjid.me.common.ui.common.ChipAction
 import com.tunjid.mutator.Mutation
 import kotlinx.serialization.Serializable
@@ -34,11 +34,11 @@ data class State(
     val isSignedIn: Boolean = false,
     val isSubmitting: Boolean = false,
     val navBarSize: Int,
-    val kind: ArchiveKind,
-    val upsert: ArchiveUpsert = ArchiveUpsert(),
+    val kind: com.tunjid.me.core.model.ArchiveKind,
+    val upsert: com.tunjid.me.core.model.ArchiveUpsert = com.tunjid.me.core.model.ArchiveUpsert(),
     val chipsState: ChipsState = ChipsState(),
     @Transient
-    val messages: MessageQueue = MessageQueue(),
+    val messages: com.tunjid.me.core.model.MessageQueue = com.tunjid.me.core.model.MessageQueue(),
 ) : ByteSerializable
 
 sealed class Action(val key: String) {
@@ -66,29 +66,29 @@ sealed class Action(val key: String) {
     }
 
     data class MessageConsumed(
-        val message: Message
+        val message: com.tunjid.me.core.model.Message
     ) : Action("MessageConsumed")
 
     data class ChipEdit(
         val chipAction: ChipAction,
-        val descriptor: Descriptor,
+        val descriptor: com.tunjid.me.core.model.Descriptor,
     ) : Action("ChipEdit")
 
     sealed class Load : Action("Load") {
         data class InitialLoad(
-            val kind: ArchiveKind,
-            val id: ArchiveId
+            val kind: com.tunjid.me.core.model.ArchiveKind,
+            val id: com.tunjid.me.core.model.ArchiveId
         ) : Load()
 
         data class Submit(
-            val kind: ArchiveKind,
-            val upsert: ArchiveUpsert
+            val kind: com.tunjid.me.core.model.ArchiveKind,
+            val upsert: com.tunjid.me.core.model.ArchiveUpsert
         ) : Load()
     }
 }
 
 @Serializable
 data class ChipsState(
-    val categoryText: Descriptor.Category = Descriptor.Category(""),
-    val tagText: Descriptor.Tag = Descriptor.Tag(""),
+    val categoryText: com.tunjid.me.core.model.Descriptor.Category = com.tunjid.me.core.model.Descriptor.Category(""),
+    val tagText: com.tunjid.me.core.model.Descriptor.Tag = com.tunjid.me.core.model.Descriptor.Tag(""),
 )

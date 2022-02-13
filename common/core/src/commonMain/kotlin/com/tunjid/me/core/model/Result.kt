@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.utilities
+package com.tunjid.me.core.model
 
-expect fun uuid(): String
+sealed class Result<T> {
+    data class Success<T>(val item: T): Result<T>()
+    data class Error<T>(val message: String?): Result<T>()
+}

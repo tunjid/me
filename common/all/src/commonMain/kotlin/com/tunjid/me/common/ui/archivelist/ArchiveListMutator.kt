@@ -18,7 +18,7 @@ package com.tunjid.me.common.ui.archivelist
 
 import com.tunjid.me.common.di.AppMutator
 import com.tunjid.me.common.di.monitorWhenActive
-import com.tunjid.me.common.data.model.Descriptor
+import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.common.globalui.navRailVisible
@@ -107,11 +107,11 @@ private fun Flow<Action.FilterChanged>.filterChangedMutations(): Flow<Mutation<S
             copy(
                 queryState = queryState.copy(
                     categoryText = when (descriptor) {
-                        is Descriptor.Category -> descriptor
+                        is com.tunjid.me.core.model.Descriptor.Category -> descriptor
                         else -> queryState.categoryText
                     },
                     tagText = when (descriptor) {
-                        is Descriptor.Tag -> descriptor
+                        is com.tunjid.me.core.model.Descriptor.Tag -> descriptor
                         else -> queryState.tagText
                     },
                 )

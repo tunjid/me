@@ -19,12 +19,12 @@ package com.tunjid.me.common.data.archive
 import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.materialPath
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.tunjid.me.common.data.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveKind
 
-val ArchiveKind.icon: ImageVector
+val com.tunjid.me.core.model.ArchiveKind.icon: ImageVector
     get() = iconMap.getOrPut(this) {
         when (this) {
-            ArchiveKind.Articles -> materialIcon(name = "Filled.Article") {
+            com.tunjid.me.core.model.ArchiveKind.Articles -> materialIcon(name = "Filled.Article") {
                 materialPath {
                     moveTo(19.0f, 3.0f)
                     lineTo(5.0f, 3.0f)
@@ -56,7 +56,7 @@ val ArchiveKind.icon: ImageVector
                     close()
                 }
             }
-            ArchiveKind.Projects -> materialIcon(name = "Filled.Handyman") {
+            com.tunjid.me.core.model.ArchiveKind.Projects -> materialIcon(name = "Filled.Handyman") {
                 materialPath {
                     moveTo(21.67f, 18.17f)
                     lineToRelative(-5.3f, -5.3f)
@@ -104,7 +104,7 @@ val ArchiveKind.icon: ImageVector
                     close()
                 }
             }
-            ArchiveKind.Talks -> materialIcon(name = "Filled.RecordVoiceOver") {
+            com.tunjid.me.core.model.ArchiveKind.Talks -> materialIcon(name = "Filled.RecordVoiceOver") {
                 materialPath {
                     moveTo(9.0f, 9.0f)
                     moveToRelative(-4.0f, 0.0f)
@@ -136,4 +136,4 @@ val ArchiveKind.icon: ImageVector
         }
     }
 
-private val iconMap = mutableMapOf<ArchiveKind, ImageVector>()
+private val iconMap = mutableMapOf<com.tunjid.me.core.model.ArchiveKind, ImageVector>()

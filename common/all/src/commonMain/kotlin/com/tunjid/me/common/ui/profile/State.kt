@@ -17,7 +17,7 @@
 package com.tunjid.me.common.ui.profile
 
 import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.model.User
+import com.tunjid.me.core.model.User
 import com.tunjid.me.common.ui.common.FormField
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -25,7 +25,7 @@ import kotlinx.serialization.Transient
 @Serializable
 data class State(
     @Transient
-    val signedInUser: User? = null,
+    val signedInUser: com.tunjid.me.core.model.User? = null,
     val fields: List<FormField> = listOf(
         FormField(
             id = "First Name",

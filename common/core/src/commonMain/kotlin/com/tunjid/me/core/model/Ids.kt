@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.utilities
+package com.tunjid.me.core.model
 
-import java.util.*
+import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmInline
 
-actual fun uuid(): String = UUID.randomUUID().toString()
+@Serializable
+@JvmInline
+value class UserId(val value: String)
+
+@Serializable
+@JvmInline
+value class ArchiveId(val value: String)

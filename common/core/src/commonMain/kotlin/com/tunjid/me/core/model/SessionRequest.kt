@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.model
+package com.tunjid.me.core.model
 
 import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmInline
 
 @Serializable
-@JvmInline
-value class UserId(val value: String)
-
-@Serializable
-@JvmInline
-value class ArchiveId(val value: String)
+data class SessionRequest(
+    val username: String,
+    val password: String
+)

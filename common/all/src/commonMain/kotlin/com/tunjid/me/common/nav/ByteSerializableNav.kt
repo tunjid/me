@@ -18,7 +18,7 @@
 package com.tunjid.me.common.nav
 
 import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Route
 import com.tunjid.treenav.StackNav
@@ -34,7 +34,7 @@ interface ByteSerializableRoute : Route, ByteSerializable
 data class ByteSerializableNav(
     val currentIndex: Int,
     val indexHistory: List<Int> = listOf(),
-    val kindToRoutes: Map<ArchiveKind, List<ByteSerializableRoute>> = mapOf()
+    val kindToRoutes: Map<com.tunjid.me.core.model.ArchiveKind, List<ByteSerializableRoute>> = mapOf()
 ) : ByteSerializable
 
 val MultiStackNav.toByteSerializable
@@ -42,7 +42,7 @@ val MultiStackNav.toByteSerializable
         currentIndex = currentIndex,
         indexHistory = indexHistory,
         kindToRoutes = stacks.fold(mutableMapOf()) { map, stack ->
-            val kind = ArchiveKind.values().first { it.name == stack.name }
+            val kind = com.tunjid.me.core.model.ArchiveKind.values().first { it.name == stack.name }
             map[kind] = stack.routes.filterIsInstance<ByteSerializableRoute>()
             map
         }

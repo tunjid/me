@@ -25,8 +25,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.tunjid.me.common.data.archive.icon
-import com.tunjid.me.common.data.model.ArchiveKind
-import com.tunjid.me.common.data.model.ArchiveQuery
+import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.settings.SettingsRoute
 import com.tunjid.mutator.Mutation
@@ -90,7 +90,7 @@ val MultiStackNav.navItems
     get() = stacks
         .map { it.name }
         .mapIndexed { index, name ->
-            val kind = ArchiveKind.values().firstOrNull { it.name == name }
+            val kind = com.tunjid.me.core.model.ArchiveKind.values().firstOrNull { it.name == name }
             NavItem(
                 name = name,
                 icon = kind?.icon ?: Icons.Default.Settings,
@@ -139,10 +139,10 @@ fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AppRoute<*>>> =
 private val startNav = MultiStackNav(
     name = NavName,
     currentIndex = 0,
-    stacks = ArchiveKind.values().map { kind ->
+    stacks = com.tunjid.me.core.model.ArchiveKind.values().map { kind ->
         StackNav(
             name = kind.name,
-            routes = listOf(ArchiveListRoute(query = ArchiveQuery(kind = kind)))
+            routes = listOf(ArchiveListRoute(query = com.tunjid.me.core.model.ArchiveQuery(kind = kind)))
         )
     } + StackNav(
         name = "Settings",

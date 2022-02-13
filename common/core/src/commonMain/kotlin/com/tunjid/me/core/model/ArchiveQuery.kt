@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.model
+package com.tunjid.me.core.model
 
-import com.tunjid.me.common.data.model.Descriptor.Category
-import com.tunjid.me.common.data.model.Descriptor.Tag
+import com.tunjid.me.core.model.Descriptor.Category
+import com.tunjid.me.core.model.Descriptor.Tag
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind

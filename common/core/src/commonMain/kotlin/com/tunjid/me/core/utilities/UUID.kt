@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.model
+package com.tunjid.me.core.utilities
 
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class ArchiveUpsert(
-    val id: ArchiveId? = null,
-    val title: String = "",
-    val body: String = "",
-    val description: String = "",
-    val tags: List<Descriptor.Tag> = listOf(),
-    val categories: List<Descriptor.Category> = listOf(),
-)
+expect fun uuid(): String

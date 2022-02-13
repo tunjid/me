@@ -17,9 +17,9 @@
 package com.tunjid.me.common.ui.archivelist
 
 import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.model.Archive
-import com.tunjid.me.common.data.model.ArchiveQuery
-import com.tunjid.me.common.data.model.Descriptor
+import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.core.model.Descriptor
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
@@ -41,19 +41,19 @@ data class State(
 
 sealed class Action(val key: String) {
     sealed class Fetch : Action(key = "Fetch") {
-        abstract val query: ArchiveQuery
+        abstract val query: com.tunjid.me.core.model.ArchiveQuery
 
         data class Reset(
-            override val query: ArchiveQuery
+            override val query: com.tunjid.me.core.model.ArchiveQuery
         ) : Fetch()
 
         data class LoadMore(
-            override val query: ArchiveQuery
+            override val query: com.tunjid.me.core.model.ArchiveQuery
         ) : Fetch()
     }
 
     data class FilterChanged(
-        val descriptor: Descriptor
+        val descriptor: com.tunjid.me.core.model.Descriptor
     ) : Action(key = "FilterChanged")
 
     data class GridSize(val size: Int) : Action(key = "GridSize")
@@ -64,22 +64,22 @@ sealed class Action(val key: String) {
 }
 
 sealed class ArchiveItem {
-    abstract val query: ArchiveQuery
+    abstract val query: com.tunjid.me.core.model.ArchiveQuery
 
     data class Result(
-        val archive: Archive,
-        override val query: ArchiveQuery,
+        val archive: com.tunjid.me.core.model.Archive,
+        override val query: com.tunjid.me.core.model.ArchiveQuery,
     ) : ArchiveItem()
 
     data class Loading(
         val isCircular: Boolean,
-        override val query: ArchiveQuery,
+        override val query: com.tunjid.me.core.model.ArchiveQuery,
     ) : ArchiveItem()
 }
 
 private class ItemKey(
     val key: String,
-    val query: ArchiveQuery
+    val query: com.tunjid.me.core.model.ArchiveQuery
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -125,9 +125,9 @@ val ArchiveItem.Result.readTime get() = "${archive.body.trim().split("/\\s+/").s
 @Serializable
 data class QueryState(
     val expanded: Boolean = false,
-    val startQuery: ArchiveQuery,
-    val currentQuery: ArchiveQuery,
-    val categoryText: Descriptor.Category = Descriptor.Category(""),
-    val tagText: Descriptor.Tag = Descriptor.Tag(""),
+    val startQuery: com.tunjid.me.core.model.ArchiveQuery,
+    val currentQuery: com.tunjid.me.core.model.ArchiveQuery,
+    val categoryText: com.tunjid.me.core.model.Descriptor.Category = com.tunjid.me.core.model.Descriptor.Category(""),
+    val tagText: com.tunjid.me.core.model.Descriptor.Tag = com.tunjid.me.core.model.Descriptor.Tag(""),
 )
 

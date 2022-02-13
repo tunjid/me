@@ -19,8 +19,8 @@ package com.tunjid.me.common.ui.archivedetail
 
 import com.tunjid.me.common.di.AppMutator
 import com.tunjid.me.common.di.monitorWhenActive
-import com.tunjid.me.common.data.model.ArchiveId
-import com.tunjid.me.common.data.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.common.globalui.navBarSize
@@ -74,8 +74,8 @@ private fun AuthRepository.authMutations() : Flow<Mutation<State>> =
     }
 
 private fun ArchiveRepository.archiveLoadMutations(
-    id: ArchiveId,
-    kind: ArchiveKind
+    id: com.tunjid.me.core.model.ArchiveId,
+    kind: com.tunjid.me.core.model.ArchiveKind
 ): Flow<Mutation<State>> = monitorArchive(
     kind = kind,
     id = id

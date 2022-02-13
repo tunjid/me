@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.utilities
+package com.tunjid.me.core.utilities
 
 import java.util.*
 

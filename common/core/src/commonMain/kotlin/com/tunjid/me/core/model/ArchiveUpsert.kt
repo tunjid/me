@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.model
+package com.tunjid.me.core.model
 
-sealed class Result<T> {
-    data class Success<T>(val item: T): Result<T>()
-    data class Error<T>(val message: String?): Result<T>()
-}
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ArchiveUpsert(
+    val id: ArchiveId? = null,
+    val title: String = "",
+    val body: String = "",
+    val description: String = "",
+    val tags: List<Descriptor.Tag> = listOf(),
+    val categories: List<Descriptor.Category> = listOf(),
+)

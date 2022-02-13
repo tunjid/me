@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.model
+package com.tunjid.me.core.model
 
-import com.tunjid.me.common.utilities.uuid
+import com.tunjid.me.core.utilities.uuid
+
 
 /**
  * Message queue for notifying the UI according to the UI events guidance in the

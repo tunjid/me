@@ -31,14 +31,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.common.data.model.Archive
-import com.tunjid.me.common.data.model.ArchiveId
-import com.tunjid.me.common.data.model.ArchiveKind.Articles
-import com.tunjid.me.common.data.model.ArchiveQuery
-import com.tunjid.me.common.data.model.Descriptor
-import com.tunjid.me.common.data.model.User
-import com.tunjid.me.common.data.model.UserId
-import com.tunjid.me.common.data.model.plus
+import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind.Articles
+import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.User
+import com.tunjid.me.core.model.UserId
+import com.tunjid.me.core.model.plus
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.common.Chips
@@ -134,9 +134,9 @@ private fun ArchiveThumbnail(imageUrl: String?) {
 
 @Composable
 private fun ArchiveCategories(
-    categories: List<Descriptor.Category>,
+    categories: List<com.tunjid.me.core.model.Descriptor.Category>,
     published: String,
-    onCategoryClicked: (Descriptor.Category) -> Unit
+    onCategoryClicked: (com.tunjid.me.core.model.Descriptor.Category) -> Unit
 ) {
     Row(
         modifier = Modifier.padding(horizontal = 8.dp),
@@ -145,9 +145,9 @@ private fun ArchiveCategories(
     ) {
         Chips(
             modifier = Modifier.weight(1F),
-            chips = categories.map(Descriptor.Category::value),
+            chips = categories.map(com.tunjid.me.core.model.Descriptor.Category::value),
             color = MaterialTheme.colors.primaryVariant,
-            onClick = { onCategoryClicked(Descriptor.Category(it)) }
+            onClick = { onCategoryClicked(com.tunjid.me.core.model.Descriptor.Category(it)) }
         )
         Text(
             modifier = Modifier.wrapContentWidth(),
@@ -219,16 +219,16 @@ private fun ArchiveCardFooter(
 }
 
 private val sampleArchiveItem = ArchiveItem.Result(
-    query = ArchiveQuery(kind = Articles),
-    archive = Archive(
-        id = ArchiveId(""),
+    query = com.tunjid.me.core.model.ArchiveQuery(kind = Articles),
+    archive = com.tunjid.me.core.model.Archive(
+        id = com.tunjid.me.core.model.ArchiveId(""),
         link = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",
         title = "I'm an Archive",
         body = "Hello",
         description = "Hi",
         thumbnail = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",
-        author = User(
-            id = UserId("i"),
+        author = com.tunjid.me.core.model.User(
+            id = com.tunjid.me.core.model.UserId("i"),
             firstName = "TJ",
             lastName = "D",
             fullName = "TJ D",
@@ -236,7 +236,7 @@ private val sampleArchiveItem = ArchiveItem.Result(
         ),
         created = System.now(),
         tags = listOf(),
-        categories = listOf("Android", "Kotlin").map(Descriptor::Category),
+        categories = listOf("Android", "Kotlin").map(com.tunjid.me.core.model.Descriptor::Category),
         kind = Articles,
         likes = 1L
     )
