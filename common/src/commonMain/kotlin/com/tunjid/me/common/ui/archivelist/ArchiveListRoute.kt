@@ -41,7 +41,7 @@ import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.signin.SignInRoute
-import com.tunjid.me.common.ui.utilities.InitialUiState
+import com.tunjid.me.common.globalui.ScreenUiState
 import com.tunjid.mutator.accept
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.push
@@ -75,7 +75,7 @@ private fun ArchiveScreen(
     val isInNavRail = state.isInNavRail
     val query = state.queryState.startQuery
     val isSignedIn = state.isSignedIn
-    if (!isInNavRail) InitialUiState(
+    if (!isInNavRail) ScreenUiState(
         UiState(
             toolbarShows = true,
             toolbarTitle = query.kind.name,

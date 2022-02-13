@@ -38,7 +38,7 @@ import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.ui.utilities.InitialUiState
+import com.tunjid.me.common.globalui.ScreenUiState
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -59,7 +59,7 @@ private fun SignInScreen(mutator: SignInMutator) {
     val state by mutator.state.collectAsState()
     val scrollState = rememberScrollState()
 
-    InitialUiState(
+    ScreenUiState(
         UiState(
             toolbarShows = true,
             toolbarTitle = "Sign In",

@@ -17,17 +17,11 @@
 package com.tunjid.me.common.ui.utilities
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.common.app.LocalAppDependencies
-import com.tunjid.me.common.globalui.UiState
-import com.tunjid.mutator.Mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -46,65 +40,6 @@ fun <T, R> StateFlow<T>.mappedCollectAsState(
     return mapState(scope = scope, mapper = mapper).collectAsState(context = context)
 }
 
-/**
- * Provides a way of composing the [UiState] on a global level.
- * This allows for coordination of the UI across navigation destinations.
- */
-@Composable
-fun InitialUiState(state: UiState) {
-    val uiMutator = LocalAppDependencies.current.appMutator.globalUiMutator
-
-    val fabClickListener = remember {
-        MutableFunction(state.fabClickListener)
-    }
-    val toolbarMenuClickListener = remember {
-        MutableFunction(state.toolbarMenuClickListener)
-    }
-    val altToolbarMenuClickListener = remember {
-        MutableFunction(state.altToolbarMenuClickListener)
-    }
-    val snackbarMessageConsumer = remember {
-        MutableFunction(state.snackbarMessageConsumer)
-    }
-
-    val immutables = state.copy(
-        fabClickListener = fabClickListener,
-        toolbarMenuClickListener = toolbarMenuClickListener,
-        altToolbarMenuClickListener = altToolbarMenuClickListener,
-        snackbarMessageConsumer = snackbarMessageConsumer,
-    )
-
-    LaunchedEffect(immutables) {
-        uiMutator.accept(Mutation {
-            // Preserve things that should not be overwritten
-            state.copy(
-                navMode = navMode,
-                systemUI = systemUI,
-                fabClickListener = fabClickListener,
-                toolbarMenuClickListener = toolbarMenuClickListener,
-                altToolbarMenuClickListener = altToolbarMenuClickListener,
-                snackbarMessageConsumer = snackbarMessageConsumer,
-            )
-        })
-    }
-
-    DisposableEffect(true) {
-        onDispose {
-            fabClickListener.backing = {}
-            toolbarMenuClickListener.backing = {}
-            altToolbarMenuClickListener.backing = {}
-        }
-    }
-}
-
-object UiSizes {
-    val toolbarSize = 56.dp
-    val navRailWidth = 72.dp
-    val navRailContentWidth = 400.dp
-    val bottomNavSize = 56.dp
-    val snackbarPeek = 56.dp
-}
-
 infix fun Dp.countIf(condition: Boolean) = if (condition) this else 0.dp
 
 private fun <T, R> StateFlow<T>.mapState(scope: CoroutineScope, mapper: (T) -> R) =
@@ -115,10 +50,3 @@ private fun <T, R> StateFlow<T>.mapState(scope: CoroutineScope, mapper: (T) -> R
             initialValue = mapper(value),
             started = SharingStarted.WhileSubscribed(2000),
         )
-
-/**
- * Generic function that helps override the backing implementation to prevent memory leaks
- */
-private data class MutableFunction<T>(var backing: (T) -> Unit = {}) : (T) -> Unit {
-    override fun invoke(item: T) = backing(item)
-}

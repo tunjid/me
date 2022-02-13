@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.fabState
-import com.tunjid.me.common.ui.utilities.UiSizes
+import com.tunjid.me.common.globalui.UiSizes
 import com.tunjid.me.common.ui.utilities.countIf
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 

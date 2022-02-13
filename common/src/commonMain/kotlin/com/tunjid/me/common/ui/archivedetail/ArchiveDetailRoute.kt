@@ -42,7 +42,7 @@ import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
-import com.tunjid.me.common.ui.utilities.InitialUiState
+import com.tunjid.me.common.globalui.ScreenUiState
 import com.tunjid.mutator.accept
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.push
@@ -77,7 +77,7 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
     val canEdit = state.canEdit
     val navMutator = LocalAppDependencies.current.appMutator.navMutator
-    InitialUiState(
+    ScreenUiState(
         UiState(
             toolbarShows = true,
             toolbarTitle = state.archive?.title ?: "Detail",

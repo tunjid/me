@@ -41,7 +41,7 @@ import com.tunjid.me.common.nav.NavItem
 import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItems
 import com.tunjid.me.common.nav.navRailRoute
-import com.tunjid.me.common.ui.utilities.UiSizes
+import com.tunjid.me.common.globalui.UiSizes
 import com.tunjid.me.common.ui.utilities.countIf
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 import com.tunjid.mutator.accept
