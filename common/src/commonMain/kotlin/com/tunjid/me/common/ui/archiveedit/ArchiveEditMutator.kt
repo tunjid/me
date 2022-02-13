@@ -53,15 +53,8 @@ fun archiveEditMutator(
         merge(
             appMutator.globalUiMutator.navBarSizeMutations { copy(navBarSize = it) },
             authRepository.authMutations(),
-            // Start monitoring the archive from the get go
-            actions.onStart {
-                if (route.archiveId != null) emit(
-                    Action.Load.InitialLoad(
-                        kind = route.kind,
-                        id = route.archiveId,
-                    )
-                )
-            }
+            actions
+                .withInitialLoad(route)
                 .toMutationStream(keySelector = Action::key) {
                     when (val action = type()) {
                         is Action.TextEdit -> action.flow.textEditMutations()
@@ -76,6 +69,23 @@ fun archiveEditMutator(
     },
 )
 
+/**
+ * Start the load by monitoring the archive if it exists already
+ */
+private fun Flow<Action>.withInitialLoad(
+    route: ArchiveEditRoute
+) = onStart {
+    if (route.archiveId != null) emit(
+        Action.Load.InitialLoad(
+            kind = route.kind,
+            id = route.archiveId,
+        )
+    )
+}
+
+/**
+ * Mutations that have to do with the user's signed in status
+ */
 private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     isSignedIn.map {
         Mutation {
@@ -86,6 +96,9 @@ private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
         }
     }
 
+/**
+ * Mutations from monitoring the archive
+ */
 private fun ArchiveRepository.textBodyMutations(
     kind: ArchiveKind,
     archiveId: ArchiveId
@@ -106,9 +119,15 @@ private fun ArchiveRepository.textBodyMutations(
     }
 }
 
+/**
+ * Mutations from use text inputs
+ */
 private fun Flow<Action.TextEdit>.textEditMutations(): Flow<Mutation<State>> =
     map { it.mutation }
 
+/**
+ * Mutations from editing the chips
+ */
 private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
     map { (chipAction, descriptor) ->
         Mutation {
@@ -164,6 +183,9 @@ private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
         }
     }
 
+/**
+ * Mutations from consuming messages from the message queue
+ */
 private fun Flow<Action.MessageConsumed>.messageConsumptionMutations(): Flow<Mutation<State>> =
     map { (message) ->
         Mutation { copy(messages = messages - message) }
@@ -190,7 +212,10 @@ private fun Flow<Action.Load>.loadMutations(
                     val result = archiveRepository.upsert(kind = kind, upsert = upsert)
 
                     val message = when (result) {
-                        is Result.Success -> if (upsert.id == null) "Created ${kind.singular}" else "Updated ${kind.singular}"
+                        is Result.Success -> when (upsert.id) {
+                            null -> "Created ${kind.singular}"
+                            else -> "Updated ${kind.singular}"
+                        }
                         is Result.Error -> result.message ?: "unknown error"
                     }
 
