@@ -57,9 +57,8 @@ internal fun BoxScope.AppFab(
             !state.fabVisible -> UiSizes.bottomNavSize
             else -> {
                 var offset = 16.dp
-                offset += state.snackbarOffset + UiSizes.bottomNavSize countIf state.bottomNavVisible
+                offset += UiSizes.bottomNavSize countIf state.bottomNavVisible
                 offset += state.snackbarOffset
-
                 -offset
             }
         }

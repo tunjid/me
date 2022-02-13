@@ -31,11 +31,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.data.model.peek
 import com.tunjid.me.common.globalui.UiState
+import com.tunjid.me.common.globalui.snackbarPositionalState
 import com.tunjid.me.common.ui.utilities.UiSizes
+import com.tunjid.me.common.ui.utilities.countIf
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 import com.tunjid.mutator.accept
 import kotlinx.coroutines.delay
@@ -50,20 +54,30 @@ internal fun BoxScope.AppSnackBar(
     val globalUiMutator = appMutator.globalUiMutator
 
     val queue by globalUiMutator.state.mappedCollectAsState(mapper = UiState::snackbarMessages)
+    val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::snackbarPositionalState)
     val messageConsumer by globalUiMutator.state.mappedCollectAsState(mapper = UiState::snackbarMessageConsumer)
 
     var canShow by remember { mutableStateOf(true) }
+    var snackbarHeight by remember { mutableStateOf(0) }
     val message = queue.peek()?.takeIf { canShow }
     val head = message?.value
 
     val showing = head != null
-    val position by animateDpAsState(if (showing) -(16).dp else UiSizes.snackbarPeek)
+    val position by animateDpAsState(
+        if (showing) -(16.dp + (UiSizes.bottomNavSize countIf state.bottomNavVisible))
+        else UiSizes.snackbarPeek
+    )
+    val fabOffset by animateDpAsState(
+        if (showing) with(LocalDensity.current) { snackbarHeight.toDp() } + 16.dp
+        else 0.dp
+    )
 
     Snackbar(
         modifier = Modifier
             .align(Alignment.BottomCenter)
             .padding(horizontal = 16.dp)
             .widthIn(max = 400.dp)
+            .onGloballyPositioned { snackbarHeight = it.size.height }
             .offset(y = position),
         content = { Text(text = head ?: "") }
     )
@@ -77,7 +91,10 @@ internal fun BoxScope.AppSnackBar(
     }
 
     LaunchedEffect(position) {
-        globalUiMutator.accept { copy(snackbarOffset = UiSizes.snackbarPeek - position) }
         if (position == UiSizes.snackbarPeek && !canShow) canShow = true
+    }
+
+    LaunchedEffect(fabOffset) {
+        globalUiMutator.accept { copy(snackbarOffset = fabOffset) }
     }
 }
