@@ -30,18 +30,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.app.AppMutator
+import com.tunjid.me.common.globalui.UiSizes
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.navRailVisible
 import com.tunjid.me.common.globalui.slices.routeContainerState
 import com.tunjid.me.common.nav.NavItem
 import com.tunjid.me.common.nav.NavMutator
+import com.tunjid.me.common.nav.navItemSelected
 import com.tunjid.me.common.nav.navItems
 import com.tunjid.me.common.nav.navRailRoute
-import com.tunjid.me.common.globalui.UiSizes
+import com.tunjid.me.common.nav.popToRoot
 import com.tunjid.me.common.ui.utilities.countIf
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 import com.tunjid.mutator.accept
@@ -121,18 +124,26 @@ private fun NavRailItem(
             bottom = 16.dp,
         ),
         onClick = {
-            navMutator.accept { switch(toIndex = item.index) }
+            navMutator.accept { navItemSelected(item = item) }
         }
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val alpha = if (item.selected) 1f else 0.6f
             Icon(
                 imageVector = item.icon,
-                contentDescription = item.name
+                contentDescription = item.name,
+                tint = MaterialTheme.colors.onSurface.copy(
+                    alpha = alpha
+                )
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = item.name, fontSize = 12.sp)
+            Text(
+                modifier = Modifier.alpha(alpha),
+                text = item.name,
+                fontSize = 12.sp
+            )
         }
     }
     Spacer(modifier = Modifier.height(24.dp))

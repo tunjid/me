@@ -37,6 +37,7 @@ import com.tunjid.treenav.StackNav
 import com.tunjid.treenav.canGoUp
 import com.tunjid.treenav.current
 import com.tunjid.treenav.minus
+import com.tunjid.treenav.switch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -103,6 +104,21 @@ val MultiStackNav.navRailRoute: AppRoute<*>?
         is AppRoute<*> -> current.navRailRoute(this)
         else -> null
     }
+
+fun MultiStackNav.navItemSelected(item: NavItem) =
+    if (item.selected) popToRoot(indexToPop = item.index)
+    else switch(toIndex = item.index)
+
+private fun MultiStackNav.popToRoot(indexToPop: Int) = copy(
+    stacks = stacks.mapIndexed { index: Int, stackNav: StackNav ->
+        if (index == indexToPop) stackNav.popToRoot()
+        else stackNav
+    }
+)
+
+private fun StackNav.popToRoot() = copy(
+    routes = routes.take(1)
+)
 
 fun navMutator(scope: CoroutineScope): NavMutator =
     stateFlowMutator(

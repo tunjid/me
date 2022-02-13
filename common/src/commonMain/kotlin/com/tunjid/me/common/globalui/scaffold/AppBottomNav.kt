@@ -39,13 +39,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.AppMutator
+import com.tunjid.me.common.globalui.UiSizes
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.slices.bottomNavPositionalState
 import com.tunjid.me.common.nav.navItems
-import com.tunjid.me.common.globalui.UiSizes
+import com.tunjid.me.common.nav.navItemSelected
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 import com.tunjid.mutator.accept
-import com.tunjid.treenav.switch
 
 /**
  * Motionally intelligent bottom nav shared amongst nav routes in the app
@@ -96,7 +96,7 @@ internal fun BoxScope.AppBottomNav(
                             label = { Text(navItem.name) },
                             selected = navItem.selected,
                             onClick = {
-                                navMutator.accept { switch(toIndex = navItem.index) }
+                                navMutator.accept { navItemSelected(item = navItem) }
                             }
                         )
                     }
