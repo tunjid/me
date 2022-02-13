@@ -129,13 +129,12 @@ fun navMutator(scope: CoroutineScope): NavMutator =
 
 fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AppRoute<*>>> =
     distinctUntilChanged()
-        .scan(initial = startNav to listOf<AppRoute<*>>()) { pair, newNav ->
-            pair.copy(
-                first = newNav,
-                second = (newNav - pair.first).filterIsInstance<AppRoute<*>>()
-            )
+        .scan(initial = listOf(startNav, startNav)) { list, newNav ->
+            (list + newNav).takeLast(2)
         }
-        .map { it.second }
+        .map { (prevNav: MultiStackNav, currentNav: MultiStackNav) ->
+            (prevNav - currentNav).filterIsInstance<AppRoute<*>>()
+        }
 
 private val startNav = MultiStackNav(
     name = NavName,

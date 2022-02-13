@@ -89,11 +89,6 @@ private class AppModule(
     initialUiState: UiState
 ) : AppDependencies {
 
-    val routeMutatorFactory = AppMutatorFactory(
-        appScope = appScope,
-        appDependencies = this
-    )
-
     override val archiveDao = SqlArchiveDao(
         database = appDatabase,
         dispatcher = databaseDispatcher(),
@@ -149,6 +144,11 @@ private class AppModule(
                 }
             }
         }
+    )
+
+    val routeMutatorFactory = AppMutatorFactory(
+        appScope = appScope,
+        appDependencies = this
     )
 
     init {

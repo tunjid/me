@@ -28,15 +28,14 @@ import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.archivelist.archiveListMutator
 import com.tunjid.me.common.ui.profile.ProfileRoute
 import com.tunjid.me.common.ui.profile.profileMutator
-import com.tunjid.me.common.ui.signin.SignInRoute
 import com.tunjid.me.common.ui.settings.SettingsRoute
 import com.tunjid.me.common.ui.settings.settingsMutator
+import com.tunjid.me.common.ui.signin.SignInRoute
 import com.tunjid.me.common.ui.signin.signInMutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class AppMutatorFactory(
@@ -47,11 +46,13 @@ class AppMutatorFactory(
 
     init {
         appScope.launch {
-            appDependencies.appMutator.state
-                .map { it.nav }
+            appDependencies.appMutator
+                .navMutator
+                .state
                 .removedRoutes()
                 .collect { removedRoutes ->
                     removedRoutes.forEach { route ->
+                        println("Cleared ${route::class.simpleName}")
                         val holder = routeMutatorCache.remove(route)
                         holder?.scope?.cancel()
                     }
@@ -60,6 +61,7 @@ class AppMutatorFactory(
     }
 
     fun <T> routeMutator(route: AppRoute<T>): T = with(appDependencies) {
+        @Suppress("UNCHECKED_CAST")
         when (route) {
             is ArchiveListRoute -> routeMutatorCache.getOrPut(route) {
                 val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
