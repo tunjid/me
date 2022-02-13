@@ -22,14 +22,17 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.FloatingActionButton
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,9 +44,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.AppMutator
+import com.tunjid.me.common.globalui.UiSizes
 import com.tunjid.me.common.globalui.UiState
 import com.tunjid.me.common.globalui.fabState
-import com.tunjid.me.common.globalui.UiSizes
 import com.tunjid.me.common.ui.utilities.countIf
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 
@@ -58,7 +61,7 @@ internal fun BoxScope.AppFab(
     val globalUiMutator = appMutator.globalUiMutator
     val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::fabState)
     val clicks by globalUiMutator.state.mappedCollectAsState(mapper = UiState::fabClickListener)
-
+    val enabled = state.enabled
     val position by animateDpAsState(
         when {
             !state.fabVisible -> UiSizes.bottomNavSize
@@ -71,19 +74,27 @@ internal fun BoxScope.AppFab(
         }
     )
 
-    FloatingActionButton(
+    Button(
         modifier = Modifier
             .align(Alignment.BottomEnd)
             .offset(x = (-16).dp, y = position)
             .wrapContentHeight(),
-        onClick = { clicks(Unit) },
+        enabled = enabled,
+        onClick = { if (enabled) clicks(Unit) },
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.secondary
+        ),
+        contentPadding = PaddingValues(
+            horizontal = 16.dp,
+            vertical = 16.dp
+        ),
+        shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
         content = {
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 FabIcon(state.icon)
-                if (state.extended) Spacer(modifier = Modifier.width(16.dp))
+                if (state.extended) Spacer(modifier = Modifier.width(8.dp))
                 AnimatedContent(targetState = state.text) { text ->
                     Text(text = text)
                 }

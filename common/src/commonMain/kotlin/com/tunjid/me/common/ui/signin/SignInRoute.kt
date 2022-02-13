@@ -63,12 +63,19 @@ private fun SignInScreen(mutator: SignInMutator) {
         UiState(
             toolbarShows = true,
             toolbarTitle = "Sign In",
+            fabShows = true,
+            fabEnabled = state.submitButtonEnabled,
+            fabText = "Submit",
+            fabClickListener = {
+                mutator.accept(
+                    Action.Submit(request = state.sessionRequest)
+                )
+            },
             navVisibility = NavVisibility.Gone,
             insetFlags = InsetFlags.NO_BOTTOM,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
         )
     )
-
 
     Column(
         modifier = Modifier
@@ -89,14 +96,5 @@ private fun SignInScreen(mutator: SignInMutator) {
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            enabled = state.submitButtonEnabled,
-            onClick = {
-                mutator.accept(
-                    Action.Submit(request = state.sessionRequest)
-                )
-            },
-            content = { Text(text = "Submit") }
-        )
     }
 }

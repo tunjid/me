@@ -80,6 +80,7 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
             fabText = if (state.upsert.id == null) "Create" else "Save",
             fabIcon = Icons.Default.Done,
             fabExtended = true,
+            fabEnabled = !state.isSubmitting,
             fabClickListener = {
                 mutator.accept(
                     Action.Load.Submit(
