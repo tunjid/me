@@ -24,6 +24,7 @@ import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.common.globalui.navBarSize
+import com.tunjid.me.common.globalui.navBarSizeMutations
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -52,7 +53,7 @@ fun archiveDetailMutator(
     started = SharingStarted.WhileSubscribed(2000),
     actionTransform = {
         merge(
-            appMutator.navbarSizeMutations(),
+            appMutator.globalUiMutator.navBarSizeMutations { copy(navBarSize = it) },
             authRepository.signedInUserMutations(),
             archiveRepository.archiveLoadMutations(
                 kind = route.kind,
@@ -61,13 +62,6 @@ fun archiveDetailMutator(
         ).monitorWhenActive(appMutator)
     }
 )
-
-private fun AppMutator.navbarSizeMutations(): Flow<Mutation<State>> =
-    globalUiMutator.state
-        .map { it.navBarSize }
-        .map {
-            Mutation { copy(navBarSize = it) }
-        }
 
 private fun AuthRepository.signedInUserMutations() : Flow<Mutation<State>> =
     signedInUserStream.map {

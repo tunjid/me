@@ -23,6 +23,7 @@ import com.tunjid.me.common.data.model.*
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.common.globalui.navBarSize
+import com.tunjid.me.common.globalui.navBarSizeMutations
 import com.tunjid.me.common.ui.common.ChipAction
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
@@ -50,9 +51,7 @@ fun archiveEditMutator(
     started = SharingStarted.WhileSubscribed(2000),
     actionTransform = { actions ->
         merge(
-            appMutator.globalUiMutator.state
-                .map { it.navBarSize }
-                .map { Mutation { copy(navBarSize = it) } },
+            appMutator.globalUiMutator.navBarSizeMutations { copy(navBarSize = it) },
             authRepository.authMutations(),
             // Start monitoring the archive from the get go
             actions.onStart {
@@ -77,7 +76,7 @@ fun archiveEditMutator(
     },
 )
 
-private fun AuthRepository.authMutations() : Flow<Mutation<State>> =
+private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     isSignedIn.map {
         Mutation {
             copy(

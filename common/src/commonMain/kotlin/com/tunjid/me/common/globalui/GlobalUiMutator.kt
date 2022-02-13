@@ -20,7 +20,10 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 typealias GlobalUiMutator = Mutator<Mutation<UiState>, StateFlow<UiState>>
 
@@ -30,3 +33,10 @@ fun globalUiMutator(scope: CoroutineScope, initialState: UiState = UiState()): G
         initialState = initialState,
         actionTransform = { it }
     )
+
+fun <State : Any> GlobalUiMutator.navBarSizeMutations(
+    mutation: State.(navbarSize: Int) -> State
+): Flow<Mutation<State>> = state
+    .map { it.navBarSize }
+    .distinctUntilChanged()
+    .map { Mutation { mutation(this, it) } }
