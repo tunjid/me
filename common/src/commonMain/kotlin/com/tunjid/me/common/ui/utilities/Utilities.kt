@@ -46,6 +46,10 @@ fun <T, R> StateFlow<T>.mappedCollectAsState(
     return mapState(scope = scope, mapper = mapper).collectAsState(context = context)
 }
 
+/**
+ * Provides a way of composing the [UiState] on a global level.
+ * This allows for coordination of the UI across navigation destinations.
+ */
 @Composable
 fun InitialUiState(state: UiState) {
     val uiMutator = LocalAppDependencies.current.appMutator.globalUiMutator
@@ -112,6 +116,9 @@ private fun <T, R> StateFlow<T>.mapState(scope: CoroutineScope, mapper: (T) -> R
             started = SharingStarted.WhileSubscribed(2000),
         )
 
+/**
+ * Generic function that helps override the backing implementation to prevent memory leaks
+ */
 private data class MutableFunction<T>(var backing: (T) -> Unit = {}) : (T) -> Unit {
     override fun invoke(item: T) = backing(item)
 }

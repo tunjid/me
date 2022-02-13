@@ -16,8 +16,11 @@
 
 package com.tunjid.me.common.ui.scaffold
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,9 +32,13 @@ import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.app.AppMutator
 import com.tunjid.me.common.globalui.UiState
@@ -75,12 +82,35 @@ internal fun BoxScope.AppFab(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(imageVector = state.icon, contentDescription = null)
+                FabIcon(state.icon)
                 if (state.extended) Spacer(modifier = Modifier.width(16.dp))
-                AnimatedVisibility(visible = state.extended) {
-                    Text(text = state.text)
+                AnimatedContent(targetState = state.text) { text ->
+                    Text(text = text)
                 }
             }
         }
     )
+}
+
+@Composable
+private fun FabIcon(icon: ImageVector) {
+    val rotationAnimatable = remember { Animatable(initialValue = 0f) }
+    val animationSpec = remember {
+        spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessHigh,
+            visibilityThreshold = 0.1f
+        )
+    }
+
+    Icon(
+        modifier = Modifier.rotate(rotationAnimatable.value),
+        imageVector = icon,
+        contentDescription = null
+    )
+
+    LaunchedEffect(icon) {
+        rotationAnimatable.animateTo(targetValue = 30f, animationSpec = animationSpec)
+        rotationAnimatable.animateTo(targetValue = 0f, animationSpec = animationSpec)
+    }
 }
