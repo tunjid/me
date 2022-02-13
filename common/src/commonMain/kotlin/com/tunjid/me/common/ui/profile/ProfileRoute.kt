@@ -80,7 +80,7 @@ private fun ProfileScreen(mutator: ProfileMutator) {
         modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(state = scrollState),
-        horizontalAlignment = Alignment.CenterHorizontallydd,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val user = state.signedInUser
         val painter = if (user != null) RemoteImagePainter(user.imageUrl) else null
