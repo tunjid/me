@@ -18,13 +18,18 @@ package com.tunjid.me.common.data.model
 
 import com.tunjid.me.common.utilities.uuid
 
+/**
+ * Message queue for notifying the UI according to the UI events guidance in the
+ * [Android architecture docs](https://developer.android.com/jetpack/guide/ui-layer/events#handle-viewmodel-events)
+ *
+ */
+data class MessageQueue(
+    val items: List<Message> = listOf()
+)
+
 data class Message(
     val value: String,
     val id: String = uuid(),
-)
-
-data class MessageQueue(
-    val items: List<Message> = listOf()
 )
 
 fun MessageQueue.peek(): Message? = items.firstOrNull()

@@ -53,6 +53,9 @@ interface AppRoute<T> : ByteSerializableRoute {
     @Composable
     fun Render()
 
+    /**
+     * Defines what route to show in the nav rail along side this route
+     */
     fun navRailRoute(nav: MultiStackNav): AppRoute<*>? = null
 }
 

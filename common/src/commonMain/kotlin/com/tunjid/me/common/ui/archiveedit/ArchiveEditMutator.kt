@@ -53,17 +53,16 @@ fun archiveEditMutator(
             appMutator.globalUiMutator.state
                 .map { it.navBarSize }
                 .map { Mutation { copy(navBarSize = it) } },
-            authRepository.isSignedIn.map { Mutation { copy(isSignedIn = it) } },
-            actions
-                // Start monitoring the archive from the get go
-                .onStart {
-                    if (route.archiveId != null) emit(
-                        Action.Load.InitialLoad(
-                            kind = route.kind,
-                            id = route.archiveId,
-                        )
+            authRepository.authMutations(),
+            // Start monitoring the archive from the get go
+            actions.onStart {
+                if (route.archiveId != null) emit(
+                    Action.Load.InitialLoad(
+                        kind = route.kind,
+                        id = route.archiveId,
                     )
-                }
+                )
+            }
                 .toMutationStream(keySelector = Action::key) {
                     when (val action = type()) {
                         is Action.TextEdit -> action.flow.textEditMutations()
@@ -77,6 +76,16 @@ fun archiveEditMutator(
         ).monitorWhenActive(appMutator)
     },
 )
+
+private fun AuthRepository.authMutations() : Flow<Mutation<State>> =
+    isSignedIn.map {
+        Mutation {
+            copy(
+                isSignedIn = it,
+                hasFetchedAuthStatus = true
+            )
+        }
+    }
 
 private fun ArchiveRepository.textBodyMutations(
     kind: ArchiveKind,

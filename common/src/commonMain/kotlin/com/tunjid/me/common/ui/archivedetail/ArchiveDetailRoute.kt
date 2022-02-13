@@ -38,11 +38,12 @@ import com.tunjid.me.common.data.model.ArchiveId
 import com.tunjid.me.common.data.model.ArchiveKind
 import com.tunjid.me.common.globalui.InsetFlags
 import com.tunjid.me.common.globalui.NavVisibility
+import com.tunjid.me.common.globalui.ScreenUiState
 import com.tunjid.me.common.globalui.UiState
+import com.tunjid.me.common.globalui.currentUiState
 import com.tunjid.me.common.nav.AppRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
-import com.tunjid.me.common.globalui.ScreenUiState
 import com.tunjid.mutator.accept
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.push
@@ -82,7 +83,8 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             toolbarShows = true,
             toolbarTitle = state.archive?.title ?: "Detail",
             navVisibility = NavVisibility.GoneIfBottomNav,
-            fabShows = canEdit,
+            // Prevents UI from jittering as load starts
+            fabShows = if (state.hasFetchedAuthStatus) canEdit else currentUiState.fabShows,
             fabExtended = true,
             fabText = "Edit",
             fabIcon = Icons.Default.Edit,

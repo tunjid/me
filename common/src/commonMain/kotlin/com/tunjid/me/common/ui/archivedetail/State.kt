@@ -25,6 +25,7 @@ import kotlinx.serialization.Transient
 
 @Serializable
 data class State(
+    val hasFetchedAuthStatus: Boolean = false,
     val signedInUserId: UserId? = null,
     val navBarSize: Int,
     val kind: ArchiveKind,

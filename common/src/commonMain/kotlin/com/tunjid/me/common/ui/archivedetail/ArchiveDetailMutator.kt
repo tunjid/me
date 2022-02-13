@@ -53,7 +53,7 @@ fun archiveDetailMutator(
     actionTransform = {
         merge(
             appMutator.navbarSizeMutations(),
-            authRepository.signedInUserStream.map { Mutation { copy(signedInUserId = it?.id) } },
+            authRepository.signedInUserMutations(),
             archiveRepository.archiveLoadMutations(
                 kind = route.kind,
                 id = route.archiveId
@@ -68,6 +68,16 @@ private fun AppMutator.navbarSizeMutations(): Flow<Mutation<State>> =
         .map {
             Mutation { copy(navBarSize = it) }
         }
+
+private fun AuthRepository.signedInUserMutations() : Flow<Mutation<State>> =
+    signedInUserStream.map {
+        Mutation {
+            copy(
+                signedInUserId = it?.id,
+                hasFetchedAuthStatus = true,
+            )
+        }
+    }
 
 private fun ArchiveRepository.archiveLoadMutations(
     id: ArchiveId,

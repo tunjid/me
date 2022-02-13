@@ -30,6 +30,7 @@ import kotlinx.serialization.Transient
 
 @Serializable
 data class State(
+    val hasFetchedAuthStatus: Boolean = false,
     val isSignedIn: Boolean = false,
     val isSubmitting: Boolean = false,
     val navBarSize: Int,
