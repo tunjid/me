@@ -44,11 +44,9 @@ import com.tunjid.me.common.nav.NavMutator
 import com.tunjid.me.common.nav.navItemSelected
 import com.tunjid.me.common.nav.navItems
 import com.tunjid.me.common.nav.navRailRoute
-import com.tunjid.me.common.nav.popToRoot
 import com.tunjid.me.common.ui.utilities.countIf
 import com.tunjid.me.common.ui.utilities.mappedCollectAsState
 import com.tunjid.mutator.accept
-import com.tunjid.treenav.switch
 
 /**
  * Motionally intelligent nav rail shared amongst nav routes in the app
