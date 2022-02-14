@@ -20,6 +20,7 @@ import com.tunjid.me.common.di.AppMutator
 import com.tunjid.me.common.di.monitorWhenActive
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
+import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.globalui.navRailVisible
 import com.tunjid.me.nav.navRailRoute
 import com.tunjid.mutator.Mutation
@@ -47,12 +48,12 @@ fun archiveListMutator(
         items = listOf(
             ArchiveItem.Loading(
                 isCircular = true,
-                query = route.query
+                query = ArchiveQuery(kind = route.kind)
             )
         ),
         queryState = QueryState(
-            startQuery = route.query,
-            currentQuery = route.query,
+            startQuery = ArchiveQuery(kind = route.kind),
+            currentQuery = ArchiveQuery(kind = route.kind),
         )
     ),
     started = SharingStarted.WhileSubscribed(),

@@ -43,6 +43,7 @@ import com.tunjid.me.globalui.currentUiState
 import com.tunjid.me.nav.AppRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.signin.SignInRoute
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.mutator.accept
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.push
@@ -53,10 +54,10 @@ import kotlinx.serialization.Serializable
 import kotlin.math.min
 
 @Serializable
-data class ArchiveListRoute(val query: ArchiveQuery) :
+data class ArchiveListRoute(val kind: ArchiveKind) :
     AppRoute<ArchiveListMutator> {
     override val id: String
-        get() = "archive-route-${query.kind}"
+        get() = "archive-route-$kind"
 
     @Composable
     override fun Render() {

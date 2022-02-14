@@ -45,7 +45,6 @@ import com.tunjid.me.common.ui.archivelist.State
 import com.tunjid.me.common.ui.profile.ProfileRoute
 import com.tunjid.me.common.ui.settings.SettingsRoute
 import com.tunjid.me.common.ui.signin.SignInRoute
-import com.tunjid.me.core.model.ArchiveQuery
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -62,7 +61,7 @@ private val startNav = MultiStackNav(
     stacks = ArchiveKind.values().map { kind ->
         StackNav(
             name = kind.name,
-            routes = listOf(ArchiveListRoute(query = ArchiveQuery(kind = kind)))
+            routes = listOf(ArchiveListRoute(kind = kind))
         )
     } + StackNav(
         name = "Settings",

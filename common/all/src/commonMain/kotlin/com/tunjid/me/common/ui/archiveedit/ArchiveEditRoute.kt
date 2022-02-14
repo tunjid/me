@@ -51,8 +51,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ArchiveEditRoute(
-    val kind: com.tunjid.me.core.model.ArchiveKind,
-    val archiveId: com.tunjid.me.core.model.ArchiveId?
+    val kind: ArchiveKind,
+    val archiveId: ArchiveId?
 ) : AppRoute<ArchiveEditMutator> {
     override val id: String
         get() = "archive-edit-$kind-$archiveId"
