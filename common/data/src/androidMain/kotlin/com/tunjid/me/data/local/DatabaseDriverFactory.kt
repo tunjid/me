@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.local
+package com.tunjid.me.data.local
 
 import android.content.Context
 import com.squareup.sqldelight.android.AndroidSqliteDriver

@@ -28,7 +28,7 @@ import androidx.compose.ui.window.rememberWindowState
 import com.tunjid.me.common.SavedState
 import com.tunjid.me.common.di.createAppDependencies
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.common.data.local.DatabaseDriverFactory
+import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.me.core.utilities.fromBytes

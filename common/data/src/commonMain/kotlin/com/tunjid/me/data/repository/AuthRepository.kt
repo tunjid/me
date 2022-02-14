@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.repository
+package com.tunjid.me.data.repository
 
 import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.data.network.NetworkService

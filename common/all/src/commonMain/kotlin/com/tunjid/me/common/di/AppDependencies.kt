@@ -17,13 +17,10 @@
 package com.tunjid.me.common.di
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.core.utilities.ByteSerializer
-import com.tunjid.me.common.data.local.ArchiveDao
-import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.network.NetworkMonitor
-import com.tunjid.me.common.data.repository.ArchiveRepository
-import com.tunjid.me.common.data.repository.AuthRepository
+import com.tunjid.me.data.repository.ArchiveRepository
+import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.nav.AppRoute
 import com.tunjid.mutator.Mutator
 

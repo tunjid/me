@@ -23,7 +23,7 @@ import com.tunjid.me.common.di.AppAction
 import com.tunjid.me.common.SavedState
 import com.tunjid.me.common.di.createAppDependencies
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.common.data.local.DatabaseDriverFactory
+import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.core.utilities.toBytes
