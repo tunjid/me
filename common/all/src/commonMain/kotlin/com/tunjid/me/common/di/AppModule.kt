@@ -24,7 +24,6 @@ import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.local.SqlArchiveDao
 import com.tunjid.me.common.data.local.SqlSessionCookieDao
 import com.tunjid.me.common.data.local.databaseDispatcher
-import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.common.data.network.ApiUrl
 import com.tunjid.me.common.data.network.NetworkMonitor

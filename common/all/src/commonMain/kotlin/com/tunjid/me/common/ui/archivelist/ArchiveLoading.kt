@@ -16,10 +16,8 @@
 
 package com.tunjid.me.common.ui.archivelist
 
-import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.common.data.repository.ArchiveRepository
-import com.tunjid.me.core.model.DefaultQueryLimit
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.tiledList
 import com.tunjid.tiler.toTiledList

@@ -24,9 +24,7 @@ import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
-import com.tunjid.me.globalui.UiState
 import com.tunjid.me.nav.AppRoute
-import kotlinx.coroutines.CoroutineScope
 
 interface AppDependencies {
     val appDatabase: AppDatabase

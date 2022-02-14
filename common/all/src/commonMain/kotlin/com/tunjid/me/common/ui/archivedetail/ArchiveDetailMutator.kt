@@ -19,8 +19,6 @@ package com.tunjid.me.common.ui.archivedetail
 
 import com.tunjid.me.common.di.AppMutator
 import com.tunjid.me.common.di.monitorWhenActive
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.globalui.navBarSize

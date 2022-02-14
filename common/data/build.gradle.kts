@@ -17,28 +17,18 @@
 plugins {
     `android-library-convention`
     `kotlin-library-convention`
-    id("org.jetbrains.compose")
     kotlin("plugin.serialization") version "1.6.10"
     id("com.squareup.sqldelight")
 }
 
 kotlin {
+    android()
+    jvm("desktop")
     sourceSets {
         named("commonMain") {
             dependencies {
                 api(project(":common:core"))
-                api(project(":common:data"))
-                api(project(":common:scaffold"))
 
-                implementation(libs.compose.ui.tooling)
-                implementation(libs.compose.ui.util)
-
-                implementation(libs.compose.runtime)
-                implementation(libs.compose.animation)
-                implementation(libs.compose.material)
-                implementation(libs.compose.foundation.layout)
-
-                implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.cbor)
                 implementation(libs.kotlinx.serialization.json)
@@ -47,36 +37,18 @@ kotlin {
                 implementation(libs.ktor.client.logging)
                 implementation(libs.ktor.client.serialization)
 
-                implementation(libs.richtext.commonmark)
-                implementation(libs.richtext.material)
-
                 implementation(libs.square.sqldelight.coroutines.extensions)
 
                 implementation(libs.tunjid.tiler)
-                implementation(libs.tunjid.treenav.common)
-                implementation(libs.tunjid.mutator.core.common)
-                implementation(libs.tunjid.mutator.coroutines.common)
             }
         }
         named("androidMain") {
             dependencies {
                 implementation(project(":serverEvents"))
 
-                implementation(libs.accompanist.flowlayout)
-
-                implementation(libs.androidx.core.ktx)
-                implementation(libs.androidx.appcompat)
-
-                implementation(libs.coil.compose)
-
-                implementation(libs.kotlinx.coroutines.android)
-
                 implementation(libs.ktor.client.android)
 
                 implementation(libs.square.sqldelight.driver.android)
-
-                implementation(libs.tunjid.mutator.core.jvm)
-                implementation(libs.tunjid.mutator.coroutines.jvm)
             }
         }
         named("desktopMain") {
@@ -94,5 +66,13 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
+    }
+}
+
+sqldelight {
+    database("AppDatabase") {
+        dialect = "sqlite:3.25"
+        packageName = "com.tunjid.me.common.data"
+        schemaOutputDirectory = file("build/dbs")
     }
 }
