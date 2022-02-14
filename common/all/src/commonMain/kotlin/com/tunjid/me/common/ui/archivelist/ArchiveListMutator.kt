@@ -21,6 +21,7 @@ import com.tunjid.me.common.di.monitorWhenActive
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.globalui.navRailVisible
 import com.tunjid.me.nav.navRailRoute
 import com.tunjid.mutator.Mutation
@@ -86,9 +87,8 @@ private fun AuthRepository.authMutations() : Flow<Mutation<State>> =
         }
     }
 
-
 /**
- * Updates [State] with whether or not it is in the nav rail
+ * Updates [State] with whether it is in the nav rail
  */
 private fun AppMutator.navRailStatusMutations() = state.map { appState ->
     appState.nav.navRailRoute is ArchiveListRoute && appState.ui.navRailVisible
@@ -107,11 +107,11 @@ private fun Flow<Action.FilterChanged>.filterChangedMutations(): Flow<Mutation<S
             copy(
                 queryState = queryState.copy(
                     categoryText = when (descriptor) {
-                        is com.tunjid.me.core.model.Descriptor.Category -> descriptor
+                        is Descriptor.Category -> descriptor
                         else -> queryState.categoryText
                     },
                     tagText = when (descriptor) {
-                        is com.tunjid.me.core.model.Descriptor.Tag -> descriptor
+                        is Descriptor.Tag -> descriptor
                         else -> queryState.tagText
                     },
                 )

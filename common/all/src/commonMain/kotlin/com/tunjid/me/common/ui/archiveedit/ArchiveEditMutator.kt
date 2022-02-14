@@ -24,9 +24,7 @@ import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.globalui.navBarSize
 import com.tunjid.me.globalui.navBarSizeMutations
 import com.tunjid.me.common.ui.common.ChipAction
-import com.tunjid.me.core.model.minus
-import com.tunjid.me.core.model.plus
-import com.tunjid.me.core.model.singular
+import com.tunjid.me.core.model.*
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -47,7 +45,7 @@ fun archiveEditMutator(
     scope = scope,
     initialState = initialState ?: State(
         kind = route.kind,
-        upsert = com.tunjid.me.core.model.ArchiveUpsert(id = route.archiveId),
+        upsert = ArchiveUpsert(id = route.archiveId),
         navBarSize = appMutator.globalUiMutator.state.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(2000),
@@ -102,8 +100,8 @@ private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
  * Mutations from monitoring the archive
  */
 private fun ArchiveRepository.textBodyMutations(
-    kind: com.tunjid.me.core.model.ArchiveKind,
-    archiveId: com.tunjid.me.core.model.ArchiveId
+    kind: ArchiveKind,
+    archiveId: ArchiveId
 ): Flow<Mutation<State>> = monitorArchive(
     kind = kind,
     id = archiveId
@@ -138,21 +136,21 @@ private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
                 ChipAction.Added -> Pair(
                     upsert.copy(
                         categories = when (descriptor) {
-                            is com.tunjid.me.core.model.Descriptor.Category -> (upsert.categories + descriptor).distinct()
+                            is Descriptor.Category -> (upsert.categories + descriptor).distinct()
                             else -> upsert.categories
                         },
                         tags = when (descriptor) {
-                            is com.tunjid.me.core.model.Descriptor.Tag -> (upsert.tags + descriptor).distinct()
+                            is Descriptor.Tag -> (upsert.tags + descriptor).distinct()
                             else -> upsert.tags
                         },
                     ),
                     chipsState.copy(
                         categoryText = when (descriptor) {
-                            is com.tunjid.me.core.model.Descriptor.Category -> com.tunjid.me.core.model.Descriptor.Category(value = "")
+                            is Descriptor.Category -> Descriptor.Category(value = "")
                             else -> chipsState.categoryText
                         },
                         tagText = when (descriptor) {
-                            is com.tunjid.me.core.model.Descriptor.Tag -> com.tunjid.me.core.model.Descriptor.Tag(value = "")
+                            is Descriptor.Tag -> Descriptor.Tag(value = "")
                             else -> chipsState.tagText
                         },
                     )
@@ -161,11 +159,11 @@ private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
                     upsert,
                     chipsState.copy(
                         categoryText = when (descriptor) {
-                            is com.tunjid.me.core.model.Descriptor.Category -> descriptor
+                            is Descriptor.Category -> descriptor
                             else -> chipsState.categoryText
                         },
                         tagText = when (descriptor) {
-                            is com.tunjid.me.core.model.Descriptor.Tag -> descriptor
+                            is Descriptor.Tag -> descriptor
                             else -> chipsState.tagText
                         }
                     )
@@ -214,17 +212,17 @@ private fun Flow<Action.Load>.loadMutations(
                     val result = archiveRepository.upsert(kind = kind, upsert = upsert)
 
                     val message = when (result) {
-                        is com.tunjid.me.core.model.Result.Success -> when (upsert.id) {
+                        is Result.Success -> when (upsert.id) {
                             null -> "Created ${kind.singular}"
                             else -> "Updated ${kind.singular}"
                         }
-                        is com.tunjid.me.core.model.Result.Error -> result.message ?: "unknown error"
+                        is Result.Error -> result.message ?: "unknown error"
                     }
 
                     emit(Mutation { copy(isSubmitting = false, messages = messages + message) })
 
                     // Start monitoring the created archive
-                    val id = upsert.id ?: (result as? com.tunjid.me.core.model.Result.Success)?.item
+                    val id = upsert.id ?: (result as? Result.Success)?.item
                     if (id != null) emitAll(
                         archiveRepository.textBodyMutations(
                             kind = kind,
