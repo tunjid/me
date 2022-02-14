@@ -53,7 +53,7 @@ import kotlinx.serialization.Serializable
 import kotlin.math.min
 
 @Serializable
-data class ArchiveListRoute(val query: com.tunjid.me.core.model.ArchiveQuery) :
+data class ArchiveListRoute(val query: ArchiveQuery) :
     AppRoute<ArchiveListMutator> {
     override val id: String
         get() = "archive-route-${query.kind}"
@@ -195,13 +195,13 @@ private fun PreviewLoadingState() {
     ArchiveScreen(
         mutator = State(
             queryState = QueryState(
-                startQuery = com.tunjid.me.core.model.ArchiveQuery(kind = Articles),
-                currentQuery = com.tunjid.me.core.model.ArchiveQuery(kind = Articles),
+                startQuery = ArchiveQuery(kind = Articles),
+                currentQuery = ArchiveQuery(kind = Articles),
             ),
             items = listOf(
                 ArchiveItem.Loading(
                     isCircular = true,
-                    query = com.tunjid.me.core.model.ArchiveQuery(kind = Articles)
+                    query = ArchiveQuery(kind = Articles)
                 )
             )
         ).asNoOpStateFlowMutator()
