@@ -25,6 +25,7 @@ import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.nav.AppRoute
+import com.tunjid.mutator.Mutator
 
 interface AppDependencies {
     val appMutator: AppMutator
@@ -32,7 +33,7 @@ interface AppDependencies {
     val byteSerializer: ByteSerializer
     val archiveRepository: ArchiveRepository
     val authRepository: AuthRepository
-    fun <T> routeDependencies(route: AppRoute<T>): T
+    fun <T: Mutator<*, *>> routeDependencies(route: AppRoute<T>): T
 }
 
 val LocalAppDependencies = staticCompositionLocalOf {

@@ -46,7 +46,7 @@ const val NavName = "App"
 
 typealias NavMutator = Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
 
-interface AppRoute<T> : ByteSerializableRoute {
+interface AppRoute<T : Mutator<*, *>> : ByteSerializableRoute {
     @Composable
     fun Render()
 
@@ -57,7 +57,7 @@ interface AppRoute<T> : ByteSerializableRoute {
 }
 
 @Serializable
-object Route404 : AppRoute<Unit> {
+object Route404 : AppRoute<Mutator<Unit, Unit>> {
     override val id: String
         get() = "404"
 

@@ -46,6 +46,7 @@ import com.tunjid.me.common.ui.profile.ProfileRoute
 import com.tunjid.me.common.ui.settings.SettingsRoute
 import com.tunjid.me.common.ui.signin.SignInRoute
 import com.tunjid.me.data.network.KtorNetworkService
+import com.tunjid.mutator.Mutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -173,10 +174,13 @@ private class AppModule(
                         maxDelay = 20_000,
                         times = 5,
                         default = null
-                    ) { networkService.fetchArchive(kind = kind, id = com.tunjid.me.core.model.ArchiveId(
-                        event.id
-                    )
-                    ) }
+                    ) {
+                        networkService.fetchArchive(
+                            kind = kind, id = com.tunjid.me.core.model.ArchiveId(
+                                event.id
+                            )
+                        )
+                    }
                 }
                 .collect {
                     archiveDao.saveArchive(it)
@@ -184,6 +188,6 @@ private class AppModule(
         }
     }
 
-    override fun <T> routeDependencies(route: AppRoute<T>): T =
+    override fun <T : Mutator<*, *>> routeDependencies(route: AppRoute<T>): T =
         routeMutatorFactory.routeMutator(route)
 }

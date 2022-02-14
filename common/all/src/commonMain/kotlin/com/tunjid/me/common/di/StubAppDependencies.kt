@@ -16,23 +16,19 @@
 
 package com.tunjid.me.common.di
 
-import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.core.utilities.ByteSerializer
-import com.tunjid.me.common.data.local.ArchiveDao
-import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
+import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.globalui.UiState
 import com.tunjid.me.nav.AppRoute
+import com.tunjid.mutator.Mutator
 import com.tunjid.treenav.MultiStackNav
 
 fun stubAppDependencies(
     nav: MultiStackNav = MultiStackNav(name = "App"),
     globalUI: UiState = UiState()
 ): AppDependencies = object : AppDependencies {
-    override val appDatabase: AppDatabase
-        get() = TODO("Not yet implemented")
 
     override val byteSerializer: ByteSerializer
         get() = TODO("Not yet implemented")
@@ -43,13 +39,7 @@ fun stubAppDependencies(
     override val authRepository: AuthRepository
         get() = TODO("Not yet implemented")
 
-    override val archiveDao: ArchiveDao
-        get() = TODO("Not yet implemented")
-
     override val networkMonitor: NetworkMonitor
-        get() = TODO("Not yet implemented")
-
-    override val sessionCookieDao: SessionCookieDao
         get() = TODO("Not yet implemented")
 
     override val appMutator: AppMutator = AppState(
@@ -57,6 +47,6 @@ fun stubAppDependencies(
         nav = nav
     ).asAppMutator
 
-    override fun <T> routeDependencies(route: AppRoute<T>): T =
+    override fun <T : Mutator<*, *>> routeDependencies(route: AppRoute<T>): T =
         TODO("Not yet implemented")
 }

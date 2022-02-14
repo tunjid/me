@@ -32,6 +32,7 @@ import com.tunjid.me.common.ui.settings.SettingsRoute
 import com.tunjid.me.common.ui.settings.settingsMutator
 import com.tunjid.me.common.ui.signin.SignInRoute
 import com.tunjid.me.common.ui.signin.signInMutator
+import com.tunjid.mutator.Mutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -60,7 +61,7 @@ class AppMutatorFactory(
         }
     }
 
-    fun <T> routeMutator(route: AppRoute<T>): T = with(appDependencies) {
+    fun <T: Mutator<*, *>> routeMutator(route: AppRoute<T>): T = with(appDependencies) {
         @Suppress("UNCHECKED_CAST")
         when (route) {
             is ArchiveListRoute -> routeMutatorCache.getOrPut(route) {
