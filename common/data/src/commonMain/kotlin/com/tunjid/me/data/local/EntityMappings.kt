@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.local
+package com.tunjid.me.data.local
 
 import com.tunjid.me.common.data.ArchiveEntity
 import com.tunjid.me.core.model.Archive
@@ -23,15 +23,15 @@ import com.tunjid.me.common.data.UserEntity
 import com.tunjid.me.core.model.UserId
 
 internal val UserEntity.toUser
-    get() = com.tunjid.me.core.model.User(
-        id = com.tunjid.me.core.model.UserId(id),
+    get() = User(
+        id = UserId(id),
         firstName = first_name,
         lastName = last_name,
         fullName = full_name,
         imageUrl = image_url,
     )
 
-internal val com.tunjid.me.core.model.User.toEntity
+internal val User.toEntity
     get() = UserEntity(
         id = id.value,
         first_name = firstName,
@@ -40,7 +40,7 @@ internal val com.tunjid.me.core.model.User.toEntity
         image_url = imageUrl,
     )
 
-internal val com.tunjid.me.core.model.Archive.toEntity
+internal val Archive.toEntity
     get() = ArchiveEntity(
         id = id.value,
         body = body,

@@ -16,7 +16,7 @@
 
 package com.tunjid.me.common.data.network
 
-import com.tunjid.me.common.data.local.SessionCookieDao
+import com.tunjid.me.data.local.SessionCookieDao
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.observer.*

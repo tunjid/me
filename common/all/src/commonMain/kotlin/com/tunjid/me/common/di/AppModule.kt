@@ -17,27 +17,7 @@
 package com.tunjid.me.common.di
 
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.core.utilities.ByteSerializable
-import com.tunjid.me.core.utilities.ByteSerializer
-import com.tunjid.me.core.utilities.DelegatingByteSerializer
-import com.tunjid.me.common.data.local.SessionCookieDao
-import com.tunjid.me.common.data.local.SqlArchiveDao
-import com.tunjid.me.common.data.local.SqlSessionCookieDao
-import com.tunjid.me.data.local.databaseDispatcher
-import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.common.data.network.NetworkMonitor
-import com.tunjid.me.data.network.NetworkService
-import com.tunjid.me.common.data.network.exponentialBackoff
-import com.tunjid.me.data.repository.ArchiveRepository
-import com.tunjid.me.data.repository.AuthRepository
-import com.tunjid.me.data.repository.ReactiveArchiveRepository
-import com.tunjid.me.data.repository.SessionCookieAuthRepository
-import com.tunjid.me.globalui.UiState
-import com.tunjid.me.globalui.globalUiMutator
-import com.tunjid.me.nav.AppRoute
-import com.tunjid.me.nav.ByteSerializableRoute
-import com.tunjid.me.nav.navMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
@@ -45,17 +25,26 @@ import com.tunjid.me.common.ui.archivelist.State
 import com.tunjid.me.common.ui.profile.ProfileRoute
 import com.tunjid.me.common.ui.settings.SettingsRoute
 import com.tunjid.me.common.ui.signin.SignInRoute
-import com.tunjid.me.data.network.KtorNetworkService
+import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.core.utilities.ByteSerializer
+import com.tunjid.me.core.utilities.DelegatingByteSerializer
+import com.tunjid.me.data.DataModule
+import com.tunjid.me.data.repository.ArchiveRepository
+import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.globalui.UiState
+import com.tunjid.me.globalui.globalUiMutator
+import com.tunjid.me.nav.AppRoute
+import com.tunjid.me.nav.ByteSerializableRoute
+import com.tunjid.me.nav.navMutator
 import com.tunjid.mutator.Mutator
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.StackNav
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.launch
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
-import com.tunjid.treenav.MultiStackNav
-import com.tunjid.treenav.StackNav
 
 private val startNav = MultiStackNav(
     name = "NavName",
@@ -93,32 +82,15 @@ private class AppModule(
     initialUiState: UiState,
 ) : AppDependencies {
 
-    private val archiveDao = SqlArchiveDao(
-        database = appDatabase,
-        dispatcher = databaseDispatcher(),
-    )
-
-    private val sessionCookieDao: SessionCookieDao = SqlSessionCookieDao(
-        database = appDatabase,
-        dispatcher = databaseDispatcher(),
-    )
-
-    val networkService: NetworkService = KtorNetworkService(
-        sessionCookieDao = sessionCookieDao
-    )
-
-    override val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
-        networkService = networkService,
+    private val dataModule = DataModule(
         appScope = appScope,
         networkMonitor = networkMonitor,
-        dao = archiveDao
+        database = appDatabase,
     )
 
-    override val authRepository: AuthRepository =
-        SessionCookieAuthRepository(
-            networkService = networkService,
-            dao = sessionCookieDao
-        )
+    override val archiveRepository: ArchiveRepository = dataModule.archiveRepository
+
+    override val authRepository: AuthRepository = dataModule.authRepository
 
     override val appMutator: AppMutator = appMutator(
         scope = appScope,
@@ -154,39 +126,6 @@ private class AppModule(
         appScope = appScope,
         appDependencies = this
     )
-
-    init {
-        appScope.launch {
-            com.tunjid.me.common.data.network.modelEvents(
-                url = "$ApiUrl/",
-                dispatcher = databaseDispatcher()
-            )
-                .mapNotNull { event ->
-                    val kind = when (event.collection) {
-                        ArchiveKind.Articles.type -> ArchiveKind.Articles
-                        ArchiveKind.Talks.type -> ArchiveKind.Talks
-                        ArchiveKind.Projects.type -> ArchiveKind.Projects
-                        else -> null
-                    } ?: return@mapNotNull null
-
-                    exponentialBackoff(
-                        initialDelay = 1_000,
-                        maxDelay = 20_000,
-                        times = 5,
-                        default = null
-                    ) {
-                        networkService.fetchArchive(
-                            kind = kind, id = com.tunjid.me.core.model.ArchiveId(
-                                event.id
-                            )
-                        )
-                    }
-                }
-                .collect {
-                    archiveDao.saveArchive(it)
-                }
-        }
-    }
 
     override fun <T : Mutator<*, *>> routeDependencies(route: AppRoute<T>): T =
         routeMutatorFactory.routeMutator(route)

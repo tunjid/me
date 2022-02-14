@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.local
+package com.tunjid.me.data.local
 
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -22,11 +22,6 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.ArchiveEntity
-import com.tunjid.me.core.model.Archive
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.model.ArchiveQuery
-import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.Descriptor.Category
 import com.tunjid.me.core.model.Descriptor.Tag
 import com.tunjid.me.core.model.hasContentFilter
@@ -38,13 +33,13 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Instant
 
-interface ArchiveDao {
+internal interface ArchiveDao {
     fun monitorArchives(query: com.tunjid.me.core.model.ArchiveQuery): Flow<List<com.tunjid.me.core.model.Archive>>
     fun monitorArchive(kind: com.tunjid.me.core.model.ArchiveKind, id: com.tunjid.me.core.model.ArchiveId): Flow<com.tunjid.me.core.model.Archive?>
     suspend fun saveArchives(archives: List<com.tunjid.me.core.model.Archive>)
 }
 
-class SqlArchiveDao(
+internal class SqlArchiveDao(
     database: AppDatabase,
     private val dispatcher: CoroutineDispatcher,
 ): ArchiveDao {

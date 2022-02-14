@@ -16,7 +16,7 @@
 
 package com.tunjid.me.data.repository
 
-import com.tunjid.me.common.data.local.SessionCookieDao
+import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.common.data.network.exponentialBackoff
 import kotlinx.coroutines.flow.Flow
@@ -29,7 +29,7 @@ interface AuthRepository {
     suspend fun createSession(request: com.tunjid.me.core.model.SessionRequest): com.tunjid.me.core.model.Result<com.tunjid.me.core.model.UserId>
 }
 
-class SessionCookieAuthRepository(
+internal class SessionCookieAuthRepository(
     private val networkService: NetworkService,
     dao: SessionCookieDao
 ) : AuthRepository {

@@ -16,7 +16,7 @@
 
 package com.tunjid.me.data.repository
 
-import com.tunjid.me.common.data.local.ArchiveDao
+import com.tunjid.me.data.local.ArchiveDao
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.common.data.network.remoteFetcher
@@ -38,7 +38,7 @@ interface ArchiveRepository {
  * is to have a pub sub infrastructure such that when an entity changes on the server, the
  * app is notified and it pull it in.
  */
-class ReactiveArchiveRepository(
+internal class ReactiveArchiveRepository(
     private val networkService: NetworkService,
     appScope: CoroutineScope,
     networkMonitor: NetworkMonitor,

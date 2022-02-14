@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.local
+package com.tunjid.me.data.local
 
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
@@ -23,7 +23,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-interface SessionCookieDao {
+internal interface SessionCookieDao {
     val sessionCookieStream: Flow<String?>
     suspend fun saveSessionCookie(sessionCookie: String?)
 }
@@ -31,7 +31,7 @@ interface SessionCookieDao {
 
 private const val SessionCookieId = "session-cookie"
 
-class SqlSessionCookieDao(
+internal class SqlSessionCookieDao(
     database: AppDatabase,
     private val dispatcher: CoroutineDispatcher,
 ) : SessionCookieDao {

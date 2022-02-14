@@ -16,7 +16,7 @@
 
 package com.tunjid.me.data.network
 
-import com.tunjid.me.common.data.local.SessionCookieDao
+import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.common.data.network.SessionCookieInvalidator
 import com.tunjid.me.common.data.network.SessionCookiesStorage
 import com.tunjid.me.common.data.network.models.UpsertResponse
@@ -32,7 +32,7 @@ import kotlinx.serialization.decodeFromString
 
 const val ApiUrl = "https://www.tunjid.com"
 
-interface NetworkService {
+internal interface NetworkService {
     suspend fun fetchArchives(
         kind: ArchiveKind,
         options: Map<String, String> = mapOf(),
@@ -57,7 +57,7 @@ interface NetworkService {
     suspend fun session(): User
 }
 
-class KtorNetworkService(
+internal class KtorNetworkService(
     private val baseUrl: String = ApiUrl,
     sessionCookieDao: SessionCookieDao,
 ) : NetworkService {
