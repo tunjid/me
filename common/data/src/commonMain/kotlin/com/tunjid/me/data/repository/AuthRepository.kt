@@ -18,7 +18,7 @@ package com.tunjid.me.data.repository
 
 import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.data.network.NetworkService
-import com.tunjid.me.common.data.network.exponentialBackoff
+import com.tunjid.me.data.network.exponentialBackoff
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map

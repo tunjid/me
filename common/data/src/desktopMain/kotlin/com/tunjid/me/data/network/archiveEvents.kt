@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.network
+package com.tunjid.me.data.network
 
-import com.tunjid.me.common.data.network.JoinModelEvents
-import com.tunjid.me.common.data.network.ModelChangedEvent
-import com.tunjid.me.common.data.network.ModelDeletedEvent
-import com.tunjid.me.common.data.network.ModelEvent
-import com.tunjid.me.common.data.network.ModelEventsNamespace
-import com.tunjid.me.common.data.network.toArchiveEvent
+import com.tunjid.me.data.network.JoinModelEvents
+import com.tunjid.me.data.network.ModelChangedEvent
+import com.tunjid.me.data.network.ModelDeletedEvent
+import com.tunjid.me.data.network.ModelEvent
+import com.tunjid.me.data.network.ModelEventsNamespace
+import com.tunjid.me.data.network.toArchiveEvent
 import com.tunjid.serverevents.ServerEvent
 import com.tunjid.serverevents.serverEvents
 import kotlinx.coroutines.CoroutineDispatcher

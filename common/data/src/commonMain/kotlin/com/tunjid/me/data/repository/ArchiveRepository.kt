@@ -17,9 +17,11 @@
 package com.tunjid.me.data.repository
 
 import com.tunjid.me.data.local.ArchiveDao
-import com.tunjid.me.common.data.network.NetworkMonitor
+import com.tunjid.me.data.network.NetworkMonitor
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.network.NetworkService
-import com.tunjid.me.common.data.network.remoteFetcher
+import com.tunjid.me.data.network.remoteFetcher
 import com.tunjid.tiler.Tile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -54,7 +56,7 @@ internal class ReactiveArchiveRepository(
 
     private val remoteArchiveFetcher = remoteFetcher(
         scope = appScope,
-        fetch = { (kind, id): Pair<com.tunjid.me.core.model.ArchiveKind, com.tunjid.me.core.model.ArchiveId> ->
+        fetch = { (kind, id): Pair<ArchiveKind, ArchiveId> ->
             networkService.fetchArchive(
                 kind = kind,
                 id = id

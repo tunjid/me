@@ -17,7 +17,7 @@
 package com.tunjid.me.common.di
 
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.common.data.network.NetworkMonitor
+import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.archivelist.ArchiveListRoute

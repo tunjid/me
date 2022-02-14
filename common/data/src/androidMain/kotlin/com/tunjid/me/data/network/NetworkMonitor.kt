@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.network
+package com.tunjid.me.data.network
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -34,7 +34,7 @@ actual class NetworkMonitor(
     scope: CoroutineScope,
     private val context: Context
 ) {
-    actual val isConnected: Flow<Boolean> = callbackFlow<Boolean> {
+    actual val isConnected: Flow<Boolean> = callbackFlow {
         val callback = object : NetworkCallback() {
             override fun onAvailable(network: Network) {
                 if (!channel.isClosedForSend) channel.trySend(true)

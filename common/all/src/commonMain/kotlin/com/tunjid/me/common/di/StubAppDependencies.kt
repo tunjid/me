@@ -16,7 +16,7 @@
 
 package com.tunjid.me.common.di
 
-import com.tunjid.me.common.data.network.NetworkMonitor
+import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.core.utilities.ByteSerializer

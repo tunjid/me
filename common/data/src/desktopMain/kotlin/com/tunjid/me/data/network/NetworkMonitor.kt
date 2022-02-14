@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.network
+package com.tunjid.me.data.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get

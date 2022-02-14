@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.network
+package com.tunjid.me.data.network
 
 
 enum class NetworkErrorCodes(val code: String) {

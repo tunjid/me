@@ -20,12 +20,10 @@ import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.data.local.SqlArchiveDao
 import com.tunjid.me.data.local.SqlSessionCookieDao
-import com.tunjid.me.common.data.network.NetworkMonitor
-import com.tunjid.me.common.data.network.exponentialBackoff
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.local.databaseDispatcher
-import com.tunjid.me.data.network.ApiUrl
+import com.tunjid.me.data.network.*
 import com.tunjid.me.data.network.KtorNetworkService
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.repository.ArchiveRepository
@@ -70,7 +68,7 @@ class DataModule(
 
     init {
         appScope.launch {
-            com.tunjid.me.common.data.network.modelEvents(
+            modelEvents(
                 url = "$ApiUrl/",
                 dispatcher = databaseDispatcher()
             )

@@ -18,7 +18,7 @@ package com.tunjid.me.common.di
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.core.utilities.ByteSerializer
-import com.tunjid.me.common.data.network.NetworkMonitor
+import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.nav.AppRoute
