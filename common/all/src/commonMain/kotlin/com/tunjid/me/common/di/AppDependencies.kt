@@ -27,14 +27,11 @@ import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.nav.AppRoute
 
 interface AppDependencies {
-    val appDatabase: AppDatabase
     val appMutator: AppMutator
     val networkMonitor: NetworkMonitor
     val byteSerializer: ByteSerializer
     val archiveRepository: ArchiveRepository
     val authRepository: AuthRepository
-    val archiveDao: ArchiveDao
-    val sessionCookieDao: SessionCookieDao
     fun <T> routeDependencies(route: AppRoute<T>): T
 }
 

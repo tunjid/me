@@ -17,11 +17,7 @@
 package com.tunjid.me.common.data.repository
 
 import com.tunjid.me.common.data.local.SessionCookieDao
-import com.tunjid.me.core.model.UserId
-import com.tunjid.me.core.model.Result
-import com.tunjid.me.core.model.SessionRequest
-import com.tunjid.me.core.model.User
-import com.tunjid.me.common.data.network.NetworkService
+import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.common.data.network.exponentialBackoff
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged

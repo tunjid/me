@@ -25,9 +25,9 @@ import com.tunjid.me.common.data.local.SqlArchiveDao
 import com.tunjid.me.common.data.local.SqlSessionCookieDao
 import com.tunjid.me.common.data.local.databaseDispatcher
 import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.common.data.network.ApiUrl
+import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.common.data.network.NetworkMonitor
-import com.tunjid.me.common.data.network.NetworkService
+import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.common.data.network.exponentialBackoff
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
@@ -45,6 +45,7 @@ import com.tunjid.me.common.ui.archivelist.State
 import com.tunjid.me.common.ui.profile.ProfileRoute
 import com.tunjid.me.common.ui.settings.SettingsRoute
 import com.tunjid.me.common.ui.signin.SignInRoute
+import com.tunjid.me.data.network.KtorNetworkService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -85,23 +86,23 @@ fun createAppDependencies(
  * Manual dependency injection module
  */
 private class AppModule(
-    override val appDatabase: AppDatabase,
+    appDatabase: AppDatabase,
     override val networkMonitor: NetworkMonitor,
     appScope: CoroutineScope,
     initialUiState: UiState,
 ) : AppDependencies {
 
-    override val archiveDao = SqlArchiveDao(
+    private val archiveDao = SqlArchiveDao(
         database = appDatabase,
         dispatcher = databaseDispatcher(),
     )
 
-    override val sessionCookieDao: SessionCookieDao = SqlSessionCookieDao(
+    private val sessionCookieDao: SessionCookieDao = SqlSessionCookieDao(
         database = appDatabase,
         dispatcher = databaseDispatcher(),
     )
 
-    val networkService: NetworkService = NetworkService(
+    val networkService: NetworkService = KtorNetworkService(
         sessionCookieDao = sessionCookieDao
     )
 
