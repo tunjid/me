@@ -21,7 +21,7 @@ import com.tunjid.me.globalui.UiState
 import com.tunjid.me.globalui.navRailVisible
 import com.tunjid.me.globalui.statusBarSize
 
-data class ToolbarState(
+internal data class ToolbarState(
     val statusBarSize: Int,
     val visible: Boolean,
     val overlaps: Boolean,

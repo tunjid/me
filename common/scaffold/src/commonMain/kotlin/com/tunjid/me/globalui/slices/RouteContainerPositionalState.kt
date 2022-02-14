@@ -23,7 +23,7 @@ import com.tunjid.me.globalui.UiState
 import com.tunjid.me.globalui.bottomNavVisible
 import com.tunjid.me.globalui.navRailVisible
 
-data class RouteContainerPositionalState(
+internal data class RouteContainerPositionalState(
     val statusBarSize: Int,
     val toolbarOverlaps: Boolean,
     val navRailVisible: Boolean,
@@ -33,7 +33,7 @@ data class RouteContainerPositionalState(
     override val insetDescriptor: InsetDescriptor
 ) : KeyboardAware
 
-val UiState.routeContainerState
+internal val UiState.routeContainerState
     get() = RouteContainerPositionalState(
         statusBarSize = systemUI.static.statusBarSize,
         insetDescriptor = insetFlags,

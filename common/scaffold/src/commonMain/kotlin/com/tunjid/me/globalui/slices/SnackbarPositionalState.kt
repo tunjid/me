@@ -22,7 +22,7 @@ import com.tunjid.me.globalui.KeyboardAware
 import com.tunjid.me.globalui.UiState
 import com.tunjid.me.globalui.bottomNavVisible
 
-data class SnackbarPositionalState(
+internal data class SnackbarPositionalState(
     val bottomNavVisible: Boolean,
     override val ime: Ingress,
     override val navBarSize: Int,
@@ -30,7 +30,7 @@ data class SnackbarPositionalState(
 ) : KeyboardAware
 
 
-val UiState.snackbarPositionalState
+internal val UiState.snackbarPositionalState
     get() = SnackbarPositionalState(
         bottomNavVisible = bottomNavVisible,
         ime = systemUI.dynamic.ime,

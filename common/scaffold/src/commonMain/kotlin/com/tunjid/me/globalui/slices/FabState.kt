@@ -24,7 +24,7 @@ import com.tunjid.me.globalui.KeyboardAware
 import com.tunjid.me.globalui.UiState
 import com.tunjid.me.globalui.bottomNavVisible
 
-data class FabState(
+internal data class FabState(
     val fabVisible: Boolean,
     val bottomNavVisible: Boolean,
     val snackbarOffset: Dp,
@@ -37,7 +37,7 @@ data class FabState(
     override val insetDescriptor: InsetDescriptor
 ) : KeyboardAware
 
-val UiState.fabState
+internal val UiState.fabState
     get() = FabState(
         fabVisible = fabShows,
         snackbarOffset = snackbarOffset,

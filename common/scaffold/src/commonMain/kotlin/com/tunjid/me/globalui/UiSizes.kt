@@ -18,7 +18,7 @@ package com.tunjid.me.globalui
 
 import androidx.compose.ui.unit.dp
 
-object UiSizes {
+internal object UiSizes {
     val toolbarSize = 56.dp
     val navRailWidth = 72.dp
     val navRailContentWidth = 400.dp

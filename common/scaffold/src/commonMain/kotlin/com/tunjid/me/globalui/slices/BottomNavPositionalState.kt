@@ -20,13 +20,13 @@ import com.tunjid.me.globalui.InsetDescriptor
 import com.tunjid.me.globalui.UiState
 import com.tunjid.me.globalui.bottomNavVisible
 
-data class BottomNavPositionalState(
+internal data class BottomNavPositionalState(
     val insetDescriptor: InsetDescriptor,
     val bottomNavVisible: Boolean,
     val navBarSize: Int
 )
 
-val UiState.bottomNavPositionalState
+internal val UiState.bottomNavPositionalState
     get() = BottomNavPositionalState(
         bottomNavVisible = bottomNavVisible,
         navBarSize = systemUI.static.navBarSize,
