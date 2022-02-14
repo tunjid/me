@@ -18,6 +18,7 @@ package com.tunjid.me
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.snapshotFlow
@@ -30,14 +31,16 @@ import com.tunjid.me.common.di.createAppDependencies
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.local.DatabaseDriverFactory
 import com.tunjid.me.common.data.network.NetworkMonitor
-import com.tunjid.me.common.data.fromBytes
-import com.tunjid.me.common.data.toBytes
-import com.tunjid.me.common.globalui.NavMode
-import com.tunjid.me.common.globalui.UiState
+import com.tunjid.me.common.di.LocalAppDependencies
+import com.tunjid.me.core.utilities.fromBytes
+import com.tunjid.me.core.utilities.toBytes
+import com.tunjid.me.globalui.NavMode
+import com.tunjid.me.globalui.UiState
 import com.tunjid.me.common.restore
 import com.tunjid.me.common.saveState
-import com.tunjid.me.common.globalui.scaffold.Root
+import com.tunjid.me.globalui.scaffold.Root
 import com.tunjid.me.common.ui.theme.AppTheme
+import com.tunjid.me.globalui.LocalGlobalUiMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.accept
@@ -86,7 +89,15 @@ fun main() {
         ) {
             AppTheme {
                 Surface(color = MaterialTheme.colors.background) {
-                    Root(dependencies = appDependencies)
+                    CompositionLocalProvider(
+                        LocalAppDependencies provides appDependencies,
+                        LocalGlobalUiMutator provides globalUiMutator
+                    ) {
+                        Root(
+                            globalUiMutator = appDependencies.appMutator.globalUiMutator,
+                            navMutator = appDependencies.appMutator.navMutator
+                        )
+                    }
                 }
             }
 

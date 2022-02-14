@@ -16,8 +16,8 @@
 
 package com.tunjid.me.common.ui.settings
 
-import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.nav.ByteSerializableRoute
+import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.nav.ByteSerializableRoute
 import com.tunjid.me.common.ui.signin.SignInRoute
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient

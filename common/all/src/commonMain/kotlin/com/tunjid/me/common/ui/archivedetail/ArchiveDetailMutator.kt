@@ -23,8 +23,8 @@ import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
-import com.tunjid.me.common.globalui.navBarSize
-import com.tunjid.me.common.globalui.navBarSizeMutations
+import com.tunjid.me.globalui.navBarSize
+import com.tunjid.me.globalui.navBarSizeMutations
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator

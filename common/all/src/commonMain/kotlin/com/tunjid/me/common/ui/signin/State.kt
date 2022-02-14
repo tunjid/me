@@ -16,7 +16,7 @@
 
 package com.tunjid.me.common.ui.signin
 
-import com.tunjid.me.common.data.ByteSerializable
+import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.model.SessionRequest
 import com.tunjid.me.common.ui.common.FormField
 import kotlinx.serialization.Serializable

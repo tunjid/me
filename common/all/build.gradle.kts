@@ -27,6 +27,7 @@ kotlin {
         named("commonMain") {
             dependencies {
                 api(project(":common:core"))
+                api(project(":common:scaffold"))
 
                 implementation(libs.compose.ui.tooling)
                 implementation(libs.compose.ui.util)

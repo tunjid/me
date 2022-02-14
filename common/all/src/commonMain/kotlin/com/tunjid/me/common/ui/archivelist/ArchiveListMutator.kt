@@ -21,8 +21,8 @@ import com.tunjid.me.common.di.monitorWhenActive
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
-import com.tunjid.me.common.globalui.navRailVisible
-import com.tunjid.me.common.nav.navRailRoute
+import com.tunjid.me.globalui.navRailVisible
+import com.tunjid.me.nav.navRailRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator

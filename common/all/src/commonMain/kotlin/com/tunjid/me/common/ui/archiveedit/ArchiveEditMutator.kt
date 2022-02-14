@@ -21,8 +21,8 @@ import com.tunjid.me.common.di.AppMutator
 import com.tunjid.me.common.di.monitorWhenActive
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
-import com.tunjid.me.common.globalui.navBarSize
-import com.tunjid.me.common.globalui.navBarSizeMutations
+import com.tunjid.me.globalui.navBarSize
+import com.tunjid.me.globalui.navBarSizeMutations
 import com.tunjid.me.common.ui.common.ChipAction
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus

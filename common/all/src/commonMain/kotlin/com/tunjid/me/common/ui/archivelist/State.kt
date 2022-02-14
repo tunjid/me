@@ -16,7 +16,7 @@
 
 package com.tunjid.me.common.ui.archivelist
 
-import com.tunjid.me.common.data.ByteSerializable
+import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor

@@ -42,11 +42,11 @@ import androidx.compose.ui.unit.sp
 import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.common.globalui.InsetFlags
-import com.tunjid.me.common.globalui.NavVisibility
-import com.tunjid.me.common.globalui.UiState
-import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.globalui.ScreenUiState
+import com.tunjid.me.globalui.InsetFlags
+import com.tunjid.me.globalui.NavVisibility
+import com.tunjid.me.globalui.UiState
+import com.tunjid.me.nav.AppRoute
+import com.tunjid.me.globalui.ScreenUiState
 import kotlinx.serialization.Serializable
 
 @Serializable

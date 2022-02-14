@@ -17,9 +17,9 @@
 package com.tunjid.me.common.di
 
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.ByteSerializer
-import com.tunjid.me.common.data.DelegatingByteSerializer
+import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.core.utilities.ByteSerializer
+import com.tunjid.me.core.utilities.DelegatingByteSerializer
 import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.local.SqlArchiveDao
 import com.tunjid.me.common.data.local.SqlSessionCookieDao
@@ -34,11 +34,11 @@ import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
 import com.tunjid.me.common.data.repository.ReactiveArchiveRepository
 import com.tunjid.me.common.data.repository.SessionCookieAuthRepository
-import com.tunjid.me.common.globalui.UiState
-import com.tunjid.me.common.globalui.globalUiMutator
-import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.nav.ByteSerializableRoute
-import com.tunjid.me.common.nav.navMutator
+import com.tunjid.me.globalui.UiState
+import com.tunjid.me.globalui.globalUiMutator
+import com.tunjid.me.nav.AppRoute
+import com.tunjid.me.nav.ByteSerializableRoute
+import com.tunjid.me.nav.navMutator
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
@@ -53,6 +53,22 @@ import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.StackNav
+
+private val startNav = MultiStackNav(
+    name = "NavName",
+    currentIndex = 0,
+    stacks = ArchiveKind.values().map { kind ->
+        StackNav(
+            name = kind.name,
+            routes = listOf(ArchiveListRoute(query = com.tunjid.me.core.model.ArchiveQuery(kind = kind)))
+        )
+    } + StackNav(
+        name = "Settings",
+        routes = listOf(SettingsRoute)
+    )
+)
 
 fun createAppDependencies(
     appScope: CoroutineScope,
@@ -63,7 +79,7 @@ fun createAppDependencies(
     appDatabase = database,
     networkMonitor = networkMonitor,
     appScope = appScope,
-    initialUiState = initialUiState
+    initialUiState = initialUiState,
 )
 
 /**
@@ -73,7 +89,7 @@ private class AppModule(
     override val appDatabase: AppDatabase,
     override val networkMonitor: NetworkMonitor,
     appScope: CoroutineScope,
-    initialUiState: UiState
+    initialUiState: UiState,
 ) : AppDependencies {
 
     override val archiveDao = SqlArchiveDao(
@@ -105,7 +121,7 @@ private class AppModule(
 
     override val appMutator: AppMutator = appMutator(
         scope = appScope,
-        navMutator = navMutator(scope = appScope),
+        navMutator = navMutator(scope = appScope, startNav = startNav),
         globalUiMutator = globalUiMutator(scope = appScope, initialState = initialUiState)
     )
 

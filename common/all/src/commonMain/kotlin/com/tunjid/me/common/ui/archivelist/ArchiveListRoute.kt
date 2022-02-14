@@ -35,12 +35,12 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.me.core.model.ArchiveKind.Articles
 import com.tunjid.me.core.model.ArchiveQuery
-import com.tunjid.me.common.globalui.NavVisibility
-import com.tunjid.me.common.globalui.ScreenUiState
-import com.tunjid.me.common.globalui.slices.ToolbarItem
-import com.tunjid.me.common.globalui.UiState
-import com.tunjid.me.common.globalui.currentUiState
-import com.tunjid.me.common.nav.AppRoute
+import com.tunjid.me.globalui.NavVisibility
+import com.tunjid.me.globalui.ScreenUiState
+import com.tunjid.me.globalui.slices.ToolbarItem
+import com.tunjid.me.globalui.UiState
+import com.tunjid.me.globalui.currentUiState
+import com.tunjid.me.nav.AppRoute
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
 import com.tunjid.me.common.ui.signin.SignInRoute
 import com.tunjid.mutator.accept
@@ -53,7 +53,8 @@ import kotlinx.serialization.Serializable
 import kotlin.math.min
 
 @Serializable
-data class ArchiveListRoute(val query: com.tunjid.me.core.model.ArchiveQuery) : AppRoute<ArchiveListMutator> {
+data class ArchiveListRoute(val query: com.tunjid.me.core.model.ArchiveQuery) :
+    AppRoute<ArchiveListMutator> {
     override val id: String
         get() = "archive-route-${query.kind}"
 

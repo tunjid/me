@@ -18,13 +18,13 @@ package com.tunjid.me.common
 
 import com.tunjid.me.common.di.AppAction
 import com.tunjid.me.common.di.AppDependencies
-import com.tunjid.me.common.data.ByteSerializable
-import com.tunjid.me.common.data.fromBytes
-import com.tunjid.me.common.data.toBytes
-import com.tunjid.me.common.nav.AppRoute
-import com.tunjid.me.common.nav.ByteSerializableNav
-import com.tunjid.me.common.nav.toByteSerializable
-import com.tunjid.me.common.nav.toMultiStackNav
+import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.core.utilities.fromBytes
+import com.tunjid.me.core.utilities.toBytes
+import com.tunjid.me.nav.AppRoute
+import com.tunjid.me.nav.ByteSerializableNav
+import com.tunjid.me.nav.toByteSerializable
+import com.tunjid.me.nav.toMultiStackNav
 import com.tunjid.mutator.Mutator
 import com.tunjid.treenav.Order
 import com.tunjid.treenav.flatten

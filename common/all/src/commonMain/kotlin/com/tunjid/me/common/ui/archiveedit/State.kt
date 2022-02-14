@@ -16,7 +16,7 @@
 
 package com.tunjid.me.common.ui.archiveedit
 
-import com.tunjid.me.common.data.ByteSerializable
+import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveUpsert

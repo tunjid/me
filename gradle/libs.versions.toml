@@ -52,6 +52,7 @@ compose-ui-test = { group = "org.jetbrains.compose.ui", name = "ui-test-junit4",
 compose-ui-testManifest = { group = "org.jetbrains.compose.ui", name = "ui-test-manifest", version.ref = "compose" }
 #compose-ui-tooling = { group = "org.jetbrains.compose.ui", name = "ui-tooling", version.ref = "compose" }
 compose-ui-tooling = { group = "org.jetbrains.compose.ui", name = "ui-tooling-preview-desktop", version.ref = "compose" }
+compose-ui-ui = { group = "org.jetbrains.compose.ui", name = "ui", version.ref = "compose" }
 compose-ui-util = { group = "org.jetbrains.compose.ui", name = "ui-util", version.ref = "compose" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
 jakewharton-retrofit-serializationconverter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "jakeWhartonRetrofit" }

@@ -18,14 +18,14 @@ package com.tunjid.me.common.di
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.common.data.ByteSerializer
+import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.common.data.local.ArchiveDao
 import com.tunjid.me.common.data.local.SessionCookieDao
 import com.tunjid.me.common.data.network.NetworkMonitor
 import com.tunjid.me.common.data.repository.ArchiveRepository
 import com.tunjid.me.common.data.repository.AuthRepository
-import com.tunjid.me.common.globalui.UiState
-import com.tunjid.me.common.nav.AppRoute
+import com.tunjid.me.globalui.UiState
+import com.tunjid.me.nav.AppRoute
 import kotlinx.coroutines.CoroutineScope
 
 interface AppDependencies {

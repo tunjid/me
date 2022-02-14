@@ -16,7 +16,7 @@
 
 package com.tunjid.me.common.ui.profile
 
-import com.tunjid.me.common.data.ByteSerializable
+import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.model.User
 import com.tunjid.me.common.ui.common.FormField
 import kotlinx.serialization.Serializable

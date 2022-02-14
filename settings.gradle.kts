@@ -53,6 +53,7 @@ pluginManagement {
 rootProject.name = "Me"
 include(
     ":common:core",
+    ":common:scaffold",
     ":common:all",
     ":android",
     ":desktop",

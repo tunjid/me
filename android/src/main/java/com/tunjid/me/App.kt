@@ -25,8 +25,8 @@ import com.tunjid.me.common.di.createAppDependencies
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.local.DatabaseDriverFactory
 import com.tunjid.me.common.data.network.NetworkMonitor
-import com.tunjid.me.common.data.fromBytes
-import com.tunjid.me.common.data.toBytes
+import com.tunjid.me.core.utilities.fromBytes
+import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.common.restore
 import com.tunjid.me.common.saveState
 import kotlinx.coroutines.CoroutineScope

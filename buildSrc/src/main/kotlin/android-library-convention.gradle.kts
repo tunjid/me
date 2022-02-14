@@ -46,11 +46,27 @@ android {
         targetSdk = 31
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+    buildFeatures {
+        compose = true
     }
-
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.2.0-alpha02"
+    }
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+//    kotlinOptions {
+//        jvmTarget = "11"
+//        freeCompilerArgs = freeCompilerArgs + listOf(
+//            "-Xuse-experimental=androidx.compose.animation.ExperimentalAnimationApi",
+//            "-Xuse-experimental=androidx.compose.material.ExperimentalMaterialApi",
+//            "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi",
+//            "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
+//            "-Xuse-experimental=kotlinx.coroutines.FlowPreview"
+//        )
+//    }
     sourceSets {
         named("main") {
             manifest.srcFile("src/androidMain/AndroidManifest.xml")
