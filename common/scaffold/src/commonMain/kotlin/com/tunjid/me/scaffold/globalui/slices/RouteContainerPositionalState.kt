@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui.slices
+package com.tunjid.me.scaffold.globalui.slices
 
-import com.tunjid.me.globalui.Ingress
-import com.tunjid.me.globalui.InsetDescriptor
-import com.tunjid.me.globalui.KeyboardAware
-import com.tunjid.me.globalui.UiState
-import com.tunjid.me.globalui.bottomNavVisible
-import com.tunjid.me.globalui.navRailVisible
+import com.tunjid.me.scaffold.globalui.Ingress
+import com.tunjid.me.scaffold.globalui.InsetDescriptor
+import com.tunjid.me.scaffold.globalui.KeyboardAware
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.bottomNavVisible
+import com.tunjid.me.scaffold.globalui.navRailVisible
 
 internal data class RouteContainerPositionalState(
     val statusBarSize: Int,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui.scaffold
+package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -39,13 +39,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.globalui.GlobalUiMutator
-import com.tunjid.me.globalui.UiSizes
-import com.tunjid.me.globalui.UiState
-import com.tunjid.me.globalui.slices.bottomNavPositionalState
-import com.tunjid.me.nav.NavMutator
-import com.tunjid.me.nav.navItemSelected
-import com.tunjid.me.nav.navItems
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.UiSizes
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
+import com.tunjid.me.scaffold.nav.NavMutator
+import com.tunjid.me.scaffold.nav.navItemSelected
+import com.tunjid.me.scaffold.nav.navItems
 import com.tunjid.mutator.accept
 
 /**

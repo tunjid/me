@@ -14,25 +14,38 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui.slices
+package com.tunjid.me.scaffold.globalui.slices
 
-import com.tunjid.me.globalui.Ingress
-import com.tunjid.me.globalui.InsetDescriptor
-import com.tunjid.me.globalui.KeyboardAware
-import com.tunjid.me.globalui.UiState
-import com.tunjid.me.globalui.bottomNavVisible
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
+import com.tunjid.me.scaffold.globalui.Ingress
+import com.tunjid.me.scaffold.globalui.InsetDescriptor
+import com.tunjid.me.scaffold.globalui.KeyboardAware
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.bottomNavVisible
 
-internal data class SnackbarPositionalState(
+internal data class FabState(
+    val fabVisible: Boolean,
     val bottomNavVisible: Boolean,
+    val snackbarOffset: Dp,
+    val icon: ImageVector,
+    val extended: Boolean,
+    val enabled: Boolean,
+    val text: String,
     override val ime: Ingress,
     override val navBarSize: Int,
     override val insetDescriptor: InsetDescriptor
 ) : KeyboardAware
 
-
-internal val UiState.snackbarPositionalState
-    get() = SnackbarPositionalState(
+internal val UiState.fabState
+    get() = FabState(
+        fabVisible = fabShows,
+        snackbarOffset = snackbarOffset,
         bottomNavVisible = bottomNavVisible,
+        icon = fabIcon,
+        text = fabText,
+        extended = fabExtended,
+        enabled = fabEnabled,
         ime = systemUI.dynamic.ime,
         navBarSize = systemUI.static.navBarSize,
         insetDescriptor = insetFlags

@@ -21,8 +21,8 @@ import com.tunjid.me.common.di.AppMutator
 import com.tunjid.me.common.di.monitorWhenActive
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
-import com.tunjid.me.globalui.navBarSize
-import com.tunjid.me.globalui.navBarSizeMutations
+import com.tunjid.me.scaffold.globalui.navBarSize
+import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator

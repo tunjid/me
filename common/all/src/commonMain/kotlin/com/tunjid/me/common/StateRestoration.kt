@@ -21,10 +21,10 @@ import com.tunjid.me.common.di.AppDependencies
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.core.utilities.toBytes
-import com.tunjid.me.nav.AppRoute
-import com.tunjid.me.nav.ByteSerializableNav
-import com.tunjid.me.nav.toByteSerializable
-import com.tunjid.me.nav.toMultiStackNav
+import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.ByteSerializableNav
+import com.tunjid.me.scaffold.nav.toByteSerializable
+import com.tunjid.me.scaffold.nav.toMultiStackNav
 import com.tunjid.mutator.Mutator
 import com.tunjid.treenav.Order
 import com.tunjid.treenav.flatten

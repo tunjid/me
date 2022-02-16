@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui.slices
+package com.tunjid.me.scaffold.globalui.slices
 
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.tunjid.me.globalui.UiState
-import com.tunjid.me.globalui.navRailVisible
-import com.tunjid.me.globalui.statusBarSize
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.navRailVisible
+import com.tunjid.me.scaffold.globalui.statusBarSize
 
 internal data class ToolbarState(
     val statusBarSize: Int,

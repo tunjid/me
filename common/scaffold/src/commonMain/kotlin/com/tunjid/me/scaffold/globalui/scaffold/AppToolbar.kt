@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui.scaffold
+package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -39,13 +39,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.globalui.GlobalUiMutator
-import com.tunjid.me.globalui.UiState
-import com.tunjid.me.globalui.slices.ToolbarItem
-import com.tunjid.me.globalui.slices.toolbarState
-import com.tunjid.me.nav.NavMutator
-import com.tunjid.me.nav.Route404
-import com.tunjid.me.nav.canGoUp
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
+import com.tunjid.me.scaffold.globalui.slices.toolbarState
+import com.tunjid.me.scaffold.nav.NavMutator
+import com.tunjid.me.scaffold.nav.Route404
+import com.tunjid.me.scaffold.nav.canGoUp
 import com.tunjid.mutator.accept
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.MultiStackNav

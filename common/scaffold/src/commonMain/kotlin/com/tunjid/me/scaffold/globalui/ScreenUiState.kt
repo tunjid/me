@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui
+package com.tunjid.me.scaffold.globalui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect

@@ -18,8 +18,8 @@ package com.tunjid.me.common.di
 
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.fromBytes
-import com.tunjid.me.nav.AppRoute
-import com.tunjid.me.nav.removedRoutes
+import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.removedRoutes
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.archivedetail.archiveDetailMutator
 import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute

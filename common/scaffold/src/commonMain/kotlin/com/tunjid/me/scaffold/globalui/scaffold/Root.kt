@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui.scaffold
+package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
@@ -25,11 +25,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.globalui.GlobalUiMutator
-import com.tunjid.me.globalui.LocalGlobalUiMutator
-import com.tunjid.me.nav.AppRoute
-import com.tunjid.me.nav.NavMutator
-import com.tunjid.me.nav.Route404
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.LocalGlobalUiMutator
+import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.NavMutator
+import com.tunjid.me.scaffold.nav.Route404
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.current
 

@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui
+package com.tunjid.me.scaffold.globalui.slices
 
-import androidx.compose.ui.unit.dp
+import com.tunjid.me.scaffold.globalui.InsetDescriptor
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.bottomNavVisible
 
-internal object UiSizes {
-    val toolbarSize = 56.dp
-    val navRailWidth = 72.dp
-    val navRailContentWidth = 400.dp
-    val bottomNavSize = 56.dp
-    val snackbarPeek = 56.dp
-}
+internal data class BottomNavPositionalState(
+    val insetDescriptor: InsetDescriptor,
+    val bottomNavVisible: Boolean,
+    val navBarSize: Int
+)
+
+internal val UiState.bottomNavPositionalState
+    get() = BottomNavPositionalState(
+        bottomNavVisible = bottomNavVisible,
+        navBarSize = systemUI.static.navBarSize,
+        insetDescriptor = insetFlags
+    )

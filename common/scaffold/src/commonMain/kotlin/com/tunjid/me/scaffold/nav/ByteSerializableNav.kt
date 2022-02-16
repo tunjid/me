@@ -15,7 +15,7 @@
  */
 @file:UseContextualSerialization
 
-package com.tunjid.me.nav
+package com.tunjid.me.scaffold.nav
 
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.treenav.MultiStackNav

@@ -22,8 +22,8 @@ import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.globalui.navRailVisible
-import com.tunjid.me.nav.navRailRoute
+import com.tunjid.me.scaffold.globalui.navRailVisible
+import com.tunjid.me.scaffold.nav.navRailRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator

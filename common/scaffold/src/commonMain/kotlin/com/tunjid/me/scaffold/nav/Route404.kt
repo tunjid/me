@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.nav
+package com.tunjid.me.scaffold.nav
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding

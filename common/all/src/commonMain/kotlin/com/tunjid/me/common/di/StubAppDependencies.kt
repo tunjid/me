@@ -20,8 +20,8 @@ import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.core.utilities.ByteSerializer
-import com.tunjid.me.globalui.UiState
-import com.tunjid.me.nav.AppRoute
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.mutator.Mutator
 import com.tunjid.treenav.MultiStackNav
 

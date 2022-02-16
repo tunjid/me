@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.nav
+package com.tunjid.me.scaffold.nav
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings

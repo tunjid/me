@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui.scaffold
+package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
@@ -45,10 +45,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.globalui.GlobalUiMutator
-import com.tunjid.me.globalui.UiSizes
-import com.tunjid.me.globalui.UiState
-import com.tunjid.me.globalui.slices.fabState
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.UiSizes
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.slices.fabState
 
 /**
  * Common motionally intelligent Floating Action button shared amongst nav routes in the app

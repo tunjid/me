@@ -4,7 +4,7 @@ import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.ArchiveKind.Articles
 import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.core.utilities.toBytes
-import com.tunjid.me.nav.ByteSerializableRoute
+import com.tunjid.me.scaffold.nav.ByteSerializableRoute
 import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.archivelist.QueryState
 import com.tunjid.me.common.ui.archivelist.State

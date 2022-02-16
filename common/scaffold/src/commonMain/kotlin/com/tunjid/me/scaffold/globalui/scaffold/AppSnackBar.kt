@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui.scaffold
+package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.BoxScope
@@ -37,10 +37,10 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.peek
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.globalui.GlobalUiMutator
-import com.tunjid.me.globalui.UiSizes
-import com.tunjid.me.globalui.UiState
-import com.tunjid.me.globalui.slices.snackbarPositionalState
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.UiSizes
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.slices.snackbarPositionalState
 import com.tunjid.mutator.accept
 import kotlinx.coroutines.delay
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui.scaffold
+package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.*
@@ -36,16 +36,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.globalui.GlobalUiMutator
-import com.tunjid.me.globalui.UiSizes
-import com.tunjid.me.globalui.UiState
-import com.tunjid.me.globalui.navRailVisible
-import com.tunjid.me.globalui.slices.routeContainerState
-import com.tunjid.me.nav.NavItem
-import com.tunjid.me.nav.NavMutator
-import com.tunjid.me.nav.navItemSelected
-import com.tunjid.me.nav.navItems
-import com.tunjid.me.nav.navRailRoute
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.UiSizes
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.navRailVisible
+import com.tunjid.me.scaffold.globalui.slices.routeContainerState
+import com.tunjid.me.scaffold.nav.NavItem
+import com.tunjid.me.scaffold.nav.NavMutator
+import com.tunjid.me.scaffold.nav.navItemSelected
+import com.tunjid.me.scaffold.nav.navItems
+import com.tunjid.me.scaffold.nav.navRailRoute
 import com.tunjid.mutator.accept
 
 /**

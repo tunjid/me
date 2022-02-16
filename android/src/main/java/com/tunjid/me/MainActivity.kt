@@ -31,10 +31,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
-import com.tunjid.me.globalui.GlobalUiMutator
-import com.tunjid.me.globalui.NavMode
-import com.tunjid.me.globalui.insetMutations
-import com.tunjid.me.globalui.scaffold.Root
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.NavMode
+import com.tunjid.me.scaffold.globalui.insetMutations
+import com.tunjid.me.scaffold.globalui.scaffold.Root
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.mutator.accept
 import com.tunjid.treenav.pop

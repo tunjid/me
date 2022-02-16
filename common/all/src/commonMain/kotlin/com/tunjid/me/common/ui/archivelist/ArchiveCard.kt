@@ -39,7 +39,7 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.User
 import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.model.plus
-import com.tunjid.me.nav.AppRoute
+import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.common.ui.common.Chips
 import com.tunjid.me.common.ui.common.RemoteImagePainter

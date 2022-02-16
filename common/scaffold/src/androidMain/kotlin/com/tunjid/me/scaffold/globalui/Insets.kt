@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui
+package com.tunjid.me.scaffold.globalui
 
 import android.graphics.Color
 import android.os.Build
@@ -24,6 +24,7 @@ import android.view.WindowManager
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentActivity
+import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.mutator.Mutation
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

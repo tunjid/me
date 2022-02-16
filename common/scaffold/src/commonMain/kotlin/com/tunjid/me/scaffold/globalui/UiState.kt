@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.globalui
+package com.tunjid.me.scaffold.globalui
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.Message
 import com.tunjid.me.core.model.MessageQueue
-import com.tunjid.me.globalui.slices.ToolbarItem
+import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 
 sealed class NavMode {
     object BottomNav : NavMode()

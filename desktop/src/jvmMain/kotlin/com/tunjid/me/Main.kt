@@ -33,13 +33,13 @@ import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.core.utilities.toBytes
-import com.tunjid.me.globalui.NavMode
-import com.tunjid.me.globalui.UiState
+import com.tunjid.me.scaffold.globalui.NavMode
+import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.common.restore
 import com.tunjid.me.common.saveState
-import com.tunjid.me.globalui.scaffold.Root
+import com.tunjid.me.scaffold.globalui.scaffold.Root
 import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.me.globalui.LocalGlobalUiMutator
+import com.tunjid.me.scaffold.globalui.LocalGlobalUiMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.accept

@@ -16,9 +16,9 @@
 
 package com.tunjid.me.common.di
 
-import com.tunjid.me.globalui.GlobalUiMutator
-import com.tunjid.me.globalui.UiState
-import com.tunjid.me.nav.NavMutator
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.nav.NavMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
