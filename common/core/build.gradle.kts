@@ -27,9 +27,9 @@ kotlin {
     sourceSets {
         named("commonMain") {
             dependencies {
-                implementation(libs.compose.ui.ui)
-                implementation(libs.compose.ui.util)
-                implementation(libs.compose.runtime)
+                implementation(libs.jetbrains.compose.ui.ui)
+                implementation(libs.jetbrains.compose.ui.util)
+                implementation(libs.jetbrains.compose.runtime)
 
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)

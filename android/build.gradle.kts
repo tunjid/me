@@ -79,11 +79,11 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.window)
 
-    implementation(libs.compose.foundation.layout)
-    implementation(libs.compose.material)
-    implementation(libs.compose.animation)
-    implementation(libs.compose.runtime)
-    implementation(libs.compose.ui.util)
+    implementation(libs.jetbrains.compose.foundation.layout)
+    implementation(libs.jetbrains.compose.material)
+    implementation(libs.jetbrains.compose.animation)
+    implementation(libs.jetbrains.compose.runtime)
+    implementation(libs.jetbrains.compose.ui.util)
 
 //    val composeVersion = "1.2.0-alpha02"
 //    implementation("androidx.compose.foundation:foundation:$composeVersion")
