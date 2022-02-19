@@ -40,6 +40,7 @@ import com.tunjid.me.core.utilities.mappedCollectAsState
 import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.snackbarPositionalState
 import com.tunjid.mutator.accept
 import kotlinx.coroutines.delay
@@ -66,7 +67,9 @@ internal fun BoxScope.AppSnackBar(
         else UiSizes.snackbarPeek
     )
     val fabOffset by animateDpAsState(
-        if (showing) with(LocalDensity.current) { snackbarHeight.toDp() } + 16.dp
+        if (showing) with(LocalDensity.current) {
+            snackbarHeight.toDp() + state.keyboardSize.toDp() + 16.dp
+        }
         else 0.dp
     )
 

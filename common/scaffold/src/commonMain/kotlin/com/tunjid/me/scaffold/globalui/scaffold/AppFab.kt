@@ -42,12 +42,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.core.utilities.mappedCollectAsState
 import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.fabState
 
 /**
@@ -68,6 +70,7 @@ internal fun BoxScope.AppFab(
                 var offset = 16.dp
                 offset += UiSizes.bottomNavSize countIf state.bottomNavVisible
                 offset += state.snackbarOffset
+                offset += with(LocalDensity.current) { state.keyboardSize.toDp() }
                 -offset
             }
         }
