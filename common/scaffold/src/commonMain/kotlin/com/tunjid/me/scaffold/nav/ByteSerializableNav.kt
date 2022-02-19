@@ -17,11 +17,10 @@
 
 package com.tunjid.me.scaffold.nav
 
-import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Route
 import com.tunjid.treenav.StackNav
-import com.tunjid.me.core.utilities.ByteSerializable
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseContextualSerialization
 
@@ -34,16 +33,15 @@ interface ByteSerializableRoute : Route, ByteSerializable
 data class ByteSerializableNav(
     val currentIndex: Int,
     val indexHistory: List<Int> = listOf(),
-    val kindToRoutes: Map<com.tunjid.me.core.model.ArchiveKind, List<ByteSerializableRoute>> = mapOf()
+    val stackMap: Map<String, List<ByteSerializableRoute>> = mapOf()
 ) : ByteSerializable
 
 val MultiStackNav.toByteSerializable
     get() = ByteSerializableNav(
         currentIndex = currentIndex,
         indexHistory = indexHistory,
-        kindToRoutes = stacks.fold(mutableMapOf()) { map, stack ->
-            val kind = ArchiveKind.values().first { it.name == stack.name }
-            map[kind] = stack.routes.filterIsInstance<ByteSerializableRoute>()
+        stackMap = stacks.fold(mutableMapOf()) { map, stack ->
+            map[stack.name] = stack.routes.filterIsInstance<ByteSerializableRoute>()
             map
         }
     )
@@ -53,11 +51,11 @@ val ByteSerializableNav.toMultiStackNav
         name = NavName,
         currentIndex = currentIndex,
         indexHistory = indexHistory,
-        stacks = kindToRoutes
+        stacks = stackMap
             .toList()
-            .map { (kind, routes) ->
+            .map { (stackName, routes) ->
                 StackNav(
-                    name = kind.name,
+                    name = stackName,
                     routes = routes
                 )
             }
