@@ -67,6 +67,8 @@ kotlin {
                 implementation(libs.androidx.core.ktx)
                 implementation(libs.androidx.appcompat)
 
+                implementation(libs.androidx.compose.foundation.layout)
+
                 implementation(libs.coil.compose)
 
                 implementation(libs.kotlinx.coroutines.android)

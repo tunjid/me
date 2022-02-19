@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.toComposeRect
@@ -31,6 +32,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
+import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.insetMutations
@@ -57,7 +59,14 @@ class MainActivity : AppCompatActivity() {
         setContent {
             AppTheme {
                 Surface(color = MaterialTheme.colors.background) {
-                    Root(dependencies = app.appDependencies)
+                    CompositionLocalProvider(
+                        LocalAppDependencies provides app.appDependencies,
+                    ) {
+                        Root(
+                            globalUiMutator = globalUiMutator,
+                            navMutator = navMutator,
+                        )
+                    }
                 }
                 AdaptNavigation(globalUiMutator = globalUiMutator)
             }

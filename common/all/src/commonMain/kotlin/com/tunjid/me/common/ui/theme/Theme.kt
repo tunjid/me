@@ -50,7 +50,7 @@ private val LightColorPalette = lightColors(
 
 @Composable
 fun AppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colors = if (darkTheme) {

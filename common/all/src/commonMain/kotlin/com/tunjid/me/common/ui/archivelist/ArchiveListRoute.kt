@@ -17,33 +17,25 @@
 package com.tunjid.me.common.ui.archivelist
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.GridItemSpan
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyGridState
+import androidx.compose.foundation.lazy.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.common.di.LocalAppDependencies
+import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
+import com.tunjid.me.common.ui.signin.SignInRoute
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveKind.Articles
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.currentUiState
+import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
-import com.tunjid.me.common.ui.signin.SignInRoute
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.mutator.accept
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.push
@@ -159,16 +151,17 @@ private fun ArchiveScreen(
     }
 
     // Endless scrolling
-    LaunchedEffect(gridState) {
+    val currentQuery = state.queryState.currentQuery
+    LaunchedEffect(gridState, currentQuery) {
         snapshotFlow { gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.key }
             .filterNotNull()
             .distinctUntilChanged()
             .collect { firstVisibleKey ->
                 mutator.accept(Action.ToggleFilter(isExpanded = false))
                 mutator.accept(Action.LastVisibleKey(firstVisibleKey))
-                firstVisibleKey.queryFromKey?.let { query ->
+                firstVisibleKey.queryOffsetFromKey?.let { queryOffset ->
                     mutator.accept(
-                        Action.Fetch.LoadMore(query = query)
+                        Action.Fetch.LoadMore(query = currentQuery.copy(offset = queryOffset))
                     )
                 }
             }

@@ -15,19 +15,15 @@
  */
 
 plugins {
-    id("com.android.application")
+    `android-application-convention`
     id("kotlin-android")
     kotlin("plugin.serialization")
     id("kotlin-parcelize")
 }
 
 android {
-    compileSdk = 31
-
     defaultConfig {
         applicationId = "com.tunjid.me"
-        // Could have been 21, but I need sqlite 3.24.0 for upserts
-        minSdk = 30
         targetSdk = 31
         versionCode = 1
         versionName = "1.0"
@@ -43,17 +39,6 @@ android {
                 "proguard-rules.pro"
             )
         }
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.2.0-alpha02"
-    }
-    compileOptions {
-        isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
         jvmTarget = "11"

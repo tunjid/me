@@ -90,7 +90,6 @@ fun main() {
                 Surface(color = MaterialTheme.colors.background) {
                     CompositionLocalProvider(
                         LocalAppDependencies provides appDependencies,
-                        LocalGlobalUiMutator provides globalUiMutator
                     ) {
                         Root(
                             globalUiMutator = appDependencies.appMutator.globalUiMutator,

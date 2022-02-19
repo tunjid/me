@@ -41,19 +41,19 @@ data class State(
 
 sealed class Action(val key: String) {
     sealed class Fetch : Action(key = "Fetch") {
-        abstract val query: com.tunjid.me.core.model.ArchiveQuery
+        abstract val query: ArchiveQuery
 
         data class Reset(
-            override val query: com.tunjid.me.core.model.ArchiveQuery
+            override val query: ArchiveQuery
         ) : Fetch()
 
         data class LoadMore(
-            override val query: com.tunjid.me.core.model.ArchiveQuery
+            override val query: ArchiveQuery
         ) : Fetch()
     }
 
     data class FilterChanged(
-        val descriptor: com.tunjid.me.core.model.Descriptor
+        val descriptor: Descriptor
     ) : Action(key = "FilterChanged")
 
     data class GridSize(val size: Int) : Action(key = "GridSize")
@@ -64,22 +64,22 @@ sealed class Action(val key: String) {
 }
 
 sealed class ArchiveItem {
-    abstract val query: com.tunjid.me.core.model.ArchiveQuery
+    abstract val query: ArchiveQuery
 
     data class Result(
-        val archive: com.tunjid.me.core.model.Archive,
-        override val query: com.tunjid.me.core.model.ArchiveQuery,
+        val archive: Archive,
+        override val query: ArchiveQuery,
     ) : ArchiveItem()
 
     data class Loading(
         val isCircular: Boolean,
-        override val query: com.tunjid.me.core.model.ArchiveQuery,
+        override val query: ArchiveQuery,
     ) : ArchiveItem()
 }
 
 private class ItemKey(
     val key: String,
-    val query: com.tunjid.me.core.model.ArchiveQuery
+    val query: ArchiveQuery
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -100,19 +100,29 @@ private class ItemKey(
     }
 }
 
+//val ArchiveItem.key: Any
+//    get() = when (this) {
+//        is ArchiveItem.Loading -> ItemKey(
+//            key = "header-$query",
+//            query = query
+//        )
+//        is ArchiveItem.Result -> ItemKey(
+//            key = "result-${archive.id}",
+//            query = query
+//        )
+//    }
+
 val ArchiveItem.key: Any
     get() = when (this) {
-        is ArchiveItem.Loading -> ItemKey(
-            key = "header-$query",
-            query = query
-        )
-        is ArchiveItem.Result -> ItemKey(
-            key = "result-${archive.id}",
-            query = query
-        )
+        is ArchiveItem.Loading -> "loading-${query.offset}"
+        is ArchiveItem.Result -> "result-${query.offset}-${archive.id}"
     }
 
-val Any.queryFromKey get() = if(this is ItemKey) this.query else null
+val Any.queryOffsetFromKey: Int?
+    get() = when (this) {
+        is String -> split("-").getOrNull(1)?.toIntOrNull()
+        else -> null
+    }
 
 val ArchiveItem.Result.prettyDate: String
     get() {
@@ -125,9 +135,9 @@ val ArchiveItem.Result.readTime get() = "${archive.body.trim().split("/\\s+/").s
 @Serializable
 data class QueryState(
     val expanded: Boolean = false,
-    val startQuery: com.tunjid.me.core.model.ArchiveQuery,
-    val currentQuery: com.tunjid.me.core.model.ArchiveQuery,
-    val categoryText: com.tunjid.me.core.model.Descriptor.Category = com.tunjid.me.core.model.Descriptor.Category(""),
-    val tagText: com.tunjid.me.core.model.Descriptor.Tag = com.tunjid.me.core.model.Descriptor.Tag(""),
+    val startQuery: ArchiveQuery,
+    val currentQuery: ArchiveQuery,
+    val categoryText: Descriptor.Category = Descriptor.Category(""),
+    val tagText: Descriptor.Tag = Descriptor.Tag(""),
 )
 

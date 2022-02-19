@@ -31,27 +31,14 @@
  */
 
 plugins {
-    kotlin("multiplatform")
+    id("com.android.application")
 }
 
-kotlin {
-    android()
-    jvm("desktop")
-    sourceSets {
-        all {
-            languageSettings.apply {
-                optIn("androidx.compose.animation.ExperimentalAnimationApi")
-                optIn("androidx.compose.foundation.ExperimentalFoundationApi")
-                optIn("androidx.compose.material.ExperimentalMaterialApi")
-                optIn("androidx.compose.ui.ExperimentalComposeUiApi")
-                optIn("kotlinx.serialization.ExperimentalSerializationApi")
-                optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
-                optIn("kotlinx.coroutines.FlowPreview")
-            }
-        }
-    }
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "11"
+android {
+    commonConfiguration()
+
+    defaultConfig {
+        targetSdk = 31
     }
     configurations.all {
         coerceComposeVersion()
