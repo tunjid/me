@@ -16,10 +16,9 @@
 
 package com.tunjid.me.data.repository
 
+import com.tunjid.me.core.model.*
 import com.tunjid.me.data.local.ArchiveDao
 import com.tunjid.me.data.network.NetworkMonitor
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.remoteFetcher
 import com.tunjid.tiler.Tile
@@ -30,9 +29,9 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 
 interface ArchiveRepository {
-    suspend fun upsert(kind: com.tunjid.me.core.model.ArchiveKind, upsert: com.tunjid.me.core.model.ArchiveUpsert): com.tunjid.me.core.model.Result<com.tunjid.me.core.model.ArchiveId>
-    fun monitorArchives(query: com.tunjid.me.core.model.ArchiveQuery): Flow<List<com.tunjid.me.core.model.Archive>>
-    fun monitorArchive(kind: com.tunjid.me.core.model.ArchiveKind, id: com.tunjid.me.core.model.ArchiveId): Flow<com.tunjid.me.core.model.Archive>
+    suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId>
+    fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
+    fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive>
 }
 
 /**
@@ -66,25 +65,25 @@ internal class ReactiveArchiveRepository(
         networkMonitor = networkMonitor
     )
 
-    override suspend fun upsert(kind: com.tunjid.me.core.model.ArchiveKind, upsert: com.tunjid.me.core.model.ArchiveUpsert): com.tunjid.me.core.model.Result<com.tunjid.me.core.model.ArchiveId> = try {
+    override suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId> = try {
         val response = networkService.upsertArchive(kind, upsert)
-        com.tunjid.me.core.model.Result.Success(com.tunjid.me.core.model.ArchiveId(response.id))
+        Result.Success(ArchiveId(response.id))
     } catch (e: Throwable) {
-        com.tunjid.me.core.model.Result.Error(e.message)
+        Result.Error(e.message)
     }
 
-    override fun monitorArchives(query: com.tunjid.me.core.model.ArchiveQuery): Flow<List<com.tunjid.me.core.model.Archive>> =
+    override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
         dao.monitorArchives(query)
             .onStart { remoteArchivesFetcher(Tile.Request.On(query)) }
             .onCompletion { remoteArchivesFetcher(Tile.Request.Evict(query)) }
 
-    override fun monitorArchive(kind: com.tunjid.me.core.model.ArchiveKind, id: com.tunjid.me.core.model.ArchiveId): Flow<com.tunjid.me.core.model.Archive> =
+    override fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive> =
         dao.monitorArchive(kind = kind, id = id)
             .onStart { remoteArchiveFetcher(Tile.Request.On(kind to id)) }
             .onCompletion { remoteArchiveFetcher(Tile.Request.Evict(kind to id)) }
             .filterNotNull()
 
-    private suspend fun fetchArchives(query: com.tunjid.me.core.model.ArchiveQuery): List<com.tunjid.me.core.model.Archive> =
+    private suspend fun fetchArchives(query: ArchiveQuery): List<Archive> =
         networkService.fetchArchives(
             kind = query.kind,
             options = listOfNotNull(

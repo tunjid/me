@@ -67,6 +67,7 @@ class DataModule(
     )
 
     init {
+        // Todo, monitor this only when app is resumed
         appScope.launch {
             modelEvents(
                 url = "$ApiUrl/",
