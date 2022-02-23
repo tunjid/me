@@ -59,16 +59,14 @@ fun ProgressBar(isCircular: Boolean) {
 @Composable
 fun ArchiveCard(
     archiveItem: ArchiveItem.Result,
-    onRouteSelected: (String) -> Unit,
+    onArchiveSelected: (Archive) -> Unit,
     onAction: (Action) -> Unit,
 ) {
     Card(
         modifier = Modifier
             .padding(16.dp),
         onClick = {
-            val kind = archiveItem.archive.kind
-            val id = archiveItem.archive.id
-            onRouteSelected("archives/${kind.type}/${id}/edit")
+            onArchiveSelected(archiveItem.archive)
         },
         content = {
             Column {

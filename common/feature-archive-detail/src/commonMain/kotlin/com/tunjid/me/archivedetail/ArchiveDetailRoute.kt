@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archivedetail
+package com.tunjid.me.archivedetail
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,23 +35,64 @@ import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material.MaterialRichText
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.data.di.DataComponent
+import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
-import com.tunjid.me.feature.archivelist.ArchiveListRoute
+import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.LocalNavigator
+import com.tunjid.me.scaffold.nav.RouteParser
+import com.tunjid.me.scaffold.nav.routeParser
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.push
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
+import kotlin.reflect.KClass
+
+object ArchiveDetailFeature : Feature<ArchiveDetailRoute, ArchiveDetailMutator> {
+
+    override val routeType: KClass<ArchiveDetailRoute>
+        get() = ArchiveDetailRoute::class
+
+    override val routeParsers: List<RouteParser<ArchiveDetailRoute>> = listOf(
+        routeParser(
+            pattern = "archives/(.*?)/(.*?)",
+            routeMapper = { result ->
+                val kindString = result.groupValues.getOrNull(1)
+                val archiveId = ArchiveId(result.groupValues.getOrNull(2) ?: "")
+                val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
+                ArchiveDetailRoute(
+                    id = result.groupValues[0],
+                    kind = kind,
+                    archiveId = archiveId
+                )
+            }
+        )
+    )
+
+    override fun mutator(
+        scope: CoroutineScope,
+        route: ArchiveDetailRoute,
+        scaffoldComponent: ScaffoldComponent,
+        dataComponent: DataComponent
+    ): ArchiveDetailMutator = archiveDetailMutator(
+        scope = scope,
+        initialState = null,
+        route = route,
+        archiveRepository = dataComponent.archiveRepository,
+        authRepository = dataComponent.authRepository,
+        uiStateFlow = scaffoldComponent.globalUiStateStream,
+        lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
+    )
+}
 
 @Serializable
 data class ArchiveDetailRoute(
+    override val id: String,
     val kind: ArchiveKind,
     val archiveId: ArchiveId
 ) : AppRoute {
-    override val id: String
-        get() = "archive-detail-$kind-$archiveId"
-
     @Composable
     override fun Render() {
         ArchiveDetailScreen(
@@ -62,7 +103,7 @@ data class ArchiveDetailRoute(
     override fun navRailRoute(nav: MultiStackNav): AppRoute? {
         val activeStack = nav.stacks.getOrNull(nav.currentIndex) ?: return null
         val previous = activeStack.routes.getOrNull(activeStack.routes.lastIndex - 1)
-        return if (previous is ArchiveListRoute) previous else null
+        return if (previous is ArchiveDetailRoute) previous else null
     }
 }
 

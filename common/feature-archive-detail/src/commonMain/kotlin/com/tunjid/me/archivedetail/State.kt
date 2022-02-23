@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archivedetail
+package com.tunjid.me.archivedetail
 
 import com.tunjid.me.core.utilities.ByteSerializable
-import com.tunjid.me.core.model.Archive
-import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.model.UserId
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 

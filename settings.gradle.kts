@@ -59,6 +59,11 @@ include(
     ":common:all",
     ":common:feature-template",
     ":common:feature-archive-list",
+    ":common:feature-archive-detail",
+    ":common:feature-archive-edit",
+    ":common:feature-profile",
+    ":common:feature-settings",
+    ":common:feature-sign-in",
     ":android",
     ":desktop",
     ":serverEvents"

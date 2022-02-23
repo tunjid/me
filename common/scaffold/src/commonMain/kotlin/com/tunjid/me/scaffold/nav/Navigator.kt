@@ -49,14 +49,6 @@ val LocalNavigator: ProvidableCompositionLocal<Navigator> = staticCompositionLoc
     )
 }
 
-internal fun Collection<Regex>.match(path: String): Pair<Regex, MatchResult>? {
-    val regex = firstOrNull { it.matches(input = path) } ?: return null
-    return when (val result = regex.matchEntire(input = path)) {
-        null -> null
-        else -> regex to result
-    }
-}
-
 internal fun Map<Regex, RouteParser<*>>.parse(path: String): Route {
     val regex = keys.firstOrNull { it.matches(input = path) } ?: return Route404
     return when (val result = regex.matchEntire(input = path)) {

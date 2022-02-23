@@ -165,10 +165,11 @@ private fun ArchiveScreen(
                             is ArchiveItem.Result -> ArchiveCard(
                                 archiveItem = item,
                                 onAction = mutator.accept,
-                                onRouteSelected = { url ->
+                                onArchiveSelected = { archive ->
+                                    val path = "archives/${archive.kind.type}/${archive.id.value}"
                                     navigator.navigate {
-                                        if (isInNavRail) currentNav.swap(route = url.toRoute)
-                                        else currentNav.push(route = url.toRoute)
+                                        if (isInNavRail) currentNav.swap(route = path.toRoute)
+                                        else currentNav.push(route = path.toRoute)
                                     }
                                 }
                             )

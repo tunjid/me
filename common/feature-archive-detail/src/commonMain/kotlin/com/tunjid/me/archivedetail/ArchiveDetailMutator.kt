@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archivedetail
+package com.tunjid.me.archivedetail
 
 
 import com.tunjid.me.data.repository.ArchiveRepository

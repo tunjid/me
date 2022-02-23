@@ -6,8 +6,8 @@ import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.scaffold.nav.ByteSerializableRoute
 import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.archivelist.QueryState
-import com.tunjid.me.common.ui.archivelist.State
-import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
+import com.tunjid.me.archivedetail.ArchiveDetailRoute
+import com.tunjid.me.archivedetail.State
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -45,7 +45,7 @@ class StateTest {
                     }
                     polymorphic(ByteSerializable::class) {
                         subclass(State::class)
-                        subclass(com.tunjid.me.common.ui.archivedetail.State::class)
+                        subclass(State::class)
                     }
                 }
             }

@@ -69,22 +69,6 @@ class RouteMutatorFactory(
 //    fun <T : Mutator<*, *>> routeMutator(route: AppRoute): T = with(appDependencies) {
 //        @Suppress("UNCHECKED_CAST")
 //        when (route) {
-//            is ArchiveListRoute -> routeMutatorCache.getOrPut(route) {
-//                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-//                ScopeHolder(
-//                    scope = routeScope,
-//                    mutator = archiveListMutator(
-//                        scope = routeScope,
-//                        initialState = route.restoredState(),
-//                        route = route,
-//                        archiveRepository = archiveRepository,
-//                        authRepository = authRepository,
-//                        navStateFlow = navMutator.state,
-//                        uiStateFlow = globalUiMutator.state,
-//                        lifecycleStateFlow = lifecycleMutator.state,
-//                    )
-//                )
-//            }
 //            is ArchiveDetailRoute -> routeMutatorCache.getOrPut(route) {
 //                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 //                ScopeHolder(

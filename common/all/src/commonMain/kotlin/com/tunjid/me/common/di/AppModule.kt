@@ -16,6 +16,8 @@
 
 package com.tunjid.me.common.di
 
+import com.tunjid.me.archivedetail.ArchiveDetailFeature
+import com.tunjid.me.archivedetail.State
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.utilities.ByteSerializable
@@ -29,8 +31,6 @@ import com.tunjid.me.feature.archivelist.ArchiveListFeature
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.ScaffoldModule
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.mutator.Mutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.modules.SerializersModule
@@ -60,7 +60,8 @@ private class AppModule(
 ) : AppDependencies {
 
     private val features = listOf(
-        ArchiveListFeature
+        ArchiveDetailFeature,
+        ArchiveListFeature,
     )
 
     private val scaffoldModule = ScaffoldModule(
@@ -94,7 +95,7 @@ private class AppModule(
             serializersModule = SerializersModule {
                 polymorphic(ByteSerializable::class) {
                     subclass(com.tunjid.me.feature.archivelist.State::class)
-                    subclass(com.tunjid.me.common.ui.archivedetail.State::class)
+                    subclass(State::class)
                     subclass(com.tunjid.me.common.ui.archiveedit.State::class)
                     subclass(com.tunjid.me.common.ui.settings.State::class)
                     subclass(com.tunjid.me.common.ui.signin.State::class)
