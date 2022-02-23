@@ -19,6 +19,7 @@ package com.tunjid.me.scaffold.nav
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.singular
 import com.tunjid.treenav.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -31,9 +32,11 @@ val MultiStackNav.navItems
     get() = stacks
         .map { it.name }
         .mapIndexed { index, name ->
-            val kind = ArchiveKind.values().firstOrNull { it.name == name }
+            val kind = ArchiveKind.values().firstOrNull {
+                name.contains(it.type)
+            }
             NavItem(
-                name = name,
+                name = kind?.type ?: name,
                 icon = kind?.icon ?: Icons.Default.Settings,
                 index = index,
                 selected = currentIndex == index,

@@ -61,7 +61,9 @@ internal fun navMutator(
                 multiStackNav.copy(
                     stacks = multiStackNav.stacks +
                             routesForStack.fold(
-                                initial = StackNav(name = routesForStack.firstOrNull() ?: "Unknown"),
+                                initial = StackNav(
+                                    name = routesForStack.firstOrNull() ?: "Unknown"
+                                ),
                                 operation = innerFold@{ stackNav, route ->
                                     stackNav.copy(
                                         routes = stackNav.routes + patternsToParsers.parse(path = route)
