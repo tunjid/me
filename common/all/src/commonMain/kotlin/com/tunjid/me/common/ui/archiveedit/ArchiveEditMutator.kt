@@ -17,14 +17,15 @@
 package com.tunjid.me.common.ui.archiveedit
 
 
-import com.tunjid.me.common.di.AppMutator
-import com.tunjid.me.common.di.monitorWhenActive
+import com.tunjid.me.core.ui.ChipAction
+import com.tunjid.me.core.model.*
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
-import com.tunjid.me.common.ui.common.ChipAction
-import com.tunjid.me.core.model.*
+import com.tunjid.me.scaffold.lifecycle.Lifecycle
+import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -40,18 +41,19 @@ fun archiveEditMutator(
     initialState: State? = null,
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
-    appMutator: AppMutator,
+    uiStateFlow: StateFlow<UiState>,
+    lifecycleStateFlow: StateFlow<Lifecycle>,
 ): ArchiveEditMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(
         kind = route.kind,
         upsert = ArchiveUpsert(id = route.archiveId),
-        navBarSize = appMutator.globalUiMutator.state.value.navBarSize,
+        navBarSize = uiStateFlow.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(2000),
     actionTransform = { actions ->
         merge(
-            appMutator.globalUiMutator.navBarSizeMutations { copy(navBarSize = it) },
+            uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
             authRepository.authMutations(),
             actions
                 .withInitialLoad(route)
@@ -65,7 +67,7 @@ fun archiveEditMutator(
                         )
                     }
                 }
-        ).monitorWhenActive(appMutator)
+        ).monitorWhenActive(lifecycleStateFlow)
     },
 )
 

@@ -17,10 +17,10 @@
 package com.tunjid.me.common.ui.signin
 
 
-import com.tunjid.me.common.di.AppMutator
-import com.tunjid.me.common.di.monitorWhenActive
+import com.tunjid.me.core.ui.update
 import com.tunjid.me.data.repository.AuthRepository
-import com.tunjid.me.common.ui.common.update
+import com.tunjid.me.scaffold.lifecycle.Lifecycle
+import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -35,7 +35,7 @@ fun signInMutator(
     route: SignInRoute,
     initialState: State? = null,
     authRepository: AuthRepository,
-    appMutator: AppMutator,
+    lifecycleStateFlow: StateFlow<Lifecycle>,
 ): SignInMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(),
@@ -49,7 +49,7 @@ fun signInMutator(
                     is Action.Submit -> action.flow.submissionMutations(authRepository)
                 }
             }
-        ).monitorWhenActive(appMutator)
+        ).monitorWhenActive(lifecycleStateFlow)
     }
 )
 

@@ -19,7 +19,7 @@ package com.tunjid.me
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import com.tunjid.me.common.di.AppAction
+import com.tunjid.me.scaffold.lifecycle.LifecycleAction
 import com.tunjid.me.common.SavedState
 import com.tunjid.me.common.di.createAppDependencies
 import com.tunjid.me.common.data.AppDatabase
@@ -49,12 +49,12 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        val appMutator = appDependencies.appMutator
+        val lifecycleMutator = appDependencies.lifecycleMutator
         val byteSerializer = appDependencies.byteSerializer
 
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             private fun updateStatus(isInForeground: Boolean) =
-                appMutator.accept(AppAction.AppStatus(isInForeground = isInForeground))
+                lifecycleMutator.accept(LifecycleAction.LifecycleStatus(isInForeground = isInForeground))
 
             override fun onActivityCreated(p0: Activity, bundle: Bundle?) {
                 bundle?.getByteArray(SavedStateKey)

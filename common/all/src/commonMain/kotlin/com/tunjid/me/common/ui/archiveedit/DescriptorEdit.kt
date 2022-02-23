@@ -21,11 +21,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.common.ui.common.ChipAction
-import com.tunjid.me.common.ui.common.ChipEditInfo
-import com.tunjid.me.common.ui.common.Chips
+import com.tunjid.me.core.ui.ChipAction
+import com.tunjid.me.core.ui.ChipEditInfo
+import com.tunjid.me.core.ui.Chips
 
 @Composable
 fun EditChips(
@@ -40,14 +39,14 @@ fun EditChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
-            chips = upsert.categories.map(com.tunjid.me.core.model.Descriptor.Category::value),
+            chips = upsert.categories.map(Descriptor.Category::value),
             color = MaterialTheme.colors.primaryVariant,
             editInfo = ChipEditInfo(
                 currentText = state.categoryText.value,
                 onChipChanged = onChipFilterChanged(
                     state = state,
                     reader = ChipsState::categoryText,
-                    writer = com.tunjid.me.core.model.Descriptor::Category,
+                    writer = Descriptor::Category,
                     onChanged = onChanged
                 )
             )
@@ -55,14 +54,14 @@ fun EditChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
-            chips = upsert.tags.map(com.tunjid.me.core.model.Descriptor.Tag::value),
+            chips = upsert.tags.map(Descriptor.Tag::value),
             color = MaterialTheme.colors.secondary,
             editInfo = ChipEditInfo(
                 currentText = state.tagText.value,
                 onChipChanged = onChipFilterChanged(
                     state = state,
                     reader = ChipsState::tagText,
-                    writer = com.tunjid.me.core.model.Descriptor::Tag,
+                    writer = Descriptor::Tag,
                     onChanged = onChanged
                 )
             )

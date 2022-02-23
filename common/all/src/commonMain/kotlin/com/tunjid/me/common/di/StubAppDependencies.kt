@@ -16,37 +16,35 @@
 
 package com.tunjid.me.common.di
 
+import com.tunjid.me.core.utilities.ByteSerializer
+import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
-import com.tunjid.me.core.utilities.ByteSerializer
+import com.tunjid.me.feature.RouteServiceLocator
+import com.tunjid.me.scaffold.di.ScaffoldComponent
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.lifecycle.Lifecycle
+import com.tunjid.me.scaffold.lifecycle.LifecycleMutator
 import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.NavMutator
 import com.tunjid.mutator.Mutator
+import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.MultiStackNav
 
 fun stubAppDependencies(
     nav: MultiStackNav = MultiStackNav(name = "App"),
-    globalUI: UiState = UiState()
+    globalUI: UiState = UiState(),
+    lifecycle: Lifecycle = Lifecycle(),
 ): AppDependencies = object : AppDependencies {
 
+    override val dataComponent: DataComponent
+        get() = TODO("Not yet implemented")
+    override val scaffoldComponent: ScaffoldComponent
+        get() = TODO("Not yet implemented")
+    override val routeServiceLocator: RouteServiceLocator
+        get() = TODO("Not yet implemented")
     override val byteSerializer: ByteSerializer
         get() = TODO("Not yet implemented")
-
-    override val archiveRepository: ArchiveRepository
-        get() = TODO("Not yet implemented")
-
-    override val authRepository: AuthRepository
-        get() = TODO("Not yet implemented")
-
-    override val networkMonitor: NetworkMonitor
-        get() = TODO("Not yet implemented")
-
-    override val appMutator: AppMutator = AppState(
-        ui = globalUI,
-        nav = nav
-    ).asAppMutator
-
-    override fun <T : Mutator<*, *>> routeDependencies(route: AppRoute<T>): T =
-        TODO("Not yet implemented")
 }

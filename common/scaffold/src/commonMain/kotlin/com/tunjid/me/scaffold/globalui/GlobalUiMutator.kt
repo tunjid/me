@@ -29,20 +29,20 @@ import kotlinx.coroutines.flow.map
 
 typealias GlobalUiMutator = Mutator<Mutation<UiState>, StateFlow<UiState>>
 
-fun globalUiMutator(scope: CoroutineScope, initialState: UiState = UiState()): GlobalUiMutator =
+internal fun globalUiMutator(scope: CoroutineScope, initialState: UiState = UiState()): GlobalUiMutator =
     stateFlowMutator(
         scope = scope,
         initialState = initialState,
         actionTransform = { it }
     )
 
-val LocalGlobalUiMutator = staticCompositionLocalOf {
+internal val LocalGlobalUiMutator = staticCompositionLocalOf {
     UiState().asNoOpStateFlowMutator<Mutation<UiState>, UiState>()
 }
 
-fun <State : Any> GlobalUiMutator.navBarSizeMutations(
+fun <State : Any> StateFlow<UiState>.navBarSizeMutations(
     mutation: State.(navbarSize: Int) -> State
-): Flow<Mutation<State>> = state
-    .map { it.navBarSize }
-    .distinctUntilChanged()
-    .map { Mutation { mutation(this, it) } }
+): Flow<Mutation<State>> =
+    map { it.navBarSize }
+        .distinctUntilChanged()
+        .map { Mutation { mutation(this, it) } }

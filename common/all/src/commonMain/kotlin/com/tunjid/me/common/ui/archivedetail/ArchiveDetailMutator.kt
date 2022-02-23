@@ -17,21 +17,18 @@
 package com.tunjid.me.common.ui.archivedetail
 
 
-import com.tunjid.me.common.di.AppMutator
-import com.tunjid.me.common.di.monitorWhenActive
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
+import com.tunjid.me.scaffold.lifecycle.Lifecycle
+import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.*
 
 typealias ArchiveDetailMutator = Mutator<Unit, StateFlow<State>>
 
@@ -41,27 +38,28 @@ fun archiveDetailMutator(
     initialState: State? = null,
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
-    appMutator: AppMutator,
+    uiStateFlow: StateFlow<UiState>,
+    lifecycleStateFlow: StateFlow<Lifecycle>,
 ): ArchiveDetailMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(
         kind = route.kind,
-        navBarSize = appMutator.globalUiMutator.state.value.navBarSize,
+        navBarSize = uiStateFlow.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(2000),
     actionTransform = {
         merge(
-            appMutator.globalUiMutator.navBarSizeMutations { copy(navBarSize = it) },
+            uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
             authRepository.authMutations(),
             archiveRepository.archiveLoadMutations(
                 kind = route.kind,
                 id = route.archiveId
             )
-        ).monitorWhenActive(appMutator)
+        ).monitorWhenActive(lifecycleStateFlow)
     }
 )
 
-private fun AuthRepository.authMutations() : Flow<Mutation<State>> =
+private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     signedInUserStream.map {
         Mutation {
             copy(

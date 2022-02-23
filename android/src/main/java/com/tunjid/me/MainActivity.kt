@@ -32,13 +32,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
-import com.tunjid.me.common.di.LocalAppDependencies
-import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.common.ui.theme.AppTheme
+import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.insetMutations
-import com.tunjid.me.scaffold.globalui.scaffold.Root
-import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.mutator.accept
+import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
+import com.tunjid.mutator.Mutation
 import com.tunjid.treenav.pop
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -48,35 +48,33 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val app = applicationContext as App
-        val appMutator = app.appDependencies.appMutator
-        val navMutator = appMutator.navMutator
-        val globalUiMutator = appMutator.globalUiMutator
+        val appDependencies = app.appDependencies
+        val scaffoldComponent = appDependencies.scaffoldComponent
 
         onBackPressedDispatcher.addCallback(this) {
-            navMutator.accept { pop() }
+            scaffoldComponent.navActions(Mutation { pop() })
         }
 
         setContent {
             AppTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     CompositionLocalProvider(
-                        LocalAppDependencies provides app.appDependencies,
+                        LocalRouteServiceLocator provides appDependencies.routeServiceLocator,
                     ) {
-                        Root(
-                            globalUiMutator = globalUiMutator,
-                            navMutator = navMutator,
+                        Scaffold(
+                            component = appDependencies.scaffoldComponent,
                         )
                     }
                 }
-                AdaptNavigation(globalUiMutator = globalUiMutator)
+                AdaptNavigation(scaffoldComponent = scaffoldComponent)
             }
         }
 
         lifecycleScope.launch {
-            insetMutations().collect(globalUiMutator.accept)
+            insetMutations().collect(scaffoldComponent.uiActions)
         }
         lifecycleScope.launch {
-            globalUiMutator.state
+            scaffoldComponent.globalUiStateStream
                 .map { it.statusBarColor to it.navBarColor }
                 .distinctUntilChanged()
                 .collect { (statusBarColor, navBarColor) ->
@@ -90,7 +88,7 @@ class MainActivity : AppCompatActivity() {
 enum class WindowSizeClass { COMPACT, MEDIUM, EXPANDED }
 
 @Composable
-private fun MainActivity.AdaptNavigation(globalUiMutator: GlobalUiMutator) {
+private fun MainActivity.AdaptNavigation(scaffoldComponent: ScaffoldComponent) {
     val configuration = LocalConfiguration.current
     val windowMetrics = remember(configuration) {
         WindowMetricsCalculator.getOrCreate()
@@ -112,7 +110,7 @@ private fun MainActivity.AdaptNavigation(globalUiMutator: GlobalUiMutator) {
 //    }
 
     LaunchedEffect(widthWindowSizeClass) {
-        globalUiMutator.accept {
+        scaffoldComponent.uiActions(Mutation {
             copy(
                 navMode = when (widthWindowSizeClass) {
                     WindowSizeClass.COMPACT -> NavMode.BottomNav
@@ -120,6 +118,6 @@ private fun MainActivity.AdaptNavigation(globalUiMutator: GlobalUiMutator) {
                     WindowSizeClass.EXPANDED -> NavMode.NavRail
                 }
             )
-        }
+        })
     }
 }

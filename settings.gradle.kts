@@ -53,9 +53,12 @@ pluginManagement {
 rootProject.name = "Me"
 include(
     ":common:core",
+    ":common:core-ui",
     ":common:data",
     ":common:scaffold",
     ":common:all",
+    ":common:feature-template",
+    ":common:feature-archive-list",
     ":android",
     ":desktop",
     ":serverEvents"

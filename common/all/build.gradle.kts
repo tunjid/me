@@ -27,8 +27,11 @@ kotlin {
         named("commonMain") {
             dependencies {
                 api(project(":common:core"))
+                api(project(":common:core-ui"))
                 api(project(":common:data"))
                 api(project(":common:scaffold"))
+                api(project(":common:feature-template"))
+                api(project(":common:feature-archive-list"))
 
                 implementation(libs.jetbrains.compose.ui.tooling)
                 implementation(libs.jetbrains.compose.ui.util)

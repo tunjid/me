@@ -17,48 +17,25 @@
 package com.tunjid.me.common.di
 
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.data.network.NetworkMonitor
-import com.tunjid.me.common.ui.archivedetail.ArchiveDetailRoute
-import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
-import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
-import com.tunjid.me.common.ui.archivelist.State
-import com.tunjid.me.common.ui.profile.ProfileRoute
-import com.tunjid.me.common.ui.settings.SettingsRoute
-import com.tunjid.me.common.ui.signin.SignInRoute
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.DelegatingByteSerializer
+import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.data.di.DataModule
-import com.tunjid.me.data.repository.ArchiveRepository
-import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.data.network.NetworkMonitor
+import com.tunjid.me.feature.RouteServiceLocator
+import com.tunjid.me.feature.archivelist.ArchiveListFeature
+import com.tunjid.me.scaffold.di.ScaffoldComponent
+import com.tunjid.me.scaffold.di.ScaffoldModule
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.globalUiMutator
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.ByteSerializableRoute
-import com.tunjid.me.scaffold.nav.navMutator
 import com.tunjid.mutator.Mutator
-import com.tunjid.treenav.MultiStackNav
-import com.tunjid.treenav.StackNav
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
-
-private val startNav = MultiStackNav(
-    name = "NavName",
-    currentIndex = 0,
-    stacks = ArchiveKind.values().map { kind ->
-        StackNav(
-            name = kind.name,
-            routes = listOf(ArchiveListRoute(kind = kind))
-        )
-    } + StackNav(
-        name = "Settings",
-        routes = listOf(SettingsRoute)
-    )
-)
 
 fun createAppDependencies(
     appScope: CoroutineScope,
@@ -77,10 +54,26 @@ fun createAppDependencies(
  */
 private class AppModule(
     appDatabase: AppDatabase,
-    override val networkMonitor: NetworkMonitor,
+    networkMonitor: NetworkMonitor,
     appScope: CoroutineScope,
     initialUiState: UiState,
 ) : AppDependencies {
+
+    private val features = listOf(
+        ArchiveListFeature
+    )
+
+    private val scaffoldModule = ScaffoldModule(
+        appScope = appScope,
+        initialUiState = initialUiState,
+        startNav = (ArchiveKind.values().map {
+            "archives/${it.type}"
+        } + "settings")
+            .map { listOf(it) },
+        routeParsers = features
+            .map { it.routeParsers }
+            .flatten()
+    )
 
     private val dataModule = DataModule(
         appScope = appScope,
@@ -88,30 +81,19 @@ private class AppModule(
         database = appDatabase,
     )
 
-    override val archiveRepository: ArchiveRepository = dataModule.archiveRepository
-
-    override val authRepository: AuthRepository = dataModule.authRepository
-
-    override val appMutator: AppMutator = appMutator(
-        scope = appScope,
-        navMutator = navMutator(scope = appScope, startNav = startNav),
-        globalUiMutator = globalUiMutator(scope = appScope, initialState = initialUiState)
+    override val scaffoldComponent: ScaffoldComponent = ScaffoldComponent(
+        scaffoldModule
+    )
+    override val dataComponent: DataComponent = DataComponent(
+        dataModule
     )
 
     // TODO: Pass this as an argument
     override val byteSerializer: ByteSerializer = DelegatingByteSerializer(
         format = Cbor {
             serializersModule = SerializersModule {
-                polymorphic(ByteSerializableRoute::class) {
-                    subclass(ArchiveListRoute::class)
-                    subclass(ArchiveDetailRoute::class)
-                    subclass(ArchiveEditRoute::class)
-                    subclass(SignInRoute::class)
-                    subclass(SettingsRoute::class)
-                    subclass(ProfileRoute::class)
-                }
                 polymorphic(ByteSerializable::class) {
-                    subclass(State::class)
+                    subclass(com.tunjid.me.feature.archivelist.State::class)
                     subclass(com.tunjid.me.common.ui.archivedetail.State::class)
                     subclass(com.tunjid.me.common.ui.archiveedit.State::class)
                     subclass(com.tunjid.me.common.ui.settings.State::class)
@@ -122,11 +104,13 @@ private class AppModule(
         }
     )
 
-    val routeMutatorFactory = AppMutatorFactory(
+    override val routeServiceLocator: RouteServiceLocator = RouteMutatorFactory(
         appScope = appScope,
-        appDependencies = this
+        features = features,
+        scaffoldComponent = scaffoldComponent,
+        dataComponent = dataComponent
     )
 
-    override fun <T : Mutator<*, *>> routeDependencies(route: AppRoute<T>): T =
-        routeMutatorFactory.routeMutator(route)
+//    override fun <T : Mutator<*, *>> routeDependencies(route: AppRoute): T =
+//        routeMutatorFactory.routeMutator(route)
 }

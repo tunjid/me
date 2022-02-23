@@ -26,27 +26,23 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.tunjid.me.common.SavedState
-import com.tunjid.me.common.di.createAppDependencies
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.data.local.DatabaseDriverFactory
-import com.tunjid.me.data.network.NetworkMonitor
-import com.tunjid.me.common.di.LocalAppDependencies
-import com.tunjid.me.core.utilities.fromBytes
-import com.tunjid.me.core.utilities.toBytes
-import com.tunjid.me.scaffold.globalui.NavMode
-import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.common.di.createAppDependencies
 import com.tunjid.me.common.restore
 import com.tunjid.me.common.saveState
-import com.tunjid.me.scaffold.globalui.scaffold.Root
 import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.me.scaffold.globalui.LocalGlobalUiMutator
+import com.tunjid.me.core.utilities.fromBytes
+import com.tunjid.me.core.utilities.toBytes
+import com.tunjid.me.data.local.DatabaseDriverFactory
+import com.tunjid.me.data.network.NetworkMonitor
+import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.scaffold.globalui.NavMode
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.Mutator
-import com.tunjid.mutator.accept
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.io.File
 import java.io.FileInputStream
@@ -64,11 +60,10 @@ fun main() {
     savedStateFile()
         ?.takeIf { it.length() > 0 }
         ?.let(::FileInputStream)
-        ?.use {appDependencies.byteSerializer.fromBytes<SavedState>(it.readBytes())}
+        ?.use { appDependencies.byteSerializer.fromBytes<SavedState>(it.readBytes()) }
         ?.let(appDependencies::restore)
 
-    val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>> =
-        appDependencies.appMutator.globalUiMutator
+    val scaffoldComponent = appDependencies.scaffoldComponent
 
     application {
         val windowState = rememberWindowState()
@@ -89,11 +84,10 @@ fun main() {
             AppTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     CompositionLocalProvider(
-                        LocalAppDependencies provides appDependencies,
+                        LocalRouteServiceLocator provides appDependencies.routeServiceLocator,
                     ) {
-                        Root(
-                            globalUiMutator = appDependencies.appMutator.globalUiMutator,
-                            navMutator = appDependencies.appMutator.navMutator
+                        Scaffold(
+                            component = appDependencies.scaffoldComponent,
                         )
                     }
                 }
@@ -104,9 +98,9 @@ fun main() {
                 snapshotFlow { currentWidth < 600.dp }
                     .distinctUntilChanged()
                     .collect { isInPortrait ->
-                        globalUiMutator.accept {
+                        scaffoldComponent.uiActions(Mutation {
                             copy(navMode = if (isInPortrait) NavMode.BottomNav else NavMode.NavRail)
-                        }
+                        })
                     }
             }
         }

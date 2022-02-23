@@ -25,8 +25,8 @@ import kotlinx.serialization.Transient
 @Serializable
 data class State(
     @Transient
-    val routes: List<ByteSerializableRoute> = listOf(
-        SignInRoute
+    val routes: List<String> = listOf(
+        "sign-in"
     )
 ) : ByteSerializable
 

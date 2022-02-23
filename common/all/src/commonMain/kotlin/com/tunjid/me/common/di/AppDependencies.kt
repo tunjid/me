@@ -16,23 +16,17 @@
 
 package com.tunjid.me.common.di
 
-import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.core.utilities.ByteSerializer
-import com.tunjid.me.data.network.NetworkMonitor
-import com.tunjid.me.data.repository.ArchiveRepository
-import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.data.di.DataComponent
+import com.tunjid.me.feature.RouteServiceLocator
+import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.mutator.Mutator
 
 interface AppDependencies {
-    val appMutator: AppMutator
-    val networkMonitor: NetworkMonitor
+    val dataComponent: DataComponent
+    val scaffoldComponent: ScaffoldComponent
     val byteSerializer: ByteSerializer
-    val archiveRepository: ArchiveRepository
-    val authRepository: AuthRepository
-    fun <T: Mutator<*, *>> routeDependencies(route: AppRoute<T>): T
+    val routeServiceLocator: RouteServiceLocator
 }
 
-val LocalAppDependencies = staticCompositionLocalOf {
-    stubAppDependencies()
-}

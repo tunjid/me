@@ -100,3 +100,10 @@ class DataModule(
         }
     }
 }
+
+class DataComponent(
+    module: DataModule
+) {
+    val archiveRepository: ArchiveRepository = module.archiveRepository
+    val authRepository: AuthRepository = module.authRepository
+}

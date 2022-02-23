@@ -40,9 +40,9 @@ val MultiStackNav.navItems
             )
         }
 
-val MultiStackNav.navRailRoute: AppRoute<*>?
+val MultiStackNav.navRailRoute: AppRoute?
     get() = when (val current = current) {
-        is AppRoute<*> -> current.navRailRoute(this)
+        is AppRoute -> current.navRailRoute(this)
         else -> null
     }
 
@@ -53,13 +53,13 @@ fun MultiStackNav.navItemSelected(item: NavItem) =
 /**
  * Route diff between consecutive emissions of [MultiStackNav]
  */
-fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AppRoute<*>>> =
+fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AppRoute>> =
     distinctUntilChanged()
         .scan(initial = listOf(emptyNav, emptyNav)) { list, newNav ->
             (list + newNav).takeLast(2)
         }
         .map { (prevNav: MultiStackNav, currentNav: MultiStackNav) ->
-            (prevNav - currentNav).filterIsInstance<AppRoute<*>>()
+            (prevNav - currentNav).filterIsInstance<AppRoute>()
         }
 
 private fun MultiStackNav.popToRoot(indexToPop: Int) = copy(

@@ -30,24 +30,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.common.di.LocalAppDependencies
+import com.tunjid.me.core.ui.FormField
+import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.common.ui.common.FormField
 import kotlinx.serialization.Serializable
 
 @Serializable
-object SignInRoute : AppRoute<SignInMutator> {
+object SignInRoute : AppRoute {
     override val id: String
         get() = "sign-in"
 
     @Composable
     override fun Render() {
         SignInScreen(
-            mutator = LocalAppDependencies.current.routeDependencies(this)
+            mutator = LocalRouteServiceLocator.current.locate(this),
         )
     }
 }

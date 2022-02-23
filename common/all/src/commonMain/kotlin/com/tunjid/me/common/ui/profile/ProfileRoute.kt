@@ -38,25 +38,25 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.common.ui.common.RemoteImagePainter
 import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.common.ui.common.FormField
+import com.tunjid.me.core.ui.FormField
+import com.tunjid.me.core.ui.RemoteImagePainter
+import com.tunjid.me.feature.LocalRouteServiceLocator
 import kotlinx.serialization.Serializable
 
 @Serializable
-object ProfileRoute : AppRoute<ProfileMutator> {
+object ProfileRoute : AppRoute {
     override val id: String
         get() = "Profile"
 
     @Composable
     override fun Render() {
         ProfileScreen(
-            mutator = LocalAppDependencies.current.routeDependencies(this)
+            mutator = LocalRouteServiceLocator.current.locate(this),
         )
     }
 }

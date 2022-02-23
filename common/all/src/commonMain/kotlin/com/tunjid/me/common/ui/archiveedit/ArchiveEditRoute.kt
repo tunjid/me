@@ -39,9 +39,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.UiState
@@ -53,14 +53,14 @@ import kotlinx.serialization.Serializable
 data class ArchiveEditRoute(
     val kind: ArchiveKind,
     val archiveId: ArchiveId?
-) : AppRoute<ArchiveEditMutator> {
+) : AppRoute {
     override val id: String
         get() = "archive-edit-$kind-$archiveId"
 
     @Composable
     override fun Render() {
         ArchiveEditScreen(
-            mutator = LocalAppDependencies.current.routeDependencies(this)
+            mutator = LocalRouteServiceLocator.current.locate(this),
         )
     }
 }

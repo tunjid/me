@@ -17,20 +17,16 @@
 package com.tunjid.me.common.ui.profile
 
 
-import com.tunjid.me.common.di.AppMutator
-import com.tunjid.me.common.di.monitorWhenActive
+import com.tunjid.me.core.ui.update
 import com.tunjid.me.data.repository.AuthRepository
-import com.tunjid.me.common.ui.common.update
+import com.tunjid.me.scaffold.lifecycle.Lifecycle
+import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.*
 
 typealias ProfileMutator = Mutator<Action, StateFlow<State>>
 
@@ -40,7 +36,7 @@ fun profileMutator(
     route: ProfileRoute,
     initialState: State? = null,
     authRepository: AuthRepository,
-    appMutator: AppMutator,
+    lifecycleStateFlow: StateFlow<Lifecycle>,
 ): ProfileMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(),
@@ -54,7 +50,7 @@ fun profileMutator(
                 }
             }
         )
-            .monitorWhenActive(appMutator)
+            .monitorWhenActive(lifecycleStateFlow)
     }
 )
 

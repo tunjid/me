@@ -17,11 +17,11 @@
 package com.tunjid.me.common.ui.settings
 
 
-import com.tunjid.me.common.di.AppMutator
-import com.tunjid.me.common.di.monitorWhenActive
-import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.common.ui.profile.ProfileRoute
 import com.tunjid.me.common.ui.signin.SignInRoute
+import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.scaffold.lifecycle.Lifecycle
+import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -37,7 +37,7 @@ fun settingsMutator(
     route: SettingsRoute,
     initialState: State? = null,
     authRepository: AuthRepository,
-    appMutator: AppMutator,
+    lifecycleStateFlow: StateFlow<Lifecycle>,
 ): SettingsMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(),
@@ -47,12 +47,12 @@ fun settingsMutator(
             Mutation<State> {
                 copy(
                     routes = listOfNotNull(
-                        ProfileRoute.takeIf { isSignedIn },
-                        SignInRoute.takeIf { !isSignedIn }
+                        "profile".takeIf { isSignedIn },
+                        "sign-in".takeIf { !isSignedIn }
                     )
                 )
             }
         }
-            .monitorWhenActive(appMutator)
+            .monitorWhenActive(lifecycleStateFlow)
     }
 )

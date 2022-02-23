@@ -25,7 +25,7 @@ import com.tunjid.mutator.Mutator
 import kotlinx.serialization.Serializable
 
 @Serializable
-object Route404 : AppRoute<Mutator<Unit, Unit>> {
+object Route404 : AppRoute {
     override val id: String
         get() = "404"
 

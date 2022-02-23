@@ -16,7 +16,7 @@
 
 package com.tunjid.me.common
 
-import com.tunjid.me.common.di.AppAction
+import com.tunjid.me.scaffold.lifecycle.LifecycleAction
 import com.tunjid.me.common.di.AppDependencies
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.fromBytes
@@ -56,32 +56,36 @@ class SavedState(
 }
 
 fun AppDependencies.saveState(): SavedState {
-    val multiStackNav = appMutator.navMutator.state.value
-
     return SavedState(
-        navigation = byteSerializer.toBytes(multiStackNav.toByteSerializable),
-        routeStates = multiStackNav
-            .flatten(order = Order.BreadthFirst)
-            .filterIsInstance<AppRoute<*>>()
-            .fold(mutableMapOf()) { map, route ->
-                val mutator = routeDependencies(route)
-                val state = (mutator as? Mutator<*, *>)?.state ?: return@fold map
-                val serializable = (state as? StateFlow<*>)?.value ?: return@fold map
-                if (serializable is ByteSerializable) map[route.id] =
-                    byteSerializer.toBytes(serializable)
-                map
-            }
+        navigation = byteArrayOf(),
+        routeStates = mapOf()
     )
+//    val multiStackNav = appMutator.navMutator.state.value
+//
+//    return SavedState(
+//        navigation = byteSerializer.toBytes(multiStackNav.toByteSerializable),
+//        routeStates = multiStackNav
+//            .flatten(order = Order.BreadthFirst)
+//            .filterIsInstance<AppRoute<*>>()
+//            .fold(mutableMapOf()) { map, route ->
+//                val mutator = routeDependencies(route)
+//                val state = (mutator as? Mutator<*, *>)?.state ?: return@fold map
+//                val serializable = (state as? StateFlow<*>)?.value ?: return@fold map
+//                if (serializable is ByteSerializable) map[route.id] =
+//                    byteSerializer.toBytes(serializable)
+//                map
+//            }
+//    )
 }
 
 fun AppDependencies.restore(savedState: SavedState) {
-    appMutator.navMutator.accept {
-        val serializedNav: ByteSerializableNav = byteSerializer.fromBytes(savedState.navigation)
-        serializedNav.toMultiStackNav
-    }
-    appMutator.accept(
-        AppAction.RestoreSerializedStates(
-            routeIdsToSerializedStates = savedState.routeStates
-        )
-    )
+//    appMutator.navMutator.accept {
+//        val serializedNav: ByteSerializableNav = byteSerializer.fromBytes(savedState.navigation)
+//        serializedNav.toMultiStackNav
+//    }
+//    appMutator.accept(
+//        LifecycleAction.RestoreSerializedStates(
+//            routeIdsToSerializedStates = savedState.routeStates
+//        )
+//    )
 }

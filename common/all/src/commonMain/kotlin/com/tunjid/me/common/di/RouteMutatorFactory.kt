@@ -1,0 +1,175 @@
+/*
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.tunjid.me.common.di
+
+import com.tunjid.me.data.di.DataComponent
+import com.tunjid.me.feature.Feature
+import com.tunjid.me.feature.RouteServiceLocator
+import com.tunjid.me.feature.find
+import com.tunjid.me.scaffold.di.ScaffoldComponent
+import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.removedRoutes
+import kotlinx.coroutines.*
+
+class RouteMutatorFactory(
+    appScope: CoroutineScope,
+    private val features: List<Feature<*, *>>,
+    private val scaffoldComponent: ScaffoldComponent,
+    private val dataComponent: DataComponent,
+) : RouteServiceLocator {
+    private val routeMutatorCache = mutableMapOf<AppRoute, ScopeHolder>()
+
+    init {
+        appScope.launch {
+            scaffoldComponent
+                .navStateStream
+                .removedRoutes()
+                .collect { removedRoutes ->
+                    removedRoutes.forEach { route ->
+                        println("Cleared ${route::class.simpleName}")
+                        val holder = routeMutatorCache.remove(route)
+                        holder?.scope?.cancel()
+                    }
+                }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T> locate(route: AppRoute): T =
+        routeMutatorCache.getOrPut(route) {
+            val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+            ScopeHolder(
+                scope = routeScope,
+                mutator = features.find(route)
+                    .mutator(
+                        scope = routeScope,
+                        route = route,
+                        scaffoldComponent = scaffoldComponent,
+                        dataComponent = dataComponent
+                    )
+            )
+
+        }.mutator as T
+
+
+//    fun <T : Mutator<*, *>> routeMutator(route: AppRoute): T = with(appDependencies) {
+//        @Suppress("UNCHECKED_CAST")
+//        when (route) {
+//            is ArchiveListRoute -> routeMutatorCache.getOrPut(route) {
+//                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+//                ScopeHolder(
+//                    scope = routeScope,
+//                    mutator = archiveListMutator(
+//                        scope = routeScope,
+//                        initialState = route.restoredState(),
+//                        route = route,
+//                        archiveRepository = archiveRepository,
+//                        authRepository = authRepository,
+//                        navStateFlow = navMutator.state,
+//                        uiStateFlow = globalUiMutator.state,
+//                        lifecycleStateFlow = lifecycleMutator.state,
+//                    )
+//                )
+//            }
+//            is ArchiveDetailRoute -> routeMutatorCache.getOrPut(route) {
+//                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+//                ScopeHolder(
+//                    scope = routeScope,
+//                    mutator = archiveDetailMutator(
+//                        scope = routeScope,
+//                        initialState = route.restoredState(),
+//                        route = route,
+//                        archiveRepository = archiveRepository,
+//                        authRepository = authRepository,
+//                        uiStateFlow = globalUiMutator.state,
+//                        lifecycleStateFlow = lifecycleMutator.state,
+//                    )
+//                )
+//            }
+//            is ArchiveEditRoute -> routeMutatorCache.getOrPut(route) {
+//                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+//                ScopeHolder(
+//                    scope = routeScope,
+//                    mutator = archiveEditMutator(
+//                        scope = routeScope,
+//                        initialState = route.restoredState(),
+//                        route = route,
+//                        archiveRepository = archiveRepository,
+//                        authRepository = authRepository,
+//                        uiStateFlow = globalUiMutator.state,
+//                        lifecycleStateFlow = lifecycleMutator.state,
+//                    )
+//                )
+//            }
+//            is SignInRoute -> routeMutatorCache.getOrPut(route) {
+//                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+//                ScopeHolder(
+//                    scope = routeScope,
+//                    mutator = signInMutator(
+//                        scope = routeScope,
+//                        initialState = route.restoredState(),
+//                        route = route,
+//                        authRepository = authRepository,
+//                        lifecycleStateFlow = lifecycleMutator.state,
+//                    )
+//                )
+//            }
+//            is SettingsRoute -> routeMutatorCache.getOrPut(route) {
+//                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+//                ScopeHolder(
+//                    scope = routeScope,
+//                    mutator = settingsMutator(
+//                        scope = routeScope,
+//                        initialState = route.restoredState(),
+//                        route = route,
+//                        authRepository = authRepository,
+//                        lifecycleStateFlow = lifecycleMutator.state,
+//                    )
+//                )
+//            }
+//            is ProfileRoute -> routeMutatorCache.getOrPut(route) {
+//                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+//                ScopeHolder(
+//                    scope = routeScope,
+//                    mutator = profileMutator(
+//                        scope = routeScope,
+//                        initialState = route.restoredState(),
+//                        route = route,
+//                        authRepository = authRepository,
+//                        lifecycleStateFlow = lifecycleMutator.state,
+//                    )
+//                )
+//            }
+//            else -> throw IllegalArgumentException("Unknown route")
+//        }.mutator as T
+//    }
+
+//    private inline fun <reified T : ByteSerializable> AppRoute<*>.restoredState(): T? {
+//        return try {
+//            // TODO: Figure out why this throws
+//            val serialized = appDependencies.lifecycleMutator.state.value.routeIdsToSerializedStates[id]
+//            serialized?.let(appDependencies.byteSerializer::fromBytes)
+//        } catch (e: Exception) {
+//            null
+//        }
+//    }
+}
+
+private data class ScopeHolder(
+    val scope: CoroutineScope,
+    val mutator: Any
+)

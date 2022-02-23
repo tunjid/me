@@ -22,6 +22,7 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.StackNav
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -29,14 +30,14 @@ const val NavName = "App"
 
 typealias NavMutator = Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
 
-interface AppRoute<T : Mutator<*, *>> : ByteSerializableRoute {
+interface AppRoute : ByteSerializableRoute {
     @Composable
     fun Render()
 
     /**
      * Defines what route to show in the nav rail along side this route
      */
-    fun navRailRoute(nav: MultiStackNav): AppRoute<*>? = null
+    fun navRailRoute(nav: MultiStackNav): AppRoute? = null
 }
 
 data class NavItem(
@@ -46,13 +47,30 @@ data class NavItem(
     val selected: Boolean
 )
 
-fun navMutator(
+internal fun navMutator(
     scope: CoroutineScope,
-    startNav: MultiStackNav,
-): NavMutator =
-    stateFlowMutator(
+    startNav: List<List<String>>,
+    routeParsers: List<RouteParser<*>>
+): NavMutator {
+    val patternsToParsers = routeParsers.patternsToParsers()
+    return stateFlowMutator(
         scope = scope,
-        initialState = startNav,
+        initialState = startNav.fold(
+            initial = MultiStackNav(name = "AppNav"),
+            operation = { multiStackNav, routesForStack ->
+                multiStackNav.copy(
+                    stacks = multiStackNav.stacks +
+                            routesForStack.fold(
+                                initial = StackNav(name = routesForStack.firstOrNull() ?: "Unknown"),
+                                operation = innerFold@{ stackNav, route ->
+                                    stackNav.copy(
+                                        routes = stackNav.routes + patternsToParsers.parse(path = route)
+                                    )
+                                }
+                            )
+                )
+            }
+        ),
         actionTransform = { it },
     )
-
+}

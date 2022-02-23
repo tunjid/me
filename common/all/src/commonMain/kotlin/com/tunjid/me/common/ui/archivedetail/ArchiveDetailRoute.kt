@@ -33,18 +33,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material.MaterialRichText
-import com.tunjid.me.common.di.LocalAppDependencies
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.scaffold.globalui.InsetFlags
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.currentUiState
+import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.feature.archivelist.ArchiveListRoute
+import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.common.ui.archiveedit.ArchiveEditRoute
-import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
-import com.tunjid.mutator.accept
+import com.tunjid.me.scaffold.nav.LocalNavigator
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
@@ -53,18 +48,18 @@ import kotlinx.serialization.Serializable
 data class ArchiveDetailRoute(
     val kind: ArchiveKind,
     val archiveId: ArchiveId
-) : AppRoute<ArchiveDetailMutator> {
+) : AppRoute {
     override val id: String
         get() = "archive-detail-$kind-$archiveId"
 
     @Composable
     override fun Render() {
         ArchiveDetailScreen(
-            mutator = LocalAppDependencies.current.routeDependencies(this)
+            mutator = LocalRouteServiceLocator.current.locate(this),
         )
     }
 
-    override fun navRailRoute(nav: MultiStackNav): AppRoute<*>? {
+    override fun navRailRoute(nav: MultiStackNav): AppRoute? {
         val activeStack = nav.stacks.getOrNull(nav.currentIndex) ?: return null
         val previous = activeStack.routes.getOrNull(activeStack.routes.lastIndex - 1)
         return if (previous is ArchiveListRoute) previous else null
@@ -77,7 +72,7 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
     val canEdit = state.canEdit
-    val navMutator = LocalAppDependencies.current.appMutator.navMutator
+    val navigator = LocalNavigator.current
     ScreenUiState(
         UiState(
             toolbarShows = true,
@@ -89,13 +84,9 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             fabText = "Edit",
             fabIcon = Icons.Default.Edit,
             fabClickListener = {
-                navMutator.accept {
-                    push(
-                        ArchiveEditRoute(
-                            kind = state.kind,
-                            archiveId = state.archive?.id
-                        )
-                    )
+                val archiveId = state.archive?.id
+                if (archiveId != null) navigator.navigate {
+                    currentNav.push("archives/${state.kind.type}/$archiveId/edit".toRoute)
                 }
             },
             insetFlags = InsetFlags.NO_BOTTOM,

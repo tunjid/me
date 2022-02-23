@@ -25,9 +25,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import com.tunjid.me.core.utilities.mappedCollectAsState
+import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiMutator
 import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.LocalNavigator
 import com.tunjid.me.scaffold.nav.NavMutator
 import com.tunjid.me.scaffold.nav.Route404
 import com.tunjid.treenav.MultiStackNav
@@ -37,17 +39,20 @@ import com.tunjid.treenav.current
  * Root scaffold for the app
  */
 @Composable
-fun Root(
-    globalUiMutator: GlobalUiMutator,
-    navMutator: NavMutator,
+fun Scaffold(
+    component: ScaffoldComponent,
 ) {
+    val navMutator = component.navMutator
+    val globalUiMutator = component.globalUiMutator
+
     CompositionLocalProvider(
-        LocalGlobalUiMutator provides globalUiMutator
+        LocalGlobalUiMutator provides globalUiMutator,
+        LocalNavigator provides component.navigator,
     ) {
         val saveableStateHolder = rememberSaveableStateHolder()
 
         val route by navMutator.state.mappedCollectAsState(mapper = MultiStackNav::current)
-        val renderedRoute = route as? AppRoute<*> ?: Route404
+        val renderedRoute = route as? AppRoute ?: Route404
 
         Box(
             modifier = Modifier.fillMaxSize()
