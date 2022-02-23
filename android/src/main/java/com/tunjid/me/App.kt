@@ -49,12 +49,14 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        val lifecycleMutator = appDependencies.lifecycleMutator
+        val scaffoldComponent = appDependencies.scaffoldComponent
         val byteSerializer = appDependencies.byteSerializer
 
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             private fun updateStatus(isInForeground: Boolean) =
-                lifecycleMutator.accept(LifecycleAction.LifecycleStatus(isInForeground = isInForeground))
+                scaffoldComponent.lifecycleActions(
+                    LifecycleAction.LifecycleStatus(isInForeground = isInForeground)
+                )
 
             override fun onActivityCreated(p0: Activity, bundle: Bundle?) {
                 bundle?.getByteArray(SavedStateKey)

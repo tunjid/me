@@ -58,6 +58,7 @@ class ScaffoldComponent(
 
     val navActions = navMutator.accept
     val uiActions = globalUiMutator.accept
+    val lifecycleActions = lifecycleMutator.accept
 
     val navigator = Navigator(
         navMutator = navMutator,
