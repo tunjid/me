@@ -25,7 +25,7 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.removedRoutes
 import kotlinx.coroutines.*
 
-class RouteMutatorFactory(
+internal class RouteMutatorFactory(
     appScope: CoroutineScope,
     private val features: List<Feature<*, *>>,
     private val scaffoldComponent: ScaffoldComponent,

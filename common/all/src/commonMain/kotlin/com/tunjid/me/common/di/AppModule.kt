@@ -119,7 +119,4 @@ private class AppModule(
         scaffoldComponent = scaffoldComponent,
         dataComponent = dataComponent
     )
-
-//    override fun <T : Mutator<*, *>> routeDependencies(route: AppRoute): T =
-//        routeMutatorFactory.routeMutator(route)
 }

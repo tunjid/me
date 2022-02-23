@@ -16,27 +16,15 @@
 
 package com.tunjid.me.common
 
-import com.tunjid.me.scaffold.lifecycle.LifecycleAction
 import com.tunjid.me.common.di.AppDependencies
 import com.tunjid.me.core.utilities.ByteSerializable
-import com.tunjid.me.core.utilities.fromBytes
-import com.tunjid.me.core.utilities.toBytes
-import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.ByteSerializableNav
-import com.tunjid.me.scaffold.nav.toByteSerializable
-import com.tunjid.me.scaffold.nav.toMultiStackNav
-import com.tunjid.mutator.Mutator
-import com.tunjid.treenav.Order
-import com.tunjid.treenav.flatten
-import kotlinx.coroutines.flow.StateFlow
-import com.tunjid.mutator.accept
 import kotlinx.serialization.Serializable
 
 @Serializable
 class SavedState(
     val navigation: ByteArray,
     val routeStates: Map<String, ByteArray>
-): ByteSerializable {
+) : ByteSerializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
