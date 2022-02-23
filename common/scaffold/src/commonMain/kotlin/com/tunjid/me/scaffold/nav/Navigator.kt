@@ -25,11 +25,8 @@ import com.tunjid.treenav.Route
 
 class Navigator(
     private val navMutator: NavMutator,
-    routeParsers: List<RouteParser<*>>
+    private val patternsToParsers: Map<Regex, RouteParser<*>>
 ) {
-
-    private val patternsToParsers = routeParsers.patternsToParsers()
-
     val currentNav get() = navMutator.state.value
     val String.toRoute: Route
         get() = patternsToParsers.parse(this)
@@ -45,7 +42,7 @@ class Navigator(
 val LocalNavigator: ProvidableCompositionLocal<Navigator> = staticCompositionLocalOf {
     Navigator(
         navMutator = MultiStackNav("AppNav").asNoOpStateFlowMutator(),
-        routeParsers = listOf(),
+        patternsToParsers = mapOf(),
     )
 }
 
@@ -58,6 +55,6 @@ internal fun Map<Regex, RouteParser<*>>.parse(path: String): Route {
 }
 
 internal fun List<RouteParser<*>>.patternsToParsers(): Map<Regex, RouteParser<*>> =
-    fold(mapOf<Regex, RouteParser<*>>()) { map, parser ->
+    fold(mapOf()) { map, parser ->
         map + (Regex(parser.pattern) to parser)
     }

@@ -60,7 +60,10 @@ object ArchiveListFeature : Feature<ArchiveListRoute, ArchiveListMutator> {
             routeMapper = { result ->
                 val kindString = result.groupValues.getOrNull(1)
                 val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
-                ArchiveListRoute(kind = kind)
+                ArchiveListRoute(
+                    id = result.groupValues[0],
+                    kind = kind
+                )
             }
         )
     )
@@ -82,11 +85,10 @@ object ArchiveListFeature : Feature<ArchiveListRoute, ArchiveListMutator> {
 }
 
 @Serializable
-data class ArchiveListRoute(val kind: ArchiveKind) :
-    AppRoute {
-    override val id: String
-        get() = "archive-route-$kind"
-
+data class ArchiveListRoute(
+    override val id: String,
+    val kind: ArchiveKind
+) : AppRoute {
     @Composable
     override fun Render() {
         ArchiveScreen(

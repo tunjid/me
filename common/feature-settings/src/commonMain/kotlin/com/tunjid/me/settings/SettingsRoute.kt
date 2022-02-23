@@ -56,8 +56,10 @@ object SettingsFeature : Feature<SettingsRoute, SettingsMutator> {
     override val routeParsers: List<RouteParser<SettingsRoute>> = listOf(
         routeParser(
             pattern = "settings",
-            routeMapper = {
-                SettingsRoute
+            routeMapper = { result ->
+                SettingsRoute(
+                    id = result.groupValues[0],
+                )
             }
         )
     )
@@ -77,10 +79,9 @@ object SettingsFeature : Feature<SettingsRoute, SettingsMutator> {
 }
 
 @Serializable
-object SettingsRoute : AppRoute {
-    override val id: String
-        get() = "settings"
-
+data class SettingsRoute(
+    override val id: String,
+) : AppRoute {
     @Composable
     override fun Render() {
         SettingsScreen(

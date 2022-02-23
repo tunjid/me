@@ -54,8 +54,10 @@ object SignInFeature : Feature<SignInRoute, SignInMutator> {
     override val routeParsers: List<RouteParser<SignInRoute>> = listOf(
         routeParser(
             pattern = "sign-in",
-            routeMapper = {
-                SignInRoute
+            routeMapper = { result ->
+                SignInRoute(
+                    id = result.groupValues[0],
+                )
             }
         )
     )
@@ -75,10 +77,9 @@ object SignInFeature : Feature<SignInRoute, SignInMutator> {
 }
 
 @Serializable
-object SignInRoute : AppRoute {
-    override val id: String
-        get() = "sign-in"
-
+data class SignInRoute(
+    override val id: String,
+) : AppRoute {
     @Composable
     override fun Render() {
         SignInScreen(

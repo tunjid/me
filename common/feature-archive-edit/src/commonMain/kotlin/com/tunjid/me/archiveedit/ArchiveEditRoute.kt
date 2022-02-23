@@ -64,6 +64,7 @@ object ArchiveEditFeature : Feature<ArchiveEditRoute, ArchiveEditMutator> {
                 val kindString = result.groupValues.getOrNull(1)
                 val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
                 ArchiveEditRoute(
+                    id = result.groupValues[0],
                     kind = kind,
                     archiveId = ArchiveId(result.groupValues.getOrNull(2) ?: "")
                 )
@@ -75,6 +76,7 @@ object ArchiveEditFeature : Feature<ArchiveEditRoute, ArchiveEditMutator> {
                 val kindString = result.groupValues.getOrNull(1)
                 val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
                 ArchiveEditRoute(
+                    id = result.groupValues[0],
                     kind = kind,
                     archiveId = null
                 )
@@ -100,12 +102,10 @@ object ArchiveEditFeature : Feature<ArchiveEditRoute, ArchiveEditMutator> {
 
 @Serializable
 data class ArchiveEditRoute(
+    override val id: String,
     val kind: ArchiveKind,
     val archiveId: ArchiveId?
 ) : AppRoute {
-    override val id: String
-        get() = "archive-edit-$kind-$archiveId"
-
     @Composable
     override fun Render() {
         ArchiveEditScreen(

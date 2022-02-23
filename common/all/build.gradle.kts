@@ -43,6 +43,7 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.cbor)
 
+                implementation(libs.tunjid.mutator.core.common)
                 implementation(libs.tunjid.treenav.common)
             }
         }

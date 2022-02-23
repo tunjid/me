@@ -58,8 +58,10 @@ object ProfileFeature : Feature<ProfileRoute, ProfileMutator> {
     override val routeParsers: List<RouteParser<ProfileRoute>> = listOf(
         routeParser(
             pattern = "profile",
-            routeMapper = {
-                ProfileRoute
+            routeMapper = { result ->
+                ProfileRoute(
+                    id = result.groupValues[0],
+                )
             }
         )
     )
@@ -79,10 +81,9 @@ object ProfileFeature : Feature<ProfileRoute, ProfileMutator> {
 }
 
 @Serializable
-object ProfileRoute : AppRoute {
-    override val id: String
-        get() = "Profile"
-
+data class ProfileRoute(
+    override val id: String,
+) : AppRoute {
     @Composable
     override fun Render() {
         ProfileScreen(

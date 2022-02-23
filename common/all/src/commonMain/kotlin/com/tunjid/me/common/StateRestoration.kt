@@ -18,62 +18,57 @@ package com.tunjid.me.common
 
 import com.tunjid.me.common.di.AppDependencies
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.core.utilities.toBytes
+import com.tunjid.me.scaffold.lifecycle.LifecycleAction
+import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.toMultiStackNav
+import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.Mutator
+import com.tunjid.treenav.Order
+import com.tunjid.treenav.flatten
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 
 @Serializable
 class SavedState(
-    val navigation: ByteArray,
+    val activeNav: Int = 0,
+    val navigation: List<List<String>>,
     val routeStates: Map<String, ByteArray>
-) : ByteSerializable {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as SavedState
-
-        if (!navigation.contentEquals(other.navigation)) return false
-        if (routeStates.keys != other.routeStates.keys) return false
-        return routeStates.values.map { it } != other.routeStates.values.map { it }
-    }
-
-    override fun hashCode(): Int {
-        var result = navigation.contentHashCode()
-        result = 31 * result + routeStates.hashCode()
-        return result
-    }
-}
+) : ByteSerializable
 
 fun AppDependencies.saveState(): SavedState {
+    val multiStackNav = scaffoldComponent.navStateStream.value
     return SavedState(
-        navigation = byteArrayOf(),
-        routeStates = mapOf()
-    )
-//    val multiStackNav = appMutator.navMutator.state.value
-//
-//    return SavedState(
-//        navigation = byteSerializer.toBytes(multiStackNav.toByteSerializable),
-//        routeStates = multiStackNav
-//            .flatten(order = Order.BreadthFirst)
-//            .filterIsInstance<AppRoute<*>>()
-//            .fold(mutableMapOf()) { map, route ->
-//                val mutator = routeDependencies(route)
-//                val state = (mutator as? Mutator<*, *>)?.state ?: return@fold map
-//                val serializable = (state as? StateFlow<*>)?.value ?: return@fold map
-//                if (serializable is ByteSerializable) map[route.id] =
-//                    byteSerializer.toBytes(serializable)
-//                map
-//            }
-//    )
+        activeNav = multiStackNav.currentIndex,
+        navigation = multiStackNav.stacks.fold(listOf()) { listOfLists, stackNav ->
+            listOfLists.plus(
+                element = stackNav.routes
+                    .filterIsInstance<AppRoute>()
+                    .fold(listOf()) { stackList, route ->
+                        stackList + route.id
+                    }
+            )
+        },
+        routeStates = multiStackNav.flatten(order = Order.BreadthFirst)
+            .filterIsInstance<AppRoute>()
+            .fold(mutableMapOf()) { map, route ->
+                val mutator = routeServiceLocator.locate<Any>(route)
+                val state = (mutator as? Mutator<*, *>)?.state ?: return@fold map
+                val serializable = (state as? StateFlow<*>)?.value ?: return@fold map
+                if (serializable is ByteSerializable) map[route.id] = byteSerializer.toBytes(serializable)
+                map
+            })
 }
 
-fun AppDependencies.restore(savedState: SavedState) {
-//    appMutator.navMutator.accept {
-//        val serializedNav: ByteSerializableNav = byteSerializer.fromBytes(savedState.navigation)
-//        serializedNav.toMultiStackNav
-//    }
-//    appMutator.accept(
-//        LifecycleAction.RestoreSerializedStates(
-//            routeIdsToSerializedStates = savedState.routeStates
-//        )
-//    )
+fun AppDependencies.restore(savedState: SavedState) = scaffoldComponent.apply {
+    navActions(Mutation {
+        scaffoldComponent.patternsToParsers.toMultiStackNav(
+            savedState.navigation
+        ).copy(currentIndex = savedState.activeNav)
+    })
+    lifecycleActions(
+        LifecycleAction.RestoreSerializedStates(
+            routeIdsToSerializedStates = savedState.routeStates
+        )
+    )
 }

@@ -22,18 +22,20 @@ import com.tunjid.me.scaffold.lifecycle.lifecycleMutator
 import com.tunjid.me.scaffold.nav.Navigator
 import com.tunjid.me.scaffold.nav.RouteParser
 import com.tunjid.me.scaffold.nav.navMutator
+import com.tunjid.me.scaffold.nav.patternsToParsers
 import kotlinx.coroutines.CoroutineScope
 
 class ScaffoldModule(
     appScope: CoroutineScope,
     initialUiState: UiState = UiState(),
     startNav: List<List<String>>,
-    internal val routeParsers: List<RouteParser<*>>
+    routeParsers: List<RouteParser<*>>
 ) {
+    internal val patternsToParsers = routeParsers.patternsToParsers()
     val navMutator = navMutator(
         scope = appScope,
         startNav = startNav,
-        routeParsers = routeParsers,
+        patternsToParsers = patternsToParsers,
     )
     val globalUiMutator = globalUiMutator(
         scope = appScope,
@@ -51,6 +53,8 @@ class ScaffoldComponent(
     internal val globalUiMutator = module.globalUiMutator
     internal val lifecycleMutator = module.lifecycleMutator
 
+    val patternsToParsers = module.patternsToParsers
+
     val navStateStream = module.navMutator.state
     val globalUiStateStream = module.globalUiMutator.state
     val lifecycleStateStream = module.lifecycleMutator.state
@@ -61,6 +65,6 @@ class ScaffoldComponent(
 
     val navigator = Navigator(
         navMutator = navMutator,
-        routeParsers = module.routeParsers
+        patternsToParsers = patternsToParsers
     )
 }
