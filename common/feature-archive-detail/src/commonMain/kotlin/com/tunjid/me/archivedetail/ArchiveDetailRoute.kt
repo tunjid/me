@@ -102,8 +102,10 @@ data class ArchiveDetailRoute(
 
     override fun navRailRoute(nav: MultiStackNav): AppRoute? {
         val activeStack = nav.stacks.getOrNull(nav.currentIndex) ?: return null
-        val previous = activeStack.routes.getOrNull(activeStack.routes.lastIndex - 1)
-        return if (previous is ArchiveDetailRoute) previous else null
+        val previous = activeStack.routes
+            .getOrNull(activeStack.routes.lastIndex - 1) as? AppRoute
+            ?: return null
+        return if (previous.id == "archives/${kind.type}") previous else null
     }
 }
 
