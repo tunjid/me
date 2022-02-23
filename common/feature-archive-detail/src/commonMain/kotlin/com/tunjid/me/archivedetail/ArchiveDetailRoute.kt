@@ -129,7 +129,7 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             fabClickListener = {
                 val archiveId = state.archive?.id
                 if (archiveId != null) navigator.navigate {
-                    currentNav.push("archives/${state.kind.type}/$archiveId/edit".toRoute)
+                    currentNav.push("archives/${state.kind.type}/${archiveId.value}/edit".toRoute)
                 }
             },
             insetFlags = InsetFlags.NO_BOTTOM,
