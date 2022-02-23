@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import org.gradle.kotlin.dsl.`kotlin-dsl`
-
 repositories {
     google()
     mavenCentral()

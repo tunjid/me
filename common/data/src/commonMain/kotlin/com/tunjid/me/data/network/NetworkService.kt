@@ -16,9 +16,9 @@
 
 package com.tunjid.me.data.network
 
-import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.common.data.network.models.UpsertResponse
 import com.tunjid.me.core.model.*
+import com.tunjid.me.data.local.SessionCookieDao
 import io.ktor.client.*
 import io.ktor.client.features.cookies.*
 import io.ktor.client.features.json.*

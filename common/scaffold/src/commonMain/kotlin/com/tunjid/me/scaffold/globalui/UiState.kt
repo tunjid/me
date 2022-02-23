@@ -23,8 +23,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.core.model.Message
-import com.tunjid.me.core.model.MessageQueue
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 
 sealed class NavMode {

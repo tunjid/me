@@ -26,11 +26,9 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import com.tunjid.me.core.utilities.mappedCollectAsState
 import com.tunjid.me.scaffold.di.ScaffoldComponent
-import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiMutator
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.LocalNavigator
-import com.tunjid.me.scaffold.nav.NavMutator
 import com.tunjid.me.scaffold.nav.Route404
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.current

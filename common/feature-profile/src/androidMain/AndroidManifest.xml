@@ -16,5 +16,5 @@
   -->
 
 <manifest package="com.tunjid.me.feature.profile"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+>
 </manifest>

@@ -22,7 +22,6 @@ import com.tunjid.me.scaffold.lifecycle.lifecycleMutator
 import com.tunjid.me.scaffold.nav.Navigator
 import com.tunjid.me.scaffold.nav.RouteParser
 import com.tunjid.me.scaffold.nav.navMutator
-import com.tunjid.mutator.accept
 import kotlinx.coroutines.CoroutineScope
 
 class ScaffoldModule(
