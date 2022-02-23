@@ -26,7 +26,7 @@ The API consumed is that of my personal website. The source can be found [here](
 ### Navigation
 
 Each destination in the app is represented by an `AppRoute` that exposes a single `@Composable`
-`Render()` function. The backing data structures for navigation a the tree like `StackNav` and
+`Render()` function. The backing data structure for navigation is the tree like `StackNav` and
 `MultiStackNav` immutable classes. The root of the app is a `MultiStackNav` and navigation is
 controlled by a `NavMutator` defined as:
 
