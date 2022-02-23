@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archiveedit
+package com.tunjid.me.archiveedit
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -41,13 +41,66 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.data.di.DataComponent
+import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.nav.RouteParser
+import com.tunjid.me.scaffold.nav.routeParser
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
+import kotlin.reflect.KClass
+
+object ArchiveEditFeature : Feature<ArchiveEditRoute, ArchiveEditMutator> {
+
+    override val routeType: KClass<ArchiveEditRoute>
+        get() = ArchiveEditRoute::class
+
+    override val routeParsers: List<RouteParser<ArchiveEditRoute>> = listOf(
+        routeParser(
+            pattern = "archives/(.*?)/(.*?)/edit",
+            routeMapper = { result ->
+                val kindString = result.groupValues.getOrNull(1)
+                val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
+                ArchiveEditRoute(
+                    kind = kind,
+                    archiveId = ArchiveId(result.groupValues.getOrNull(2) ?: "")
+                )
+            }
+        ),
+        routeParser(
+            pattern = "archives/(.*?)/create",
+            routeMapper = { result ->
+                val kindString = result.groupValues.getOrNull(1)
+                val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
+                ArchiveEditRoute(
+                    kind = kind,
+                    archiveId = null
+                )
+            }
+        )
+    )
+
+    override fun mutator(
+        scope: CoroutineScope,
+        route: ArchiveEditRoute,
+        scaffoldComponent: ScaffoldComponent,
+        dataComponent: DataComponent
+    ): ArchiveEditMutator = archiveEditMutator(
+        scope = scope,
+        initialState = null,
+        route = route,
+        archiveRepository = dataComponent.archiveRepository,
+        authRepository = dataComponent.authRepository,
+        uiStateFlow = scaffoldComponent.globalUiStateStream,
+        lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
+    )
+}
 
 @Serializable
 data class ArchiveEditRoute(

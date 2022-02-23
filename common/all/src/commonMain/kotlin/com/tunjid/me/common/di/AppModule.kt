@@ -18,6 +18,7 @@ package com.tunjid.me.common.di
 
 import com.tunjid.me.archivedetail.ArchiveDetailFeature
 import com.tunjid.me.archivedetail.State
+import com.tunjid.me.archiveedit.ArchiveEditFeature
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.utilities.ByteSerializable
@@ -60,6 +61,7 @@ private class AppModule(
 ) : AppDependencies {
 
     private val features = listOf(
+        ArchiveEditFeature,
         ArchiveDetailFeature,
         ArchiveListFeature,
     )
@@ -96,7 +98,7 @@ private class AppModule(
                 polymorphic(ByteSerializable::class) {
                     subclass(com.tunjid.me.feature.archivelist.State::class)
                     subclass(State::class)
-                    subclass(com.tunjid.me.common.ui.archiveedit.State::class)
+                    subclass(com.tunjid.me.archiveedit.State::class)
                     subclass(com.tunjid.me.common.ui.settings.State::class)
                     subclass(com.tunjid.me.common.ui.signin.State::class)
                     subclass(com.tunjid.me.common.ui.profile.State::class)

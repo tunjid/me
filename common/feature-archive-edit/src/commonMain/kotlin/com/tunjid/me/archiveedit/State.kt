@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archiveedit
+package com.tunjid.me.archiveedit
 
+import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveUpsert
+import com.tunjid.me.core.model.MessageQueue
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.mutator.Mutation
@@ -28,11 +31,11 @@ data class State(
     val isSignedIn: Boolean = false,
     val isSubmitting: Boolean = false,
     val navBarSize: Int,
-    val kind: com.tunjid.me.core.model.ArchiveKind,
-    val upsert: com.tunjid.me.core.model.ArchiveUpsert = com.tunjid.me.core.model.ArchiveUpsert(),
+    val kind: ArchiveKind,
+    val upsert: ArchiveUpsert = ArchiveUpsert(),
     val chipsState: ChipsState = ChipsState(),
     @Transient
-    val messages: com.tunjid.me.core.model.MessageQueue = com.tunjid.me.core.model.MessageQueue(),
+    val messages: MessageQueue = MessageQueue(),
 ) : ByteSerializable
 
 sealed class Action(val key: String) {
@@ -76,7 +79,7 @@ sealed class Action(val key: String) {
 
         data class Submit(
             val kind: com.tunjid.me.core.model.ArchiveKind,
-            val upsert: com.tunjid.me.core.model.ArchiveUpsert
+            val upsert: ArchiveUpsert
         ) : Load()
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archiveedit
+package com.tunjid.me.archiveedit
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -80,10 +80,10 @@ private fun onChipFilterChanged(
             Action.ChipEdit(chipAction = it, descriptor = reader(state))
         )
         is ChipAction.Changed -> onChanged(
-                Action.ChipEdit(chipAction = it, descriptor = writer(it.text))
+            Action.ChipEdit(chipAction = it, descriptor = writer(it.text))
             )
         is ChipAction.Removed -> onChanged(
-                Action.ChipEdit(chipAction = it, descriptor = writer(it.text))
+            Action.ChipEdit(chipAction = it, descriptor = writer(it.text))
             )
     }
 }

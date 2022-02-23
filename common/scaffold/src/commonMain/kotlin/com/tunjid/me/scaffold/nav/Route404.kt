@@ -17,10 +17,13 @@
 package com.tunjid.me.scaffold.nav
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.sp
 import com.tunjid.mutator.Mutator
 import kotlinx.serialization.Serializable
 
@@ -31,11 +34,15 @@ object Route404 : AppRoute {
 
     @Composable
     override fun Render() {
-        Box {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
             Text(
                 modifier = Modifier
+                    .align(Alignment.Center)
                     .padding(),
-                text = "404"
+                text = "404",
+                fontSize = 40.sp
             )
         }
     }

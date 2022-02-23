@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.archiveedit
+package com.tunjid.me.archiveedit
 
 
 import com.tunjid.me.core.ui.ChipAction
