@@ -14,62 +14,96 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.profile
+package com.tunjid.me.signin
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.tunjid.me.core.ui.FormField
+import com.tunjid.me.data.di.DataComponent
+import com.tunjid.me.feature.Feature
+import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.core.ui.FormField
-import com.tunjid.me.core.ui.RemoteImagePainter
-import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.scaffold.nav.RouteParser
+import com.tunjid.me.scaffold.nav.routeParser
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
+import kotlin.reflect.KClass
+
+object SignInFeature : Feature<SignInRoute, SignInMutator> {
+
+    override val routeType: KClass<SignInRoute>
+        get() = SignInRoute::class
+
+    override val routeParsers: List<RouteParser<SignInRoute>> = listOf(
+        routeParser(
+            pattern = "sign-in",
+            routeMapper = {
+                SignInRoute
+            }
+        )
+    )
+
+    override fun mutator(
+        scope: CoroutineScope,
+        route: SignInRoute,
+        scaffoldComponent: ScaffoldComponent,
+        dataComponent: DataComponent
+    ): SignInMutator = signInMutator(
+        scope = scope,
+        initialState = null,
+        route = route,
+        authRepository = dataComponent.authRepository,
+        lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
+    )
+}
 
 @Serializable
-object ProfileRoute : AppRoute {
+object SignInRoute : AppRoute {
     override val id: String
-        get() = "Profile"
+        get() = "sign-in"
 
     @Composable
     override fun Render() {
-        ProfileScreen(
+        SignInScreen(
             mutator = LocalRouteServiceLocator.current.locate(this),
         )
     }
 }
 
 @Composable
-private fun ProfileScreen(mutator: ProfileMutator) {
+private fun SignInScreen(mutator: SignInMutator) {
     val state by mutator.state.collectAsState()
     val scrollState = rememberScrollState()
 
     ScreenUiState(
         UiState(
             toolbarShows = true,
-            toolbarTitle = "Profile",
+            toolbarTitle = "Sign In",
+            fabShows = true,
+            fabEnabled = state.submitButtonEnabled,
+            fabText = "Submit",
+            fabClickListener = {
+                mutator.accept(
+                    Action.Submit(request = state.sessionRequest)
+                )
+            },
             navVisibility = NavVisibility.Gone,
             insetFlags = InsetFlags.NO_BOTTOM,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
@@ -82,26 +116,6 @@ private fun ProfileScreen(mutator: ProfileMutator) {
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val user = state.signedInUser
-        val painter = if (user != null) RemoteImagePainter(user.imageUrl) else null
-
-        Spacer(modifier = Modifier.height(32.dp))
-        val modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .size(96.dp)
-
-        if (user != null && painter != null) Image(
-            painter = painter,
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
-            modifier = modifier.clip(CircleShape)
-        ) else Image(
-            imageVector = Icons.Default.Person,
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
-            modifier = modifier.clip(CircleShape)
-        )
-
         state.fields.forEach { field ->
             Spacer(modifier = Modifier.height(8.dp))
             FormField(
@@ -113,5 +127,6 @@ private fun ProfileScreen(mutator: ProfileMutator) {
                 }
             )
         }
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.signin
+package com.tunjid.me.profile
 
 
 import com.tunjid.me.core.ui.update
@@ -28,28 +28,29 @@ import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 
-typealias SignInMutator = Mutator<Action, StateFlow<State>>
+typealias ProfileMutator = Mutator<Action, StateFlow<State>>
 
-fun signInMutator(
+fun profileMutator(
     scope: CoroutineScope,
-    route: SignInRoute,
+    @Suppress("UNUSED_PARAMETER")
+    route: ProfileRoute,
     initialState: State? = null,
     authRepository: AuthRepository,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-): SignInMutator = stateFlowMutator(
+): ProfileMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(2000),
     actionTransform = { actions ->
         merge(
-            authRepository.isSignedIn.map { Mutation { copy(isSignedIn = it) } },
+            authRepository.signedInUserStream.map { Mutation { copy(signedInUser = it) } },
             actions.toMutationStream {
                 when (val action = type()) {
                     is Action.FieldChanged -> action.flow.formEditMutations()
-                    is Action.Submit -> action.flow.submissionMutations(authRepository)
                 }
             }
-        ).monitorWhenActive(lifecycleStateFlow)
+        )
+            .monitorWhenActive(lifecycleStateFlow)
     }
 )
 
@@ -59,16 +60,3 @@ private fun Flow<Action.FieldChanged>.formEditMutations(): Flow<Mutation<State>>
             copy(fields = fields.update(updatedField))
         }
     }
-
-private fun Flow<Action.Submit>.submissionMutations(
-    authRepository: AuthRepository
-): Flow<Mutation<State>> =
-    debounce(200)
-        .flatMapLatest { (request) ->
-            flow<Mutation<State>> {
-                emit(Mutation { copy(isSubmitting = true) })
-                // TODO: Show snack bar if error
-                authRepository.createSession(request = request)
-                emit(Mutation { copy(isSubmitting = false) })
-            }
-        }

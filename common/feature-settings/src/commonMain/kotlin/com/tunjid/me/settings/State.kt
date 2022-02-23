@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.settings
+package com.tunjid.me.settings
 
 import com.tunjid.me.core.utilities.ByteSerializable
-import com.tunjid.me.scaffold.nav.ByteSerializableRoute
-import com.tunjid.me.common.ui.signin.SignInRoute
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 

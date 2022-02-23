@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.settings
+package com.tunjid.me.settings
 
 
-import com.tunjid.me.common.ui.profile.ProfileRoute
-import com.tunjid.me.common.ui.signin.SignInRoute
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive

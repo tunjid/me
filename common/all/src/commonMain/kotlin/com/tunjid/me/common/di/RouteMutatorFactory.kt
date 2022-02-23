@@ -65,53 +65,6 @@ class RouteMutatorFactory(
 
         }.mutator as T
 
-
-//    fun <T : Mutator<*, *>> routeMutator(route: AppRoute): T = with(appDependencies) {
-//        @Suppress("UNCHECKED_CAST")
-//        when (route) {
-//            is SignInRoute -> routeMutatorCache.getOrPut(route) {
-//                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-//                ScopeHolder(
-//                    scope = routeScope,
-//                    mutator = signInMutator(
-//                        scope = routeScope,
-//                        initialState = route.restoredState(),
-//                        route = route,
-//                        authRepository = authRepository,
-//                        lifecycleStateFlow = lifecycleMutator.state,
-//                    )
-//                )
-//            }
-//            is SettingsRoute -> routeMutatorCache.getOrPut(route) {
-//                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-//                ScopeHolder(
-//                    scope = routeScope,
-//                    mutator = settingsMutator(
-//                        scope = routeScope,
-//                        initialState = route.restoredState(),
-//                        route = route,
-//                        authRepository = authRepository,
-//                        lifecycleStateFlow = lifecycleMutator.state,
-//                    )
-//                )
-//            }
-//            is ProfileRoute -> routeMutatorCache.getOrPut(route) {
-//                val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-//                ScopeHolder(
-//                    scope = routeScope,
-//                    mutator = profileMutator(
-//                        scope = routeScope,
-//                        initialState = route.restoredState(),
-//                        route = route,
-//                        authRepository = authRepository,
-//                        lifecycleStateFlow = lifecycleMutator.state,
-//                    )
-//                )
-//            }
-//            else -> throw IllegalArgumentException("Unknown route")
-//        }.mutator as T
-//    }
-
 //    private inline fun <reified T : ByteSerializable> AppRoute<*>.restoredState(): T? {
 //        return try {
 //            // TODO: Figure out why this throws

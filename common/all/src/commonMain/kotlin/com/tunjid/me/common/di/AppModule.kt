@@ -29,9 +29,12 @@ import com.tunjid.me.data.di.DataModule
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.feature.RouteServiceLocator
 import com.tunjid.me.feature.archivelist.ArchiveListFeature
+import com.tunjid.me.profile.ProfileFeature
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.ScaffoldModule
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.settings.SettingsFeature
+import com.tunjid.me.signin.SignInFeature
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.modules.SerializersModule
@@ -64,6 +67,9 @@ private class AppModule(
         ArchiveEditFeature,
         ArchiveDetailFeature,
         ArchiveListFeature,
+        ProfileFeature,
+        SettingsFeature,
+        SignInFeature,
     )
 
     private val scaffoldModule = ScaffoldModule(
@@ -99,9 +105,9 @@ private class AppModule(
                     subclass(com.tunjid.me.feature.archivelist.State::class)
                     subclass(State::class)
                     subclass(com.tunjid.me.archiveedit.State::class)
-                    subclass(com.tunjid.me.common.ui.settings.State::class)
-                    subclass(com.tunjid.me.common.ui.signin.State::class)
-                    subclass(com.tunjid.me.common.ui.profile.State::class)
+                    subclass(com.tunjid.me.settings.State::class)
+                    subclass(com.tunjid.me.signin.State::class)
+                    subclass(com.tunjid.me.profile.State::class)
                 }
             }
         }

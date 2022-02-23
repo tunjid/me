@@ -14,39 +14,31 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.signin
+package com.tunjid.me.profile
 
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.ui.FormField
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class State(
-    val isSignedIn: Boolean = false,
-    val isSubmitting: Boolean = false,
+    @Transient
+    val signedInUser: com.tunjid.me.core.model.User? = null,
     val fields: List<FormField> = listOf(
         FormField(
-            id = "username",
+            id = "First Name",
             value = "",
         ),
         FormField(
-            id = "password",
+            id = "LastName",
             value = "",
         )
     )
 ) : ByteSerializable
 
-val State.submitButtonEnabled: Boolean get() = !isSignedIn && !isSubmitting
-
-val State.sessionRequest: com.tunjid.me.core.model.SessionRequest
-    get() = fields.associateBy { it.id }.let { formMap ->
-        com.tunjid.me.core.model.SessionRequest(
-            username = formMap.getValue("username").value,
-            password = formMap.getValue("password").value,
-        )
-    }
-
 sealed class Action {
-    data class FieldChanged(val field: FormField) : Action()
-    data class Submit(val request: com.tunjid.me.core.model.SessionRequest) : Action()
+    data class FieldChanged(
+        val field: FormField
+    ): Action()
 }
