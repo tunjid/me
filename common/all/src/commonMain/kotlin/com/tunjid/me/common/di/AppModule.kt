@@ -17,7 +17,6 @@
 package com.tunjid.me.common.di
 
 import com.tunjid.me.archivedetail.ArchiveDetailFeature
-import com.tunjid.me.archivedetail.State
 import com.tunjid.me.archiveedit.ArchiveEditFeature
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.core.model.ArchiveKind
@@ -72,9 +71,26 @@ private class AppModule(
         SignInFeature,
     )
 
+    override val byteSerializer: ByteSerializer = DelegatingByteSerializer(
+        format = Cbor {
+            serializersModule = SerializersModule {
+                polymorphic(ByteSerializable::class) {
+                    // TODO expose this on the feature directly
+                    subclass(com.tunjid.me.feature.archivelist.State::class)
+                    subclass(com.tunjid.me.archivedetail.State::class)
+                    subclass(com.tunjid.me.archiveedit.State::class)
+                    subclass(com.tunjid.me.settings.State::class)
+                    subclass(com.tunjid.me.signin.State::class)
+                    subclass(com.tunjid.me.profile.State::class)
+                }
+            }
+        }
+    )
+
     private val scaffoldModule = ScaffoldModule(
         appScope = appScope,
         initialUiState = initialUiState,
+        byteSerializer = byteSerializer,
         startNav = (ArchiveKind.values().map {
             "archives/${it.type}"
         } + "settings")
@@ -89,28 +105,12 @@ private class AppModule(
         networkMonitor = networkMonitor,
         database = appDatabase,
     )
-
     override val scaffoldComponent: ScaffoldComponent = ScaffoldComponent(
         scaffoldModule
     )
+
     override val dataComponent: DataComponent = DataComponent(
         dataModule
-    )
-
-    // TODO: Pass this as an argument
-    override val byteSerializer: ByteSerializer = DelegatingByteSerializer(
-        format = Cbor {
-            serializersModule = SerializersModule {
-                polymorphic(ByteSerializable::class) {
-                    subclass(com.tunjid.me.feature.archivelist.State::class)
-                    subclass(State::class)
-                    subclass(com.tunjid.me.archiveedit.State::class)
-                    subclass(com.tunjid.me.settings.State::class)
-                    subclass(com.tunjid.me.signin.State::class)
-                    subclass(com.tunjid.me.profile.State::class)
-                }
-            }
-        }
     )
 
     override val routeServiceLocator: RouteServiceLocator = RouteMutatorFactory(

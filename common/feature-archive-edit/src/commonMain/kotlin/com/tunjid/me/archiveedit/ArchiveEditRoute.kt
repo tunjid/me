@@ -41,6 +41,7 @@ import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.di.ScaffoldComponent
+import com.tunjid.me.scaffold.di.restoredState
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
@@ -91,8 +92,8 @@ object ArchiveEditFeature : Feature<ArchiveEditRoute, ArchiveEditMutator> {
         dataComponent: DataComponent
     ): ArchiveEditMutator = archiveEditMutator(
         scope = scope,
-        initialState = null,
         route = route,
+        initialState = scaffoldComponent.restoredState(route),
         archiveRepository = dataComponent.archiveRepository,
         authRepository = dataComponent.authRepository,
         uiStateFlow = scaffoldComponent.globalUiStateStream,

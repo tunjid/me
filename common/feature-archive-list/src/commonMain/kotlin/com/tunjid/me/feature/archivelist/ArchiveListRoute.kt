@@ -30,6 +30,7 @@ import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.di.ScaffoldComponent
+import com.tunjid.me.scaffold.di.restoredState
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
@@ -76,6 +77,7 @@ object ArchiveListFeature : Feature<ArchiveListRoute, ArchiveListMutator> {
     ): ArchiveListMutator = archiveListMutator(
         scope = scope,
         route = route,
+        initialState = scaffoldComponent.restoredState(route),
         archiveRepository = dataComponent.archiveRepository,
         authRepository = dataComponent.authRepository,
         navStateFlow = scaffoldComponent.navStateStream,

@@ -64,16 +64,6 @@ internal class RouteMutatorFactory(
             )
 
         }.mutator as T
-
-//    private inline fun <reified T : ByteSerializable> AppRoute<*>.restoredState(): T? {
-//        return try {
-//            // TODO: Figure out why this throws
-//            val serialized = appDependencies.lifecycleMutator.state.value.routeIdsToSerializedStates[id]
-//            serialized?.let(appDependencies.byteSerializer::fromBytes)
-//        } catch (e: Exception) {
-//            null
-//        }
-//    }
 }
 
 private data class ScopeHolder(

@@ -35,6 +35,7 @@ import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.di.ScaffoldComponent
+import com.tunjid.me.scaffold.di.restoredState
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
@@ -69,8 +70,8 @@ object SignInFeature : Feature<SignInRoute, SignInMutator> {
         dataComponent: DataComponent
     ): SignInMutator = signInMutator(
         scope = scope,
-        initialState = null,
         route = route,
+        initialState = scaffoldComponent.restoredState(route),
         authRepository = dataComponent.authRepository,
         lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
     )

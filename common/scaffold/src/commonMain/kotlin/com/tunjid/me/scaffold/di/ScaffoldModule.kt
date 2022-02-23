@@ -16,20 +16,21 @@
 
 package com.tunjid.me.scaffold.di
 
+import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.core.utilities.ByteSerializer
+import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.globalUiMutator
 import com.tunjid.me.scaffold.lifecycle.lifecycleMutator
-import com.tunjid.me.scaffold.nav.Navigator
-import com.tunjid.me.scaffold.nav.RouteParser
-import com.tunjid.me.scaffold.nav.navMutator
-import com.tunjid.me.scaffold.nav.patternsToParsers
+import com.tunjid.me.scaffold.nav.*
 import kotlinx.coroutines.CoroutineScope
 
 class ScaffoldModule(
     appScope: CoroutineScope,
     initialUiState: UiState = UiState(),
     startNav: List<List<String>>,
-    routeParsers: List<RouteParser<*>>
+    routeParsers: List<RouteParser<*>>,
+    internal val byteSerializer: ByteSerializer
 ) {
     internal val patternsToParsers = routeParsers.patternsToParsers()
     val navMutator = navMutator(
@@ -51,9 +52,10 @@ class ScaffoldComponent(
 ) {
     internal val navMutator = module.navMutator
     internal val globalUiMutator = module.globalUiMutator
-    internal val lifecycleMutator = module.lifecycleMutator
+    private val lifecycleMutator = module.lifecycleMutator
 
     val patternsToParsers = module.patternsToParsers
+    val byteSerializer = module.byteSerializer
 
     val navStateStream = module.navMutator.state
     val globalUiStateStream = module.globalUiMutator.state
@@ -67,4 +69,14 @@ class ScaffoldComponent(
         navMutator = navMutator,
         patternsToParsers = patternsToParsers
     )
+}
+
+inline fun <reified T : ByteSerializable> ScaffoldComponent.restoredState(route: AppRoute): T? {
+    return try {
+        // TODO: Figure out why this throws
+        val serialized = lifecycleStateStream.value.routeIdsToSerializedStates[route.id]
+        serialized?.let(byteSerializer::fromBytes)
+    } catch (e: Exception) {
+        null
+    }
 }
