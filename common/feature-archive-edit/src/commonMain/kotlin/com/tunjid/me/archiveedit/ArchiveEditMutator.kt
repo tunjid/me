@@ -111,6 +111,7 @@ private fun ArchiveRepository.textBodyMutations(
     Mutation {
         copy(
             upsert = upsert.copy(
+                id = archive.id,
                 title = archive.title,
                 description = archive.description,
                 body = archive.body,
