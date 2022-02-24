@@ -56,11 +56,13 @@ internal fun BoxScope.AppFab(
     val position by animateDpAsState(
         when {
             state.fabVisible -> -with(LocalDensity.current) {
-                16.dp +
-                        (UiSizes.bottomNavSize countIf state.bottomNavVisible) +
-                        state.keyboardSize.toDp() +
-                        state.navBarSize.toDp() +
-                        state.snackbarOffset
+                16.dp + when {
+                    state.keyboardSize > 0 -> state.keyboardSize.toDp() +
+                            state.snackbarOffset
+                    else -> (UiSizes.bottomNavSize countIf state.bottomNavVisible) +
+                            state.navBarSize.toDp() +
+                            state.snackbarOffset
+                }
             }
             else -> UiSizes.bottomNavSize
         }
