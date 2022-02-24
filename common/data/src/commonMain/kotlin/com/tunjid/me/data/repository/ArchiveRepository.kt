@@ -37,7 +37,7 @@ interface ArchiveRepository {
 /**
  * An implementation of [ArchiveRepository] that uses reactive pull. The long term goal
  * is to have a pub sub infrastructure such that when an entity changes on the server, the
- * app is notified and it pull it in.
+ * app is notified, and pulls it in.
  */
 internal class ReactiveArchiveRepository(
     private val networkService: NetworkService,

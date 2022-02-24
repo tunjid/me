@@ -56,3 +56,7 @@ ON CONFLICT(id) DO UPDATE SET
     author=excluded.author,
     created=excluded.created,
     created=excluded.created;
+
+delete:
+DELETE FROM archiveEntity
+WHERE id = :id;

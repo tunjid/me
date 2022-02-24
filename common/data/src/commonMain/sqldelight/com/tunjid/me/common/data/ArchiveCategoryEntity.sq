@@ -15,3 +15,7 @@ WHERE archive_id = :archive_id;
 upsert:
 INSERT OR IGNORE INTO archiveCategory (archive_id, category)
 VALUES (:archive_id, :category);
+
+delete:
+DELETE FROM archiveCategory
+WHERE archive_id = :archive_id;
