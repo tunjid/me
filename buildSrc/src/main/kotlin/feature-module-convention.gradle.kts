@@ -1,3 +1,6 @@
+import org.gradle.kotlin.dsl.kotlin
+import org.gradle.kotlin.dsl.version
+
 /*
  * Copyright 2021 Google LLC
  *
@@ -16,6 +19,9 @@
 
 plugins {
     kotlin("multiplatform")
+    id("org.jetbrains.compose")
+    kotlin("plugin.serialization")
 }
 
 configureKotlinMultiplatform()
+configureFeatureModule()

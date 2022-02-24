@@ -17,25 +17,14 @@
 plugins {
     `android-library-convention`
     `kotlin-library-convention`
-    id("org.jetbrains.compose")
-    kotlin("plugin.serialization") version "1.6.10"
+    `feature-module-convention`
 }
 
 kotlin {
-    android()
-    jvm("desktop")
     sourceSets {
         named("commonMain") {
             dependencies {
                 api(project(":common:core-ui"))
-                implementation(project(":common:data"))
-                implementation(project(":common:scaffold"))
-                implementation(project(":common:feature-template"))
-
-                implementation(libs.jetbrains.compose.runtime)
-                implementation(libs.jetbrains.compose.animation)
-                implementation(libs.jetbrains.compose.material)
-                implementation(libs.jetbrains.compose.foundation.layout)
 
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
@@ -49,21 +38,6 @@ kotlin {
                 implementation(libs.tunjid.mutator.coroutines.common)
 
                 implementation(libs.tunjid.treenav.common)
-            }
-        }
-        named("androidMain") {
-            dependencies {
-                implementation(libs.accompanist.flowlayout)
-                implementation(libs.androidx.compose.foundation.layout)
-            }
-        }
-        named("desktopMain") {
-            dependencies {
-            }
-        }
-        named("commonTest") {
-            dependencies {
-                implementation(kotlin("test"))
             }
         }
     }

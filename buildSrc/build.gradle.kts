@@ -25,6 +25,8 @@ plugins {
 }
 
 dependencies {
+    implementation("org.jetbrains.compose:compose-gradle-plugin:1.2.0-alpha01-dev620")
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
+    implementation("org.jetbrains.kotlin:kotlin-serialization:1.6.10")
     implementation("com.android.tools.build:gradle:7.0.4")
 }

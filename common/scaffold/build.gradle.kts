@@ -18,7 +18,7 @@ plugins {
     `android-library-convention`
     `kotlin-library-convention`
     id("org.jetbrains.compose")
-    kotlin("plugin.serialization") version "1.6.10"
+    kotlin("plugin.serialization")
 }
 
 kotlin {

@@ -17,13 +17,10 @@
 plugins {
     `android-library-convention`
     `kotlin-library-convention`
-    id("org.jetbrains.compose")
-    kotlin("plugin.serialization") version "1.6.10"
+    `feature-module-convention`
 }
 
 kotlin {
-    android()
-    jvm("desktop")
     sourceSets {
         named("commonMain") {
             dependencies {
@@ -48,21 +45,6 @@ kotlin {
                 implementation(libs.tunjid.mutator.coroutines.common)
 
                 implementation(libs.tunjid.treenav.common)
-            }
-        }
-        named("androidMain") {
-            dependencies {
-                implementation(libs.accompanist.flowlayout)
-                implementation(libs.androidx.compose.foundation.layout)
-            }
-        }
-        named("desktopMain") {
-            dependencies {
-            }
-        }
-        named("commonTest") {
-            dependencies {
-                implementation(kotlin("test"))
             }
         }
     }
