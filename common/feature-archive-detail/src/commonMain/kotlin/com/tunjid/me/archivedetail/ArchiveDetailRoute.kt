@@ -25,6 +25,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -46,6 +47,7 @@ import com.tunjid.me.scaffold.nav.LocalNavigator
 import com.tunjid.me.scaffold.nav.RouteParser
 import com.tunjid.me.scaffold.nav.routeParser
 import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.pop
 import com.tunjid.treenav.push
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
@@ -115,7 +117,9 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
     val state by mutator.state.collectAsState()
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
+
     val canEdit = state.canEdit
+
     val navigator = LocalNavigator.current
     ScreenUiState(
         UiState(
@@ -153,5 +157,11 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             )
         }
         Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))
+    }
+
+    // Pop nav if this archive does not exist anymore
+    val wasDeleted = state.wasDeleted
+    LaunchedEffect(wasDeleted) {
+        if (wasDeleted) navigator.navigate { currentNav.pop() }
     }
 }

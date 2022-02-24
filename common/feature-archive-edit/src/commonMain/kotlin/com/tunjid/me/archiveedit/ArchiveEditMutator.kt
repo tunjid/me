@@ -107,7 +107,9 @@ private fun ArchiveRepository.textBodyMutations(
 ): Flow<Mutation<State>> = monitorArchive(
     kind = kind,
     id = archiveId
-).map { archive ->
+)
+    .filterNotNull()
+    .map { archive ->
     Mutation {
         copy(
             upsert = upsert.copy(

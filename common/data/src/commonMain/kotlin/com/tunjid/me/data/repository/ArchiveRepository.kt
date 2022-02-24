@@ -24,14 +24,13 @@ import com.tunjid.me.data.network.remoteFetcher
 import com.tunjid.tiler.Tile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 
 interface ArchiveRepository {
     suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId>
     fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
-    fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive>
+    fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive?>
 }
 
 /**
@@ -77,11 +76,10 @@ internal class ReactiveArchiveRepository(
             .onStart { remoteArchivesFetcher(Tile.Request.On(query)) }
             .onCompletion { remoteArchivesFetcher(Tile.Request.Evict(query)) }
 
-    override fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive> =
+    override fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive?> =
         dao.monitorArchive(kind = kind, id = id)
             .onStart { remoteArchiveFetcher(Tile.Request.On(kind to id)) }
             .onCompletion { remoteArchiveFetcher(Tile.Request.Evict(kind to id)) }
-            .filterNotNull()
 
     private suspend fun fetchArchives(query: ArchiveQuery): List<Archive> =
         networkService.fetchArchives(

@@ -17,6 +17,8 @@
 package com.tunjid.me.archivedetail
 
 
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.scaffold.globalui.UiState
@@ -70,12 +72,17 @@ private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     }
 
 private fun ArchiveRepository.archiveLoadMutations(
-    id: com.tunjid.me.core.model.ArchiveId,
-    kind: com.tunjid.me.core.model.ArchiveKind
+    id: ArchiveId,
+    kind: ArchiveKind
 ): Flow<Mutation<State>> = monitorArchive(
     kind = kind,
     id = id
 )
     .map { fetchedArchive ->
-        Mutation { copy(archive = fetchedArchive) }
+        Mutation {
+            copy(
+                wasDeleted = archive != null && fetchedArchive == null,
+                archive = fetchedArchive
+            )
+        }
     }

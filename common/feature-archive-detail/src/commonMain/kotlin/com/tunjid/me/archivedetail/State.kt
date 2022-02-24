@@ -16,6 +16,8 @@
 
 package com.tunjid.me.archivedetail
 
+import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -25,10 +27,11 @@ data class State(
     val hasFetchedAuthStatus: Boolean = false,
     val signedInUserId: com.tunjid.me.core.model.UserId? = null,
     val navBarSize: Int,
-    val kind: com.tunjid.me.core.model.ArchiveKind,
+    val wasDeleted: Boolean = false,
+    val kind: ArchiveKind,
     // Read this from the DB
     @Transient
-    val archive: com.tunjid.me.core.model.Archive? = null,
+    val archive: Archive? = null,
 ) : ByteSerializable
 
 val State.canEdit: Boolean get() = signedInUserId != null && signedInUserId == archive?.author?.id
