@@ -21,6 +21,7 @@ import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
@@ -48,7 +49,7 @@ fun archiveDetailMutator(
         kind = route.kind,
         navBarSize = uiStateFlow.value.navBarSize,
     ),
-    started = SharingStarted.WhileSubscribed(2000),
+    started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     actionTransform = {
         merge(
             uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },

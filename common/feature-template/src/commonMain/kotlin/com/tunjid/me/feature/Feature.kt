@@ -25,6 +25,8 @@ import com.tunjid.me.scaffold.nav.RouteParser
 import kotlinx.coroutines.CoroutineScope
 import kotlin.reflect.KClass
 
+const val FeatureWhileSubscribed = 2_000L
+
 interface Feature<Route : AppRoute, Mutator: Any> {
     val routeType: KClass<Route>
     val routeParsers: List<RouteParser<Route>>

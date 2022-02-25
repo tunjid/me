@@ -50,7 +50,7 @@ fun archiveEditMutator(
         upsert = ArchiveUpsert(id = route.archiveId),
         navBarSize = uiStateFlow.value.navBarSize,
     ),
-    started = SharingStarted.WhileSubscribed(2000),
+    started = SharingStarted.WhileSubscribed(),
     actionTransform = { actions ->
         merge(
             uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },

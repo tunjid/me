@@ -18,6 +18,7 @@ package com.tunjid.me.settings
 
 
 import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
@@ -39,7 +40,7 @@ fun settingsMutator(
 ): SettingsMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(),
-    started = SharingStarted.WhileSubscribed(2000),
+    started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     actionTransform = {
         authRepository.isSignedIn.map { isSignedIn ->
             Mutation<State> {

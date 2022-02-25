@@ -19,6 +19,7 @@ package com.tunjid.me.profile
 
 import com.tunjid.me.core.ui.update
 import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
@@ -40,7 +41,7 @@ fun profileMutator(
 ): ProfileMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(),
-    started = SharingStarted.WhileSubscribed(2000),
+    started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     actionTransform = { actions ->
         merge(
             authRepository.signedInUserStream.map { Mutation { copy(signedInUser = it) } },

@@ -20,6 +20,7 @@ import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.feature.archivelist.*
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
@@ -62,7 +63,7 @@ fun archiveListMutator(
             currentQuery = ArchiveQuery(kind = route.kind),
         )
     ),
-    started = SharingStarted.WhileSubscribed(),
+    started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     actionTransform = { actions ->
         merge(
             navRailStatusMutations(
