@@ -25,13 +25,18 @@ import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.DelegatingByteSerializer
 import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.data.di.DataModule
+import com.tunjid.me.data.di.monitorServerEvents
+import com.tunjid.me.data.local.databaseDispatcher
+import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.NetworkMonitor
+import com.tunjid.me.data.network.modelEvents
 import com.tunjid.me.feature.RouteServiceLocator
 import com.tunjid.me.feature.archivelist.ArchiveListFeature
 import com.tunjid.me.profile.ProfileFeature
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.ScaffoldModule
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.settings.SettingsFeature
 import com.tunjid.me.signin.SignInFeature
 import kotlinx.coroutines.CoroutineScope
@@ -105,6 +110,7 @@ private class AppModule(
         networkMonitor = networkMonitor,
         database = appDatabase,
     )
+
     override val scaffoldComponent: ScaffoldComponent = ScaffoldComponent(
         scaffoldModule
     )
@@ -119,4 +125,16 @@ private class AppModule(
         scaffoldComponent = scaffoldComponent,
         dataComponent = dataComponent
     )
+
+    init {
+        dataComponent.monitorServerEvents(
+            scope = appScope,
+            events = modelEvents(
+                url = "$ApiUrl/",
+                dispatcher = databaseDispatcher()
+            )
+                // This is an Android concern. Remove this when this is firebase powered.
+                .monitorWhenActive(scaffoldComponent.lifecycleStateStream)
+        )
+    }
 }
