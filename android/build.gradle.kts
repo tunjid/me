@@ -54,8 +54,7 @@ android {
 
 dependencies {
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
-
-    implementation(project(":common:all"))
+    implementation(project(":common:app"))
 
     implementation(libs.accompanist.flowlayout)
 

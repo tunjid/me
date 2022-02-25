@@ -56,7 +56,7 @@ include(
     ":common:core-ui",
     ":common:data",
     ":common:scaffold",
-    ":common:all",
+    ":common:app",
     ":common:feature-template",
     ":common:feature-archive-list",
     ":common:feature-archive-detail",
