@@ -57,6 +57,11 @@ fun createAppDependencies(
     initialUiState = initialUiState,
 )
 
+private val startRoutes = ArchiveKind.values()
+    .map { "archives/${it.type}" }
+    .plus("settings")
+    .map { listOf(it) }
+
 /**
  * Manual dependency injection module
  */
@@ -96,10 +101,7 @@ private class AppModule(
         appScope = appScope,
         initialUiState = initialUiState,
         byteSerializer = byteSerializer,
-        startNav = (ArchiveKind.values().map {
-            "archives/${it.type}"
-        } + "settings")
-            .map { listOf(it) },
+        startRoutes = startRoutes,
         routeParsers = features
             .map { it.routeParsers }
             .flatten()

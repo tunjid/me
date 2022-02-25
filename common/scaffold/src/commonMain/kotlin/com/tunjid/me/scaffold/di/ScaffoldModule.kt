@@ -28,14 +28,14 @@ import kotlinx.coroutines.CoroutineScope
 class ScaffoldModule(
     appScope: CoroutineScope,
     initialUiState: UiState = UiState(),
-    startNav: List<List<String>>,
+    startRoutes: List<List<String>>,
     routeParsers: List<RouteParser<*>>,
     internal val byteSerializer: ByteSerializer
 ) {
     internal val patternsToParsers = routeParsers.patternsToParsers()
     val navMutator = navMutator(
         scope = appScope,
-        startNav = startNav,
+        startNav = startRoutes,
         patternsToParsers = patternsToParsers,
     )
     val globalUiMutator = globalUiMutator(
