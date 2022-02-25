@@ -31,7 +31,10 @@ import java.io.ByteArrayInputStream
 
 @Composable
 actual fun RemoteImagePainter(imageUrl: String?): Painter? {
-    val image: ImageBitmap? by produceState<ImageBitmap?>(null) {
+    val image: ImageBitmap? by produceState<ImageBitmap?>(
+        initialValue = null,
+        key1 = imageUrl,
+    ) {
         value = withContext(Dispatchers.IO) {
             try {
                 if (imageUrl != null) urlStream(imageUrl)
