@@ -24,6 +24,7 @@ import com.tunjid.me.data.local.SqlArchiveDao
 import com.tunjid.me.data.local.SqlSessionCookieDao
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.*
+import com.tunjid.me.data.network.models.item
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.data.repository.ReactiveArchiveRepository
@@ -89,7 +90,7 @@ class DataModule(
                             kind = kind, id = ArchiveId(
                                 event.id
                             )
-                        )
+                        ).item()
                     }
                 }
                 .collect {

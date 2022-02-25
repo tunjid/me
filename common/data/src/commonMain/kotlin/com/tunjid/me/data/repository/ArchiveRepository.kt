@@ -18,8 +18,10 @@ package com.tunjid.me.data.repository
 
 import com.tunjid.me.core.model.*
 import com.tunjid.me.data.local.ArchiveDao
+import com.tunjid.me.data.network.models.NetworkErrorCodes
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.network.NetworkService
+import com.tunjid.me.data.network.models.NetworkResponse
 import com.tunjid.me.data.network.remoteFetcher
 import com.tunjid.tiler.Tile
 import kotlinx.coroutines.CoroutineScope
@@ -55,12 +57,20 @@ internal class ReactiveArchiveRepository(
     private val remoteArchiveFetcher = remoteFetcher(
         scope = appScope,
         fetch = { (kind, id): Pair<ArchiveKind, ArchiveId> ->
-            networkService.fetchArchive(
+            id to networkService.fetchArchive(
                 kind = kind,
                 id = id
             )
         },
-        save = { dao.saveArchives(listOf(it)) },
+        save = { (id, response) ->
+            when (response) {
+                is NetworkResponse.Success -> dao.saveArchives(listOf(response.item))
+                is NetworkResponse.Error -> when (response.errorCode) {
+                    NetworkErrorCodes.ModelNotFound -> dao.deleteArchives(listOf(id))
+                    else -> Unit
+                }
+            }
+        },
         networkMonitor = networkMonitor
     )
 

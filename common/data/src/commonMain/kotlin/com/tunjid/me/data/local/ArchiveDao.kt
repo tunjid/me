@@ -23,27 +23,30 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.data.ArchiveEntity
 import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor.Category
 import com.tunjid.me.core.model.Descriptor.Tag
 import com.tunjid.me.core.model.hasContentFilter
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Instant
 
 internal interface ArchiveDao {
     fun monitorArchives(query: com.tunjid.me.core.model.ArchiveQuery): Flow<List<Archive>>
-    fun monitorArchive(kind: com.tunjid.me.core.model.ArchiveKind, id: com.tunjid.me.core.model.ArchiveId): Flow<Archive?>
+    fun monitorArchive(
+        kind: ArchiveKind,
+        id: ArchiveId
+    ): Flow<Archive?>
+
     suspend fun saveArchives(archives: List<Archive>)
+    suspend fun deleteArchives(ids: List<ArchiveId>)
 }
 
 internal class SqlArchiveDao(
     database: AppDatabase,
     private val dispatcher: CoroutineDispatcher,
-): ArchiveDao {
+) : ArchiveDao {
 
     private val archiveQueries = database.archiveEntityQueries
     private val archiveTagQueries = database.archiveTagEntityQueries
@@ -58,7 +61,10 @@ internal class SqlArchiveDao(
             .flatMapLatest { archiveEntities -> archiveEntitiesToArchives(archiveEntities) }
             .distinctUntilChanged()
 
-    override fun monitorArchive(kind: com.tunjid.me.core.model.ArchiveKind, id: com.tunjid.me.core.model.ArchiveId): Flow<Archive?> =
+    override fun monitorArchive(
+        kind: ArchiveKind,
+        id: ArchiveId
+    ): Flow<Archive?> =
         archiveQueries.get(
             id = id.value,
             kind = kind.type
@@ -70,7 +76,13 @@ internal class SqlArchiveDao(
 
     override suspend fun saveArchives(archives: List<Archive>) {
         archiveAuthorQueries.suspendingTransaction(context = dispatcher) {
-            archives.map(::saveArchive)
+            archives.forEach(::saveArchive)
+        }
+    }
+
+    override suspend fun deleteArchives(ids: List<ArchiveId>) {
+        archiveAuthorQueries.suspendingTransaction(context = dispatcher) {
+            ids.map(ArchiveId::value).forEach(archiveQueries::delete)
         }
     }
 
@@ -160,13 +172,13 @@ internal class SqlArchiveDao(
                 .mapToOne(context = this.dispatcher),
         ) { tags, categories, author ->
             Archive(
-                id = com.tunjid.me.core.model.ArchiveId(archiveEntity.id),
+                id = ArchiveId(archiveEntity.id),
                 link = archiveEntity.link,
                 title = archiveEntity.title,
                 description = archiveEntity.description,
                 thumbnail = archiveEntity.thumbnail,
                 likes = archiveEntity.likes,
-                kind = com.tunjid.me.core.model.ArchiveKind.values()
+                kind = ArchiveKind.values()
                     .first { it.type == archiveEntity.kind },
                 created = Instant.fromEpochMilliseconds(archiveEntity.created),
                 body = archiveEntity.body,

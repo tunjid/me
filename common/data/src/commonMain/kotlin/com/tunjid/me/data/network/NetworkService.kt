@@ -16,17 +16,21 @@
 
 package com.tunjid.me.data.network
 
-import com.tunjid.me.common.data.network.models.UpsertResponse
+import com.tunjid.me.data.network.models.UpsertResponse
 import com.tunjid.me.core.model.*
 import com.tunjid.me.data.local.SessionCookieDao
+import com.tunjid.me.data.network.models.NetworkResponse
 import io.ktor.client.*
+import io.ktor.client.features.*
 import io.ktor.client.features.cookies.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 const val ApiUrl = "https://www.tunjid.com"
 
@@ -41,7 +45,7 @@ internal interface NetworkService {
     suspend fun fetchArchive(
         kind: ArchiveKind,
         id: ArchiveId,
-    ): Archive
+    ): NetworkResponse<Archive>
 
     suspend fun upsertArchive(
         kind: ArchiveKind,
@@ -59,12 +63,13 @@ internal class KtorNetworkService(
     private val baseUrl: String = ApiUrl,
     sessionCookieDao: SessionCookieDao,
 ) : NetworkService {
-    private val client = HttpClient {
-        val json = kotlinx.serialization.json.Json {
-            explicitNulls = false
-            ignoreUnknownKeys = true
-        }
 
+    private val json = Json {
+        explicitNulls = false
+        ignoreUnknownKeys = true
+    }
+
+    private val client = HttpClient {
         install(JsonFeature) {
             accept(ContentType.Application.Json, ContentType.Text.Html)
             serializer = KotlinxSerializer(json = json)
@@ -104,7 +109,9 @@ internal class KtorNetworkService(
     override suspend fun fetchArchive(
         kind: ArchiveKind,
         id: ArchiveId,
-    ): Archive = client.get("$baseUrl/api/${kind.type}/${id.value}")
+    ): NetworkResponse<Archive> = json.parseErrors {
+        client.get("$baseUrl/api/${kind.type}/${id.value}")
+    }
 
     override suspend fun upsertArchive(
         kind: ArchiveKind,
@@ -129,4 +136,17 @@ internal class KtorNetworkService(
     }
 
     override suspend fun session(): User = client.get("$baseUrl/api/session")
+}
+
+private suspend fun <T> Json.parseErrors(body: suspend () -> T): NetworkResponse<T> = try {
+    NetworkResponse.Success(body())
+} catch (exception: Exception) {
+    when (exception) {
+        is ClientRequestException -> try {
+            decodeFromString(exception.response.readText())
+        } catch (deserializationException: Exception) {
+            NetworkResponse.Error(message = deserializationException.message ?: "Unknown error")
+        }
+        else -> NetworkResponse.Error(message = exception.message ?: "Unknown error")
+    }
 }

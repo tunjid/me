@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.data.network.models
+package com.tunjid.me.data.network.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

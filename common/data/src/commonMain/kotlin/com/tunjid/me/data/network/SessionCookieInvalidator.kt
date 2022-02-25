@@ -17,23 +17,17 @@
 package com.tunjid.me.data.network
 
 import com.tunjid.me.data.local.SessionCookieDao
+import com.tunjid.me.data.network.models.NetworkErrorCodes
+import com.tunjid.me.data.network.models.NetworkResponse
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.observer.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
-import kotlinx.serialization.Serializable
-
-@Serializable
-internal data class NetworkError(
-    val errorCode: String?,
-    val message: String?,
-    val model: String?,
-)
 
 class ErrorInterceptorConfig {
-    internal var networkErrorConverter: ((String) -> NetworkError)? = null
+    internal var networkErrorConverter: ((String) -> NetworkResponse.Error<Any>)? = null
     internal var sessionCookieDao: SessionCookieDao? = null
 }
 
@@ -41,7 +35,7 @@ class ErrorInterceptorConfig {
  * Invalidates session cookies that have expired or are otherwise invalid
  */
 internal class SessionCookieInvalidator(
-    private val networkErrorConverter: ((String) -> NetworkError)?,
+    private val networkErrorConverter: ((String) -> NetworkResponse.Error<Any>)?,
     private val sessionCookieDao: SessionCookieDao?
 ) {
 
@@ -67,7 +61,7 @@ internal class SessionCookieInvalidator(
                         val responseText = response.readText()
                         val error = converter(responseText)
 
-                        if (error.errorCode == NetworkErrorCodes.NotLoggedIn.code) {
+                        if (error.errorCode == NetworkErrorCodes.NotLoggedIn) {
                             sessionCookieDao.saveSessionCookie(sessionCookie = null)
                         }
                     } catch (_: Throwable) {
