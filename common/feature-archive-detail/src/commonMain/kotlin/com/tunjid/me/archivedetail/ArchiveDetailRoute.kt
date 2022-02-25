@@ -18,6 +18,7 @@ package com.tunjid.me.archivedetail
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -36,6 +37,8 @@ import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material.MaterialRichText
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
@@ -149,13 +152,35 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             .verticalScroll(state = scrollState),
     ) {
         Spacer(modifier = Modifier.padding(8.dp))
+
+        Chips(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            name = "Categories:",
+            chips = state.archive?.categories?.map(Descriptor.Category::value) ?: listOf(),
+            color = MaterialTheme.colors.primaryVariant,
+        )
+
         MaterialRichText(
-            modifier = Modifier.padding(horizontal = 8.dp)
+            modifier = Modifier.padding(horizontal = 16.dp)
         ) {
             if (archive != null) Markdown(
                 content = archive.body
             )
         }
+
+        Spacer(modifier = Modifier.padding(16.dp))
+
+        Chips(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            name = "Tags:",
+            chips = state.archive?.tags?.map(Descriptor.Tag::value) ?: listOf(),
+            color = MaterialTheme.colors.secondary,
+        )
+
         Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))
     }
 
