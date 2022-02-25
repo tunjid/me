@@ -16,6 +16,7 @@
 
 package com.tunjid.me.archivedetail
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.Markdown
@@ -39,6 +41,7 @@ import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.Chips
+import com.tunjid.me.core.ui.RemoteImagePainter
 import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
@@ -151,7 +154,7 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
         modifier = Modifier
             .verticalScroll(state = scrollState),
     ) {
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.padding(16.dp))
 
         Chips(
             modifier = Modifier
@@ -160,6 +163,15 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             name = "Categories:",
             chips = state.archive?.categories?.map(Descriptor.Category::value) ?: listOf(),
             color = MaterialTheme.colors.primaryVariant,
+        )
+
+        val painter = RemoteImagePainter(state.archive?.thumbnail)
+
+        if (painter != null) Image(
+            painter = painter,
+            contentScale = ContentScale.Crop,
+            contentDescription = null,
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
 
         MaterialRichText(
