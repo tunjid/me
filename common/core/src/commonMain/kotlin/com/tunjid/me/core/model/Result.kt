@@ -17,6 +17,11 @@
 package com.tunjid.me.core.model
 
 sealed class Result<T> {
-    data class Success<T>(val item: T): Result<T>()
-    data class Error<T>(val message: String?): Result<T>()
+    data class Success<T>(val item: T) : Result<T>()
+    data class Error<T>(val message: String?) : Result<T>()
+}
+
+fun <T, R> Result<T>.map(mapper: (T) -> R): Result<R> = when (this) {
+    is Result.Success -> Result.Success(mapper(item))
+    is Result.Error -> Result.Error(message = message)
 }

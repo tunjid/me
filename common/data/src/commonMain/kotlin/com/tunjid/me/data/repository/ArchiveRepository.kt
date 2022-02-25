@@ -22,6 +22,8 @@ import com.tunjid.me.data.network.models.NetworkErrorCodes
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.models.NetworkResponse
+import com.tunjid.me.data.network.models.item
+import com.tunjid.me.data.network.models.toResult
 import com.tunjid.me.data.network.remoteFetcher
 import com.tunjid.tiler.Tile
 import kotlinx.coroutines.CoroutineScope
@@ -74,12 +76,10 @@ internal class ReactiveArchiveRepository(
         networkMonitor = networkMonitor
     )
 
-    override suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId> = try {
-        val response = networkService.upsertArchive(kind, upsert)
-        Result.Success(ArchiveId(response.id))
-    } catch (e: Throwable) {
-        Result.Error(e.message)
-    }
+    override suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId> =
+        networkService.upsertArchive(kind, upsert)
+            .toResult()
+            .map { ArchiveId(it.id) }
 
     override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
         dao.monitorArchives(query)
@@ -102,5 +102,5 @@ internal class ReactiveArchiveRepository(
             ).toMap(),
             tags = query.contentFilter.tags,
             categories = query.contentFilter.categories,
-        )
+        ).item() ?: listOf()
 }

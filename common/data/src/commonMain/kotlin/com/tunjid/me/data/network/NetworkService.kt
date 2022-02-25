@@ -40,7 +40,7 @@ internal interface NetworkService {
         options: Map<String, String> = mapOf(),
         tags: List<Descriptor.Tag> = listOf(),
         categories: List<Descriptor.Category> = listOf(),
-    ): List<Archive>
+    ): NetworkResponse<List<Archive>>
 
     suspend fun fetchArchive(
         kind: ArchiveKind,
@@ -50,13 +50,13 @@ internal interface NetworkService {
     suspend fun upsertArchive(
         kind: ArchiveKind,
         upsert: ArchiveUpsert,
-    ): UpsertResponse
+    ): NetworkResponse<UpsertResponse>
 
     suspend fun signIn(
         sessionRequest: SessionRequest
-    ): User
+    ): NetworkResponse<User>
 
-    suspend fun session(): User
+    suspend fun session(): NetworkResponse<User>
 }
 
 internal class KtorNetworkService(
@@ -96,33 +96,35 @@ internal class KtorNetworkService(
         options: Map<String, String>,
         tags: List<Descriptor.Tag>,
         categories: List<Descriptor.Category>,
-    ): List<Archive> = client.get("$baseUrl/api/${kind.type}") {
-        options.forEach { (key, value) -> parameter(key, value) }
-        if (tags.isNotEmpty()) tags.map(Descriptor.Tag::value).forEach {
-            parameter("tag", it)
-        }
-        if (categories.isNotEmpty()) categories.map(Descriptor.Category::value).forEach {
-            parameter("category", it)
+    ): NetworkResponse<List<Archive>> = json.parseServerErrors {
+        client.get("$baseUrl/api/${kind.type}") {
+            options.forEach { (key, value) -> parameter(key, value) }
+            if (tags.isNotEmpty()) tags.map(Descriptor.Tag::value).forEach {
+                parameter("tag", it)
+            }
+            if (categories.isNotEmpty()) categories.map(Descriptor.Category::value).forEach {
+                parameter("category", it)
+            }
         }
     }
 
     override suspend fun fetchArchive(
         kind: ArchiveKind,
         id: ArchiveId,
-    ): NetworkResponse<Archive> = json.parseErrors {
+    ): NetworkResponse<Archive> = json.parseServerErrors {
         client.get("$baseUrl/api/${kind.type}/${id.value}")
     }
 
     override suspend fun upsertArchive(
         kind: ArchiveKind,
         upsert: ArchiveUpsert,
-    ): UpsertResponse {
+    ): NetworkResponse<UpsertResponse> = json.parseServerErrors {
         val id = upsert.id
         val requestBuilder: HttpRequestBuilder.() -> Unit = {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             body = upsert
         }
-        return when (id) {
+        when (id) {
             null -> client.post("$baseUrl/api/$kind", requestBuilder)
             else -> client.put("$baseUrl/api/$kind/${id.value}", requestBuilder)
         }
@@ -130,15 +132,19 @@ internal class KtorNetworkService(
 
     override suspend fun signIn(
         sessionRequest: SessionRequest
-    ): User = client.post("$baseUrl/api/sign-in") {
-        header(HttpHeaders.ContentType, ContentType.Application.Json)
-        body = sessionRequest
+    ): NetworkResponse<User> = json.parseServerErrors {
+        client.post("$baseUrl/api/sign-in") {
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+            body = sessionRequest
+        }
     }
 
-    override suspend fun session(): User = client.get("$baseUrl/api/session")
+    override suspend fun session(): NetworkResponse<User> = json.parseServerErrors {
+        client.get("$baseUrl/api/session")
+    }
 }
 
-private suspend fun <T> Json.parseErrors(body: suspend () -> T): NetworkResponse<T> = try {
+private suspend fun <T> Json.parseServerErrors(body: suspend () -> T): NetworkResponse<T> = try {
     NetworkResponse.Success(body())
 } catch (exception: Exception) {
     when (exception) {
@@ -147,6 +153,6 @@ private suspend fun <T> Json.parseErrors(body: suspend () -> T): NetworkResponse
         } catch (deserializationException: Exception) {
             NetworkResponse.Error(message = deserializationException.message ?: "Unknown error")
         }
-        else -> NetworkResponse.Error(message = exception.message ?: "Unknown error")
+        else -> throw exception
     }
 }

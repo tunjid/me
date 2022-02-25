@@ -16,17 +16,20 @@
 
 package com.tunjid.me.data.repository
 
+import com.tunjid.me.core.model.*
 import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.exponentialBackoff
+import com.tunjid.me.data.network.models.item
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import com.tunjid.me.data.network.models.toResult
 
 interface AuthRepository {
     val isSignedIn: Flow<Boolean>
-    val signedInUserStream: Flow<com.tunjid.me.core.model.User?>
-    suspend fun createSession(request: com.tunjid.me.core.model.SessionRequest): com.tunjid.me.core.model.Result<com.tunjid.me.core.model.UserId>
+    val signedInUserStream: Flow<User?>
+    suspend fun createSession(request: SessionRequest): Result<UserId>
 }
 
 internal class SessionCookieAuthRepository(
@@ -38,19 +41,17 @@ internal class SessionCookieAuthRepository(
         dao.sessionCookieStream.map { it != null }
             .distinctUntilChanged()
 
-    override val signedInUserStream: Flow<com.tunjid.me.core.model.User?> =
+    override val signedInUserStream: Flow<User?> =
         isSignedIn.map {
             if (it) exponentialBackoff(
                 default = null,
-                block = { networkService.session() }
+                block = { networkService.session().item() }
             )
             else null
         }
 
-    override suspend fun createSession(request: com.tunjid.me.core.model.SessionRequest): com.tunjid.me.core.model.Result<com.tunjid.me.core.model.UserId> = try {
-        val user = networkService.signIn(request)
-        com.tunjid.me.core.model.Result.Success(user.id)
-    } catch (e: Throwable) {
-        com.tunjid.me.core.model.Result.Error(e.message)
-    }
+    override suspend fun createSession(request: SessionRequest): Result<UserId> =
+        networkService.signIn(request)
+            .toResult()
+            .map(User::id)
 }

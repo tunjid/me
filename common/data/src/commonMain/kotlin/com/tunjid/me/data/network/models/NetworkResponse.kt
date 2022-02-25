@@ -16,6 +16,7 @@
 
 package com.tunjid.me.data.network.models
 
+import com.tunjid.me.core.model.Result
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -43,9 +44,14 @@ internal sealed class NetworkResponse<T> {
     ) : NetworkResponse<T>()
 }
 
-internal fun <T> NetworkResponse<T>.item() = when (this) {
+internal fun <T> NetworkResponse<T>.item(): T? = when (this) {
     is NetworkResponse.Success -> item
     is NetworkResponse.Error -> null
+}
+
+internal fun <T> NetworkResponse<T>.toResult(): Result<T> = when(this) {
+    is NetworkResponse.Success -> Result.Success(item)
+    is NetworkResponse.Error -> Result.Error(message = message)
 }
 
 private object NetworkErrorCodesSerializer : KSerializer<NetworkErrorCodes> {
