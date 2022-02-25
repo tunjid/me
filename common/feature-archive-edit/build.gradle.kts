@@ -39,6 +39,9 @@ kotlin {
                 implementation(libs.kotlinx.serialization.cbor)
                 implementation(libs.kotlinx.serialization.json)
 
+                implementation(libs.richtext.commonmark)
+                implementation(libs.richtext.material)
+
                 implementation(libs.tunjid.tiler)
 
                 implementation(libs.tunjid.mutator.core.common)

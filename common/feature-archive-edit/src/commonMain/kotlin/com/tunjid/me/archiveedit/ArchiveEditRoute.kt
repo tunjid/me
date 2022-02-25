@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,8 +36,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.halilibo.richtext.markdown.Markdown
+import com.halilibo.richtext.ui.material.MaterialRichText
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.ui.icons.Preview
 import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
@@ -46,6 +50,7 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.RouteParser
 import com.tunjid.me.scaffold.nav.routeParser
@@ -126,6 +131,21 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
         UiState(
             toolbarShows = true,
             toolbarTitle = "${if (state.upsert.id == null) "Create" else "Edit"} ${state.kind.name}",
+            toolbarItems = listOfNotNull(
+                ToolbarItem(
+                    id = "preview",
+                    text = "Preview",
+                    imageVector = Icons.Default.Preview
+                ).takeIf { state.isEditing },
+                ToolbarItem(
+                    id = "edit",
+                    text = "Edit",
+                    imageVector = Icons.Default.Edit
+                ).takeIf { !state.isEditing }
+            ),
+            toolbarMenuClickListener = {
+                mutator.accept(Action.ToggleEditView)
+            },
             fabShows = true,
             fabText = if (state.upsert.id == null) "Create" else "Save",
             fabIcon = Icons.Default.Done,
@@ -189,18 +209,28 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
         )
         Spacer(modifier = Modifier.padding(16.dp))
 
-        TextField(
-            value = upsert.body,
-            colors = Unstyled(),
-            textStyle = LocalTextStyle.current.copy(
-                color = MaterialTheme.colors.onSurface,
-                fontFamily = FontFamily.Monospace,
-                fontSize = 16.sp,
-                lineHeight = 24.sp
-            ),
-            label = { Text(text = "Body") },
-            onValueChange = { mutator.accept(Action.TextEdit.Body(it)) }
-        )
+        when (state.isEditing) {
+            true -> TextField(
+                value = upsert.body,
+                colors = Unstyled(),
+                textStyle = LocalTextStyle.current.copy(
+                    color = MaterialTheme.colors.onSurface,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 16.sp,
+                    lineHeight = 24.sp
+                ),
+                label = { Text(text = "Body") },
+                onValueChange = { mutator.accept(Action.TextEdit.Body(it)) }
+            )
+            false -> MaterialRichText(
+                modifier = Modifier.padding(horizontal = 16.dp)
+            ) {
+                Markdown(
+                    content = state.upsert.body
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))
     }
 }

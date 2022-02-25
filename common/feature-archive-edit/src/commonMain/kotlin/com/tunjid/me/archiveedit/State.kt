@@ -16,9 +16,7 @@
 
 package com.tunjid.me.archiveedit
 
-import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.model.ArchiveUpsert
-import com.tunjid.me.core.model.MessageQueue
+import com.tunjid.me.core.model.*
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.mutator.Mutation
@@ -29,6 +27,7 @@ import kotlinx.serialization.Transient
 data class State(
     val hasFetchedAuthStatus: Boolean = false,
     val isSignedIn: Boolean = false,
+    val isEditing: Boolean = true,
     val isSubmitting: Boolean = false,
     val navBarSize: Int,
     val kind: ArchiveKind,
@@ -62,23 +61,25 @@ sealed class Action(val key: String) {
             }
     }
 
+    object ToggleEditView : Action("ToggleEditView")
+
     data class MessageConsumed(
-        val message: com.tunjid.me.core.model.Message
+        val message: Message
     ) : Action("MessageConsumed")
 
     data class ChipEdit(
         val chipAction: ChipAction,
-        val descriptor: com.tunjid.me.core.model.Descriptor,
+        val descriptor: Descriptor,
     ) : Action("ChipEdit")
 
     sealed class Load : Action("Load") {
         data class InitialLoad(
-            val kind: com.tunjid.me.core.model.ArchiveKind,
-            val id: com.tunjid.me.core.model.ArchiveId
+            val kind: ArchiveKind,
+            val id: ArchiveId
         ) : Load()
 
         data class Submit(
-            val kind: com.tunjid.me.core.model.ArchiveKind,
+            val kind: ArchiveKind,
             val upsert: ArchiveUpsert
         ) : Load()
     }
@@ -86,6 +87,6 @@ sealed class Action(val key: String) {
 
 @Serializable
 data class ChipsState(
-    val categoryText: com.tunjid.me.core.model.Descriptor.Category = com.tunjid.me.core.model.Descriptor.Category(""),
-    val tagText: com.tunjid.me.core.model.Descriptor.Tag = com.tunjid.me.core.model.Descriptor.Tag(""),
+    val categoryText: Descriptor.Category = Descriptor.Category(""),
+    val tagText: Descriptor.Tag = Descriptor.Tag(""),
 )

@@ -61,6 +61,7 @@ fun archiveEditMutator(
                     when (val action = type()) {
                         is Action.TextEdit -> action.flow.textEditMutations()
                         is Action.ChipEdit -> action.flow.chipEditMutations()
+                        is Action.ToggleEditView -> action.flow.viewToggleMutations()
                         is Action.MessageConsumed -> action.flow.messageConsumptionMutations()
                         is Action.Load -> action.flow.loadMutations(
                             archiveRepository = archiveRepository
@@ -129,6 +130,12 @@ private fun ArchiveRepository.textBodyMutations(
  */
 private fun Flow<Action.TextEdit>.textEditMutations(): Flow<Mutation<State>> =
     map { it.mutation }
+
+/**
+ * Mutations from use text inputs
+ */
+private fun Flow<Action.ToggleEditView>.viewToggleMutations(): Flow<Mutation<State>> =
+    map { Mutation { copy(isEditing = !isEditing) } }
 
 /**
  * Mutations from editing the chips
