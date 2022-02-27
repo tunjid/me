@@ -35,7 +35,7 @@ fun CommonExtension<*, *, *, *>.commonConfiguration() {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.2.0-alpha03"
+        kotlinCompilerExtensionVersion = "1.2.0-alpha04"
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -63,7 +63,7 @@ fun CommonExtension<*, *, *, *>.commonConfiguration() {
 fun Configuration.coerceComposeVersion() {
     resolutionStrategy.eachDependency {
         if (requested.group.startsWith("androidx.compose")) {
-            useVersion("1.2.0-alpha03")
+            useVersion("1.2.0-alpha04")
             because("I need the changes in lazyGrid")
         }
     }
