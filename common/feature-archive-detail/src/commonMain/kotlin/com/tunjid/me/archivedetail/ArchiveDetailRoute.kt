@@ -17,10 +17,7 @@
 package com.tunjid.me.archivedetail
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
@@ -162,7 +159,10 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             painter = painter,
             contentScale = ContentScale.Crop,
             contentDescription = null,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .padding(horizontal = 16.dp)
         )
 
         Chips(
