@@ -28,9 +28,6 @@ internal interface SessionCookieDao {
     suspend fun saveSessionCookie(sessionCookie: String?)
 }
 
-
-private const val SessionCookieId = "session-cookie"
-
 internal class SqlSessionCookieDao(
     database: AppDatabase,
     private val dispatcher: CoroutineDispatcher,
@@ -39,7 +36,7 @@ internal class SqlSessionCookieDao(
 
     override val sessionCookieStream: Flow<String?> =
         keyValueQueries
-            .find(id = SessionCookieId)
+            .find(id = Keys.SessionCookieId.key)
             .asFlow()
             .mapToOneOrNull(context = dispatcher)
             .map { it?.data_ }
@@ -47,7 +44,7 @@ internal class SqlSessionCookieDao(
     override suspend fun saveSessionCookie(sessionCookie: String?) {
         keyValueQueries.suspendingTransaction(context = dispatcher) {
             keyValueQueries.upsert(
-                id = SessionCookieId,
+                id = Keys.SessionCookieId.key,
                 data = sessionCookie
             )
         }

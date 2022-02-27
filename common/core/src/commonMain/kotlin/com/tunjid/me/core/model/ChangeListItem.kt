@@ -16,17 +16,16 @@
 
 package com.tunjid.me.core.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmInline
 
 @Serializable
-@JvmInline
-value class UserId(val value: String)
+data class ChangeListItem(
+   val changeType: String,
+   val modelId: String,
+   val model: String,
+   @SerialName("_id")
+   val id: ChangeListId,
+)
 
-@Serializable
-@JvmInline
-value class ArchiveId(val value: String)
-
-@Serializable
-@JvmInline
-value class ChangeListId(val value: String)
+fun ChangeListItem.isDelete() = changeType == "delete"

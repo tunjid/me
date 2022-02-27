@@ -18,18 +18,12 @@ package com.tunjid.me.data.repository
 
 import com.tunjid.me.core.model.*
 import com.tunjid.me.data.local.ArchiveDao
-import com.tunjid.me.data.network.models.NetworkErrorCodes
-import com.tunjid.me.data.network.NetworkMonitor
+import com.tunjid.me.data.local.Keys
 import com.tunjid.me.data.network.NetworkService
-import com.tunjid.me.data.network.models.NetworkResponse
+import com.tunjid.me.data.network.exponentialBackoff
 import com.tunjid.me.data.network.models.item
 import com.tunjid.me.data.network.models.toResult
-import com.tunjid.me.data.network.remoteFetcher
-import com.tunjid.tiler.Tile
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
 
 interface ArchiveRepository {
     suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId>
@@ -44,37 +38,8 @@ interface ArchiveRepository {
  */
 internal class ReactiveArchiveRepository(
     private val networkService: NetworkService,
-    appScope: CoroutineScope,
-    networkMonitor: NetworkMonitor,
     private val dao: ArchiveDao
-) : ArchiveRepository {
-
-    private val remoteArchivesFetcher = remoteFetcher(
-        scope = appScope,
-        fetch = ::fetchArchives,
-        save = dao::saveArchives,
-        networkMonitor = networkMonitor
-    )
-
-    private val remoteArchiveFetcher = remoteFetcher(
-        scope = appScope,
-        fetch = { (kind, id): Pair<ArchiveKind, ArchiveId> ->
-            id to networkService.fetchArchive(
-                kind = kind,
-                id = id
-            )
-        },
-        save = { (id, response) ->
-            when (response) {
-                is NetworkResponse.Success -> dao.saveArchives(listOf(response.item))
-                is NetworkResponse.Error -> when (response.errorCode) {
-                    NetworkErrorCodes.ModelNotFound -> dao.deleteArchives(listOf(id))
-                    else -> Unit
-                }
-            }
-        },
-        networkMonitor = networkMonitor
-    )
+) : ArchiveRepository, ChangeListProcessor<Keys.ChangeList.Archive> {
 
     override suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId> =
         networkService.upsertArchive(kind, upsert)
@@ -83,24 +48,36 @@ internal class ReactiveArchiveRepository(
 
     override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
         dao.monitorArchives(query)
-            .onStart { remoteArchivesFetcher(Tile.Request.On(query)) }
-            .onCompletion { remoteArchivesFetcher(Tile.Request.Evict(query)) }
 
     override fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive?> =
         dao.monitorArchive(kind = kind, id = id)
-            .onStart { remoteArchiveFetcher(Tile.Request.On(kind to id)) }
-            .onCompletion { remoteArchiveFetcher(Tile.Request.Evict(kind to id)) }
 
-    private suspend fun fetchArchives(query: ArchiveQuery): List<Archive> =
-        networkService.fetchArchives(
-            kind = query.kind,
-            options = listOfNotNull(
-                "offset" to query.offset.toString(),
-                "limit" to query.limit.toString(),
-                query.temporalFilter?.let { "month" to it.month.toString() },
-                query.temporalFilter?.let { "year" to it.year.toString() },
-            ).toMap(),
-            tags = query.contentFilter.tags,
-            categories = query.contentFilter.categories,
-        ).item() ?: listOf()
+    override suspend fun process(key: Keys.ChangeList.Archive, changeListItem: ChangeListItem): Boolean {
+        val archive = exponentialBackoff(
+            initialDelay = 1_000,
+            maxDelay = 20_000,
+            default = null,
+        ) {
+            networkService.fetchArchive(
+                kind = key.kind,
+                id = ArchiveId(changeListItem.id.value)
+            ).item()
+        } ?: return false
+
+        dao.saveArchives(listOf(archive))
+        return true
+    }
+
+//    private suspend fun fetchArchives(query: ArchiveQuery): List<Archive> =
+//        networkService.fetchArchives(
+//            kind = query.kind,
+//            options = listOfNotNull(
+//                "offset" to query.offset.toString(),
+//                "limit" to query.limit.toString(),
+//                query.temporalFilter?.let { "month" to it.month.toString() },
+//                query.temporalFilter?.let { "year" to it.year.toString() },
+//            ).toMap(),
+//            tags = query.contentFilter.tags,
+//            categories = query.contentFilter.categories,
+//        ).item() ?: listOf()
 }

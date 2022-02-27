@@ -18,6 +18,7 @@ package com.tunjid.me.data.network
 
 import com.tunjid.me.data.network.models.UpsertResponse
 import com.tunjid.me.core.model.*
+import com.tunjid.me.data.local.Keys
 import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.data.network.models.NetworkResponse
 import io.ktor.client.*
@@ -57,6 +58,8 @@ internal interface NetworkService {
     ): NetworkResponse<User>
 
     suspend fun session(): NetworkResponse<User>
+
+    suspend fun changeList(key: Keys.ChangeList, id: ChangeListId? = null): NetworkResponse<List<ChangeListItem>>
 }
 
 internal class KtorNetworkService(
@@ -141,6 +144,14 @@ internal class KtorNetworkService(
 
     override suspend fun session(): NetworkResponse<User> = json.parseServerErrors {
         client.get("$baseUrl/api/session")
+    }
+
+    override suspend fun changeList(
+        key: Keys.ChangeList, id: ChangeListId?
+    ): NetworkResponse<List<ChangeListItem>> = json.parseServerErrors {
+        client.get("$baseUrl/api/${key.path}/changelist") {
+            if (id != null) parameter("after", id.value)
+        }
     }
 }
 

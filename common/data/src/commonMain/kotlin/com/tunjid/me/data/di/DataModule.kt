@@ -20,16 +20,9 @@ import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.local.*
-import com.tunjid.me.data.local.ArchiveDao
-import com.tunjid.me.data.local.SessionCookieDao
-import com.tunjid.me.data.local.SqlArchiveDao
-import com.tunjid.me.data.local.SqlSessionCookieDao
 import com.tunjid.me.data.network.*
 import com.tunjid.me.data.network.models.item
-import com.tunjid.me.data.repository.ArchiveRepository
-import com.tunjid.me.data.repository.AuthRepository
-import com.tunjid.me.data.repository.ReactiveArchiveRepository
-import com.tunjid.me.data.repository.SessionCookieAuthRepository
+import com.tunjid.me.data.repository.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -46,6 +39,11 @@ class DataModule(
         dispatcher = databaseDispatcher(),
     )
 
+    private val changeListDao: ChangeListDao = SqlChangeListDao(
+        database = database,
+        dispatcher = databaseDispatcher(),
+    )
+
     private val sessionCookieDao: SessionCookieDao = SqlSessionCookieDao(
         database = database,
         dispatcher = databaseDispatcher(),
@@ -55,16 +53,22 @@ class DataModule(
         sessionCookieDao = sessionCookieDao
     )
 
-    val archiveRepository: ArchiveRepository = ReactiveArchiveRepository(
+    internal val archiveRepository = ReactiveArchiveRepository(
         networkService = networkService,
-        appScope = appScope,
         networkMonitor = networkMonitor,
         dao = archiveDao
     )
 
-    val authRepository: AuthRepository = SessionCookieAuthRepository(
+    internal val authRepository = SessionCookieAuthRepository(
         networkService = networkService,
         dao = sessionCookieDao
+    )
+
+    private val changeListRepository = SqlChangeListRepository(
+        appScope = appScope,
+        networkService = networkService,
+        changeListDao = changeListDao,
+        archiveChangeListProcessor = archiveRepository
     )
 }
 
