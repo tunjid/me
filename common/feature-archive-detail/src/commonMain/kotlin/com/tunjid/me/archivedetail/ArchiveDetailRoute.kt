@@ -156,6 +156,15 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
     ) {
         Spacer(modifier = Modifier.padding(16.dp))
 
+        val painter = RemoteImagePainter(state.archive?.thumbnail)
+
+        if (painter != null) Image(
+            painter = painter,
+            contentScale = ContentScale.Crop,
+            contentDescription = null,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
         Chips(
             modifier = Modifier
                 .fillMaxWidth()
@@ -165,14 +174,7 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             color = MaterialTheme.colors.primaryVariant,
         )
 
-        val painter = RemoteImagePainter(state.archive?.thumbnail)
-
-        if (painter != null) Image(
-            painter = painter,
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+        Spacer(modifier = Modifier.padding(16.dp))
 
         MaterialRichText(
             modifier = Modifier.padding(horizontal = 16.dp)
@@ -193,7 +195,7 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             color = MaterialTheme.colors.secondary,
         )
 
-        Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))
+        Spacer(modifier = Modifier.padding(64.dp + navBarSizeDp))
     }
 
     // Pop nav if this archive does not exist anymore

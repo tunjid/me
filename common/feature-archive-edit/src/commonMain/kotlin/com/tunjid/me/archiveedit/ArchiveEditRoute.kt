@@ -231,7 +231,7 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
             }
         }
 
-        Spacer(modifier = Modifier.padding(8.dp + navBarSizeDp))
+        Spacer(modifier = Modifier.padding(64.dp + navBarSizeDp))
     }
 }
 
