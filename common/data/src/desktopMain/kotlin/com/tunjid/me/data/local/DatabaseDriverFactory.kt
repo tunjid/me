@@ -27,7 +27,7 @@ actual fun databaseDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
 actual class DatabaseDriverFactory {
     actual fun createDriver(): SqlDriver {
-        val databasePath = File(System.getProperty("java.io.tmpdir"), "ComposeTodoDatabase.db")
+        val databasePath = File(System.getProperty("java.io.tmpdir"), "Me.db")
         val driver = JdbcSqliteDriver(url = "jdbc:sqlite:${databasePath.absolutePath}")
 
 //        val driver: SqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
