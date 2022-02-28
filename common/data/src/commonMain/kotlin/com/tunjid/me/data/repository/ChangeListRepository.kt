@@ -27,7 +27,6 @@ import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 internal interface ChangeListRepository {
     fun sync(key: Keys.ChangeList)
@@ -46,31 +45,18 @@ private val allKeys = listOf(
 
 internal class SqlChangeListRepository(
     appScope: CoroutineScope,
-    private val networkMonitor: NetworkMonitor,
+    networkMonitor: NetworkMonitor,
     private val networkService: NetworkService,
     private val changeListDao: ChangeListDao,
     private val archiveChangeListProcessor: ChangeListProcessor<Keys.ChangeList.Archive>,
 ) : ChangeListRepository {
 
-    init {
-        appScope.launch {
-            // Re-sync each time we're online
-            networkMonitor.isConnected
-                .distinctUntilChanged()
-                .filter { it }
-                .collect { allKeys.forEach(::sync) }
-        }
-    }
     private val mutator = stateFlowMutator<Keys.ChangeList, Unit>(
         scope = appScope,
         initialState = Unit,
-        started = SharingStarted.Eagerly,
+        started = SharingStarted.WhileSubscribed(),
         actionTransform = { actions ->
             actions
-                .onStart {
-                    // Sync all keys on start
-                    allKeys.forEach { emit(it) }
-                }
                 .toMutationStream(
                     keySelector = Keys.ChangeList::key,
                     transform = {
@@ -87,6 +73,19 @@ internal class SqlChangeListRepository(
                 )
         }
     )
+
+    init {
+        mutator.state
+            .launchIn(appScope)
+
+        // Re-sync each time we're online
+        networkMonitor.isConnected
+            .distinctUntilChanged()
+            .filter { it }
+            .flatMapLatest { allKeys.asFlow() }
+            .onEach { sync(it) }
+            .launchIn(appScope)
+    }
 
     override fun sync(key: Keys.ChangeList) = mutator.accept(key)
 }

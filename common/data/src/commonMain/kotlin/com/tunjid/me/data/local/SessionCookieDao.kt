@@ -23,6 +23,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+/**
+ * Dao for auth sessions
+ */
 internal interface SessionCookieDao {
     val sessionCookieStream: Flow<String?>
     suspend fun saveSessionCookie(sessionCookie: String?)

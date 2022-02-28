@@ -18,6 +18,9 @@ package com.tunjid.me.data.local
 
 import com.tunjid.me.core.model.ArchiveKind
 
+/**
+ * Keys uesd for key value storage
+ */
 internal sealed class Keys(val key: String) {
     object SessionCookieId : Keys(key = "session-cookie")
 

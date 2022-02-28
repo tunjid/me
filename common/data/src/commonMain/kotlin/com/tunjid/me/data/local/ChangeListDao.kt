@@ -22,6 +22,10 @@ import com.tunjid.me.core.model.ChangeListItem
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
+
+/**
+ * Dao for syncing change lists from the server
+ */
 internal interface ChangeListDao {
     suspend fun latestId(keys: Keys.ChangeList): ChangeListId?
     suspend fun markComplete(keys: Keys.ChangeList, item: ChangeListItem)
