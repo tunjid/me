@@ -63,14 +63,10 @@ internal interface NetworkService {
 }
 
 internal class KtorNetworkService(
+    private val json: Json,
     private val baseUrl: String = ApiUrl,
     sessionCookieDao: SessionCookieDao,
 ) : NetworkService {
-
-    private val json = Json {
-        explicitNulls = false
-        ignoreUnknownKeys = true
-    }
 
     private val client = HttpClient {
         install(JsonFeature) {

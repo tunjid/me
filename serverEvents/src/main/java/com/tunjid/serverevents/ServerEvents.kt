@@ -48,7 +48,7 @@ sealed class ServerEvent {
 
         data class Socket(
             override val event: String,
-            override val arguments: List<Any>,
+            override val arguments: List<String>,
         ) : Response()
     }
     data class Request(
@@ -75,7 +75,7 @@ fun serverEvents(
         socket.on(event) {
             val response = ServerEvent.Response.Socket(
                 event = event,
-                arguments = it.toList()
+                arguments = it.map(Any::toString)
             )
             channel.trySend(response)
             onResponse(response)?.let { request ->

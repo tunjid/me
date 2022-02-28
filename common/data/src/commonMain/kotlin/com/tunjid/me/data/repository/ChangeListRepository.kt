@@ -19,6 +19,7 @@ package com.tunjid.me.data.repository
 import com.tunjid.me.core.model.ChangeListItem
 import com.tunjid.me.data.local.ChangeListDao
 import com.tunjid.me.data.local.Keys
+import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.models.NetworkResponse
 import com.tunjid.mutator.Mutation
@@ -26,6 +27,7 @@ import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 internal interface ChangeListRepository {
     fun sync(key: Keys.ChangeList)
@@ -35,13 +37,30 @@ internal interface ChangeListProcessor<in Key : Keys.ChangeList> {
     suspend fun process(key: Key, changeListItem: ChangeListItem): Boolean
 }
 
+private val allKeys = listOf(
+    Keys.ChangeList.Users,
+    Keys.ChangeList.Archive.Articles,
+    Keys.ChangeList.Archive.Projects,
+    Keys.ChangeList.Archive.Talks,
+)
+
 internal class SqlChangeListRepository(
     appScope: CoroutineScope,
+    private val networkMonitor: NetworkMonitor,
     private val networkService: NetworkService,
     private val changeListDao: ChangeListDao,
     private val archiveChangeListProcessor: ChangeListProcessor<Keys.ChangeList.Archive>,
 ) : ChangeListRepository {
 
+    init {
+        appScope.launch {
+            // Re-sync each time we're online
+            networkMonitor.isConnected
+                .distinctUntilChanged()
+                .filter { it }
+                .collect { allKeys.forEach(::sync) }
+        }
+    }
     private val mutator = stateFlowMutator<Keys.ChangeList, Unit>(
         scope = appScope,
         initialState = Unit,
@@ -50,10 +69,7 @@ internal class SqlChangeListRepository(
             actions
                 .onStart {
                     // Sync all keys on start
-                    emit(Keys.ChangeList.Users)
-                    emit(Keys.ChangeList.Archive.Articles)
-                    emit(Keys.ChangeList.Archive.Projects)
-                    emit(Keys.ChangeList.Archive.Talks)
+                    allKeys.forEach { emit(it) }
                 }
                 .toMutationStream(
                     keySelector = Keys.ChangeList::key,

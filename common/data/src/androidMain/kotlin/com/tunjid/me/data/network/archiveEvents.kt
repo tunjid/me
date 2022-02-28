@@ -16,6 +16,7 @@
 
 package com.tunjid.me.data.network
 
+import com.tunjid.me.core.model.ChangeListItem
 import com.tunjid.serverevents.ServerEvent
 import com.tunjid.serverevents.serverEvents
 import kotlinx.coroutines.CoroutineDispatcher
@@ -27,12 +28,11 @@ import kotlinx.coroutines.flow.map
 actual fun modelEvents(
     url: String,
     dispatcher: CoroutineDispatcher
-): Flow<ModelEvent> = serverEvents(
+): Flow<ChangeListItem> = serverEvents(
     url = url,
     namespace = ModelEventsNamespace,
     events = listOf(
         ModelChangedEvent,
-        ModelDeletedEvent
     ),
     dispatcher = dispatcher,
     onResponse = { response ->
@@ -45,5 +45,5 @@ actual fun modelEvents(
     }
 )
     .filterIsInstance<ServerEvent.Response.Socket>()
-    .map { it.arguments.toArchiveEvent(it.event) }
+    .map { it.arguments.toChangeListItem(it.event) }
     .filterNotNull()

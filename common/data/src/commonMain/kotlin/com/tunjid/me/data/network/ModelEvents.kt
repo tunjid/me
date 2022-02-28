@@ -16,45 +16,36 @@
 
 package com.tunjid.me.data.network
 
-import com.tunjid.me.data.network.ModelEvent.Changed
-import com.tunjid.me.data.network.ModelEvent.Deleted
+import com.tunjid.me.core.model.ChangeListItem
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
-sealed class ModelEvent {
-    abstract val collection: String
-    abstract val id: String
-
-    data class Changed(
-        override val collection: String,
-        override val id: String,
-    ) : ModelEvent()
-
-    data class Deleted(
-        override val collection: String,
-        override val id: String,
-    ) : ModelEvent()
+// TODO: Use the Json from the DataModule
+private val json = Json {
+    explicitNulls = false
+    ignoreUnknownKeys = true
 }
 
-fun List<Any>.toArchiveEvent(event: String): ModelEvent? {
-    if (size < 2) return null
-    val (collection, id) = this
-    return if (collection is String && id is String) when (event) {
-        "modelChanged" -> Changed(collection, id)
-        "modelDeleted" -> Deleted(collection, id)
-        else -> null
+fun List<String>.toChangeListItem(
+    event: String
+): ChangeListItem? {
+    if (event != ModelChangedEvent) return null
+    val rawJson = firstOrNull()  ?: return null
+    return try {
+        json.decodeFromString<ChangeListItem>(rawJson)
+    } catch (e: Exception) {
+        return null
     }
-    else null
 }
 
 expect fun modelEvents(
     url: String,
     dispatcher: CoroutineDispatcher
-): Flow<ModelEvent>
-
+): Flow<ChangeListItem>
 
 
 internal const val ModelEventsNamespace = "/model-events"
 internal const val JoinModelEvents = "join-model-events"
 internal const val ModelChangedEvent = "modelChanged"
-internal const val ModelDeletedEvent = "modelDeleted"

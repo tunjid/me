@@ -17,24 +17,29 @@
 package com.tunjid.me.data.di
 
 import com.tunjid.me.common.data.AppDatabase
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.ChangeListItem
 import com.tunjid.me.data.local.*
-import com.tunjid.me.data.network.*
-import com.tunjid.me.data.network.models.item
+import com.tunjid.me.data.network.KtorNetworkService
+import com.tunjid.me.data.network.NetworkMonitor
+import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.repository.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 class DataModule(
     appScope: CoroutineScope,
     database: AppDatabase,
     internal val networkMonitor: NetworkMonitor
 ) {
-    internal val archiveDao = SqlArchiveDao(
+    internal val json = Json {
+        explicitNulls = false
+        ignoreUnknownKeys = true
+    }
+
+    private val archiveDao = SqlArchiveDao(
         database = database,
         dispatcher = databaseDispatcher(),
     )
@@ -49,13 +54,13 @@ class DataModule(
         dispatcher = databaseDispatcher(),
     )
 
-    internal val networkService: NetworkService = KtorNetworkService(
+    private val networkService: NetworkService = KtorNetworkService(
+        json = json,
         sessionCookieDao = sessionCookieDao
     )
 
     internal val archiveRepository = ReactiveArchiveRepository(
         networkService = networkService,
-        networkMonitor = networkMonitor,
         dao = archiveDao
     )
 
@@ -64,8 +69,9 @@ class DataModule(
         dao = sessionCookieDao
     )
 
-    private val changeListRepository = SqlChangeListRepository(
+    internal val changeListRepository = SqlChangeListRepository(
         appScope = appScope,
+        networkMonitor = networkMonitor,
         networkService = networkService,
         changeListDao = changeListDao,
         archiveChangeListProcessor = archiveRepository
@@ -73,44 +79,30 @@ class DataModule(
 }
 
 class DataComponent(
-    module: DataModule
+    private val module: DataModule
 ) {
-    internal val archiveDao: ArchiveDao = module.archiveDao
-    internal val networkService: NetworkService = module.networkService
+    internal val json = module.json
 
     val archiveRepository: ArchiveRepository = module.archiveRepository
     val authRepository: AuthRepository = module.authRepository
+
+    fun sync(changeListItem: ChangeListItem) {
+        val key = when (changeListItem.model) {
+            Keys.ChangeList.Archive.Articles.path -> Keys.ChangeList.Archive.Articles
+            Keys.ChangeList.Archive.Projects.path -> Keys.ChangeList.Archive.Projects
+            Keys.ChangeList.Archive.Talks.path -> Keys.ChangeList.Archive.Talks
+            Keys.ChangeList.Users.path -> Keys.ChangeList.Users
+            else -> null
+        }
+        if (key != null) module.changeListRepository.sync(key)
+    }
 }
 
 fun DataComponent.monitorServerEvents(
     scope: CoroutineScope,
-    events: Flow<ModelEvent>
+    events: Flow<ChangeListItem>
 ) {
     scope.launch {
-        events
-            .mapNotNull { event ->
-                val kind = when (event.collection) {
-                    ArchiveKind.Articles.type -> ArchiveKind.Articles
-                    ArchiveKind.Talks.type -> ArchiveKind.Talks
-                    ArchiveKind.Projects.type -> ArchiveKind.Projects
-                    else -> null
-                } ?: return@mapNotNull null
-
-                exponentialBackoff(
-                    initialDelay = 1_000,
-                    maxDelay = 20_000,
-                    times = 5,
-                    default = null
-                ) {
-                    networkService.fetchArchive(
-                        kind = kind, id = ArchiveId(
-                            event.id
-                        )
-                    ).item()
-                }
-            }
-            .collect {
-                archiveDao.saveArchives(listOf(it))
-            }
+        events.collect(::sync)
     }
 }
