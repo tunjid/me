@@ -1,7 +1,3 @@
-import gradle.kotlin.dsl.accessors._84dd20d1a49d379320fe96b7964013dd.kotlin
-import gradle.kotlin.dsl.accessors._84dd20d1a49d379320fe96b7964013dd.sourceSets
-import org.gradle.kotlin.dsl.withType
-
 /*
  * Copyright 2021 Google LLC
  *
@@ -17,6 +13,10 @@ import org.gradle.kotlin.dsl.withType
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import gradle.kotlin.dsl.accessors._84dd20d1a49d379320fe96b7964013dd.kotlin
+import gradle.kotlin.dsl.accessors._84dd20d1a49d379320fe96b7964013dd.sourceSets
+import org.gradle.kotlin.dsl.withType
 
 fun org.gradle.api.Project.configureKotlinMultiplatform() {
     kotlin {

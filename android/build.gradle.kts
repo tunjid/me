@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     `android-application-convention`
     id("kotlin-android")
@@ -30,7 +33,18 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    signingConfigs {
+        getByName("debug") {
+            if (file("debugKeystore.properties").exists()) {
+                val props = Properties()
+                props.load(FileInputStream(file("debugKeystore.properties")))
+                storeFile = file(props["keystore"] as String)
+                storePassword = props["keystore.password"] as String
+                keyAlias = props["keyAlias"] as String
+                keyPassword = props["keyPassword"] as String
+            }
+        }
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -56,8 +70,6 @@ dependencies {
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
     implementation(project(":common:app"))
 
-    implementation(libs.accompanist.flowlayout)
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
@@ -69,14 +81,6 @@ dependencies {
     implementation(libs.jetbrains.compose.runtime)
     implementation(libs.jetbrains.compose.ui.util)
 
-//    val composeVersion = "1.2.0-alpha02"
-//    implementation("androidx.compose.foundation:foundation:$composeVersion")
-//    implementation("androidx.compose.material:material:$composeVersion")
-//    implementation("androidx.compose.animation:animation:$composeVersion")
-//    implementation("androidx.compose.runtime:runtime:$composeVersion")
-//    implementation("androidx.compose.animation:animation:$composeVersion")
-
-
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.serialization.json)
@@ -85,9 +89,6 @@ dependencies {
 
     implementation(libs.coil.core)
     implementation(libs.coil.compose)
-
-    implementation(libs.richtext.commonmark)
-    implementation(libs.richtext.material)
 
     implementation(libs.tunjid.mutator.core.jvm)
     implementation(libs.tunjid.mutator.coroutines.jvm)

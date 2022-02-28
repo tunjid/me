@@ -1,6 +1,3 @@
-import org.gradle.kotlin.dsl.kotlin
-import org.gradle.kotlin.dsl.version
-
 /*
  * Copyright 2021 Google LLC
  *
@@ -16,6 +13,9 @@ import org.gradle.kotlin.dsl.version
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import org.gradle.kotlin.dsl.kotlin
+import org.gradle.kotlin.dsl.version
 
 plugins {
     kotlin("multiplatform")
