@@ -24,9 +24,6 @@ import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.repository.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 class DataModule(
@@ -95,14 +92,5 @@ class DataComponent(
             else -> null
         }
         if (key != null) module.changeListRepository.sync(key)
-    }
-}
-
-fun DataComponent.monitorServerEvents(
-    scope: CoroutineScope,
-    events: Flow<ChangeListItem>
-) {
-    scope.launch {
-        events.collect(::sync)
     }
 }

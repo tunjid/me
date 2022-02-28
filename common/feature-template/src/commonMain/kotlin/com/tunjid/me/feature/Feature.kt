@@ -27,9 +27,13 @@ import kotlin.reflect.KClass
 
 const val FeatureWhileSubscribed = 2_000L
 
+/**
+ * Representation of a full screen destination
+ */
 interface Feature<Route : AppRoute, Mutator: Any> {
     val routeType: KClass<Route>
     val routeParsers: List<RouteParser<Route>>
+    // A factory function for the mutator of this feature. Should go away when I have dependency injection.
     fun mutator(
         scope: CoroutineScope,
         route: Route,

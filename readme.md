@@ -11,6 +11,7 @@ These ideas typically center around state and it's production; a repository of "
 Some of the ideas explored include:
 
 * Android insets and IME behavior driven by immutable state
+* Reactive app architecture
 * [Tiling](https://github.com/tunjid/Tiler) as a way of loading paginated data
 * [Trees](https://github.com/tunjid/treeNav) as a backing data structure for app navigation
 * [`Mutators`](https://github.com/tunjid/Mutator) as abstract data types for the production and mutation of state
@@ -22,6 +23,19 @@ Some of the ideas explored include:
 The API consumed is that of my personal website. The source can be found [here](https://github.com/tunjid/tunji-web-deux).
 
 ## Arch
+
+### Reactive architecture
+
+The app is a subscriber in a pub-sub liaison with the server. There is no pull to refresh, instead the app pulls diffs
+of `ChangeListItem` when the server notifies the app of changes made.
+
+The following rules are applied to the data layer:
+
+* DAOs are internal to the data layer
+* DAOs expose their data with reactive types (`Flow`)
+* Reads from the data layer NEVER error.
+* Writes to the data layer may error and the error is bubbled back up to the caller
+* The `NetworkService` is internal to the data layer
 
 ### Navigation
 
@@ -62,38 +76,47 @@ Things restored after process death currently include:
 
 Lifecycles are one of the most important concepts on Android, however Jetpack Compose itself is
 pretty binary; a `Composable` is either in composition or not. Trying to expand this simplicity to
-Android; the app may either be in the foreground or not. Therefore, the state of the app so far
-can be represented as:
+Android; the app may either be in the foreground or not.
+
+The application state is defined in the `ScaffoldModule`:
 
 ```
-data class AppState(
-    val nav: MultiStackNav,
-    val ui: UiState,
-    val isInForeground: Boolean = true
+class ScaffoldModule(
+    appScope: CoroutineScope,
+    ...
+) {
+    val navMutator: Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> = ...
+    val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>> = ...
+    val lifecycleMutator: Mutator<LifecycleAction, StateFlow<Lifecycle>> = ...
+}
+```
+
+where `Lifecycle` is:
+
+```
+data class Lifecycle(
+    val isInForeground: Boolean = true,
+    val routeIdsToSerializedStates: Map<String, ByteArray> = mapOf()
 )
 ```
 
 With the above managing the lifecycle of components scoped to navigation destinations becomes as
 easy as:
-```
-private data class ScopeHolder(
-    val scope: CoroutineScope,
-    val mutator: Any
-)
 
-object: AppDependencies {
+```
+internal class RouteMutatorFactory(
+    appScope: CoroutineScope,
+    private val scaffoldComponent: ScaffoldComponent,
+    ...
+) : RouteServiceLocator {
     init {
-        scope.launch {
-            appMutator.state
-                .map { it.nav.routes.filterIsInstance<AppRoute<*>>() }
-                .distinctUntilChanged()
-                .scan(listOf<AppRoute<*>>() to listOf<AppRoute<*>>()) { pair, newRoutes ->
-                    pair.copy(first = pair.second, second = newRoutes)
-                }
-                .distinctUntilChanged()
-                .collect { (oldRoutes, newRoutes) ->
-                    oldRoutes.minus(newRoutes.toSet()).forEach { route ->
-                        val holder = routeMutatorFactory.remove(route)
+        appScope.launch {
+            scaffoldComponent
+                .navStateStream
+                .removedRoutes()
+                .collect { removedRoutes ->
+                    removedRoutes.forEach { route ->
+                        val holder = routeMutatorCache.remove(route)
                         holder?.scope?.cancel()
                     }
                 }
@@ -113,10 +136,14 @@ convenience and whim. I'm a huge proponent of dependency injection, yet the repo
 service location. Also outside data classes, virtually everything else is implemented as a function,
 or anonymous class just because.
 
-Again, the work presented here are the ideas of an immutable state zealot. It's far from objective,
-I just be doing anything tbh. Caveat emptor.
+Again, the work presented here are the ideas of an immutable state and functional reactive programming zealot.
+It's far from objective, I just be doing anything tbh. Caveat emptor.
 
 ## Running
+
+As this is a multiplatform app, syntax highlighting may be broken in Android studio. You may fare
+better building with Intellij.
+
 Desktop: `./gradlew :desktop:run`
 Android: `./gradlew :android:assembleDebug` or run the Android target in Android Studio
 

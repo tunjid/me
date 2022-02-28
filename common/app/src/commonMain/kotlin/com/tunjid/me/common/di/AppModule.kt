@@ -25,7 +25,6 @@ import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.DelegatingByteSerializer
 import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.data.di.DataModule
-import com.tunjid.me.data.di.monitorServerEvents
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.NetworkMonitor
@@ -40,6 +39,8 @@ import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.settings.SettingsFeature
 import com.tunjid.me.signin.SignInFeature
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -129,14 +130,13 @@ private class AppModule(
     )
 
     init {
-        dataComponent.monitorServerEvents(
-            scope = appScope,
-            events = modelEvents(
-                url = "$ApiUrl/",
-                dispatcher = databaseDispatcher()
-            )
-                // This is an Android concern. Remove this when this is firebase powered.
-                .monitorWhenActive(scaffoldComponent.lifecycleStateStream)
+        modelEvents(
+            url = "$ApiUrl/",
+            dispatcher = databaseDispatcher()
         )
+            // This is an Android concern. Remove this when this is firebase powered.
+            .monitorWhenActive(scaffoldComponent.lifecycleStateStream)
+            .onEach(dataComponent::sync)
+            .launchIn(appScope)
     }
 }

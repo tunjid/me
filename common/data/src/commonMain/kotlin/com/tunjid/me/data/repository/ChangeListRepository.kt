@@ -28,10 +28,16 @@ import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 
+/**
+ * Syncs [ChangeListItem] from the server and incrementally applies their updates
+ */
 internal interface ChangeListRepository {
     fun sync(key: Keys.ChangeList)
 }
 
+/**
+ * Processes a [ChangeListItem]
+ */
 internal interface ChangeListProcessor<in Key : Keys.ChangeList> {
     suspend fun process(key: Key, changeListItem: ChangeListItem): Boolean
 }
