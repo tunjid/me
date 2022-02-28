@@ -88,7 +88,7 @@ class DataComponent(
             Keys.ChangeList.Archive.Articles.path -> Keys.ChangeList.Archive.Articles
             Keys.ChangeList.Archive.Projects.path -> Keys.ChangeList.Archive.Projects
             Keys.ChangeList.Archive.Talks.path -> Keys.ChangeList.Archive.Talks
-            Keys.ChangeList.Users.path -> Keys.ChangeList.Users
+            Keys.ChangeList.User.path -> Keys.ChangeList.User
             else -> null
         }
         if (key != null) module.changeListRepository.sync(key)

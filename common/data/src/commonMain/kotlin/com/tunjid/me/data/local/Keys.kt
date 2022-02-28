@@ -52,7 +52,7 @@ internal sealed class Keys(val key: String) {
             )
         }
 
-        object Users : ChangeList(
+        object User : ChangeList(
             key = "users-change-list",
             path = "users",
         )

@@ -19,7 +19,7 @@ package com.tunjid.me.data.network
 import kotlinx.coroutines.flow.Flow
 
 /**
- * A class that reports if theres a network connection
+ * An interface that reports if there's a network connection
  */
 expect class NetworkMonitor {
     val isConnected: Flow<Boolean>

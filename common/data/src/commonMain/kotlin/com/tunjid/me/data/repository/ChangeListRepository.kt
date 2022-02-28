@@ -22,11 +22,10 @@ import com.tunjid.me.data.local.Keys
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.models.NetworkResponse
-import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.stateFlowMutator
-import com.tunjid.mutator.coroutines.toMutationStream
+import com.tunjid.mutator.coroutines.splitByType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 /**
  * Syncs [ChangeListItem] from the server and incrementally applies their updates
@@ -43,45 +42,39 @@ internal interface ChangeListProcessor<in Key : Keys.ChangeList> {
 }
 
 private val allKeys = listOf(
-    Keys.ChangeList.Users,
+    Keys.ChangeList.User,
     Keys.ChangeList.Archive.Articles,
     Keys.ChangeList.Archive.Projects,
     Keys.ChangeList.Archive.Talks,
 )
 
 internal class SqlChangeListRepository(
-    appScope: CoroutineScope,
+    private val appScope: CoroutineScope,
     networkMonitor: NetworkMonitor,
     private val networkService: NetworkService,
     private val changeListDao: ChangeListDao,
     private val archiveChangeListProcessor: ChangeListProcessor<Keys.ChangeList.Archive>,
 ) : ChangeListRepository {
 
-    private val mutator = stateFlowMutator<Keys.ChangeList, Unit>(
-        scope = appScope,
-        initialState = Unit,
-        started = SharingStarted.WhileSubscribed(),
-        actionTransform = { actions ->
-            actions
-                .toMutationStream(
-                    keySelector = Keys.ChangeList::key,
-                    transform = {
-                        when (val key = type()) {
-                            is Keys.ChangeList.Archive -> key.flow.chew(
-                                networkService = networkService,
-                                changeListDao = changeListDao,
-                                archiveChangeListProcessor = archiveChangeListProcessor
-                            )
-                            // TODO: Process user changes
-                            Keys.ChangeList.Users -> flowOf(NoOpMutation)
-                        }
-                    }
-                )
-        }
-    )
+    private val input = MutableSharedFlow<Keys.ChangeList>()
 
     init {
-        mutator.state
+        // Process sync requests for each key in parallel.
+        input.splitByType(
+            typeSelector = { it },
+            keySelector = Keys.ChangeList::key,
+            transform = {
+                when (val key = type()) {
+                    is Keys.ChangeList.Archive -> key.flow.chew(
+                        networkService = networkService,
+                        changeListDao = changeListDao,
+                        changeListProcessor = archiveChangeListProcessor
+                    )
+                    // TODO: Process user changes
+                    Keys.ChangeList.User -> emptyFlow()
+                }
+            }
+        )
             .launchIn(appScope)
 
         // Re-sync each time we're online
@@ -93,7 +86,11 @@ internal class SqlChangeListRepository(
             .launchIn(appScope)
     }
 
-    override fun sync(key: Keys.ChangeList) = mutator.accept(key)
+    override fun sync(key: Keys.ChangeList) {
+        appScope.launch {
+            input.emit(key)
+        }
+    }
 }
 
 /**
@@ -102,23 +99,20 @@ internal class SqlChangeListRepository(
 private fun Flow<Keys.ChangeList.Archive>.chew(
     networkService: NetworkService,
     changeListDao: ChangeListDao,
-    archiveChangeListProcessor: ChangeListProcessor<Keys.ChangeList.Archive>
-): Flow<Mutation<Unit>> =
-    // New calls to sync should map latest, especially if it's in the middle of exp backoff
+    changeListProcessor: ChangeListProcessor<Keys.ChangeList.Archive>
+): Flow<Unit> =
+    // New calls to sync should map latest, especially if it's in the middle of exp backoff bc of network loss.
     mapLatest { key ->
         val id = changeListDao.latestId(key)
         val changeList = when (val response = networkService.changeList(key = key, id = id)) {
             is NetworkResponse.Success -> response.item
-            is NetworkResponse.Error -> return@mapLatest NoOpMutation
+            is NetworkResponse.Error -> return@mapLatest
         }
         changeList
             .takeWhile { item ->
-                archiveChangeListProcessor.process(key = key, changeListItem = item)
+                changeListProcessor.process(key = key, changeListItem = item)
             }
             .forEach { item ->
                 changeListDao.markComplete(keys = key, item = item)
             }
-        NoOpMutation
     }
-
-private val NoOpMutation = Mutation<Unit> {}
