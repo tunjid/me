@@ -156,13 +156,15 @@ private fun ArchiveScreen(
                 items(
                     items = items,
                     key = { it.key },
-                    span = { item ->
-                        mutator.accept(Action.GridSize(maxCurrentLineSpan))
-                        when (item) {
-                            is ArchiveItem.Result -> GridItemSpan(1)
-                            is ArchiveItem.Loading -> GridItemSpan(maxCurrentLineSpan)
-                        }
-                    },
+                    // TODO: There's a compose bug that causes span calculation to crash
+                    //  with an indexOutOfBounds exception. Commenting out for now.
+//                    span = { item ->
+//                        mutator.accept(Action.GridSize(maxCurrentLineSpan))
+//                        when (item) {
+//                            is ArchiveItem.Result -> GridItemSpan(1)
+//                            is ArchiveItem.Loading -> GridItemSpan(maxCurrentLineSpan)
+//                        }
+//                    },
                     itemContent = { item ->
                         when (item) {
                             is ArchiveItem.Loading -> ProgressBar(isCircular = item.isCircular)
