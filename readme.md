@@ -26,7 +26,7 @@ The API consumed is that of my personal website. The source can be found [here](
 
 I try to keep the code at a near production quality, but this often takes a back seat to
 convenience and whim. I'm a huge proponent of dependency injection, yet the repository uses manual
-service location. Also I haven't separated my netwrok models from my data models as wel as I would like.
+service location. Also I haven't separated my netwrok models from my data models as well as I would like.
 
 Again, the work presented here are the experiments of an immutable state and functional reactive programming zealot.
 It's far from objective, Caveat emptor.
