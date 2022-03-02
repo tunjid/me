@@ -22,7 +22,8 @@ Some of the ideas explored include:
 
 The API consumed is that of my personal website. The source can be found [here](https://github.com/tunjid/tunji-web-deux).
 
-⚠️⚠️⚠️
+⚠️⚠️⚠️⚠️
+
 I try to keep the code at a near production quality, but this often takes a back seat to
 convenience and whim. I'm a huge proponent of dependency injection, yet the repository uses manual
 service location. Also I haven't separated my netwrok models from my data models as wel as I would like.
