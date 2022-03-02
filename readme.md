@@ -22,6 +22,14 @@ Some of the ideas explored include:
 
 The API consumed is that of my personal website. The source can be found [here](https://github.com/tunjid/tunji-web-deux).
 
+⚠️⚠️⚠️
+I try to keep the code at a near production quality, but this often takes a back seat to
+convenience and whim. I'm a huge proponent of dependency injection, yet the repository uses manual
+service location. Also I haven't separated my netwrok models from my data models as wel as I would like.
+
+Again, the work presented here are the experiments of an immutable state and functional reactive programming zealot.
+It's far from objective, Caveat emptor.
+
 ## Arch
 
 ### Reactive architecture
@@ -130,14 +138,6 @@ By watching the changes to the available routes in the `MultiStackNav` class, th
 Each navigation destination can also be informed when the app is in the background via the
 `isInForeground` field on `AppState`. It's `Mutator` can then opt to terminate it's backing flow
 if necessary.
-
-I try to keep the code at a near production quality, but this often takes a back seat to
-convenience and whim. I'm a huge proponent of dependency injection, yet the repository uses manual
-service location. Also outside data classes, virtually everything else is implemented as a function,
-or anonymous class just because.
-
-Again, the work presented here are the ideas of an immutable state and functional reactive programming zealot.
-It's far from objective, I just be doing anything tbh. Caveat emptor.
 
 ## Running
 
