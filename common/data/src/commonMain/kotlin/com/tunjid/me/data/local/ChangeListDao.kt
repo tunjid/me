@@ -50,6 +50,6 @@ internal class SqlChangeListDao(
     }
 
     override suspend fun markComplete(keys: Keys.ChangeList, item: ChangeListItem) = withContext(dispatcher) {
-        keyValueQueries.upsert(keys.key, item.id.value)
+        keyValueQueries.upsert(keys.key, item.changeId.value)
     }
 }
