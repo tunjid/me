@@ -16,7 +16,6 @@
 
 package com.tunjid.me.core.model
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable

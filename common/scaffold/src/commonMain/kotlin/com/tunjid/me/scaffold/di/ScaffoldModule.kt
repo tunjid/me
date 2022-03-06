@@ -22,7 +22,11 @@ import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.globalUiMutator
 import com.tunjid.me.scaffold.lifecycle.lifecycleMutator
-import com.tunjid.me.scaffold.nav.*
+import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.Navigator
+import com.tunjid.me.scaffold.nav.RouteParser
+import com.tunjid.me.scaffold.nav.navMutator
+import com.tunjid.me.scaffold.nav.patternsToParsers
 import kotlinx.coroutines.CoroutineScope
 
 class ScaffoldModule(

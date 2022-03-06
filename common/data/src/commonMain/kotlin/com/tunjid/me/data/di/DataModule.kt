@@ -18,11 +18,21 @@ package com.tunjid.me.data.di
 
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.core.model.ChangeListItem
-import com.tunjid.me.data.local.*
+import com.tunjid.me.data.local.ChangeListDao
+import com.tunjid.me.data.local.Keys
+import com.tunjid.me.data.local.SessionCookieDao
+import com.tunjid.me.data.local.SqlArchiveDao
+import com.tunjid.me.data.local.SqlChangeListDao
+import com.tunjid.me.data.local.SqlSessionCookieDao
+import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.KtorNetworkService
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.network.NetworkService
-import com.tunjid.me.data.repository.*
+import com.tunjid.me.data.repository.ArchiveRepository
+import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.data.repository.ReactiveArchiveRepository
+import com.tunjid.me.data.repository.SessionCookieAuthRepository
+import com.tunjid.me.data.repository.SqlChangeListRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
 

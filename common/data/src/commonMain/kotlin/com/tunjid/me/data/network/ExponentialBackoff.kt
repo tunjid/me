@@ -16,7 +16,7 @@
 
 package com.tunjid.me.data.network
 
-import io.ktor.utils.io.errors.*
+import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.delay
 
 suspend fun <T> exponentialBackoff(

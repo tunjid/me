@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import java.util.Properties
 import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     `android-application-convention`

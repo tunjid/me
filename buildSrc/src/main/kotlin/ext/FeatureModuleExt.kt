@@ -17,8 +17,6 @@
 import gradle.kotlin.dsl.accessors._84dd20d1a49d379320fe96b7964013dd.kotlin
 import gradle.kotlin.dsl.accessors._84dd20d1a49d379320fe96b7964013dd.sourceSets
 import org.gradle.api.artifacts.VersionCatalogsExtension
-import org.gradle.kotlin.dsl.project
-import org.gradle.kotlin.dsl.withType
 
 fun org.gradle.api.Project.configureFeatureModule() {
     kotlin {

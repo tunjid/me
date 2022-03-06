@@ -16,15 +16,19 @@
 
 package com.tunjid.me.data.repository
 
-import com.tunjid.me.core.model.*
+import com.tunjid.me.core.model.Result
+import com.tunjid.me.core.model.SessionRequest
+import com.tunjid.me.core.model.User
+import com.tunjid.me.core.model.UserId
+import com.tunjid.me.core.model.map
 import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.exponentialBackoff
 import com.tunjid.me.data.network.models.item
+import com.tunjid.me.data.network.models.toResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import com.tunjid.me.data.network.models.toResult
 
 interface AuthRepository {
     val isSignedIn: Flow<Boolean>

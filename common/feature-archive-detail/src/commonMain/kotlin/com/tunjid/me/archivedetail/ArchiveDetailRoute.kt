@@ -17,7 +17,11 @@
 package com.tunjid.me.archivedetail
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
@@ -44,7 +48,11 @@ import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.restoredState
-import com.tunjid.me.scaffold.globalui.*
+import com.tunjid.me.scaffold.globalui.InsetFlags
+import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.currentUiState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.LocalNavigator
 import com.tunjid.me.scaffold.nav.RouteParser

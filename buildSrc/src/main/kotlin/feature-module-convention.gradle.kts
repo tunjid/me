@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import org.gradle.kotlin.dsl.kotlin
-import org.gradle.kotlin.dsl.version
-
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")

@@ -16,7 +16,15 @@
 
 package com.tunjid.me.data.repository
 
-import com.tunjid.me.core.model.*
+import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.core.model.ArchiveUpsert
+import com.tunjid.me.core.model.ChangeListItem
+import com.tunjid.me.core.model.Result
+import com.tunjid.me.core.model.isDelete
+import com.tunjid.me.core.model.map
 import com.tunjid.me.data.local.ArchiveDao
 import com.tunjid.me.data.local.Keys
 import com.tunjid.me.data.network.NetworkService
