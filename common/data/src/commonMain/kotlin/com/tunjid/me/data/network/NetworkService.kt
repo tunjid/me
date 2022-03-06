@@ -27,7 +27,7 @@ import com.tunjid.me.core.model.SessionRequest
 import com.tunjid.me.core.model.User
 import com.tunjid.me.data.local.Keys
 import com.tunjid.me.data.local.SessionCookieDao
-import com.tunjid.me.data.network.models.Message
+import com.tunjid.me.data.network.models.NetworkMessage
 import com.tunjid.me.data.network.models.NetworkResponse
 import com.tunjid.me.data.network.models.UpsertResponse
 import io.ktor.client.HttpClient
@@ -47,7 +47,6 @@ import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
-import io.ktor.client.request.url
 import io.ktor.client.statement.readText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -79,7 +78,7 @@ internal interface NetworkService {
         kind: ArchiveKind,
         id: ArchiveId,
         photo: Input,
-    ): NetworkResponse<Message>
+    ): NetworkResponse<NetworkMessage>
 
     suspend fun signIn(
         sessionRequest: SessionRequest
@@ -164,17 +163,15 @@ internal class KtorNetworkService(
         kind: ArchiveKind,
         id: ArchiveId,
         photo: Input
-    ): NetworkResponse<Message> = json.parseServerErrors {
+    ): NetworkResponse<NetworkMessage> = json.parseServerErrors {
         client.submitFormWithBinaryData(
+            url = "$baseUrl/${kind.type}/${id.value}",
             formData = formData {
                 append(
                     key = "photo",
                     value = InputProvider { photo },
                 )
             },
-            block = {
-                url("$baseUrl/${kind.type}/${id.value}")
-            }
         )
     }
 

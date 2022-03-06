@@ -19,6 +19,6 @@ package com.tunjid.me.data.network.models
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Message(
+data class NetworkMessage(
     val message: String? = null,
 )

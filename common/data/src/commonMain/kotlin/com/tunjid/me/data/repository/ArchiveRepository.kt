@@ -31,10 +31,17 @@ import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.exponentialBackoff
 import com.tunjid.me.data.network.models.item
 import com.tunjid.me.data.network.models.toResult
+import io.ktor.utils.io.core.Input
 import kotlinx.coroutines.flow.Flow
 
 interface ArchiveRepository {
     suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId>
+    suspend fun uploadArchiveHeaderPhoto(
+        kind: ArchiveKind,
+        id: ArchiveId,
+        photo: Input
+    ): Result<Unit>
+
     fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
     fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive?>
 }
@@ -53,6 +60,19 @@ internal class ReactiveArchiveRepository(
         networkService.upsertArchive(kind, upsert)
             .toResult()
             .map { ArchiveId(it.id) }
+
+    override suspend fun uploadArchiveHeaderPhoto(
+        kind: ArchiveKind,
+        id: ArchiveId,
+        photo: Input
+    ): Result<Unit> =
+        networkService.uploadArchiveHeaderPhoto(
+            kind = kind,
+            id = id,
+            photo = photo
+        )
+            .toResult()
+            .map { }
 
     override fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>> =
         dao.monitorArchives(query)
