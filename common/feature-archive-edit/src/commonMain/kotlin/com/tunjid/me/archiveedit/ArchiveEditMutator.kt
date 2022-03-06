@@ -130,6 +130,7 @@ private fun ArchiveRepository.textBodyMutations(
     .map { archive ->
     Mutation {
         copy(
+            thumbnail = archive.thumbnail,
             upsert = upsert.copy(
                 id = archive.id,
                 title = archive.title,

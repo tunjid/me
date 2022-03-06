@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.ui.ChipEditInfo
@@ -29,7 +30,7 @@ import com.tunjid.me.core.ui.Chips
 @Composable
 fun EditChips(
     modifier: Modifier,
-    upsert: com.tunjid.me.core.model.ArchiveUpsert,
+    upsert: ArchiveUpsert,
     state: ChipsState,
     onChanged: (Action) -> Unit
 ) {
@@ -71,8 +72,8 @@ fun EditChips(
 
 private fun onChipFilterChanged(
     state: ChipsState,
-    reader: (ChipsState) -> com.tunjid.me.core.model.Descriptor,
-    writer: (String) -> com.tunjid.me.core.model.Descriptor,
+    reader: (ChipsState) -> Descriptor,
+    writer: (String) -> Descriptor,
     onChanged: (Action) -> Unit
 ): (ChipAction) -> Unit = {
     when (it) {
@@ -81,9 +82,9 @@ private fun onChipFilterChanged(
         )
         is ChipAction.Changed -> onChanged(
             Action.ChipEdit(chipAction = it, descriptor = writer(it.text))
-            )
+        )
         is ChipAction.Removed -> onChanged(
             Action.ChipEdit(chipAction = it, descriptor = writer(it.text))
-            )
+        )
     }
 }
