@@ -16,11 +16,11 @@
 
 package com.tunjid.me.data.network
 
-import com.tunjid.me.data.network.models.UpsertResponse
 import com.tunjid.me.core.model.*
 import com.tunjid.me.data.local.Keys
 import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.data.network.models.NetworkResponse
+import com.tunjid.me.data.network.models.UpsertResponse
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.cookies.*
@@ -28,8 +28,10 @@ import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.utils.io.core.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -53,13 +55,22 @@ internal interface NetworkService {
         upsert: ArchiveUpsert,
     ): NetworkResponse<UpsertResponse>
 
+    suspend fun uploadArchiveHeaderPhoto(
+        kind: ArchiveKind,
+        id: ArchiveId,
+        photo: Input,
+    ): NetworkResponse<Message>
+
     suspend fun signIn(
         sessionRequest: SessionRequest
     ): NetworkResponse<User>
 
     suspend fun session(): NetworkResponse<User>
 
-    suspend fun changeList(key: Keys.ChangeList, id: ChangeListId? = null): NetworkResponse<List<ChangeListItem>>
+    suspend fun changeList(
+        key: Keys.ChangeList,
+        id: ChangeListId? = null
+    ): NetworkResponse<List<ChangeListItem>>
 }
 
 internal class KtorNetworkService(
@@ -127,6 +138,24 @@ internal class KtorNetworkService(
             null -> client.post("$baseUrl/api/$kind", requestBuilder)
             else -> client.put("$baseUrl/api/$kind/${id.value}", requestBuilder)
         }
+    }
+
+    override suspend fun uploadArchiveHeaderPhoto(
+        kind: ArchiveKind,
+        id: ArchiveId,
+        photo: Input
+    ): NetworkResponse<Message> = json.parseServerErrors {
+        client.submitFormWithBinaryData(
+            formData = formData {
+                append(
+                    key = "photo",
+                    value = InputProvider { photo },
+                )
+            },
+            block = {
+                url("$baseUrl/${kind.type}/${id.value}")
+            }
+        )
     }
 
     override suspend fun signIn(
