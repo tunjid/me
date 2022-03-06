@@ -56,36 +56,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
-object ProfileFeature : Feature<ProfileRoute, ProfileMutator> {
-
-    override val routeType: KClass<ProfileRoute>
-        get() = ProfileRoute::class
-
-    override val routeParsers: List<RouteParser<ProfileRoute>> = listOf(
-        routeParser(
-            pattern = "profile",
-            routeMapper = { result ->
-                ProfileRoute(
-                    id = result.groupValues[0],
-                )
-            }
-        )
-    )
-
-    override fun mutator(
-        scope: CoroutineScope,
-        route: ProfileRoute,
-        scaffoldComponent: ScaffoldComponent,
-        dataComponent: DataComponent
-    ): ProfileMutator = profileMutator(
-        scope = scope,
-        route = route,
-        initialState = scaffoldComponent.restoredState(route),
-        authRepository = dataComponent.authRepository,
-        lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
-    )
-}
-
 @Serializable
 data class ProfileRoute(
     override val id: String,

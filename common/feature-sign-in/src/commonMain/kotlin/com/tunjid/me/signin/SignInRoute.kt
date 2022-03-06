@@ -31,51 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
-import com.tunjid.me.data.di.DataComponent
-import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
-import com.tunjid.me.scaffold.di.ScaffoldComponent
-import com.tunjid.me.scaffold.di.restoredState
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.RouteParser
-import com.tunjid.me.scaffold.nav.routeParser
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
-import kotlin.reflect.KClass
-
-object SignInFeature : Feature<SignInRoute, SignInMutator> {
-
-    override val routeType: KClass<SignInRoute>
-        get() = SignInRoute::class
-
-    override val routeParsers: List<RouteParser<SignInRoute>> = listOf(
-        routeParser(
-            pattern = "sign-in",
-            routeMapper = { result ->
-                SignInRoute(
-                    id = result.groupValues[0],
-                )
-            }
-        )
-    )
-
-    override fun mutator(
-        scope: CoroutineScope,
-        route: SignInRoute,
-        scaffoldComponent: ScaffoldComponent,
-        dataComponent: DataComponent
-    ): SignInMutator = signInMutator(
-        scope = scope,
-        route = route,
-        initialState = scaffoldComponent.restoredState(route),
-        authRepository = dataComponent.authRepository,
-        lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
-    )
-}
 
 @Serializable
 data class SignInRoute(

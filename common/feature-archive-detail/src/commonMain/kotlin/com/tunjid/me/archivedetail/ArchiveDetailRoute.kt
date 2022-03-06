@@ -43,11 +43,7 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.RemoteImagePainter
-import com.tunjid.me.data.di.DataComponent
-import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
-import com.tunjid.me.scaffold.di.ScaffoldComponent
-import com.tunjid.me.scaffold.di.restoredState
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
@@ -55,51 +51,10 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.currentUiState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.LocalNavigator
-import com.tunjid.me.scaffold.nav.RouteParser
-import com.tunjid.me.scaffold.nav.routeParser
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.push
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
-import kotlin.reflect.KClass
-
-object ArchiveDetailFeature : Feature<ArchiveDetailRoute, ArchiveDetailMutator> {
-
-    override val routeType: KClass<ArchiveDetailRoute>
-        get() = ArchiveDetailRoute::class
-
-    override val routeParsers: List<RouteParser<ArchiveDetailRoute>> = listOf(
-        routeParser(
-            pattern = "archives/(.*?)/(.*?)",
-            routeMapper = { result ->
-                val kindString = result.groupValues.getOrNull(1)
-                val archiveId = ArchiveId(result.groupValues.getOrNull(2) ?: "")
-                val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
-                ArchiveDetailRoute(
-                    id = result.groupValues[0],
-                    kind = kind,
-                    archiveId = archiveId
-                )
-            }
-        )
-    )
-
-    override fun mutator(
-        scope: CoroutineScope,
-        route: ArchiveDetailRoute,
-        scaffoldComponent: ScaffoldComponent,
-        dataComponent: DataComponent
-    ): ArchiveDetailMutator = archiveDetailMutator(
-        scope = scope,
-        route = route,
-        initialState = scaffoldComponent.restoredState(route),
-        archiveRepository = dataComponent.archiveRepository,
-        authRepository = dataComponent.authRepository,
-        uiStateFlow = scaffoldComponent.globalUiStateStream,
-        lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
-    )
-}
 
 @Serializable
 data class ArchiveDetailRoute(

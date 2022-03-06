@@ -33,11 +33,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
-import com.tunjid.me.data.di.DataComponent
-import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
-import com.tunjid.me.scaffold.di.ScaffoldComponent
-import com.tunjid.me.scaffold.di.restoredState
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
@@ -45,53 +41,13 @@ import com.tunjid.me.scaffold.globalui.currentUiState
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.LocalNavigator
-import com.tunjid.me.scaffold.nav.RouteParser
-import com.tunjid.me.scaffold.nav.routeParser
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.Serializable
 import kotlin.math.min
-import kotlin.reflect.KClass
-
-object ArchiveListFeature : Feature<ArchiveListRoute, ArchiveListMutator> {
-
-    override val routeType: KClass<ArchiveListRoute>
-        get() = ArchiveListRoute::class
-
-    override val routeParsers: List<RouteParser<ArchiveListRoute>> = listOf(
-        routeParser(
-            pattern = "archives/(.*?)",
-            routeMapper = { result ->
-                val kindString = result.groupValues.getOrNull(1)
-                val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
-                ArchiveListRoute(
-                    id = result.groupValues[0],
-                    kind = kind
-                )
-            }
-        )
-    )
-
-    override fun mutator(
-        scope: CoroutineScope,
-        route: ArchiveListRoute,
-        scaffoldComponent: ScaffoldComponent,
-        dataComponent: DataComponent
-    ): ArchiveListMutator = archiveListMutator(
-        scope = scope,
-        route = route,
-        initialState = scaffoldComponent.restoredState(route),
-        archiveRepository = dataComponent.archiveRepository,
-        authRepository = dataComponent.authRepository,
-        navStateFlow = scaffoldComponent.navStateStream,
-        uiStateFlow = scaffoldComponent.globalUiStateStream,
-        lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
-    )
-}
 
 @Serializable
 data class ArchiveListRoute(
