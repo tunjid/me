@@ -16,9 +16,11 @@
 
 package com.tunjid.me.archiveedit
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -27,15 +29,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -44,71 +43,11 @@ import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material.MaterialRichText
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.ui.icons.Preview
-import com.tunjid.me.data.di.DataComponent
-import com.tunjid.me.feature.Feature
+import com.tunjid.me.core.model.ArchiveUpsert
+import com.tunjid.me.core.ui.RemoteImagePainter
 import com.tunjid.me.feature.LocalRouteServiceLocator
-import com.tunjid.me.scaffold.di.ScaffoldComponent
-import com.tunjid.me.scaffold.di.restoredState
-import com.tunjid.me.scaffold.globalui.InsetFlags
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.RouteParser
-import com.tunjid.me.scaffold.nav.routeParser
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
-import kotlin.reflect.KClass
-
-object ArchiveEditFeature : Feature<ArchiveEditRoute, ArchiveEditMutator> {
-
-    override val routeType: KClass<ArchiveEditRoute>
-        get() = ArchiveEditRoute::class
-
-    override val routeParsers: List<RouteParser<ArchiveEditRoute>> = listOf(
-        routeParser(
-            pattern = "archives/(.*?)/(.*?)/edit",
-            routeMapper = { result ->
-                val kindString = result.groupValues.getOrNull(1)
-                val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
-                ArchiveEditRoute(
-                    id = result.groupValues[0],
-                    kind = kind,
-                    archiveId = ArchiveId(result.groupValues.getOrNull(2) ?: "")
-                )
-            }
-        ),
-        routeParser(
-            pattern = "archives/(.*?)/create",
-            routeMapper = { result ->
-                val kindString = result.groupValues.getOrNull(1)
-                val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
-                ArchiveEditRoute(
-                    id = result.groupValues[0],
-                    kind = kind,
-                    archiveId = null
-                )
-            }
-        )
-    )
-
-    override fun mutator(
-        scope: CoroutineScope,
-        route: ArchiveEditRoute,
-        scaffoldComponent: ScaffoldComponent,
-        dataComponent: DataComponent
-    ): ArchiveEditMutator = archiveEditMutator(
-        scope = scope,
-        route = route,
-        initialState = scaffoldComponent.restoredState(route),
-        archiveRepository = dataComponent.archiveRepository,
-        authRepository = dataComponent.authRepository,
-        uiStateFlow = scaffoldComponent.globalUiStateStream,
-        lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
-    )
-}
 
 @Serializable
 data class ArchiveEditRoute(
@@ -131,46 +70,9 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
 
-    ScreenUiState(
-        UiState(
-            toolbarShows = true,
-            toolbarTitle = "${if (state.upsert.id == null) "Create" else "Edit"} ${state.kind.name}",
-            toolbarItems = listOfNotNull(
-                ToolbarItem(
-                    id = "preview",
-                    text = "Preview",
-                    imageVector = Icons.Default.Preview
-                ).takeIf { state.isEditing },
-                ToolbarItem(
-                    id = "edit",
-                    text = "Edit",
-                    imageVector = Icons.Default.Edit
-                ).takeIf { !state.isEditing }
-            ),
-            toolbarMenuClickListener = {
-                mutator.accept(Action.ToggleEditView)
-            },
-            fabShows = true,
-            fabText = if (state.upsert.id == null) "Create" else "Save",
-            fabIcon = Icons.Default.Done,
-            fabExtended = true,
-            fabEnabled = !state.isSubmitting,
-            fabClickListener = {
-                mutator.accept(
-                    Action.Load.Submit(
-                        kind = state.kind,
-                        upsert = state.upsert
-                    )
-                )
-            },
-            snackbarMessages = state.messages,
-            snackbarMessageConsumer = {
-                mutator.accept(Action.MessageConsumed(it))
-            },
-            navVisibility = NavVisibility.GoneIfBottomNav,
-            insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colors.primary.toArgb(),
-        )
+    GlobalUi(
+        state = state,
+        onAction = mutator.accept
     )
 
     Column(
@@ -178,65 +80,136 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
             .verticalScroll(state = scrollState),
     ) {
         Spacer(modifier = Modifier.padding(8.dp))
-        TextField(
-            value = upsert.title,
-            maxLines = 2,
-            colors = Unstyled(),
-            textStyle = LocalTextStyle.current.copy(
-                color = MaterialTheme.colors.onSurface,
-                fontSize = 24.sp
-            ),
-            label = { Text(text = "Title", fontSize = 24.sp) },
-            onValueChange = { mutator.accept(Action.TextEdit.Title(it)) }
-        )
-        Spacer(modifier = Modifier.padding(8.dp))
+        Thumbnail(state.thumbnail)
 
-        TextField(
-            value = upsert.description,
-            maxLines = 2,
-            colors = Unstyled(),
-            textStyle = LocalTextStyle.current.copy(
-                color = MaterialTheme.colors.onSurface,
-                fontSize = 18.sp
-            ),
-            label = { Text(text = "Description", fontSize = 18.sp) },
-            onValueChange = { mutator.accept(Action.TextEdit.Description(it)) }
-        )
         Spacer(modifier = Modifier.padding(8.dp))
-
-        EditChips(
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            upsert = state.upsert,
-            state = state.chipsState,
-            onChanged = mutator.accept
+        TitleEditor(
+            title = upsert.title,
+            onEdit = mutator.accept
         )
+
+        Spacer(modifier = Modifier.padding(8.dp))
+        DescriptionEditor(
+            description = upsert.description,
+            onEdit = mutator.accept
+        )
+
+        Spacer(modifier = Modifier.padding(8.dp))
+        ChipsEditor(
+            upsert = upsert,
+            chipsState = state.chipsState,
+            onAction = mutator.accept
+        )
+
         Spacer(modifier = Modifier.padding(16.dp))
-
         when (state.isEditing) {
-            true -> TextField(
-                value = upsert.body,
-                colors = Unstyled(),
-                textStyle = LocalTextStyle.current.copy(
-                    color = MaterialTheme.colors.onSurface,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 16.sp,
-                    lineHeight = 24.sp
-                ),
-                label = { Text(text = "Body") },
-                onValueChange = { mutator.accept(Action.TextEdit.Body(it)) }
+            true -> BodyEditor(
+                body = upsert.body,
+                onEdit = mutator.accept
             )
-            false -> MaterialRichText(
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) {
-                Markdown(
-                    content = state.upsert.body
-                )
-            }
+            false -> BodyPreview(
+                body = upsert.body
+            )
         }
 
         Spacer(modifier = Modifier.padding(64.dp + navBarSizeDp))
     }
+}
+
+@Composable
+private fun Thumbnail(thumbnail: String?) {
+    val painter = RemoteImagePainter(thumbnail)
+
+    if (painter != null) Image(
+        painter = painter,
+        contentScale = ContentScale.Crop,
+        contentDescription = null,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .padding(horizontal = 16.dp)
+    )
+}
+
+@Composable
+private fun TitleEditor(
+    title: String,
+    onEdit: (Action.TextEdit) -> Unit,
+) {
+    TextField(
+        value = title,
+        maxLines = 2,
+        colors = Unstyled(),
+        textStyle = LocalTextStyle.current.copy(
+            color = MaterialTheme.colors.onSurface,
+            fontSize = 24.sp
+        ),
+        label = { Text(text = "Title", fontSize = 24.sp) },
+        onValueChange = { onEdit(Action.TextEdit.Title(it)) }
+    )
+}
+
+@Composable
+private fun DescriptionEditor(
+    description: String,
+    onEdit: (Action.TextEdit) -> Unit,
+) {
+    TextField(
+        value = description,
+        maxLines = 2,
+        colors = Unstyled(),
+        textStyle = LocalTextStyle.current.copy(
+            color = MaterialTheme.colors.onSurface,
+            fontSize = 18.sp
+        ),
+        label = { Text(text = "Description", fontSize = 18.sp) },
+        onValueChange = { onEdit(Action.TextEdit.Description(it)) }
+    )
+}
+
+@Composable
+private fun BodyEditor(
+    body: String,
+    onEdit: (Action.TextEdit) -> Unit,
+) {
+    TextField(
+        value = body,
+        colors = Unstyled(),
+        textStyle = LocalTextStyle.current.copy(
+            color = MaterialTheme.colors.onSurface,
+            fontFamily = FontFamily.Monospace,
+            fontSize = 16.sp,
+            lineHeight = 24.sp
+        ),
+        label = { Text(text = "Body") },
+        onValueChange = { onEdit(Action.TextEdit.Body(it)) }
+    )
+}
+
+@Composable
+private fun BodyPreview(body: String) {
+    MaterialRichText(
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) {
+        Markdown(
+            content = body
+        )
+    }
+}
+
+@Composable
+private fun ChipsEditor(
+    upsert: ArchiveUpsert,
+    chipsState: ChipsState,
+    onAction: (Action) -> Unit,
+) {
+    EditChips(
+        modifier = Modifier.fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        upsert = upsert,
+        state = chipsState,
+        onChanged = onAction
+    )
 }
 
 @Composable

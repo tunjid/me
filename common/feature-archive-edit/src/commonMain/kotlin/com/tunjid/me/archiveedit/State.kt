@@ -36,6 +36,7 @@ data class State(
     val isSubmitting: Boolean = false,
     val navBarSize: Int,
     val kind: ArchiveKind,
+    val thumbnail: String? = null,
     val upsert: ArchiveUpsert = ArchiveUpsert(),
     val chipsState: ChipsState = ChipsState(),
     @Transient
