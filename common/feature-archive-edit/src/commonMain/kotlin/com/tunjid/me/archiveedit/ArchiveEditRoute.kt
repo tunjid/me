@@ -22,12 +22,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.runtime.*
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -66,7 +64,6 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
     val upsert = state.upsert
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
-    var isInDragWindow by remember { mutableStateOf(false) }
 
     GlobalUi(
         state = state,
@@ -77,22 +74,23 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
             .verticalScroll(state = scrollState)
             .dropTarget(
                 onDragStarted = {
-                    isInDragWindow = true
+                    mutator.accept(Action.Drop.Window(inside = true))
                     true
                 },
-                onDragEntered = { isInDragWindow = true },
-                onDragExited = { isInDragWindow = false },
-                onDragEnded = { isInDragWindow = false },
+                onDragEntered = { mutator.accept(Action.Drop.Window(inside = true)) },
+                onDragExited = { mutator.accept(Action.Drop.Window(inside = false)) },
+                onDragEnded = { mutator.accept(Action.Drop.Window(inside = false)) },
                 onDropped = {
-                    isInDragWindow = false
+                    mutator.accept(Action.Drop.Window(inside = false))
                     false
                 }
             ),
     ) {
         Spacer(modifier = Modifier.padding(8.dp))
         Thumbnail(
-            isInDragWindow = isInDragWindow,
-            thumbnail = state.thumbnail
+            thumbnail = state.thumbnail,
+            dropStatus = state.dropStatus,
+            onDropChanged = mutator.accept
         )
 
         Spacer(modifier = Modifier.padding(8.dp))
@@ -131,17 +129,16 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
 
 @Composable
 private fun Thumbnail(
-    isInDragWindow: Boolean,
-    thumbnail: String?
+    thumbnail: String?,
+    dropStatus: DropStatus,
+    onDropChanged: (Action.Drop.Thumbnail) -> Unit
 ) {
     val painter = RemoteImagePainter(thumbnail)
-    var isDraggedInThumbnail by remember { mutableStateOf(false) }
-
     val borderColor by animateColorAsState(
-        when {
-            isInDragWindow -> Color.Red
-            isDraggedInThumbnail -> Color.Green
-            else -> Color.Transparent
+        when (dropStatus) {
+            DropStatus.InWindow -> Color.Red
+            DropStatus.InThumbnail -> Color.Green
+            DropStatus.None -> Color.Transparent
         }
     )
     if (painter != null) Image(
@@ -158,13 +155,13 @@ private fun Thumbnail(
             )
             .dropTarget(
                 onDragStarted = { true },
-                onDragEntered = { isDraggedInThumbnail = true },
-                onDragExited = { isDraggedInThumbnail = false },
+                onDragEntered = { onDropChanged(Action.Drop.Thumbnail(inside = true)) },
+                onDragExited = { onDropChanged(Action.Drop.Thumbnail(inside = false)) },
                 onDropped = {
-                    isDraggedInThumbnail = false
+                    onDropChanged(Action.Drop.Thumbnail(inside = false))
                     true
                 },
-                onDragEnded = { isDraggedInThumbnail = false },
+                onDragEnded = { onDropChanged(Action.Drop.Thumbnail(inside = false)) },
             ),
     )
 }

@@ -38,17 +38,7 @@ import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.*
 
 typealias ArchiveEditMutator = Mutator<Action, StateFlow<State>>
 
@@ -76,6 +66,7 @@ fun archiveEditMutator(
                 .withInitialLoad(route)
                 .toMutationStream(keySelector = Action::key) {
                     when (val action = type()) {
+                        is Action.Drop -> action.flow.dropStatusMutations()
                         is Action.TextEdit -> action.flow.textEditMutations()
                         is Action.ChipEdit -> action.flow.chipEditMutations()
                         is Action.ToggleEditView -> action.flow.viewToggleMutations()
@@ -128,20 +119,20 @@ private fun ArchiveRepository.textBodyMutations(
 )
     .filterNotNull()
     .map { archive ->
-    Mutation {
-        copy(
-            thumbnail = archive.thumbnail,
-            upsert = upsert.copy(
-                id = archive.id,
-                title = archive.title,
-                description = archive.description,
-                body = archive.body,
-                categories = archive.categories,
-                tags = archive.tags,
+        Mutation {
+            copy(
+                thumbnail = archive.thumbnail,
+                upsert = upsert.copy(
+                    id = archive.id,
+                    title = archive.title,
+                    description = archive.description,
+                    body = archive.body,
+                    categories = archive.categories,
+                    tags = archive.tags,
+                )
             )
-        )
+        }
     }
-}
 
 /**
  * Mutations from use text inputs
@@ -154,6 +145,29 @@ private fun Flow<Action.TextEdit>.textEditMutations(): Flow<Mutation<State>> =
  */
 private fun Flow<Action.ToggleEditView>.viewToggleMutations(): Flow<Mutation<State>> =
     map { Mutation { copy(isEditing = !isEditing) } }
+
+/**
+ * Mutations from use dropActions
+ */
+private fun Flow<Action.Drop>.dropStatusMutations(): Flow<Mutation<State>> =
+    distinctUntilChanged()
+        .scan(false to false) { inWindowToInThumbnail, action ->
+            when (action) {
+                is Action.Drop.Window -> inWindowToInThumbnail.copy(first = action.inside)
+                is Action.Drop.Thumbnail -> inWindowToInThumbnail.copy(second = action.inside)
+            }
+        }
+        .map { (inWindow, inThumbnail) ->
+            Mutation {
+                copy(
+                    dropStatus = when {
+                        inThumbnail -> DropStatus.InThumbnail
+                        inWindow -> DropStatus.InWindow
+                        else -> DropStatus.None
+                    }
+                )
+            }
+        }
 
 /**
  * Mutations from editing the chips
