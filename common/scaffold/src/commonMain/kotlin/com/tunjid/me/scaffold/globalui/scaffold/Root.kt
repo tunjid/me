@@ -38,6 +38,7 @@ import com.tunjid.treenav.current
  */
 @Composable
 fun Scaffold(
+    modifier: Modifier,
     component: ScaffoldComponent,
 ) {
     val navMutator = component.navMutator
@@ -53,7 +54,7 @@ fun Scaffold(
         val renderedRoute = route as? AppRoute ?: Route404
 
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = modifier.fillMaxSize()
         ) {
             AppNavRail(
                 globalUiMutator = globalUiMutator,

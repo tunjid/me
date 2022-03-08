@@ -31,6 +31,7 @@ kotlin {
                 implementation(libs.jetbrains.compose.animation)
                 implementation(libs.jetbrains.compose.material)
                 implementation(libs.jetbrains.compose.foundation.layout)
+                implementation(libs.jetbrains.compose.ui.util)
 
                 implementation(libs.kotlinx.serialization.cbor)
                 implementation(libs.kotlinx.serialization.json)

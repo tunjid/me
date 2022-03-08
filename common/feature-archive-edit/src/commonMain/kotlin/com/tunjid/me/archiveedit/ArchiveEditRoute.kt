@@ -16,12 +16,10 @@
 
 package com.tunjid.me.archiveedit
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.LocalTextStyle
@@ -29,9 +27,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -45,6 +41,7 @@ import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.ui.RemoteImagePainter
+import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.nav.AppRoute
 import kotlinx.serialization.Serializable
@@ -69,18 +66,34 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
     val upsert = state.upsert
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
+    var isInDragWindow by remember { mutableStateOf(false) }
 
     GlobalUi(
         state = state,
         onAction = mutator.accept
     )
-
     Column(
         modifier = Modifier
-            .verticalScroll(state = scrollState),
+            .verticalScroll(state = scrollState)
+            .dropTarget(
+                onDragStarted = {
+                    isInDragWindow = true
+                    true
+                },
+                onDragEntered = { isInDragWindow = true },
+                onDragExited = { isInDragWindow = false },
+                onDragEnded = { isInDragWindow = false },
+                onDropped = {
+                    isInDragWindow = false
+                    false
+                }
+            ),
     ) {
         Spacer(modifier = Modifier.padding(8.dp))
-        Thumbnail(state.thumbnail)
+        Thumbnail(
+            isInDragWindow = isInDragWindow,
+            thumbnail = state.thumbnail
+        )
 
         Spacer(modifier = Modifier.padding(8.dp))
         TitleEditor(
@@ -117,9 +130,20 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
 }
 
 @Composable
-private fun Thumbnail(thumbnail: String?) {
+private fun Thumbnail(
+    isInDragWindow: Boolean,
+    thumbnail: String?
+) {
     val painter = RemoteImagePainter(thumbnail)
+    var isDraggedInThumbnail by remember { mutableStateOf(false) }
 
+    val borderColor by animateColorAsState(
+        when {
+            isInDragWindow -> Color.Red
+            isDraggedInThumbnail -> Color.Green
+            else -> Color.Transparent
+        }
+    )
     if (painter != null) Image(
         painter = painter,
         contentScale = ContentScale.Crop,
@@ -128,6 +152,20 @@ private fun Thumbnail(thumbnail: String?) {
             .fillMaxWidth()
             .height(200.dp)
             .padding(horizontal = 16.dp)
+            .border(
+                width = 2.dp,
+                color = borderColor
+            )
+            .dropTarget(
+                onDragStarted = { true },
+                onDragEntered = { isDraggedInThumbnail = true },
+                onDragExited = { isDraggedInThumbnail = false },
+                onDropped = {
+                    isDraggedInThumbnail = false
+                    true
+                },
+                onDragEnded = { isDraggedInThumbnail = false },
+            ),
     )
 }
 

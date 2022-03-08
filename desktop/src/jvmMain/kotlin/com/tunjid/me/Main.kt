@@ -20,7 +20,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -31,6 +34,7 @@ import com.tunjid.me.common.di.createAppDependencies
 import com.tunjid.me.common.restore
 import com.tunjid.me.common.saveState
 import com.tunjid.me.common.ui.theme.AppTheme
+import com.tunjid.me.core.ui.dragdrop.PlatformDropTargetModifier
 import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.data.local.DatabaseDriverFactory
@@ -81,12 +85,22 @@ fun main() {
             state = windowState,
             title = "Me as a composition"
         ) {
+            val density = LocalDensity.current.density
+            val dropParent = remember(density) {
+                PlatformDropTargetModifier(
+                    density = density,
+                    window = window,
+                )
+            }
             AppTheme {
-                Surface(color = MaterialTheme.colors.background) {
+                Surface(
+                    color = MaterialTheme.colors.background,
+                ) {
                     CompositionLocalProvider(
                         LocalRouteServiceLocator provides appDependencies.routeServiceLocator,
                     ) {
                         Scaffold(
+                            modifier = Modifier.then(dropParent),
                             component = appDependencies.scaffoldComponent,
                         )
                     }
