@@ -28,6 +28,8 @@ import io.ktor.client.request.get
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.InputStream
 
 @Composable
 actual fun RemoteImagePainter(imageUrl: String?): Painter? {
@@ -37,10 +39,11 @@ actual fun RemoteImagePainter(imageUrl: String?): Painter? {
     ) {
         value = withContext(Dispatchers.IO) {
             try {
-                if (imageUrl != null) urlStream(imageUrl)
-                    .buffered()
-                    .use(::loadImageBitmap)
-                else null
+                when {
+                    imageUrl == null -> null
+                    imageUrl.startsWith("http") -> imageUrl.remoteInputStream()
+                    else -> imageUrl.fileInputStream()
+                }?.toBitMap()
             } catch (e: Exception) {
                 // instead of printing to console, you can also write this to log,
                 // or show some error placeholder
@@ -53,6 +56,12 @@ actual fun RemoteImagePainter(imageUrl: String?): Painter? {
     return image?.let { BitmapPainter(it) }
 }
 
-private suspend fun urlStream(url: String) = HttpClient().use {
-    ByteArrayInputStream(it.get(url))
+private suspend fun String.remoteInputStream() = HttpClient().use {
+    ByteArrayInputStream(it.get(this))
 }
+
+private fun String.fileInputStream() = File(this).inputStream()
+
+private fun InputStream.toBitMap() =
+    buffered()
+        .use(::loadImageBitmap)

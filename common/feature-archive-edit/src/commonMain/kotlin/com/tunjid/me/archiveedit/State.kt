@@ -22,6 +22,7 @@ import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.Message
 import com.tunjid.me.core.model.MessageQueue
+import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.mutator.Mutation
@@ -38,6 +39,7 @@ data class State(
     val isSignedIn: Boolean = false,
     val isEditing: Boolean = true,
     val isSubmitting: Boolean = false,
+    val toUpload: Uri? = null,
     val navBarSize: Int,
     val kind: ArchiveKind,
     val thumbnail: String? = null,
@@ -47,6 +49,8 @@ data class State(
     @Transient
     val messages: MessageQueue = MessageQueue(),
 ) : ByteSerializable
+
+val State.thumbnailUrl get() = toUpload?.path ?: thumbnail
 
 sealed class Action(val key: String) {
     sealed class TextEdit : Action("TextEdit") {
@@ -91,7 +95,8 @@ sealed class Action(val key: String) {
 
         data class Submit(
             val kind: ArchiveKind,
-            val upsert: ArchiveUpsert
+            val upsert: ArchiveUpsert,
+            val headerPhoto: Uri? = null
         ) : Load()
     }
 

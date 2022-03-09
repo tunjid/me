@@ -16,10 +16,10 @@
 
 package com.tunjid.me.scaffold.lifecycle
 
+import com.tunjid.me.core.utilities.Uri
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
-import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,22 +29,22 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
-typealias LifecycleMutator = Mutator<LifecycleAction, StateFlow<Lifecycle>>
+typealias LifecycleMutator = Mutator<Mutation<Lifecycle>, StateFlow<Lifecycle>>
+
+sealed class DragDropStatus {
+    object Dragging : DragDropStatus()
+    data class Dropped(
+        val uri: Uri
+    ) : DragDropStatus()
+
+    object Idle : DragDropStatus()
+}
 
 data class Lifecycle(
     val isInForeground: Boolean = true,
+    val dragDropStatus: DragDropStatus = DragDropStatus.Idle,
     val routeIdsToSerializedStates: Map<String, ByteArray> = mapOf()
 )
-
-sealed class LifecycleAction {
-    data class LifecycleStatus(
-        val isInForeground: Boolean
-    ) : LifecycleAction()
-
-    data class RestoreSerializedStates(
-        val routeIdsToSerializedStates: Map<String, ByteArray>
-    ) : LifecycleAction()
-}
 
 fun <T> Flow<T>.monitorWhenActive(lifecycleStateFlow: StateFlow<Lifecycle>) =
     lifecycleStateFlow
@@ -61,24 +61,5 @@ internal fun lifecycleMutator(
     scope = scope,
     started = SharingStarted.Eagerly,
     initialState = Lifecycle(),
-    actionTransform = { actions ->
-        actions.toMutationStream {
-            when (val action = type()) {
-                is LifecycleAction.LifecycleStatus -> action.flow.foregroundMutations()
-                is LifecycleAction.RestoreSerializedStates -> action.flow.stateRestorationMutations()
-            }
-        }
-    }
+    actionTransform = { it }
 )
-
-private fun Flow<LifecycleAction.LifecycleStatus>.foregroundMutations(): Flow<Mutation<Lifecycle>> =
-    distinctUntilChanged()
-        .map {
-            Mutation { copy(isInForeground = it.isInForeground) }
-        }
-
-private fun Flow<LifecycleAction.RestoreSerializedStates>.stateRestorationMutations(): Flow<Mutation<Lifecycle>> =
-    distinctUntilChanged()
-        .map {
-            Mutation { copy(routeIdsToSerializedStates = it.routeIdsToSerializedStates) }
-        }

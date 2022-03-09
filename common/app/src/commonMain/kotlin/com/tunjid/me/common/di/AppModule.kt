@@ -23,6 +23,7 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.DelegatingByteSerializer
+import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.data.di.DataModule
 import com.tunjid.me.data.local.databaseDispatcher
@@ -51,9 +52,11 @@ fun createAppDependencies(
     initialUiState: UiState = UiState(),
     database: AppDatabase,
     networkMonitor: NetworkMonitor,
+    uriConverter: UriConverter,
 ): AppDependencies = AppModule(
     appDatabase = database,
     networkMonitor = networkMonitor,
+    uriConverter = uriConverter,
     appScope = appScope,
     initialUiState = initialUiState,
 )
@@ -69,6 +72,7 @@ private val startRoutes = ArchiveKind.values()
 private class AppModule(
     appDatabase: AppDatabase,
     networkMonitor: NetworkMonitor,
+    uriConverter: UriConverter,
     appScope: CoroutineScope,
     initialUiState: UiState,
 ) : AppDependencies {
@@ -102,6 +106,7 @@ private class AppModule(
         appScope = appScope,
         initialUiState = initialUiState,
         byteSerializer = byteSerializer,
+        uriConverter = uriConverter,
         startRoutes = startRoutes,
         routeParsers = features
             .map { it.routeParsers }

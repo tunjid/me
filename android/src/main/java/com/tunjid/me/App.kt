@@ -24,11 +24,12 @@ import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.di.createAppDependencies
 import com.tunjid.me.common.restore
 import com.tunjid.me.common.saveState
+import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.network.NetworkMonitor
-import com.tunjid.me.scaffold.lifecycle.LifecycleAction
+import com.tunjid.mutator.Mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -42,6 +43,7 @@ class App : Application() {
         createAppDependencies(
             appScope = appScope,
             networkMonitor = NetworkMonitor(scope = appScope, context = this),
+            uriConverter = UriConverter(),
             database = AppDatabase.invoke(DatabaseDriverFactory(this).createDriver())
         )
     }
@@ -54,9 +56,9 @@ class App : Application() {
 
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             private fun updateStatus(isInForeground: Boolean) =
-                scaffoldComponent.lifecycleActions(
-                    LifecycleAction.LifecycleStatus(isInForeground = isInForeground)
-                )
+                scaffoldComponent.lifecycleActions(Mutation {
+                    copy(isInForeground = isInForeground)
+                })
 
             override fun onActivityCreated(p0: Activity, bundle: Bundle?) {
                 bundle?.getByteArray(SavedStateKey)

@@ -35,6 +35,7 @@ import com.tunjid.me.common.restore
 import com.tunjid.me.common.saveState
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.me.core.ui.dragdrop.PlatformDropTargetModifier
+import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.data.local.DatabaseDriverFactory
@@ -59,7 +60,8 @@ fun main() {
         appScope = appScope,
         initialUiState = UiState(navMode = NavMode.NavRail),
         database = AppDatabase.invoke(DatabaseDriverFactory().createDriver()),
-        networkMonitor = NetworkMonitor(scope = appScope)
+        networkMonitor = NetworkMonitor(scope = appScope),
+        uriConverter = UriConverter(),
     )
     savedStateFile()
         ?.takeIf { it.length() > 0 }

@@ -19,7 +19,6 @@ package com.tunjid.me.common
 import com.tunjid.me.common.di.AppDependencies
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.toBytes
-import com.tunjid.me.scaffold.lifecycle.LifecycleAction
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.toMultiStackNav
 import com.tunjid.mutator.Mutation
@@ -66,9 +65,7 @@ fun AppDependencies.restore(savedState: SavedState) = scaffoldComponent.apply {
             savedState.navigation
         ).copy(currentIndex = savedState.activeNav)
     })
-    lifecycleActions(
-        LifecycleAction.RestoreSerializedStates(
-            routeIdsToSerializedStates = savedState.routeStates
-        )
-    )
+    lifecycleActions(Mutation {
+        copy(routeIdsToSerializedStates = savedState.routeStates)
+    })
 }

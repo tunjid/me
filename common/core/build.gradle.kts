@@ -35,6 +35,8 @@ kotlin {
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.cbor)
                 implementation(libs.kotlinx.serialization.json)
+
+                implementation(libs.ktor.io.core)
             }
         }
         named("androidMain") {
@@ -43,6 +45,7 @@ kotlin {
         }
         named("desktopMain") {
             dependencies {
+                implementation(libs.ktor.io.jvm)
             }
         }
         named("commonTest") {

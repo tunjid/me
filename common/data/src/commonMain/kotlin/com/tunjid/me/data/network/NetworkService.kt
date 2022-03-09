@@ -38,6 +38,7 @@ import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.features.logging.LogLevel
 import io.ktor.client.features.logging.Logger
 import io.ktor.client.features.logging.Logging
+import io.ktor.client.features.onUpload
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.forms.InputProvider
 import io.ktor.client.request.forms.formData
@@ -172,7 +173,11 @@ internal class KtorNetworkService(
                     value = InputProvider { photo },
                 )
             },
-        )
+        ) {
+            onUpload { bytesSentTotal, contentLength ->
+                println("Uploaded $bytesSentTotal")
+            }
+        }
     }
 
     override suspend fun signIn(

@@ -26,6 +26,7 @@ import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.model.singular
 import com.tunjid.me.core.ui.ChipAction
+import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.scaffold.globalui.UiState
@@ -38,7 +39,19 @@ import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.scan
 
 typealias ArchiveEditMutator = Mutator<Action, StateFlow<State>>
 
@@ -47,6 +60,7 @@ fun archiveEditMutator(
     route: ArchiveEditRoute,
     initialState: State? = null,
     archiveRepository: ArchiveRepository,
+    uriConverter: UriConverter,
     authRepository: AuthRepository,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
@@ -72,7 +86,8 @@ fun archiveEditMutator(
                         is Action.ToggleEditView -> action.flow.viewToggleMutations()
                         is Action.MessageConsumed -> action.flow.messageConsumptionMutations()
                         is Action.Load -> action.flow.loadMutations(
-                            archiveRepository = archiveRepository
+                            archiveRepository = archiveRepository,
+                            uriConverter = uriConverter
                         )
                     }
                 }
@@ -240,7 +255,8 @@ private fun Flow<Action.MessageConsumed>.messageConsumptionMutations(): Flow<Mut
  * archives that initially don't exist, and are then created.
  */
 private fun Flow<Action.Load>.loadMutations(
-    archiveRepository: ArchiveRepository
+    archiveRepository: ArchiveRepository,
+    uriConverter: UriConverter
 ): Flow<Mutation<State>> =
     debounce(200)
         .flatMapLatest { monitor ->
@@ -250,7 +266,7 @@ private fun Flow<Action.Load>.loadMutations(
                     archiveId = monitor.id
                 )
                 is Action.Load.Submit -> flow<Mutation<State>> {
-                    val (kind, upsert) = monitor
+                    val (kind, upsert, headerPhoto) = monitor
                     emit(Mutation { copy(isSubmitting = true) })
 
                     val result = archiveRepository.upsert(kind = kind, upsert = upsert)

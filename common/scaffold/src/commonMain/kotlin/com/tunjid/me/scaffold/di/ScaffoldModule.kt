@@ -18,6 +18,7 @@ package com.tunjid.me.scaffold.di
 
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
+import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.globalUiMutator
@@ -34,7 +35,8 @@ class ScaffoldModule(
     initialUiState: UiState = UiState(),
     startRoutes: List<List<String>>,
     routeParsers: List<RouteParser<*>>,
-    internal val byteSerializer: ByteSerializer
+    internal val byteSerializer: ByteSerializer,
+    internal val uriConverter: UriConverter
 ) {
     internal val patternsToParsers = routeParsers.patternsToParsers()
     val navMutator = navMutator(
@@ -60,6 +62,7 @@ class ScaffoldComponent(
 
     val patternsToParsers = module.patternsToParsers
     val byteSerializer = module.byteSerializer
+    val uriConverter = module.uriConverter
 
     val navStateStream = module.navMutator.state
     val globalUiStateStream = module.globalUiMutator.state
