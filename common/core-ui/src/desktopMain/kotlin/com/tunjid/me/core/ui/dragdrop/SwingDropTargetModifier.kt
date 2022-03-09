@@ -69,6 +69,7 @@ private fun dropTargetListener(
 
     override fun dragExit(dte: DropTargetEvent?) {
         dropTargetModifier.onDragExited()
+        dropTargetModifier.onDragEnded()
     }
 
     override fun drop(dtde: DropTargetDropEvent?) {
