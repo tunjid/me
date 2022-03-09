@@ -73,24 +73,24 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
         modifier = Modifier
             .verticalScroll(state = scrollState)
             .dropTarget(
-                onDragStarted = {
-                    mutator.accept(Action.Drop.Window(inside = true))
+                onDragStarted = { _, _ ->
+                    mutator.accept(Action.Drag.Window(inside = true))
                     true
                 },
-                onDragEntered = { mutator.accept(Action.Drop.Window(inside = true)) },
-                onDragExited = { mutator.accept(Action.Drop.Window(inside = false)) },
-                onDragEnded = { mutator.accept(Action.Drop.Window(inside = false)) },
-                onDropped = {
-                    mutator.accept(Action.Drop.Window(inside = false))
+                onDragEntered = { mutator.accept(Action.Drag.Window(inside = true)) },
+                onDragExited = { mutator.accept(Action.Drag.Window(inside = false)) },
+                onDragEnded = { mutator.accept(Action.Drag.Window(inside = false)) },
+                onDropped = { _, _ ->
+                    mutator.accept(Action.Drag.Window(inside = false))
                     false
                 }
             ),
     ) {
         Spacer(modifier = Modifier.padding(8.dp))
         Thumbnail(
-            thumbnail = state.thumbnail,
-            dropStatus = state.dropStatus,
-            onDropChanged = mutator.accept
+            thumbnail = state.thumbnailUrl,
+            dragStatus = state.dragStatus,
+            onAction = mutator.accept
         )
 
         Spacer(modifier = Modifier.padding(8.dp))
@@ -130,15 +130,15 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
 @Composable
 private fun Thumbnail(
     thumbnail: String?,
-    dropStatus: DropStatus,
-    onDropChanged: (Action.Drop.Thumbnail) -> Unit
+    dragStatus: DragStatus,
+    onAction: (Action) -> Unit
 ) {
     val painter = RemoteImagePainter(thumbnail)
     val borderColor by animateColorAsState(
-        when (dropStatus) {
-            DropStatus.InWindow -> Color.Red
-            DropStatus.InThumbnail -> Color.Green
-            DropStatus.None -> Color.Transparent
+        when (dragStatus) {
+            DragStatus.InWindow -> Color.Red
+            DragStatus.InThumbnail -> Color.Green
+            DragStatus.None -> Color.Transparent
         }
     )
     if (painter != null) Image(
@@ -154,14 +154,15 @@ private fun Thumbnail(
                 color = borderColor
             )
             .dropTarget(
-                onDragStarted = { true },
-                onDragEntered = { onDropChanged(Action.Drop.Thumbnail(inside = true)) },
-                onDragExited = { onDropChanged(Action.Drop.Thumbnail(inside = false)) },
-                onDropped = {
-                    onDropChanged(Action.Drop.Thumbnail(inside = false))
+                onDragStarted = { _, _ -> true },
+                onDragEntered = { onAction(Action.Drag.Thumbnail(inside = true)) },
+                onDragExited = { onAction(Action.Drag.Thumbnail(inside = false)) },
+                onDropped = { uris, _ ->
+                    onAction(Action.Drag.Thumbnail(inside = false))
+                    onAction(Action.Drop(uris = uris))
                     true
                 },
-                onDragEnded = { onDropChanged(Action.Drop.Thumbnail(inside = false)) },
+                onDragEnded = { onAction(Action.Drag.Thumbnail(inside = false)) },
             ),
     )
 }

@@ -80,7 +80,8 @@ fun archiveEditMutator(
                 .withInitialLoad(route)
                 .toMutationStream(keySelector = Action::key) {
                     when (val action = type()) {
-                        is Action.Drop -> action.flow.dropStatusMutations()
+                        is Action.Drop -> action.flow.dropMutations()
+                        is Action.Drag -> action.flow.dragStatusMutations()
                         is Action.TextEdit -> action.flow.textEditMutations()
                         is Action.ChipEdit -> action.flow.chipEditMutations()
                         is Action.ToggleEditView -> action.flow.viewToggleMutations()
@@ -162,27 +163,43 @@ private fun Flow<Action.ToggleEditView>.viewToggleMutations(): Flow<Mutation<Sta
     map { Mutation { copy(isEditing = !isEditing) } }
 
 /**
- * Mutations from use dropActions
+ * Mutations from use drag events
  */
-private fun Flow<Action.Drop>.dropStatusMutations(): Flow<Mutation<State>> =
+private fun Flow<Action.Drag>.dragStatusMutations(): Flow<Mutation<State>> =
     distinctUntilChanged()
         .scan(false to false) { inWindowToInThumbnail, action ->
             when (action) {
-                is Action.Drop.Window -> inWindowToInThumbnail.copy(first = action.inside)
-                is Action.Drop.Thumbnail -> inWindowToInThumbnail.copy(second = action.inside)
+                is Action.Drag.Window -> inWindowToInThumbnail.copy(first = action.inside)
+                is Action.Drag.Thumbnail -> inWindowToInThumbnail.copy(second = action.inside)
             }
         }
         .map { (inWindow, inThumbnail) ->
             Mutation {
                 copy(
-                    dropStatus = when {
-                        inThumbnail -> DropStatus.InThumbnail
-                        inWindow -> DropStatus.InWindow
-                        else -> DropStatus.None
+                    dragStatus = when {
+                        inThumbnail -> DragStatus.InThumbnail
+                        inWindow -> DragStatus.InWindow
+                        else -> DragStatus.None
                     }
                 )
             }
         }
+
+/**
+ * Mutations from drop events
+ */
+private val validMimeTypes = listOf("jpeg", "jpg", "png")
+private fun Flow<Action.Drop>.dropMutations(): Flow<Mutation<State>> =
+    map { (uris) ->
+        val uri = uris.filter {
+            val mimeType = it.mimeType ?: return@filter false
+            mimeType.contains("image") && validMimeTypes.any(mimeType::contains)
+        }.firstOrNull()
+        Mutation {
+            if (uri != null) copy(toUpload = uri)
+            else copy(toUpload = null, messages = messages + "Only png and jpg uploads are supported")
+        }
+    }
 
 /**
  * Mutations from editing the chips

@@ -18,11 +18,16 @@ package com.tunjid.me.core.ui.dragdrop
 
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.geometry.Offset
-import java.awt.dnd.DropTarget as AwtDropTarget
+import com.tunjid.me.core.utilities.FileUri
+import com.tunjid.me.core.utilities.Uri
+import java.awt.datatransfer.DataFlavor
+import java.awt.dnd.DnDConstants
 import java.awt.dnd.DropTargetDragEvent
 import java.awt.dnd.DropTargetDropEvent
 import java.awt.dnd.DropTargetEvent
 import java.awt.dnd.DropTargetListener
+import java.io.File
+import java.awt.dnd.DropTarget as AwtDropTarget
 
 actual class PlatformDropTargetModifier(
     density: Float,
@@ -47,6 +52,7 @@ private fun dropTargetListener(
     override fun dragEnter(dtde: DropTargetDragEvent?) {
         if (dtde == null) return
         dropTargetModifier.onDragStarted(
+            listOf(),
             Offset(
                 dtde.location.x * density,
                 dtde.location.y * density
@@ -75,8 +81,10 @@ private fun dropTargetListener(
     override fun drop(dtde: DropTargetDropEvent?) {
         if (dtde == null) return dropTargetModifier.onDragEnded()
 
+        dtde.acceptDrop(DnDConstants.ACTION_REFERENCE)
         dtde.dropComplete(
             dropTargetModifier.onDropped(
+                dtde.fileUris(),
                 Offset(
                     dtde.location.x * density,
                     dtde.location.y * density
@@ -86,3 +94,9 @@ private fun dropTargetListener(
         dropTargetModifier.onDragEnded()
     }
 }
+
+private fun DropTargetDropEvent.fileUris(): List<Uri> = transferable
+    .getTransferData(DataFlavor.javaFileListFlavor)
+    .let { it as? List<*> ?: listOf<File>() }
+    .filterIsInstance<File>()
+    .map(::FileUri)

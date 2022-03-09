@@ -23,11 +23,17 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.OnGloballyPositionedModifier
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.modifier.*
+import androidx.compose.ui.modifier.ModifierLocalConsumer
+import androidx.compose.ui.modifier.ModifierLocalProvider
+import androidx.compose.ui.modifier.ModifierLocalReadScope
+import androidx.compose.ui.modifier.ProvidableModifierLocal
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.platform.InspectorValueInfo
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
+import com.tunjid.me.core.utilities.Uri
+
 internal val ModifierLocalDropTargetParent = modifierLocalOf<DropTargetParent?> { null }
 
 internal interface DropTargetParent {
@@ -43,6 +49,7 @@ internal sealed class DragAction {
     object Reject : DragAction()
 
     data class Accept(val dropTarget: DropTarget) : DragAction()
+
     internal val target: DropTarget?
         get() = when (this) {
             Reject -> null
@@ -51,7 +58,7 @@ internal sealed class DragAction {
 }
 
 internal class DropTargetContainer(
-    private val onDragStarted: (Offset) -> DragAction
+    private val onDragStarted: (uris: List<Uri>, Offset) -> DragAction
 ) : Modifier.Element,
     ModifierLocalConsumer,
     ModifierLocalProvider<DropTargetParent?>,
@@ -127,16 +134,19 @@ internal class DropTargetContainer(
         return position.x in x1..x2 && position.y in y1..y2
     }
 
-    override fun onDragStarted(position: Offset): Boolean {
+    override fun onDragStarted(uris: List<Uri>, position: Offset): Boolean {
         coordinates ?: return false
 
         check(currentTarget == null)
-        currentTarget = onDragStarted.invoke(position).target
+        currentTarget = onDragStarted.invoke(uris, position).target
 
         var handledByChild = false
 
         children.fastForEach { child ->
-            handledByChild = handledByChild or child.onDragStarted(position)
+            handledByChild = handledByChild or child.onDragStarted(
+                uris = uris,
+                position = position
+            )
         }
         return handledByChild || currentTarget != null
     }
@@ -194,10 +204,16 @@ internal class DropTargetContainer(
         currentTarget?.onDragExited()
     }
 
-    override fun onDropped(position: Offset): Boolean =
+    override fun onDropped(uris: List<Uri>, position: Offset): Boolean =
         when (val currentActiveChild = activeChild) {
-            null -> currentTarget?.onDropped(position) ?: false
-            else -> currentActiveChild.onDropped(position)
+            null -> currentTarget?.onDropped(
+                uris = uris,
+                position = position
+            ) ?: false
+            else -> currentActiveChild.onDropped(
+                uris = uris,
+                position = position
+            )
         }
 
     override fun onDragEnded() {

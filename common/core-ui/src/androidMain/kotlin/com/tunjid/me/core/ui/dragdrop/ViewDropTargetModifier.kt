@@ -19,6 +19,8 @@ package com.tunjid.me.core.ui.dragdrop
 import android.view.DragEvent
 import android.view.View
 import androidx.compose.ui.geometry.Offset
+import com.tunjid.me.core.utilities.ClipItemUri
+import com.tunjid.me.core.utilities.Uri
 
 actual class PlatformDropTargetModifier(
     view: View,
@@ -31,10 +33,12 @@ actual class PlatformDropTargetModifier(
 fun dragListener(
     dropTargetModifier: DropTargetModifier,
 ): View.OnDragListener = View.OnDragListener { _, event ->
-    val position = Offset(event.x, event.y)
     when (event.action) {
         DragEvent.ACTION_DRAG_STARTED -> {
-            dropTargetModifier.onDragStarted(Offset(event.x, event.y))
+            dropTargetModifier.onDragStarted(
+                uris = listOf(),
+                position = Offset(event.x, event.y)
+            )
             true
         }
         DragEvent.ACTION_DRAG_ENTERED -> {
@@ -50,12 +54,24 @@ fun dragListener(
             true
         }
         DragEvent.ACTION_DROP -> {
-            dropTargetModifier.onDropped(Offset(event.x, event.y))
+            dropTargetModifier.onDropped(
+                uris = event.clipItemUris(),
+                position = Offset(event.x, event.y)
+            )
         }
         DragEvent.ACTION_DRAG_ENDED -> {
             dropTargetModifier.onDragEnded()
             true
         }
         else -> error("Invalid action: ${event.action}")
+    }
+}
+
+private fun DragEvent.clipItemUris(): List<Uri> = with(clipData) {
+    0.rangeTo(itemCount).map {
+        ClipItemUri(
+            item = getItemAt(it),
+            mimeType = description.getMimeType(it)
+        )
     }
 }

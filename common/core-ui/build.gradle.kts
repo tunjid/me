@@ -27,6 +27,8 @@ kotlin {
     sourceSets {
         named("commonMain") {
             dependencies {
+                api(project(":common:core"))
+
                 implementation(libs.jetbrains.compose.runtime)
                 implementation(libs.jetbrains.compose.animation)
                 implementation(libs.jetbrains.compose.material)

@@ -29,7 +29,7 @@ import com.tunjid.mutator.Mutation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
-enum class DropStatus {
+enum class DragStatus {
     None, InWindow, InThumbnail
 }
 
@@ -45,7 +45,7 @@ data class State(
     val thumbnail: String? = null,
     val upsert: ArchiveUpsert = ArchiveUpsert(),
     val chipsState: ChipsState = ChipsState(),
-    val dropStatus: DropStatus = DropStatus.None,
+    val dragStatus: DragStatus = DragStatus.None,
     @Transient
     val messages: MessageQueue = MessageQueue(),
 ) : ByteSerializable
@@ -100,10 +100,12 @@ sealed class Action(val key: String) {
         ) : Load()
     }
 
-    sealed class Drop : Action("Drop") {
-        data class Window(val inside: Boolean) : Drop()
-        data class Thumbnail(val inside: Boolean) : Drop()
+    sealed class Drag : Action("Drag") {
+        data class Window(val inside: Boolean) : Drag()
+        data class Thumbnail(val inside: Boolean) : Drag()
     }
+
+    data class Drop(val uris: List<Uri>) : Action("Drop")
 }
 
 @Serializable
