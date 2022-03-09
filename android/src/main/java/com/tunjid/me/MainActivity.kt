@@ -26,13 +26,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toComposeRect
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
 import com.tunjid.me.common.ui.theme.AppTheme
+import com.tunjid.me.core.ui.dragdrop.PlatformDropTargetModifier
 import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.globalui.NavMode
@@ -55,13 +58,17 @@ class MainActivity : AppCompatActivity() {
             scaffoldComponent.navActions(Mutation { pop() })
         }
 
-        setContent {
+        val composeView = ComposeView(this)
+        val dropModifier = PlatformDropTargetModifier(view = composeView)
+
+        composeView.setContent {
             AppTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     CompositionLocalProvider(
                         LocalRouteServiceLocator provides appDependencies.routeServiceLocator,
                     ) {
                         Scaffold(
+                            modifier = Modifier.then(dropModifier),
                             component = appDependencies.scaffoldComponent,
                         )
                     }
@@ -69,6 +76,8 @@ class MainActivity : AppCompatActivity() {
                 AdaptNavigation(scaffoldComponent = scaffoldComponent)
             }
         }
+
+        setContentView(composeView)
 
         lifecycleScope.launch {
             insetMutations().collect(scaffoldComponent.uiActions)
