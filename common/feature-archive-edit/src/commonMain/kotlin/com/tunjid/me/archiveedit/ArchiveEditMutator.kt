@@ -196,7 +196,7 @@ private fun Flow<Action.Drop>.dropMutations(): Flow<Mutation<State>> =
             mimeType.contains("image") && validMimeTypes.any(mimeType::contains)
         }.firstOrNull()
         Mutation {
-            if (uri != null) copy(toUpload = uri)
+            if (uri != null) copy(toUpload = uri, thumbnail = uri.path)
             else copy(toUpload = null, messages = messages + "Only png and jpg uploads are supported")
         }
     }

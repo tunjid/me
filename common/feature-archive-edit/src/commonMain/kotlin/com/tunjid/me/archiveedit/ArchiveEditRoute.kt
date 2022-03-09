@@ -88,7 +88,7 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
     ) {
         Spacer(modifier = Modifier.padding(8.dp))
         Thumbnail(
-            thumbnail = state.thumbnailUrl,
+            thumbnail = state.thumbnail,
             dragStatus = state.dragStatus,
             onAction = mutator.accept
         )

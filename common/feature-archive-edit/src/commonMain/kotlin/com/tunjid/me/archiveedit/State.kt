@@ -50,8 +50,6 @@ data class State(
     val messages: MessageQueue = MessageQueue(),
 ) : ByteSerializable
 
-val State.thumbnailUrl get() = toUpload?.path ?: thumbnail
-
 sealed class Action(val key: String) {
     sealed class TextEdit : Action("TextEdit") {
         abstract val value: String
