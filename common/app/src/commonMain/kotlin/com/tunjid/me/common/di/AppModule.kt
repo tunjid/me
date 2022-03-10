@@ -115,6 +115,7 @@ private class AppModule(
 
     private val dataModule = DataModule(
         appScope = appScope,
+        uriConverter = uriConverter,
         networkMonitor = networkMonitor,
         database = appDatabase,
     )
