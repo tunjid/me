@@ -7,29 +7,30 @@ are production tested, and should not be taken as anything more than its face va
 ## Introduction
 
 "Me" is a Kotlin Multiplatform playground for ideas that pop into my head around app architecture.
-These ideas typically center around state and it's production; a repository of "what ifs?".
-Some of the ideas explored include:
+These ideas typically center around state, and it's production; a repository of "what ifs?".
+Specifically, this repository aims to explore representing various app architecture components "as state".
 
-* Android insets and IME behavior driven by immutable state
-* Reactive app architecture
-* [Tiling](https://github.com/tunjid/Tiler) as a way of loading paginated data
-* [Trees](https://github.com/tunjid/treeNav) as a backing data structure for app navigation
-* [`Mutators`](https://github.com/tunjid/Mutator) as abstract data types for the production and mutation of state
-* [Motional Intelligence](https://medium.com/androiddevelopers/motional-intelligence-build-smarter-animations-821af4d5f8c0) with global UI as implemented with Jetpack Compose
-
+The app is a WYSIWYG editor for my personal website. The source for the backend can be found [here](https://github.com/tunjid/tunji-web-deux).
 
 ![Demo image](https://github.com/tunjid/me/blob/main/misc/demo.gif)
 
-The API consumed is that of my personal website. The source can be found [here](https://github.com/tunjid/tunji-web-deux).
+Some ideas explored include:
 
-⚠️⚠️⚠️⚠️
+* [Mutators](https://github.com/tunjid/Mutator) as abstract data types for the production and mutation of state
+* Reactive app architecture as a driver of app state
+* Android insets and IME (keyboard) behavior as state
+* [Tiling](https://github.com/tunjid/Tiler) for incremental loading (pagination) as state
+* [Trees](https://github.com/tunjid/treeNav) for representing app navigation as state
+* [Jetpack Compose](https://developer.android.com/jetpack/compose?gclid=CjwKCAiA4KaRBhBdEiwAZi1zzpXxpbbQ5-qXVpv8RHzJKKCDY_Yv7AXMLpeRHaMCK-SNVI9i4jvJ4RoC_VQQAvD_BwE&gclsrc=aw.ds) for stateful [motionally intelligent](https://medium.com/androiddevelopers/motional-intelligence-build-smarter-animations-821af4d5f8c0) global UI 
+
+🚨⚠️🚧👷🏿‍♂️🏗️🛠️🚨
 
 I try to keep the code at a near production quality, but this often takes a back seat to
 convenience and whim. I'm a huge proponent of dependency injection, yet the repository uses manual
-service location. Also I haven't separated my netwrok models from my data models as well as I would like.
+service location. Also I haven't separated my network models from my data models as well as I would like.
 
 Again, the work presented here are the experiments of an immutable state and functional reactive programming zealot.
-It's far from objective, Caveat emptor.
+It's far from objective, caveat emptor.
 
 ## Arch
 
