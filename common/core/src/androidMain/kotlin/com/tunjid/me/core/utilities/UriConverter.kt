@@ -31,6 +31,8 @@ data class ClipItemUri(
     override val mimeType: String?
 ) : Uri {
     override val path: String
-        get() = item?.uri?.path ?: item.toString()
+        get() = item.uri?.path ?: item.toString()
+    override val name: String
+        get() = TODO()
 
 }
