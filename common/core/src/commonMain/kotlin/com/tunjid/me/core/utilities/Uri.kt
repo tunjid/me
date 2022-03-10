@@ -21,7 +21,6 @@ import io.ktor.utils.io.core.Input
 
 interface Uri {
     val path: String
-    val name: String
     val mimeType: String?
 }
 

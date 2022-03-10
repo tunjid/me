@@ -32,7 +32,4 @@ data class ClipItemUri(
 ) : Uri {
     override val path: String
         get() = item.uri?.path ?: item.toString()
-    override val name: String
-        get() = TODO()
-
 }
