@@ -18,6 +18,7 @@ package com.tunjid.me.data.di
 
 import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.core.model.ChangeListItem
+import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.local.ChangeListDao
 import com.tunjid.me.data.local.Keys
 import com.tunjid.me.data.local.SessionCookieDao
@@ -39,6 +40,7 @@ import kotlinx.serialization.json.Json
 class DataModule(
     appScope: CoroutineScope,
     database: AppDatabase,
+    uriConverter: UriConverter,
     internal val networkMonitor: NetworkMonitor
 ) {
     internal val json = Json {
@@ -67,6 +69,7 @@ class DataModule(
     )
 
     internal val archiveRepository = ReactiveArchiveRepository(
+        uriConverter = uriConverter,
         networkService = networkService,
         dao = archiveDao
     )

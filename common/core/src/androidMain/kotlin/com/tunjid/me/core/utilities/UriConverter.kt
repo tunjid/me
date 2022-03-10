@@ -23,6 +23,7 @@ import io.ktor.utils.io.core.Input
 actual class UriConverter {
     // TODO Use Android context to get a safe input stream to read from and convert to [Input]
     actual fun toInput(uri: Uri): Input = TODO()
+    actual suspend fun name(uri: Uri): String = TODO()
 }
 
 data class ClipItemUri(

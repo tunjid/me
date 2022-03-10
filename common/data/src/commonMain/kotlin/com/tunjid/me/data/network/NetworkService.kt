@@ -27,11 +27,10 @@ import com.tunjid.me.core.model.SessionRequest
 import com.tunjid.me.core.model.User
 import com.tunjid.me.data.local.Keys
 import com.tunjid.me.data.local.SessionCookieDao
-import com.tunjid.me.data.network.models.NetworkMessage
 import com.tunjid.me.data.network.models.NetworkResponse
 import com.tunjid.me.data.network.models.UpsertResponse
 import io.ktor.client.HttpClient
-import io.ktor.client.features.ClientRequestException
+import io.ktor.client.features.ResponseException
 import io.ktor.client.features.cookies.HttpCookies
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.KotlinxSerializer
@@ -49,6 +48,7 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.statement.readText
+import io.ktor.client.utils.buildHeaders
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.utils.io.core.Input
@@ -78,8 +78,10 @@ internal interface NetworkService {
     suspend fun uploadArchiveHeaderPhoto(
         kind: ArchiveKind,
         id: ArchiveId,
+        name: String,
+        mime: String,
         photo: Input,
-    ): NetworkResponse<NetworkMessage>
+    ): NetworkResponse<Archive>
 
     suspend fun signIn(
         sessionRequest: SessionRequest
@@ -163,19 +165,26 @@ internal class KtorNetworkService(
     override suspend fun uploadArchiveHeaderPhoto(
         kind: ArchiveKind,
         id: ArchiveId,
+        name: String,
+        mime: String,
         photo: Input
-    ): NetworkResponse<NetworkMessage> = json.parseServerErrors {
+    ): NetworkResponse<Archive> = json.parseServerErrors {
         client.submitFormWithBinaryData(
-            url = "$baseUrl/${kind.type}/${id.value}",
+            url = "$baseUrl/api/${kind.type}/${id.value}",
             formData = formData {
                 append(
                     key = "photo",
                     value = InputProvider { photo },
+                    headers = buildHeaders {
+                        append(HttpHeaders.ContentType, mime)
+                        append(HttpHeaders.ContentDisposition, "filename=$name")
+                    }
                 )
             },
         ) {
-            onUpload { bytesSentTotal, contentLength ->
-                println("Uploaded $bytesSentTotal")
+            // TODO, make this a flow of upload progress so the UI can display a progress bar
+            onUpload { bytesSentTotal, _ ->
+                println("Uploaded $bytesSentTotal for header photo")
             }
         }
     }
@@ -206,10 +215,10 @@ private suspend fun <T> Json.parseServerErrors(body: suspend () -> T): NetworkRe
     NetworkResponse.Success(body())
 } catch (exception: Exception) {
     when (exception) {
-        is ClientRequestException -> try {
+        is ResponseException -> try {
             decodeFromString(exception.response.readText())
         } catch (deserializationException: Exception) {
-            NetworkResponse.Error(message = deserializationException.message ?: "Unknown error")
+            NetworkResponse.Error(message = exception.response.readText())
         }
         else -> throw exception
     }

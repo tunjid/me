@@ -69,7 +69,6 @@ object ArchiveEditFeature : Feature<ArchiveEditRoute, ArchiveEditMutator> {
         route = route,
         initialState = scaffoldComponent.restoredState(route),
         archiveRepository = dataComponent.archiveRepository,
-        uriConverter = scaffoldComponent.uriConverter,
         authRepository = dataComponent.authRepository,
         uiStateFlow = scaffoldComponent.globalUiStateStream,
         lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,

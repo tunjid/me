@@ -17,15 +17,15 @@
 package com.tunjid.me.core.utilities
 
 import io.ktor.utils.io.core.Input
-import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmInline
 
 
-interface Uri{
+interface Uri {
     val path: String
+    val name: String
     val mimeType: String?
 }
 
 expect class UriConverter() {
     fun toInput(uri: Uri): Input
+    suspend fun name(uri: Uri): String
 }

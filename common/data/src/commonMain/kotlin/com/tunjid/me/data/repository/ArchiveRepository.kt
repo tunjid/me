@@ -25,13 +25,14 @@ import com.tunjid.me.core.model.ChangeListItem
 import com.tunjid.me.core.model.Result
 import com.tunjid.me.core.model.isDelete
 import com.tunjid.me.core.model.map
+import com.tunjid.me.core.utilities.Uri
+import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.local.ArchiveDao
 import com.tunjid.me.data.local.Keys
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.exponentialBackoff
 import com.tunjid.me.data.network.models.item
 import com.tunjid.me.data.network.models.toResult
-import io.ktor.utils.io.core.Input
 import kotlinx.coroutines.flow.Flow
 
 interface ArchiveRepository {
@@ -39,7 +40,7 @@ interface ArchiveRepository {
     suspend fun uploadArchiveHeaderPhoto(
         kind: ArchiveKind,
         id: ArchiveId,
-        photo: Input
+        uri: Uri,
     ): Result<Unit>
 
     fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
@@ -53,6 +54,7 @@ interface ArchiveRepository {
  */
 internal class ReactiveArchiveRepository(
     private val networkService: NetworkService,
+    private val uriConverter: UriConverter,
     private val dao: ArchiveDao
 ) : ArchiveRepository, ChangeListProcessor<Keys.ChangeList.Archive> {
 
@@ -64,12 +66,14 @@ internal class ReactiveArchiveRepository(
     override suspend fun uploadArchiveHeaderPhoto(
         kind: ArchiveKind,
         id: ArchiveId,
-        photo: Input
+        uri: Uri,
     ): Result<Unit> =
         networkService.uploadArchiveHeaderPhoto(
             kind = kind,
             id = id,
-            photo = photo
+            mime = uri.mimeType ?: "",
+            name = uriConverter.name(uri),
+            photo = uriConverter.toInput(uri)
         )
             .toResult()
             .map { }

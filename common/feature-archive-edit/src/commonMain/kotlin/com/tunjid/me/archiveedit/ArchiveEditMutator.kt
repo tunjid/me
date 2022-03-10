@@ -26,7 +26,7 @@ import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.model.singular
 import com.tunjid.me.core.ui.ChipAction
-import com.tunjid.me.core.utilities.UriConverter
+import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.scaffold.globalui.UiState
@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -60,7 +61,6 @@ fun archiveEditMutator(
     route: ArchiveEditRoute,
     initialState: State? = null,
     archiveRepository: ArchiveRepository,
-    uriConverter: UriConverter,
     authRepository: AuthRepository,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
@@ -88,7 +88,6 @@ fun archiveEditMutator(
                         is Action.MessageConsumed -> action.flow.messageConsumptionMutations()
                         is Action.Load -> action.flow.loadMutations(
                             archiveRepository = archiveRepository,
-                            uriConverter = uriConverter
                         )
                     }
                 }
@@ -119,33 +118,6 @@ private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
             copy(
                 isSignedIn = it,
                 hasFetchedAuthStatus = true
-            )
-        }
-    }
-
-/**
- * Mutations from monitoring the archive
- */
-private fun ArchiveRepository.textBodyMutations(
-    kind: ArchiveKind,
-    archiveId: ArchiveId
-): Flow<Mutation<State>> = monitorArchive(
-    kind = kind,
-    id = archiveId
-)
-    .filterNotNull()
-    .map { archive ->
-        Mutation {
-            copy(
-                thumbnail = archive.thumbnail,
-                upsert = upsert.copy(
-                    id = archive.id,
-                    title = archive.title,
-                    description = archive.description,
-                    body = archive.body,
-                    categories = archive.categories,
-                    tags = archive.tags,
-                )
             )
         }
     }
@@ -273,7 +245,6 @@ private fun Flow<Action.MessageConsumed>.messageConsumptionMutations(): Flow<Mut
  */
 private fun Flow<Action.Load>.loadMutations(
     archiveRepository: ArchiveRepository,
-    uriConverter: UriConverter
 ): Flow<Mutation<State>> =
     debounce(200)
         .flatMapLatest { monitor ->
@@ -299,13 +270,73 @@ private fun Flow<Action.Load>.loadMutations(
                     emit(Mutation { copy(isSubmitting = false, messages = messages + message) })
 
                     // Start monitoring the created archive
-                    val id = upsert.id ?: (result as? Result.Success)?.item
-                    if (id != null) emitAll(
-                        archiveRepository.textBodyMutations(
-                            kind = kind,
-                            archiveId = id
+                    val id = upsert.id ?: (result as? Result.Success)?.item ?: return@flow
+
+                    emitAll(
+                        merge(
+                            archiveRepository.headerUploadMutations(
+                                headerPhoto = headerPhoto,
+                                id = id,
+                                kind = kind
+                            ),
+                            archiveRepository.textBodyMutations(
+                                kind = kind,
+                                archiveId = id
+                            )
                         )
                     )
                 }
             }
         }
+
+/**
+ * Mutations from monitoring the archive
+ */
+private fun ArchiveRepository.textBodyMutations(
+    kind: ArchiveKind,
+    archiveId: ArchiveId
+): Flow<Mutation<State>> = monitorArchive(
+    kind = kind,
+    id = archiveId
+)
+    .filterNotNull()
+    .map { archive ->
+        Mutation {
+            copy(
+                thumbnail = archive.thumbnail,
+                upsert = upsert.copy(
+                    id = archive.id,
+                    title = archive.title,
+                    description = archive.description,
+                    body = archive.body,
+                    categories = archive.categories,
+                    tags = archive.tags,
+                )
+            )
+        }
+    }
+
+/**
+ * Mutations from header image uploads
+ */
+private fun ArchiveRepository.headerUploadMutations(
+    headerPhoto: Uri?,
+    id: ArchiveId,
+    kind: ArchiveKind
+): Flow<Mutation<State>> =
+    when (headerPhoto) {
+        null -> emptyFlow()
+        else -> flow {
+            when (val result = uploadArchiveHeaderPhoto(
+                kind = kind,
+                id = id,
+                uri = headerPhoto
+            )) {
+                // Do nothing on success
+                is Result.Success -> Unit
+                is Result.Error -> emit(Mutation {
+                    copy(messages = messages + "Error uploading header: ${result.message ?: "Unknown error"}")
+                })
+            }
+        }
+    }

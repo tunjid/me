@@ -59,11 +59,12 @@ internal fun GlobalUi(
             fabIcon = Icons.Default.Done,
             fabExtended = true,
             fabEnabled = !state.isSubmitting,
-            fabClickListener = rememberFunction(state.kind, state.upsert) {
+            fabClickListener = rememberFunction(state.kind, state.upsert, state.toUpload) {
                 onAction(
                     Action.Load.Submit(
                         kind = state.kind,
-                        upsert = state.upsert
+                        upsert = state.upsert,
+                        headerPhoto = state.toUpload,
                     )
                 )
             },

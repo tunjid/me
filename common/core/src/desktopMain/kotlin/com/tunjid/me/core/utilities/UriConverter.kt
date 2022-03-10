@@ -26,6 +26,11 @@ actual class UriConverter {
         uri.path.startsWith("http") -> TODO("unimplemented")
         else -> File(uri.path).inputStream().asInput()
     }
+    actual suspend fun name(uri: Uri): String = when {
+        uri.path.startsWith("http") -> TODO("unimplemented")
+        else -> File(uri.path).name
+    }
+
 }
 
 data class FileUri(
