@@ -36,6 +36,7 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.rememberFunction
 import com.tunjid.me.scaffold.nav.AppRoute
 import kotlinx.serialization.Serializable
 
@@ -63,7 +64,7 @@ private fun SignInScreen(mutator: SignInMutator) {
             fabShows = true,
             fabEnabled = state.submitButtonEnabled,
             fabText = "Submit",
-            fabClickListener = {
+            fabClickListener = rememberFunction(state.sessionRequest) {
                 mutator.accept(
                     Action.Submit(request = state.sessionRequest)
                 )

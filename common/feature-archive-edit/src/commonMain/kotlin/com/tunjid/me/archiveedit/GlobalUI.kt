@@ -27,6 +27,7 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.rememberFunction
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 
 @Composable
@@ -50,7 +51,7 @@ internal fun GlobalUi(
                     imageVector = Icons.Default.Edit
                 ).takeIf { !state.isEditing }
             ),
-            toolbarMenuClickListener = {
+            toolbarMenuClickListener = rememberFunction {
                 onAction(Action.ToggleEditView)
             },
             fabShows = true,
@@ -58,7 +59,7 @@ internal fun GlobalUi(
             fabIcon = Icons.Default.Done,
             fabExtended = true,
             fabEnabled = !state.isSubmitting,
-            fabClickListener = {
+            fabClickListener = rememberFunction(state.kind, state.upsert) {
                 onAction(
                     Action.Load.Submit(
                         kind = state.kind,
@@ -67,7 +68,7 @@ internal fun GlobalUi(
                 )
             },
             snackbarMessages = state.messages,
-            snackbarMessageConsumer = {
+            snackbarMessageConsumer = rememberFunction {
                 onAction(Action.MessageConsumed(it))
             },
             navVisibility = NavVisibility.GoneIfBottomNav,

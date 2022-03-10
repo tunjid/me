@@ -38,6 +38,7 @@ import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.currentUiState
+import com.tunjid.me.scaffold.globalui.rememberFunction
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.LocalNavigator
@@ -81,7 +82,7 @@ private fun ArchiveScreen(
                 ToolbarItem(id = SignIn, text = "Sign In")
                     .takeIf { !isSignedIn }
             ),
-            toolbarMenuClickListener = { item ->
+            toolbarMenuClickListener = rememberFunction { item ->
                 when (item.id) {
                     SignIn -> navigator.navigate {
                         currentNav.push("sign-in".toRoute)
@@ -92,7 +93,7 @@ private fun ArchiveScreen(
             fabExtended = true,
             fabText = "Create",
             fabIcon = Icons.Default.Add,
-            fabClickListener = {
+            fabClickListener = rememberFunction {
                 navigator.navigate {
                     val kind = state.queryState.currentQuery.kind
                     currentNav.push("archives/${kind.type}/create".toRoute)

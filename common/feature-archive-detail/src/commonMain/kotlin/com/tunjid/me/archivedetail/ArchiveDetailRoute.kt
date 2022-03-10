@@ -49,6 +49,7 @@ import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.currentUiState
+import com.tunjid.me.scaffold.globalui.rememberFunction
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.LocalNavigator
 import com.tunjid.treenav.MultiStackNav
@@ -97,7 +98,7 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             fabExtended = true,
             fabText = "Edit",
             fabIcon = Icons.Default.Edit,
-            fabClickListener = {
+            fabClickListener = rememberFunction(state.archive?.id) {
                 val archiveId = state.archive?.id
                 if (archiveId != null) navigator.navigate {
                     currentNav.push("archives/${state.kind.type}/${archiveId.value}/edit".toRoute)

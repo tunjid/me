@@ -20,7 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.tunjid.mutator.Mutation
 
 val currentUiState
@@ -35,21 +38,14 @@ val currentUiState
 @Composable
 fun ScreenUiState(state: UiState) {
     val uiMutator = LocalGlobalUiMutator.current
+    var immutables by remember { mutableStateOf(state) }
 
-    val fabClickListener = remember {
-        MutableFunction(state.fabClickListener)
-    }
-    val toolbarMenuClickListener = remember {
-        MutableFunction(state.toolbarMenuClickListener)
-    }
-    val altToolbarMenuClickListener = remember {
-        MutableFunction(state.altToolbarMenuClickListener)
-    }
-    val snackbarMessageConsumer = remember {
-        MutableFunction(state.snackbarMessageConsumer)
-    }
+    val fabClickListener = MutableFunction(state.fabClickListener)
+    val toolbarMenuClickListener = MutableFunction(state.toolbarMenuClickListener)
+    val altToolbarMenuClickListener = MutableFunction(state.altToolbarMenuClickListener)
+    val snackbarMessageConsumer = MutableFunction(state.snackbarMessageConsumer)
 
-    val immutables = state.copy(
+    immutables = state.copy(
         fabClickListener = fabClickListener,
         toolbarMenuClickListener = toolbarMenuClickListener,
         altToolbarMenuClickListener = altToolbarMenuClickListener,
@@ -59,13 +55,9 @@ fun ScreenUiState(state: UiState) {
     LaunchedEffect(immutables) {
         uiMutator.accept(Mutation {
             // Preserve things that should not be overwritten
-            state.copy(
+            immutables.copy(
                 navMode = navMode,
                 systemUI = systemUI,
-                fabClickListener = fabClickListener,
-                toolbarMenuClickListener = toolbarMenuClickListener,
-                altToolbarMenuClickListener = altToolbarMenuClickListener,
-                snackbarMessageConsumer = snackbarMessageConsumer,
             )
         })
     }
@@ -75,9 +67,19 @@ fun ScreenUiState(state: UiState) {
             fabClickListener.backing = {}
             toolbarMenuClickListener.backing = {}
             altToolbarMenuClickListener.backing = {}
+            snackbarMessageConsumer.backing = {}
         }
     }
 }
+
+/**
+ * Syntactic sugar for [remember] remembering a single argument function
+ */
+@Composable
+fun <T> rememberFunction(
+    vararg keys: Any?,
+    implementation: (T) -> Unit
+): (T) -> Unit = remember(*keys) { implementation }
 
 /**
  * Generic function that helps override the backing implementation to prevent memory leaks
