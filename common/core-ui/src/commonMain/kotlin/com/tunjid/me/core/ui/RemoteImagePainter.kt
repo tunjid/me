@@ -21,4 +21,4 @@ import androidx.compose.ui.graphics.painter.Painter
 
 
 @Composable
-expect fun RemoteImagePainter(imageUrl: String?): Painter?
+expect fun RemoteImagePainter(imageUri: String?): Painter?

@@ -32,17 +32,17 @@ import java.io.File
 import java.io.InputStream
 
 @Composable
-actual fun RemoteImagePainter(imageUrl: String?): Painter? {
+actual fun RemoteImagePainter(imageUri: String?): Painter? {
     val image: ImageBitmap? by produceState<ImageBitmap?>(
         initialValue = null,
-        key1 = imageUrl,
+        key1 = imageUri,
     ) {
         value = withContext(Dispatchers.IO) {
             try {
                 when {
-                    imageUrl == null -> null
-                    imageUrl.startsWith("http") -> imageUrl.remoteInputStream()
-                    else -> imageUrl.fileInputStream()
+                    imageUri == null -> null
+                    imageUri.startsWith("http") -> imageUri.remoteInputStream()
+                    else -> imageUri.fileInputStream()
                 }?.toBitMap()
             } catch (e: Exception) {
                 // instead of printing to console, you can also write this to log,

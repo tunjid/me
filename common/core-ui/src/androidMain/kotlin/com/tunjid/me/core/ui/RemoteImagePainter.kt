@@ -23,13 +23,7 @@ import coil.compose.rememberImagePainter
 import coil.size.Scale
 
 @Composable
-actual fun RemoteImagePainter(imageUrl: String?): Painter? =
-    rememberImagePainter(
-        when {
-            imageUrl == null -> null
-            imageUrl.startsWith("http") -> imageUrl
-            else -> Uri.parse(imageUrl)
-        }
-    ) {
+actual fun RemoteImagePainter(imageUri: String?): Painter? =
+    rememberImagePainter(imageUri) {
         scale(Scale.FILL)
     }
