@@ -39,12 +39,14 @@ data class State(
     val isSignedIn: Boolean = false,
     val isEditing: Boolean = true,
     val isSubmitting: Boolean = false,
-    val toUpload: Uri? = null,
     val navBarSize: Int,
     val kind: ArchiveKind,
     val thumbnail: String? = null,
     val upsert: ArchiveUpsert = ArchiveUpsert(),
     val chipsState: ChipsState = ChipsState(),
+    @Transient
+    val toUpload: Uri? = null,
+    @Transient
     val dragStatus: DragStatus = DragStatus.None,
     @Transient
     val messages: MessageQueue = MessageQueue(),

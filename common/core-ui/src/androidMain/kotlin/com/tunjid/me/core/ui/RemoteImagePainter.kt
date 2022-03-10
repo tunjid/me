@@ -16,6 +16,7 @@
 
 package com.tunjid.me.core.ui
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import coil.compose.rememberImagePainter
@@ -23,6 +24,12 @@ import coil.size.Scale
 
 @Composable
 actual fun RemoteImagePainter(imageUrl: String?): Painter? =
-    rememberImagePainter(imageUrl) {
+    rememberImagePainter(
+        when {
+            imageUrl == null -> null
+            imageUrl.startsWith("http") -> imageUrl
+            else -> Uri.parse(imageUrl)
+        }
+    ) {
         scale(Scale.FILL)
     }

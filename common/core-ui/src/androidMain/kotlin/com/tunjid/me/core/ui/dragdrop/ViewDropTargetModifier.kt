@@ -68,10 +68,15 @@ fun dragListener(
 }
 
 private fun DragEvent.clipItemUris(): List<Uri> = with(clipData) {
-    0.rangeTo(itemCount).map {
-        ClipItemUri(
-            item = getItemAt(it),
-            mimeType = description.getMimeType(it)
-        )
+    0.until(itemCount).map { itemIndex ->
+        with(description) {
+             0.until(mimeTypeCount).map { mimeTypeIndex ->
+                 ClipItemUri(
+                     item = getItemAt(itemIndex),
+                     mimeType = getMimeType(mimeTypeIndex)
+                 )
+            }
+        }
     }
+        .flatten()
 }
