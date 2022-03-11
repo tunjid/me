@@ -31,18 +31,8 @@ import kotlinx.coroutines.flow.map
 
 typealias LifecycleMutator = Mutator<Mutation<Lifecycle>, StateFlow<Lifecycle>>
 
-sealed class DragDropStatus {
-    object Dragging : DragDropStatus()
-    data class Dropped(
-        val uri: Uri
-    ) : DragDropStatus()
-
-    object Idle : DragDropStatus()
-}
-
 data class Lifecycle(
     val isInForeground: Boolean = true,
-    val dragDropStatus: DragDropStatus = DragDropStatus.Idle,
     val routeIdsToSerializedStates: Map<String, ByteArray> = mapOf()
 )
 
