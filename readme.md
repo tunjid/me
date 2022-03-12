@@ -19,6 +19,7 @@ Some ideas explored include:
 * [Mutators](https://github.com/tunjid/Mutator) as abstract data types for the production and mutation of state
 * Reactive app architecture as a driver of app state
 * Android insets and IME (keyboard) behavior as state
+* Android permissions as state
 * [Tiling](https://github.com/tunjid/Tiler) for incremental loading (pagination) as state
 * [Trees](https://github.com/tunjid/treeNav) for representing app navigation as state
 * [Jetpack Compose](https://developer.android.com/jetpack/compose?gclid=CjwKCAiA4KaRBhBdEiwAZi1zzpXxpbbQ5-qXVpv8RHzJKKCDY_Yv7AXMLpeRHaMCK-SNVI9i4jvJ4RoC_VQQAvD_BwE&gclsrc=aw.ds) for stateful [motionally intelligent](https://medium.com/androiddevelopers/motional-intelligence-build-smarter-animations-821af4d5f8c0) global UI 
