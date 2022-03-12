@@ -34,6 +34,8 @@ import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
+import com.tunjid.me.scaffold.permissions.Permission
+import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
@@ -64,17 +66,21 @@ fun archiveEditMutator(
     authRepository: AuthRepository,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
+    permissionsFlow: StateFlow<Permissions>,
+    onPermissionRequested: (Permission) -> Unit,
 ): ArchiveEditMutator = stateFlowMutator(
     scope = scope,
     initialState = initialState ?: State(
         kind = route.kind,
         upsert = ArchiveUpsert(id = route.archiveId),
         navBarSize = uiStateFlow.value.navBarSize,
+        hasStoragePermissions = permissionsFlow.value.isGranted(Permission.ReadExternalStorage)
     ),
     started = SharingStarted.WhileSubscribed(),
     actionTransform = { actions ->
         merge(
             uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
+            permissionsFlow.storagePermissionMutations(),
             authRepository.authMutations(),
             actions
                 .withInitialLoad(route)
@@ -86,6 +92,9 @@ fun archiveEditMutator(
                         is Action.ChipEdit -> action.flow.chipEditMutations()
                         is Action.ToggleEditView -> action.flow.viewToggleMutations()
                         is Action.MessageConsumed -> action.flow.messageConsumptionMutations()
+                        is Action.RequestPermission -> action.flow.permissionRequestMutations(
+                            onPermissionRequested = onPermissionRequested
+                        )
                         is Action.Load -> action.flow.loadMutations(
                             archiveRepository = archiveRepository,
                         )
@@ -108,6 +117,14 @@ private fun Flow<Action>.withInitialLoad(
         )
     )
 }
+
+/**
+ * Mutations for permission status for reading from storage
+ */
+private fun Flow<Permissions>.storagePermissionMutations(): Flow<Mutation<State>> =
+    map { it.isGranted(Permission.ReadExternalStorage) }
+        .distinctUntilChanged()
+        .map { Mutation { copy(hasStoragePermissions = it) } }
 
 /**
  * Mutations that have to do with the user's signed in status
@@ -237,6 +254,17 @@ private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
 private fun Flow<Action.MessageConsumed>.messageConsumptionMutations(): Flow<Mutation<State>> =
     map { (message) ->
         Mutation { copy(messages = messages - message) }
+    }
+
+/**
+ * Empty mutations proxied to [onPermissionRequested] to request permissions
+ */
+private fun Flow<Action.RequestPermission>.permissionRequestMutations(
+    onPermissionRequested: (Permission) -> Unit
+): Flow<Mutation<State>> =
+    flatMapLatest { (permission) ->
+        onPermissionRequested(permission)
+        emptyFlow()
     }
 
 /**

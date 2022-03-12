@@ -72,5 +72,7 @@ object ArchiveEditFeature : Feature<ArchiveEditRoute, ArchiveEditMutator> {
         authRepository = dataComponent.authRepository,
         uiStateFlow = scaffoldComponent.globalUiStateStream,
         lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
+        permissionsFlow = scaffoldComponent.permissionsStream,
+        onPermissionRequested = scaffoldComponent.permissionActions,
     )
 }

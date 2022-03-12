@@ -41,18 +41,19 @@ class ScaffoldModule(
     internal val uriConverter: UriConverter
 ) {
     internal val patternsToParsers = routeParsers.patternsToParsers()
-    val navMutator = navMutator(
+    internal val navMutator = navMutator(
         scope = appScope,
         startNav = startRoutes,
         patternsToParsers = patternsToParsers,
     )
-    val globalUiMutator = globalUiMutator(
+    internal val globalUiMutator = globalUiMutator(
         scope = appScope,
         initialState = initialUiState
     )
-    val lifecycleMutator = lifecycleMutator(
+    internal val lifecycleMutator = lifecycleMutator(
         scope = appScope
     )
+    internal val permissionsMutator = permissionsProvider.mutator
 }
 
 class ScaffoldComponent(
@@ -61,6 +62,7 @@ class ScaffoldComponent(
     internal val navMutator = module.navMutator
     internal val globalUiMutator = module.globalUiMutator
     private val lifecycleMutator = module.lifecycleMutator
+    private val permissionsMutator = module.permissionsMutator
 
     val patternsToParsers = module.patternsToParsers
     val byteSerializer = module.byteSerializer
@@ -69,10 +71,12 @@ class ScaffoldComponent(
     val navStateStream = module.navMutator.state
     val globalUiStateStream = module.globalUiMutator.state
     val lifecycleStateStream = module.lifecycleMutator.state
+    val permissionsStream = permissionsMutator.state
 
     val navActions = navMutator.accept
     val uiActions = globalUiMutator.accept
     val lifecycleActions = lifecycleMutator.accept
+    val permissionActions = permissionsMutator.accept
 
     val navigator = Navigator(
         navMutator = navMutator,

@@ -25,6 +25,7 @@ import com.tunjid.me.core.model.MessageQueue
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.mutator.Mutation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -39,6 +40,7 @@ data class State(
     val isSignedIn: Boolean = false,
     val isEditing: Boolean = true,
     val isSubmitting: Boolean = false,
+    val hasStoragePermissions: Boolean = false,
     val navBarSize: Int,
     val kind: ArchiveKind,
     val thumbnail: String? = null,
@@ -106,6 +108,8 @@ sealed class Action(val key: String) {
     }
 
     data class Drop(val uris: List<Uri>) : Action("Drop")
+
+    data class RequestPermission(val permission: Permission) : Action("RequestPermission")
 }
 
 @Serializable

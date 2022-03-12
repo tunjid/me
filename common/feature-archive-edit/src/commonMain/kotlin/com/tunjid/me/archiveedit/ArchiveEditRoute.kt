@@ -42,6 +42,7 @@ import com.tunjid.me.core.ui.RemoteImagePainter
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.permissions.Permission
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -74,8 +75,12 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
             .verticalScroll(state = scrollState)
             .dropTarget(
                 onDragStarted = { _, _ ->
-                    mutator.accept(Action.Drag.Window(inside = true))
-                    true
+                    val (action, acceptedDrag) = when (state.hasStoragePermissions) {
+                        true -> Action.Drag.Window(inside = true) to true
+                        false -> Action.RequestPermission(Permission.ReadExternalStorage) to false
+                    }
+                    mutator.accept(action)
+                    acceptedDrag
                 },
                 onDragEntered = { mutator.accept(Action.Drag.Window(inside = true)) },
                 onDragExited = { mutator.accept(Action.Drag.Window(inside = false)) },
@@ -89,6 +94,7 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
         Spacer(modifier = Modifier.padding(8.dp))
         Thumbnail(
             thumbnail = state.thumbnail,
+            hasStoragePermission = state.hasStoragePermissions,
             dragStatus = state.dragStatus,
             onAction = mutator.accept
         )
@@ -130,6 +136,7 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
 @Composable
 private fun Thumbnail(
     thumbnail: String?,
+    hasStoragePermission: Boolean,
     dragStatus: DragStatus,
     onAction: (Action) -> Unit
 ) {
@@ -154,7 +161,7 @@ private fun Thumbnail(
                 color = borderColor
             )
             .dropTarget(
-                onDragStarted = { _, _ -> true },
+                onDragStarted = { _, _ -> hasStoragePermission },
                 onDragEntered = { onAction(Action.Drag.Thumbnail(inside = true)) },
                 onDragExited = { onAction(Action.Drag.Thumbnail(inside = false)) },
                 onDropped = { uris, _ ->
