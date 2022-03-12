@@ -28,6 +28,7 @@ import com.tunjid.me.scaffold.nav.Navigator
 import com.tunjid.me.scaffold.nav.RouteParser
 import com.tunjid.me.scaffold.nav.navMutator
 import com.tunjid.me.scaffold.nav.patternsToParsers
+import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import kotlinx.coroutines.CoroutineScope
 
 class ScaffoldModule(
@@ -35,6 +36,7 @@ class ScaffoldModule(
     initialUiState: UiState = UiState(),
     startRoutes: List<List<String>>,
     routeParsers: List<RouteParser<*>>,
+    internal val permissionsProvider: PermissionsProvider,
     internal val byteSerializer: ByteSerializer,
     internal val uriConverter: UriConverter
 ) {

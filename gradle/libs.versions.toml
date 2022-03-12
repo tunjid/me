@@ -5,6 +5,7 @@ androidGradlePlugin = "7.0.4"
 androidxActivity = "1.5.0-alpha02"
 androidxAppCompat = "1.4.0"
 androidxCore = "1.7.0"
+androidxLifecycle = "2.4.1"
 androidxWindow = "1.0.0-rc01"
 arkivanovEssenty = "0.2.2"
 coil = "1.4.0"
@@ -55,6 +56,7 @@ androidx-compose-ui-testManifest = { group = "androidx.compose.ui", name = "ui-t
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling-preview-desktop", version.ref = "androidxCompose" }
 androidx-compose-ui-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "androidxCompose" }
 androidx-compose-ui-util = { group = "androidx.compose.ui", name = "ui-util", version.ref = "androidxCompose" }
+androidx-lifecycle-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
 jakewharton-retrofit-serializationconverter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "jakeWhartonRetrofit" }
 jetbrains-compose-animation = { group = "org.jetbrains.compose.animation", name = "animation", version.ref = "jetbrainsCompose" }

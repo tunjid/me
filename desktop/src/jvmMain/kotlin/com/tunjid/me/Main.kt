@@ -44,6 +44,7 @@ import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
+import com.tunjid.me.scaffold.permissions.PlatformPermissionsProvider
 import com.tunjid.mutator.Mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -59,6 +60,7 @@ fun main() {
     val appDependencies = createAppDependencies(
         appScope = appScope,
         initialUiState = UiState(navMode = NavMode.NavRail),
+        permissionsProvider = PlatformPermissionsProvider(),
         database = AppDatabase.invoke(DatabaseDriverFactory().createDriver()),
         networkMonitor = NetworkMonitor(scope = appScope),
         uriConverter = UriConverter(),

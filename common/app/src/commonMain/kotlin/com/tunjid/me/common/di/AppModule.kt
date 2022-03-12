@@ -37,6 +37,7 @@ import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.ScaffoldModule
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
+import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.me.settings.SettingsFeature
 import com.tunjid.me.signin.SignInFeature
 import kotlinx.coroutines.CoroutineScope
@@ -51,10 +52,12 @@ fun createAppDependencies(
     appScope: CoroutineScope,
     initialUiState: UiState = UiState(),
     database: AppDatabase,
+    permissionsProvider: PermissionsProvider,
     networkMonitor: NetworkMonitor,
     uriConverter: UriConverter,
 ): AppDependencies = AppModule(
     appDatabase = database,
+    permissionsProvider = permissionsProvider,
     networkMonitor = networkMonitor,
     uriConverter = uriConverter,
     appScope = appScope,
@@ -71,6 +74,7 @@ private val startRoutes = ArchiveKind.values()
  */
 private class AppModule(
     appDatabase: AppDatabase,
+    permissionsProvider: PermissionsProvider,
     networkMonitor: NetworkMonitor,
     uriConverter: UriConverter,
     appScope: CoroutineScope,
@@ -105,6 +109,7 @@ private class AppModule(
     private val scaffoldModule = ScaffoldModule(
         appScope = appScope,
         initialUiState = initialUiState,
+        permissionsProvider = permissionsProvider,
         byteSerializer = byteSerializer,
         uriConverter = uriConverter,
         startRoutes = startRoutes,

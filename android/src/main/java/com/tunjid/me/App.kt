@@ -29,6 +29,7 @@ import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.network.NetworkMonitor
+import com.tunjid.me.scaffold.permissions.PlatformPermissionsProvider
 import com.tunjid.mutator.Mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,7 @@ class App : Application() {
         val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         createAppDependencies(
             appScope = appScope,
+            permissionsProvider = PlatformPermissionsProvider(appScope = appScope, context = this),
             networkMonitor = NetworkMonitor(scope = appScope, context = this),
             uriConverter = UriConverter(),
             database = AppDatabase.invoke(DatabaseDriverFactory(this).createDriver())
