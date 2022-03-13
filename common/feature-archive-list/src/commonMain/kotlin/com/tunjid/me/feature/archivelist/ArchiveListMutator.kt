@@ -86,8 +86,10 @@ fun archiveListMutator(
     }
 )
 
-private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
-    isSignedIn.map {
+internal fun AuthRepository.authMutations(): Flow<Mutation<State>> =
+    isSignedIn
+        .distinctUntilChanged()
+        .map {
         Mutation {
             copy(
                 isSignedIn = it,

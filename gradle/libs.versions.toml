@@ -13,6 +13,7 @@ androidxCompose = "1.2.0-alpha04"
 androidxEspresso = "3.3.0"
 androidxTest = "1.4.0"
 androidxTestExt = "1.1.2"
+googleMaterial = "1.4.0"
 jakeWhartonRetrofit = "0.8.0"
 jetbrainsCompose = "1.2.0-alpha01-dev620"
 junit4 = "4.13.2"
@@ -21,7 +22,7 @@ kotlinxCoroutines = "1.6.0"
 kotlinxDatetime = "0.3.1"
 kotlinxSerialization = "1.3.1"
 ktor = "1.6.0"
-googleMaterial = "1.4.0"
+mockk = "1.12.3"
 okhttp = "4.9.3"
 retrofit = "2.9.0"
 richtext = "0.10.0"
@@ -87,6 +88,7 @@ ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version
 ktor-client-serialization = { group = "io.ktor", name = "ktor-client-serialization", version.ref = "ktor" }
 ktor-io-core = { group = "io.ktor", name = "ktor-io", version.ref = "ktor" }
 ktor-io-jvm = { group = "io.ktor", name = "ktor-io-jvm", version.ref = "ktor" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 retrofit= { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 richtext-commonmark= { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "richtext" }

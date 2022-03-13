@@ -19,7 +19,10 @@ package com.tunjid.me.feature.archivelist
 import app.cash.turbine.test
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.mutator.coroutines.reduceInto
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -96,6 +99,43 @@ class ArchiveListMutatorKtTest {
                     actual = awaitItem().queryState
                 )
 
+                awaitComplete()
+            }
+    }
+
+    @Test
+    fun testAuthMutations() = runTest {
+        val initialState = State(
+            queryState = QueryState(
+                expanded = false,
+                startQuery = ArchiveQuery(kind = ArchiveKind.Articles),
+                currentQuery = ArchiveQuery(kind = ArchiveKind.Articles),
+            )
+        )
+        val authRepository = mockk<AuthRepository>()
+
+        every { authRepository.isSignedIn } returns listOf(
+            false,
+            false,
+            true,
+        ).asFlow()
+
+        authRepository
+            .authMutations()
+            .reduceInto(initialState)
+            .test {
+                assertEquals(
+                    expected = initialState,
+                    actual = awaitItem()
+                )
+                assertEquals(
+                    expected = initialState.copy(isSignedIn = false),
+                    actual = awaitItem()
+                )
+                assertEquals(
+                    expected = initialState.copy(isSignedIn = true),
+                    actual = awaitItem()
+                )
                 awaitComplete()
             }
     }
