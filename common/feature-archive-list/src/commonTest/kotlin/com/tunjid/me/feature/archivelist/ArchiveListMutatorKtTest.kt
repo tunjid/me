@@ -1,22 +1,3 @@
-import app.cash.turbine.test
-import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.model.ArchiveQuery
-import com.tunjid.me.feature.archivelist.Action
-import com.tunjid.me.feature.archivelist.QueryState
-import com.tunjid.me.feature.archivelist.State
-import com.tunjid.me.feature.archivelist.filterToggleMutations
-import com.tunjid.mutator.coroutines.reduceInto
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-
 /*
  * Copyright 2021 Google LLC
  *
@@ -33,6 +14,22 @@ import kotlin.test.assertEquals
  * limitations under the License.
  */
 
+package com.tunjid.me.feature.archivelist
+
+import app.cash.turbine.test
+import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.mutator.coroutines.reduceInto
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class ArchiveListMutatorKtTest {
     private val testDispatcher = UnconfinedTestDispatcher()
