@@ -30,6 +30,7 @@ sqldelight = "1.5.3"
 tunjidMutator = "0.0.1"
 tunjidTiler = "0.0.1"
 tunjidTreeNav = "0.0.0-alpha01"
+turbine = "0.7.0"
 
 [libraries]
 accompanist-flowlayout = { group="com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
@@ -101,3 +102,4 @@ tunjid-mutator-coroutines-jvm = { group = "com.tunjid.mutator", name = "coroutin
 tunjid-tiler = { group = "com.tunjid.tiler", name = "tiler", version.ref = "tunjidTiler" }
 tunjid-treenav-common = { group = "com.tunjid.treenav", name = "treenav", version.ref = "tunjidTreeNav" }
 tunjid-treenav-jvm = { group = "com.tunjid.treenav", name = "treenav-jvm", version.ref = "tunjidTreeNav" }
+cashapp-turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }

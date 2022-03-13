@@ -138,7 +138,7 @@ private fun Flow<Action.FilterChanged>.filterChangedMutations(): Flow<Mutation<S
  * Every toggle isExpanded == null should be processed, however every specific request to
  * expand or collapse, should be distinct until changed.
  */
-private fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<State>> =
+internal fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<State>> =
     map { it.isExpanded }
         .scan(listOf<Boolean?>()) { emissions, isExpanded -> (emissions + isExpanded).takeLast(2) }
         .transformWhile { emissions ->

@@ -47,6 +47,13 @@ kotlin {
                 implementation(libs.tunjid.treenav.common)
             }
         }
+        named("commonTest") {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.cashapp.turbine)
+            }
+        }
     }
 }
 
