@@ -33,7 +33,6 @@ import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.LocalNavigator
-import com.tunjid.me.scaffold.nav.Navigator
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
@@ -93,9 +92,13 @@ private fun ArchiveScreen(
                     itemContent = { item ->
                         GridCell(
                             item = item,
-                            navigator = navigator,
-                            isInNavRail = state.isInNavRail,
-                            onAction = mutator.accept
+                            onAction = mutator.accept,
+                            navigate = { path ->
+                                navigator.navigate {
+                                    if (state.isInNavRail) currentNav.swap(route = path.toRoute)
+                                    else currentNav.push(route = path.toRoute)
+                                }
+                            }
                         )
                     }
                 )
@@ -114,36 +117,15 @@ private fun ArchiveScreen(
         onAction = mutator.accept
     )
 
-    // Keep list in sync between navbar and destination pages
+    // Keep list in sync between navbar and fullscreen views
     ListSync(state, gridState)
-}
-
-@Composable
-private fun ListSync(
-    state: State,
-    gridState: LazyGridState
-) {
-    LaunchedEffect(true) {
-        val key = state.lastVisibleKey ?: return@LaunchedEffect
-        // Item is on screen do nothing
-        if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) return@LaunchedEffect
-
-        val indexOfKey = state.items.indexOfFirst { it.key == key }
-        if (indexOfKey < 0) return@LaunchedEffect
-
-        gridState.scrollToItem(
-            index = min(indexOfKey + 1, gridState.layoutInfo.totalItemsCount - 1),
-            scrollOffset = 400
-        )
-    }
 }
 
 @Composable
 private fun GridCell(
     item: ArchiveItem,
-    isInNavRail: Boolean,
-    navigator: Navigator,
     onAction: (Action) -> Unit,
+    navigate: (String) -> Unit
 ) {
     when (item) {
         is ArchiveItem.Loading -> ProgressBar(isCircular = item.isCircular)
@@ -151,11 +133,7 @@ private fun GridCell(
             archiveItem = item,
             onAction = onAction,
             onArchiveSelected = { archive ->
-                val path = "archives/${archive.kind.type}/${archive.id.value}"
-                navigator.navigate {
-                    if (isInNavRail) currentNav.swap(route = path.toRoute)
-                    else currentNav.push(route = path.toRoute)
-                }
+                navigate("archives/${archive.kind.type}/${archive.id.value}")
             }
         )
     }
@@ -181,6 +159,26 @@ private fun EndlessScroll(
                     )
                 }
             }
+    }
+}
+
+@Composable
+private fun ListSync(
+    state: State,
+    gridState: LazyGridState
+) {
+    LaunchedEffect(true) {
+        val key = state.lastVisibleKey ?: return@LaunchedEffect
+        // Item is on screen do nothing
+        if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) return@LaunchedEffect
+
+        val indexOfKey = state.items.indexOfFirst { it.key == key }
+        if (indexOfKey < 0) return@LaunchedEffect
+
+        gridState.scrollToItem(
+            index = min(indexOfKey + 1, gridState.layoutInfo.totalItemsCount - 1),
+            scrollOffset = 400
+        )
     }
 }
 
