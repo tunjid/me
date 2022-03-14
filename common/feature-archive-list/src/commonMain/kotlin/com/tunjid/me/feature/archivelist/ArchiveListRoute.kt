@@ -18,30 +18,22 @@ package com.tunjid.me.feature.archivelist
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyGridState
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.feature.LocalRouteServiceLocator
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.currentUiState
-import com.tunjid.me.scaffold.globalui.rememberFunction
-import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.LocalNavigator
+import com.tunjid.me.scaffold.nav.Navigator
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
@@ -63,54 +55,23 @@ data class ArchiveListRoute(
     }
 }
 
-private const val SignIn = "sign-in"
-
 @Composable
 private fun ArchiveScreen(
     mutator: ArchiveListMutator,
 ) {
     val navigator = LocalNavigator.current
     val state by mutator.state.collectAsState()
-    val isInNavRail = state.isInNavRail
-    val query = state.queryState.startQuery
-    val isSignedIn = state.isSignedIn
-    if (!isInNavRail) ScreenUiState(
-        UiState(
-            toolbarShows = true,
-            toolbarTitle = query.kind.name,
-            toolbarItems = listOfNotNull(
-                ToolbarItem(id = SignIn, text = "Sign In")
-                    .takeIf { !isSignedIn }
-            ),
-            toolbarMenuClickListener = rememberFunction { item ->
-                when (item.id) {
-                    SignIn -> navigator.navigate {
-                        currentNav.push("sign-in".toRoute)
-                    }
-                }
-            },
-            fabShows = if (state.hasFetchedAuthStatus) isSignedIn else currentUiState.fabShows,
-            fabExtended = true,
-            fabText = "Create",
-            fabIcon = Icons.Default.Add,
-            fabClickListener = rememberFunction {
-                navigator.navigate {
-                    val kind = state.queryState.currentQuery.kind
-                    currentNav.push("archives/${kind.type}/create".toRoute)
-                }
-            },
-            navVisibility = NavVisibility.Visible,
-            statusBarColor = MaterialTheme.colors.primary.toArgb(),
-        )
+
+    if (!state.isInNavRail) GlobalUi(
+        state = state,
+        navigator = navigator
     )
 
-    val filter = state.queryState
-    val items = state.items
     val gridState = rememberLazyGridState()
 
     Column {
         ArchiveFilters(
-            item = filter,
+            item = state.queryState,
             onChanged = mutator.accept
         )
         LazyVerticalGrid(
@@ -118,7 +79,7 @@ private fun ArchiveScreen(
             cells = GridCells.Adaptive(350.dp),
             content = {
                 items(
-                    items = items,
+                    items = state.items,
                     key = { it.key },
                     // TODO: There's a compose bug that causes span calculation to crash
                     //  with an indexOutOfBounds exception. Commenting out for now.
@@ -130,20 +91,12 @@ private fun ArchiveScreen(
 //                        }
 //                    },
                     itemContent = { item ->
-                        when (item) {
-                            is ArchiveItem.Loading -> ProgressBar(isCircular = item.isCircular)
-                            is ArchiveItem.Result -> ArchiveCard(
-                                archiveItem = item,
-                                onAction = mutator.accept,
-                                onArchiveSelected = { archive ->
-                                    val path = "archives/${archive.kind.type}/${archive.id.value}"
-                                    navigator.navigate {
-                                        if (isInNavRail) currentNav.swap(route = path.toRoute)
-                                        else currentNav.push(route = path.toRoute)
-                                    }
-                                }
-                            )
-                        }
+                        GridCell(
+                            item = item,
+                            navigator = navigator,
+                            isInNavRail = state.isInNavRail,
+                            onAction = mutator.accept
+                        )
                     }
                 )
             }
@@ -151,40 +104,83 @@ private fun ArchiveScreen(
     }
 
     // Initial load
-    LaunchedEffect(query) {
+    LaunchedEffect(state.queryState.startQuery) {
         mutator.accept(Action.Fetch.LoadMore(query = state.queryState.currentQuery))
     }
 
-    // Endless scrolling
-    val currentQuery = state.queryState.currentQuery
-    LaunchedEffect(gridState, currentQuery) {
-        snapshotFlow { gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.key }
-            .filterNotNull()
-            .distinctUntilChanged()
-            .collect { firstVisibleKey ->
-                mutator.accept(Action.ToggleFilter(isExpanded = false))
-                mutator.accept(Action.LastVisibleKey(firstVisibleKey))
-                firstVisibleKey.queryOffsetFromKey?.let { queryOffset ->
-                    mutator.accept(
-                        Action.Fetch.LoadMore(query = currentQuery.copy(offset = queryOffset))
-                    )
-                }
-            }
-    }
+    EndlessScroll(
+        gridState = gridState,
+        currentQuery = state.queryState.currentQuery,
+        onAction = mutator.accept
+    )
 
     // Keep list in sync between navbar and destination pages
+    ListSync(state, gridState)
+}
+
+@Composable
+private fun ListSync(
+    state: State,
+    gridState: LazyGridState
+) {
     LaunchedEffect(true) {
         val key = state.lastVisibleKey ?: return@LaunchedEffect
         // Item is on screen do nothing
         if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) return@LaunchedEffect
 
-        val indexOfKey = items.indexOfFirst { it.key == key }
+        val indexOfKey = state.items.indexOfFirst { it.key == key }
         if (indexOfKey < 0) return@LaunchedEffect
 
         gridState.scrollToItem(
             index = min(indexOfKey + 1, gridState.layoutInfo.totalItemsCount - 1),
             scrollOffset = 400
         )
+    }
+}
+
+@Composable
+private fun GridCell(
+    item: ArchiveItem,
+    isInNavRail: Boolean,
+    navigator: Navigator,
+    onAction: (Action) -> Unit,
+) {
+    when (item) {
+        is ArchiveItem.Loading -> ProgressBar(isCircular = item.isCircular)
+        is ArchiveItem.Result -> ArchiveCard(
+            archiveItem = item,
+            onAction = onAction,
+            onArchiveSelected = { archive ->
+                val path = "archives/${archive.kind.type}/${archive.id.value}"
+                navigator.navigate {
+                    if (isInNavRail) currentNav.swap(route = path.toRoute)
+                    else currentNav.push(route = path.toRoute)
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun EndlessScroll(
+    gridState: LazyGridState,
+    currentQuery: ArchiveQuery,
+    onAction: (Action) -> Unit
+) {
+    // Endless scrolling
+    LaunchedEffect(gridState, currentQuery) {
+        snapshotFlow { gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.key }
+            .filterNotNull()
+            .distinctUntilChanged()
+            .collect { firstVisibleKey ->
+                onAction(Action.ToggleFilter(isExpanded = false))
+                onAction(Action.LastVisibleKey(firstVisibleKey))
+                firstVisibleKey.queryOffsetFromKey?.let { queryOffset ->
+                    onAction(
+                        Action.Fetch.LoadMore(query = currentQuery.copy(offset = queryOffset))
+                    )
+                }
+            }
     }
 }
 
