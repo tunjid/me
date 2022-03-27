@@ -40,6 +40,7 @@ It's far from objective, caveat emptor.
 The app is a subscriber in a pub-sub liaison with the server. There is no pull to refresh, instead the app pulls diffs
 of `ChangeListItem` when the server notifies the app of changes made.
 
+
 The following rules are applied to the data layer:
 
 * DAOs are internal to the data layer
@@ -47,6 +48,18 @@ The following rules are applied to the data layer:
 * Reads from the data layer NEVER error.
 * Writes to the data layer may error and the error is bubbled back up to the caller
 * The `NetworkService` is internal to the data layer
+
+#### Pub sub implementation
+
+Pub sub in the app is backed by a change list invalidation based system. Its premise is:
+
+* Each model table on the server will have a sibling table that has a row that tracks a unique id that identifies a CRUD update (change_list_id). This unique id must have natural ordering. 
+* CRUD updates to any model will cause an update for the change_list_id (akin to a new commit in git).
+* The client will then hit an endpoint asking for changes since the last change_list_id it has, or its local HEAD. A changelist of model ids that have changed will then be sent (akin to a git fetch)
+* The clients will then chew on the change list incrementally, updating its local HEAD as each update is consumed.
+
+Real time updates are implemented with websockets via [socket.io](https://socket.io/). I intend to move the android client to FCM for efficiency reasons in the future.
+
 
 ### Navigation
 
