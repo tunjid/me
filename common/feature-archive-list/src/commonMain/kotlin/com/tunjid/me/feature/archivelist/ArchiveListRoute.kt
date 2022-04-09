@@ -27,6 +27,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
@@ -67,15 +70,22 @@ private fun ArchiveScreen(
     )
 
     val gridState = rememberLazyGridState()
+    val cardWidth = 350.dp
+    val cardWidthPx = with(LocalDensity.current) { cardWidth.toPx() }.toInt()
 
-    Column {
+    Column(
+        modifier = Modifier.onGloballyPositioned {
+            val gridSize = it.size.width / cardWidthPx
+            mutator.accept(Action.GridSize(gridSize))
+        }
+    ) {
         ArchiveFilters(
             item = state.queryState,
             onChanged = mutator.accept
         )
         LazyVerticalGrid(
             state = gridState,
-            cells = GridCells.Adaptive(350.dp),
+            cells = GridCells.Adaptive(cardWidth),
             content = {
                 items(
                     items = state.items,
@@ -108,11 +118,17 @@ private fun ArchiveScreen(
 
     // Initial load
     LaunchedEffect(state.queryState.startQuery) {
-        mutator.accept(Action.Fetch.LoadMore(query = state.queryState.currentQuery))
+        mutator.accept(
+            Action.Fetch.LoadMore(
+                query = state.queryState.currentQuery,
+                gridSize = state.queryState.gridSize,
+            )
+        )
     }
 
     EndlessScroll(
         gridState = gridState,
+        gridSize = state.queryState.gridSize,
         currentQuery = state.queryState.currentQuery,
         onAction = mutator.accept
     )
@@ -141,12 +157,13 @@ private fun GridCell(
 
 @Composable
 private fun EndlessScroll(
+    gridSize: Int,
     gridState: LazyGridState,
     currentQuery: ArchiveQuery,
     onAction: (Action) -> Unit
 ) {
     // Endless scrolling
-    LaunchedEffect(gridState, currentQuery) {
+    LaunchedEffect(gridSize, gridState, currentQuery) {
         snapshotFlow { gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.key }
             .filterNotNull()
             .distinctUntilChanged()
@@ -155,7 +172,10 @@ private fun EndlessScroll(
                 onAction(Action.LastVisibleKey(firstVisibleKey))
                 firstVisibleKey.queryOffsetFromKey?.let { queryOffset ->
                     onAction(
-                        Action.Fetch.LoadMore(query = currentQuery.copy(offset = queryOffset))
+                        Action.Fetch.LoadMore(
+                            query = currentQuery.copy(offset = queryOffset),
+                            gridSize = gridSize,
+                        )
                     )
                 }
             }

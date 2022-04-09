@@ -166,7 +166,7 @@ private fun Flow<Action.GridSize>.gridSizeMutations(): Flow<Mutation<State>> =
     distinctUntilChanged()
         .map {
             Mutation {
-                copy(gridSize = it.size)
+                copy(queryState = queryState.copy(gridSize = it.size))
             }
         }
 

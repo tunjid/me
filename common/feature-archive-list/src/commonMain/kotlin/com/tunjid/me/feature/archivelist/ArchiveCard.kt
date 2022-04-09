@@ -100,7 +100,8 @@ fun ArchiveCard(
                         val query = archiveItem.query
                         onAction(
                             Action.Fetch.Reset(
-                                query = query.copy(offset = 0) + category
+                                query = query.copy(offset = 0) + category,
+                                gridSize = 2 // TODO: This is an assumption, pass in the actual grid size
                             )
                         )
                     }

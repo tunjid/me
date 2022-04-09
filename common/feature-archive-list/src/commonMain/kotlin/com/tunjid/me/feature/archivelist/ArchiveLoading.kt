@@ -84,28 +84,27 @@ fun Flow<Action.Fetch>.toFetchResult(
 }
 
 /**
- * Converts a query to fetch data to a window to monitor multiple queries concurrently
+ * Converts [Action.Fetch] requests to a [Flow] of [FetchMetadata] allowing for efficient pagination dependent on
+ * screen size.
  */
 private fun Flow<Action.Fetch>.fetchMetadata(): Flow<FetchMetadata> =
     distinctUntilChanged()
         .scan(FetchMetadata()) { existingQueries, fetchAction ->
             val query = fetchAction.query
+            val gridSize = fetchAction.gridSize
             val shouldReset = fetchAction is Action.Fetch.Reset
             val on = listOf(
-                query.copy(offset = query.offset - (query.limit * 2)),
-                query.copy(offset = query.offset - (query.limit)),
+                *query.shift(size = gridSize, operator = Int::minus),
                 query,
-                query.copy(offset = query.offset + (query.limit)),
-                query.copy(offset = query.offset + (query.limit * 2))
+                *query.shift(size = gridSize, operator = Int::plus),
             )
                 .filter { it.offset >= 0 }
             val off = listOf(
-                query.copy(offset = query.offset - (query.limit * 4)),
-                query.copy(offset = query.offset - (query.limit * 3)),
-                query.copy(offset = query.offset + (query.limit * 3)),
-                query.copy(offset = query.offset + (query.limit * 4))
+                *query.shift(start = gridSize + 1, size = gridSize, operator = Int::minus),
+                *query.shift(start = gridSize + 1, size = gridSize, operator = Int::plus),
             )
                 .filter { it.offset >= 0 }
+
             FetchMetadata(
                 on = on,
                 off = off,
@@ -136,3 +135,16 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Tile.Input.List<ArchiveQuery
         }
     )
 
+/**
+ * Returns an [Array] of [ArchiveQuery] of [size] in which each element has it's [ArchiveQuery.offset] changed by
+ * the result of [operator] applied to the [ArchiveQuery.limit] of [this]  at each index.
+ *
+ * [start] the value applied to [ArchiveQuery.limit] at the first index
+ */
+private fun ArchiveQuery.shift(
+    start: Int = 1,
+    size: Int,
+    operator: (Int, Int) -> Int
+): Array<ArchiveQuery> = Array(size) { index ->
+    copy(offset = operator(offset, (limit * (index + start))))
+}

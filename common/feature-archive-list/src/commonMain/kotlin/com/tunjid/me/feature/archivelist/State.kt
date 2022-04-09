@@ -27,7 +27,6 @@ import kotlinx.serialization.Transient
 
 @Serializable
 data class State(
-    val gridSize: Int = 1,
     val shouldScrollToTop: Boolean = true,
     val isInNavRail: Boolean = false,
     val hasFetchedAuthStatus: Boolean = false,
@@ -42,13 +41,16 @@ data class State(
 sealed class Action(val key: String) {
     sealed class Fetch : Action(key = "Fetch") {
         abstract val query: ArchiveQuery
+        abstract val gridSize: Int
 
         data class Reset(
-            override val query: ArchiveQuery
+            override val query: ArchiveQuery,
+            override val gridSize: Int,
         ) : Fetch()
 
         data class LoadMore(
-            override val query: ArchiveQuery
+            override val query: ArchiveQuery,
+            override val gridSize: Int,
         ) : Fetch()
     }
 
@@ -134,6 +136,7 @@ val ArchiveItem.Result.readTime get() = "${archive.body.trim().split("/\\s+/").s
 
 @Serializable
 data class QueryState(
+    val gridSize: Int = 1,
     val expanded: Boolean = false,
     val startQuery: ArchiveQuery,
     val currentQuery: ArchiveQuery,

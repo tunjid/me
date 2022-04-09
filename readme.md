@@ -84,6 +84,30 @@ The definition for the `GlobalUiMutator` is:
 typealias GlobalUiMutator = Mutator<Mutation<UiState>, StateFlow<UiState>>
 ```
 
+### Pagination
+
+Pagination is implemented as a function of the current page and grid size:
+```
+[out of bounds]                    -> Evict from memory
+                                                   _
+[currentPage - gridSize - gridSize]                 |
+...                                                 | -> Keep pages in memory, but don't observe
+[currentPage - gridSize - 1]   _                   _|                        
+[currentPage - gridSize]        |
+...                             |
+[currentPage - 1]               |
+[currentPage]                   |  -> Observe pages     
+[currentPage + 1]               |
+...                             |
+[currentPage + gridSize]       _|                  _
+[currentPage + gridSize + 1]                        |
+...                                                 | -> Keep pages in memory, but don't observe
+[currentPage + gridSize + 1 + gridSize]            _|
+
+[out of bounds]                    -> Evict from memory
+```
+As the user scrolls, `currentPage` changes and new pages are observed to keep the UI relevant.
+
 ### State restoration and process death
 
 All types that need to be restored after process death implement the `ByteSerializable` interface.
