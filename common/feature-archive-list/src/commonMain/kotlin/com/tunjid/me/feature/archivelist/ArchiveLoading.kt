@@ -44,8 +44,11 @@ data class FetchResult(
  * A summary of the loading queries in the app
  */
 private data class FetchMetadata(
+    // Queries that are actively monitored
     val on: List<ArchiveQuery> = listOf(),
+    // Queries that are not being monitored, but whose results are in memory
     val off: List<ArchiveQuery> = listOf(),
+    // Queries that will be removed from memory
     val evict: List<ArchiveQuery> = listOf(),
 )
 
