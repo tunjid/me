@@ -32,10 +32,10 @@ object ProfileFeature : Feature<ProfileRoute, ProfileMutator> {
 
     override val routeParsers: List<RouteParser<ProfileRoute>> = listOf(
         routeParser(
-            pattern = "profile",
-            routeMapper = { result ->
+            routePattern = "profile",
+            routeMapper = { (route: String) ->
                 ProfileRoute(
-                    id = result.groupValues[0],
+                    id = route,
                 )
             }
         )

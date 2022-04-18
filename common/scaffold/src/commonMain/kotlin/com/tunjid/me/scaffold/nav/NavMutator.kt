@@ -71,7 +71,7 @@ fun Map<Regex, RouteParser<*>>.toMultiStackNav(paths: List<List<String>>) = path
                         ),
                         operation = innerFold@{ stackNav, route ->
                             stackNav.copy(
-                                routes = stackNav.routes + parse(path = route)
+                                routes = stackNav.routes + parse(route = route)
                             )
                         }
                     )

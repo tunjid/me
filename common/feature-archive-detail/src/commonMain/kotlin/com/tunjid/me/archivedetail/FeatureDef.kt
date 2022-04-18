@@ -34,13 +34,12 @@ object ArchiveDetailFeature : Feature<ArchiveDetailRoute, ArchiveDetailMutator> 
 
     override val routeParsers: List<RouteParser<ArchiveDetailRoute>> = listOf(
         routeParser(
-            pattern = "archives/(.*?)/(.*?)",
-            routeMapper = { result ->
-                val kindString = result.groupValues.getOrNull(1)
-                val archiveId = ArchiveId(result.groupValues.getOrNull(2) ?: "")
-                val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
+            routePattern = "archives/{kind}/{id}",
+            routeMapper = { (route: String, pathKeys: Map<String, String>) ->
+                val archiveId = ArchiveId(pathKeys["id"] ?: "")
+                val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
                 ArchiveDetailRoute(
-                    id = result.groupValues[0],
+                    id = route,
                     kind = kind,
                     archiveId = archiveId
                 )

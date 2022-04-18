@@ -16,17 +16,39 @@
 
 package com.tunjid.me.scaffold.nav
 
+data class RouteParams(
+    val route: String,
+    val pathArgs: Map<String, String> = mapOf(),
+    val queryArgs: Map<String, List<String>> = mapOf(),
+)
+
 interface RouteParser<T : AppRoute> {
-    val pattern: String
-    fun route(matchResult: MatchResult): T
+    val patterns: List<String>
+    val pathKeys: List<String>
+    fun route(params: RouteParams): T
 }
 
 fun <T : AppRoute> routeParser(
-    pattern: String,
-    routeMapper: (MatchResult) -> T
+    routePattern: String,
+    routeMapper: (RouteParams) -> T
 ) = object : RouteParser<T> {
-    override val pattern: String
-        get() = pattern
 
-    override fun route(matchResult: MatchResult): T = routeMapper(matchResult)
+    init {
+        pathKeys = mutableListOf()
+        val basicPattern = routePattern.replace(regex = pathRegex){
+            pathKeys.add(it.value.replace(regex = pathArgRegex, replacement = ""))
+            "(.*?)"
+        }
+        val queryPattern = "$basicPattern?(.*?)"
+        patterns = listOf(basicPattern, queryPattern)
+    }
+
+    override val pathKeys: List<String>
+
+    override val patterns: List<String>
+
+    override fun route(params: RouteParams): T = routeMapper(params)
 }
+
+private val pathRegex = "\\{.*?}".toRegex()
+private val pathArgRegex = "[{}]".toRegex()

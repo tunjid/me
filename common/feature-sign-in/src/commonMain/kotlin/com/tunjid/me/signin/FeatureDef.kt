@@ -32,10 +32,10 @@ object SignInFeature : Feature<SignInRoute, SignInMutator> {
 
     override val routeParsers: List<RouteParser<SignInRoute>> = listOf(
         routeParser(
-            pattern = "sign-in",
-            routeMapper = { result ->
+            routePattern = "sign-in",
+            routeMapper = { (route: String) ->
                 SignInRoute(
-                    id = result.groupValues[0],
+                    id = route,
                 )
             }
         )

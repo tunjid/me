@@ -33,12 +33,12 @@ object ArchiveListFeature : Feature<ArchiveListRoute, ArchiveListMutator> {
 
     override val routeParsers: List<RouteParser<ArchiveListRoute>> = listOf(
         routeParser(
-            pattern = "archives/(.*?)",
-            routeMapper = { result ->
-                val kindString = result.groupValues.getOrNull(1)
+            routePattern = "archives/{kind}",
+            routeMapper = { (route: String, pathKeys: Map<String, String>) ->
+                val kindString = pathKeys["kind"]
                 val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
                 ArchiveListRoute(
-                    id = result.groupValues[0],
+                    id = route,
                     kind = kind
                 )
             }

@@ -34,24 +34,23 @@ object ArchiveEditFeature : Feature<ArchiveEditRoute, ArchiveEditMutator> {
 
     override val routeParsers: List<RouteParser<ArchiveEditRoute>> = listOf(
         routeParser(
-            pattern = "archives/(.*?)/(.*?)/edit",
-            routeMapper = { result ->
-                val kindString = result.groupValues.getOrNull(1)
-                val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
+            routePattern = "archives/{kind}/{id}/edit",
+            routeMapper = { (route: String, pathKeys: Map<String, String>) ->
+                val archiveId = ArchiveId(pathKeys["id"] ?: "")
+                val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
                 ArchiveEditRoute(
-                    id = result.groupValues[0],
+                    id = route,
                     kind = kind,
-                    archiveId = ArchiveId(result.groupValues.getOrNull(2) ?: "")
+                    archiveId = archiveId
                 )
             }
         ),
         routeParser(
-            pattern = "archives/(.*?)/create",
-            routeMapper = { result ->
-                val kindString = result.groupValues.getOrNull(1)
-                val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
+            routePattern = "archives/{kind}/create",
+            routeMapper = { (route, pathKeys) ->
+                val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
                 ArchiveEditRoute(
-                    id = result.groupValues[0],
+                    id = route,
                     kind = kind,
                     archiveId = null
                 )

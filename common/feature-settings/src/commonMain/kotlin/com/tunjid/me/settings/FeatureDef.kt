@@ -32,10 +32,10 @@ object SettingsFeature : Feature<SettingsRoute, SettingsMutator> {
 
     override val routeParsers: List<RouteParser<SettingsRoute>> = listOf(
         routeParser(
-            pattern = "settings",
-            routeMapper = { result ->
+            routePattern = "settings",
+            routeMapper = { (route: String) ->
                 SettingsRoute(
-                    id = result.groupValues[0],
+                    id = route,
                 )
             }
         )
