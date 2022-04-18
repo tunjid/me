@@ -21,8 +21,8 @@ import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.Feature
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.restoredState
-import com.tunjid.me.scaffold.nav.RouteParser
-import com.tunjid.me.scaffold.nav.routeParser
+import com.tunjid.treenav.strings.UrlRouteMatcher
+import com.tunjid.treenav.strings.urlRouteMatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlin.reflect.KClass
 
@@ -31,8 +31,8 @@ object ArchiveListFeature : Feature<ArchiveListRoute, ArchiveListMutator> {
     override val routeType: KClass<ArchiveListRoute>
         get() = ArchiveListRoute::class
 
-    override val routeParsers: List<RouteParser<ArchiveListRoute>> = listOf(
-        routeParser(
+    override val routeMatchers: List<UrlRouteMatcher<ArchiveListRoute>> = listOf(
+        urlRouteMatcher(
             routePattern = "archives/{kind}",
             routeMapper = { (route: String, pathKeys: Map<String, String>) ->
                 val kindString = pathKeys["kind"]

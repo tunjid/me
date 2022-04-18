@@ -36,7 +36,8 @@ fun org.gradle.api.Project.configureFeatureModule() {
                     implementation(libs.findDependency("jetbrains-compose-foundation-layout").get())
 
                     implementation(libs.findDependency("kotlinx-coroutines-core").get())
-                    implementation(libs.findDependency("tunjid-treenav-common").get())
+                    api(libs.findDependency("tunjid-treenav-core-common").get())
+                    api(libs.findDependency("tunjid-treenav-strings-common").get())
                 }
             }
             named("androidMain") {

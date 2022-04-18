@@ -22,8 +22,8 @@ import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.Feature
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.restoredState
-import com.tunjid.me.scaffold.nav.RouteParser
-import com.tunjid.me.scaffold.nav.routeParser
+import com.tunjid.treenav.strings.UrlRouteMatcher
+import com.tunjid.treenav.strings.urlRouteMatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlin.reflect.KClass
 
@@ -32,8 +32,8 @@ object ArchiveEditFeature : Feature<ArchiveEditRoute, ArchiveEditMutator> {
     override val routeType: KClass<ArchiveEditRoute>
         get() = ArchiveEditRoute::class
 
-    override val routeParsers: List<RouteParser<ArchiveEditRoute>> = listOf(
-        routeParser(
+    override val routeMatchers: List<UrlRouteMatcher<ArchiveEditRoute>> = listOf(
+        urlRouteMatcher(
             routePattern = "archives/{kind}/{id}/edit",
             routeMapper = { (route: String, pathKeys: Map<String, String>) ->
                 val archiveId = ArchiveId(pathKeys["id"] ?: "")
@@ -45,7 +45,7 @@ object ArchiveEditFeature : Feature<ArchiveEditRoute, ArchiveEditMutator> {
                 )
             }
         ),
-        routeParser(
+        urlRouteMatcher(
             routePattern = "archives/{kind}/create",
             routeMapper = { (route, pathKeys) ->
                 val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles

@@ -44,7 +44,7 @@ kotlin {
                 implementation(libs.kotlinx.serialization.cbor)
 
                 implementation(libs.tunjid.mutator.core.common)
-                implementation(libs.tunjid.treenav.common)
+                implementation(libs.tunjid.treenav.core.common)
             }
         }
         named("androidMain") {

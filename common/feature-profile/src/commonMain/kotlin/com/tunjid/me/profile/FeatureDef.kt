@@ -20,8 +20,8 @@ import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.Feature
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.restoredState
-import com.tunjid.me.scaffold.nav.RouteParser
-import com.tunjid.me.scaffold.nav.routeParser
+import com.tunjid.treenav.strings.UrlRouteMatcher
+import com.tunjid.treenav.strings.urlRouteMatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlin.reflect.KClass
 
@@ -30,8 +30,8 @@ object ProfileFeature : Feature<ProfileRoute, ProfileMutator> {
     override val routeType: KClass<ProfileRoute>
         get() = ProfileRoute::class
 
-    override val routeParsers: List<RouteParser<ProfileRoute>> = listOf(
-        routeParser(
+    override val routeMatchers: List<UrlRouteMatcher<ProfileRoute>> = listOf(
+        urlRouteMatcher(
             routePattern = "profile",
             routeMapper = { (route: String) ->
                 ProfileRoute(

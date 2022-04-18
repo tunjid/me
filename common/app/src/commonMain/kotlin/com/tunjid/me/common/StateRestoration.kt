@@ -61,7 +61,7 @@ fun AppDependencies.saveState(): SavedState {
 
 fun AppDependencies.restore(savedState: SavedState) = scaffoldComponent.apply {
     navActions(Mutation {
-        scaffoldComponent.patternsToParsers.toMultiStackNav(
+        scaffoldComponent.routeParser.toMultiStackNav(
             savedState.navigation
         ).copy(currentIndex = savedState.activeNav)
     })

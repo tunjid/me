@@ -22,14 +22,16 @@ import com.tunjid.mutator.accept
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Route
+import com.tunjid.treenav.strings.RouteParser
 
 class Navigator(
     private val navMutator: NavMutator,
-    private val patternsToParsers: Map<Regex, RouteParser<*>>
+    private val routeParser: RouteParser<AppRoute>
 ) {
     val currentNav get() = navMutator.state.value
+
     val String.toRoute: Route
-        get() = patternsToParsers.parse(this)
+        get() = routeParser.parse(this) ?: Route404
 
     fun navigate(action: Navigator.() -> MultiStackNav) {
         navMutator.accept {
@@ -42,31 +44,6 @@ class Navigator(
 val LocalNavigator: ProvidableCompositionLocal<Navigator> = staticCompositionLocalOf {
     Navigator(
         navMutator = MultiStackNav("AppNav").asNoOpStateFlowMutator(),
-        patternsToParsers = mapOf(),
+        routeParser = { null },
     )
 }
-
-internal fun Map<Regex, RouteParser<*>>.parse(route: String): Route {
-    val regex = keys.firstOrNull { it.matches(input = route) } ?: return Route404
-    return when (val result = regex.matchEntire(input = route)) {
-        null -> Route404
-        else -> {
-            val routeParser = getValue(regex)
-            routeParser.route(
-                RouteParams(
-                    route = route,
-                    pathArgs = routeParser.pathKeys
-                        .zip(result.groupValues.drop(1))
-                        .toMap(),
-                    // TODO: Parse query parameters
-                    queryArgs = mapOf(),
-                )
-            )
-        }
-    }
-}
-
-internal fun List<RouteParser<*>>.patternsToParsers(): Map<Regex, RouteParser<*>> =
-    fold(mapOf()) { map, parser ->
-        map + parser.patterns.map { Regex(it) to parser }
-    }

@@ -37,9 +37,11 @@ import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.ScaffoldModule
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
+import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.me.settings.SettingsFeature
 import com.tunjid.me.signin.SignInFeature
+import com.tunjid.treenav.strings.UrlRouteMatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -113,8 +115,8 @@ private class AppModule(
         byteSerializer = byteSerializer,
         uriConverter = uriConverter,
         startRoutes = startRoutes,
-        routeParsers = features
-            .map { it.routeParsers }
+        routeMatchers = features
+            .map { it.routeMatchers as List<UrlRouteMatcher<AppRoute>> }
             .flatten()
     )
 

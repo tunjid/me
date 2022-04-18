@@ -40,21 +40,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.core.ui.RemoteImagePainter
-import com.tunjid.me.data.di.DataComponent
-import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.LocalRouteServiceLocator
-import com.tunjid.me.scaffold.di.ScaffoldComponent
-import com.tunjid.me.scaffold.di.restoredState
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.RouteParser
-import com.tunjid.me.scaffold.nav.routeParser
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
-import kotlin.reflect.KClass
 
 @Serializable
 data class ProfileRoute(

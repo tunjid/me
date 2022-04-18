@@ -31,7 +31,8 @@ kotlin {
 
                 implementation(libs.jetbrains.compose.runtime)
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.tunjid.treenav.common)
+                api(libs.tunjid.treenav.core.common)
+                api(libs.tunjid.treenav.strings.common)
             }
         }
         named("androidMain") {

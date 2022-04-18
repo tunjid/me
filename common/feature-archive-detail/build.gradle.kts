@@ -37,7 +37,6 @@ kotlin {
                 implementation(libs.tunjid.mutator.core.common)
                 implementation(libs.tunjid.mutator.coroutines.common)
 
-                implementation(libs.tunjid.treenav.common)
             }
         }
     }

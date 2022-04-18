@@ -20,8 +20,8 @@ import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.Feature
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.restoredState
-import com.tunjid.me.scaffold.nav.RouteParser
-import com.tunjid.me.scaffold.nav.routeParser
+import com.tunjid.treenav.strings.UrlRouteMatcher
+import com.tunjid.treenav.strings.urlRouteMatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlin.reflect.KClass
 
@@ -30,8 +30,8 @@ object SignInFeature : Feature<SignInRoute, SignInMutator> {
     override val routeType: KClass<SignInRoute>
         get() = SignInRoute::class
 
-    override val routeParsers: List<RouteParser<SignInRoute>> = listOf(
-        routeParser(
+    override val routeMatchers: List<UrlRouteMatcher<SignInRoute>> = listOf(
+        urlRouteMatcher(
             routePattern = "sign-in",
             routeMapper = { (route: String) ->
                 SignInRoute(

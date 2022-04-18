@@ -25,26 +25,26 @@ import com.tunjid.me.scaffold.globalui.globalUiMutator
 import com.tunjid.me.scaffold.lifecycle.lifecycleMutator
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.Navigator
-import com.tunjid.me.scaffold.nav.RouteParser
 import com.tunjid.me.scaffold.nav.navMutator
-import com.tunjid.me.scaffold.nav.patternsToParsers
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
+import com.tunjid.treenav.strings.UrlRouteMatcher
+import com.tunjid.treenav.strings.routeParserFrom
 import kotlinx.coroutines.CoroutineScope
 
 class ScaffoldModule(
     appScope: CoroutineScope,
     initialUiState: UiState = UiState(),
     startRoutes: List<List<String>>,
-    routeParsers: List<RouteParser<*>>,
+    routeMatchers: List<UrlRouteMatcher<AppRoute>>,
     internal val permissionsProvider: PermissionsProvider,
     internal val byteSerializer: ByteSerializer,
     internal val uriConverter: UriConverter
 ) {
-    internal val patternsToParsers = routeParsers.patternsToParsers()
+    internal val routeParser = routeParserFrom(*routeMatchers.toTypedArray())
     internal val navMutator = navMutator(
         scope = appScope,
         startNav = startRoutes,
-        patternsToParsers = patternsToParsers,
+        routeParser = routeParser,
     )
     internal val globalUiMutator = globalUiMutator(
         scope = appScope,
@@ -64,7 +64,7 @@ class ScaffoldComponent(
     private val lifecycleMutator = module.lifecycleMutator
     private val permissionsMutator = module.permissionsMutator
 
-    val patternsToParsers = module.patternsToParsers
+    val routeParser = module.routeParser
     val byteSerializer = module.byteSerializer
     val uriConverter = module.uriConverter
 
@@ -80,7 +80,7 @@ class ScaffoldComponent(
 
     val navigator = Navigator(
         navMutator = navMutator,
-        patternsToParsers = patternsToParsers
+        routeParser = routeParser
     )
 }
 

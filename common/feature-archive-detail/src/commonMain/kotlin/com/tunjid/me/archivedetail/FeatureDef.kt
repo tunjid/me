@@ -22,8 +22,8 @@ import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.Feature
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.restoredState
-import com.tunjid.me.scaffold.nav.RouteParser
-import com.tunjid.me.scaffold.nav.routeParser
+import com.tunjid.treenav.strings.UrlRouteMatcher
+import com.tunjid.treenav.strings.urlRouteMatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlin.reflect.KClass
 
@@ -32,8 +32,8 @@ object ArchiveDetailFeature : Feature<ArchiveDetailRoute, ArchiveDetailMutator> 
     override val routeType: KClass<ArchiveDetailRoute>
         get() = ArchiveDetailRoute::class
 
-    override val routeParsers: List<RouteParser<ArchiveDetailRoute>> = listOf(
-        routeParser(
+    override val routeMatchers: List<UrlRouteMatcher<ArchiveDetailRoute>> = listOf(
+        urlRouteMatcher(
             routePattern = "archives/{kind}/{id}",
             routeMapper = { (route: String, pathKeys: Map<String, String>) ->
                 val archiveId = ArchiveId(pathKeys["id"] ?: "")

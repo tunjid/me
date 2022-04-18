@@ -24,6 +24,7 @@ import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Route
 import com.tunjid.treenav.StackNav
+import com.tunjid.treenav.strings.RouteParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -51,16 +52,16 @@ data class NavItem(
 internal fun navMutator(
     scope: CoroutineScope,
     startNav: List<List<String>>,
-    patternsToParsers: Map<Regex, RouteParser<*>>
+    routeParser: RouteParser<AppRoute>,
 ): NavMutator {
     return stateFlowMutator(
         scope = scope,
-        initialState = patternsToParsers.toMultiStackNav(startNav),
+        initialState = routeParser.toMultiStackNav(startNav),
         actionTransform = { it },
     )
 }
 
-fun Map<Regex, RouteParser<*>>.toMultiStackNav(paths: List<List<String>>) = paths.fold(
+fun RouteParser<AppRoute>.toMultiStackNav(paths: List<List<String>>) = paths.fold(
     initial = MultiStackNav(name = "AppNav"),
     operation = { multiStackNav, routesForStack ->
         multiStackNav.copy(
@@ -71,7 +72,7 @@ fun Map<Regex, RouteParser<*>>.toMultiStackNav(paths: List<List<String>>) = path
                         ),
                         operation = innerFold@{ stackNav, route ->
                             stackNav.copy(
-                                routes = stackNav.routes + parse(route = route)
+                                routes = stackNav.routes + (parse(routeString = route) ?: Route404)
                             )
                         }
                     )
