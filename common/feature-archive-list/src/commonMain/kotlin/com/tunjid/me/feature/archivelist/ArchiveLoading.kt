@@ -52,11 +52,12 @@ private data class FetchMetadata(
     val evict: List<ArchiveQuery> = listOf(),
 )
 
-private fun FetchMetadata.tileRequests(): Flow<Tile.Request<ArchiveQuery, List<ArchiveItem>>> =
-    listOf<List<Tile.Request<ArchiveQuery, List<ArchiveItem>>>>(
+private fun FetchMetadata.tileRequests(): Flow<Tile.Input.List<ArchiveQuery, List<ArchiveItem>>> =
+    listOf<List<Tile.Input.List<ArchiveQuery, List<ArchiveItem>>>>(
         on.map { Tile.Request.On(it) },
         off.map { Tile.Request.Off(it) },
-        evict.map { Tile.Request.Evict(it) }
+        evict.map { Tile.Request.Evict(it) },
+        listOf(Tile.Limiter.List{ it.size > 40})
     )
         .flatten()
         .asFlow()
