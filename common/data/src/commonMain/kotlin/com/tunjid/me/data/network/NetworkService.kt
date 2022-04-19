@@ -61,6 +61,7 @@ internal interface NetworkService {
     suspend fun fetchArchives(
         kind: ArchiveKind,
         options: Map<String, String> = mapOf(),
+        ids: List<ArchiveId>? = null,
         tags: List<Descriptor.Tag> = listOf(),
         categories: List<Descriptor.Category> = listOf(),
     ): NetworkResponse<List<Archive>>
@@ -126,11 +127,15 @@ internal class KtorNetworkService(
     override suspend fun fetchArchives(
         kind: ArchiveKind,
         options: Map<String, String>,
+        ids: List<ArchiveId>?,
         tags: List<Descriptor.Tag>,
         categories: List<Descriptor.Category>,
     ): NetworkResponse<List<Archive>> = json.parseServerErrors {
         client.get("$baseUrl/api/${kind.type}") {
             options.forEach { (key, value) -> parameter(key, value) }
+            ids?.map(ArchiveId::value)?.forEach {
+                parameter("id", it)
+            }
             if (tags.isNotEmpty()) tags.map(Descriptor.Tag::value).forEach {
                 parameter("tag", it)
             }

@@ -47,7 +47,7 @@ internal interface ChangeListRepository {
  * Processes a [ChangeListItem]
  */
 internal interface ChangeListProcessor<in Key : Keys.ChangeList> {
-    suspend fun process(key: Key, changeListItem: ChangeListItem): Boolean
+    suspend fun process(key: Key, changeList: List<ChangeListItem>): Boolean
 }
 
 private val allKeys = listOf(
@@ -117,11 +117,11 @@ private fun Flow<Keys.ChangeList.Archive>.chew(
             is NetworkResponse.Success -> response.item
             is NetworkResponse.Error -> return@mapLatest
         }
-        changeList
-            .takeWhile { item ->
-                changeListProcessor.process(key = key, changeListItem = item)
+        changeList.chunked(10)
+            .takeWhile { items ->
+                changeListProcessor.process(key = key, changeList = items)
             }
-            .forEach { item ->
-                changeListDao.markComplete(keys = key, item = item)
+            .forEach { items ->
+                changeListDao.markComplete(keys = key, item = items.last())
             }
     }

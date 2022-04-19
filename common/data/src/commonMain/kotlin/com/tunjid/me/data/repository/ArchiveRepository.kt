@@ -84,24 +84,23 @@ internal class ReactiveArchiveRepository(
     override fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive?> =
         dao.monitorArchive(kind = kind, id = id)
 
-    override suspend fun process(key: Keys.ChangeList.Archive, changeListItem: ChangeListItem): Boolean {
-        if (changeListItem.isDelete()) {
-            dao.deleteArchives(listOf(ArchiveId(changeListItem.modelId)))
-            return true
-        }
+    override suspend fun process(key: Keys.ChangeList.Archive, changeList: List<ChangeListItem>): Boolean {
+        val (deleted, updated) = changeList.partition(ChangeListItem::isDelete)
 
-        val archive = exponentialBackoff(
+        dao.deleteArchives(deleted.map(ChangeListItem::modelId).map(::ArchiveId))
+
+        val archives = exponentialBackoff(
             initialDelay = 1_000,
             maxDelay = 20_000,
             default = null,
         ) {
-            networkService.fetchArchive(
+            networkService.fetchArchives(
                 kind = key.kind,
-                id = ArchiveId(changeListItem.modelId)
+                ids = updated.map(ChangeListItem::modelId).map(::ArchiveId)
             ).item()
         } ?: return false
 
-        dao.saveArchives(listOf(archive))
+        dao.saveArchives(archives)
         return true
     }
 
