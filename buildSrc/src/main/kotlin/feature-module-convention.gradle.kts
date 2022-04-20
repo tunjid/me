@@ -20,5 +20,7 @@ plugins {
     kotlin("plugin.serialization")
 }
 
-configureKotlinMultiplatform()
-configureFeatureModule()
+kotlin {
+    configureKotlinMultiplatform(this)
+    configureFeatureModule(this)
+}

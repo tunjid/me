@@ -18,4 +18,6 @@ plugins {
     kotlin("multiplatform")
 }
 
-configureKotlinMultiplatform()
+kotlin {
+    configureKotlinMultiplatform(this)
+}

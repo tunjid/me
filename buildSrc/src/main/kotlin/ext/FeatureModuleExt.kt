@@ -14,45 +14,45 @@
  * limitations under the License.
  */
 
-import gradle.kotlin.dsl.accessors._84dd20d1a49d379320fe96b7964013dd.kotlin
-import gradle.kotlin.dsl.accessors._84dd20d1a49d379320fe96b7964013dd.sourceSets
+
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
-fun org.gradle.api.Project.configureFeatureModule() {
-    kotlin {
-        sourceSets {
-            val catalogs = extensions.getByType(VersionCatalogsExtension::class.java)
-            val libs = catalogs.named("libs")
+fun org.gradle.api.Project.configureFeatureModule(
+    multiplatformExtension: KotlinMultiplatformExtension
+) = multiplatformExtension.apply {
+    sourceSets.apply {
+        val catalogs = extensions.getByType(VersionCatalogsExtension::class.java)
+        val libs = catalogs.named("libs")
 
-            named("commonMain") {
-                dependencies {
-                    implementation(project(":common:data"))
-                    implementation(project(":common:scaffold"))
-                    implementation(project(":common:feature-template"))
+        named("commonMain") {
+            dependencies {
+                implementation(project(":common:data"))
+                implementation(project(":common:scaffold"))
+                implementation(project(":common:feature-template"))
 
-                    implementation(libs.findDependency("jetbrains-compose-runtime").get())
-                    implementation(libs.findDependency("jetbrains-compose-animation").get())
-                    implementation(libs.findDependency("jetbrains-compose-material").get())
-                    implementation(libs.findDependency("jetbrains-compose-foundation-layout").get())
+                implementation(libs.findDependency("jetbrains-compose-runtime").get())
+                implementation(libs.findDependency("jetbrains-compose-animation").get())
+                implementation(libs.findDependency("jetbrains-compose-material").get())
+                implementation(libs.findDependency("jetbrains-compose-foundation-layout").get())
 
-                    implementation(libs.findDependency("kotlinx-coroutines-core").get())
-                    api(libs.findDependency("tunjid-treenav-core-common").get())
-                    api(libs.findDependency("tunjid-treenav-strings-common").get())
-                }
+                implementation(libs.findDependency("kotlinx-coroutines-core").get())
+                api(libs.findDependency("tunjid-treenav-core-common").get())
+                api(libs.findDependency("tunjid-treenav-strings-common").get())
             }
-            named("androidMain") {
-                dependencies {
-                    implementation(libs.findDependency("androidx-compose-foundation-layout").get())
-                }
+        }
+        named("androidMain") {
+            dependencies {
+                implementation(libs.findDependency("androidx-compose-foundation-layout").get())
             }
-            named("desktopMain") {
-                dependencies {
-                }
+        }
+        named("desktopMain") {
+            dependencies {
             }
-            named("commonTest") {
-                dependencies {
-                    implementation(kotlin("test"))
-                }
+        }
+        named("commonTest") {
+            dependencies {
+                implementation(kotlin("test"))
             }
         }
     }

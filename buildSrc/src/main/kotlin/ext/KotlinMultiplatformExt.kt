@@ -14,32 +14,31 @@
  * limitations under the License.
  */
 
-import gradle.kotlin.dsl.accessors._84dd20d1a49d379320fe96b7964013dd.kotlin
-import gradle.kotlin.dsl.accessors._84dd20d1a49d379320fe96b7964013dd.sourceSets
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
-fun org.gradle.api.Project.configureKotlinMultiplatform() {
-    kotlin {
-        android()
-        jvm("desktop")
-        sourceSets {
-            all {
-                languageSettings.apply {
-                    optIn("androidx.compose.animation.ExperimentalAnimationApi")
-                    optIn("androidx.compose.foundation.ExperimentalFoundationApi")
-                    optIn("androidx.compose.material.ExperimentalMaterialApi")
-                    optIn("androidx.compose.ui.ExperimentalComposeUiApi")
-                    optIn("kotlinx.serialization.ExperimentalSerializationApi")
-                    optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
-                    optIn("kotlinx.coroutines.FlowPreview")
-                }
+fun org.gradle.api.Project.configureKotlinMultiplatform(
+    multiplatformExtension: KotlinMultiplatformExtension
+) = multiplatformExtension.apply {
+    android()
+    jvm("desktop")
+    sourceSets.apply {
+        all {
+            languageSettings.apply {
+                optIn("androidx.compose.animation.ExperimentalAnimationApi")
+                optIn("androidx.compose.foundation.ExperimentalFoundationApi")
+                optIn("androidx.compose.material.ExperimentalMaterialApi")
+                optIn("androidx.compose.ui.ExperimentalComposeUiApi")
+                optIn("kotlinx.serialization.ExperimentalSerializationApi")
+                optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
+                optIn("kotlinx.coroutines.FlowPreview")
             }
         }
-        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-            kotlinOptions.jvmTarget = "11"
-        }
-        configurations.all {
-            coerceComposeVersion()
-        }
+    }
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.jvmTarget = "11"
+    }
+    configurations.all {
+        coerceComposeVersion()
     }
 }

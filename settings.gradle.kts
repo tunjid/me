@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-enableFeaturePreview("VERSION_CATALOGS")
 //dependencyResolutionManagement {
 //    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
 //    repositories {
