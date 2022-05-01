@@ -17,11 +17,7 @@
 package com.tunjid.me.feature.archivelist
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyGridState
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -85,7 +81,7 @@ private fun ArchiveScreen(
         )
         LazyVerticalGrid(
             state = gridState,
-            cells = GridCells.Adaptive(cardWidth),
+            columns = GridCells.Adaptive(cardWidth),
             content = {
                 items(
                     items = state.items,

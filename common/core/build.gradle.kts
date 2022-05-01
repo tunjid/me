@@ -41,11 +41,13 @@ kotlin {
         }
         named("androidMain") {
             dependencies {
+                implementation(libs.kotlinx.coroutines.android)
             }
         }
         named("desktopMain") {
             dependencies {
                 implementation(libs.ktor.io.jvm)
+                implementation(libs.kotlinx.coroutines.swing)
             }
         }
         named("commonTest") {

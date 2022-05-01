@@ -18,8 +18,8 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 fun org.gradle.api.Project.configureKotlinMultiplatform(
-    multiplatformExtension: KotlinMultiplatformExtension
-) = multiplatformExtension.apply {
+    extension: KotlinMultiplatformExtension
+) = extension.apply {
     android()
     jvm("desktop")
     sourceSets.apply {
@@ -39,6 +39,6 @@ fun org.gradle.api.Project.configureKotlinMultiplatform(
         kotlinOptions.jvmTarget = "11"
     }
     configurations.all {
-        coerceComposeVersion()
+        coerceComposeVersion(this)
     }
 }

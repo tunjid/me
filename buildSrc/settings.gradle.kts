@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-plugins {
-    id("com.android.library")
-}
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-android {
-    commonConfiguration(this)
-
-    defaultConfig {
-        targetSdk = 31
+dependencyResolutionManagement {
+    repositories {
+        gradlePluginPortal()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        mavenCentral()
+        google()
     }
-
-    sourceSets {
-        named("main") {
-            manifest.srcFile("src/androidMain/AndroidManifest.xml")
-            res.srcDirs("src/androidMain/res")
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
         }
-    }
-    configurations.all {
-        coerceComposeVersion(this)
     }
 }

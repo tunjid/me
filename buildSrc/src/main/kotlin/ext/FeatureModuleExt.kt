@@ -19,8 +19,8 @@ import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 fun org.gradle.api.Project.configureFeatureModule(
-    multiplatformExtension: KotlinMultiplatformExtension
-) = multiplatformExtension.apply {
+    extension: KotlinMultiplatformExtension
+) = extension.apply {
     sourceSets.apply {
         val catalogs = extensions.getByType(VersionCatalogsExtension::class.java)
         val libs = catalogs.named("libs")
@@ -31,19 +31,19 @@ fun org.gradle.api.Project.configureFeatureModule(
                 implementation(project(":common:scaffold"))
                 implementation(project(":common:feature-template"))
 
-                implementation(libs.findDependency("jetbrains-compose-runtime").get())
-                implementation(libs.findDependency("jetbrains-compose-animation").get())
-                implementation(libs.findDependency("jetbrains-compose-material").get())
-                implementation(libs.findDependency("jetbrains-compose-foundation-layout").get())
+                implementation(libs.findLibrary("jetbrains-compose-runtime").get())
+                implementation(libs.findLibrary("jetbrains-compose-animation").get())
+                implementation(libs.findLibrary("jetbrains-compose-material").get())
+                implementation(libs.findLibrary("jetbrains-compose-foundation-layout").get())
 
-                implementation(libs.findDependency("kotlinx-coroutines-core").get())
-                api(libs.findDependency("tunjid-treenav-core-common").get())
-                api(libs.findDependency("tunjid-treenav-strings-common").get())
+                implementation(libs.findLibrary("kotlinx-coroutines-core").get())
+                api(libs.findLibrary("tunjid-treenav-core-common").get())
+                api(libs.findLibrary("tunjid-treenav-strings-common").get())
             }
         }
         named("androidMain") {
             dependencies {
-                implementation(libs.findDependency("androidx-compose-foundation-layout").get())
+                implementation(libs.findLibrary("androidx-compose-foundation-layout").get())
             }
         }
         named("desktopMain") {

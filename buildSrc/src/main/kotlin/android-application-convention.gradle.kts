@@ -19,12 +19,12 @@ plugins {
 }
 
 android {
-    commonConfiguration()
+    commonConfiguration(this)
 
     defaultConfig {
         targetSdk = 31
     }
     configurations.all {
-        coerceComposeVersion()
+        coerceComposeVersion(this)
     }
 }

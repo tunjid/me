@@ -14,38 +14,12 @@
  * limitations under the License.
  */
 
-//dependencyResolutionManagement {
-//    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-//    repositories {
-//        google()
-//        mavenCentral()
-//    }
-//}
 pluginManagement {
     repositories {
         gradlePluginPortal()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         mavenCentral()
         google()
-    }
-
-    plugins {
-        val kotlinVersion = "1.6.10"
-        val agpVersion = "7.0.4"
-        val composeVersion = "1.0.1"
-        val sqlDelightVersion = "1.5.3"
-
-        kotlin("jvm").version(kotlinVersion)
-        kotlin("multiplatform").version(kotlinVersion)
-        kotlin("android").version(kotlinVersion)
-        kotlin("plugin.serialization").version(kotlinVersion)
-        kotlin("plugin.parcelize").version(kotlinVersion)
-
-        id("com.android.application").version(agpVersion)
-        id("com.android.library").version(agpVersion)
-        id("org.jetbrains.compose").version(composeVersion)
-
-        id("com.squareup.sqldelight").version(sqlDelightVersion)
     }
 }
 

@@ -18,12 +18,15 @@ import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Action
 import org.gradle.api.JavaVersion
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
 /**
  * Sets common values for Android Applications and Libraries
  */
-fun CommonExtension<*, *, *, *>.commonConfiguration() {
+fun org.gradle.api.Project.commonConfiguration(
+   extension: CommonExtension<*, *, *, *>
+) = extension.apply {
     compileSdk = 31
 
     defaultConfig {
@@ -35,7 +38,8 @@ fun CommonExtension<*, *, *, *>.commonConfiguration() {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.2.0-alpha04"
+        println("USING VERSION ${versionCatalog.findVersion("androidxCompose").get().requiredVersion}")
+        kotlinCompilerExtensionVersion = versionCatalog.findVersion("androidxCompose").get().requiredVersion
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -60,11 +64,15 @@ fun CommonExtension<*, *, *, *>.commonConfiguration() {
     }
 }
 
-fun Configuration.coerceComposeVersion() {
-    resolutionStrategy.eachDependency {
+fun org.gradle.api.Project.coerceComposeVersion(configuration: Configuration) {
+    configuration.resolutionStrategy.eachDependency {
         if (requested.group.startsWith("androidx.compose")) {
-            useVersion("1.2.0-alpha04")
+            useVersion(versionCatalog.findVersion("androidxCompose").get().requiredVersion)
             because("I need the changes in lazyGrid")
         }
     }
 }
+
+val org.gradle.api.Project.versionCatalog
+    get() = extensions.getByType(VersionCatalogsExtension::class.java)
+        .named("libs")
