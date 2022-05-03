@@ -30,6 +30,7 @@ import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.network.modelEvents
+import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.RouteServiceLocator
 import com.tunjid.me.feature.archivelist.ArchiveListFeature
 import com.tunjid.me.profile.ProfileFeature
@@ -41,8 +42,9 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.me.settings.SettingsFeature
 import com.tunjid.me.signin.SignInFeature
-import com.tunjid.treenav.strings.UrlRouteMatcher
+import com.tunjid.mutator.Mutator
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.cbor.Cbor
@@ -69,7 +71,7 @@ fun createAppDependencies(
 private val startRoutes = ArchiveKind.values()
     .map { "archives/${it.type}" }
     .plus("settings")
-    .map { listOf(it) }
+    .map(::listOf)
 
 /**
  * Manual dependency injection module
@@ -116,7 +118,7 @@ private class AppModule(
         uriConverter = uriConverter,
         startRoutes = startRoutes,
         routeMatchers = features
-            .map { it.routeMatchers as List<UrlRouteMatcher<AppRoute>> }
+            .map(Feature<out AppRoute, out Mutator<out Any, out StateFlow<*>>>::routeMatchers)
             .flatten()
     )
 
