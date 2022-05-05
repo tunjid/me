@@ -30,7 +30,7 @@ class Navigator(
 ) {
     val currentNav get() = navMutator.state.value
 
-    val String.toRoute: Route
+    val String.toRoute: AppRoute
         get() = routeParser.parse(this) ?: Route404
 
     fun navigate(action: Navigator.() -> MultiStackNav) {

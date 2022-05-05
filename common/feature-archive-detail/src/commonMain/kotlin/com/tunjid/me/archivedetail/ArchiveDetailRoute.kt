@@ -52,7 +52,6 @@ import com.tunjid.me.scaffold.globalui.currentUiState
 import com.tunjid.me.scaffold.globalui.rememberFunction
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.LocalNavigator
-import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
@@ -70,13 +69,7 @@ data class ArchiveDetailRoute(
         )
     }
 
-    override fun navRailRoute(nav: MultiStackNav): AppRoute? {
-        val activeStack = nav.stacks.getOrNull(nav.currentIndex) ?: return null
-        val previous = activeStack.routes
-            .getOrNull(activeStack.routes.lastIndex - 1) as? AppRoute
-            ?: return null
-        return if (previous.id == "archives/${kind.type}") previous else null
-    }
+    override val navRailRoute get() = "archives/{${kind.type}}"
 }
 
 @Composable

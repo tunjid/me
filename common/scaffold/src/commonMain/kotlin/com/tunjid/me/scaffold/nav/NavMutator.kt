@@ -39,7 +39,8 @@ interface AppRoute : Route {
     /**
      * Defines what route to show in the nav rail alongside this route
      */
-    fun navRailRoute(nav: MultiStackNav): AppRoute? = null
+    val navRailRoute: String?
+        get() = null
 }
 
 data class NavItem(

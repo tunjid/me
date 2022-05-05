@@ -16,6 +16,7 @@
 
 package com.tunjid.me.feature.archivelist
 
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.data.repository.ArchiveRepository
@@ -90,13 +91,13 @@ internal fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     isSignedIn
         .distinctUntilChanged()
         .map {
-        Mutation {
-            copy(
-                isSignedIn = it,
-                hasFetchedAuthStatus = true,
-            )
+            Mutation {
+                copy(
+                    isSignedIn = it,
+                    hasFetchedAuthStatus = true,
+                )
+            }
         }
-    }
 
 /**
  * Updates [State] with whether it is in the nav rail
@@ -105,7 +106,16 @@ private fun navRailStatusMutations(
     navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>,
 ) = combine(
-    navStateFlow.map { it.navRailRoute is ArchiveListRoute },
+    navStateFlow.map {
+        val kindMatch = ArchiveKind.values()
+            .map(ArchiveKind::type)
+            .joinToString(separator = "|")
+        val pathMatch = "archive/$kindMatch".toRegex()
+        when (val navRailRoute = it.navRailRoute) {
+            null -> false
+            else -> pathMatch.matches(navRailRoute)
+        }
+    },
     uiStateFlow.map { it.navRailVisible },
     Boolean::and,
 )
