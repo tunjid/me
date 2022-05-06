@@ -23,9 +23,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -140,6 +138,10 @@ private fun Thumbnail(
     dragStatus: DragStatus,
     onAction: (Action) -> Unit
 ) {
+    // Create a var so edits can be captured
+    val permissionState = remember { mutableStateOf(hasStoragePermission) }
+    permissionState.value = hasStoragePermission
+
     val painter = RemoteImagePainter(thumbnail)
     val borderColor by animateColorAsState(
         when (dragStatus) {
@@ -161,7 +163,7 @@ private fun Thumbnail(
                 color = borderColor
             )
             .dropTarget(
-                onDragStarted = { _, _ -> hasStoragePermission },
+                onDragStarted = { _, _ -> permissionState.value },
                 onDragEntered = { onAction(Action.Drag.Thumbnail(inside = true)) },
                 onDragExited = { onAction(Action.Drag.Thumbnail(inside = false)) },
                 onDropped = { uris, _ ->
