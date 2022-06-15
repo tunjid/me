@@ -29,7 +29,7 @@ richtext = "0.10.0"
 socketio = "2.0.0"
 sqldelight = "1.5.3"
 tunjidMutator = "0.0.2"
-tunjidTiler = "0.0.2"
+tunjidTiler = "0.0.3"
 tunjidTreeNav = "0.0.3"
 turbine = "0.7.0"
 

@@ -19,48 +19,20 @@ package com.tunjid.me.feature.archivelist
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.data.repository.ArchiveRepository
+import com.tunjid.tiler.ListTiler
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.tiledList
 import com.tunjid.tiler.toTiledList
+import com.tunjid.utilities.PivotRequest
+import com.tunjid.utilities.pivotWith
+import com.tunjid.utilities.toRequests
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.scan
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.*
 
 data class FetchResult(
     val action: Action.Fetch,
     val queriedArchives: List<List<ArchiveItem>>
 )
-
-/**
- * A summary of the loading queries in the app
- */
-private data class FetchMetadata(
-    // Queries that are actively monitored
-    val on: List<ArchiveQuery> = listOf(),
-    // Queries that are not being monitored, but whose results are in memory
-    val off: List<ArchiveQuery> = listOf(),
-    // Queries that will be removed from memory
-    val evict: List<ArchiveQuery> = listOf(),
-)
-
-private fun FetchMetadata.tileRequests(): Flow<Tile.Input.List<ArchiveQuery, List<ArchiveItem>>> =
-    listOf<List<Tile.Input.List<ArchiveQuery, List<ArchiveItem>>>>(
-        on.map { Tile.Request.On(it) },
-        off.map { Tile.Request.Off(it) },
-        evict.map { Tile.Request.Evict(it) },
-        listOf(Tile.Limiter.List{ it.size > 40})
-    )
-        .flatten()
-        .asFlow()
 
 /**
  * Converts a query to output data for [State]
@@ -75,59 +47,39 @@ fun Flow<Action.Fetch>.toFetchResult(
 ).let { sharedFlow ->
     combine(
         flow = sharedFlow,
-        flow2 = sharedFlow
-            .fetchMetadata()
-            .flatMapLatest(FetchMetadata::tileRequests)
-            .toTiledList(repo.archiveTiler())
-            .debounce(150),
+        flow2 = sharedFlow.distinctBy(Action.Fetch::gridSize)
+            .map { (fetchAction, fetchActionFlow) ->
+                fetchAction to fetchActionFlow.map { it.query }
+            }
+            .flatMapLatest { (gridSize, flow) ->
+                flow.pivotWith(pivotRequest(gridSize))
+                    .toRequests<ArchiveQuery, List<ArchiveItem>>()
+                    .toTiledList(repo.archiveTiler(Tile.Limiter.List { pages -> pages.size > 4 * gridSize }))
+            },
         transform = ::FetchResult
     )
 }
 
-/**
- * Converts [Action.Fetch] requests to a [Flow] of [FetchMetadata] allowing for efficient pagination dependent on
- * screen size.
- */
-private fun Flow<Action.Fetch>.fetchMetadata(): Flow<FetchMetadata> =
-    distinctUntilChanged()
-        .scan(FetchMetadata()) { existingQueries, fetchAction ->
-            val query = fetchAction.query
-            val gridSize = fetchAction.gridSize
-            val shouldReset = fetchAction is Action.Fetch.Reset
-            val on = listOf(
-                *query.shift(size = gridSize, operator = Int::minus),
-                query,
-                *query.shift(size = gridSize, operator = Int::plus),
-            )
-                .filter { it.offset >= 0 }
-            val off = listOf(
-                *query.shift(start = gridSize + 1, size = gridSize, operator = Int::minus),
-                *query.shift(start = gridSize + 1, size = gridSize, operator = Int::plus),
-            )
-                .filter { it.offset >= 0 }
+private fun pivotRequest(gridSize: Int) = PivotRequest<ArchiveQuery>(
+    onCount = 3 * gridSize,
+    offCount = 1 * gridSize,
+    nextQuery = { copy(offset = offset + limit) },
+    previousQuery = {
+        if (offset == 0) null
+        else copy(offset = maxOf(0, offset - limit))
+    },
+)
 
-            FetchMetadata(
-                on = on,
-                off = off,
-                evict = when {
-                    shouldReset -> existingQueries.on + existingQueries.off
-                    else -> (existingQueries.on + existingQueries.off) - (on + off).toSet()
-                }
-            )
-        }
-
-private fun ArchiveRepository.archiveTiler(): (Flow<Tile.Input.List<ArchiveQuery, List<ArchiveItem>>>) -> Flow<List<List<ArchiveItem>>> =
+private fun ArchiveRepository.archiveTiler(
+    limiter: Tile.Limiter.List<ArchiveQuery, List<ArchiveItem>>
+): ListTiler<ArchiveQuery, List<ArchiveItem>> =
     tiledList(
-        // Limit results to at most 4 pages at once
-        limiter = Tile.Limiter.List { pages -> pages.size > 4 },
+        limiter = limiter,
         order = Tile.Order.PivotSorted(comparator = compareBy(ArchiveQuery::offset)),
         fetcher = { query ->
             monitorArchives(query).map<List<Archive>, List<ArchiveItem>> { archives ->
                 archives.map { archive ->
-                    ArchiveItem.Result(
-                        archive = archive,
-                        query = query
-                    )
+                    ArchiveItem.Result(archive = archive, query = query)
                 }
             }
                 .onStart {
@@ -137,15 +89,24 @@ private fun ArchiveRepository.archiveTiler(): (Flow<Tile.Input.List<ArchiveQuery
     )
 
 /**
- * Returns an [Array] of [ArchiveQuery] of [size] in which each element has it's [ArchiveQuery.offset] changed by
- * the result of [operator] applied to the [ArchiveQuery.limit] of [this]  at each index.
- *
- * [start] the value applied to [ArchiveQuery.limit] at the first index
+ * Creates a [Flow] of [Flow] where each inner [Flow] has the same [R]. Changes to [R] emits new inner [Flow]s into
+ * the stream.
  */
-private fun ArchiveQuery.shift(
-    start: Int = 1,
-    size: Int,
-    operator: (Int, Int) -> Int
-): Array<ArchiveQuery> = Array(size) { index ->
-    copy(offset = operator(offset, (limit * (index + start))))
-}
+private fun <T, R> Flow<T>.distinctBy(splitter: (T) -> R): Flow<Pair<R, Flow<T>>> =
+    channelFlow channel@{
+        var currentKey: R? = null
+        var currentFlow = MutableSharedFlow<T>()
+        this@distinctBy.collect { item ->
+            when (val emittedKey: R = splitter(item)) {
+                currentKey -> {
+                    currentFlow.subscriptionCount.first { it > 0 }
+                    currentFlow.emit(item)
+                }
+                else -> {
+                    currentKey = emittedKey
+                    currentFlow = MutableSharedFlow()
+                    channel.send(emittedKey to currentFlow.onStart { emit(item) })
+                }
+            }
+        }
+    }
