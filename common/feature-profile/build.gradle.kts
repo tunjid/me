@@ -39,7 +39,7 @@ kotlin {
                 implementation(libs.kotlinx.serialization.cbor)
                 implementation(libs.kotlinx.serialization.json)
 
-                implementation(libs.tunjid.tiler)
+                implementation(libs.tunjid.tiler.tiler)
 
                 implementation(libs.tunjid.mutator.core.common)
                 implementation(libs.tunjid.mutator.coroutines.common)

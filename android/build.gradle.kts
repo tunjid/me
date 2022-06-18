@@ -92,7 +92,7 @@ dependencies {
 
     implementation(libs.tunjid.mutator.core.jvm)
     implementation(libs.tunjid.mutator.coroutines.jvm)
-    implementation(libs.tunjid.tiler)
+    implementation(libs.tunjid.tiler.tiler)
     implementation(libs.tunjid.treenav.core.jvm)
     implementation(libs.tunjid.treenav.strings.jvm)
 }
