@@ -27,6 +27,7 @@ import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -72,9 +73,9 @@ sealed class Action(val key: String) {
 
         val mutation: Mutation<State>
             get() = when (this) {
-                is Title -> Mutation { copy(upsert = upsert.copy(title = value)) }
-                is Description -> Mutation { copy(upsert = upsert.copy(description = value)) }
-                is Body -> Mutation { copy(upsert = upsert.copy(body = value)) }
+                is Title -> mutation { copy(upsert = upsert.copy(title = value)) }
+                is Description -> mutation { copy(upsert = upsert.copy(description = value)) }
+                is Body -> mutation { copy(upsert = upsert.copy(body = value)) }
             }
     }
 

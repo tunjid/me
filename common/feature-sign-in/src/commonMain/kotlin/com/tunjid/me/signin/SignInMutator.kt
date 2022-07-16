@@ -23,6 +23,7 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
@@ -44,13 +45,12 @@ fun signInMutator(
     initialState: State? = null,
     authRepository: AuthRepository,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-): SignInMutator = stateFlowMutator(
-    scope = scope,
+): SignInMutator = scope.stateFlowMutator(
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     actionTransform = { actions ->
         merge(
-            authRepository.isSignedIn.map { Mutation { copy(isSignedIn = it) } },
+            authRepository.isSignedIn.map { mutation { copy(isSignedIn = it) } },
             actions.toMutationStream {
                 when (val action = type()) {
                     is Action.FieldChanged -> action.flow.formEditMutations()
@@ -63,7 +63,7 @@ fun signInMutator(
 
 private fun Flow<Action.FieldChanged>.formEditMutations(): Flow<Mutation<State>> =
     map { (updatedField) ->
-        Mutation {
+        mutation {
             copy(fields = fields.update(updatedField))
         }
     }
@@ -74,9 +74,9 @@ private fun Flow<Action.Submit>.submissionMutations(
     debounce(200)
         .flatMapLatest { (request) ->
             flow<Mutation<State>> {
-                emit(Mutation { copy(isSubmitting = true) })
+                emit(mutation { copy(isSubmitting = true) })
                 // TODO: Show snack bar if error
                 authRepository.createSession(request = request)
-                emit(Mutation { copy(isSubmitting = false) })
+                emit(mutation { copy(isSubmitting = false) })
             }
         }

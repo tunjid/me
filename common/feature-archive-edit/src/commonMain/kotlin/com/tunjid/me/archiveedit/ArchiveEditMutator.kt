@@ -37,6 +37,7 @@ import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
@@ -68,8 +69,7 @@ fun archiveEditMutator(
     lifecycleStateFlow: StateFlow<Lifecycle>,
     permissionsFlow: StateFlow<Permissions>,
     onPermissionRequested: (Permission) -> Unit,
-): ArchiveEditMutator = stateFlowMutator(
-    scope = scope,
+): ArchiveEditMutator = scope.stateFlowMutator(
     initialState = initialState ?: State(
         kind = route.kind,
         upsert = ArchiveUpsert(id = route.archiveId),
@@ -124,14 +124,14 @@ private fun Flow<Action>.withInitialLoad(
 private fun Flow<Permissions>.storagePermissionMutations(): Flow<Mutation<State>> =
     map { it.isGranted(Permission.ReadExternalStorage) }
         .distinctUntilChanged()
-        .map { Mutation { copy(hasStoragePermissions = it) } }
+        .map { mutation { copy(hasStoragePermissions = it) } }
 
 /**
  * Mutations that have to do with the user's signed in status
  */
 private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     isSignedIn.map {
-        Mutation {
+        mutation {
             copy(
                 isSignedIn = it,
                 hasFetchedAuthStatus = true
@@ -149,7 +149,7 @@ private fun Flow<Action.TextEdit>.textEditMutations(): Flow<Mutation<State>> =
  * Mutations from use text inputs
  */
 private fun Flow<Action.ToggleEditView>.viewToggleMutations(): Flow<Mutation<State>> =
-    map { Mutation { copy(isEditing = !isEditing) } }
+    map { mutation { copy(isEditing = !isEditing) } }
 
 /**
  * Mutations from use drag events
@@ -163,7 +163,7 @@ private fun Flow<Action.Drag>.dragStatusMutations(): Flow<Mutation<State>> =
             }
         }
         .map { (inWindow, inThumbnail) ->
-            Mutation {
+            mutation {
                 copy(
                     dragStatus = when {
                         inThumbnail -> DragStatus.InThumbnail
@@ -184,7 +184,7 @@ private fun Flow<Action.Drop>.dropMutations(): Flow<Mutation<State>> =
             val mimeType = it.mimeType ?: return@filter false
             mimeType.contains("image") && validMimeTypes.any(mimeType::contains)
         }.firstOrNull()
-        Mutation {
+        mutation {
             if (uri != null) copy(toUpload = uri, thumbnail = uri.path)
             else copy(toUpload = null, messages = messages + "Only png and jpg uploads are supported")
         }
@@ -195,8 +195,8 @@ private fun Flow<Action.Drop>.dropMutations(): Flow<Mutation<State>> =
  */
 private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
     map { (chipAction, descriptor) ->
-        Mutation {
-            if (descriptor.value.isBlank()) return@Mutation this
+        mutation {
+            if (descriptor.value.isBlank()) return@mutation this
             val (updatedUpsert, updatedChipsState) = when (chipAction) {
                 ChipAction.Added -> Pair(
                     upsert.copy(
@@ -253,7 +253,7 @@ private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
  */
 private fun Flow<Action.MessageConsumed>.messageConsumptionMutations(): Flow<Mutation<State>> =
     map { (message) ->
-        Mutation { copy(messages = messages - message) }
+        mutation { copy(messages = messages - message) }
     }
 
 /**
@@ -283,7 +283,7 @@ private fun Flow<Action.Load>.loadMutations(
                 )
                 is Action.Load.Submit -> flow<Mutation<State>> {
                     val (kind, upsert, headerPhoto) = monitor
-                    emit(Mutation { copy(isSubmitting = true) })
+                    emit(mutation { copy(isSubmitting = true) })
 
                     val result = archiveRepository.upsert(kind = kind, upsert = upsert)
 
@@ -295,7 +295,7 @@ private fun Flow<Action.Load>.loadMutations(
                         is Result.Error -> result.message ?: "unknown error"
                     }
 
-                    emit(Mutation { copy(isSubmitting = false, messages = messages + message) })
+                    emit(mutation { copy(isSubmitting = false, messages = messages + message) })
 
                     // Start monitoring the created archive
                     val id = upsert.id ?: (result as? Result.Success)?.item ?: return@flow
@@ -329,7 +329,7 @@ private fun ArchiveRepository.textBodyMutations(
 )
     .filterNotNull()
     .map { archive ->
-        Mutation {
+        mutation {
             copy(
                 thumbnail = archive.thumbnail,
                 upsert = upsert.copy(
@@ -362,7 +362,7 @@ private fun ArchiveRepository.headerUploadMutations(
             )) {
                 // Do nothing on success
                 is Result.Success -> Unit
-                is Result.Error -> emit(Mutation {
+                is Result.Error -> emit(mutation {
                     copy(messages = messages + "Error uploading header: ${result.message ?: "Unknown error"}")
                 })
             }

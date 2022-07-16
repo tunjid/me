@@ -28,6 +28,7 @@ import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.navRailRoute
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
@@ -49,8 +50,7 @@ fun archiveListMutator(
     navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-): ArchiveListMutator = stateFlowMutator(
-    scope = scope,
+): ArchiveListMutator = scope.stateFlowMutator(
     initialState = initialState ?: State(
         items = listOf(
             ArchiveItem.Loading(
@@ -91,7 +91,7 @@ internal fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     isSignedIn
         .distinctUntilChanged()
         .map {
-            Mutation {
+            mutation {
                 copy(
                     isSignedIn = it,
                     hasFetchedAuthStatus = true,
@@ -121,7 +121,7 @@ private fun navRailStatusMutations(
 )
     .distinctUntilChanged()
     .map {
-        Mutation<State> { copy(isInNavRail = it) }
+        mutation<State> { copy(isInNavRail = it) }
     }
 
 /**
@@ -129,7 +129,7 @@ private fun navRailStatusMutations(
  */
 private fun Flow<Action.FilterChanged>.filterChangedMutations(): Flow<Mutation<State>> =
     map { (descriptor) ->
-        Mutation {
+        mutation {
             copy(
                 queryState = queryState.copy(
                     categoryText = when (descriptor) {
@@ -164,7 +164,7 @@ internal fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<St
             true
         }
         .map { isExpanded ->
-            Mutation {
+            mutation {
                 copy(queryState = queryState.copy(expanded = isExpanded ?: !queryState.expanded))
             }
         }
@@ -175,7 +175,7 @@ internal fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<St
 private fun Flow<Action.GridSize>.gridSizeMutations(): Flow<Mutation<State>> =
     distinctUntilChanged()
         .map {
-            Mutation {
+            mutation {
                 copy(queryState = queryState.copy(gridSize = it.size))
             }
         }
@@ -187,7 +187,7 @@ private fun Flow<Action.GridSize>.gridSizeMutations(): Flow<Mutation<State>> =
 private fun Flow<Action.LastVisibleKey>.resetScrollMutations(): Flow<Mutation<State>> =
     distinctUntilChanged()
         .map {
-            Mutation {
+            mutation {
                 copy(lastVisibleKey = it.itemKey)
             }
         }
@@ -203,7 +203,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
     repo = repo
 )
     .map { fetchResult ->
-        Mutation {
+        mutation {
             val fetchAction = fetchResult.action
             val items = when {
                 fetchResult.hasNoResults -> when (fetchAction) {

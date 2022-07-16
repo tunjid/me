@@ -28,6 +28,7 @@ import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
@@ -47,8 +48,7 @@ fun archiveDetailMutator(
     authRepository: AuthRepository,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-): ArchiveDetailMutator = stateFlowMutator(
-    scope = scope,
+): ArchiveDetailMutator = scope.stateFlowMutator(
     initialState = initialState ?: State(
         kind = route.kind,
         navBarSize = uiStateFlow.value.navBarSize,
@@ -68,7 +68,7 @@ fun archiveDetailMutator(
 
 private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     signedInUserStream.map {
-        Mutation {
+        mutation {
             copy(
                 signedInUserId = it?.id,
                 hasFetchedAuthStatus = true,
@@ -84,7 +84,7 @@ private fun ArchiveRepository.archiveLoadMutations(
     id = id
 )
     .map { fetchedArchive ->
-        Mutation {
+        mutation {
             copy(
                 wasDeleted = archive != null && fetchedArchive == null,
                 archive = fetchedArchive

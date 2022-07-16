@@ -46,6 +46,7 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
 import com.tunjid.me.scaffold.permissions.PlatformPermissionsProvider
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -116,7 +117,7 @@ fun main() {
                 snapshotFlow { currentWidth < 600.dp }
                     .distinctUntilChanged()
                     .collect { isInPortrait ->
-                        scaffoldComponent.uiActions(Mutation {
+                        scaffoldComponent.uiActions(mutation {
                             copy(navMode = if (isInPortrait) NavMode.BottomNav else NavMode.NavRail)
                         })
                     }

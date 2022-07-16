@@ -31,6 +31,7 @@ import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.scaffold.permissions.PlatformPermissionsProvider
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -58,7 +59,7 @@ class App : Application() {
 
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             private fun updateStatus(isInForeground: Boolean) =
-                scaffoldComponent.lifecycleActions(Mutation {
+                scaffoldComponent.lifecycleActions(mutation {
                     copy(isInForeground = isInForeground)
                 })
 

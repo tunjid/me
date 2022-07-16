@@ -26,6 +26,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentActivity
 import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -44,15 +45,15 @@ fun FragmentActivity.insetMutations(): Flow<Mutation<UiState>> {
         .findViewById<ViewGroup>(android.R.id.content)
         .getChildAt(0)
 
-    return callbackFlow {
+    return callbackFlow<Mutation<UiState>> {
         rootView.setOnApplyWindowInsetsListener { _, insets ->
-            channel.trySend(Mutation<UiState> {
+            channel.trySend {
                 reduceSystemInsets(
                     WindowInsetsCompat.toWindowInsetsCompat(insets),
                     0
                 )
                 // Consume insets so other views will not see them.
-            })
+            }
             insets.consumeSystemWindowInsets()
         }
         awaitClose { }

@@ -22,6 +22,7 @@ import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.toMultiStackNav
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.treenav.Order
 import com.tunjid.treenav.flatten
@@ -60,12 +61,12 @@ fun AppDependencies.saveState(): SavedState {
 }
 
 fun AppDependencies.restore(savedState: SavedState) = scaffoldComponent.apply {
-    navActions(Mutation {
+    navActions(mutation {
         scaffoldComponent.routeParser.toMultiStackNav(
             savedState.navigation
         ).copy(currentIndex = savedState.activeNav)
     })
-    lifecycleActions(Mutation {
+    lifecycleActions(mutation {
         copy(routeIdsToSerializedStates = savedState.routeStates)
     })
 }

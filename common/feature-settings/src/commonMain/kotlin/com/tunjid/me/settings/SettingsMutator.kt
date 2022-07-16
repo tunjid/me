@@ -22,6 +22,7 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
@@ -37,13 +38,12 @@ fun settingsMutator(
     initialState: State? = null,
     authRepository: AuthRepository,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-): SettingsMutator = stateFlowMutator(
-    scope = scope,
+): SettingsMutator = scope.stateFlowMutator(
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     actionTransform = {
         authRepository.isSignedIn.map { isSignedIn ->
-            Mutation<State> {
+            mutation<State> {
                 copy(
                     routes = listOfNotNull(
                         "profile".takeIf { isSignedIn },

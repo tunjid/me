@@ -23,6 +23,7 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
@@ -42,13 +43,12 @@ fun profileMutator(
     initialState: State? = null,
     authRepository: AuthRepository,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-): ProfileMutator = stateFlowMutator(
-    scope = scope,
+): ProfileMutator = scope.stateFlowMutator(
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     actionTransform = { actions ->
         merge(
-            authRepository.signedInUserStream.map { Mutation { copy(signedInUser = it) } },
+            authRepository.signedInUserStream.map { mutation { copy(signedInUser = it) } },
             actions.toMutationStream {
                 when (val action = type()) {
                     is Action.FieldChanged -> action.flow.formEditMutations()
@@ -61,7 +61,7 @@ fun profileMutator(
 
 private fun Flow<Action.FieldChanged>.formEditMutations(): Flow<Mutation<State>> =
     map { (updatedField) ->
-        Mutation {
+        mutation {
             copy(fields = fields.update(updatedField))
         }
     }

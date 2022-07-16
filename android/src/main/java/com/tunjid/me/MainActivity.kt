@@ -42,6 +42,7 @@ import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.insetMutations
 import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import com.tunjid.treenav.pop
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -55,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         val scaffoldComponent = appDependencies.scaffoldComponent
 
         onBackPressedDispatcher.addCallback(this) {
-            scaffoldComponent.navActions(Mutation { pop() })
+            scaffoldComponent.navActions(mutation { pop() })
         }
 
         val composeView = ComposeView(this)
@@ -119,7 +120,7 @@ private fun MainActivity.AdaptNavigation(scaffoldComponent: ScaffoldComponent) {
 //    }
 
     LaunchedEffect(widthWindowSizeClass) {
-        scaffoldComponent.uiActions(Mutation {
+        scaffoldComponent.uiActions(mutation {
             copy(
                 navMode = when (widthWindowSizeClass) {
                     WindowSizeClass.COMPACT -> NavMode.BottomNav

@@ -19,6 +19,7 @@ package com.tunjid.me.scaffold.nav
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import com.tunjid.treenav.MultiStackNav
@@ -55,8 +56,7 @@ internal fun navMutator(
     startNav: List<List<String>>,
     routeParser: RouteParser<AppRoute>,
 ): NavMutator {
-    return stateFlowMutator(
-        scope = scope,
+    return scope.stateFlowMutator(
         initialState = routeParser.toMultiStackNav(startNav),
         actionTransform = { it },
     )

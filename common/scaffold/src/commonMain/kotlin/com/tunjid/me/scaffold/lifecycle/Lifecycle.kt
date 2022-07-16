@@ -18,6 +18,7 @@ package com.tunjid.me.scaffold.lifecycle
 
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 import com.tunjid.mutator.Mutator
 import com.tunjid.mutator.coroutines.stateFlowMutator
 import kotlinx.coroutines.CoroutineScope
@@ -47,8 +48,7 @@ fun <T> Flow<T>.monitorWhenActive(lifecycleStateFlow: StateFlow<Lifecycle>) =
 
 internal fun lifecycleMutator(
     scope: CoroutineScope,
-): LifecycleMutator = stateFlowMutator(
-    scope = scope,
+): LifecycleMutator = scope.stateFlowMutator(
     started = SharingStarted.Eagerly,
     initialState = Lifecycle(),
     actionTransform = { it }

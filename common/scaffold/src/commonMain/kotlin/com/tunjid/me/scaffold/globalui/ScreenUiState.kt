@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.mutation
 
 val currentUiState
     @ReadOnlyComposable
@@ -53,7 +54,7 @@ fun ScreenUiState(state: UiState) {
     )
 
     LaunchedEffect(immutables) {
-        uiMutator.accept(Mutation {
+        uiMutator.accept(mutation {
             // Preserve things that should not be overwritten
             immutables.copy(
                 navMode = navMode,
