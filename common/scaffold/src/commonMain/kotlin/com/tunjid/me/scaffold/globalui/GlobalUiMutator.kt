@@ -19,19 +19,19 @@ package com.tunjid.me.scaffold.globalui
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
-import com.tunjid.mutator.Mutator
+import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
-import com.tunjid.mutator.coroutines.stateFlowMutator
+import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-typealias GlobalUiMutator = Mutator<Mutation<UiState>, StateFlow<UiState>>
+typealias GlobalUiMutator = ActionStateProducer<Mutation<UiState>, StateFlow<UiState>>
 
 internal fun globalUiMutator(scope: CoroutineScope, initialState: UiState = UiState()): GlobalUiMutator =
-    scope.stateFlowMutator(
+    scope.actionStateFlowProducer(
         initialState = initialState,
         actionTransform = { it }
     )

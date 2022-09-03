@@ -24,8 +24,8 @@ import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
-import com.tunjid.mutator.Mutator
-import com.tunjid.mutator.coroutines.stateFlowMutator
+import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
-typealias ProfileMutator = Mutator<Action, StateFlow<State>>
+typealias ProfileMutator = ActionStateProducer<Action, StateFlow<State>>
 
 fun profileMutator(
     scope: CoroutineScope,
@@ -43,7 +43,7 @@ fun profileMutator(
     initialState: State? = null,
     authRepository: AuthRepository,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-): ProfileMutator = scope.stateFlowMutator(
+): ProfileMutator = scope.actionStateFlowProducer(
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     actionTransform = { actions ->

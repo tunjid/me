@@ -24,8 +24,8 @@ import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
-import com.tunjid.mutator.Mutator
-import com.tunjid.mutator.coroutines.stateFlowMutator
+import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
-typealias SignInMutator = Mutator<Action, StateFlow<State>>
+typealias SignInMutator = ActionStateProducer<Action, StateFlow<State>>
 
 fun signInMutator(
     scope: CoroutineScope,
@@ -45,7 +45,7 @@ fun signInMutator(
     initialState: State? = null,
     authRepository: AuthRepository,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-): SignInMutator = scope.stateFlowMutator(
+): SignInMutator = scope.actionStateFlowProducer(
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     actionTransform = { actions ->
@@ -73,7 +73,7 @@ private fun Flow<Action.Submit>.submissionMutations(
 ): Flow<Mutation<State>> =
     debounce(200)
         .flatMapLatest { (request) ->
-            flow<Mutation<State>> {
+            flow {
                 emit(mutation { copy(isSubmitting = true) })
                 // TODO: Show snack bar if error
                 authRepository.createSession(request = request)

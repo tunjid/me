@@ -29,8 +29,8 @@ import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
-import com.tunjid.mutator.Mutator
-import com.tunjid.mutator.coroutines.stateFlowMutator
+import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,7 +38,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
-typealias ArchiveDetailMutator = Mutator<Unit, StateFlow<State>>
+typealias ArchiveDetailMutator = ActionStateProducer<Unit, StateFlow<State>>
 
 fun archiveDetailMutator(
     scope: CoroutineScope,
@@ -48,7 +48,7 @@ fun archiveDetailMutator(
     authRepository: AuthRepository,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-): ArchiveDetailMutator = scope.stateFlowMutator(
+): ArchiveDetailMutator = scope.actionStateFlowProducer(
     initialState = initialState ?: State(
         kind = route.kind,
         navBarSize = uiStateFlow.value.navBarSize,

@@ -20,8 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
-import com.tunjid.mutator.Mutator
-import com.tunjid.mutator.coroutines.stateFlowMutator
+import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Route
 import com.tunjid.treenav.StackNav
@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 const val NavName = "App"
 
-typealias NavMutator = Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
+typealias NavMutator = ActionStateProducer<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
 
 interface AppRoute : Route {
     @Composable
@@ -56,7 +56,7 @@ internal fun navMutator(
     startNav: List<List<String>>,
     routeParser: RouteParser<AppRoute>,
 ): NavMutator {
-    return scope.stateFlowMutator(
+    return scope.actionStateFlowProducer(
         initialState = routeParser.toMultiStackNav(startNav),
         actionTransform = { it },
     )

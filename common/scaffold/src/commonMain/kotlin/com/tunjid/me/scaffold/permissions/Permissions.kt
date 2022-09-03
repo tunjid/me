@@ -19,14 +19,14 @@ package com.tunjid.me.scaffold.permissions
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
-import com.tunjid.mutator.Mutator
+import com.tunjid.mutator.ActionStateProducer
 import kotlinx.coroutines.flow.StateFlow
 
 interface PermissionsProvider {
     val mutator: PermissionsMutator
 }
 
-typealias PermissionsMutator = Mutator<Permission, StateFlow<Permissions>>
+typealias PermissionsMutator = ActionStateProducer<Permission, StateFlow<Permissions>>
 
 sealed class Permission {
     object ReadExternalStorage : Permission()

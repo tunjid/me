@@ -42,7 +42,7 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.me.settings.SettingsFeature
 import com.tunjid.me.signin.SignInFeature
-import com.tunjid.mutator.Mutator
+import com.tunjid.mutator.ActionStateProducer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -118,7 +118,7 @@ private class AppModule(
         uriConverter = uriConverter,
         startRoutes = startRoutes,
         routeMatchers = features
-            .map(Feature<out AppRoute, out Mutator<out Any, out StateFlow<*>>>::routeMatchers)
+            .map(Feature<out AppRoute, out ActionStateProducer<out Any, out StateFlow<*>>>::routeMatchers)
             .flatten()
     )
 

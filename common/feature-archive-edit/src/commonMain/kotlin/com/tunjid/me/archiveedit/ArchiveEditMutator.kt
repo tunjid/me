@@ -38,8 +38,8 @@ import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
-import com.tunjid.mutator.Mutator
-import com.tunjid.mutator.coroutines.stateFlowMutator
+import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -57,7 +57,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
 
-typealias ArchiveEditMutator = Mutator<Action, StateFlow<State>>
+typealias ArchiveEditMutator = ActionStateProducer<Action, StateFlow<State>>
 
 fun archiveEditMutator(
     scope: CoroutineScope,
@@ -69,7 +69,7 @@ fun archiveEditMutator(
     lifecycleStateFlow: StateFlow<Lifecycle>,
     permissionsFlow: StateFlow<Permissions>,
     onPermissionRequested: (Permission) -> Unit,
-): ArchiveEditMutator = scope.stateFlowMutator(
+): ArchiveEditMutator = scope.actionStateFlowProducer(
     initialState = initialState ?: State(
         kind = route.kind,
         upsert = ArchiveUpsert(id = route.archiveId),

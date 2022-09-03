@@ -29,14 +29,14 @@ import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.navRailRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
-import com.tunjid.mutator.Mutator
-import com.tunjid.mutator.coroutines.stateFlowMutator
+import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.treenav.MultiStackNav
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 
-typealias ArchiveListMutator = Mutator<Action, StateFlow<State>>
+typealias ArchiveListMutator = ActionStateProducer<Action, StateFlow<State>>
 
 /**
  * Manages [State] for [ArchiveListRoute]
@@ -50,7 +50,7 @@ fun archiveListMutator(
     navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-): ArchiveListMutator = scope.stateFlowMutator(
+): ArchiveListMutator = scope.actionStateFlowProducer(
     initialState = initialState ?: State(
         items = listOf(
             ArchiveItem.Loading(

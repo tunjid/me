@@ -69,7 +69,7 @@ Each destination in the app is represented by an `AppRoute` that exposes a singl
 controlled by a `NavMutator` defined as:
 
 ```
-typealias NavMutator = Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
+typealias NavMutator = ActionStateProducer<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
 ```
 
 ### Global UI
@@ -81,7 +81,7 @@ for visual semantic differences between Android and desktop. Android for example
 The definition for the `GlobalUiMutator` is:
 
 ```
-typealias GlobalUiMutator = Mutator<Mutation<UiState>, StateFlow<UiState>>
+typealias GlobalUiMutator = ActionStateProducer<Mutation<UiState>, StateFlow<UiState>>
 ```
 
 ### Pagination
@@ -133,9 +133,9 @@ class ScaffoldModule(
     appScope: CoroutineScope,
     ...
 ) {
-    val navMutator: Mutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> = ...
-    val globalUiMutator: Mutator<Mutation<UiState>, StateFlow<UiState>> = ...
-    val lifecycleMutator: Mutator<LifecycleAction, StateFlow<Lifecycle>> = ...
+    val navMutator: ActionStateProducer<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> = ...
+    val globalUiMutator: ActionStateProducer<Mutation<UiState>, StateFlow<UiState>> = ...
+    val lifecycleMutator: ActionStateProducer<LifecycleAction, StateFlow<Lifecycle>> = ...
 }
 ```
 

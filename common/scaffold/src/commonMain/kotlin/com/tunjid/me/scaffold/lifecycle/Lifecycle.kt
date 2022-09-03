@@ -19,8 +19,8 @@ package com.tunjid.me.scaffold.lifecycle
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
-import com.tunjid.mutator.Mutator
-import com.tunjid.mutator.coroutines.stateFlowMutator
+import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
-typealias LifecycleMutator = Mutator<Mutation<Lifecycle>, StateFlow<Lifecycle>>
+typealias LifecycleMutator = ActionStateProducer<Mutation<Lifecycle>, StateFlow<Lifecycle>>
 
 data class Lifecycle(
     val isInForeground: Boolean = true,
@@ -48,7 +48,7 @@ fun <T> Flow<T>.monitorWhenActive(lifecycleStateFlow: StateFlow<Lifecycle>) =
 
 internal fun lifecycleMutator(
     scope: CoroutineScope,
-): LifecycleMutator = scope.stateFlowMutator(
+): LifecycleMutator = scope.actionStateFlowProducer(
     started = SharingStarted.Eagerly,
     initialState = Lifecycle(),
     actionTransform = { it }

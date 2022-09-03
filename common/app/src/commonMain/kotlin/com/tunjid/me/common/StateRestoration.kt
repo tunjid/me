@@ -23,7 +23,7 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.toMultiStackNav
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
-import com.tunjid.mutator.Mutator
+import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.treenav.Order
 import com.tunjid.treenav.flatten
 import kotlinx.coroutines.flow.StateFlow
@@ -53,7 +53,7 @@ fun AppDependencies.saveState(): SavedState {
             .filterIsInstance<AppRoute>()
             .fold(mutableMapOf()) { map, route ->
                 val mutator = routeServiceLocator.locate<Any>(route)
-                val state = (mutator as? Mutator<*, *>)?.state ?: return@fold map
+                val state = (mutator as? ActionStateProducer<*, *>)?.state ?: return@fold map
                 val serializable = (state as? StateFlow<*>)?.value ?: return@fold map
                 if (serializable is ByteSerializable) map[route.id] = byteSerializer.toBytes(serializable)
                 map
