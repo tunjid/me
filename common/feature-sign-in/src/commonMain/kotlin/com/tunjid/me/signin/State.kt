@@ -16,9 +16,12 @@
 
 package com.tunjid.me.signin
 
+import com.tunjid.me.core.model.Message
+import com.tunjid.me.core.model.MessageQueue
 import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.core.utilities.ByteSerializable
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class State(
@@ -33,7 +36,9 @@ data class State(
             id = "password",
             value = "",
         )
-    )
+    ),
+    @Transient
+    val messages: MessageQueue = MessageQueue(),
 ) : ByteSerializable
 
 val State.submitButtonEnabled: Boolean get() = !isSignedIn && !isSubmitting
@@ -49,4 +54,8 @@ val State.sessionRequest: com.tunjid.me.core.model.SessionRequest
 sealed class Action {
     data class FieldChanged(val field: FormField) : Action()
     data class Submit(val request: com.tunjid.me.core.model.SessionRequest) : Action()
+
+    data class MessageConsumed(
+        val message: Message
+    ) : Action()
 }

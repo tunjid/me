@@ -22,17 +22,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.feature.LocalRouteServiceLocator
-import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.me.scaffold.nav.AppRoute
 import kotlinx.serialization.Serializable
 
@@ -53,22 +50,9 @@ private fun SignInScreen(mutator: SignInMutator) {
     val state by mutator.state.collectAsState()
     val scrollState = rememberScrollState()
 
-    ScreenUiState(
-        UiState(
-            toolbarShows = true,
-            toolbarTitle = "Sign In",
-            fabShows = true,
-            fabEnabled = state.submitButtonEnabled,
-            fabText = "Submit",
-            fabClickListener = rememberFunction(state.sessionRequest) {
-                mutator.accept(
-                    Action.Submit(request = state.sessionRequest)
-                )
-            },
-            navVisibility = NavVisibility.Gone,
-            insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colors.primary.toArgb(),
-        )
+    GlobalUi(
+        state = state,
+        onAction = mutator.accept
     )
 
     Column(

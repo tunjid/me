@@ -19,12 +19,17 @@ package com.tunjid.me.scaffold.nav
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.RouteParser
 
-class Navigator(
+interface NavContext {
+    val currentNav: MultiStackNav
+    val String.toRoute: AppRoute
+}
+
+class ImmutableNavContext(
     private val state: MultiStackNav,
     private val routeParser: RouteParser<AppRoute>
-) {
-    val currentNav: MultiStackNav get() = state
+) : NavContext {
+    override val currentNav: MultiStackNav get() = state
 
-    val String.toRoute: AppRoute
+    override val String.toRoute: AppRoute
         get() = routeParser.parse(this) ?: Route404
 }

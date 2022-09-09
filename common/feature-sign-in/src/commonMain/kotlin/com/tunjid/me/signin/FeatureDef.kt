@@ -52,5 +52,6 @@ object SignInFeature : Feature<SignInRoute, SignInMutator> {
         initialState = scaffoldComponent.restoredState(route),
         authRepository = dataComponent.authRepository,
         lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
+        navActions = scaffoldComponent.navActions,
     )
 }

@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.*
 const val NavName = "App"
 
 typealias NavMutator = ActionStateProducer<NavMutation, StateFlow<NavState>>
-typealias NavMutation = Navigator.() -> MultiStackNav
+typealias NavMutation = NavContext.() -> MultiStackNav
 
 interface AppRoute : Route {
     @Composable
@@ -74,7 +74,12 @@ internal fun navMutator(
         actionTransform = { navMutations ->
             navMutations.map { navMutation ->
                 mutation {
-                    val newMultiStackNav = navMutation(Navigator(rootNav, routeParser))
+                    val newMultiStackNav = navMutation(
+                        ImmutableNavContext(
+                            state = rootNav,
+                            routeParser = routeParser
+                        )
+                    )
                     NavState(
                         rootNav = newMultiStackNav,
                         navRailRoute = newMultiStackNav.navRailRoute?.let(routeParser::parse)
