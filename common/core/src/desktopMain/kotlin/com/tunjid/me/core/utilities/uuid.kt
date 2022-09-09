@@ -16,6 +16,6 @@
 
 package com.tunjid.me.core.utilities
 
-import java.util.UUID
+import java.util.*
 
 actual fun uuid(): String = UUID.randomUUID().toString()

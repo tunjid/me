@@ -23,11 +23,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.OnGloballyPositionedModifier
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.modifier.ModifierLocalConsumer
-import androidx.compose.ui.modifier.ModifierLocalProvider
-import androidx.compose.ui.modifier.ModifierLocalReadScope
-import androidx.compose.ui.modifier.ProvidableModifierLocal
-import androidx.compose.ui.modifier.modifierLocalOf
+import androidx.compose.ui.modifier.*
 import androidx.compose.ui.platform.InspectorValueInfo
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.util.fastFirstOrNull
@@ -210,6 +206,7 @@ internal class DropTargetContainer(
                 uris = uris,
                 position = position
             ) ?: false
+
             else -> currentActiveChild.onDropped(
                 uris = uris,
                 position = position

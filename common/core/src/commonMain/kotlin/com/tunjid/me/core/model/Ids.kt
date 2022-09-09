@@ -17,7 +17,6 @@
 package com.tunjid.me.core.model
 
 import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmInline
 
 @Serializable
 @JvmInline

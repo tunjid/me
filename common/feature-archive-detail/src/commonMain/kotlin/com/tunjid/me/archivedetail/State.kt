@@ -19,8 +19,13 @@ package com.tunjid.me.archivedetail
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.scaffold.nav.NavMutation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+
+sealed class Action {
+    data class Navigate(val navMutation: NavMutation) : Action()
+}
 
 @Serializable
 data class State(

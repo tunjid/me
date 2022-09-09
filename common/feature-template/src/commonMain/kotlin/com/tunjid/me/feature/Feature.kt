@@ -30,9 +30,10 @@ const val FeatureWhileSubscribed = 2_000L
 /**
  * Representation of a full screen destination
  */
-interface Feature<Route : AppRoute, Mutator: Any> {
+interface Feature<Route : AppRoute, Mutator : Any> {
     val routeType: KClass<Route>
     val routeMatchers: List<UrlRouteMatcher<Route>>
+
     // A factory function for the mutator of this feature. Should go away when I have dependency injection.
     fun mutator(
         scope: CoroutineScope,
@@ -55,7 +56,7 @@ val LocalRouteServiceLocator: ProvidableCompositionLocal<RouteServiceLocator> = 
 }
 
 @Suppress("UNCHECKED_CAST")
-inline fun <reified Route: AppRoute> List<Feature<*, *>>.find(route: Route): Feature<Route, *> =
+inline fun <reified Route : AppRoute> List<Feature<*, *>>.find(route: Route): Feature<Route, *> =
     first { feature ->
         feature.routeType.isInstance(route)
     } as Feature<Route, *>

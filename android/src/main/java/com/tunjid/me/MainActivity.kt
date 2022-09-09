@@ -18,7 +18,6 @@ package com.tunjid.me
 
 import android.os.Bundle
 import androidx.activity.addCallback
-import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -41,7 +40,6 @@ import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.insetMutations
 import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
-import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
 import com.tunjid.treenav.pop
 import kotlinx.coroutines.flow.distinctUntilChanged

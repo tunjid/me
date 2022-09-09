@@ -20,6 +20,7 @@ import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.scaffold.nav.NavMutation
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
@@ -63,6 +64,8 @@ sealed class Action(val key: String) {
     data class ToggleFilter(val isExpanded: Boolean? = null) : Action(key = "ToggleFilter")
 
     data class LastVisibleKey(val itemKey: Any) : Action(key = "LastVisibleKey")
+
+    data class Navigate(val navMutation: NavMutation) : Action(key = "Navigate")
 }
 
 sealed class ArchiveItem {

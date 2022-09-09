@@ -21,9 +21,8 @@ import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.toMultiStackNav
-import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.mutation
 import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.mutation
 import com.tunjid.treenav.Order
 import com.tunjid.treenav.flatten
 import kotlinx.coroutines.flow.StateFlow
@@ -37,7 +36,8 @@ class SavedState(
 ) : ByteSerializable
 
 fun AppDependencies.saveState(): SavedState {
-    val multiStackNav = scaffoldComponent.navStateStream.value
+    val navState = scaffoldComponent.navStateStream.value
+    val multiStackNav = navState.rootNav
     return SavedState(
         activeNav = multiStackNav.currentIndex,
         navigation = multiStackNav.stacks.fold(listOf()) { listOfLists, stackNav ->
@@ -61,11 +61,11 @@ fun AppDependencies.saveState(): SavedState {
 }
 
 fun AppDependencies.restore(savedState: SavedState) = scaffoldComponent.apply {
-    navActions(mutation {
+    navActions {
         scaffoldComponent.routeParser.toMultiStackNav(
             savedState.navigation
         ).copy(currentIndex = savedState.activeNav)
-    })
+    }
     lifecycleActions(mutation {
         copy(routeIdsToSerializedStates = savedState.routeStates)
     })

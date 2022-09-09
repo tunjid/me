@@ -34,7 +34,7 @@ tunjidTreeNav = "0.0.3"
 turbine = "0.7.0"
 
 [libraries]
-accompanist-flowlayout = { group="com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
+accompanist-flowlayout = { group = "com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
 android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJdkLibs" }
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
@@ -64,7 +64,7 @@ jakewharton-retrofit-serializationconverter = { group = "com.jakewharton.retrofi
 jetbrains-compose-animation = { group = "org.jetbrains.compose.animation", name = "animation", version.ref = "jetbrainsCompose" }
 jetbrains-compose-foundation-layout = { group = "org.jetbrains.compose.foundation", name = "foundation-layout", version.ref = "jetbrainsCompose" }
 jetbrains-compose-material = { group = "org.jetbrains.compose.material", name = "material", version.ref = "jetbrainsCompose" }
-jetbrains-compose-gradlePlugin =   { group = "org.jetbrains.compose", name = "compose-gradle-plugin", version.ref = "jetbrainsCompose" }
+jetbrains-compose-gradlePlugin = { group = "org.jetbrains.compose", name = "compose-gradle-plugin", version.ref = "jetbrainsCompose" }
 jetbrains-compose-runtime = { group = "org.jetbrains.compose.runtime", name = "runtime", version.ref = "jetbrainsCompose" }
 jetbrains-compose-ui-test = { group = "org.jetbrains.compose.ui", name = "ui-test-junit4", version.ref = "jetbrainsCompose" }
 jetbrains-compose-ui-testManifest = { group = "org.jetbrains.compose.ui", name = "ui-test-manifest", version.ref = "jetbrainsCompose" }
@@ -92,9 +92,9 @@ ktor-io-core = { group = "io.ktor", name = "ktor-io", version.ref = "ktor" }
 ktor-io-jvm = { group = "io.ktor", name = "ktor-io-jvm", version.ref = "ktor" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-retrofit= { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-richtext-commonmark= { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "richtext" }
-richtext-material= { group = "com.halilibo.compose-richtext", name = "richtext-ui-material", version.ref = "richtext" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+richtext-commonmark = { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "richtext" }
+richtext-material = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material", version.ref = "richtext" }
 square-sqldelight-driver-android = { group = "com.squareup.sqldelight", name = "android-driver", version.ref = "sqldelight" }
 square-sqldelight-driver-jvm = { group = "com.squareup.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
 square-sqldelight-coroutines-extensions = { group = "com.squareup.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }

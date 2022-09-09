@@ -21,10 +21,12 @@ import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
-import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.mutation
+import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.toMutationStream
+import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -38,10 +40,11 @@ fun settingsMutator(
     initialState: State? = null,
     authRepository: AuthRepository,
     lifecycleStateFlow: StateFlow<Lifecycle>,
+    navActions: (NavMutation) -> Unit
 ): SettingsMutator = scope.actionStateFlowProducer(
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
-    actionTransform = {
+    mutationFlows = listOf(
         authRepository.isSignedIn.map { isSignedIn ->
             mutation<State> {
                 copy(
@@ -53,5 +56,15 @@ fun settingsMutator(
             }
         }
             .monitorWhenActive(lifecycleStateFlow)
+    ),
+    actionTransform = { actions ->
+        actions.toMutationStream {
+            when (val type = type()) {
+                is Action.Navigate -> type.flow.consumeNavActions<Action.Navigate, State>(
+                    mutationMapper = Action.Navigate::navMutation,
+                    action = navActions
+                )
+            }
+        }.monitorWhenActive(lifecycleStateFlow)
     }
 )

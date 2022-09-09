@@ -33,7 +33,7 @@ kotlin {
 
                 implementation(libs.richtext.commonmark)
                 implementation(libs.richtext.material)
-                
+
                 implementation(libs.tunjid.mutator.core.common)
                 implementation(libs.tunjid.mutator.coroutines.common)
 

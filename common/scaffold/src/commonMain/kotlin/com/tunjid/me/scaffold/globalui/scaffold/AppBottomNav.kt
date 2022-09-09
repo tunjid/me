@@ -18,21 +18,9 @@ package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.BottomAppBar
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,9 +32,9 @@ import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
 import com.tunjid.me.scaffold.nav.NavMutator
+import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.navItemSelected
 import com.tunjid.me.scaffold.nav.navItems
-import com.tunjid.mutator.accept
 
 /**
  * Motionally intelligent bottom nav shared amongst nav routes in the app
@@ -56,7 +44,7 @@ internal fun BoxScope.AppBottomNav(
     globalUiMutator: GlobalUiMutator,
     navMutator: NavMutator,
 ) {
-    val nav by navMutator.state.collectAsState()
+    val nav by navMutator.state.mappedCollectAsState(mapper = NavState::rootNav)
     val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::bottomNavPositionalState)
 
     val bottomNavPosition by animateDpAsState(
@@ -95,7 +83,7 @@ internal fun BoxScope.AppBottomNav(
                             label = { Text(navItem.name) },
                             selected = navItem.selected,
                             onClick = {
-                                navMutator.accept { navItemSelected(item = navItem) }
+                                navMutator.accept { currentNav.navItemSelected(item = navItem) }
                             }
                         )
                     }

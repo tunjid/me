@@ -60,5 +60,6 @@ object ArchiveDetailFeature : Feature<ArchiveDetailRoute, ArchiveDetailMutator> 
         authRepository = dataComponent.authRepository,
         uiStateFlow = scaffoldComponent.globalUiStateStream,
         lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
+        navActions = scaffoldComponent.navActions,
     )
 }

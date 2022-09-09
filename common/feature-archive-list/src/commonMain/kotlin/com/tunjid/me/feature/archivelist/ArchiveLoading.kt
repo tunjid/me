@@ -102,6 +102,7 @@ private fun <T, R> Flow<T>.distinctBy(splitter: (T) -> R): Flow<Pair<R, Flow<T>>
                     currentFlow.subscriptionCount.first { it > 0 }
                     currentFlow.emit(item)
                 }
+
                 else -> {
                     currentKey = emittedKey
                     currentFlow = MutableSharedFlow()

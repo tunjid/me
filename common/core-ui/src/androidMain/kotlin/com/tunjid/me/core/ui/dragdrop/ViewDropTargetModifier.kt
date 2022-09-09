@@ -41,28 +41,34 @@ fun dragListener(
             )
             true
         }
+
         DragEvent.ACTION_DRAG_ENTERED -> {
             dropTargetModifier.onDragEntered()
             true
         }
+
         DragEvent.ACTION_DRAG_LOCATION -> {
             dropTargetModifier.onDragMoved(Offset(event.x, event.y))
             true
         }
+
         DragEvent.ACTION_DRAG_EXITED -> {
             dropTargetModifier.onDragExited()
             true
         }
+
         DragEvent.ACTION_DROP -> {
             dropTargetModifier.onDropped(
                 uris = event.clipItemUris(),
                 position = Offset(event.x, event.y)
             )
         }
+
         DragEvent.ACTION_DRAG_ENDED -> {
             dropTargetModifier.onDragEnded()
             true
         }
+
         else -> error("Invalid action: ${event.action}")
     }
 }
@@ -70,11 +76,11 @@ fun dragListener(
 private fun DragEvent.clipItemUris(): List<Uri> = with(clipData) {
     0.until(itemCount).map { itemIndex ->
         with(description) {
-             0.until(mimeTypeCount).map { mimeTypeIndex ->
-                 ClipItemUri(
-                     item = getItemAt(itemIndex),
-                     mimeType = getMimeType(mimeTypeIndex)
-                 )
+            0.until(mimeTypeCount).map { mimeTypeIndex ->
+                ClipItemUri(
+                    item = getItemAt(itemIndex),
+                    mimeType = getMimeType(mimeTypeIndex)
+                )
             }
         }
     }

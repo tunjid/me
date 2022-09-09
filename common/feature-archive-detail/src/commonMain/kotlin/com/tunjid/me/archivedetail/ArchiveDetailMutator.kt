@@ -27,18 +27,20 @@ import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
-import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.mutation
+import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.toMutationStream
+import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 
-typealias ArchiveDetailMutator = ActionStateProducer<Unit, StateFlow<State>>
+typealias ArchiveDetailMutator = ActionStateProducer<Action, StateFlow<State>>
 
 fun archiveDetailMutator(
     scope: CoroutineScope,
@@ -48,21 +50,30 @@ fun archiveDetailMutator(
     authRepository: AuthRepository,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
+    navActions: (NavMutation) -> Unit
 ): ArchiveDetailMutator = scope.actionStateFlowProducer(
     initialState = initialState ?: State(
         kind = route.kind,
         navBarSize = uiStateFlow.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
-    actionTransform = {
-        merge(
-            uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
-            authRepository.authMutations(),
-            archiveRepository.archiveLoadMutations(
-                kind = route.kind,
-                id = route.archiveId
-            )
-        ).monitorWhenActive(lifecycleStateFlow)
+    mutationFlows = listOf(
+        uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
+        authRepository.authMutations(),
+        archiveRepository.archiveLoadMutations(
+            kind = route.kind,
+            id = route.archiveId
+        )
+    ).monitorWhenActive(lifecycleStateFlow),
+    actionTransform = { actions ->
+        actions.toMutationStream {
+            when (val type = type()) {
+                is Action.Navigate -> type.flow.consumeNavActions(
+                    mutationMapper = Action.Navigate::navMutation,
+                    action = navActions
+                )
+            }
+        }
     }
 )
 

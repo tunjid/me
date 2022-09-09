@@ -40,7 +40,7 @@ sealed class ServerEvent {
     abstract val event: String
     abstract val arguments: List<Any>
 
-    sealed class Response : ServerEvent(){
+    sealed class Response : ServerEvent() {
         data class Manager(
             override val event: String,
             override val arguments: List<Any>,
@@ -51,6 +51,7 @@ sealed class ServerEvent {
             override val arguments: List<String>,
         ) : Response()
     }
+
     data class Request(
         override val event: String,
         override val arguments: List<Any>,

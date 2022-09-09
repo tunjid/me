@@ -80,9 +80,11 @@ private fun onChipFilterChanged(
         ChipAction.Added -> onChanged(
             Action.ChipEdit(chipAction = it, descriptor = reader(state))
         )
+
         is ChipAction.Changed -> onChanged(
             Action.ChipEdit(chipAction = it, descriptor = writer(it.text))
         )
+
         is ChipAction.Removed -> onChanged(
             Action.ChipEdit(chipAction = it, descriptor = writer(it.text))
         )

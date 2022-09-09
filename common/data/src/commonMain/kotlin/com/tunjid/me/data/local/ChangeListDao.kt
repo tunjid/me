@@ -30,6 +30,7 @@ internal interface ChangeListDao {
      * Last changeList processed
      */
     suspend fun latestId(keys: Keys.ChangeList): ChangeListId?
+
     /**
      * Record that a change list has been processed
      */

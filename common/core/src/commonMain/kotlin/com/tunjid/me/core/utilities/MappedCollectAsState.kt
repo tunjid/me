@@ -23,11 +23,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlin.coroutines.CoroutineContext
 
 @Composable
@@ -45,9 +41,9 @@ private fun <T, R> StateFlow<T>.mapState(
     scope: CoroutineScope,
     mapper: (T) -> R
 ): StateFlow<R> = map { mapper(it) }
-        .distinctUntilChanged()
-        .stateIn(
-            scope = scope,
-            initialValue = mapper(value),
-            started = SharingStarted.WhileSubscribed(2000),
-        )
+    .distinctUntilChanged()
+    .stateIn(
+        scope = scope,
+        initialValue = mapper(value),
+        started = SharingStarted.WhileSubscribed(2000),
+    )

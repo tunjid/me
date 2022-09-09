@@ -16,8 +16,8 @@
 
 package com.tunjid.me.core.utilities
 
-import io.ktor.utils.io.core.Input
-import io.ktor.utils.io.streams.asInput
+import io.ktor.utils.io.core.*
+import io.ktor.utils.io.streams.*
 import java.io.File
 import java.nio.file.Files
 
@@ -26,6 +26,7 @@ actual class UriConverter {
         uri.path.startsWith("http") -> TODO("unimplemented")
         else -> File(uri.path).inputStream().asInput()
     }
+
     actual suspend fun name(uri: Uri): String = when {
         uri.path.startsWith("http") -> TODO("unimplemented")
         else -> File(uri.path).name

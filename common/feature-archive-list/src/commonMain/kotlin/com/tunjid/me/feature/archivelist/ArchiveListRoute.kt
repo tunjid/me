@@ -18,11 +18,7 @@ package com.tunjid.me.feature.archivelist
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.grid.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -31,7 +27,6 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.LocalNavigator
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
@@ -57,12 +52,11 @@ data class ArchiveListRoute(
 private fun ArchiveScreen(
     mutator: ArchiveListMutator,
 ) {
-    val navigator = LocalNavigator.current
     val state by mutator.state.collectAsState()
 
     if (!state.isInNavRail) GlobalUi(
         state = state,
-        navigator = navigator
+        onNavigate = mutator.accept
     )
 
     val gridState = rememberLazyGridState()
@@ -100,10 +94,10 @@ private fun ArchiveScreen(
                             item = item,
                             onAction = mutator.accept,
                             navigate = { path ->
-                                navigator.navigate {
+                                mutator.accept(Action.Navigate {
                                     if (state.isInNavRail) currentNav.swap(route = path.toRoute)
                                     else currentNav.push(route = path.toRoute)
-                                }
+                                })
                             }
                         )
                     }

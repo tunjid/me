@@ -23,11 +23,8 @@ import com.tunjid.me.feature.find
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.removedRoutes
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.map
 
 internal class RouteMutatorFactory(
     appScope: CoroutineScope,
@@ -41,6 +38,7 @@ internal class RouteMutatorFactory(
         appScope.launch {
             scaffoldComponent
                 .navStateStream
+                .map { it.rootNav }
                 .removedRoutes()
                 .collect { removedRoutes ->
                     removedRoutes.forEach { route ->

@@ -16,9 +16,7 @@
 
 package com.tunjid.me.core.model
 
-import com.tunjid.me.core.model.ArchiveKind.Articles
-import com.tunjid.me.core.model.ArchiveKind.Projects
-import com.tunjid.me.core.model.ArchiveKind.Talks
+import com.tunjid.me.core.model.ArchiveKind.*
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.KSerializer
@@ -36,11 +34,12 @@ enum class ArchiveKind(val type: String) {
     Talks(type = "talks"),
 }
 
-val ArchiveKind.singular get() = when(this) {
-    Articles -> "article"
-    Projects -> "project"
-    Talks -> "talks"
-}
+val ArchiveKind.singular
+    get() = when (this) {
+        Articles -> "article"
+        Projects -> "project"
+        Talks -> "talks"
+    }
 
 @Serializable
 data class Archive(

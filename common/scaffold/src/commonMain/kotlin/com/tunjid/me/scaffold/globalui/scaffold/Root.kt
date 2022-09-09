@@ -28,10 +28,9 @@ import com.tunjid.me.core.utilities.mappedCollectAsState
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiMutator
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.LocalNavigator
+import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.Route404
-import com.tunjid.treenav.MultiStackNav
-import com.tunjid.treenav.current
+import com.tunjid.me.scaffold.nav.current
 
 /**
  * Root scaffold for the app
@@ -46,11 +45,10 @@ fun Scaffold(
 
     CompositionLocalProvider(
         LocalGlobalUiMutator provides globalUiMutator,
-        LocalNavigator provides component.navigator,
     ) {
         val saveableStateHolder = rememberSaveableStateHolder()
 
-        val route by navMutator.state.mappedCollectAsState(mapper = MultiStackNav::current)
+        val route by navMutator.state.mappedCollectAsState(mapper = NavState::current)
         val renderedRoute = route as? AppRoute ?: Route404
 
         Box(

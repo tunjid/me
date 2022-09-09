@@ -10,7 +10,8 @@ are production tested, and should not be taken as anything more than its face va
 These ideas typically center around state, and it's production; a repository of "what ifs?".
 Specifically, this repository aims to explore representing various app architecture components "as state".
 
-The app is a WYSIWYG editor for my personal website. The source for the backend can be found [here](https://github.com/tunjid/tunji-web-deux).
+The app is a WYSIWYG editor for my personal website. The source for the backend can be
+found [here](https://github.com/tunjid/tunji-web-deux).
 
 ![Demo image](https://github.com/tunjid/me/blob/main/misc/demo.gif)
 
@@ -22,7 +23,10 @@ Some ideas explored include:
 * Android permissions as state
 * [Tiling](https://github.com/tunjid/Tiler) for incremental loading (pagination) as state
 * [Trees](https://github.com/tunjid/treeNav) for representing app navigation as state
-* [Jetpack Compose](https://developer.android.com/jetpack/compose?gclid=CjwKCAiA4KaRBhBdEiwAZi1zzpXxpbbQ5-qXVpv8RHzJKKCDY_Yv7AXMLpeRHaMCK-SNVI9i4jvJ4RoC_VQQAvD_BwE&gclsrc=aw.ds) for stateful [motionally intelligent](https://medium.com/androiddevelopers/motional-intelligence-build-smarter-animations-821af4d5f8c0) global UI 
+* [Jetpack Compose](https://developer.android.com/jetpack/compose?gclid=CjwKCAiA4KaRBhBdEiwAZi1zzpXxpbbQ5-qXVpv8RHzJKKCDY_Yv7AXMLpeRHaMCK-SNVI9i4jvJ4RoC_VQQAvD_BwE&gclsrc=aw.ds)
+  for
+  stateful [motionally intelligent](https://medium.com/androiddevelopers/motional-intelligence-build-smarter-animations-821af4d5f8c0)
+  global UI
 
 🚨⚠️🚧👷🏿‍♂️🏗️🛠️🚨
 
@@ -40,7 +44,6 @@ It's far from objective, caveat emptor.
 The app is a subscriber in a pub-sub liaison with the server. There is no pull to refresh, instead the app pulls diffs
 of `ChangeListItem` when the server notifies the app of changes made.
 
-
 The following rules are applied to the data layer:
 
 * DAOs are internal to the data layer
@@ -53,13 +56,16 @@ The following rules are applied to the data layer:
 
 Pub sub in the app is backed by a change list invalidation based system. Its premise is:
 
-* Each model table on the server will have a sibling table that has a row that tracks a unique id that identifies a CRUD update (change_list_id). This unique id must have natural ordering. 
+* Each model table on the server will have a sibling table that has a row that tracks a unique id that identifies a CRUD
+  update (change_list_id). This unique id must have natural ordering.
 * CRUD updates to any model will cause an update for the change_list_id (akin to a new commit in git).
-* The client will then hit an endpoint asking for changes since the last change_list_id it has, or its local HEAD. A changelist of model ids that have changed will then be sent (akin to a git fetch)
-* The clients will then chew on the change list incrementally, updating its local HEAD as each update is consumed (akin to applying the pulled commits).
+* The client will then hit an endpoint asking for changes since the last change_list_id it has, or its local HEAD. A
+  changelist of model ids that have changed will then be sent (akin to a git fetch)
+* The clients will then chew on the change list incrementally, updating its local HEAD as each update is consumed (akin
+  to applying the pulled commits).
 
-Real time updates are implemented with websockets via [socket.io](https://socket.io/). I intend to move the android client to FCM for efficiency reasons in the future.
-
+Real time updates are implemented with websockets via [socket.io](https://socket.io/). I intend to move the android
+client to FCM for efficiency reasons in the future.
 
 ### Navigation
 
@@ -87,6 +93,7 @@ typealias GlobalUiMutator = ActionStateProducer<Mutation<UiState>, StateFlow<UiS
 ### Pagination
 
 Pagination is implemented as a function of the current page and grid size:
+
 ```
 [out of bounds]                    -> Evict from memory
                                                    _
@@ -106,6 +113,7 @@ Pagination is implemented as a function of the current page and grid size:
 
 [out of bounds]                    -> Evict from memory
 ```
+
 As the user scrolls, `currentPage` changes and new pages are observed to keep the UI relevant.
 
 ### State restoration and process death
@@ -172,6 +180,7 @@ internal class RouteMutatorFactory(
     }
 }
 ```
+
 By watching the changes to the available routes in the `MultiStackNav` class, the scopes for
 `Mutators` for routes that have been removed can be cancelled.
 
@@ -188,6 +197,7 @@ Desktop: `./gradlew :desktop:run`
 Android: `./gradlew :android:assembleDebug` or run the Android target in Android Studio
 
 ## License
+
     Copyright 2021 Google LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");

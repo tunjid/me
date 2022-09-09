@@ -17,7 +17,7 @@
 package com.tunjid.me.core.utilities
 
 import android.content.ClipData
-import io.ktor.utils.io.core.Input
+import io.ktor.utils.io.core.*
 
 
 actual class UriConverter {

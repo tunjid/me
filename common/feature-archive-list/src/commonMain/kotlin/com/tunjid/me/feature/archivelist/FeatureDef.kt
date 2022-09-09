@@ -59,5 +59,6 @@ object ArchiveListFeature : Feature<ArchiveListRoute, ArchiveListMutator> {
         navStateFlow = scaffoldComponent.navStateStream,
         uiStateFlow = scaffoldComponent.globalUiStateStream,
         lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
+        navActions = scaffoldComponent.navActions,
     )
 }

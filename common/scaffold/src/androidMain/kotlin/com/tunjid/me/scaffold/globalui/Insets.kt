@@ -26,7 +26,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentActivity
 import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.mutation
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -92,10 +91,12 @@ private fun UiState.reduceSystemInsets(
             statusBarSize = statusBars.top,
             navBarSize = navBars.bottom
         )
+
         navBars.bottom < navBarHeightThreshold -> DelegateStaticSystemUI(
             statusBarSize = currentStaticSystemUI.statusBarSize,
             navBarSize = navBars.bottom
         )
+
         else -> currentStaticSystemUI
     }
 

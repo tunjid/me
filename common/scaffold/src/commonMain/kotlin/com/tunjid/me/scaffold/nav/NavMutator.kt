@@ -18,20 +18,22 @@ package com.tunjid.me.scaffold.nav
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.mutation
 import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.mutation
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Route
 import com.tunjid.treenav.StackNav
+import com.tunjid.treenav.current
 import com.tunjid.treenav.strings.RouteParser
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.*
 
 const val NavName = "App"
 
-typealias NavMutator = ActionStateProducer<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
+typealias NavMutator = ActionStateProducer<NavMutation, StateFlow<NavState>>
+typealias NavMutation = Navigator.() -> MultiStackNav
 
 interface AppRoute : Route {
     @Composable
@@ -51,15 +53,44 @@ data class NavItem(
     val selected: Boolean
 )
 
+data class NavState(
+    val rootNav: MultiStackNav,
+    val navRailRoute: AppRoute?
+)
+
+val NavState.current get() = rootNav.current
+
 internal fun navMutator(
     scope: CoroutineScope,
     startNav: List<List<String>>,
     routeParser: RouteParser<AppRoute>,
 ): NavMutator {
+    val multiStackNav = routeParser.toMultiStackNav(startNav)
     return scope.actionStateFlowProducer(
-        initialState = routeParser.toMultiStackNav(startNav),
-        actionTransform = { it },
+        initialState = NavState(
+            rootNav = multiStackNav,
+            navRailRoute = multiStackNav.navRailRoute?.let(routeParser::parse)
+        ),
+        actionTransform = { navMutations ->
+            navMutations.map { navMutation ->
+                mutation {
+                    val newMultiStackNav = navMutation(Navigator(rootNav, routeParser))
+                    NavState(
+                        rootNav = newMultiStackNav,
+                        navRailRoute = newMultiStackNav.navRailRoute?.let(routeParser::parse)
+                    )
+                }
+            }
+        },
     )
+}
+
+fun <Action, State> Flow<Action>.consumeNavActions(
+    mutationMapper: (Action) -> NavMutation,
+    action: (NavMutation) -> Unit
+) = flatMapLatest {
+    action(mutationMapper(it))
+    emptyFlow<Mutation<State>>()
 }
 
 fun RouteParser<AppRoute>.toMultiStackNav(paths: List<List<String>>) = paths.fold(

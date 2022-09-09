@@ -52,5 +52,6 @@ object SettingsFeature : Feature<SettingsRoute, SettingsMutator> {
         initialState = scaffoldComponent.restoredState(route),
         authRepository = dataComponent.authRepository,
         lifecycleStateFlow = scaffoldComponent.lifecycleStateStream,
+        navActions = scaffoldComponent.navActions,
     )
 }

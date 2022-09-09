@@ -122,6 +122,7 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
                 body = upsert.body,
                 onEdit = mutator.accept
             )
+
             false -> BodyPreview(
                 body = upsert.body
             )

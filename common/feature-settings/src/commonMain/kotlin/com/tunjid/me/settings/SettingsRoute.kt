@@ -37,7 +37,6 @@ import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.LocalNavigator
 import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
 
@@ -57,7 +56,6 @@ data class SettingsRoute(
 private fun SettingsScreen(mutator: SettingsMutator) {
     val state by mutator.state.collectAsState()
     val scrollState = rememberScrollState()
-    val navigator = LocalNavigator.current
 
     ScreenUiState(
         UiState(
@@ -80,7 +78,7 @@ private fun SettingsScreen(mutator: SettingsMutator) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        navigator.navigate { currentNav.push(path.toRoute) }
+                        mutator.accept(Action.Navigate { currentNav.push(path.toRoute) })
                     },
                 content = {
                     Text(

@@ -20,10 +20,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ChangeListItem(
-   val changeId: ChangeListId,
-   val changeType: String,
-   val modelId: String,
-   val model: String,
+    val changeId: ChangeListId,
+    val changeType: String,
+    val modelId: String,
+    val model: String,
 )
 
 fun ChangeListItem.isDelete() = changeType == "delete"

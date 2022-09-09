@@ -23,12 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -42,7 +37,6 @@ import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.snackbarPositionalState
-import com.tunjid.mutator.accept
 import kotlinx.coroutines.delay
 
 /**
@@ -71,6 +65,7 @@ internal fun BoxScope.AppSnackBar(
             16.dp + when {
                 state.keyboardSize > 0 -> state.keyboardSize.toDp() +
                         snackbarHeight.toDp()
+
                 else -> (UiSizes.bottomNavSize countIf state.bottomNavVisible) +
                         state.navBarSize.toDp() +
                         snackbarHeight.toDp()

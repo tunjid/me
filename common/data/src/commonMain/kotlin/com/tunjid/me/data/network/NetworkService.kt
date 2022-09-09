@@ -16,42 +16,23 @@
 
 package com.tunjid.me.data.network
 
-import com.tunjid.me.core.model.Archive
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.model.ArchiveUpsert
-import com.tunjid.me.core.model.ChangeListId
-import com.tunjid.me.core.model.ChangeListItem
-import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.model.SessionRequest
-import com.tunjid.me.core.model.User
+import com.tunjid.me.core.model.*
 import com.tunjid.me.data.local.Keys
 import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.data.network.models.NetworkResponse
 import com.tunjid.me.data.network.models.UpsertResponse
-import io.ktor.client.HttpClient
-import io.ktor.client.features.ResponseException
-import io.ktor.client.features.cookies.HttpCookies
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.features.logging.LogLevel
-import io.ktor.client.features.logging.Logger
-import io.ktor.client.features.logging.Logging
-import io.ktor.client.features.onUpload
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.forms.InputProvider
-import io.ktor.client.request.forms.formData
-import io.ktor.client.request.forms.submitFormWithBinaryData
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.parameter
-import io.ktor.client.request.post
-import io.ktor.client.request.put
-import io.ktor.client.statement.readText
-import io.ktor.client.utils.buildHeaders
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.utils.io.core.Input
+import io.ktor.client.*
+import io.ktor.client.features.*
+import io.ktor.client.features.cookies.*
+import io.ktor.client.features.json.*
+import io.ktor.client.features.json.serializer.*
+import io.ktor.client.features.logging.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
+import io.ktor.client.utils.*
+import io.ktor.http.*
+import io.ktor.utils.io.core.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -225,6 +206,7 @@ private suspend fun <T> Json.parseServerErrors(body: suspend () -> T): NetworkRe
         } catch (deserializationException: Exception) {
             NetworkResponse.Error(message = exception.response.readText())
         }
+
         else -> throw exception
     }
 }

@@ -16,34 +16,15 @@
 
 package com.tunjid.me.scaffold.nav
 
-import androidx.compose.runtime.ProvidableCompositionLocal
-import androidx.compose.runtime.staticCompositionLocalOf
-import com.tunjid.mutator.accept
-import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.MultiStackNav
-import com.tunjid.treenav.Route
 import com.tunjid.treenav.strings.RouteParser
 
 class Navigator(
-    private val navMutator: NavMutator,
+    private val state: MultiStackNav,
     private val routeParser: RouteParser<AppRoute>
 ) {
-    val currentNav get() = navMutator.state.value
+    val currentNav: MultiStackNav get() = state
 
     val String.toRoute: AppRoute
         get() = routeParser.parse(this) ?: Route404
-
-    fun navigate(action: Navigator.() -> MultiStackNav) {
-        navMutator.accept {
-            val changedNav = action(this@Navigator)
-            changedNav
-        }
-    }
-}
-
-val LocalNavigator: ProvidableCompositionLocal<Navigator> = staticCompositionLocalOf {
-    Navigator(
-        navMutator = MultiStackNav("AppNav").asNoOpStateFlowMutator(),
-        routeParser = { null },
-    )
 }

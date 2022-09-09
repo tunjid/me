@@ -24,7 +24,6 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.globalUiMutator
 import com.tunjid.me.scaffold.lifecycle.lifecycleMutator
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.Navigator
 import com.tunjid.me.scaffold.nav.navMutator
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.treenav.strings.UrlRouteMatcher
@@ -77,11 +76,6 @@ class ScaffoldComponent(
     val uiActions = globalUiMutator.accept
     val lifecycleActions = lifecycleMutator.accept
     val permissionActions = permissionsMutator.accept
-
-    val navigator = Navigator(
-        navMutator = navMutator,
-        routeParser = routeParser
-    )
 }
 
 inline fun <reified T : ByteSerializable> ScaffoldComponent.restoredState(route: AppRoute): T? {

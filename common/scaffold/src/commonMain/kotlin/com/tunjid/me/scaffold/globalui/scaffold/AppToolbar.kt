@@ -19,27 +19,8 @@ package com.tunjid.me.scaffold.globalui.scaffold
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -57,9 +38,9 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.globalui.slices.toolbarState
 import com.tunjid.me.scaffold.nav.NavMutator
+import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.Route404
 import com.tunjid.me.scaffold.nav.canGoUp
-import com.tunjid.mutator.accept
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.StackNav
@@ -112,14 +93,14 @@ internal fun BoxScope.AppToolbar(
 private fun UpButton(
     navMutator: NavMutator,
 ) {
-    val canGoUp by navMutator.state.mappedCollectAsState(mapper = MultiStackNav::canGoUp)
+    val canGoUp by navMutator.state.mappedCollectAsState { it.rootNav.canGoUp }
 
     AnimatedVisibility(visible = canGoUp) {
         Button(
             modifier = Modifier
                 .wrapContentSize()
                 .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
-            onClick = { navMutator.accept { pop() } },
+            onClick = { navMutator.accept { currentNav.pop() } },
             elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
             // Uses ButtonDefaults.ContentPadding by default
             contentPadding = PaddingValues(
@@ -205,6 +186,7 @@ private fun ToolbarIcon(
                 )
             }
         )
+
         else -> IconButton(
             modifier = Modifier
                 .wrapContentSize(align = Alignment.CenterEnd)
@@ -229,18 +211,21 @@ fun Test() {
                 toolbarTitle = "Hi",
                 toolbarShows = true
             ).asNoOpStateFlowMutator(),
-            navMutator = MultiStackNav(
-                name = "App",
-                currentIndex = 0,
-                stacks = listOf(
-                    StackNav(
-                        name = "Preview",
-                        routes = listOf(
-                            Route404,
-                            Route404
+            navMutator = NavState(
+                rootNav = MultiStackNav(
+                    name = "App",
+                    currentIndex = 0,
+                    stacks = listOf(
+                        StackNav(
+                            name = "Preview",
+                            routes = listOf(
+                                Route404,
+                                Route404
+                            )
                         )
                     )
-                )
+                ),
+                navRailRoute = null
             ).asNoOpStateFlowMutator(),
         )
     }

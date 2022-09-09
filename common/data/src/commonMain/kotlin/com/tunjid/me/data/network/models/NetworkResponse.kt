@@ -49,7 +49,7 @@ internal fun <T> NetworkResponse<T>.item(): T? = when (this) {
     is NetworkResponse.Error -> null
 }
 
-internal fun <T> NetworkResponse<T>.toResult(): Result<T> = when(this) {
+internal fun <T> NetworkResponse<T>.toResult(): Result<T> = when (this) {
     is NetworkResponse.Success -> Result.Success(item)
     is NetworkResponse.Error -> Result.Error(message = message)
 }

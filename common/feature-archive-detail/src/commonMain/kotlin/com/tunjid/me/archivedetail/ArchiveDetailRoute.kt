@@ -17,11 +17,7 @@
 package com.tunjid.me.archivedetail
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
@@ -44,14 +40,8 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.RemoteImagePainter
 import com.tunjid.me.feature.LocalRouteServiceLocator
-import com.tunjid.me.scaffold.globalui.InsetFlags
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.currentUiState
-import com.tunjid.me.scaffold.globalui.rememberFunction
+import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.LocalNavigator
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
@@ -80,7 +70,7 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
 
     val canEdit = state.canEdit
 
-    val navigator = LocalNavigator.current
+//    val navigator = LocalNavigator.current
     ScreenUiState(
         UiState(
             toolbarShows = true,
@@ -93,9 +83,9 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             fabIcon = Icons.Default.Edit,
             fabClickListener = rememberFunction(state.archive?.id) {
                 val archiveId = state.archive?.id
-                if (archiveId != null) navigator.navigate {
+                if (archiveId != null) mutator.accept(Action.Navigate {
                     currentNav.push("archives/${state.kind.type}/${archiveId.value}/edit".toRoute)
-                }
+                })
             },
             insetFlags = InsetFlags.NO_BOTTOM,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
@@ -158,6 +148,6 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
     // Pop nav if this archive does not exist anymore
     val wasDeleted = state.wasDeleted
     LaunchedEffect(wasDeleted) {
-        if (wasDeleted) navigator.navigate { currentNav.pop() }
+        if (wasDeleted) mutator.accept(Action.Navigate { currentNav.pop() })
     }
 }

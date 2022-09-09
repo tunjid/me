@@ -75,12 +75,14 @@ private fun ArchiveQuery.amend(
             is Category -> operator(contentFilter.categories, descriptor)
                 .distinct()
                 .filterIsInstance<Category>()
+
             else -> contentFilter.categories
         },
         tags = when (descriptor) {
             is Tag -> operator(contentFilter.tags, descriptor)
                 .distinct()
                 .filterIsInstance<Tag>()
+
             else -> contentFilter.tags
         }
     )

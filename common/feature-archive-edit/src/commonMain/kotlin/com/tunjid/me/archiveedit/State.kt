@@ -16,15 +16,10 @@
 
 package com.tunjid.me.archiveedit
 
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.model.ArchiveUpsert
-import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.model.Message
-import com.tunjid.me.core.model.MessageQueue
-import com.tunjid.me.core.utilities.Uri
+import com.tunjid.me.core.model.*
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation

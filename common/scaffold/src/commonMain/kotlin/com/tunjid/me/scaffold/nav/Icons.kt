@@ -55,6 +55,7 @@ val com.tunjid.me.core.model.ArchiveKind.icon: ImageVector
                     close()
                 }
             }
+
             com.tunjid.me.core.model.ArchiveKind.Projects -> materialIcon(name = "Filled.Handyman") {
                 materialPath {
                     moveTo(21.67f, 18.17f)
@@ -103,6 +104,7 @@ val com.tunjid.me.core.model.ArchiveKind.icon: ImageVector
                     close()
                 }
             }
+
             com.tunjid.me.core.model.ArchiveKind.Talks -> materialIcon(name = "Filled.RecordVoiceOver") {
                 materialPath {
                     moveTo(9.0f, 9.0f)

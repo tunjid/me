@@ -37,7 +37,6 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.nav.*
-import com.tunjid.mutator.accept
 
 /**
  * Motionally intelligent nav rail shared amongst nav routes in the app
@@ -81,15 +80,14 @@ fun AppNavRail(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
-                navState.navItems.forEach { navItem ->
+                navState.rootNav.navItems.forEach { navItem ->
                     NavRailItem(item = navItem, navMutator = navMutator)
                 }
             }
             Box(
                 modifier = Modifier.width(navRailContentWidth)
             ) {
-                val navigator = LocalNavigator.current
-                val route = with(navigator) { navState.navRailRoute?.toRoute }
+                val route by navMutator.state.mappedCollectAsState(mapper = NavState::navRailRoute)
                 saveableStateHolder.SaveableStateProvider(key = "nav-rail-${route?.id}") {
                     if (navRailVisible) route?.Render()
                 }
@@ -112,7 +110,7 @@ private fun NavRailItem(
             bottom = 16.dp,
         ),
         onClick = {
-            navMutator.accept { navItemSelected(item = item) }
+            navMutator.accept { currentNav.navItemSelected(item = item) }
         }
     ) {
         Column(

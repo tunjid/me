@@ -109,6 +109,7 @@ private fun Context.permissionsCacheMutator(
                         permission to lastChangedActivity.permissionMutator(permission)
                     }.toMap())
                 )
+
                 Lifecycle.Event.ON_DESTROY -> permissionCache.copy(
                     activeActivity = when (lastChangedActivity) {
                         permissionCache.activeActivity -> null
@@ -116,6 +117,7 @@ private fun Context.permissionsCacheMutator(
                     },
                     map = permissionCache.map - lastChangedActivity
                 )
+
                 Lifecycle.Event.ON_RESUME -> permissionCache.copy(activeActivity = lastChangedActivity)
                 Lifecycle.Event.ON_START -> permissionCache.copy(activeActivity = lastChangedActivity)
                 Lifecycle.Event.ON_PAUSE,
@@ -123,6 +125,7 @@ private fun Context.permissionsCacheMutator(
                     permissionCache.activeActivity -> permissionCache.copy(activeActivity = null)
                     else -> permissionCache
                 }
+
                 Lifecycle.Event.ON_ANY -> permissionCache
             }
         }

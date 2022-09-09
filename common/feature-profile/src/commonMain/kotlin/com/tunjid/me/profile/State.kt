@@ -40,5 +40,5 @@ data class State(
 sealed class Action {
     data class FieldChanged(
         val field: FormField
-    ): Action()
+    ) : Action()
 }

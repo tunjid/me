@@ -80,6 +80,7 @@ val UiState.navRailVisible
     get() = navMode is NavMode.NavRail && when (navVisibility) {
         NavVisibility.Visible,
         NavVisibility.GoneIfBottomNav -> true
+
         NavVisibility.Gone -> false
     }
 

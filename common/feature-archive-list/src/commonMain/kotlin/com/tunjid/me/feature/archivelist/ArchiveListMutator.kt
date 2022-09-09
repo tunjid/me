@@ -26,13 +26,14 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
-import com.tunjid.me.scaffold.nav.navRailRoute
-import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.mutation
+import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.NavState
+import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.treenav.MultiStackNav
+import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 
@@ -47,9 +48,10 @@ fun archiveListMutator(
     initialState: State? = null,
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
-    navStateFlow: StateFlow<MultiStackNav>,
+    navStateFlow: StateFlow<NavState>,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
+    navActions: (NavMutation) -> Unit
 ): ArchiveListMutator = scope.actionStateFlowProducer(
     initialState = initialState ?: State(
         items = listOf(
@@ -64,26 +66,31 @@ fun archiveListMutator(
         )
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
+    mutationFlows = listOf(
+        navRailStatusMutations(
+            navStateFlow = navStateFlow,
+            uiStateFlow = uiStateFlow
+        ),
+        authRepository.authMutations(),
+    ).monitorWhenActive(lifecycleStateFlow),
     actionTransform = { actions ->
-        merge(
-            navRailStatusMutations(
-                navStateFlow = navStateFlow,
-                uiStateFlow = uiStateFlow
-            ),
-            authRepository.authMutations(),
-            actions.toMutationStream(keySelector = Action::key) {
-                when (val action = type()) {
-                    is Action.Fetch -> action.flow.fetchMutations(
-                        scope = scope,
-                        repo = archiveRepository
-                    )
-                    is Action.FilterChanged -> action.flow.filterChangedMutations()
-                    is Action.ToggleFilter -> action.flow.filterToggleMutations()
-                    is Action.LastVisibleKey -> action.flow.resetScrollMutations()
-                    is Action.GridSize -> action.flow.gridSizeMutations()
-                }
+        actions.toMutationStream(keySelector = Action::key) {
+            when (val action = type()) {
+                is Action.Fetch -> action.flow.fetchMutations(
+                    scope = scope,
+                    repo = archiveRepository
+                )
+
+                is Action.FilterChanged -> action.flow.filterChangedMutations()
+                is Action.ToggleFilter -> action.flow.filterToggleMutations()
+                is Action.LastVisibleKey -> action.flow.resetScrollMutations()
+                is Action.GridSize -> action.flow.gridSizeMutations()
+                is Action.Navigate -> action.flow.consumeNavActions(
+                    mutationMapper = Action.Navigate::navMutation,
+                    action = navActions
+                )
             }
-        ).monitorWhenActive(lifecycleStateFlow)
+        }.monitorWhenActive(lifecycleStateFlow)
     }
 )
 
@@ -103,7 +110,7 @@ internal fun AuthRepository.authMutations(): Flow<Mutation<State>> =
  * Updates [State] with whether it is in the nav rail
  */
 private fun navRailStatusMutations(
-    navStateFlow: StateFlow<MultiStackNav>,
+    navStateFlow: StateFlow<NavState>,
     uiStateFlow: StateFlow<UiState>,
 ) = combine(
     navStateFlow.map {
@@ -111,7 +118,7 @@ private fun navRailStatusMutations(
             .map(ArchiveKind::type)
             .joinToString(separator = "|")
         val pathMatch = "archive/$kindMatch".toRegex()
-        when (val navRailRoute = it.navRailRoute) {
+        when (val navRailRoute = it.navRailRoute?.id) {
             null -> false
             else -> pathMatch.matches(navRailRoute)
         }
@@ -217,6 +224,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
                     // The mutator was just resubscribed to, show existing items
                     else -> items
                 }
+
                 else -> fetchResult.flattenedArchives
             }
                 // Filtering is cheap because at most 4 * [DefaultQueryLimit] items
@@ -235,6 +243,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
                         is Action.Fetch.Reset -> queryState.startQuery.copy(
                             contentFilter = fetchAction.query.contentFilter
                         )
+
                         else -> queryState.startQuery
                     },
                     expanded = when (fetchAction) {

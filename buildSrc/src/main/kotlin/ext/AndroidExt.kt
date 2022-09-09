@@ -25,7 +25,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
  * Sets common values for Android Applications and Libraries
  */
 fun org.gradle.api.Project.commonConfiguration(
-   extension: CommonExtension<*, *, *, *>
+    extension: CommonExtension<*, *, *, *>
 ) = extension.apply {
     compileSdk = 31
 

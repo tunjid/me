@@ -17,14 +17,7 @@
 package com.tunjid.me.archiveedit
 
 
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.model.ArchiveUpsert
-import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.model.Result
-import com.tunjid.me.core.model.minus
-import com.tunjid.me.core.model.plus
-import com.tunjid.me.core.model.singular
+import com.tunjid.me.core.model.*
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.data.repository.ArchiveRepository
@@ -36,11 +29,11 @@ import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
-import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.mutation
 import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
+import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -95,6 +88,7 @@ fun archiveEditMutator(
                         is Action.RequestPermission -> action.flow.permissionRequestMutations(
                             onPermissionRequested = onPermissionRequested
                         )
+
                         is Action.Load -> action.flow.loadMutations(
                             archiveRepository = archiveRepository,
                         )
@@ -220,6 +214,7 @@ private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
                         },
                     )
                 )
+
                 is ChipAction.Changed -> Pair(
                     upsert,
                     chipsState.copy(
@@ -233,6 +228,7 @@ private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
                         }
                     )
                 )
+
                 is ChipAction.Removed -> Pair(
                     upsert.copy(
                         categories = upsert.categories.filter { it != descriptor },
@@ -281,6 +277,7 @@ private fun Flow<Action.Load>.loadMutations(
                     kind = monitor.kind,
                     archiveId = monitor.id
                 )
+
                 is Action.Load.Submit -> flow<Mutation<State>> {
                     val (kind, upsert, headerPhoto) = monitor
                     emit(mutation { copy(isSubmitting = true) })
@@ -292,6 +289,7 @@ private fun Flow<Action.Load>.loadMutations(
                             null -> "Created ${kind.singular}"
                             else -> "Updated ${kind.singular}"
                         }
+
                         is Result.Error -> result.message ?: "unknown error"
                     }
 

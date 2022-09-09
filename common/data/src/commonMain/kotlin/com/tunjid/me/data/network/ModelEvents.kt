@@ -32,7 +32,7 @@ fun List<String>.toChangeListItem(
     event: String
 ): ChangeListItem? {
     if (event != ModelChangedEvent) return null
-    val rawJson = firstOrNull()  ?: return null
+    val rawJson = firstOrNull() ?: return null
     return try {
         json.decodeFromString<ChangeListItem>(rawJson)
     } catch (e: Exception) {

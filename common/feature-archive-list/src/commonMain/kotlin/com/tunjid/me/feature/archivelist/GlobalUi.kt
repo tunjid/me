@@ -21,13 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.currentUiState
-import com.tunjid.me.scaffold.globalui.rememberFunction
+import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
-import com.tunjid.me.scaffold.nav.Navigator
 import com.tunjid.treenav.push
 
 private const val SignIn = "sign-in"
@@ -35,7 +30,7 @@ private const val SignIn = "sign-in"
 @Composable
 fun GlobalUi(
     state: State,
-    navigator: Navigator
+    onNavigate: (Action.Navigate) -> Unit
 ) {
     val query = state.queryState.startQuery
     val isSignedIn = state.isSignedIn
@@ -51,9 +46,9 @@ fun GlobalUi(
             ),
             toolbarMenuClickListener = rememberFunction { item ->
                 when (item.id) {
-                    SignIn -> navigator.navigate {
+                    SignIn -> onNavigate(Action.Navigate {
                         currentNav.push("sign-in".toRoute)
-                    }
+                    })
                 }
             },
             fabShows = if (state.hasFetchedAuthStatus) isSignedIn else currentUiState.fabShows,
@@ -61,10 +56,10 @@ fun GlobalUi(
             fabText = "Create",
             fabIcon = Icons.Default.Add,
             fabClickListener = rememberFunction {
-                navigator.navigate {
+                onNavigate(Action.Navigate {
                     val kind = state.queryState.currentQuery.kind
                     currentNav.push("archives/${kind.type}/create".toRoute)
-                }
+                })
             },
             navVisibility = NavVisibility.Visible,
             statusBarColor = MaterialTheme.colors.primary.toArgb(),
