@@ -71,6 +71,7 @@ internal fun navMutator(
             rootNav = multiStackNav,
             navRailRoute = multiStackNav.navRailRoute?.let(routeParser::parse)
         ),
+        started = SharingStarted.Eagerly,
         actionTransform = { navMutations ->
             navMutations.map { navMutation ->
                 mutation {

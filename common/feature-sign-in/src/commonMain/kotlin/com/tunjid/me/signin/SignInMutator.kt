@@ -96,6 +96,7 @@ private fun Flow<Action.Submit>.submissionMutations(
                     is Result.Error -> emit {
                         copy(messages = messages + "Error signing in: ${result.message}")
                     }
+
                     else -> navActions(NavContext::resetNav)
                 }
                 emit { copy(isSubmitting = false) }
@@ -105,7 +106,7 @@ private fun Flow<Action.Submit>.submissionMutations(
 private fun NavContext.resetNav(): MultiStackNav {
     var newNav = currentNav
     for (i in 0.until(currentNav.stacks.size)) {
-        newNav = currentNav.switch(i)
+        newNav = newNav.switch(i)
         while (newNav.canGoUp) newNav = newNav.pop()
     }
     return newNav.switch(0)
