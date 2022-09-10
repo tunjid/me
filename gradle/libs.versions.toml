@@ -1,31 +1,32 @@
 [versions]
-accompanist = "0.21.4-beta"
+accompanist = "0.25.1"
 androidDesugarJdkLibs = "1.1.5"
-androidGradlePlugin = "7.0.4"
-androidxActivity = "1.5.0-rc01"
-androidxAppCompat = "1.4.0"
-androidxCore = "1.7.0"
-androidxLifecycle = "2.4.1"
-androidxWindow = "1.0.0-rc01"
-arkivanovEssenty = "0.2.2"
-coil = "1.4.0"
-androidxCompose = "1.2.0-beta01"
+androidGradlePlugin = "7.2.2"
+androidxActivity = "1.5.1"
+androidxAppCompat = "1.5.1"
+androidxCore = "1.9.0"
+androidxLifecycle = "2.5.1"
+androidxWindow = "1.0.0"
+coil = "2.2.1"
+androidxCompose = "1.3.0-beta02"
+androidxComposeCompiler = "1.3.1"
 androidxEspresso = "3.3.0"
 androidxTest = "1.4.0"
 androidxTestExt = "1.1.2"
-googleMaterial = "1.4.0"
+googleMaterial = "1.7.0-beta01"
+gradleKotlinDsl = "3.1.0"
 jakeWhartonRetrofit = "0.8.0"
-jetbrainsCompose = "1.2.0-alpha01-dev683"
+jetbrainsCompose = "1.2.0-alpha01-dev774"
 junit4 = "4.13.2"
-kotlin = "1.6.21"
-kotlinxCoroutines = "1.6.0"
-kotlinxDatetime = "0.3.1"
-kotlinxSerialization = "1.3.2"
-ktor = "1.6.0"
+kotlin = "1.7.10"
+kotlinxCoroutines = "1.6.3"
+kotlinxDatetime = "0.4.0"
+kotlinxSerialization = "1.3.3"
+ktor = "2.0.3"
 mockk = "1.12.3"
-okhttp = "4.9.3"
+okhttp = "4.10.0"
 retrofit = "2.9.0"
-richtext = "0.10.0"
+richtext = "0.13.0"
 socketio = "2.0.0"
 sqldelight = "1.5.3"
 tunjidMutator = "0.0.7"
@@ -45,7 +46,6 @@ androidx-test-core = { group = "androidx.test", name = "core", version.ref = "an
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTest" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidxTestExt" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }
-arkivanov-essenty-parcelable = { group = "com.arkivanov.essenty", name = "parcelable", version.ref = "arkivanovEssenty" }
 coil-core = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 androidx-compose-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "androidxCompose" }
@@ -60,6 +60,7 @@ androidx-compose-ui-ui = { group = "androidx.compose.ui", name = "ui", version.r
 androidx-compose-ui-util = { group = "androidx.compose.ui", name = "ui-util", version.ref = "androidxCompose" }
 androidx-lifecycle-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
+gradle-kotlinDslPlugin = { group = "org.gradle.kotlin", name = "gradle-kotlin-dsl-plugins", version.ref = "gradleKotlinDsl" }
 jakewharton-retrofit-serializationconverter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "jakeWhartonRetrofit" }
 jetbrains-compose-animation = { group = "org.jetbrains.compose.animation", name = "animation", version.ref = "jetbrainsCompose" }
 jetbrains-compose-foundation-layout = { group = "org.jetbrains.compose.foundation", name = "foundation-layout", version.ref = "jetbrainsCompose" }
@@ -85,9 +86,12 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-serialization-protobuf = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-protobuf", version.ref = "kotlinxSerialization" }
 ktor-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor" }
+ktor-client-contentNegotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-java = { group = "io.ktor", name = "ktor-client-java", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+ktor-client-resources = { group = "io.ktor", name = "ktor-client-resources", version.ref = "ktor" }
 ktor-client-serialization = { group = "io.ktor", name = "ktor-client-serialization", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-io-core = { group = "io.ktor", name = "ktor-io", version.ref = "ktor" }
 ktor-io-jvm = { group = "io.ktor", name = "ktor-io-jvm", version.ref = "ktor" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }

@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.loadImageBitmap
 import io.ktor.client.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayInputStream
@@ -57,7 +58,7 @@ actual fun RemoteImagePainter(imageUri: String?): Painter? {
 }
 
 private suspend fun String.remoteInputStream() = HttpClient().use {
-    ByteArrayInputStream(it.get(this))
+    ByteArrayInputStream(it.get(this).readBytes())
 }
 
 private fun String.fileInputStream() = File(this).inputStream()

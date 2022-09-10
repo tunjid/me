@@ -37,6 +37,7 @@ allprojects {
         maven {
             url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev/")
         }
+        maven("https://plugins.gradle.org/m2/")
     }
 }
 
@@ -44,6 +45,7 @@ subprojects {
     repositories {
         google()
         mavenCentral()
+        maven("https://plugins.gradle.org/m2/")
         maven {
             url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev/")
         }

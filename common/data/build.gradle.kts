@@ -34,8 +34,10 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
 
                 implementation(libs.ktor.core)
+                implementation(libs.ktor.client.contentNegotiation)
                 implementation(libs.ktor.client.logging)
-                implementation(libs.ktor.client.serialization)
+                implementation(libs.ktor.client.resources)
+                implementation(libs.ktor.serialization.kotlinx.json)
 
                 implementation(libs.square.sqldelight.coroutines.extensions)
 

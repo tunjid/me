@@ -28,7 +28,12 @@ import com.tunjid.treenav.StackNav
 import com.tunjid.treenav.current
 import com.tunjid.treenav.strings.RouteParser
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 
 const val NavName = "App"
 
@@ -104,16 +109,16 @@ fun RouteParser<AppRoute>.toMultiStackNav(paths: List<List<String>>) = paths.fol
     operation = { multiStackNav, routesForStack ->
         multiStackNav.copy(
             stacks = multiStackNav.stacks +
-                    routesForStack.fold(
-                        initial = StackNav(
-                            name = routesForStack.firstOrNull() ?: "Unknown"
-                        ),
-                        operation = innerFold@{ stackNav, route ->
-                            stackNav.copy(
-                                routes = stackNav.routes + (parse(routeString = route) ?: Route404)
-                            )
-                        }
-                    )
+                routesForStack.fold(
+                    initial = StackNav(
+                        name = routesForStack.firstOrNull() ?: "Unknown"
+                    ),
+                    operation = innerFold@{ stackNav, route ->
+                        stackNav.copy(
+                            routes = stackNav.routes + (parse(routeString = route) ?: Route404)
+                        )
+                    }
+                )
         )
     }
 )

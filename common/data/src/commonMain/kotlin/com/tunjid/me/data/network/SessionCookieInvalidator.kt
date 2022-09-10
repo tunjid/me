@@ -20,8 +20,8 @@ import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.data.network.models.NetworkErrorCodes
 import com.tunjid.me.data.network.models.NetworkResponse
 import io.ktor.client.*
-import io.ktor.client.features.*
-import io.ktor.client.features.observer.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.observer.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
@@ -39,7 +39,7 @@ internal class SessionCookieInvalidator(
     private val sessionCookieDao: SessionCookieDao?
 ) {
 
-    companion object : HttpClientFeature<ErrorInterceptorConfig, SessionCookieInvalidator> {
+    companion object : HttpClientPlugin<ErrorInterceptorConfig, SessionCookieInvalidator> {
         override val key: AttributeKey<SessionCookieInvalidator> =
             AttributeKey("ClientNetworkErrorInterceptor")
 
@@ -58,7 +58,7 @@ internal class SessionCookieInvalidator(
 
                 if (!response.status.isSuccess())
                     try {
-                        val responseText = response.readText()
+                        val responseText = response.bodyAsText()
                         val error = converter(responseText)
 
                         if (error.errorCode == NetworkErrorCodes.NotLoggedIn) {

@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 fun org.gradle.api.Project.commonConfiguration(
     extension: CommonExtension<*, *, *, *>
 ) = extension.apply {
-    compileSdk = 31
+    compileSdk = 33
 
     defaultConfig {
         // Could have been 21, but I need sqlite 3.24.0 for upserts
@@ -38,8 +38,12 @@ fun org.gradle.api.Project.commonConfiguration(
         compose = true
     }
     composeOptions {
-        println("USING VERSION ${versionCatalog.findVersion("androidxCompose").get().requiredVersion}")
-        kotlinCompilerExtensionVersion = versionCatalog.findVersion("androidxCompose").get().requiredVersion
+        val composeCompilerVersion = versionCatalog
+            .findVersion("androidxComposeCompiler")
+            .get()
+            .requiredVersion
+        println("USING VERSION $composeCompilerVersion")
+        kotlinCompilerExtensionVersion = composeCompilerVersion
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -66,7 +70,7 @@ fun org.gradle.api.Project.commonConfiguration(
 
 fun org.gradle.api.Project.coerceComposeVersion(configuration: Configuration) {
     configuration.resolutionStrategy.eachDependency {
-        if (requested.group.startsWith("androidx.compose")) {
+        if (requested.group.startsWith("androidx.compose") && !requested.group.contains("compiler")) {
             useVersion(versionCatalog.findVersion("androidxCompose").get().requiredVersion)
             because("I need the changes in lazyGrid")
         }

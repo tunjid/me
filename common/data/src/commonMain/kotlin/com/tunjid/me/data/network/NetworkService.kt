@@ -22,16 +22,17 @@ import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.data.network.models.NetworkResponse
 import com.tunjid.me.data.network.models.UpsertResponse
 import io.ktor.client.*
-import io.ktor.client.features.*
-import io.ktor.client.features.cookies.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
-import io.ktor.client.features.logging.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.cookies.*
+import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.client.utils.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -84,9 +85,12 @@ internal class KtorNetworkService(
 ) : NetworkService {
 
     private val client = HttpClient {
-        install(JsonFeature) {
-            accept(ContentType.Application.Json, ContentType.Text.Html)
-            serializer = KotlinxSerializer(json = json)
+        expectSuccess = true
+        install(ContentNegotiation) {
+            json(
+                json = json,
+                contentType = ContentType.Application.Json
+            )
         }
         install(HttpCookies) {
             storage = SessionCookiesStorage(sessionCookieDao)
@@ -123,14 +127,14 @@ internal class KtorNetworkService(
             if (categories.isNotEmpty()) categories.map(Descriptor.Category::value).forEach {
                 parameter("category", it)
             }
-        }
+        }.body()
     }
 
     override suspend fun fetchArchive(
         kind: ArchiveKind,
         id: ArchiveId,
     ): NetworkResponse<Archive> = json.parseServerErrors {
-        client.get("$baseUrl/api/${kind.type}/${id.value}")
+        client.get("$baseUrl/api/${kind.type}/${id.value}").body()
     }
 
     override suspend fun upsertArchive(
@@ -140,12 +144,12 @@ internal class KtorNetworkService(
         val id = upsert.id
         val requestBuilder: HttpRequestBuilder.() -> Unit = {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
-            body = upsert
+            setBody(upsert)
         }
         when (id) {
             null -> client.post("$baseUrl/api/$kind", requestBuilder)
             else -> client.put("$baseUrl/api/$kind/${id.value}", requestBuilder)
-        }
+        }.body()
     }
 
     override suspend fun uploadArchiveHeaderPhoto(
@@ -172,7 +176,7 @@ internal class KtorNetworkService(
             onUpload { bytesSentTotal, _ ->
                 println("Uploaded $bytesSentTotal for header photo")
             }
-        }
+        }.body()
     }
 
     override suspend fun signIn(
@@ -180,12 +184,12 @@ internal class KtorNetworkService(
     ): NetworkResponse<User> = json.parseServerErrors {
         client.post("$baseUrl/api/sign-in") {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
-            body = sessionRequest
-        }
+            setBody(sessionRequest)
+        }.body()
     }
 
     override suspend fun session(): NetworkResponse<User> = json.parseServerErrors {
-        client.get("$baseUrl/api/session")
+        client.get("$baseUrl/api/session").body()
     }
 
     override suspend fun changeList(
@@ -193,18 +197,19 @@ internal class KtorNetworkService(
     ): NetworkResponse<List<ChangeListItem>> = json.parseServerErrors {
         client.get("$baseUrl/api/${key.path}/changelist") {
             if (id != null) parameter("after", id.value)
-        }
+        }.body()
     }
 }
 
 private suspend fun <T> Json.parseServerErrors(body: suspend () -> T): NetworkResponse<T> = try {
     NetworkResponse.Success(body())
 } catch (exception: Exception) {
+    exception.printStackTrace()
     when (exception) {
         is ResponseException -> try {
-            decodeFromString(exception.response.readText())
+            decodeFromString(exception.response.bodyAsText())
         } catch (deserializationException: Exception) {
-            NetworkResponse.Error(message = exception.response.readText())
+            NetworkResponse.Error(message = exception.response.bodyAsText())
         }
 
         else -> throw exception

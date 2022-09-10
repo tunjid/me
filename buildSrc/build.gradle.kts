@@ -25,6 +25,7 @@ repositories {
 
 plugins {
     `kotlin-dsl`
+//    kotlin("plugin.serialization").version("1.7.10")
 }
 
 dependencies {
@@ -32,4 +33,6 @@ dependencies {
     implementation(libs.android.gradlePlugin)
     implementation(libs.kotlin.gradlePlugin)
     implementation(libs.kotlin.serializationPlugin)
+    implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:3.1.0")
+
 }

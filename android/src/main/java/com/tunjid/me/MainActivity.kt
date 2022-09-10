@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         val scaffoldComponent = appDependencies.scaffoldComponent
 
         onBackPressedDispatcher.addCallback(this) {
-            scaffoldComponent.navActions(mutation { pop() })
+            scaffoldComponent.navActions { currentNav.pop() }
         }
 
         val composeView = ComposeView(this)

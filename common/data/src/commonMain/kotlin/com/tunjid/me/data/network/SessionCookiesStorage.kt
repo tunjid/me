@@ -17,7 +17,7 @@
 package com.tunjid.me.data.network
 
 import com.tunjid.me.data.local.SessionCookieDao
-import io.ktor.client.features.cookies.*
+import io.ktor.client.plugins.cookies.*
 import io.ktor.http.*
 import kotlinx.coroutines.flow.firstOrNull
 

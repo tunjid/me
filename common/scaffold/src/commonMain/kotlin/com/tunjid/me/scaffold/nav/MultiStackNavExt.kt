@@ -19,7 +19,12 @@ package com.tunjid.me.scaffold.nav
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.treenav.*
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.StackNav
+import com.tunjid.treenav.canGoUp
+import com.tunjid.treenav.current
+import com.tunjid.treenav.minus
+import com.tunjid.treenav.switch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map

@@ -21,7 +21,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
-import com.tunjid.me.scaffold.globalui.*
+import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.currentUiState
+import com.tunjid.me.scaffold.globalui.rememberFunction
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.treenav.push
 

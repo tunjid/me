@@ -23,6 +23,6 @@ import coil.size.Scale
 
 @Composable
 actual fun RemoteImagePainter(imageUri: String?): Painter? =
-    rememberImagePainter(imageUri) {
+    rememberImagePainter(data = imageUri, builder = {
         scale(Scale.FILL)
-    }
+    })
