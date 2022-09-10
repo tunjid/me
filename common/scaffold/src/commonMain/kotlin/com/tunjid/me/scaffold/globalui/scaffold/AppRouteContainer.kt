@@ -63,7 +63,7 @@ internal fun AppRouteContainer(
 
     val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
 
-    val hasNavContent by navMutator.state.mappedCollectAsState { it.navRailRoute != null }
+    val hasNavContent by navMutator.state.mappedCollectAsState { it.navRail != null }
     val navRailVisible = state.navRailVisible
     val navRailSize = UiSizes.navRailWidth countIf navRailVisible
     val navRailContentWidth = UiSizes.navRailContentWidth countIf (hasNavContent && navRailVisible)

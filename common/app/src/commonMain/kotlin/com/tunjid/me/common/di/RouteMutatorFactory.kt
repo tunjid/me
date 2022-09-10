@@ -42,7 +42,7 @@ internal class RouteMutatorFactory(
         appScope.launch {
             scaffoldComponent
                 .navStateStream
-                .map { it.rootNav }
+                .map { it.mainNav }
                 .removedRoutes()
                 .collect { removedRoutes ->
                     removedRoutes.forEach { route ->

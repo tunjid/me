@@ -93,7 +93,7 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
             fabClickListener = rememberFunction(state.archive?.id) {
                 val archiveId = state.archive?.id
                 if (archiveId != null) mutator.accept(Action.Navigate {
-                    currentNav.push("archives/${state.kind.type}/${archiveId.value}/edit".toRoute)
+                    mainNav.push("archives/${state.kind.type}/${archiveId.value}/edit".toRoute)
                 })
             },
             insetFlags = InsetFlags.NO_BOTTOM,
@@ -157,6 +157,6 @@ private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
     // Pop nav if this archive does not exist anymore
     val wasDeleted = state.wasDeleted
     LaunchedEffect(wasDeleted) {
-        if (wasDeleted) mutator.accept(Action.Navigate { currentNav.pop() })
+        if (wasDeleted) mutator.accept(Action.Navigate { mainNav.pop() })
     }
 }

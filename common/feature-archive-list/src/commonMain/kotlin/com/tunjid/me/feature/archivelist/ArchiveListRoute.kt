@@ -103,8 +103,8 @@ private fun ArchiveScreen(
                             onAction = mutator.accept,
                             navigate = { path ->
                                 mutator.accept(Action.Navigate {
-                                    if (state.isInNavRail) currentNav.swap(route = path.toRoute)
-                                    else currentNav.push(route = path.toRoute)
+                                    if (state.isInNavRail) mainNav.swap(route = path.toRoute)
+                                    else mainNav.push(route = path.toRoute)
                                 })
                             }
                         )

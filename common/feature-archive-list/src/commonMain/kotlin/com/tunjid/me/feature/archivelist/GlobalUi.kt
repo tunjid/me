@@ -51,7 +51,7 @@ fun GlobalUi(
             toolbarMenuClickListener = rememberFunction { item ->
                 when (item.id) {
                     SignIn -> onNavigate(Action.Navigate {
-                        currentNav.push("sign-in".toRoute)
+                        mainNav.push("sign-in".toRoute)
                     })
                 }
             },
@@ -62,7 +62,7 @@ fun GlobalUi(
             fabClickListener = rememberFunction {
                 onNavigate(Action.Navigate {
                     val kind = state.queryState.currentQuery.kind
-                    currentNav.push("archives/${kind.type}/create".toRoute)
+                    mainNav.push("archives/${kind.type}/create".toRoute)
                 })
             },
             navVisibility = NavVisibility.Visible,

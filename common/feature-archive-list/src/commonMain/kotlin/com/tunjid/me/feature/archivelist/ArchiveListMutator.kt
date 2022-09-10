@@ -118,7 +118,7 @@ private fun navRailStatusMutations(
             .map(ArchiveKind::type)
             .joinToString(separator = "|")
         val pathMatch = "archive/$kindMatch".toRegex()
-        when (val navRailRoute = it.navRailRoute?.id) {
+        when (val navRailRoute = it.navRail?.id) {
             null -> false
             else -> pathMatch.matches(navRailRoute)
         }

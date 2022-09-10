@@ -78,7 +78,7 @@ private fun SettingsScreen(mutator: SettingsMutator) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        mutator.accept(Action.Navigate { currentNav.push(path.toRoute) })
+                        mutator.accept(Action.Navigate { mainNav.push(path.toRoute) })
                     },
                 content = {
                     Text(

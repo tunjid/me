@@ -99,14 +99,14 @@ internal fun BoxScope.AppToolbar(
 private fun UpButton(
     navMutator: NavMutator,
 ) {
-    val canGoUp by navMutator.state.mappedCollectAsState { it.rootNav.canGoUp }
+    val canGoUp by navMutator.state.mappedCollectAsState { it.mainNav.canGoUp }
 
     AnimatedVisibility(visible = canGoUp) {
         Button(
             modifier = Modifier
                 .wrapContentSize()
                 .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
-            onClick = { navMutator.accept { currentNav.pop() } },
+            onClick = { navMutator.accept { mainNav.pop() } },
             elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
             // Uses ButtonDefaults.ContentPadding by default
             contentPadding = PaddingValues(
@@ -218,7 +218,7 @@ fun Test() {
                 toolbarShows = true
             ).asNoOpStateFlowMutator(),
             navMutator = NavState(
-                rootNav = MultiStackNav(
+                mainNav = MultiStackNav(
                     name = "App",
                     currentIndex = 0,
                     stacks = listOf(
@@ -231,7 +231,7 @@ fun Test() {
                         )
                     )
                 ),
-                navRailRoute = null
+                navRail = null
             ).asNoOpStateFlowMutator(),
         )
     }

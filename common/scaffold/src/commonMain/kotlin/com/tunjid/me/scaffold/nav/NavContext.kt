@@ -20,7 +20,7 @@ import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.RouteParser
 
 interface NavContext {
-    val currentNav: MultiStackNav
+    val mainNav: MultiStackNav
     val String.toRoute: AppRoute
 }
 
@@ -28,7 +28,7 @@ class ImmutableNavContext(
     private val state: MultiStackNav,
     private val routeParser: RouteParser<AppRoute>
 ) : NavContext {
-    override val currentNav: MultiStackNav get() = state
+    override val mainNav: MultiStackNav get() = state
 
     override val String.toRoute: AppRoute
         get() = routeParser.parse(this) ?: Route404

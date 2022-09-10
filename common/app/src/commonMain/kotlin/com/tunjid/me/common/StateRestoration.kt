@@ -37,7 +37,7 @@ class SavedState(
 
 fun AppDependencies.saveState(): SavedState {
     val navState = scaffoldComponent.navStateStream.value
-    val multiStackNav = navState.rootNav
+    val multiStackNav = navState.mainNav
     return SavedState(
         activeNav = multiStackNav.currentIndex,
         navigation = multiStackNav.stacks.fold(listOf()) { listOfLists, stackNav ->

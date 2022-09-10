@@ -59,11 +59,11 @@ data class NavItem(
 )
 
 data class NavState(
-    val rootNav: MultiStackNav,
-    val navRailRoute: AppRoute?
+    val mainNav: MultiStackNav,
+    val navRail: AppRoute?
 )
 
-val NavState.current get() = rootNav.current
+val NavState.current get() = mainNav.current
 
 internal fun navMutator(
     scope: CoroutineScope,
@@ -73,8 +73,8 @@ internal fun navMutator(
     val multiStackNav = routeParser.toMultiStackNav(startNav)
     return scope.actionStateFlowProducer(
         initialState = NavState(
-            rootNav = multiStackNav,
-            navRailRoute = multiStackNav.navRailRoute?.let(routeParser::parse)
+            mainNav = multiStackNav,
+            navRail = multiStackNav.navRailRoute?.let(routeParser::parse)
         ),
         started = SharingStarted.Eagerly,
         actionTransform = { navMutations ->
@@ -82,13 +82,13 @@ internal fun navMutator(
                 mutation {
                     val newMultiStackNav = navMutation(
                         ImmutableNavContext(
-                            state = rootNav,
+                            state = mainNav,
                             routeParser = routeParser
                         )
                     )
                     NavState(
-                        rootNav = newMultiStackNav,
-                        navRailRoute = newMultiStackNav.navRailRoute?.let(routeParser::parse)
+                        mainNav = newMultiStackNav,
+                        navRail = newMultiStackNav.navRailRoute?.let(routeParser::parse)
                     )
                 }
             }

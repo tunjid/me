@@ -55,7 +55,7 @@ internal fun BoxScope.AppBottomNav(
     globalUiMutator: GlobalUiMutator,
     navMutator: NavMutator,
 ) {
-    val nav by navMutator.state.mappedCollectAsState(mapper = NavState::rootNav)
+    val nav by navMutator.state.mappedCollectAsState(mapper = NavState::mainNav)
     val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::bottomNavPositionalState)
 
     val bottomNavPosition by animateDpAsState(
@@ -94,7 +94,7 @@ internal fun BoxScope.AppBottomNav(
                             label = { Text(navItem.name) },
                             selected = navItem.selected,
                             onClick = {
-                                navMutator.accept { currentNav.navItemSelected(item = navItem) }
+                                navMutator.accept { mainNav.navItemSelected(item = navItem) }
                             }
                         )
                     }

@@ -59,7 +59,7 @@ fun AppNavRail(
     val navState by navMutator.state.collectAsState()
     val containerState by globalUiMutator.state.mappedCollectAsState(mapper = UiState::routeContainerState)
 
-    val hasRailRoute by navMutator.state.mappedCollectAsState { it.navRailRoute != null }
+    val hasRailRoute by navMutator.state.mappedCollectAsState { it.navRail != null }
     val navRailVisible by globalUiMutator.state.mappedCollectAsState(mapper = UiState::navRailVisible)
 
     val statusBarSize = with(LocalDensity.current) {
@@ -89,14 +89,14 @@ fun AppNavRail(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
-                navState.rootNav.navItems.forEach { navItem ->
+                navState.mainNav.navItems.forEach { navItem ->
                     NavRailItem(item = navItem, navMutator = navMutator)
                 }
             }
             Box(
                 modifier = Modifier.width(navRailContentWidth)
             ) {
-                val route by navMutator.state.mappedCollectAsState(mapper = NavState::navRailRoute)
+                val route by navMutator.state.mappedCollectAsState(mapper = NavState::navRail)
                 saveableStateHolder.SaveableStateProvider(key = "nav-rail-${route?.id}") {
                     if (navRailVisible) route?.Render()
                 }
@@ -119,7 +119,7 @@ private fun NavRailItem(
             bottom = 16.dp,
         ),
         onClick = {
-            navMutator.accept { currentNav.navItemSelected(item = item) }
+            navMutator.accept { mainNav.navItemSelected(item = item) }
         }
     ) {
         Column(
