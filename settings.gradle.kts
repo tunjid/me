@@ -44,6 +44,7 @@ include(
     ":common:feature-profile",
     ":common:feature-settings",
     ":common:feature-sign-in",
+    ":common:sync",
     ":android",
     ":desktop",
     ":serverEvents"

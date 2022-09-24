@@ -16,10 +16,13 @@
 
 package com.tunjid.me.common.di
 
+import com.tunjid.me.AppDatabase
 import com.tunjid.me.archivedetail.ArchiveDetailFeature
 import com.tunjid.me.archiveedit.ArchiveEditFeature
-import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.sync.ChangeListKey
+import com.tunjid.me.core.sync.Syncable
+import com.tunjid.me.core.sync.changeListKey
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.DelegatingByteSerializer
@@ -42,10 +45,13 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.me.settings.SettingsFeature
 import com.tunjid.me.signin.SignInFeature
+import com.tunjid.me.sync.di.SyncComponent
+import com.tunjid.me.sync.di.SyncModule
 import com.tunjid.mutator.ActionStateProducer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.modules.SerializersModule
@@ -137,6 +143,22 @@ private class AppModule(
         dataModule
     )
 
+    private val syncModule = SyncModule(
+        appScope = appScope,
+        networkMonitor = networkMonitor,
+        database = appDatabase,
+        locator = mapOf(
+            ChangeListKey.User to Syncable { _, _ -> },
+            ChangeListKey.Archive.Articles to dataComponent.archiveRepository,
+            ChangeListKey.Archive.Projects to dataComponent.archiveRepository,
+            ChangeListKey.Archive.Talks to dataComponent.archiveRepository,
+        )
+    )
+
+    private val syncComponent: SyncComponent = SyncComponent(
+        module = syncModule
+    )
+
     override val routeServiceLocator: RouteServiceLocator = RouteMutatorFactory(
         appScope = appScope,
         features = features,
@@ -151,7 +173,8 @@ private class AppModule(
         )
             // This is an Android concern. Remove this when this is firebase powered.
             .monitorWhenActive(scaffoldComponent.lifecycleStateStream)
-            .onEach(dataComponent::sync)
+            .map { it.model.changeListKey() }
+            .onEach(syncComponent::sync)
             .launchIn(appScope)
     }
 }

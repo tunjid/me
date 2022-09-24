@@ -24,17 +24,19 @@ import com.tunjid.me.common.data.ArchiveCategoryEntityQueries
 import com.tunjid.me.common.data.ArchiveEntity
 import com.tunjid.me.common.data.ArchiveEntityQueries
 import com.tunjid.me.common.data.ArchiveTagEntityQueries
-import com.tunjid.me.common.data.UserEntity
 import com.tunjid.me.common.data.UserEntityQueries
 import com.tunjid.me.core.model.*
+import com.tunjid.me.core.sync.ChangeListKey
+import com.tunjid.me.core.sync.SyncRequest
+import com.tunjid.me.core.sync.Syncable
+import com.tunjid.me.core.sync.changeListKey
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.core.utilities.UriConverter
-import com.tunjid.me.data.local.Keys
 import com.tunjid.me.data.local.suspendingTransaction
 import com.tunjid.me.data.local.toUser
 import com.tunjid.me.data.network.NetworkService
-import com.tunjid.me.data.network.exponentialBackoff
 import com.tunjid.me.data.network.models.NetworkArchive
+import com.tunjid.me.data.network.models.NetworkResponse
 import com.tunjid.me.data.network.models.item
 import com.tunjid.me.data.network.models.toResult
 import kotlinx.coroutines.CoroutineDispatcher
@@ -45,7 +47,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.Instant
 
-interface ArchiveRepository {
+interface ArchiveRepository : Syncable {
     suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId>
     suspend fun uploadArchiveHeaderPhoto(
         kind: ArchiveKind,
@@ -70,7 +72,7 @@ internal class ReactiveArchiveRepository(
     private val archiveCategoryQueries: ArchiveCategoryEntityQueries,
     private val archiveAuthorQueries: UserEntityQueries,
     private val dispatcher: CoroutineDispatcher,
-    ) : ArchiveRepository, ChangeListProcessor<Keys.ChangeList.Archive> {
+) : ArchiveRepository {
 
     override suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId> =
         networkService.upsertArchive(kind, upsert)
@@ -103,6 +105,7 @@ internal class ReactiveArchiveRepository(
                 .plus(query.contentFilter.categories.map(Descriptor.Category::value))
                 .distinct()
         )
+
         else -> archiveEntityQueries.find(
             kind = query.kind.type,
             limit = query.limit.toLong(),
@@ -125,33 +128,43 @@ internal class ReactiveArchiveRepository(
         .flatMapLatest { it?.let(::archiveEntityToArchive) ?: flowOf(null) }
         .distinctUntilChanged()
 
-    override suspend fun process(key: Keys.ChangeList.Archive, changeList: List<ChangeListItem>): Boolean {
-        val (deleted, updated) = changeList.partition(ChangeListItem::isDelete)
+    override suspend fun syncWith(
+        request: SyncRequest,
+        onVersionUpdated: suspend (ChangeListItem) -> Unit
+    ) {
 
-        archiveAuthorQueries.suspendingTransaction(context = dispatcher) {
-            deleted
-                .map(ChangeListItem::modelId)
-                .map(::ArchiveId)
-                .map(ArchiveId::value)
-                .forEach(archiveEntityQueries::delete)
+        val changeList = when (val response = networkService.changeList(request)) {
+            is NetworkResponse.Success -> response.item
+            is NetworkResponse.Error -> return
         }
+        // Chew through the change list and process it sequentially
+        changeList.chunked(10)
+            .takeWhile { items ->
+                val (deleted, updated) = items.partition(ChangeListItem::isDelete)
 
-        val archives = exponentialBackoff(
-            initialDelay = 1_000,
-            maxDelay = 20_000,
-            default = null,
-        ) {
-            networkService.fetchArchives(
-                kind = key.kind,
-                ids = updated.map(ChangeListItem::modelId).map(::ArchiveId)
-            ).item()
-        } ?: return false
+                archiveAuthorQueries.suspendingTransaction(context = dispatcher) {
+                    deleted
+                        .map(ChangeListItem::modelId)
+                        .map(::ArchiveId)
+                        .map(ArchiveId::value)
+                        .forEach(archiveEntityQueries::delete)
+                }
 
-        archiveAuthorQueries.suspendingTransaction(context = dispatcher) {
-            archives.forEach(::saveNetworkArchive)
-        }
+                val archives = networkService.fetchArchives(
+                    kind = (request.model.changeListKey() as ChangeListKey.Archive).kind,
+                    ids = updated.map(ChangeListItem::modelId).map(::ArchiveId)
+                ).item()
 
-        return true
+                if (archives != null) {
+                    archiveAuthorQueries.suspendingTransaction(context = dispatcher) {
+                        archives.forEach(::saveNetworkArchive)
+                    }
+                    true
+                } else false
+            }
+            .forEach { items ->
+                onVersionUpdated(items.last())
+            }
     }
 
     private fun archiveEntitiesToArchives(list: List<ArchiveEntity>): Flow<List<Archive>> =

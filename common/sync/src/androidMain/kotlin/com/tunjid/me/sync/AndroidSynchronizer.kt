@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.core.model
+package com.tunjid.me.sync
 
-import kotlinx.serialization.Serializable
+import com.tunjid.me.common.sync.AppDatabase
+import com.tunjid.me.data.network.NetworkMonitor
+import com.tunjid.me.sync.di.SyncableLocator
+import kotlinx.coroutines.CoroutineScope
 
-@Serializable
-data class ChangeListItem(
-    val id: String,
-    val changeId: ChangeListId,
-    val changeType: String,
-    val modelId: String,
-    val model: String,
+actual fun synchronizer(
+    appScope: CoroutineScope,
+    database: AppDatabase,
+    locator: SyncableLocator,
+    networkMonitor: NetworkMonitor,
+): Synchronizer = commonSynchronizer(
+    appScope = appScope,
+    database = database,
+    locator = locator,
+    networkMonitor = networkMonitor
 )
-
-fun ChangeListItem.isDelete() = changeType == "delete"

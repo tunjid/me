@@ -23,38 +23,4 @@ import com.tunjid.me.core.model.ArchiveKind
  */
 internal sealed class Keys(val key: String) {
     object SessionCookieId : Keys(key = "session-cookie")
-
-    sealed class ChangeList(
-        key: String, val path: String
-    ) : Keys(key = key) {
-
-        sealed class Archive(
-            key: String,
-            path: String,
-            val kind: ArchiveKind,
-        ) : ChangeList(key = key, path = path) {
-            object Articles : Archive(
-                key = "articles-change-list",
-                path = "articles",
-                kind = ArchiveKind.Articles,
-            )
-
-            object Projects : Archive(
-                key = "projects-change-list",
-                path = "projects",
-                kind = ArchiveKind.Projects,
-            )
-
-            object Talks : Archive(
-                key = "talks-change-list",
-                path = "talks",
-                kind = ArchiveKind.Talks,
-            )
-        }
-
-        object User : ChangeList(
-            key = "users-change-list",
-            path = "users",
-        )
-    }
 }

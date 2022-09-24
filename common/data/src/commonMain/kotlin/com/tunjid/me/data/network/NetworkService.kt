@@ -18,9 +18,9 @@ package com.tunjid.me.data.network
 
 import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.core.model.*
+import com.tunjid.me.core.sync.SyncRequest
 import com.tunjid.me.data.network.models.NetworkArchive
 import com.tunjid.me.data.network.models.NetworkUser
-import com.tunjid.me.data.local.Keys
 import com.tunjid.me.data.network.models.NetworkResponse
 import com.tunjid.me.data.network.models.UpsertResponse
 import io.ktor.client.*
@@ -76,8 +76,7 @@ internal interface NetworkService {
     suspend fun session(): NetworkResponse<NetworkUser>
 
     suspend fun changeList(
-        key: Keys.ChangeList,
-        id: ChangeListId? = null
+        request: SyncRequest
     ): NetworkResponse<List<ChangeListItem>>
 }
 
@@ -200,10 +199,12 @@ internal class KtorNetworkService(
     }
 
     override suspend fun changeList(
-        key: Keys.ChangeList, id: ChangeListId?
+        request: SyncRequest
     ): NetworkResponse<List<ChangeListItem>> = json.parseServerErrors {
-        client.get("$baseUrl/api/${key.path}/changelist") {
-            if (id != null) parameter("after", id.value)
+        client.get("$baseUrl/api/${request.model}/changelist") {
+            request.after?.let { changeListItem ->
+                parameter("after", changeListItem.changeId.value)
+            }
         }.body()
     }
 }

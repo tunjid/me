@@ -13,6 +13,7 @@ androidxComposeCompiler = "1.3.1"
 androidxEspresso = "3.3.0"
 androidxTest = "1.4.0"
 androidxTestExt = "1.1.2"
+androidxWork = "2.7.1"
 googleMaterial = "1.7.0-beta01"
 gradleKotlinDsl = "3.1.0"
 jakeWhartonRetrofit = "0.8.0"
@@ -60,6 +61,7 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "androidxCompose" }
 androidx-compose-ui-util = { group = "androidx.compose.ui", name = "ui-util", version.ref = "androidxCompose" }
 androidx-lifecycle-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
+androidx-work-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidxWork" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
 gradle-kotlinDslPlugin = { group = "org.gradle.kotlin", name = "gradle-kotlin-dsl-plugins", version.ref = "gradleKotlinDsl" }
 jakewharton-retrofit-serializationconverter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "jakeWhartonRetrofit" }

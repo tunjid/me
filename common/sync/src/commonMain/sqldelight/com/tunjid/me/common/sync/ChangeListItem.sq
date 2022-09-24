@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS changeListItem (
+    model TEXT PRIMARY KEY,
+    id TEXT NOT NULL,
+    changeId TEXT NOT NULL,
+    changeType TEXT NOT NULL,
+    modelId TEXT NOT NULL
+);
+
+get:
+SELECT *
+FROM changeListItem
+WHERE model = :model;
+
+upsert:
+INSERT INTO changeListItem (model, id, changeId, changeType, modelId)
+VALUES (:model, :id, :changeId, :changeType, :modelId)
+ON CONFLICT(model) DO UPDATE SET
+    id = excluded.id,
+    changeId = excluded.changeId,
+    changeType=excluded.changeType,
+    modelId=excluded.modelId;
