@@ -16,7 +16,7 @@ androidxTestExt = "1.1.2"
 googleMaterial = "1.7.0-beta01"
 gradleKotlinDsl = "3.1.0"
 jakeWhartonRetrofit = "0.8.0"
-jetbrainsCompose = "1.2.0-alpha01-dev774"
+jetbrainsCompose = "1.2.0-beta01"
 junit4 = "4.13.2"
 kotlin = "1.7.10"
 kotlinxCoroutines = "1.6.3"
@@ -49,6 +49,7 @@ androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espres
 coil-core = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 androidx-compose-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "androidxCompose" }
+androidx-compose-foundation-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "androidxCompose" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "androidxCompose" }
 androidx-compose-material = { group = "androidx.compose.material", name = "material", version.ref = "androidxCompose" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "androidxCompose" }
@@ -63,6 +64,7 @@ google-material = { group = "com.google.android.material", name = "material", ve
 gradle-kotlinDslPlugin = { group = "org.gradle.kotlin", name = "gradle-kotlin-dsl-plugins", version.ref = "gradleKotlinDsl" }
 jakewharton-retrofit-serializationconverter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "jakeWhartonRetrofit" }
 jetbrains-compose-animation = { group = "org.jetbrains.compose.animation", name = "animation", version.ref = "jetbrainsCompose" }
+jetbrains-compose-foundation-foundation = { group = "org.jetbrains.compose.foundation", name = "foundation", version.ref = "jetbrainsCompose" }
 jetbrains-compose-foundation-layout = { group = "org.jetbrains.compose.foundation", name = "foundation-layout", version.ref = "jetbrainsCompose" }
 jetbrains-compose-material = { group = "org.jetbrains.compose.material", name = "material", version.ref = "jetbrainsCompose" }
 jetbrains-compose-gradlePlugin = { group = "org.jetbrains.compose", name = "compose-gradle-plugin", version.ref = "jetbrainsCompose" }
