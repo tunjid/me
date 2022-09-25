@@ -41,6 +41,7 @@ import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.RemoteImagePainter
+import com.tunjid.me.core.ui.Thumbnail
 import kotlinx.datetime.Clock.System
 
 @Composable
@@ -80,7 +81,12 @@ fun ArchiveCard(
         },
         content = {
             Column {
-                ArchiveThumbnail(archiveItem.archive.thumbnail)
+                Thumbnail(
+                    imageUrl = archiveItem.archive.thumbnail,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                )
                 Spacer(Modifier.height(8.dp))
                 ArchiveCategories(
                     categories = archiveItem.archive.categories,
@@ -108,22 +114,6 @@ fun ArchiveCard(
             }
         }
     )
-}
-
-@Composable
-private fun ArchiveThumbnail(imageUrl: String?) {
-    val modifier = Modifier
-        .fillMaxWidth()
-        .height(200.dp)
-    val painter = RemoteImagePainter(imageUrl)
-
-    if (painter != null) Image(
-        painter = painter,
-        contentScale = ContentScale.Crop,
-        contentDescription = null,
-        modifier = modifier
-    )
-    else Box(modifier = modifier)
 }
 
 @Composable

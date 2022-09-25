@@ -17,7 +17,6 @@
 package com.tunjid.me.archiveedit
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -38,7 +37,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -48,7 +46,7 @@ import com.halilibo.richtext.ui.material.MaterialRichText
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveUpsert
-import com.tunjid.me.core.ui.RemoteImagePainter
+import com.tunjid.me.core.ui.Thumbnail
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.nav.AppRoute
@@ -102,7 +100,7 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
             ),
     ) {
         Spacer(modifier = Modifier.padding(8.dp))
-        Thumbnail(
+        DragDropThumbnail(
             thumbnail = state.thumbnail,
             hasStoragePermission = state.hasStoragePermissions,
             dragStatus = state.dragStatus,
@@ -145,7 +143,7 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
 }
 
 @Composable
-private fun Thumbnail(
+private fun DragDropThumbnail(
     thumbnail: String?,
     hasStoragePermission: Boolean,
     dragStatus: DragStatus,
@@ -155,7 +153,6 @@ private fun Thumbnail(
     val permissionState = remember { mutableStateOf(hasStoragePermission) }
     permissionState.value = hasStoragePermission
 
-    val painter = RemoteImagePainter(thumbnail)
     val borderColor by animateColorAsState(
         when (dragStatus) {
             DragStatus.InWindow -> Color.Red
@@ -163,10 +160,8 @@ private fun Thumbnail(
             DragStatus.None -> Color.Transparent
         }
     )
-    if (painter != null) Image(
-        painter = painter,
-        contentScale = ContentScale.Crop,
-        contentDescription = null,
+    Thumbnail(
+        imageUrl = thumbnail,
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
@@ -185,7 +180,7 @@ private fun Thumbnail(
                     true
                 },
                 onDragEnded = { onAction(Action.Drag.Thumbnail(inside = false)) },
-            ),
+            )
     )
 }
 
