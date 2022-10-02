@@ -20,22 +20,18 @@ import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.KtorNetworkService
-import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.data.repository.ReactiveArchiveRepository
 import com.tunjid.me.data.repository.SessionCookieAuthRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
 
 class DataModule(
-    appScope: CoroutineScope,
     database: AppDatabase,
-    uriConverter: UriConverter,
-    internal val networkMonitor: NetworkMonitor
+    uriConverter: UriConverter
 ) {
-    internal val json = Json {
+    private val json = Json {
         explicitNulls = false
         ignoreUnknownKeys = true
     }

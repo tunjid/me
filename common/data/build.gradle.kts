@@ -18,7 +18,7 @@ plugins {
     `android-library-convention`
     `kotlin-library-convention`
     kotlin("plugin.serialization")
-    id("com.squareup.sqldelight")
+    id("app.cash.sqldelight")
 }
 
 kotlin {
@@ -77,7 +77,7 @@ kotlin {
 
 sqldelight {
     database("AppDatabase") {
-        dialect = "sqlite:3.25"
+        dialect = libs.square.sqldelight.dialect.get().toString()
         packageName = "com.tunjid.me.common.data"
         schemaOutputDirectory = file("build/dbs")
     }

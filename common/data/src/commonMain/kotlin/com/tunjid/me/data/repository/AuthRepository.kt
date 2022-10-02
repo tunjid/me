@@ -16,9 +16,9 @@
 
 package com.tunjid.me.data.repository
 
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.common.data.UserEntityQueries
 import com.tunjid.me.core.model.Result

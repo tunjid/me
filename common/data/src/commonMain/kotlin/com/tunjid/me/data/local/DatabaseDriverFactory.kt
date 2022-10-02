@@ -16,7 +16,7 @@
 
 package com.tunjid.me.data.local
 
-import com.squareup.sqldelight.db.SqlDriver
+import app.cash.sqldelight.db.SqlDriver
 import kotlinx.coroutines.CoroutineDispatcher
 
 expect class DatabaseDriverFactory {

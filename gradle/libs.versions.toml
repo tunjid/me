@@ -29,7 +29,7 @@ okhttp = "4.10.0"
 retrofit = "2.9.0"
 richtext = "0.13.0"
 socketio = "2.0.0"
-sqldelight = "1.5.3"
+sqldelight = "2.0.0-alpha02"
 tunjidMutator = "0.0.7"
 tunjidTiler = "0.0.3"
 tunjidTreeNav = "0.0.3"
@@ -103,10 +103,11 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 richtext-commonmark = { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "richtext" }
 richtext-material = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material", version.ref = "richtext" }
-square-sqldelight-driver-android = { group = "com.squareup.sqldelight", name = "android-driver", version.ref = "sqldelight" }
-square-sqldelight-driver-jvm = { group = "com.squareup.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
-square-sqldelight-coroutines-extensions = { group = "com.squareup.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
-square-sqldelight-gradlePlugin = { group = "com.squareup.sqldelight", name = "gradle-plugin", version.ref = "sqldelight" }
+square-sqldelight-dialect = { group = "app.cash.sqldelight", name = "sqlite-3-25-dialect", version.ref = "sqldelight" }
+square-sqldelight-driver-android = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
+square-sqldelight-driver-jvm = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
+square-sqldelight-coroutines-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
+square-sqldelight-gradlePlugin = { group = "app.cash.sqldelight", name = "gradle-plugin", version.ref = "sqldelight" }
 socketio-client-jvm = { group = "io.socket", name = "socket.io-client", version.ref = "socketio" }
 tunjid-mutator-core-common = { group = "com.tunjid.mutator", name = "core", version.ref = "tunjidMutator" }
 tunjid-mutator-core-jvm = { group = "com.tunjid.mutator", name = "core-jvm", version.ref = "tunjidMutator" }

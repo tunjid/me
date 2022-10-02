@@ -16,10 +16,10 @@
 
 package com.tunjid.me.data.repository
 
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOne
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
+import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.tunjid.me.common.data.ArchiveCategoryEntityQueries
 import com.tunjid.me.common.data.ArchiveEntity
 import com.tunjid.me.common.data.ArchiveEntityQueries

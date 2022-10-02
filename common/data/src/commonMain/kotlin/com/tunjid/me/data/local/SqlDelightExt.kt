@@ -16,8 +16,8 @@
 
 package com.tunjid.me.data.local
 
-import com.squareup.sqldelight.Transacter
-import com.squareup.sqldelight.TransactionWithoutReturn
+import app.cash.sqldelight.Transacter
+import app.cash.sqldelight.TransactionWithoutReturn
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
