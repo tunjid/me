@@ -57,7 +57,9 @@ internal class RouteMutatorFactory(
     @Suppress("UNCHECKED_CAST")
     override fun <T> locate(route: AppRoute): T =
         routeMutatorCache.getOrPut(route) {
-            val routeScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+            val routeScope = CoroutineScope(
+                SupervisorJob() + Dispatchers.Main.immediate
+            )
             ScopeHolder(
                 scope = routeScope,
                 mutator = features.find(route)
