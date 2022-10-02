@@ -25,6 +25,7 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import com.tunjid.me.common.data.ArchiveEntity
+import com.tunjid.me.common.data.UserEntity
 
 @Serializable
 class NetworkArchive(
@@ -57,4 +58,11 @@ fun NetworkArchive.toEntity() = ArchiveEntity(
     kind = kind.type,
     link = link,
     likes = likes,
+)
+
+fun NetworkArchive.authorShell() = UserEntity(
+    id = author.value,   first_name = "",
+    last_name = "",
+    full_name = "",
+    image_url = "",
 )

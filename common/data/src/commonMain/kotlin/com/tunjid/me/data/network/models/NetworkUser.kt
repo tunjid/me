@@ -16,6 +16,7 @@
 
 package com.tunjid.me.data.network.models
 
+import com.tunjid.me.common.data.UserEntity
 import com.tunjid.me.core.model.UserId
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -28,4 +29,12 @@ class NetworkUser(
     val lastName: String,
     val fullName: String,
     val imageUrl: String,
+)
+
+fun NetworkUser.toEntity() = UserEntity(
+    id = id.value,
+    first_name = firstName,
+    last_name = lastName,
+    full_name = fullName,
+    image_url = imageUrl,
 )

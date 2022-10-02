@@ -23,7 +23,7 @@ import com.tunjid.me.data.network.KtorNetworkService
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
-import com.tunjid.me.data.repository.ReactiveArchiveRepository
+import com.tunjid.me.data.repository.OfflineFirstArchiveRepository
 import com.tunjid.me.data.repository.SessionCookieAuthRepository
 import kotlinx.serialization.json.Json
 
@@ -42,7 +42,7 @@ class DataModule(
         dispatcher = databaseDispatcher(),
     )
 
-    internal val archiveRepository = ReactiveArchiveRepository(
+    internal val archiveRepository = OfflineFirstArchiveRepository(
         uriConverter = uriConverter,
         networkService = networkService,
         archiveEntityQueries = database.archiveEntityQueries,

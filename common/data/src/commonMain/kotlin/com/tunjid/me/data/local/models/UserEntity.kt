@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.data.local
+package com.tunjid.me.data.local.models
 
 import com.tunjid.me.common.data.UserEntity
 import com.tunjid.me.core.model.User
 import com.tunjid.me.core.model.UserId
 
-internal val UserEntity.toUser
-    get() = User(
-        id = UserId(id),
-        firstName = first_name,
-        lastName = last_name,
-        fullName = full_name,
-        imageUrl = image_url,
-    )
+internal fun UserEntity.toExternalModel() = User(
+    id = UserId(id),
+    firstName = first_name,
+    lastName = last_name,
+    fullName = full_name,
+    imageUrl = image_url,
+)

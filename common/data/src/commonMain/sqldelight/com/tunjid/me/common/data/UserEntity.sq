@@ -12,12 +12,12 @@ FROM userEntity
 WHERE id = :id;
 
 insertOrIgnore:
-INSERT OR IGNORE INTO userEntity (id, first_name, last_name, full_name, image_url)
-VALUES (:id, :first_name, :last_name, :full_name, :image_url);
+INSERT OR IGNORE INTO userEntity
+VALUES ?;
 
 upsert:
-INSERT INTO userEntity (id, first_name, last_name, full_name, image_url)
-VALUES (:id, :first_name, :last_name, :full_name, :image_url)
+INSERT INTO userEntity
+VALUES ?
 ON CONFLICT(id) DO UPDATE SET
     first_name=excluded.first_name,
     last_name=excluded.last_name,

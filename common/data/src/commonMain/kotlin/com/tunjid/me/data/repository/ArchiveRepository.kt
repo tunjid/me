@@ -32,11 +32,12 @@ import com.tunjid.me.core.sync.Syncable
 import com.tunjid.me.core.sync.changeListKey
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.core.utilities.UriConverter
+import com.tunjid.me.data.local.models.toExternalModel
 import com.tunjid.me.data.local.suspendingTransaction
-import com.tunjid.me.data.local.toUser
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.models.NetworkArchive
 import com.tunjid.me.data.network.models.NetworkResponse
+import com.tunjid.me.data.network.models.authorShell
 import com.tunjid.me.data.network.models.item
 import com.tunjid.me.data.network.models.toEntity
 import com.tunjid.me.data.network.models.toResult
@@ -46,7 +47,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.datetime.Instant
 
 interface ArchiveRepository : Syncable {
     suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId>
@@ -65,7 +65,7 @@ interface ArchiveRepository : Syncable {
  * is to have a pub sub infrastructure such that when an entity changes on the server, the
  * app is notified, and pulls it in.
  */
-internal class ReactiveArchiveRepository(
+internal class OfflineFirstArchiveRepository(
     private val networkService: NetworkService,
     private val uriConverter: UriConverter,
     private val archiveEntityQueries: ArchiveEntityQueries,
@@ -186,32 +186,15 @@ internal class ReactiveArchiveRepository(
                 .asFlow()
                 .mapToOne(context = this.dispatcher),
         ) { tags, categories, author ->
-            Archive(
-                id = ArchiveId(archiveEntity.id),
-                link = archiveEntity.link,
-                title = archiveEntity.title,
-                description = archiveEntity.description,
-                thumbnail = archiveEntity.thumbnail,
-                videoUrl = archiveEntity.videoUrl,
-                likes = archiveEntity.likes,
-                kind = ArchiveKind.values()
-                    .first { it.type == archiveEntity.kind },
-                created = Instant.fromEpochMilliseconds(archiveEntity.created),
-                body = archiveEntity.body,
-                author = author.toUser,
-                tags = tags.map(Descriptor::Tag),
-                categories = categories.map(Descriptor::Category),
+            archiveEntity.toExternalModel(
+                author = author,
+                tags = tags,
+                categories = categories
             )
         }
 
     private fun saveNetworkArchive(networkArchive: NetworkArchive) {
-        archiveAuthorQueries.insertOrIgnore(
-            id = networkArchive.author.value,
-            first_name = "",
-            last_name = "",
-            full_name = "",
-            image_url = "",
-        )
+        archiveAuthorQueries.insertOrIgnore(networkArchive.authorShell())
         archiveEntityQueries.upsert(networkArchive.toEntity())
 
         archiveTagQueries.delete(networkArchive.id.value)

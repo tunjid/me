@@ -26,13 +26,15 @@ import com.tunjid.me.core.model.SessionRequest
 import com.tunjid.me.core.model.User
 import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.model.map
-import com.tunjid.me.data.local.toUser
+import com.tunjid.me.data.local.models.toExternalModel
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.models.NetworkUser
 import com.tunjid.me.data.network.models.item
+import com.tunjid.me.data.network.models.toEntity
 import com.tunjid.me.data.network.models.toResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -55,12 +57,13 @@ internal class SessionCookieAuthRepository(
             .asFlow()
             .mapToList(context = dispatcher)
             .map { networkService.session().item() }
+            .distinctUntilChanged()
             .flatMapLatest { networkUser ->
                 if (networkUser == null) flowOf(null)
                 else userEntityQueries.find(networkUser.id.value)
                     .asFlow()
                     .mapToOneOrNull(context = dispatcher)
-                    .map { it?.toUser }
+                    .map { it?.toExternalModel() }
             }
 
     override val isSignedIn: Flow<Boolean> =
@@ -69,15 +72,10 @@ internal class SessionCookieAuthRepository(
     override suspend fun createSession(request: SessionRequest): Result<UserId> =
         networkService.signIn(request)
             .toResult()
-            .also {
-                if (it is Result.Success)
-                    userEntityQueries.upsert(
-                        id = it.item.id.value,
-                        first_name = it.item.firstName,
-                        last_name = it.item.lastName,
-                        full_name = it.item.fullName,
-                        image_url = it.item.imageUrl,
-                    )
+            .also { networkUserResult ->
+                if (networkUserResult is Result.Success) userEntityQueries.upsert(
+                    networkUserResult.item.toEntity()
+                )
             }
             .map(NetworkUser::id)
 }
