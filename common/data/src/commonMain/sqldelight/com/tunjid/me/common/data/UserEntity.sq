@@ -11,6 +11,10 @@ SELECT *
 FROM userEntity
 WHERE id = :id;
 
+insertOrIgnore:
+INSERT OR IGNORE INTO userEntity (id, first_name, last_name, full_name, image_url)
+VALUES (:id, :first_name, :last_name, :full_name, :image_url);
+
 upsert:
 INSERT INTO userEntity (id, first_name, last_name, full_name, image_url)
 VALUES (:id, :first_name, :last_name, :full_name, :image_url)

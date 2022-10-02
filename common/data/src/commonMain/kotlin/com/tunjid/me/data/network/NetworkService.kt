@@ -16,9 +16,11 @@
 
 package com.tunjid.me.data.network
 
+import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.core.model.*
+import com.tunjid.me.data.network.models.NetworkArchive
+import com.tunjid.me.data.network.models.NetworkUser
 import com.tunjid.me.data.local.Keys
-import com.tunjid.me.data.local.SessionCookieDao
 import com.tunjid.me.data.network.models.NetworkResponse
 import com.tunjid.me.data.network.models.UpsertResponse
 import io.ktor.client.*
@@ -34,6 +36,7 @@ import io.ktor.client.utils.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -46,12 +49,12 @@ internal interface NetworkService {
         ids: List<ArchiveId>? = null,
         tags: List<Descriptor.Tag> = listOf(),
         categories: List<Descriptor.Category> = listOf(),
-    ): NetworkResponse<List<Archive>>
+    ): NetworkResponse<List<NetworkArchive>>
 
     suspend fun fetchArchive(
         kind: ArchiveKind,
         id: ArchiveId,
-    ): NetworkResponse<Archive>
+    ): NetworkResponse<NetworkArchive>
 
     suspend fun upsertArchive(
         kind: ArchiveKind,
@@ -64,13 +67,13 @@ internal interface NetworkService {
         name: String,
         mime: String,
         photo: Input,
-    ): NetworkResponse<Archive>
+    ): NetworkResponse<NetworkArchive>
 
     suspend fun signIn(
         sessionRequest: SessionRequest
-    ): NetworkResponse<User>
+    ): NetworkResponse<NetworkUser>
 
-    suspend fun session(): NetworkResponse<User>
+    suspend fun session(): NetworkResponse<NetworkUser>
 
     suspend fun changeList(
         key: Keys.ChangeList,
@@ -81,7 +84,8 @@ internal interface NetworkService {
 internal class KtorNetworkService(
     private val json: Json,
     private val baseUrl: String = ApiUrl,
-    sessionCookieDao: SessionCookieDao,
+    sessionEntityQueries: SessionEntityQueries,
+    dispatcher: CoroutineDispatcher,
 ) : NetworkService {
 
     private val client = HttpClient {
@@ -93,10 +97,13 @@ internal class KtorNetworkService(
             )
         }
         install(HttpCookies) {
-            storage = SessionCookiesStorage(sessionCookieDao)
+            storage = SessionCookiesStorage(
+                sessionEntityQueries = sessionEntityQueries,
+                dispatcher = dispatcher
+            )
         }
         install(SessionCookieInvalidator) {
-            this.sessionCookieDao = sessionCookieDao
+            this.sessionEntityQueries = sessionEntityQueries
             this.networkErrorConverter = { json.decodeFromString(it) }
         }
         install(Logging) {
@@ -115,7 +122,7 @@ internal class KtorNetworkService(
         ids: List<ArchiveId>?,
         tags: List<Descriptor.Tag>,
         categories: List<Descriptor.Category>,
-    ): NetworkResponse<List<Archive>> = json.parseServerErrors {
+    ): NetworkResponse<List<NetworkArchive>> = json.parseServerErrors {
         client.get("$baseUrl/api/${kind.type}") {
             options.forEach { (key, value) -> parameter(key, value) }
             ids?.map(ArchiveId::value)?.forEach {
@@ -133,7 +140,7 @@ internal class KtorNetworkService(
     override suspend fun fetchArchive(
         kind: ArchiveKind,
         id: ArchiveId,
-    ): NetworkResponse<Archive> = json.parseServerErrors {
+    ): NetworkResponse<NetworkArchive> = json.parseServerErrors {
         client.get("$baseUrl/api/${kind.type}/${id.value}").body()
     }
 
@@ -158,7 +165,7 @@ internal class KtorNetworkService(
         name: String,
         mime: String,
         photo: Input
-    ): NetworkResponse<Archive> = json.parseServerErrors {
+    ): NetworkResponse<NetworkArchive> = json.parseServerErrors {
         client.submitFormWithBinaryData(
             url = "$baseUrl/api/${kind.type}/${id.value}",
             formData = formData {
@@ -181,14 +188,14 @@ internal class KtorNetworkService(
 
     override suspend fun signIn(
         sessionRequest: SessionRequest
-    ): NetworkResponse<User> = json.parseServerErrors {
+    ): NetworkResponse<NetworkUser> = json.parseServerErrors {
         client.post("$baseUrl/api/sign-in") {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             setBody(sessionRequest)
         }.body()
     }
 
-    override suspend fun session(): NetworkResponse<User> = json.parseServerErrors {
+    override suspend fun session(): NetworkResponse<NetworkUser> = json.parseServerErrors {
         client.get("$baseUrl/api/session").body()
     }
 

@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS sessionEntity (
+    id TEXT PRIMARY KEY,
+    cookie TEXT
+);
+
+cookie:
+SELECT cookie
+FROM sessionEntity
+WHERE id = "current";
+
+updateCookie:
+INSERT INTO sessionEntity
+VALUES ("current", :cookie)
+ON CONFLICT(id) DO UPDATE SET
+    cookie=excluded.cookie;

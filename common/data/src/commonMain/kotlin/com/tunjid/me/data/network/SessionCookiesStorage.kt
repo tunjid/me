@@ -16,27 +16,34 @@
 
 package com.tunjid.me.data.network
 
-import com.tunjid.me.data.local.SessionCookieDao
+import com.tunjid.me.common.data.SessionEntityQueries
 import io.ktor.client.plugins.cookies.*
 import io.ktor.http.*
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 
 private const val SessionCookieName = "linesman.id"
 
 internal class SessionCookiesStorage(
-    private val sessionCookieDao: SessionCookieDao
+    private val sessionEntityQueries: SessionEntityQueries,
+    private val dispatcher: CoroutineDispatcher,
 ) : CookiesStorage {
 
-    override suspend fun get(requestUrl: Url): List<Cookie> = listOfNotNull(
-        sessionCookieDao.sessionCookieStream
-            .firstOrNull()
-            ?.let(::parseServerSetCookieHeader)
-    )
+    override suspend fun get(
+        requestUrl: Url
+    ): List<Cookie> = withContext(dispatcher) {
+        listOfNotNull(
+            sessionEntityQueries.cookie()
+                .executeAsOneOrNull()
+                ?.cookie
+                ?.let(::parseServerSetCookieHeader)
+        )
+    }
 
     override suspend fun addCookie(requestUrl: Url, cookie: Cookie) {
-        if (cookie.name == SessionCookieName) sessionCookieDao.saveSessionCookie(
-            sessionCookie = renderSetCookieHeader(cookie)
+        if (cookie.name == SessionCookieName) sessionEntityQueries.updateCookie(
+            cookie = renderSetCookieHeader(cookie)
         )
 
         println("Session cookie: $cookie")

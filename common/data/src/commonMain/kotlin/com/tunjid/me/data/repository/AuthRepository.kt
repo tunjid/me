@@ -16,18 +16,25 @@
 
 package com.tunjid.me.data.repository
 
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import com.tunjid.me.common.data.SessionEntityQueries
+import com.tunjid.me.common.data.UserEntityQueries
 import com.tunjid.me.core.model.Result
 import com.tunjid.me.core.model.SessionRequest
 import com.tunjid.me.core.model.User
 import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.model.map
-import com.tunjid.me.data.local.SessionCookieDao
+import com.tunjid.me.data.local.toUser
 import com.tunjid.me.data.network.NetworkService
-import com.tunjid.me.data.network.exponentialBackoff
+import com.tunjid.me.data.network.models.NetworkUser
 import com.tunjid.me.data.network.models.item
 import com.tunjid.me.data.network.models.toResult
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 interface AuthRepository {
@@ -38,24 +45,39 @@ interface AuthRepository {
 
 internal class SessionCookieAuthRepository(
     private val networkService: NetworkService,
-    dao: SessionCookieDao
+    private val userEntityQueries: UserEntityQueries,
+    sessionEntityQueries: SessionEntityQueries,
+    dispatcher: CoroutineDispatcher,
 ) : AuthRepository {
 
-    override val isSignedIn: Flow<Boolean> =
-        dao.sessionCookieStream.map { it != null }
-            .distinctUntilChanged()
-
     override val signedInUserStream: Flow<User?> =
-        isSignedIn.map {
-            if (it) exponentialBackoff(
-                default = null,
-                block = { networkService.session().item() }
-            )
-            else null
-        }
+        sessionEntityQueries.cookie()
+            .asFlow()
+            .mapToList(context = dispatcher)
+            .map { networkService.session().item() }
+            .flatMapLatest { networkUser ->
+                if (networkUser == null) flowOf(null)
+                else userEntityQueries.find(networkUser.id.value)
+                    .asFlow()
+                    .mapToOneOrNull(context = dispatcher)
+                    .map { it?.toUser }
+            }
+
+    override val isSignedIn: Flow<Boolean> =
+        signedInUserStream.map { it != null }
 
     override suspend fun createSession(request: SessionRequest): Result<UserId> =
         networkService.signIn(request)
             .toResult()
-            .map(User::id)
+            .also {
+                if (it is Result.Success)
+                    userEntityQueries.upsert(
+                        id = it.item.id.value,
+                        first_name = it.item.firstName,
+                        last_name = it.item.lastName,
+                        full_name = it.item.fullName,
+                        image_url = it.item.imageUrl,
+                    )
+            }
+            .map(NetworkUser::id)
 }

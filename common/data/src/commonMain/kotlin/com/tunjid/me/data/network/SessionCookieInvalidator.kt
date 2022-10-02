@@ -16,7 +16,7 @@
 
 package com.tunjid.me.data.network
 
-import com.tunjid.me.data.local.SessionCookieDao
+import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.data.network.models.NetworkErrorCodes
 import com.tunjid.me.data.network.models.NetworkResponse
 import io.ktor.client.*
@@ -28,7 +28,7 @@ import io.ktor.util.*
 
 class ErrorInterceptorConfig {
     internal var networkErrorConverter: ((String) -> NetworkResponse.Error<Any>)? = null
-    internal var sessionCookieDao: SessionCookieDao? = null
+    internal var sessionEntityQueries: SessionEntityQueries? = null
 }
 
 /**
@@ -36,7 +36,7 @@ class ErrorInterceptorConfig {
  */
 internal class SessionCookieInvalidator(
     private val networkErrorConverter: ((String) -> NetworkResponse.Error<Any>)?,
-    private val sessionCookieDao: SessionCookieDao?
+    private val sessionEntityQueries: SessionEntityQueries?
 ) {
 
     companion object : HttpClientPlugin<ErrorInterceptorConfig, SessionCookieInvalidator> {
@@ -47,14 +47,14 @@ internal class SessionCookieInvalidator(
             val config = ErrorInterceptorConfig().apply(block)
             return SessionCookieInvalidator(
                 networkErrorConverter = config.networkErrorConverter,
-                sessionCookieDao = config.sessionCookieDao
+                sessionEntityQueries = config.sessionEntityQueries
             )
         }
 
         override fun install(feature: SessionCookieInvalidator, scope: HttpClient) {
             val observer: ResponseHandler = responseHandler@{ response ->
                 val converter = feature.networkErrorConverter ?: return@responseHandler
-                val sessionCookieDao = feature.sessionCookieDao ?: return@responseHandler
+                val sessionEntityQueries = feature.sessionEntityQueries ?: return@responseHandler
 
                 if (!response.status.isSuccess())
                     try {
@@ -62,7 +62,7 @@ internal class SessionCookieInvalidator(
                         val error = converter(responseText)
 
                         if (error.errorCode == NetworkErrorCodes.NotLoggedIn) {
-                            sessionCookieDao.saveSessionCookie(sessionCookie = null)
+                            sessionEntityQueries.updateCookie(cookie = null)
                         }
                     } catch (_: Throwable) {
                     }

@@ -25,6 +25,24 @@ ORDER BY created DESC
 LIMIT :limit
 OFFSET :offset;
 
+findBy:
+SELECT *
+FROM archiveEntity
+WHERE id IN (
+    SELECT DISTINCT archiveEntity.id
+    FROM archiveEntity AS innerArchiveEntity
+    INNER JOIN archiveTag
+    ON innerArchiveEntity.id = archiveTag.archive_id
+    INNER JOIN archiveCategory
+    ON innerArchiveEntity.id = archiveCategory.archive_id
+    WHERE kind = :kind
+    AND (archiveTag.tag IN :tagsOrCategories OR archiveCategory.category IN :tagsOrCategories)
+    ORDER BY created DESC
+    LIMIT :limit
+    OFFSET :offset
+);
+
+
 idsForQuery:
 SELECT DISTINCT archiveEntity.id
 FROM archiveEntity

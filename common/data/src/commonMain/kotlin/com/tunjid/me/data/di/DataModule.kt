@@ -21,10 +21,7 @@ import com.tunjid.me.core.model.ChangeListItem
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.local.ChangeListDao
 import com.tunjid.me.data.local.Keys
-import com.tunjid.me.data.local.SessionCookieDao
-import com.tunjid.me.data.local.SqlArchiveDao
 import com.tunjid.me.data.local.SqlChangeListDao
-import com.tunjid.me.data.local.SqlSessionCookieDao
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.KtorNetworkService
 import com.tunjid.me.data.network.NetworkMonitor
@@ -48,35 +45,32 @@ class DataModule(
         ignoreUnknownKeys = true
     }
 
-    private val archiveDao = SqlArchiveDao(
-        database = database,
-        dispatcher = databaseDispatcher(),
-    )
-
     private val changeListDao: ChangeListDao = SqlChangeListDao(
-        database = database,
-        dispatcher = databaseDispatcher(),
-    )
-
-    private val sessionCookieDao: SessionCookieDao = SqlSessionCookieDao(
         database = database,
         dispatcher = databaseDispatcher(),
     )
 
     private val networkService: NetworkService = KtorNetworkService(
         json = json,
-        sessionCookieDao = sessionCookieDao
+        sessionEntityQueries = database.sessionEntityQueries,
+        dispatcher = databaseDispatcher(),
     )
 
     internal val archiveRepository = ReactiveArchiveRepository(
         uriConverter = uriConverter,
         networkService = networkService,
-        dao = archiveDao
+        archiveEntityQueries = database.archiveEntityQueries,
+        archiveTagQueries = database.archiveTagEntityQueries,
+        archiveCategoryQueries = database.archiveCategoryEntityQueries,
+        archiveAuthorQueries = database.userEntityQueries,
+        dispatcher = databaseDispatcher(),
     )
 
     internal val authRepository = SessionCookieAuthRepository(
         networkService = networkService,
-        dao = sessionCookieDao
+        userEntityQueries = database.userEntityQueries,
+        sessionEntityQueries = database.sessionEntityQueries,
+        dispatcher = databaseDispatcher(),
     )
 
     internal val changeListRepository = SqlChangeListRepository(

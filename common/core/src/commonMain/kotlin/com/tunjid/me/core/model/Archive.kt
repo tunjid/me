@@ -19,8 +19,8 @@ package com.tunjid.me.core.model
 import com.tunjid.me.core.model.ArchiveKind.Articles
 import com.tunjid.me.core.model.ArchiveKind.Projects
 import com.tunjid.me.core.model.ArchiveKind.Talks
+import com.tunjid.me.core.utilities.LocalDateTimeSerializer
 import kotlinx.datetime.Instant
-import kotlinx.datetime.toInstant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -70,14 +70,6 @@ data class User(
     val fullName: String,
     val imageUrl: String,
 )
-
-private object LocalDateTimeSerializer : KSerializer<Instant> {
-    override val descriptor = PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
-    override fun serialize(encoder: Encoder, value: Instant) =
-        encoder.encodeString(value.toString())
-
-    override fun deserialize(decoder: Decoder): Instant = decoder.decodeString().toInstant()
-}
 
 object ArchiveKindSerializer : KSerializer<ArchiveKind> {
     override val descriptor = PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
