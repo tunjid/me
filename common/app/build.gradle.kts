@@ -67,7 +67,7 @@ kotlin {
 
 sqldelight {
     database("AppDatabase") {
-        dialect = libs.square.sqldelight.dialect.get().toString()
+        dialect(libs.cashapp.sqldelight.dialect.get().toString())
         packageName = "com.tunjid.me"
         schemaOutputDirectory = file("build/dbs")
         dependency(project(":common:data"))

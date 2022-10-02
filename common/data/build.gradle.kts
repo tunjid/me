@@ -39,7 +39,7 @@ kotlin {
                 implementation(libs.ktor.client.resources)
                 implementation(libs.ktor.serialization.kotlinx.json)
 
-                implementation(libs.square.sqldelight.coroutines.extensions)
+                implementation(libs.cashapp.sqldelight.coroutines.extensions)
 
                 implementation(libs.tunjid.tiler.tiler)
                 implementation(libs.tunjid.mutator.core.common)
@@ -54,7 +54,7 @@ kotlin {
 
                 implementation(libs.ktor.client.android)
 
-                implementation(libs.square.sqldelight.driver.android)
+                implementation(libs.cashapp.sqldelight.driver.android)
             }
         }
         named("desktopMain") {
@@ -64,7 +64,7 @@ kotlin {
 
                 implementation(libs.ktor.client.java)
 
-                implementation(libs.square.sqldelight.driver.jvm)
+                implementation(libs.cashapp.sqldelight.driver.jvm)
             }
         }
         named("commonTest") {
@@ -77,7 +77,7 @@ kotlin {
 
 sqldelight {
     database("AppDatabase") {
-        dialect = libs.square.sqldelight.dialect.get().toString()
+        dialect(libs.cashapp.sqldelight.dialect.get().toString())
         packageName = "com.tunjid.me.common.data"
         schemaOutputDirectory = file("build/dbs")
     }
