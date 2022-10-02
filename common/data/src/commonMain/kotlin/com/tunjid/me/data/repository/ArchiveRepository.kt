@@ -84,16 +84,15 @@ internal class OfflineFirstArchiveRepository(
         kind: ArchiveKind,
         id: ArchiveId,
         uri: Uri,
-    ): Result<Unit> =
-        networkService.uploadArchiveHeaderPhoto(
-            kind = kind,
-            id = id,
-            mime = uri.mimeType ?: "",
-            name = uriConverter.name(uri),
-            photo = uriConverter.toInput(uri)
-        )
-            .toResult()
-            .map { }
+    ): Result<Unit> = networkService.uploadArchiveHeaderPhoto(
+        kind = kind,
+        id = id,
+        mime = uri.mimeType ?: "",
+        name = uriConverter.name(uri),
+        photo = uriConverter.toInput(uri)
+    )
+        .toResult()
+        .map { }
 
     override fun monitorArchives(
         query: ArchiveQuery
@@ -133,10 +132,9 @@ internal class OfflineFirstArchiveRepository(
         request: SyncRequest,
         onVersionUpdated: suspend (ChangeListItem) -> Unit
     ) {
-
         val changeList = when (val response = networkService.changeList(request)) {
             is NetworkResponse.Success -> response.item
-            is NetworkResponse.Error -> return
+            is NetworkResponse.Error -> throw Exception(response.message)
         }
         // Chew through the change list and process it sequentially
         changeList.chunked(10)
