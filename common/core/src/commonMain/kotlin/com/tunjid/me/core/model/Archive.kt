@@ -52,6 +52,7 @@ data class Archive(
     val body: String,
     val description: String,
     val thumbnail: String?,
+    val videoUrl: String?,
     val author: User,
     val likes: Long,
     @Serializable(LocalDateTimeSerializer::class)

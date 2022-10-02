@@ -35,6 +35,7 @@ class NetworkArchive(
     val body: String,
     val description: String,
     val thumbnail: String?,
+    val videoUrl: String?,
     val author: UserId,
     val likes: Long,
     @Serializable(LocalDateTimeSerializer::class)
@@ -48,6 +49,7 @@ fun NetworkArchive.toEntity() = ArchiveEntity(
     id = id.value,
     body = body,
     thumbnail = thumbnail,
+    videoUrl = videoUrl,
     description = description,
     title = title,
     author = author.value,

@@ -45,7 +45,12 @@ class App : Application() {
             permissionsProvider = PlatformPermissionsProvider(appScope = appScope, context = this),
             networkMonitor = NetworkMonitor(scope = appScope, context = this),
             uriConverter = UriConverter(),
-            database = AppDatabase.invoke(DatabaseDriverFactory(this).createDriver())
+            database = AppDatabase(
+                DatabaseDriverFactory(
+                    context = this,
+                    schema = AppDatabase.Schema,
+                ).createDriver()
+            )
         )
     }
 

@@ -1,4 +1,0 @@
-CREATE TABLE IF NOT EXISTS keyData (
-    id TEXT PRIMARY KEY,
-    data TEXT
-);

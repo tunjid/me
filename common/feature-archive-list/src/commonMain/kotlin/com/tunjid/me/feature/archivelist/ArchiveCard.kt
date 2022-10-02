@@ -211,6 +211,7 @@ private val sampleArchiveItem = ArchiveItem.Result(
         body = "Hello",
         description = "Hi",
         thumbnail = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",
+        videoUrl = null,
         author = User(
             id = UserId("i"),
             firstName = "TJ",

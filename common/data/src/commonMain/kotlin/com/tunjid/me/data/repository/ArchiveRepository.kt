@@ -38,6 +38,7 @@ import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.models.NetworkArchive
 import com.tunjid.me.data.network.models.NetworkResponse
 import com.tunjid.me.data.network.models.item
+import com.tunjid.me.data.network.models.toEntity
 import com.tunjid.me.data.network.models.toResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -191,6 +192,7 @@ internal class ReactiveArchiveRepository(
                 title = archiveEntity.title,
                 description = archiveEntity.description,
                 thumbnail = archiveEntity.thumbnail,
+                videoUrl = archiveEntity.videoUrl,
                 likes = archiveEntity.likes,
                 kind = ArchiveKind.values()
                     .first { it.type == archiveEntity.kind },
@@ -210,18 +212,7 @@ internal class ReactiveArchiveRepository(
             full_name = "",
             image_url = "",
         )
-        archiveEntityQueries.upsert(
-            id = networkArchive.id.value,
-            title = networkArchive.title,
-            description = networkArchive.description,
-            thumbnail = networkArchive.thumbnail,
-            body = networkArchive.body,
-            created = networkArchive.created.toEpochMilliseconds(),
-            link = networkArchive.link,
-            likes = networkArchive.likes,
-            author = networkArchive.author.value,
-            kind = networkArchive.kind.type,
-        )
+        archiveEntityQueries.upsert(networkArchive.toEntity())
 
         archiveTagQueries.delete(networkArchive.id.value)
         networkArchive.tags.forEach { tag ->

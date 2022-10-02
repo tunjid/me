@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS archiveEntity (
     body TEXT NOT NULL,
     description TEXT NOT NULL,
     thumbnail TEXT,
+    videoUrl TEXT,
     author TEXT NOT NULL,
     likes INTEGER NOT NULL DEFAULT 0,
     created INTEGER NOT NULL,
@@ -62,18 +63,19 @@ FROM archiveEntity
 WHERE id IN :ids;
 
 upsert:
-INSERT INTO archiveEntity (id, link, title, description, body, thumbnail, author, created, kind, likes)
-VALUES (:id, :link, :title, :description, :body, :thumbnail, :author, :created, :kind, :likes)
+INSERT INTO archiveEntity
+VALUES ?
 ON CONFLICT(id) DO UPDATE SET
     link=excluded.link,
     title=excluded.title,
     description=excluded.description,
     body=excluded.body,
     thumbnail=excluded.thumbnail,
+    videoUrl=excluded.videoUrl,
     likes=excluded.likes,
     author=excluded.author,
     created=excluded.created,
-    created=excluded.created;
+    kind=excluded.kind;
 
 delete:
 DELETE FROM archiveEntity

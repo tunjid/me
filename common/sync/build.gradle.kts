@@ -30,8 +30,6 @@ kotlin {
                 api(project(":common:core"))
                 api(project(":common:data"))
 
-                implementation(libs.androidx.work.ktx)
-
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.cbor)
                 implementation(libs.kotlinx.serialization.json)
@@ -54,6 +52,7 @@ kotlin {
                 implementation(project(":serverEvents"))
 
                 implementation(libs.androidx.core.ktx)
+                implementation(libs.androidx.work.ktx)
 
                 implementation(libs.ktor.client.android)
 

@@ -17,17 +17,20 @@
 package com.tunjid.me.data.local
 
 import android.content.Context
-import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import app.cash.sqldelight.db.SqlDriver
-import com.tunjid.me.common.data.AppDatabase
+import app.cash.sqldelight.db.SqlSchema
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
 actual fun databaseDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
-actual class DatabaseDriverFactory(private val context: Context) {
+actual class DatabaseDriverFactory(
+    private val context: Context,
+    private val schema: SqlSchema
+) {
     actual fun createDriver(): SqlDriver = AndroidSqliteDriver(
-        schema = AppDatabase.Schema,
+        schema = schema,
         context = context,
         name = "test.db"
     )

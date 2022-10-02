@@ -17,21 +17,23 @@
 package com.tunjid.me.data.local
 
 import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
-import com.tunjid.me.common.data.AppDatabase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import java.io.File
 
 actual fun databaseDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
-actual class DatabaseDriverFactory {
+actual class DatabaseDriverFactory(
+    private val schema: SqlSchema
+) {
     actual fun createDriver(): SqlDriver {
-        val databasePath = File(System.getProperty("java.io.tmpdir"), "Me.db")
+        val databasePath = File(System.getProperty("java.io.tmpdir"), "me.db")
         val driver = JdbcSqliteDriver(url = "jdbc:sqlite:${databasePath.absolutePath}")
 
 //        val driver: SqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
-        AppDatabase.Schema.create(driver)
+        schema.create(driver)
         return driver
     }
 }

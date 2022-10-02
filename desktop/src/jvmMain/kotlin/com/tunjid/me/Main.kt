@@ -60,7 +60,11 @@ fun main() {
         appScope = appScope,
         initialUiState = UiState(navMode = NavMode.NavRail),
         permissionsProvider = PlatformPermissionsProvider(),
-        database = AppDatabase.invoke(DatabaseDriverFactory().createDriver()),
+        database = AppDatabase(
+            DatabaseDriverFactory(
+                schema = AppDatabase.Schema,
+            ).createDriver()
+        ),
         networkMonitor = NetworkMonitor(scope = appScope),
         uriConverter = UriConverter(),
     )
