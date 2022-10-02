@@ -20,7 +20,6 @@ import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 import com.tunjid.me.common.SavedState
-import com.tunjid.me.common.data.AppDatabase
 import com.tunjid.me.common.di.createAppDependencies
 import com.tunjid.me.common.restore
 import com.tunjid.me.common.saveState
