@@ -36,7 +36,9 @@ object ArchiveListFeature : Feature<ArchiveListRoute, ArchiveListMutator> {
             routePattern = "archives/{kind}",
             routeMapper = { (route: String, pathKeys: Map<String, String>) ->
                 val kindString = pathKeys["kind"]
-                val kind = ArchiveKind.values().firstOrNull { it.type == kindString } ?: ArchiveKind.Articles
+                val kind = ArchiveKind.values()
+                    .firstOrNull { it.type == kindString }
+                    ?: ArchiveKind.Articles
                 ArchiveListRoute(
                     id = route,
                     kind = kind
