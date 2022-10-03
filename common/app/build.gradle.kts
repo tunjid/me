@@ -32,13 +32,13 @@ kotlin {
                 api(project(":common:scaffold"))
                 api(project(":common:sync"))
 
-                api(project(":common:feature-template"))
-                api(project(":common:feature-archive-list"))
-                api(project(":common:feature-archive-detail"))
-                api(project(":common:feature-archive-edit"))
-                api(project(":common:feature-profile"))
-                api(project(":common:feature-settings"))
-                api(project(":common:feature-sign-in"))
+                api(project(":common:ui:template"))
+                api(project(":common:ui:archive-list"))
+                api(project(":common:ui:archive-detail"))
+                api(project(":common:ui:archive-edit"))
+                api(project(":common:ui:profile"))
+                api(project(":common:ui:settings"))
+                api(project(":common:ui:sign-in"))
 
                 implementation(libs.jetbrains.compose.material)
 

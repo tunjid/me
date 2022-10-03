@@ -29,7 +29,7 @@ fun org.gradle.api.Project.configureFeatureModule(
             dependencies {
                 implementation(project(":common:data"))
                 implementation(project(":common:scaffold"))
-                implementation(project(":common:feature-template"))
+                implementation(project(":common:ui:template"))
 
                 implementation(libs.findLibrary("jetbrains-compose-runtime").get())
                 implementation(libs.findLibrary("jetbrains-compose-animation").get())

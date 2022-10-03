@@ -27,7 +27,7 @@ kotlin {
                 api(project(":common:core-ui"))
                 implementation(project(":common:data"))
                 implementation(project(":common:scaffold"))
-                implementation(project(":common:feature-template"))
+                implementation(project(":common:ui:template"))
 
                 implementation(libs.jetbrains.compose.runtime)
                 implementation(libs.jetbrains.compose.animation)
@@ -40,19 +40,10 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
 
                 implementation(libs.tunjid.tiler.tiler)
-                implementation(libs.tunjid.tiler.compose)
 
                 implementation(libs.tunjid.mutator.core.common)
                 implementation(libs.tunjid.mutator.coroutines.common)
 
-            }
-        }
-        named("commonTest") {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.cashapp.turbine)
-                implementation(libs.mockk)
             }
         }
     }

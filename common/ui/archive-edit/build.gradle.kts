@@ -27,7 +27,7 @@ kotlin {
                 api(project(":common:core-ui"))
                 implementation(project(":common:data"))
                 implementation(project(":common:scaffold"))
-                implementation(project(":common:feature-template"))
+                implementation(project(":common:ui:template"))
 
                 implementation(libs.jetbrains.compose.runtime)
                 implementation(libs.jetbrains.compose.animation)
