@@ -9,7 +9,8 @@ are production tested, and should not be taken as anything more than its face va
 "Me" is a Kotlin Multiplatform playground for ideas that pop into my head around app architecture.
 These ideas typically center around state, and it's production; a repository of "what ifs?".
 
-It's an attempt to envision what building apps will look like in the near future,
+It follows the modern android development [architecture guide](https://developer.android.com/topic/architecture), and
+attempts to extend it to envision what building apps will look like in the near future,
 with novel/experimental implementations of fundamental app architecture units including:
 
 * Navigation
@@ -17,6 +18,8 @@ with novel/experimental implementations of fundamental app architecture units in
 * UI State production
 * Dependency injection
 * Persistent animation
+
+All while targeting multiple platforms.
 
 The app is a WYSIWYG editor for my personal website. The source for the backend can be
 found [here](https://github.com/tunjid/tunji-web-deux).
