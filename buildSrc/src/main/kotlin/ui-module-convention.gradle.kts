@@ -22,5 +22,5 @@ plugins {
 
 kotlin {
     configureKotlinMultiplatform(this)
-    configureFeatureModule(this)
+    configureUiModule(this)
 }

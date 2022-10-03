@@ -18,7 +18,7 @@
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
-fun org.gradle.api.Project.configureFeatureModule(
+fun org.gradle.api.Project.configureUiModule(
     extension: KotlinMultiplatformExtension
 ) = extension.apply {
     sourceSets.apply {
