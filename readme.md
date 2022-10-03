@@ -8,7 +8,15 @@ are production tested, and should not be taken as anything more than its face va
 
 "Me" is a Kotlin Multiplatform playground for ideas that pop into my head around app architecture.
 These ideas typically center around state, and it's production; a repository of "what ifs?".
-Specifically, this repository aims to explore representing various app architecture components "as state".
+
+It's an attempt to envision what building apps will look like in the near future,
+with novel/experimental implementations of fundamental app architecture units including:
+
+* Navigation
+* Pagination
+* UI State production
+* Dependency injection
+* Persistent animation
 
 The app is a WYSIWYG editor for my personal website. The source for the backend can be
 found [here](https://github.com/tunjid/tunji-web-deux).
@@ -32,7 +40,7 @@ Some ideas explored include:
 
 I try to keep the code at a near production quality, but this often takes a back seat to
 convenience and whim. I'm a huge proponent of dependency injection, yet the repository uses manual
-service location. Also I haven't separated my network models from my data models as well as I would like.
+service location. 
 
 Again, the work presented here are the experiments of an immutable state and functional reactive programming zealot.
 It's far from objective, caveat emptor.
