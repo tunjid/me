@@ -33,6 +33,6 @@ dependencies {
     implementation(libs.android.gradlePlugin)
     implementation(libs.kotlin.gradlePlugin)
     implementation(libs.kotlin.serializationPlugin)
-    implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:3.1.0")
-
+    implementation(libs.google.devtools.kspPlugin)
+    implementation(libs.gradle.kotlinDslPlugin)
 }
