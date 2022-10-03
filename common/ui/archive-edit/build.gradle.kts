@@ -17,7 +17,7 @@
 plugins {
     `android-library-convention`
     `kotlin-library-convention`
-    `feature-module-convention`
+    `ui-module-convention`
 }
 
 kotlin {
