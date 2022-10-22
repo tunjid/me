@@ -23,6 +23,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,6 +44,32 @@ import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.RemoteImagePainter
 import com.tunjid.me.core.ui.Thumbnail
 import kotlinx.datetime.Clock.System
+
+@Composable
+fun StickyHeader(
+    item: ArchiveItem.Header
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                vertical = 16.dp,
+                horizontal = 16.dp
+            ),
+        shape = MaterialTheme.shapes.medium,
+        elevation = 1.dp
+    ) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    vertical = 16.dp,
+                    horizontal = 8.dp
+                ),
+            text = item.text
+        )
+    }
+}
 
 @Composable
 fun ProgressBar(isCircular: Boolean) {

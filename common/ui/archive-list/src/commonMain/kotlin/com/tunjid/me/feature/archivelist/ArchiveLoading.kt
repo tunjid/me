@@ -29,11 +29,6 @@ import com.tunjid.utilities.toRequests
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 
-data class FetchResult(
-    val action: Action.Fetch,
-    val queriedArchives: List<List<ArchiveItem>>
-)
-
 /**
  * Converts a query to output data for [State]
  */

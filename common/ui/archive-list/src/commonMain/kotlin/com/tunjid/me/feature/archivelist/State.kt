@@ -71,6 +71,11 @@ sealed class Action(val key: String) {
 sealed class ArchiveItem {
     abstract val query: ArchiveQuery
 
+    data class Header(
+        val text: String,
+        override val query: ArchiveQuery,
+    ) : ArchiveItem()
+
     data class Result(
         val archive: Archive,
         override val query: ArchiveQuery,
@@ -105,20 +110,9 @@ private class ItemKey(
     }
 }
 
-//val ArchiveItem.key: Any
-//    get() = when (this) {
-//        is ArchiveItem.Loading -> ItemKey(
-//            key = "header-$query",
-//            query = query
-//        )
-//        is ArchiveItem.Result -> ItemKey(
-//            key = "result-${archive.id}",
-//            query = query
-//        )
-//    }
-
-val ArchiveItem.key: Any
+val ArchiveItem.key: String
     get() = when (this) {
+        is ArchiveItem.Header -> "header-${query.offset}-$text"
         is ArchiveItem.Loading -> "loading-${query.offset}"
         is ArchiveItem.Result -> "result-${query.offset}-${archive.id}"
     }

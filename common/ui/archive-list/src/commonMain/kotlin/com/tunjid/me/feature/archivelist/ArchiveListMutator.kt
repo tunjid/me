@@ -212,29 +212,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
     .map { fetchResult ->
         mutation {
             val fetchAction = fetchResult.action
-            val items = when {
-                fetchResult.hasNoResults -> when (fetchAction) {
-                    // Fetch action is reset, show a loading spinner
-                    is Action.Fetch.Reset -> listOf(
-                        ArchiveItem.Loading(
-                            isCircular = true,
-                            query = fetchAction.query
-                        )
-                    )
-                    // The mutator was just resubscribed to, show existing items
-                    else -> items
-                }
-
-                else -> fetchResult.flattenedArchives
-            }
-                // Filtering is cheap because at most 4 * [DefaultQueryLimit] items
-                // are ever sent to the UI
-                .filter { item ->
-                    when (item) {
-                        is ArchiveItem.Loading -> true
-                        is ArchiveItem.Result -> item.query.contentFilter == fetchAction.query.contentFilter
-                    }
-                }
+            val items = fetchResult.items(default = this.items)
             copy(
                 items = items,
                 queryState = queryState.copy(
@@ -253,14 +231,4 @@ private fun Flow<Action.Fetch>.fetchMutations(
                 )
             )
         }
-    }
-
-private val FetchResult.flattenedArchives: List<ArchiveItem>
-    get() = queriedArchives
-        .flatten()
-        .distinctBy { it.key }
-
-private val FetchResult.hasNoResults: Boolean
-    get() = queriedArchives.isEmpty() || queriedArchives.all {
-        it.all { items -> items is ArchiveItem.Loading }
     }

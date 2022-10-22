@@ -17,11 +17,18 @@
 package com.tunjid.me.feature.archivelist
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,6 +45,7 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.Serializable
@@ -88,15 +96,14 @@ private fun ArchiveScreen(
                 items(
                     items = state.items,
                     key = { it.key },
-                    // TODO: There's a compose bug that causes span calculation to crash
-                    //  with an indexOutOfBounds exception. Commenting out for now.
-//                    span = { item ->
-//                        mutator.accept(Action.GridSize(maxCurrentLineSpan))
-//                        when (item) {
-//                            is ArchiveItem.Result -> GridItemSpan(1)
-//                            is ArchiveItem.Loading -> GridItemSpan(maxCurrentLineSpan)
-//                        }
-//                    },
+                    span = { item ->
+                        mutator.accept(Action.GridSize(maxLineSpan))
+                        when (item) {
+                            is ArchiveItem.Result -> GridItemSpan(1)
+                            is ArchiveItem.Header,
+                            is ArchiveItem.Loading -> GridItemSpan(maxLineSpan)
+                        }
+                    },
                     itemContent = { item ->
                         GridCell(
                             item = item,
@@ -142,6 +149,7 @@ private fun GridCell(
     navigate: (String) -> Unit
 ) {
     when (item) {
+        is ArchiveItem.Header -> StickyHeader(item = item)
         is ArchiveItem.Loading -> ProgressBar(isCircular = item.isCircular)
         is ArchiveItem.Result -> ArchiveCard(
             archiveItem = item,
@@ -162,7 +170,10 @@ private fun EndlessScroll(
 ) {
     // Endless scrolling
     LaunchedEffect(gridSize, gridState, currentQuery) {
-        snapshotFlow { gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.key }
+        snapshotFlow {
+            val visibleItems = gridState.layoutInfo.visibleItemsInfo
+            visibleItems.getOrNull(visibleItems.size / 2)?.key
+        }
             .filterNotNull()
             .distinctUntilChanged()
             .collect { firstVisibleKey ->
@@ -178,6 +189,16 @@ private fun EndlessScroll(
                 }
             }
     }
+
+    LaunchedEffect(gridState){
+        snapshotFlow {
+            val visibleItems = gridState.layoutInfo.visibleItemsInfo
+            "Offset: ${visibleItems.joinToString(separator = ", ") { it.key?.queryOffsetFromKey?.toString() ?: "" }}"
+        }
+
+            .distinctUntilChanged()
+            .collect(::println)
+    }
 }
 
 @Composable
@@ -185,19 +206,19 @@ private fun ListSync(
     state: State,
     gridState: LazyGridState
 ) {
-    LaunchedEffect(true) {
-        val key = state.lastVisibleKey ?: return@LaunchedEffect
-        // Item is on screen do nothing
-        if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) return@LaunchedEffect
-
-        val indexOfKey = state.items.indexOfFirst { it.key == key }
-        if (indexOfKey < 0) return@LaunchedEffect
-
-        gridState.scrollToItem(
-            index = min(indexOfKey + 1, gridState.layoutInfo.totalItemsCount - 1),
-            scrollOffset = 400
-        )
-    }
+//    LaunchedEffect(true) {
+//        val key = state.lastVisibleKey ?: return@LaunchedEffect
+//        // Item is on screen do nothing
+//        if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) return@LaunchedEffect
+//
+//        val indexOfKey = state.items.indexOfFirst { it.key == key }
+//        if (indexOfKey < 0) return@LaunchedEffect
+//
+//        gridState.scrollToItem(
+//            index = min(indexOfKey + 1, gridState.layoutInfo.totalItemsCount - 1),
+//            scrollOffset = 400
+//        )
+//    }
 }
 
 //@Preview
