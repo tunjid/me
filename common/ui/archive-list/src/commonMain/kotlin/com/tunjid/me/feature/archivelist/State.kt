@@ -48,6 +48,7 @@ val State.stickyHeader: ArchiveItem.Header?
                 text = lastVisibleItem.headerText,
                 query = lastVisibleItem.query
             )
+
             else -> null
         }
     }
@@ -124,15 +125,13 @@ val ArchiveItem.Result.prettyDate: String
 
 val ArchiveItem.Result.readTime get() = "${archive.body.trim().split("/\\s+/").size / 250} min read"
 
+val ArchiveItem.Result.dateTime
+    get() = archive.created.toLocalDateTime(
+        TimeZone.currentSystemDefault()
+    )
 val ArchiveItem.Result.headerText
-    get(): String {
-        val dateTime = archive.created.toLocalDateTime(
-            TimeZone.currentSystemDefault()
-        )
-        val month = dateTime.monthNumber
-        val year = dateTime.year
-
-        return "${dateTime.month.name}, ${dateTime.year}"
+    get(): String = with(dateTime) {
+        "${month.name.lowercase().replaceFirstChar(Char::uppercase)}, $year"
     }
 
 @Serializable

@@ -71,8 +71,6 @@ fun StickyHeaderGrid(
             }
         }
             .distinctUntilChanged()
-            .collect {
-            println("headerOffset: $it")
-                headerOffset = it }
+            .collect { headerOffset = it }
     }
 }

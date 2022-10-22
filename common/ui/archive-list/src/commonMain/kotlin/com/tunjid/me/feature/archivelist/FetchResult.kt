@@ -16,9 +16,6 @@
 
 package com.tunjid.me.feature.archivelist
 
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-
 data class FetchResult(
     val action: Action.Fetch,
     val queriedArchives: List<List<ArchiveItem>>
@@ -42,6 +39,17 @@ fun FetchResult.items(default: List<ArchiveItem>) = when {
 
 private val FetchResult.items: List<ArchiveItem>
     get() {
+        fun MutableList<ArchiveItem>.addIfNotPresent(
+            keySet: MutableSet<String>,
+            item: ArchiveItem
+        ) {
+            item.takeUnless {
+                keySet.contains(it.key) && it.query.contentFilter == action.query.contentFilter
+            }
+                ?.also { keySet.add(it.key) }
+                ?.also(::add)
+        }
+
         var month = -1
         var year = -1
         val keySet = mutableSetOf<String>()
@@ -52,29 +60,22 @@ private val FetchResult.items: List<ArchiveItem>
             }.flatMap { item ->
                 buildList {
                     if (item is ArchiveItem.Result) {
-                        val dateTime = item.archive.created.toLocalDateTime(
-                            TimeZone.currentSystemDefault()
-                        )
+                        val dateTime = item.dateTime
                         if (month != dateTime.monthNumber || year != dateTime.year) {
                             month = dateTime.monthNumber
                             year = dateTime.year
-                            ArchiveItem.Header(
-                                text = "${dateTime.month.name}, ${dateTime.year}",
-                                query = item.query
+                            addIfNotPresent(
+                                keySet = keySet,
+                                item = ArchiveItem.Header(
+                                    text = item.headerText,
+                                    query = item.query
+                                )
                             )
-                                .takeUnless {
-                                    keySet.contains(it.key) && it.query.contentFilter == action.query.contentFilter
-                                }
-                                ?.also { keySet.add(it.key) }
-                                ?.also(::add)
                         }
-
-                        item
-                            .takeUnless {
-                                keySet.contains(it.key) && it.query.contentFilter == action.query.contentFilter
-                            }
-                            ?.also { keySet.add(it.key) }
-                            ?.also(::add)
+                        addIfNotPresent(
+                            keySet = keySet,
+                            item = item
+                        )
                     }
                 }
             }
@@ -94,26 +95,26 @@ private val FetchResult.flattenedArchives: List<ArchiveItem>
         .distinctBy { it.key }
 
 fun FetchResult.m(default: List<ArchiveItem>): List<ArchiveItem> = when {
-            hasNoResults -> when (action) {
-                // Fetch action is reset, show a loading spinner
-                is Action.Fetch.Reset -> listOf(
-                    ArchiveItem.Loading(
-                        isCircular = true,
-                        query = action.query
-                    )
-                )
-                // The mutator was just resubscribed to, show existing items
-                else -> default
-            }
+    hasNoResults -> when (action) {
+        // Fetch action is reset, show a loading spinner
+        is Action.Fetch.Reset -> listOf(
+            ArchiveItem.Loading(
+                isCircular = true,
+                query = action.query
+            )
+        )
+        // The mutator was just resubscribed to, show existing items
+        else -> default
+    }
 
-            else -> flattenedArchives
+    else -> flattenedArchives
+}
+    // Filtering is cheap because at most 4 * [DefaultQueryLimit] items
+    // are ever sent to the UI
+    .filter { item ->
+        when (item) {
+            is ArchiveItem.Header -> true
+            is ArchiveItem.Loading -> true
+            is ArchiveItem.Result -> item.query.contentFilter == action.query.contentFilter
         }
-            // Filtering is cheap because at most 4 * [DefaultQueryLimit] items
-            // are ever sent to the UI
-            .filter { item ->
-                when (item) {
-                    is ArchiveItem.Header -> true
-                    is ArchiveItem.Loading -> true
-                    is ArchiveItem.Result -> item.query.contentFilter == action.query.contentFilter
-                }
-            }
+    }
