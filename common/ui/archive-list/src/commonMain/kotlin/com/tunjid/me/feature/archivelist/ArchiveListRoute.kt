@@ -17,6 +17,8 @@
 package com.tunjid.me.feature.archivelist
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -81,10 +83,12 @@ private fun ArchiveScreen(
             mutator.accept(Action.GridSize(gridSize))
         }
     ) {
+        Spacer(modifier = Modifier.height(16.dp))
         ArchiveFilters(
             item = state.queryState,
             onChanged = mutator.accept
         )
+        Spacer(modifier = Modifier.height(16.dp))
         StickyHeaderGrid(
             modifier = Modifier.zIndex(-1f),
             lazyState = gridState,
