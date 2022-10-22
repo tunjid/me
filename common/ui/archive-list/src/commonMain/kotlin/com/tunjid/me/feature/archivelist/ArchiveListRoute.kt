@@ -17,18 +17,12 @@
 package com.tunjid.me.feature.archivelist
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,14 +32,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.feature.LocalRouteServiceLocator
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.Serializable
@@ -78,6 +73,7 @@ private fun ArchiveScreen(
     val gridState = rememberLazyGridState()
     val cardWidth = 350.dp
     val cardWidthPx = with(LocalDensity.current) { cardWidth.toPx() }.toInt()
+    val stickyHeaderItem = state.stickyHeader
 
     Column(
         modifier = Modifier.onGloballyPositioned {
@@ -89,36 +85,45 @@ private fun ArchiveScreen(
             item = state.queryState,
             onChanged = mutator.accept
         )
-        LazyVerticalGrid(
-            state = gridState,
-            columns = GridCells.Adaptive(cardWidth),
-            content = {
-                items(
-                    items = state.items,
-                    key = { it.key },
-                    span = { item ->
-                        mutator.accept(Action.GridSize(maxLineSpan))
-                        when (item) {
-                            is ArchiveItem.Result -> GridItemSpan(1)
-                            is ArchiveItem.Header,
-                            is ArchiveItem.Loading -> GridItemSpan(maxLineSpan)
-                        }
-                    },
-                    itemContent = { item ->
-                        GridCell(
-                            item = item,
-                            onAction = mutator.accept,
-                            navigate = { path ->
-                                mutator.accept(Action.Navigate {
-                                    if (state.isInNavRail) mainNav.swap(route = path.toRoute)
-                                    else mainNav.push(route = path.toRoute)
-                                })
-                            }
-                        )
-                    }
-                )
+        StickyHeaderGrid(
+            modifier = Modifier.zIndex(-1f),
+            lazyState = gridState,
+            headerMatcher = { it.key.isHeaderKey },
+            stickyHeader = {
+                if (stickyHeaderItem != null) StickyHeader(item = stickyHeaderItem)
             }
-        )
+        ) {
+            LazyVerticalGrid(
+                state = gridState,
+                columns = GridCells.Adaptive(cardWidth),
+                content = {
+                    items(
+                        items = state.items,
+                        key = { it.key },
+                        span = { item ->
+                            mutator.accept(Action.GridSize(maxLineSpan))
+                            when (item) {
+                                is ArchiveItem.Result -> GridItemSpan(1)
+                                is ArchiveItem.Header,
+                                is ArchiveItem.Loading -> GridItemSpan(maxLineSpan)
+                            }
+                        },
+                        itemContent = { item ->
+                            GridCell(
+                                item = item,
+                                onAction = mutator.accept,
+                                navigate = { path ->
+                                    mutator.accept(Action.Navigate {
+                                        if (state.isInNavRail) mainNav.swap(route = path.toRoute)
+                                        else mainNav.push(route = path.toRoute)
+                                    })
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+        }
     }
 
     // Initial load
@@ -149,8 +154,14 @@ private fun GridCell(
     navigate: (String) -> Unit
 ) {
     when (item) {
-        is ArchiveItem.Header -> StickyHeader(item = item)
-        is ArchiveItem.Loading -> ProgressBar(isCircular = item.isCircular)
+        is ArchiveItem.Header -> StickyHeader(
+            item = item
+        )
+
+        is ArchiveItem.Loading -> ProgressBar(
+            isCircular = item.isCircular
+        )
+
         is ArchiveItem.Result -> ArchiveCard(
             archiveItem = item,
             onAction = onAction,
@@ -176,10 +187,9 @@ private fun EndlessScroll(
         }
             .filterNotNull()
             .distinctUntilChanged()
-            .collect { firstVisibleKey ->
+            .collect { middleItemKey ->
                 onAction(Action.ToggleFilter(isExpanded = false))
-                onAction(Action.LastVisibleKey(firstVisibleKey))
-                firstVisibleKey.queryOffsetFromKey?.let { queryOffset ->
+                middleItemKey.queryOffsetFromKey?.let { queryOffset ->
                     onAction(
                         Action.Fetch.LoadMore(
                             query = currentQuery.copy(offset = queryOffset),
@@ -189,15 +199,13 @@ private fun EndlessScroll(
                 }
             }
     }
-
-    LaunchedEffect(gridState){
+    LaunchedEffect(gridState) {
         snapshotFlow {
-            val visibleItems = gridState.layoutInfo.visibleItemsInfo
-            "Offset: ${visibleItems.joinToString(separator = ", ") { it.key?.queryOffsetFromKey?.toString() ?: "" }}"
+            gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.key
         }
-
+            .filterNotNull()
             .distinctUntilChanged()
-            .collect(::println)
+            .collect { onAction(Action.LastVisibleKey(it)) }
     }
 }
 
@@ -206,19 +214,19 @@ private fun ListSync(
     state: State,
     gridState: LazyGridState
 ) {
-//    LaunchedEffect(true) {
-//        val key = state.lastVisibleKey ?: return@LaunchedEffect
-//        // Item is on screen do nothing
-//        if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) return@LaunchedEffect
-//
-//        val indexOfKey = state.items.indexOfFirst { it.key == key }
-//        if (indexOfKey < 0) return@LaunchedEffect
-//
-//        gridState.scrollToItem(
-//            index = min(indexOfKey + 1, gridState.layoutInfo.totalItemsCount - 1),
-//            scrollOffset = 400
-//        )
-//    }
+    LaunchedEffect(true) {
+        val key = state.lastVisibleKey ?: return@LaunchedEffect
+        // Item is on screen do nothing
+        if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) return@LaunchedEffect
+
+        val indexOfKey = state.items.indexOfFirst { it.key == key }
+        if (indexOfKey < 0) return@LaunchedEffect
+
+        gridState.scrollToItem(
+            index = min(indexOfKey + 1, gridState.layoutInfo.totalItemsCount - 1),
+            scrollOffset = 400
+        )
+    }
 }
 
 //@Preview

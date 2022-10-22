@@ -39,6 +39,19 @@ data class State(
     val items: List<ArchiveItem> = listOf()
 ) : ByteSerializable
 
+val State.stickyHeader: ArchiveItem.Header?
+    get() = when (lastVisibleKey) {
+        null -> null
+        else -> when (val lastVisibleItem = items.find { it.key == lastVisibleKey }) {
+            is ArchiveItem.Header -> lastVisibleItem
+            is ArchiveItem.Result -> ArchiveItem.Header(
+                text = lastVisibleItem.headerText,
+                query = lastVisibleItem.query
+            )
+            else -> null
+        }
+    }
+
 sealed class Action(val key: String) {
     sealed class Fetch : Action(key = "Fetch") {
         abstract val query: ArchiveQuery
@@ -87,29 +100,6 @@ sealed class ArchiveItem {
     ) : ArchiveItem()
 }
 
-private class ItemKey(
-    val key: String,
-    val query: ArchiveQuery
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as ItemKey
-
-        if (key != other.key) return false
-        if (query != other.query) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = key.hashCode()
-        result = 31 * result + query.hashCode()
-        return result
-    }
-}
-
 val ArchiveItem.key: String
     get() = when (this) {
         is ArchiveItem.Header -> "header-${query.offset}-$text"
@@ -123,6 +113,9 @@ val Any.queryOffsetFromKey: Int?
         else -> null
     }
 
+val Any.isHeaderKey: Boolean
+    get() = this is String && this.startsWith("header")
+
 val ArchiveItem.Result.prettyDate: String
     get() {
         val dateTime = archive.created.toLocalDateTime(TimeZone.currentSystemDefault())
@@ -130,6 +123,17 @@ val ArchiveItem.Result.prettyDate: String
     }
 
 val ArchiveItem.Result.readTime get() = "${archive.body.trim().split("/\\s+/").size / 250} min read"
+
+val ArchiveItem.Result.headerText
+    get(): String {
+        val dateTime = archive.created.toLocalDateTime(
+            TimeZone.currentSystemDefault()
+        )
+        val month = dateTime.monthNumber
+        val year = dateTime.year
+
+        return "${dateTime.month.name}, ${dateTime.year}"
+    }
 
 @Serializable
 data class QueryState(

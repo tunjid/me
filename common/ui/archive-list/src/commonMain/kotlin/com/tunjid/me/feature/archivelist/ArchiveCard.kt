@@ -19,6 +19,7 @@ package com.tunjid.me.feature.archivelist
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.LinearProgressIndicator
@@ -52,11 +53,8 @@ fun StickyHeader(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                vertical = 16.dp,
-                horizontal = 16.dp
-            ),
-        shape = MaterialTheme.shapes.medium,
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(0.dp),
         elevation = 1.dp
     ) {
         Text(
