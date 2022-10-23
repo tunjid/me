@@ -19,7 +19,6 @@ package com.tunjid.me.common.di
 import com.tunjid.me.AppDatabase
 import com.tunjid.me.archivedetail.ArchiveDetailFeature
 import com.tunjid.me.archiveedit.ArchiveEditFeature
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.sync.ChangeListKey
 import com.tunjid.me.core.sync.Syncable
 import com.tunjid.me.core.sync.changeListKey
@@ -53,20 +52,23 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import kotlinx.serialization.protobuf.ProtoBuf
+import okio.Path
 
 fun createAppDependencies(
     appScope: CoroutineScope,
     initialUiState: UiState = UiState(),
     database: AppDatabase,
+    savedStatePath: Path,
     permissionsProvider: PermissionsProvider,
     networkMonitor: NetworkMonitor,
     uriConverter: UriConverter,
 ): AppDependencies = AppModule(
     appDatabase = database,
+    savedStatePath = savedStatePath,
     permissionsProvider = permissionsProvider,
     networkMonitor = networkMonitor,
     uriConverter = uriConverter,
@@ -74,16 +76,12 @@ fun createAppDependencies(
     initialUiState = initialUiState,
 )
 
-private val startRoutes = ArchiveKind.values()
-    .map { "archives/${it.type}" }
-    .plus("settings")
-    .map(::listOf)
-
 /**
  * Manual dependency injection module
  */
 private class AppModule(
     appDatabase: AppDatabase,
+    savedStatePath: Path,
     permissionsProvider: PermissionsProvider,
     networkMonitor: NetworkMonitor,
     uriConverter: UriConverter,
@@ -101,7 +99,7 @@ private class AppModule(
     )
 
     override val byteSerializer: ByteSerializer = DelegatingByteSerializer(
-        format = Cbor {
+        format = ProtoBuf {
             serializersModule = SerializersModule {
                 polymorphic(ByteSerializable::class) {
                     // TODO expose this on the feature directly
@@ -118,11 +116,11 @@ private class AppModule(
 
     private val scaffoldModule = ScaffoldModule(
         appScope = appScope,
+        savedStatePath = savedStatePath,
         initialUiState = initialUiState,
         permissionsProvider = permissionsProvider,
         byteSerializer = byteSerializer,
         uriConverter = uriConverter,
-        startRoutes = startRoutes,
         routeMatchers = features
             .map(Feature<out AppRoute, out ActionStateProducer<out Any, out StateFlow<*>>>::routeMatchers)
             .flatten()
@@ -160,6 +158,7 @@ private class AppModule(
     override val routeServiceLocator: RouteServiceLocator = RouteMutatorFactory(
         appScope = appScope,
         features = features,
+        byteSerializer = byteSerializer,
         scaffoldComponent = scaffoldComponent,
         dataComponent = dataComponent
     )

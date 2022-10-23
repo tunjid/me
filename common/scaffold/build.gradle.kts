@@ -29,6 +29,8 @@ kotlin {
             dependencies {
                 api(project(":common:core"))
 
+                implementation(libs.androidx.datastore.core.okio)
+
                 implementation(libs.jetbrains.compose.ui.tooling)
                 implementation(libs.jetbrains.compose.ui.util)
                 implementation(libs.jetbrains.compose.ui.ui)
@@ -41,6 +43,10 @@ kotlin {
 
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.cbor)
+
+                implementation(libs.cashapp.sqldelight.coroutines.extensions)
+
+                implementation(libs.squareup.okio)
 
                 implementation(libs.tunjid.treenav.core.common)
                 implementation(libs.tunjid.treenav.strings.common)

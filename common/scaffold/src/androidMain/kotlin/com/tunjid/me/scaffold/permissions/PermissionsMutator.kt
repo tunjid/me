@@ -28,10 +28,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
-import com.tunjid.me.scaffold.permissions.MapPermissions
-import com.tunjid.me.scaffold.permissions.Permission
-import com.tunjid.me.scaffold.permissions.Permissions
-import com.tunjid.me.scaffold.permissions.PermissionsMutator
 import com.tunjid.mutator.ActionStateProducer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*

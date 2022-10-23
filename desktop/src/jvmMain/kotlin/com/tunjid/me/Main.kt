@@ -28,15 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import com.tunjid.me.common.SavedState
 import com.tunjid.me.common.di.createAppDependencies
-import com.tunjid.me.common.restore
-import com.tunjid.me.common.saveState
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.me.core.ui.dragdrop.PlatformDropTargetModifier
 import com.tunjid.me.core.utilities.UriConverter
-import com.tunjid.me.core.utilities.fromBytes
-import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.feature.LocalRouteServiceLocator
@@ -49,15 +44,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.distinctUntilChanged
+import okio.Path
+import okio.Path.Companion.toOkioPath
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 
 fun main() {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     val appDependencies = createAppDependencies(
         appScope = appScope,
+        savedStatePath = savedStatePath(),
         initialUiState = UiState(navMode = NavMode.NavRail),
         permissionsProvider = PlatformPermissionsProvider(),
         database = AppDatabase(
@@ -68,27 +64,13 @@ fun main() {
         networkMonitor = NetworkMonitor(scope = appScope),
         uriConverter = UriConverter(),
     )
-    savedStateFile()
-        ?.takeIf { it.length() > 0 }
-        ?.let(::FileInputStream)
-        ?.use { appDependencies.byteSerializer.fromBytes<SavedState>(it.readBytes()) }
-        ?.let(appDependencies::restore)
 
     val scaffoldComponent = appDependencies.scaffoldComponent
 
     application {
         val windowState = rememberWindowState()
         Window(
-            onCloseRequest = {
-                savedStateFile()?.delete()
-                savedStateFile()
-                    ?.let(::FileOutputStream)
-                    ?.use {
-                        it.write(appDependencies.byteSerializer.toBytes(appDependencies.saveState()))
-                    }
-
-                exitApplication()
-            },
+            onCloseRequest = ::exitApplication,
             state = windowState,
             title = "Me as a composition"
         ) {
@@ -128,10 +110,9 @@ fun main() {
     }
 }
 
-private fun savedStateFile(): File? =
-    File(System.getProperty("java.io.tmpdir"), "tunji-me-saved-state-7.ser").run {
-        if (!exists() && !createNewFile()) null
-        else this
-    }
+private fun savedStatePath(): Path = File(
+    System.getProperty("java.io.tmpdir"),
+    "tunji-me-saved-state-9.ser"
+).toOkioPath()
 
 

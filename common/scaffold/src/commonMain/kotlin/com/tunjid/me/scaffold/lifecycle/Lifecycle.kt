@@ -32,7 +32,6 @@ typealias LifecycleMutator = ActionStateProducer<Mutation<Lifecycle>, StateFlow<
 
 data class Lifecycle(
     val isInForeground: Boolean = true,
-    val routeIdsToSerializedStates: Map<String, ByteArray> = mapOf()
 )
 
 fun <T> Flow<T>.monitorWhenActive(lifecycleStateFlow: StateFlow<Lifecycle>) =

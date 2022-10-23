@@ -16,21 +16,21 @@
 
 import com.tunjid.me.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.archivedetail.State
-import com.tunjid.me.common.SavedState
-import com.tunjid.me.common.ui.archivelist.ArchiveListRoute
 import com.tunjid.me.common.ui.archivelist.QueryState
 import com.tunjid.me.core.model.ArchiveKind.Articles
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.DelegatingByteSerializer
 import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.core.utilities.toBytes
+import com.tunjid.me.feature.archivelist.ArchiveListRoute
 import com.tunjid.me.scaffold.nav.ByteSerializableRoute
 import com.tunjid.me.scaffold.nav.toByteSerializable
+import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.treenav.MultiStackNav
-import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import kotlinx.serialization.protobuf.ProtoBuf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -55,7 +55,7 @@ class StateRestorationTest {
     @Test
     fun testStateSerialization() {
         val byteSerializer = DelegatingByteSerializer(
-            format = Cbor {
+            format = ProtoBuf {
                 serializersModule = SerializersModule {
                     polymorphic(ByteSerializableRoute::class) {
                         subclass(ArchiveListRoute::class)

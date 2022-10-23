@@ -16,22 +16,34 @@
 
 package com.tunjid.me.common.di
 
+import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.core.utilities.ByteSerializer
+import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.RouteServiceLocator
 import com.tunjid.me.feature.find
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.Route404
 import com.tunjid.me.scaffold.nav.removedRoutes
+import com.tunjid.me.scaffold.savedstate.SavedState
+import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.Order
+import com.tunjid.treenav.flatten
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 internal class RouteMutatorFactory(
     appScope: CoroutineScope,
+    byteSerializer: ByteSerializer,
     private val features: List<Feature<*, *>>,
     private val scaffoldComponent: ScaffoldComponent,
     private val dataComponent: DataComponent,
@@ -52,6 +64,13 @@ internal class RouteMutatorFactory(
                     }
                 }
         }
+        appScope.launch {
+            scaffoldComponent
+                .navStateStream
+                .map { it.mainNav }
+                .map { it.toSavedState(byteSerializer) }
+                .collectLatest(scaffoldComponent.savedStateRepository::saveState)
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -62,7 +81,7 @@ internal class RouteMutatorFactory(
             )
             ScopeHolder(
                 scope = routeScope,
-                mutator = features.find(route)
+                mutator = if (route is Route404) Route404 else features.find(route)
                     .mutator(
                         scope = routeScope,
                         route = route,
@@ -72,6 +91,31 @@ internal class RouteMutatorFactory(
             )
 
         }.mutator as T
+
+    private fun MultiStackNav.toSavedState(
+        byteSerializer: ByteSerializer
+    ) = SavedState(
+        isEmpty = false,
+        activeNav = currentIndex,
+        navigation = stacks.fold(listOf()) { listOfLists, stackNav ->
+            listOfLists.plus(
+                element = stackNav.routes
+                    .filterIsInstance<AppRoute>()
+                    .fold(listOf()) { stackList, route ->
+                        stackList + route.id
+                    }
+            )
+        },
+        routeStates = flatten(order = Order.BreadthFirst)
+            .filterIsInstance<AppRoute>()
+            .fold(mutableMapOf()) { map, route ->
+                val mutator = locate<Any>(route)
+                val state = (mutator as? ActionStateProducer<*, *>)?.state ?: return@fold map
+                val serializable = (state as? StateFlow<*>)?.value ?: return@fold map
+                if (serializable is ByteSerializable) map[route.id] =
+                    byteSerializer.toBytes(serializable)
+                map
+            })
 }
 
 private data class ScopeHolder(

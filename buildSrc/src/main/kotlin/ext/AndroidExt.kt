@@ -15,10 +15,12 @@
  */
 
 import com.android.build.api.dsl.CommonExtension
+import gradle.kotlin.dsl.accessors._670b062c00b9623c6990300359413371.coreLibraryDesugaring
 import org.gradle.api.Action
 import org.gradle.api.JavaVersion
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.kotlin.dsl.dependencies
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
 /**
@@ -74,6 +76,12 @@ fun org.gradle.api.Project.coerceComposeVersion(configuration: Configuration) {
             useVersion(versionCatalog.findVersion("androidxCompose").get().requiredVersion)
             because("I need the changes in lazyGrid")
         }
+    }
+}
+
+fun org.gradle.api.Project.addDesugarDependencies() {
+    dependencies {
+        coreLibraryDesugaring(versionCatalog.findLibrary("android-desugarJdkLibs").get())
     }
 }
 

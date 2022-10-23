@@ -50,10 +50,10 @@ fun org.gradle.api.Project.configureFeatureModule(
             dependencies {
             }
         }
-        named("commonTest") {
-            dependencies {
-                implementation(kotlin("test"))
-            }
-        }
+//        named("commonTest") {
+//            dependencies {
+//                implementation(kotlin("test"))
+//            }
+//        }
     }
 }

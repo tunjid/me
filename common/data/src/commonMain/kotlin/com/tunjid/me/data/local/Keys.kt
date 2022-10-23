@@ -16,8 +16,6 @@
 
 package com.tunjid.me.data.local
 
-import com.tunjid.me.core.model.ArchiveKind
-
 /**
  * Keys used for key value storage
  */

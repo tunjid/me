@@ -19,13 +19,8 @@ package com.tunjid.me
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import com.tunjid.me.common.SavedState
 import com.tunjid.me.common.di.createAppDependencies
-import com.tunjid.me.common.restore
-import com.tunjid.me.common.saveState
 import com.tunjid.me.core.utilities.UriConverter
-import com.tunjid.me.core.utilities.fromBytes
-import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.scaffold.permissions.PlatformPermissionsProvider
@@ -33,8 +28,7 @@ import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-
-private const val SavedStateKey = "com.tunjid.me.android_saved_state"
+import okio.Path.Companion.toPath
 
 class App : Application() {
 
@@ -42,6 +36,7 @@ class App : Application() {
         val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         createAppDependencies(
             appScope = appScope,
+            savedStatePath = filesDir.resolve("savedState").absolutePath.toPath(),
             permissionsProvider = PlatformPermissionsProvider(appScope = appScope, context = this),
             networkMonitor = NetworkMonitor(scope = appScope, context = this),
             uriConverter = UriConverter(),
@@ -58,7 +53,6 @@ class App : Application() {
         super.onCreate()
 
         val scaffoldComponent = appDependencies.scaffoldComponent
-        val byteSerializer = appDependencies.byteSerializer
 
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             private fun updateStatus(isInForeground: Boolean) =
@@ -66,13 +60,8 @@ class App : Application() {
                     copy(isInForeground = isInForeground)
                 })
 
-            override fun onActivityCreated(p0: Activity, bundle: Bundle?) {
-                bundle?.getByteArray(SavedStateKey)
-                    ?.let<ByteArray, SavedState>(byteSerializer::fromBytes)
-                    ?.let(appDependencies::restore)
-
+            override fun onActivityCreated(p0: Activity, bundle: Bundle?) =
                 updateStatus(isInForeground = true)
-            }
 
             override fun onActivityStarted(p0: Activity) =
                 updateStatus(isInForeground = true)
@@ -86,12 +75,7 @@ class App : Application() {
             override fun onActivityStopped(p0: Activity) =
                 updateStatus(isInForeground = false)
 
-            override fun onActivitySaveInstanceState(p0: Activity, bundle: Bundle) {
-                bundle.putByteArray(
-                    SavedStateKey,
-                    byteSerializer.toBytes(appDependencies.saveState())
-                )
-            }
+            override fun onActivitySaveInstanceState(p0: Activity, bundle: Bundle) = Unit
 
             override fun onActivityDestroyed(p0: Activity) =
                 updateStatus(isInForeground = false)

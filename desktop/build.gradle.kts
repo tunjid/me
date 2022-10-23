@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -37,6 +36,8 @@ kotlin {
                 implementation(libs.jetbrains.compose.material)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.coroutines.swing)
+
+                implementation(libs.squareup.okio)
 
                 implementation(libs.tunjid.mutator.core.jvm)
                 implementation(libs.tunjid.mutator.coroutines.jvm)

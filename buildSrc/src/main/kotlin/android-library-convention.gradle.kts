@@ -35,3 +35,5 @@ android {
         coerceComposeVersion(this)
     }
 }
+
+addDesugarDependencies()

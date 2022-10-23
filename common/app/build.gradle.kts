@@ -43,7 +43,9 @@ kotlin {
                 implementation(libs.jetbrains.compose.material)
 
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.kotlinx.serialization.cbor)
+                implementation(libs.kotlinx.serialization.protobuf)
+
+                implementation(libs.squareup.okio)
 
                 implementation(libs.tunjid.mutator.core.common)
                 implementation(libs.tunjid.treenav.core.common)

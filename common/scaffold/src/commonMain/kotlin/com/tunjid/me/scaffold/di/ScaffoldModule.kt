@@ -26,23 +26,31 @@ import com.tunjid.me.scaffold.lifecycle.lifecycleMutator
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.navMutator
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
+import com.tunjid.me.scaffold.savedstate.DataStoreSavedStateRepository
+import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.treenav.strings.UrlRouteMatcher
 import com.tunjid.treenav.strings.routeParserFrom
 import kotlinx.coroutines.CoroutineScope
+import okio.Path
 
 class ScaffoldModule(
     appScope: CoroutineScope,
+    savedStatePath: Path,
     initialUiState: UiState = UiState(),
-    startRoutes: List<List<String>>,
     routeMatchers: List<UrlRouteMatcher<AppRoute>>,
     internal val permissionsProvider: PermissionsProvider,
     internal val byteSerializer: ByteSerializer,
     internal val uriConverter: UriConverter
 ) {
+    internal val savedStateRepository = DataStoreSavedStateRepository(
+        appScope = appScope,
+        path = savedStatePath,
+        byteSerializer = byteSerializer
+    )
     internal val routeParser = routeParserFrom(*routeMatchers.toTypedArray())
     internal val navMutator = navMutator(
         scope = appScope,
-        startNav = startRoutes,
+        savedStateRepository = savedStateRepository,
         routeParser = routeParser,
     )
     internal val globalUiMutator = globalUiMutator(
@@ -63,6 +71,8 @@ class ScaffoldComponent(
     private val lifecycleMutator = module.lifecycleMutator
     private val permissionsMutator = module.permissionsMutator
 
+    val savedStateRepository: SavedStateRepository = module.savedStateRepository
+
     val routeParser = module.routeParser
     val byteSerializer = module.byteSerializer
     val uriConverter = module.uriConverter
@@ -81,7 +91,7 @@ class ScaffoldComponent(
 inline fun <reified T : ByteSerializable> ScaffoldComponent.restoredState(route: AppRoute): T? {
     return try {
         // TODO: Figure out why this throws
-        val serialized = lifecycleStateStream.value.routeIdsToSerializedStates[route.id]
+        val serialized = savedStateRepository.savedState.value.routeStates[route.id]
         serialized?.let(byteSerializer::fromBytes)
     } catch (e: Exception) {
         null

@@ -16,16 +16,16 @@
 
 package com.tunjid.me.data.network.models
 
+import com.tunjid.me.common.data.ArchiveEntity
+import com.tunjid.me.common.data.UserEntity
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.utilities.LocalDateTimeSerializer
 import com.tunjid.me.core.model.UserId
+import com.tunjid.me.core.utilities.LocalDateTimeSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import com.tunjid.me.common.data.ArchiveEntity
-import com.tunjid.me.common.data.UserEntity
 
 @Serializable
 class NetworkArchive(
@@ -61,7 +61,7 @@ fun NetworkArchive.toEntity() = ArchiveEntity(
 )
 
 fun NetworkArchive.authorShell() = UserEntity(
-    id = author.value,   first_name = "",
+    id = author.value, first_name = "",
     last_name = "",
     full_name = "",
     image_url = "",
