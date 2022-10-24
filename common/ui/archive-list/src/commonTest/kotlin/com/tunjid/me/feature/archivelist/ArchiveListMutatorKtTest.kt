@@ -52,7 +52,6 @@ class ArchiveListMutatorKtTest {
         val initialQueryState = QueryState(
             expanded = false,
             startQuery = ArchiveQuery(kind = ArchiveKind.Articles),
-            currentQuery = ArchiveQuery(kind = ArchiveKind.Articles),
         )
         val initialState = State(
             queryState = initialQueryState
@@ -109,7 +108,6 @@ class ArchiveListMutatorKtTest {
             queryState = QueryState(
                 expanded = false,
                 startQuery = ArchiveQuery(kind = ArchiveKind.Articles),
-                currentQuery = ArchiveQuery(kind = ArchiveKind.Articles),
             )
         )
         val authRepository = mockk<AuthRepository>()

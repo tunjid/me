@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.map
 
 interface AuthRepository {
     val isSignedIn: Flow<Boolean>
+
     val signedInUserStream: Flow<User?>
     suspend fun createSession(request: SessionRequest): Result<UserId>
 }

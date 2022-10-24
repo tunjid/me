@@ -225,6 +225,6 @@ private suspend fun <T> Json.parseServerErrors(body: suspend () -> T): NetworkRe
             NetworkResponse.Error(message = exception.response.bodyAsText())
         }
 
-        else -> throw exception
+        else -> NetworkResponse.Error(message = exception.message)
     }
 }

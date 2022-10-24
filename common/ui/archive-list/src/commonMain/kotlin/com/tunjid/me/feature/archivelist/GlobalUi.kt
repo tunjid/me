@@ -61,7 +61,7 @@ fun GlobalUi(
             fabIcon = Icons.Default.Add,
             fabClickListener = rememberFunction {
                 onNavigate(Action.Navigate {
-                    val kind = state.queryState.currentQuery.kind
+                    val kind = state.queryState.startQuery.kind
                     mainNav.push("archives/${kind.type}/create".toRoute)
                 })
             },

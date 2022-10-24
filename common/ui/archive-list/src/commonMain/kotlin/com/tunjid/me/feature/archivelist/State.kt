@@ -25,6 +25,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
 data class State(
@@ -33,8 +34,7 @@ data class State(
     val hasFetchedAuthStatus: Boolean = false,
     val isSignedIn: Boolean = false,
     val queryState: QueryState,
-    @Transient
-    val lastVisibleKey: Any? = null,
+    val lastVisibleKey: String? = null,
     @Transient
     val items: List<ArchiveItem> = listOf()
 ) : ByteSerializable
@@ -77,7 +77,7 @@ sealed class Action(val key: String) {
 
     data class ToggleFilter(val isExpanded: Boolean? = null) : Action(key = "ToggleFilter")
 
-    data class LastVisibleKey(val itemKey: Any) : Action(key = "LastVisibleKey")
+    data class LastVisibleKey(val itemKey: String) : Action(key = "LastVisibleKey")
 
     data class Navigate(val navMutation: NavMutation) : Action(key = "Navigate")
 }
@@ -136,11 +136,17 @@ val ArchiveItem.Result.headerText
 
 @Serializable
 data class QueryState(
+    @ProtoNumber(1)
     val gridSize: Int = 1,
+    @ProtoNumber(2)
     val expanded: Boolean = false,
+    @ProtoNumber(3)
     val startQuery: ArchiveQuery,
-    val currentQuery: ArchiveQuery,
+    // Deleted field
+    // val currentQuery: ArchiveQuery,
+    @ProtoNumber(5)
     val categoryText: Descriptor.Category = Descriptor.Category(""),
+    @ProtoNumber(6)
     val tagText: Descriptor.Tag = Descriptor.Tag(""),
 )
 

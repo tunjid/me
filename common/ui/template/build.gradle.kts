@@ -31,6 +31,9 @@ kotlin {
 
                 implementation(libs.jetbrains.compose.runtime)
                 implementation(libs.kotlinx.coroutines.core)
+
+                api(libs.kotlinx.serialization.protobuf)
+
                 api(libs.tunjid.treenav.core.common)
                 api(libs.tunjid.treenav.strings.common)
             }

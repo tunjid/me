@@ -62,7 +62,6 @@ fun archiveListMutator(
         ),
         queryState = QueryState(
             startQuery = ArchiveQuery(kind = route.kind),
-            currentQuery = ArchiveQuery(kind = route.kind),
         )
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
@@ -216,14 +215,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
             copy(
                 items = items,
                 queryState = queryState.copy(
-                    currentQuery = fetchResult.action.query,
-                    startQuery = when (fetchAction) {
-                        is Action.Fetch.Reset -> queryState.startQuery.copy(
-                            contentFilter = fetchAction.query.contentFilter
-                        )
-
-                        else -> queryState.startQuery
-                    },
+                    startQuery = fetchResult.action.query,
                     expanded = when (fetchAction) {
                         is Action.Fetch.Reset -> true
                         else -> queryState.expanded

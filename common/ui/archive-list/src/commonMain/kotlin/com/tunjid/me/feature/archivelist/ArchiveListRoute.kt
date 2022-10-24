@@ -25,11 +25,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -44,7 +40,9 @@ import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlin.math.min
 
@@ -131,10 +129,10 @@ private fun ArchiveScreen(
     }
 
     // Initial load
-    LaunchedEffect(state.queryState.startQuery) {
+    LaunchedEffect(true) {
         mutator.accept(
             Action.Fetch.LoadMore(
-                query = state.queryState.currentQuery,
+                query = state.queryState.startQuery,
                 gridSize = state.queryState.gridSize,
             )
         )
@@ -143,7 +141,7 @@ private fun ArchiveScreen(
     EndlessScroll(
         gridState = gridState,
         gridSize = state.queryState.gridSize,
-        currentQuery = state.queryState.currentQuery,
+        currentQuery = state.queryState.startQuery,
         onAction = mutator.accept
     )
 
@@ -207,9 +205,10 @@ private fun EndlessScroll(
         snapshotFlow {
             gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.key
         }
-            .filterNotNull()
+            .filterIsInstance<String>()
             .distinctUntilChanged()
-            .collect { onAction(Action.LastVisibleKey(it)) }
+            .map(Action::LastVisibleKey)
+            .collect(onAction)
     }
 }
 
@@ -218,10 +217,16 @@ private fun ListSync(
     state: State,
     gridState: LazyGridState
 ) {
-    LaunchedEffect(true) {
+    var hasRun by remember { mutableStateOf(false) }
+    LaunchedEffect(state.items) {
+        if (hasRun || state.items.isEmpty()) return@LaunchedEffect
+
         val key = state.lastVisibleKey ?: return@LaunchedEffect
         // Item is on screen do nothing
-        if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) return@LaunchedEffect
+        if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) {
+            hasRun = true
+            return@LaunchedEffect
+        }
 
         val indexOfKey = state.items.indexOfFirst { it.key == key }
         if (indexOfKey < 0) return@LaunchedEffect
@@ -230,6 +235,7 @@ private fun ListSync(
             index = min(indexOfKey + 1, gridState.layoutInfo.totalItemsCount - 1),
             scrollOffset = 400
         )
+        hasRun = true
     }
 }
 
@@ -240,7 +246,6 @@ private fun PreviewLoadingState() {
         mutator = State(
             queryState = QueryState(
                 startQuery = ArchiveQuery(kind = ArchiveKind.Articles),
-                currentQuery = ArchiveQuery(kind = ArchiveKind.Articles),
             ),
             items = listOf(
                 ArchiveItem.Loading(
