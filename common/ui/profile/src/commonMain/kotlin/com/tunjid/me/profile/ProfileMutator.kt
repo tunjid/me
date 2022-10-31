@@ -20,6 +20,7 @@ package com.tunjid.me.profile
 import com.tunjid.me.core.ui.update
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
+import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.ActionStateProducer
@@ -28,22 +29,25 @@ import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.*
+import me.tatarka.inject.annotations.Inject
 
 typealias ProfileMutator = ActionStateProducer<Action, StateFlow<State>>
 
-fun profileMutator(
-    scope: CoroutineScope,
-    @Suppress("UNUSED_PARAMETER")
-    route: ProfileRoute,
+@Inject
+class ProfileMutatorCreator(
+    creator: (scope: CoroutineScope, route: ProfileRoute) -> ProfileMutator
+) : ScreenStateHolderCreator by creator as ScreenStateHolderCreator
+
+@Inject
+class ActualProfileMutator(
     initialState: State? = null,
     authRepository: AuthRepository,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-): ProfileMutator = scope.actionStateFlowProducer(
+    scope: CoroutineScope,
+    @Suppress("UNUSED_PARAMETER")
+    route: ProfileRoute,
+) : ProfileMutator by scope.actionStateFlowProducer(
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     actionTransform = { actions ->

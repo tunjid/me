@@ -46,7 +46,7 @@ object SignInFeature : Feature<SignInRoute, SignInMutator> {
         route: SignInRoute,
         scaffoldComponent: ScaffoldComponent,
         dataComponent: DataComponent
-    ): SignInMutator = signInMutator(
+    ): SignInMutator = ActualSignInMutator(
         scope = scope,
         route = route,
         initialState = scaffoldComponent.restoredState(route),

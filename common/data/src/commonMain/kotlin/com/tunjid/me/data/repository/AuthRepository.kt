@@ -21,11 +21,7 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.common.data.UserEntityQueries
-import com.tunjid.me.core.model.Result
-import com.tunjid.me.core.model.SessionRequest
-import com.tunjid.me.core.model.User
-import com.tunjid.me.core.model.UserId
-import com.tunjid.me.core.model.map
+import com.tunjid.me.core.model.*
 import com.tunjid.me.data.local.models.toExternalModel
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.models.NetworkUser
@@ -33,11 +29,8 @@ import com.tunjid.me.data.network.models.item
 import com.tunjid.me.data.network.models.toEntity
 import com.tunjid.me.data.network.models.toResult
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
+import me.tatarka.inject.annotations.Inject
 
 interface AuthRepository {
     val isSignedIn: Flow<Boolean>
@@ -46,6 +39,7 @@ interface AuthRepository {
     suspend fun createSession(request: SessionRequest): Result<UserId>
 }
 
+@Inject
 internal class SessionCookieAuthRepository(
     private val networkService: NetworkService,
     private val userEntityQueries: UserEntityQueries,

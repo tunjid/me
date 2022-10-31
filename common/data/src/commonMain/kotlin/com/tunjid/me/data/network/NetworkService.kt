@@ -17,12 +17,7 @@
 package com.tunjid.me.data.network
 
 import com.tunjid.me.common.data.SessionEntityQueries
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.model.ArchiveUpsert
-import com.tunjid.me.core.model.ChangeListItem
-import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.model.SessionRequest
+import com.tunjid.me.core.model.*
 import com.tunjid.me.core.sync.SyncRequest
 import com.tunjid.me.data.network.models.NetworkArchive
 import com.tunjid.me.data.network.models.NetworkResponse
@@ -44,8 +39,11 @@ import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import me.tatarka.inject.annotations.Inject
 
-const val ApiUrl = "https://www.tunjid.com"
+const val ApiUrl: BaseUrl = "https://www.tunjid.com"
+
+typealias BaseUrl = String
 
 internal interface NetworkService {
     suspend fun fetchArchives(
@@ -85,9 +83,10 @@ internal interface NetworkService {
     ): NetworkResponse<List<ChangeListItem>>
 }
 
+@Inject
 internal class KtorNetworkService(
     private val json: Json,
-    private val baseUrl: String = ApiUrl,
+    private val baseUrl: BaseUrl,
     sessionEntityQueries: SessionEntityQueries,
     dispatcher: CoroutineDispatcher,
 ) : NetworkService {

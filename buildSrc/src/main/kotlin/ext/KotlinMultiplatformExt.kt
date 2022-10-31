@@ -14,31 +14,79 @@
  * limitations under the License.
  */
 
+import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 
 fun org.gradle.api.Project.configureKotlinMultiplatform(
-    extension: KotlinMultiplatformExtension
-) = extension.apply {
-    android()
-    jvm("desktop")
-    sourceSets.apply {
-        all {
-            languageSettings.apply {
-                optIn("androidx.compose.animation.ExperimentalAnimationApi")
-                optIn("androidx.compose.foundation.ExperimentalFoundationApi")
-                optIn("androidx.compose.material.ExperimentalMaterialApi")
-                optIn("androidx.compose.ui.ExperimentalComposeUiApi")
-                optIn("kotlinx.serialization.ExperimentalSerializationApi")
-                optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
-                optIn("kotlinx.coroutines.FlowPreview")
+    kotlinMultiplatformExtension: KotlinMultiplatformExtension
+) {
+    val project = this@configureKotlinMultiplatform
+
+    kotlinMultiplatformExtension.apply {
+        android()
+        jvm("desktop")
+        sourceSets.apply {
+            all {
+                languageSettings.apply {
+                    optIn("androidx.compose.animation.ExperimentalAnimationApi")
+                    optIn("androidx.compose.foundation.ExperimentalFoundationApi")
+                    optIn("androidx.compose.material.ExperimentalMaterialApi")
+                    optIn("androidx.compose.ui.ExperimentalComposeUiApi")
+                    optIn("kotlinx.serialization.ExperimentalSerializationApi")
+                    optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
+                    optIn("kotlinx.coroutines.FlowPreview")
+                }
+            }
+            val catalogs = extensions.getByType(VersionCatalogsExtension::class.java)
+            val libs = catalogs.named("libs")
+
+            named("commonMain") {
+//                kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
+                dependencies {
+                    api(libs.findLibrary("tartaka-kotlin-inject-runtime").get())
+                }
             }
         }
+
+        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+            kotlinOptions.jvmTarget = "11"
+        }
+//        tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
+//            if (name != "kspCommonMainKotlinMetadata") {
+//                dependsOn("kspCommonMainKotlinMetadata")
+//            }
+//            kotlinOptions.freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+//        }
+
+        configurations.all {
+            coerceComposeVersion(this)
+        }
+        targets.configureEach {
+            configureKsp(project = project)
+        }
     }
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "11"
+}
+
+private fun KotlinTarget.configureKsp(project: Project) {
+    println("Target name: $targetName. Metadata? ${targetName == "metadata"}")
+    if (targetName != "metadata") {
+        project.dependencies {
+            add(
+                configurationName = "ksp${targetName.capitalize()}",
+                dependencyNotation = project.versionCatalog.findLibrary("tartaka-kotlin-inject-compiler").get()
+            )
+        }
     }
-    configurations.all {
-        coerceComposeVersion(this)
+
+    compilations.configureEach {
+        kotlinSourceSets.forEach { sourceSet ->
+            println("Target name: $targetName. sourceSet name: ${sourceSet.name}")
+
+            sourceSet.kotlin.srcDir("build/generated/ksp/$targetName/${sourceSet.name}/kotlin")
+        }
     }
 }

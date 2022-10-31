@@ -46,7 +46,7 @@ object ProfileFeature : Feature<ProfileRoute, ProfileMutator> {
         route: ProfileRoute,
         scaffoldComponent: ScaffoldComponent,
         dataComponent: DataComponent
-    ): ProfileMutator = profileMutator(
+    ): ProfileMutator = ActualProfileMutator(
         scope = scope,
         route = route,
         initialState = scaffoldComponent.restoredState(route),

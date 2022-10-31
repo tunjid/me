@@ -19,10 +19,7 @@ package com.tunjid.me.common.di
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.toBytes
-import com.tunjid.me.data.di.DataComponent
-import com.tunjid.me.feature.Feature
 import com.tunjid.me.feature.RouteServiceLocator
-import com.tunjid.me.feature.find
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.Route404
@@ -32,21 +29,15 @@ import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Order
 import com.tunjid.treenav.flatten
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
-internal class RouteMutatorFactory(
-    appScope: CoroutineScope,
-    byteSerializer: ByteSerializer,
-    private val features: List<Feature<*, *>>,
-    private val scaffoldComponent: ScaffoldComponent,
-    private val dataComponent: DataComponent,
+class RouteMutatorFactory(
+    val appScope: CoroutineScope,
+    val scaffoldComponent: ScaffoldComponent,
+    val screenStateHolderComponent: AppScreenStateHolderComponent
 ) : RouteServiceLocator {
     private val routeMutatorCache = mutableMapOf<AppRoute, ScopeHolder>()
 
@@ -68,7 +59,7 @@ internal class RouteMutatorFactory(
             scaffoldComponent
                 .navStateStream
                 .map { it.mainNav }
-                .map { it.toSavedState(byteSerializer) }
+                .map { it.toSavedState(scaffoldComponent.byteSerializer) }
                 .collectLatest(scaffoldComponent.savedStateRepository::saveState)
         }
     }
@@ -81,13 +72,12 @@ internal class RouteMutatorFactory(
             )
             ScopeHolder(
                 scope = routeScope,
-                mutator = if (route is Route404) Route404 else features.find(route)
-                    .mutator(
-                        scope = routeScope,
-                        route = route,
-                        scaffoldComponent = scaffoldComponent,
-                        dataComponent = dataComponent
-                    )
+                mutator = when (route) {
+                    is Route404 -> Route404
+                    else -> screenStateHolderComponent.allScreenHolders
+                        .getValue(route::class.simpleName!!)
+                }
+
             )
 
         }.mutator as T

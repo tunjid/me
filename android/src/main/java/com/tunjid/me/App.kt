@@ -20,6 +20,7 @@ import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 import com.tunjid.me.common.di.createAppDependencies
+import com.tunjid.me.core.utilities.ActualUriConverter
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.network.NetworkMonitor
@@ -39,7 +40,7 @@ class App : Application() {
             savedStatePath = filesDir.resolve("savedState").absolutePath.toPath(),
             permissionsProvider = PlatformPermissionsProvider(appScope = appScope, context = this),
             networkMonitor = NetworkMonitor(scope = appScope, context = this),
-            uriConverter = UriConverter(),
+            uriConverter = ActualUriConverter(),
             database = AppDatabase(
                 DatabaseDriverFactory(
                     context = this,

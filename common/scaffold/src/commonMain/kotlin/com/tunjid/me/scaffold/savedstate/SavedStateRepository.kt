@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.Serializable
+import me.tatarka.inject.annotations.Inject
 import okio.BufferedSink
 import okio.BufferedSource
 import okio.FileSystem
@@ -58,6 +59,7 @@ interface SavedStateRepository {
     suspend fun saveState(savedState: SavedState)
 }
 
+@Inject
 class DataStoreSavedStateRepository(
     path: Path,
     appScope: CoroutineScope,

@@ -23,6 +23,7 @@ import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.update
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
+import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.NavContext
@@ -37,25 +38,26 @@ import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.switch
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
+import me.tatarka.inject.annotations.Inject
 
 typealias SignInMutator = ActionStateProducer<Action, StateFlow<State>>
 
-fun signInMutator(
-    scope: CoroutineScope,
-    @Suppress("UNUSED_PARAMETER")
-    route: SignInRoute,
+@Inject
+class SignInMutatorCreator(
+    creator: (scope: CoroutineScope, route: SignInRoute) -> SignInMutator
+) : ScreenStateHolderCreator by creator as ScreenStateHolderCreator
+
+@Inject
+class ActualSignInMutator(
     initialState: State? = null,
     authRepository: AuthRepository,
     lifecycleStateFlow: StateFlow<Lifecycle>,
     navActions: (NavMutation) -> Unit,
-): SignInMutator = scope.actionStateFlowProducer(
+    scope: CoroutineScope,
+    @Suppress("UNUSED_PARAMETER")
+    route: SignInRoute,
+) : SignInMutator by scope.actionStateFlowProducer(
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf<Flow<Mutation<State>>>(

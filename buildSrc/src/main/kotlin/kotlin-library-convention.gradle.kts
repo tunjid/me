@@ -22,3 +22,10 @@ plugins {
 kotlin {
     configureKotlinMultiplatform(this)
 }
+
+//dependencies {
+//    add(
+//        configurationName = "kspCommonMainMetadata",
+//        dependencyNotation = project.versionCatalog.findLibrary("tartaka-kotlin-inject-compiler").get()
+//    )
+//}

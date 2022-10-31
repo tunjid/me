@@ -19,6 +19,7 @@ package com.tunjid.me.settings
 
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
+import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.NavMutation
@@ -31,17 +32,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import me.tatarka.inject.annotations.Inject
 
 typealias SettingsMutator = ActionStateProducer<Action, StateFlow<State>>
 
-fun settingsMutator(
-    scope: CoroutineScope,
-    route: SettingsRoute,
+@Inject
+class SettingsMutatorCreator(
+    creator: (scope: CoroutineScope, route: SettingsRoute) -> SettingsMutator
+) : ScreenStateHolderCreator by creator as ScreenStateHolderCreator
+
+@Inject
+class ActualSettingsMutator(
     initialState: State? = null,
     authRepository: AuthRepository,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-    navActions: (NavMutation) -> Unit
-): SettingsMutator = scope.actionStateFlowProducer(
+    navActions: (NavMutation) -> Unit,
+    scope: CoroutineScope,
+    route: SettingsRoute,
+) : SettingsMutator by scope.actionStateFlowProducer(
     initialState = initialState ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(

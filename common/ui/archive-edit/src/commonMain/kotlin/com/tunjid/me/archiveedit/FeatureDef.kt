@@ -63,7 +63,7 @@ object ArchiveEditFeature : Feature<ArchiveEditRoute, ArchiveEditMutator> {
         route: ArchiveEditRoute,
         scaffoldComponent: ScaffoldComponent,
         dataComponent: DataComponent
-    ): ArchiveEditMutator = archiveEditMutator(
+    ): ArchiveEditMutator = ActualArchiveEditMutator(
         scope = scope,
         route = route,
         initialState = scaffoldComponent.restoredState(route),

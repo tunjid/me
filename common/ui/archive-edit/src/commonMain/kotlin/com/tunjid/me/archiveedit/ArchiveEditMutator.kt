@@ -22,6 +22,7 @@ import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
@@ -49,12 +50,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
+import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveEditMutator = ActionStateProducer<Action, StateFlow<State>>
 
-fun archiveEditMutator(
-    scope: CoroutineScope,
-    route: ArchiveEditRoute,
+@Inject
+class ArchiveEditMutatorCreator(
+    creator: (scope: CoroutineScope, route: ArchiveEditRoute) -> ArchiveEditMutator
+) : ScreenStateHolderCreator by creator as ScreenStateHolderCreator
+
+@Inject
+class ActualArchiveEditMutator(
     initialState: State? = null,
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
@@ -62,7 +68,9 @@ fun archiveEditMutator(
     lifecycleStateFlow: StateFlow<Lifecycle>,
     permissionsFlow: StateFlow<Permissions>,
     onPermissionRequested: (Permission) -> Unit,
-): ArchiveEditMutator = scope.actionStateFlowProducer(
+    scope: CoroutineScope,
+    route: ArchiveEditRoute,
+) : ArchiveEditMutator by scope.actionStateFlowProducer(
     initialState = initialState ?: State(
         kind = route.kind,
         upsert = ArchiveUpsert(id = route.archiveId),

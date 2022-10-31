@@ -22,8 +22,6 @@ plugins {
 }
 
 kotlin {
-    android()
-    jvm("desktop")
     sourceSets {
         named("commonMain") {
             dependencies {
@@ -48,11 +46,6 @@ kotlin {
             dependencies {
                 implementation(libs.ktor.io.jvm)
                 implementation(libs.kotlinx.coroutines.swing)
-            }
-        }
-        named("commonTest") {
-            dependencies {
-                implementation(kotlin("test"))
             }
         }
     }

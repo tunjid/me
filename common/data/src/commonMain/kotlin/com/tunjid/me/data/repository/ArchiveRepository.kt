@@ -20,11 +20,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.coroutines.mapToOneOrNull
-import com.tunjid.me.common.data.ArchiveCategoryEntityQueries
-import com.tunjid.me.common.data.ArchiveEntity
-import com.tunjid.me.common.data.ArchiveEntityQueries
-import com.tunjid.me.common.data.ArchiveTagEntityQueries
-import com.tunjid.me.common.data.UserEntityQueries
+import com.tunjid.me.common.data.*
 import com.tunjid.me.core.model.*
 import com.tunjid.me.core.sync.ChangeListKey
 import com.tunjid.me.core.sync.SyncRequest
@@ -35,18 +31,14 @@ import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.local.models.toExternalModel
 import com.tunjid.me.data.local.suspendingTransaction
 import com.tunjid.me.data.network.NetworkService
-import com.tunjid.me.data.network.models.NetworkArchive
-import com.tunjid.me.data.network.models.NetworkResponse
-import com.tunjid.me.data.network.models.authorShell
-import com.tunjid.me.data.network.models.item
-import com.tunjid.me.data.network.models.toEntity
-import com.tunjid.me.data.network.models.toResult
+import com.tunjid.me.data.network.models.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import me.tatarka.inject.annotations.Inject
 
 interface ArchiveRepository : Syncable {
     suspend fun upsert(kind: ArchiveKind, upsert: ArchiveUpsert): Result<ArchiveId>
@@ -65,6 +57,7 @@ interface ArchiveRepository : Syncable {
  * is to have a pub sub infrastructure such that when an entity changes on the server, the
  * app is notified, and pulls it in.
  */
+@Inject
 internal class OfflineFirstArchiveRepository(
     private val networkService: NetworkService,
     private val uriConverter: UriConverter,

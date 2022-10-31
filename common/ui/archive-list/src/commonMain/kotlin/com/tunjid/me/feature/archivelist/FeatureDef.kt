@@ -52,7 +52,7 @@ object ArchiveListFeature : Feature<ArchiveListRoute, ArchiveListMutator> {
         route: ArchiveListRoute,
         scaffoldComponent: ScaffoldComponent,
         dataComponent: DataComponent
-    ): ArchiveListMutator = archiveListMutator(
+    ): ArchiveListMutator = ActualArchiveListMutator(
         scope = scope,
         route = route,
         initialState = scaffoldComponent.restoredState(route),

@@ -31,6 +31,7 @@ import com.tunjid.treenav.current
 import com.tunjid.treenav.strings.RouteParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
+import me.tatarka.inject.annotations.Inject
 
 const val NavName = "App"
 
@@ -75,38 +76,37 @@ val EmptyNavState = NavState(
 
 val NavState.current get() = mainNav.current
 
-internal fun navMutator(
-    scope: CoroutineScope,
+@Inject
+class PersistedNavMutator(
+    appScope: CoroutineScope,
     savedStateRepository: SavedStateRepository,
     routeParser: RouteParser<AppRoute>,
-): NavMutator {
-    return scope.actionStateFlowProducer(
-        initialState = EmptyNavState,
-        started = SharingStarted.Eagerly,
-        actionTransform = { navMutations ->
-            flow {
-                // Restore saved nav from disk first
-                val savedState = savedStateRepository.savedState.first { !it.isEmpty }
-                val multiStackNav = routeParser.parseMultiStackNav(savedState)
+) : NavMutator by appScope.actionStateFlowProducer(
+    initialState = EmptyNavState,
+    started = SharingStarted.Eagerly,
+    actionTransform = { navMutations ->
+        flow {
+            // Restore saved nav from disk first
+            val savedState = savedStateRepository.savedState.first { !it.isEmpty }
+            val multiStackNav = routeParser.parseMultiStackNav(savedState)
 
-                emit { routeParser.parseNavState(multiStackNav) }
-                emitAll(
-                    navMutations.map { navMutation ->
-                        mutation {
-                            val newMultiStackNav = navMutation(
-                                ImmutableNavContext(
-                                    state = mainNav,
-                                    routeParser = routeParser
-                                )
+            emit { routeParser.parseNavState(multiStackNav) }
+            emitAll(
+                navMutations.map { navMutation ->
+                    mutation {
+                        val newMultiStackNav = navMutation(
+                            ImmutableNavContext(
+                                state = mainNav,
+                                routeParser = routeParser
                             )
-                            routeParser.parseNavState(newMultiStackNav)
-                        }
+                        )
+                        routeParser.parseNavState(newMultiStackNav)
                     }
-                )
-            }
-        },
-    )
-}
+                }
+            )
+        }
+    },
+)
 
 
 fun <Action, State> Flow<Action>.consumeNavActions(
@@ -130,16 +130,16 @@ fun RouteParser<AppRoute>.parseMultiStackNav(savedState: SavedState) =
         operation = { multiStackNav, routesForStack ->
             multiStackNav.copy(
                 stacks = multiStackNav.stacks +
-                    routesForStack.fold(
-                        initial = StackNav(
-                            name = routesForStack.firstOrNull() ?: "Unknown"
-                        ),
-                        operation = innerFold@{ stackNav, route ->
-                            stackNav.copy(
-                                routes = stackNav.routes + (parse(routeString = route) ?: Route404)
-                            )
-                        }
-                    )
+                        routesForStack.fold(
+                            initial = StackNav(
+                                name = routesForStack.firstOrNull() ?: "Unknown"
+                            ),
+                            operation = innerFold@{ stackNav, route ->
+                                stackNav.copy(
+                                    routes = stackNav.routes + (parse(routeString = route) ?: Route404)
+                                )
+                            }
+                        )
             )
         }
     ).copy(currentIndex = savedState.activeNav)

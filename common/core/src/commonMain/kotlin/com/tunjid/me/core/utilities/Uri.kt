@@ -24,7 +24,9 @@ interface Uri {
     val mimeType: String?
 }
 
-expect class UriConverter() {
+interface UriConverter {
     fun toInput(uri: Uri): Input
     suspend fun name(uri: Uri): String
 }
+
+expect class ActualUriConverter : UriConverter

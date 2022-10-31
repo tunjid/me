@@ -16,20 +16,26 @@
 
 package com.tunjid.me.data.di
 
-import com.tunjid.me.common.data.AppDatabase
+import com.tunjid.me.common.data.*
+import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.local.databaseDispatcher
+import com.tunjid.me.data.network.ApiUrl
+import com.tunjid.me.data.network.BaseUrl
 import com.tunjid.me.data.network.KtorNetworkService
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.data.repository.OfflineFirstArchiveRepository
 import com.tunjid.me.data.repository.SessionCookieAuthRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.serialization.json.Json
+import me.tatarka.inject.annotations.Component
+import me.tatarka.inject.annotations.Provides
 
 class DataModule(
-    database: AppDatabase,
-    uriConverter: UriConverter
+    internal val database: AppDatabase,
+    internal val uriConverter: UriConverter
 ) {
     private val json = Json {
         explicitNulls = false
@@ -38,6 +44,7 @@ class DataModule(
 
     private val networkService: NetworkService = KtorNetworkService(
         json = json,
+        baseUrl = ApiUrl,
         sessionEntityQueries = database.sessionEntityQueries,
         dispatcher = databaseDispatcher(),
     )
@@ -65,4 +72,65 @@ class DataComponent(
 ) {
     val archiveRepository: ArchiveRepository = module.archiveRepository
     val authRepository: AuthRepository = module.authRepository
+}
+
+@SingletonScope
+@Component
+abstract class InjectedDataComponent(
+    private val module: DataModule
+) {
+
+    @Provides
+    internal fun appUrl(): BaseUrl = ApiUrl
+
+    @Provides
+    internal fun json() = Json {
+        explicitNulls = false
+        ignoreUnknownKeys = true
+    }
+
+    @SingletonScope
+    @Provides
+    internal fun uriConverter(): UriConverter = module.uriConverter
+
+    @SingletonScope
+    @Provides
+    internal fun coroutineDispatcher(): CoroutineDispatcher = databaseDispatcher()
+
+    @SingletonScope
+    @Provides
+    internal fun sessionEntityQueries(): SessionEntityQueries = module.database.sessionEntityQueries
+
+    @SingletonScope
+    @Provides
+    internal fun userEntityQueries(): UserEntityQueries = module.database.userEntityQueries
+
+    @SingletonScope
+    @Provides
+    internal fun archiveEntityQueries(): ArchiveEntityQueries = module.database.archiveEntityQueries
+
+    @SingletonScope
+    @Provides
+    internal fun archiveTagEntityQueries(): ArchiveTagEntityQueries = module.database.archiveTagEntityQueries
+
+    @SingletonScope
+    @Provides
+    internal fun archiveCategoryEntityQueries(): ArchiveCategoryEntityQueries =
+        module.database.archiveCategoryEntityQueries
+
+    internal val KtorNetworkService.bind: NetworkService
+        @SingletonScope
+        @Provides get() = this
+
+    internal val OfflineFirstArchiveRepository.bind: ArchiveRepository
+        @SingletonScope
+        @Provides get() = this
+
+    internal val SessionCookieAuthRepository.bind: AuthRepository
+        @SingletonScope
+        @Provides get() = this
+
+    abstract val archiveRepository: ArchiveRepository
+
+    abstract val authRepository: AuthRepository
 }

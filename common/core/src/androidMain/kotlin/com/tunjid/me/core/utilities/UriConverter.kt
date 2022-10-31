@@ -20,10 +20,10 @@ import android.content.ClipData
 import io.ktor.utils.io.core.*
 
 
-actual class UriConverter {
+actual class ActualUriConverter : UriConverter {
     // TODO Use Android context to get a safe input stream to read from and convert to [Input]
-    actual fun toInput(uri: Uri): Input = TODO()
-    actual suspend fun name(uri: Uri): String = TODO()
+    override fun toInput(uri: Uri): Input = TODO()
+    override suspend fun name(uri: Uri): String = TODO()
 }
 
 data class ClipItemUri(

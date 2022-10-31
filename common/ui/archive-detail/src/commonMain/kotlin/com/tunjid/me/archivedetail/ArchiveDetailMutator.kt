@@ -22,6 +22,7 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
+import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
@@ -39,19 +40,26 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveDetailMutator = ActionStateProducer<Action, StateFlow<State>>
 
-fun archiveDetailMutator(
-    scope: CoroutineScope,
-    route: ArchiveDetailRoute,
+@Inject
+class ArchiveDetailMutatorCreator(
+    creator: (scope: CoroutineScope, route: ArchiveDetailRoute) -> ArchiveDetailMutator
+) : ScreenStateHolderCreator by creator as ScreenStateHolderCreator
+
+@Inject
+class ActualArchiveDetailMutator(
     initialState: State? = null,
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-    navActions: (NavMutation) -> Unit
-): ArchiveDetailMutator = scope.actionStateFlowProducer(
+    navActions: (NavMutation) -> Unit,
+    scope: CoroutineScope,
+    route: ArchiveDetailRoute,
+) : ArchiveDetailMutator by scope.actionStateFlowProducer(
     initialState = initialState ?: State(
         kind = route.kind,
         navBarSize = uiStateFlow.value.navBarSize,

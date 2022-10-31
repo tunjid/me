@@ -46,7 +46,7 @@ object SettingsFeature : Feature<SettingsRoute, SettingsMutator> {
         route: SettingsRoute,
         scaffoldComponent: ScaffoldComponent,
         dataComponent: DataComponent
-    ): SettingsMutator = settingsMutator(
+    ): SettingsMutator = ActualSettingsMutator(
         scope = scope,
         route = route,
         initialState = scaffoldComponent.restoredState(route),

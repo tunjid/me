@@ -21,11 +21,7 @@ import androidx.compose.ui.geometry.Offset
 import com.tunjid.me.core.utilities.FileUri
 import com.tunjid.me.core.utilities.Uri
 import java.awt.datatransfer.DataFlavor
-import java.awt.dnd.DnDConstants
-import java.awt.dnd.DropTargetDragEvent
-import java.awt.dnd.DropTargetDropEvent
-import java.awt.dnd.DropTargetEvent
-import java.awt.dnd.DropTargetListener
+import java.awt.dnd.*
 import java.io.File
 import java.awt.dnd.DropTarget as AwtDropTarget
 

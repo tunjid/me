@@ -22,6 +22,7 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
+import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
@@ -36,23 +37,30 @@ import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
+import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveListMutator = ActionStateProducer<Action, StateFlow<State>>
+
+@Inject
+class ArchiveListMutatorCreator(
+    creator: (scope: CoroutineScope, route: ArchiveListRoute) -> ArchiveListMutator
+) : ScreenStateHolderCreator by creator as ScreenStateHolderCreator
 
 /**
  * Manages [State] for [ArchiveListRoute]
  */
-fun archiveListMutator(
-    scope: CoroutineScope,
-    route: ArchiveListRoute,
+@Inject
+class ActualArchiveListMutator(
     initialState: State? = null,
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
     navStateFlow: StateFlow<NavState>,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
-    navActions: (NavMutation) -> Unit
-): ArchiveListMutator = scope.actionStateFlowProducer(
+    navActions: (NavMutation) -> Unit,
+    scope: CoroutineScope,
+    route: ArchiveListRoute,
+) : ArchiveListMutator by scope.actionStateFlowProducer(
     initialState = initialState ?: State(
         items = listOf(
             ArchiveItem.Loading(

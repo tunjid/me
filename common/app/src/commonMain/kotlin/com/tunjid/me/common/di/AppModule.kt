@@ -38,7 +38,6 @@ import com.tunjid.me.feature.archivelist.ArchiveListFeature
 import com.tunjid.me.profile.ProfileFeature
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.ScaffoldModule
-import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
@@ -60,7 +59,6 @@ import okio.Path
 
 fun createAppDependencies(
     appScope: CoroutineScope,
-    initialUiState: UiState = UiState(),
     database: AppDatabase,
     savedStatePath: Path,
     permissionsProvider: PermissionsProvider,
@@ -73,7 +71,6 @@ fun createAppDependencies(
     networkMonitor = networkMonitor,
     uriConverter = uriConverter,
     appScope = appScope,
-    initialUiState = initialUiState,
 )
 
 /**
@@ -86,7 +83,6 @@ private class AppModule(
     networkMonitor: NetworkMonitor,
     uriConverter: UriConverter,
     appScope: CoroutineScope,
-    initialUiState: UiState,
 ) : AppDependencies {
 
     private val features = listOf(
@@ -117,7 +113,6 @@ private class AppModule(
     private val scaffoldModule = ScaffoldModule(
         appScope = appScope,
         savedStatePath = savedStatePath,
-        initialUiState = initialUiState,
         permissionsProvider = permissionsProvider,
         byteSerializer = byteSerializer,
         uriConverter = uriConverter,

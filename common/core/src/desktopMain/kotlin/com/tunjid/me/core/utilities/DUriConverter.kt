@@ -21,13 +21,13 @@ import io.ktor.utils.io.streams.*
 import java.io.File
 import java.nio.file.Files
 
-actual class UriConverter {
-    actual fun toInput(uri: Uri): Input = when {
+actual class ActualUriConverter : UriConverter {
+    override fun toInput(uri: Uri): Input = when {
         uri.path.startsWith("http") -> TODO("unimplemented")
         else -> File(uri.path).inputStream().asInput()
     }
 
-    actual suspend fun name(uri: Uri): String = when {
+    override suspend fun name(uri: Uri): String = when {
         uri.path.startsWith("http") -> TODO("unimplemented")
         else -> File(uri.path).name
     }

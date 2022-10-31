@@ -52,7 +52,7 @@ object ArchiveDetailFeature : Feature<ArchiveDetailRoute, ArchiveDetailMutator> 
         route: ArchiveDetailRoute,
         scaffoldComponent: ScaffoldComponent,
         dataComponent: DataComponent
-    ): ArchiveDetailMutator = archiveDetailMutator(
+    ): ArchiveDetailMutator = ActualArchiveDetailMutator(
         scope = scope,
         route = route,
         initialState = scaffoldComponent.restoredState(route),

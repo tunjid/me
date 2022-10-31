@@ -34,6 +34,7 @@ retrofit = "2.9.0"
 richtext = "0.13.0"
 socketio = "2.0.0"
 sqldelight = "2.0.0-alpha03"
+tartakaKotlinInject = "0.5.1"
 tunjidMutator = "0.0.7"
 tunjidTiler = "0.0.3"
 tunjidTreeNav = "0.0.3"
@@ -118,6 +119,8 @@ richtext-commonmark = { group = "com.halilibo.compose-richtext", name = "richtex
 richtext-material = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material", version.ref = "richtext" }
 socketio-client-jvm = { group = "io.socket", name = "socket.io-client", version.ref = "socketio" }
 squareup-okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
+tartaka-kotlin-inject-compiler = { group = "me.tatarka.inject", name = "kotlin-inject-compiler-ksp", version.ref = "tartakaKotlinInject" }
+tartaka-kotlin-inject-runtime = { group = "me.tatarka.inject", name = "kotlin-inject-runtime", version.ref = "tartakaKotlinInject" }
 tunjid-mutator-core-common = { group = "com.tunjid.mutator", name = "core", version.ref = "tunjidMutator" }
 tunjid-mutator-core-jvm = { group = "com.tunjid.mutator", name = "core-jvm", version.ref = "tunjidMutator" }
 tunjid-mutator-coroutines-common = { group = "com.tunjid.mutator", name = "coroutines", version.ref = "tunjidMutator" }

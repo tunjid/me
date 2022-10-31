@@ -20,13 +20,8 @@ import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
+import me.tatarka.inject.annotations.Inject
 
 typealias LifecycleMutator = ActionStateProducer<Mutation<Lifecycle>, StateFlow<Lifecycle>>
 
@@ -54,9 +49,10 @@ fun <T> List<Flow<T>>.monitorWhenActive(lifecycleStateFlow: StateFlow<Lifecycle>
             }
     }
 
-internal fun lifecycleMutator(
-    scope: CoroutineScope,
-): LifecycleMutator = scope.actionStateFlowProducer(
+@Inject
+class ActualLifecycleMutator(
+    appScope: CoroutineScope,
+) : LifecycleMutator by appScope.actionStateFlowProducer(
     started = SharingStarted.Eagerly,
     initialState = Lifecycle(),
     actionTransform = { it }
