@@ -21,6 +21,7 @@ import com.tunjid.me.core.ui.update
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
+import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.ActionStateProducer
@@ -37,7 +38,7 @@ typealias ProfileMutator = ActionStateProducer<Action, StateFlow<State>>
 @Inject
 class ProfileMutatorCreator(
     creator: (scope: CoroutineScope, route: ProfileRoute) -> ProfileMutator
-) : ScreenStateHolderCreator by creator as ScreenStateHolderCreator
+) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
 class ActualProfileMutator(

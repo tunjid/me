@@ -20,6 +20,7 @@ package com.tunjid.me.settings
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
+import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.NavMutation
@@ -39,7 +40,7 @@ typealias SettingsMutator = ActionStateProducer<Action, StateFlow<State>>
 @Inject
 class SettingsMutatorCreator(
     creator: (scope: CoroutineScope, route: SettingsRoute) -> SettingsMutator
-) : ScreenStateHolderCreator by creator as ScreenStateHolderCreator
+) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
 class ActualSettingsMutator(

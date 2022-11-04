@@ -20,11 +20,15 @@ import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.feature.RouteServiceLocator
+import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.ScaffoldComponent
+import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.Route404
 import com.tunjid.me.scaffold.nav.removedRoutes
 import com.tunjid.me.scaffold.savedstate.SavedState
+import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Order
@@ -33,18 +37,21 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
+import me.tatarka.inject.annotations.Inject
 
+@Inject
 class RouteMutatorFactory(
-    val appScope: CoroutineScope,
-    val scaffoldComponent: ScaffoldComponent,
-    val screenStateHolderComponent: AppScreenStateHolderComponent
+    appScope: CoroutineScope,
+    byteSerializer: ByteSerializer,
+    navStateStream: StateFlow<NavState>,
+    savedStateRepository: SavedStateRepository,
+    private val allScreenStateHolders: Map<String, ScreenStateHolderCreator>
 ) : RouteServiceLocator {
     private val routeMutatorCache = mutableMapOf<AppRoute, ScopeHolder>()
 
     init {
         appScope.launch {
-            scaffoldComponent
-                .navStateStream
+            navStateStream
                 .map { it.mainNav }
                 .removedRoutes()
                 .collect { removedRoutes ->
@@ -56,11 +63,10 @@ class RouteMutatorFactory(
                 }
         }
         appScope.launch {
-            scaffoldComponent
-                .navStateStream
+            navStateStream
                 .map { it.mainNav }
-                .map { it.toSavedState(scaffoldComponent.byteSerializer) }
-                .collectLatest(scaffoldComponent.savedStateRepository::saveState)
+                .map { it.toSavedState(byteSerializer) }
+                .collectLatest(savedStateRepository::saveState)
         }
     }
 
@@ -74,8 +80,9 @@ class RouteMutatorFactory(
                 scope = routeScope,
                 mutator = when (route) {
                     is Route404 -> Route404
-                    else -> screenStateHolderComponent.allScreenHolders
+                    else -> allScreenStateHolders
                         .getValue(route::class.simpleName!!)
+                        .invoke(routeScope, route)
                 }
 
             )

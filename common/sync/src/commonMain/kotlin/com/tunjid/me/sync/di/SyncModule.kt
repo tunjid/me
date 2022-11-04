@@ -19,10 +19,12 @@ package com.tunjid.me.sync.di
 import com.tunjid.me.common.sync.AppDatabase
 import com.tunjid.me.core.sync.ChangeListKey
 import com.tunjid.me.core.sync.Syncable
+import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.sync.Synchronizer
 import com.tunjid.me.sync.synchronizer
 import kotlinx.coroutines.CoroutineScope
+import me.tatarka.inject.annotations.Component
 
 typealias SyncableLocator = Map<ChangeListKey, Syncable>
 
@@ -42,6 +44,15 @@ class SyncModule(
 
 class SyncComponent(
     private val module: SyncModule
+) {
+    fun sync(key: ChangeListKey) = module.synchronizer.sync(key)
+}
+
+
+@Component
+class InjectedSyncComponent(
+    private val module: SyncModule,
+    @Component dataComponent: InjectedDataComponent,
 ) {
     fun sync(key: ChangeListKey) = module.synchronizer.sync(key)
 }

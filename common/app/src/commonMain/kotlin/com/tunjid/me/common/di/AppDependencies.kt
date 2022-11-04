@@ -20,11 +20,3 @@ import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.di.DataComponent
 import com.tunjid.me.feature.RouteServiceLocator
 import com.tunjid.me.scaffold.di.ScaffoldComponent
-
-interface AppDependencies {
-    val dataComponent: DataComponent
-    val scaffoldComponent: ScaffoldComponent
-    val byteSerializer: ByteSerializer
-    val routeServiceLocator: RouteServiceLocator
-}
-

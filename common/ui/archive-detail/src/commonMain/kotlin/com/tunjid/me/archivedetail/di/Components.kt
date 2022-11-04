@@ -20,6 +20,7 @@ import com.tunjid.me.archivedetail.*
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
+import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
@@ -60,7 +61,7 @@ abstract class ArchiveDetailNavigationComponent {
 @Component
 abstract class ArchiveDetailScreenHolderComponent(
     @Component val dataComponent: InjectedDataComponent,
-    @Component val scaffoldComponent: ScaffoldComponent
+    @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
     val ActualArchiveDetailMutator.bind: ArchiveDetailMutator

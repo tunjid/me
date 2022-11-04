@@ -24,6 +24,7 @@ import com.tunjid.me.core.ui.update
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
+import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.NavContext
@@ -46,7 +47,7 @@ typealias SignInMutator = ActionStateProducer<Action, StateFlow<State>>
 @Inject
 class SignInMutatorCreator(
     creator: (scope: CoroutineScope, route: SignInRoute) -> SignInMutator
-) : ScreenStateHolderCreator by creator as ScreenStateHolderCreator
+) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
 class ActualSignInMutator(

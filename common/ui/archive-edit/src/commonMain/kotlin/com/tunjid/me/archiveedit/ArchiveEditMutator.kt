@@ -23,6 +23,7 @@ import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
+import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
@@ -57,7 +58,7 @@ typealias ArchiveEditMutator = ActionStateProducer<Action, StateFlow<State>>
 @Inject
 class ArchiveEditMutatorCreator(
     creator: (scope: CoroutineScope, route: ArchiveEditRoute) -> ArchiveEditMutator
-) : ScreenStateHolderCreator by creator as ScreenStateHolderCreator
+) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
 class ActualArchiveEditMutator(

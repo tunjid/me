@@ -83,56 +83,8 @@ private class AppModule(
     networkMonitor: NetworkMonitor,
     uriConverter: UriConverter,
     appScope: CoroutineScope,
-) : AppDependencies {
+)  {
 
-    private val features = listOf(
-        ArchiveEditFeature,
-        ArchiveDetailFeature,
-        ArchiveListFeature,
-        ProfileFeature,
-        SettingsFeature,
-        SignInFeature,
-    )
-
-    override val byteSerializer: ByteSerializer = DelegatingByteSerializer(
-        format = ProtoBuf {
-            serializersModule = SerializersModule {
-                polymorphic(ByteSerializable::class) {
-                    // TODO expose this on the feature directly
-                    subclass(com.tunjid.me.feature.archivelist.State::class)
-                    subclass(com.tunjid.me.archivedetail.State::class)
-                    subclass(com.tunjid.me.archiveedit.State::class)
-                    subclass(com.tunjid.me.settings.State::class)
-                    subclass(com.tunjid.me.signin.State::class)
-                    subclass(com.tunjid.me.profile.State::class)
-                }
-            }
-        }
-    )
-
-    private val scaffoldModule = ScaffoldModule(
-        appScope = appScope,
-        savedStatePath = savedStatePath,
-        permissionsProvider = permissionsProvider,
-        byteSerializer = byteSerializer,
-        uriConverter = uriConverter,
-        routeMatchers = features
-            .map(Feature<out AppRoute, out ActionStateProducer<out Any, out StateFlow<*>>>::routeMatchers)
-            .flatten()
-    )
-
-    private val dataModule = DataModule(
-        database = appDatabase,
-        uriConverter = uriConverter,
-    )
-
-    override val scaffoldComponent: ScaffoldComponent = ScaffoldComponent(
-        scaffoldModule
-    )
-
-    override val dataComponent: DataComponent = DataComponent(
-        dataModule
-    )
 
     private val syncModule = SyncModule(
         appScope = appScope,
@@ -148,14 +100,6 @@ private class AppModule(
 
     private val syncComponent: SyncComponent = SyncComponent(
         module = syncModule
-    )
-
-    override val routeServiceLocator: RouteServiceLocator = RouteMutatorFactory(
-        appScope = appScope,
-        features = features,
-        byteSerializer = byteSerializer,
-        scaffoldComponent = scaffoldComponent,
-        dataComponent = dataComponent
     )
 
     init {

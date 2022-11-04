@@ -18,6 +18,7 @@ package com.tunjid.me.profile.di
 
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.profile.*
+import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
@@ -54,7 +55,7 @@ abstract class ProfileNavigationComponent {
 @Component
 abstract class ProfileScreenHolderComponent(
     @Component val dataComponent: InjectedDataComponent,
-    @Component val scaffoldComponent: ScaffoldComponent
+    @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
     val ActualProfileMutator.bind: ProfileMutator

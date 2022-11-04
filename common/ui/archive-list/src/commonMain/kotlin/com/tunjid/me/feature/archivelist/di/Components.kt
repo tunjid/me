@@ -19,6 +19,7 @@ package com.tunjid.me.feature.archivelist.di
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivelist.*
+import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
@@ -60,7 +61,7 @@ abstract class ArchiveListNavigationComponent {
 @Component
 abstract class ArchiveListScreenHolderComponent(
     @Component val dataComponent: InjectedDataComponent,
-    @Component val scaffoldComponent: ScaffoldComponent
+    @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
     val ActualArchiveListMutator.bind: ArchiveListMutator

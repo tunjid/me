@@ -18,6 +18,7 @@ package com.tunjid.me.common.di
 
 import com.tunjid.me.archivedetail.di.ArchiveDetailScreenHolderComponent
 import com.tunjid.me.archiveedit.di.ArchiveEditScreenHolderComponent
+import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.feature.archivelist.di.ArchiveListScreenHolderComponent
 import com.tunjid.me.profile.di.ProfileScreenHolderComponent
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
@@ -37,4 +38,6 @@ abstract class AppScreenStateHolderComponent(
 ) {
 
     abstract val allScreenHolders: Map<String, ScreenStateHolderCreator>
+
+    abstract val routeMutatorFactory: RouteMutatorFactory
 }

@@ -23,10 +23,12 @@ import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
+import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
+import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.consumeNavActions
@@ -44,7 +46,7 @@ typealias ArchiveListMutator = ActionStateProducer<Action, StateFlow<State>>
 @Inject
 class ArchiveListMutatorCreator(
     creator: (scope: CoroutineScope, route: ArchiveListRoute) -> ArchiveListMutator
-) : ScreenStateHolderCreator by creator as ScreenStateHolderCreator
+) : ScreenStateHolderCreator by creator.downcast()
 
 /**
  * Manages [State] for [ArchiveListRoute]
