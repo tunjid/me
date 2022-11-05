@@ -17,11 +17,13 @@
 package com.tunjid.me.sync
 
 import com.tunjid.me.common.sync.AppDatabase
+import com.tunjid.me.common.sync.ChangeListItemQueries
 import com.tunjid.me.core.model.ChangeListId
 import com.tunjid.me.core.model.ChangeListItem
 import com.tunjid.me.core.sync.ChangeListKey
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import me.tatarka.inject.annotations.Inject
 
 /**
  * Dao for syncing change lists from the server
@@ -38,12 +40,11 @@ internal interface ChangeListDao {
     suspend fun markComplete(item: ChangeListItem)
 }
 
+@Inject
 internal class SqlChangeListDao(
-    database: AppDatabase,
+    private val changeListItemQueries: ChangeListItemQueries,
     private val dispatcher: CoroutineDispatcher,
 ) : ChangeListDao {
-
-    private val changeListItemQueries = database.changeListItemQueries
 
     override suspend fun latestItem(
         key: ChangeListKey

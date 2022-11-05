@@ -29,6 +29,7 @@ import com.tunjid.mutator.coroutines.splitByType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import me.tatarka.inject.annotations.Inject
 
 
 interface Synchronizer {
@@ -63,7 +64,7 @@ internal fun commonSynchronizer(
     networkMonitor = networkMonitor,
     locator = locator,
     changeListDao = SqlChangeListDao(
-        database = database,
+        changeListItemQueries = database.changeListItemQueries,
         dispatcher = databaseDispatcher(),
     )
 )
@@ -75,6 +76,7 @@ private val allChangeListKey = listOf(
     ChangeListKey.User,
 )
 
+@Inject
 internal class InMemorySynchronizer(
     private val appScope: CoroutineScope,
     networkMonitor: NetworkMonitor,

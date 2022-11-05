@@ -17,42 +17,75 @@
 package com.tunjid.me.sync.di
 
 import com.tunjid.me.common.sync.AppDatabase
+import com.tunjid.me.common.sync.ChangeListItemQueries
 import com.tunjid.me.core.sync.ChangeListKey
 import com.tunjid.me.core.sync.Syncable
 import com.tunjid.me.data.di.InjectedDataComponent
+import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.NetworkMonitor
-import com.tunjid.me.sync.Synchronizer
-import com.tunjid.me.sync.synchronizer
+import com.tunjid.me.data.repository.ArchiveRepository
+import com.tunjid.me.sync.*
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import me.tatarka.inject.annotations.Component
+import me.tatarka.inject.annotations.Provides
 
 typealias SyncableLocator = Map<ChangeListKey, Syncable>
 
 class SyncModule(
-    appScope: CoroutineScope,
-    database: AppDatabase,
-    locator: SyncableLocator,
-    networkMonitor: NetworkMonitor,
+    internal val appScope: CoroutineScope,
+    internal val database: AppDatabase,
+    internal val networkMonitor: NetworkMonitor,
 ) {
-    val synchronizer: Synchronizer = synchronizer(
-        appScope,
-        database,
-        locator,
-        networkMonitor
-    )
+//    val synchronizer: Synchronizer = synchronizer(
+//        appScope,
+//        database,
+//        locator,
+//        networkMonitor
+//    )
 }
 
 class SyncComponent(
     private val module: SyncModule
 ) {
-    fun sync(key: ChangeListKey) = module.synchronizer.sync(key)
+//    fun sync(key: ChangeListKey) = module.synchronizer.sync(key)
 }
 
 
 @Component
-class InjectedSyncComponent(
+abstract class InjectedSyncComponent(
     private val module: SyncModule,
-    @Component dataComponent: InjectedDataComponent,
+    @Component val dataComponent: InjectedDataComponent,
 ) {
-    fun sync(key: ChangeListKey) = module.synchronizer.sync(key)
+    fun sync(key: ChangeListKey) = synchronizer.sync(key)
+
+    @Provides
+    fun networkMonitor(): NetworkMonitor = module.networkMonitor
+
+    @Provides
+    fun appScope(): CoroutineScope = module.appScope
+
+    @Provides
+    internal fun coroutineDispatcher(): CoroutineDispatcher = databaseDispatcher()
+
+    @Provides
+    fun changeListItemQueries(): ChangeListItemQueries = module.database.changeListItemQueries
+
+    @Provides
+    fun provideSyncableLocator(
+        archiveRepository: ArchiveRepository
+    ): SyncableLocator = mapOf(
+        ChangeListKey.User to Syncable { _, _ -> },
+        ChangeListKey.Archive.Articles to archiveRepository,
+        ChangeListKey.Archive.Projects to archiveRepository,
+        ChangeListKey.Archive.Talks to archiveRepository,
+    )
+
+    internal val InMemorySynchronizer.bind: Synchronizer
+        @Provides get() = this
+
+    internal val SqlChangeListDao.bind: ChangeListDao
+        @Provides get() = this
+
+    abstract val synchronizer: Synchronizer
 }

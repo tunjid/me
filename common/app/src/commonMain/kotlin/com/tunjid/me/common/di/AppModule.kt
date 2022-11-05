@@ -17,61 +17,39 @@
 package com.tunjid.me.common.di
 
 import com.tunjid.me.AppDatabase
-import com.tunjid.me.archivedetail.ArchiveDetailFeature
-import com.tunjid.me.archiveedit.ArchiveEditFeature
 import com.tunjid.me.core.sync.ChangeListKey
 import com.tunjid.me.core.sync.Syncable
 import com.tunjid.me.core.sync.changeListKey
-import com.tunjid.me.core.utilities.ByteSerializable
-import com.tunjid.me.core.utilities.ByteSerializer
-import com.tunjid.me.core.utilities.DelegatingByteSerializer
 import com.tunjid.me.core.utilities.UriConverter
-import com.tunjid.me.data.di.DataComponent
-import com.tunjid.me.data.di.DataModule
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.network.modelEvents
-import com.tunjid.me.feature.Feature
-import com.tunjid.me.feature.RouteServiceLocator
-import com.tunjid.me.feature.archivelist.ArchiveListFeature
-import com.tunjid.me.profile.ProfileFeature
-import com.tunjid.me.scaffold.di.ScaffoldComponent
-import com.tunjid.me.scaffold.di.ScaffoldModule
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
-import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
-import com.tunjid.me.settings.SettingsFeature
-import com.tunjid.me.signin.SignInFeature
 import com.tunjid.me.sync.di.SyncComponent
 import com.tunjid.me.sync.di.SyncModule
-import com.tunjid.mutator.ActionStateProducer
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
-import kotlinx.serialization.protobuf.ProtoBuf
 import okio.Path
 
-fun createAppDependencies(
-    appScope: CoroutineScope,
-    database: AppDatabase,
-    savedStatePath: Path,
-    permissionsProvider: PermissionsProvider,
-    networkMonitor: NetworkMonitor,
-    uriConverter: UriConverter,
-): AppDependencies = AppModule(
-    appDatabase = database,
-    savedStatePath = savedStatePath,
-    permissionsProvider = permissionsProvider,
-    networkMonitor = networkMonitor,
-    uriConverter = uriConverter,
-    appScope = appScope,
-)
+//fun createAppDependencies(
+//    appScope: CoroutineScope,
+//    database: AppDatabase,
+//    savedStatePath: Path,
+//    permissionsProvider: PermissionsProvider,
+//    networkMonitor: NetworkMonitor,
+//    uriConverter: UriConverter,
+//): AppDependencies = AppModule(
+//    appDatabase = database,
+//    savedStatePath = savedStatePath,
+//    permissionsProvider = permissionsProvider,
+//    networkMonitor = networkMonitor,
+//    uriConverter = uriConverter,
+//    appScope = appScope,
+//)
 
 /**
  * Manual dependency injection module
@@ -83,34 +61,34 @@ private class AppModule(
     networkMonitor: NetworkMonitor,
     uriConverter: UriConverter,
     appScope: CoroutineScope,
-)  {
+) {
 
 
-    private val syncModule = SyncModule(
-        appScope = appScope,
-        networkMonitor = networkMonitor,
-        database = appDatabase,
-        locator = mapOf(
-            ChangeListKey.User to Syncable { _, _ -> },
-            ChangeListKey.Archive.Articles to dataComponent.archiveRepository,
-            ChangeListKey.Archive.Projects to dataComponent.archiveRepository,
-            ChangeListKey.Archive.Talks to dataComponent.archiveRepository,
-        )
-    )
+//    private val syncModule = SyncModule(
+//        appScope = appScope,
+//        networkMonitor = networkMonitor,
+//        database = appDatabase,
+//        locator = mapOf(
+//            ChangeListKey.User to Syncable { _, _ -> },
+//            ChangeListKey.Archive.Articles to dataComponent.archiveRepository,
+//            ChangeListKey.Archive.Projects to dataComponent.archiveRepository,
+//            ChangeListKey.Archive.Talks to dataComponent.archiveRepository,
+//        )
+//    )
+//
+//    private val syncComponent: SyncComponent = SyncComponent(
+//        module = syncModule
+//    )
 
-    private val syncComponent: SyncComponent = SyncComponent(
-        module = syncModule
-    )
-
-    init {
-        modelEvents(
-            url = "$ApiUrl/",
-            dispatcher = databaseDispatcher()
-        )
-            // This is an Android concern. Remove this when this is firebase powered.
-            .monitorWhenActive(scaffoldComponent.lifecycleStateStream)
-            .map { it.model.changeListKey() }
-            .onEach(syncComponent::sync)
-            .launchIn(appScope)
-    }
+//    init {
+//        modelEvents(
+//            url = "$ApiUrl/",
+//            dispatcher = databaseDispatcher()
+//        )
+//            // This is an Android concern. Remove this when this is firebase powered.
+//            .monitorWhenActive(scaffoldComponent.lifecycleStateStream)
+//            .map { it.model.changeListKey() }
+//            .onEach(syncComponent::sync)
+//            .launchIn(appScope)
+//    }
 }

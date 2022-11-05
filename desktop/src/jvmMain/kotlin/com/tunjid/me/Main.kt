@@ -62,6 +62,9 @@ import com.tunjid.me.settings.di.create
 import com.tunjid.me.signin.di.SignInNavigationComponent
 import com.tunjid.me.signin.di.SignInScreenHolderComponent
 import com.tunjid.me.signin.di.create
+import com.tunjid.me.sync.di.InjectedSyncComponent
+import com.tunjid.me.sync.di.SyncModule
+import com.tunjid.me.sync.di.create
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -69,7 +72,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import okio.Path
 import okio.Path.Companion.toOkioPath
 import java.io.File
-
+import com.tunjid.me.data.network.NetworkMonitor
 fun main() {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -82,13 +85,15 @@ fun main() {
         signInNavigationComponent = SignInNavigationComponent::class.create(),
     )
 
+    val appDatabase = AppDatabase(
+        DatabaseDriverFactory(
+            schema = AppDatabase.Schema,
+        ).createDriver()
+    )
+
     val injectedDataComponent = InjectedDataComponent::class.create(
         DataModule(
-            database = AppDatabase(
-                DatabaseDriverFactory(
-                    schema = AppDatabase.Schema,
-                ).createDriver()
-            ),
+            database = appDatabase,
             uriConverter = ActualUriConverter(),
         )
     )
@@ -102,6 +107,15 @@ fun main() {
             routeMatchers = appRouteComponent.allUrlRouteMatchers.toList(),
             byteSerializer = appRouteComponent.byteSerializer,
         )
+    )
+
+    val injectedSyncComponent = InjectedSyncComponent::class.create(
+        module = SyncModule(
+            appScope = appScope,
+            networkMonitor = NetworkMonitor(appScope),
+            database = appDatabase,
+            ),
+        dataComponent = injectedDataComponent
     )
 
     val appScreenStateHolderComponent = AppScreenStateHolderComponent::class.create(
