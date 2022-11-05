@@ -18,6 +18,7 @@ package com.tunjid.me.data.di
 
 import com.tunjid.me.common.data.*
 import com.tunjid.me.core.di.SingletonScope
+import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
@@ -36,43 +37,12 @@ import me.tatarka.inject.annotations.Provides
 class DataModule(
     internal val database: AppDatabase,
     internal val uriConverter: UriConverter
-) {
-    private val json = Json {
-        explicitNulls = false
-        ignoreUnknownKeys = true
-    }
+)
 
-    private val networkService: NetworkService = KtorNetworkService(
-        json = json,
-        baseUrl = ApiUrl,
-        sessionEntityQueries = database.sessionEntityQueries,
-        dispatcher = databaseDispatcher(),
-    )
-
-    internal val archiveRepository = OfflineFirstArchiveRepository(
-        uriConverter = uriConverter,
-        networkService = networkService,
-        archiveEntityQueries = database.archiveEntityQueries,
-        archiveTagQueries = database.archiveTagEntityQueries,
-        archiveCategoryQueries = database.archiveCategoryEntityQueries,
-        archiveAuthorQueries = database.userEntityQueries,
-        dispatcher = databaseDispatcher(),
-    )
-
-    internal val authRepository = SessionCookieAuthRepository(
-        networkService = networkService,
-        userEntityQueries = database.userEntityQueries,
-        sessionEntityQueries = database.sessionEntityQueries,
-        dispatcher = databaseDispatcher(),
-    )
-}
-
-class DataComponent(
-    module: DataModule
-) {
-    val archiveRepository: ArchiveRepository = module.archiveRepository
-    val authRepository: AuthRepository = module.authRepository
-}
+/**
+ * Wrapper for [UriConverter] to get around ksp compilation issues
+ */
+class UriConverterWrapper(uriConverter: UriConverter): UriConverter by uriConverter
 
 @SingletonScope
 @Component

@@ -20,7 +20,6 @@ import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.UriConverter
-import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.scaffold.globalui.ActualGlobalUiMutator
 import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.UiState
@@ -34,7 +33,6 @@ import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.me.scaffold.savedstate.DataStoreSavedStateRepository
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.strings.RouteParser
 import com.tunjid.treenav.strings.UrlRouteMatcher
 import com.tunjid.treenav.strings.routeParserFrom
@@ -47,9 +45,15 @@ import okio.Path
 
 interface ScreenStateHolderCreator : (CoroutineScope, AppRoute) -> Any
 
-inline fun <reified Route: AppRoute> ((CoroutineScope, Route) -> Any).downcast(): ScreenStateHolderCreator = object : ScreenStateHolderCreator{
-    override fun invoke(scope: CoroutineScope, route: AppRoute): Any = this@downcast(scope, route as Route)
-}
+inline fun <reified Route : AppRoute> ((CoroutineScope, Route) -> Any).downcast(): ScreenStateHolderCreator =
+    object : ScreenStateHolderCreator {
+        override fun invoke(scope: CoroutineScope, route: AppRoute): Any = this@downcast(scope, route as Route)
+    }
+
+/**
+ * Wrapper for [ByteSerializer] to get around ksp compilation issues
+ */
+class ByteSerializerWrapper(byteSerializer: ByteSerializer) : ByteSerializer by byteSerializer
 
 data class SavedStateType(
     val apply: PolymorphicModuleBuilder<ByteSerializable>.() -> Unit
@@ -62,29 +66,9 @@ class ScaffoldModule(
     val permissionsProvider: PermissionsProvider,
     val byteSerializer: ByteSerializer,
     val uriConverter: UriConverter
-) {
-    val routeParser = routeParserFrom(*routeMatchers.toTypedArray())
-    val navMutator: NavMutator = EmptyNavState.asNoOpStateFlowMutator()
-    val globalUiMutator = ActualGlobalUiMutator(
-        appScope = appScope,
-    )
-    val lifecycleMutator = ActualLifecycleMutator(
-        appScope = appScope
-    )
-    val permissionsMutator = permissionsProvider.mutator
-}
+)
 
-class ScaffoldComponent(
-    module: ScaffoldModule
-) {
-    val globalUiMutator = module.globalUiMutator
-
-    val byteSerializer = module.byteSerializer
-
-    val uiActions = globalUiMutator.accept
-}
-
-inline fun <reified T : ByteSerializable> ScaffoldComponent.restoredState(route: AppRoute): T? {
+inline fun <reified T : ByteSerializable> InjectedScaffoldComponent.restoredState(route: AppRoute): T? {
     return try {
         // TODO: Figure out why this throws
 //        val serialized = savedStateRepository.savedState.value.routeStates[route.id]
@@ -170,16 +154,4 @@ abstract class InjectedScaffoldComponent(
         @Provides get() = this
 
     abstract val navMutator: NavMutator
-
-//    abstract val globalUiMutator: GlobalUiMutator
-//
-//    abstract val navStateStream: StateFlow<NavState>
-
-//    abstract val globalUiStateStream: StateFlow<UiState>
-//
-//    abstract val lifecycleStateStream: StateFlow<Lifecycle>
-
-//    abstract val byteSerializer: ByteSerializer
-//
-//    abstract val savedStateRepository: SavedStateRepository
 }

@@ -18,30 +18,10 @@ package com.tunjid.me.feature
 
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.tunjid.me.data.di.DataComponent
-import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.treenav.strings.UrlRouteMatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlin.reflect.KClass
 
 const val FeatureWhileSubscribed = 2_000L
 
-/**
- * Representation of a full screen destination
- */
-interface Feature<Route : AppRoute, Mutator : Any> {
-    val routeType: KClass<Route>
-    val routeMatchers: List<UrlRouteMatcher<Route>>
-
-    // A factory function for the mutator of this feature. Should go away when I have dependency injection.
-    fun mutator(
-        scope: CoroutineScope,
-        route: Route,
-        scaffoldComponent: ScaffoldComponent,
-        dataComponent: DataComponent
-    ): Mutator
-}
 
 interface RouteServiceLocator {
     fun <T> locate(route: AppRoute): T
@@ -54,9 +34,3 @@ val LocalRouteServiceLocator: ProvidableCompositionLocal<RouteServiceLocator> = 
         }
     }
 }
-
-@Suppress("UNCHECKED_CAST")
-inline fun <reified Route : AppRoute> List<Feature<*, *>>.find(route: Route): Feature<Route, *> =
-    first { feature ->
-        feature.routeType.isInstance(route)
-    } as Feature<Route, *>

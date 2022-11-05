@@ -55,6 +55,7 @@ kotlin {
         }
         named("androidMain") {
             dependencies {
+                api(project(":common:core"))
                 implementation(libs.androidx.core.ktx)
                 implementation(libs.androidx.appcompat)
                 implementation(libs.androidx.lifecycle.ktx)
@@ -62,6 +63,7 @@ kotlin {
         }
         named("desktopMain") {
             dependencies {
+                api(project(":common:core"))
             }
         }
         named("commonTest") {

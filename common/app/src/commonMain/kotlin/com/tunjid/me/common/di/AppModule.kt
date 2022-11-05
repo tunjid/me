@@ -17,22 +17,10 @@
 package com.tunjid.me.common.di
 
 import com.tunjid.me.AppDatabase
-import com.tunjid.me.core.sync.ChangeListKey
-import com.tunjid.me.core.sync.Syncable
-import com.tunjid.me.core.sync.changeListKey
 import com.tunjid.me.core.utilities.UriConverter
-import com.tunjid.me.data.local.databaseDispatcher
-import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.NetworkMonitor
-import com.tunjid.me.data.network.modelEvents
-import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
-import com.tunjid.me.sync.di.SyncComponent
-import com.tunjid.me.sync.di.SyncModule
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import okio.Path
 
 //fun createAppDependencies(

@@ -18,7 +18,6 @@ package com.tunjid.me.settings.di
 
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
-import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.nav.AppRoute

@@ -21,7 +21,6 @@ import android.app.Application
 import android.os.Bundle
 import com.tunjid.me.common.di.createAppDependencies
 import com.tunjid.me.core.utilities.ActualUriConverter
-import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.scaffold.permissions.PlatformPermissionsProvider

@@ -109,14 +109,14 @@ fun main() {
         )
     )
 
-    val injectedSyncComponent = InjectedSyncComponent::class.create(
-        module = SyncModule(
-            appScope = appScope,
-            networkMonitor = NetworkMonitor(appScope),
-            database = appDatabase,
-            ),
-        dataComponent = injectedDataComponent
-    )
+//    val injectedSyncComponent = InjectedSyncComponent::class.create(
+//        module = SyncModule(
+//            appScope = appScope,
+//            networkMonitor = NetworkMonitor(appScope),
+//            database = appDatabase,
+//            ),
+//        dataComponent = injectedDataComponent
+//    )
 
     val appScreenStateHolderComponent = AppScreenStateHolderComponent::class.create(
         ArchiveListScreenHolderComponent::class.create(
