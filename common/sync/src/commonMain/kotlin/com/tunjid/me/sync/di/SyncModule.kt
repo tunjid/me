@@ -31,33 +31,21 @@ import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
 typealias SyncableLocator = Map<ChangeListKey, Syncable>
+typealias Sync = (ChangeListKey) -> Unit
 
 class SyncModule(
     internal val appScope: CoroutineScope,
     internal val database: AppDatabase,
     internal val networkMonitor: NetworkMonitor,
-) {
-//    val synchronizer: Synchronizer = synchronizer(
-//        appScope,
-//        database,
-//        locator,
-//        networkMonitor
-//    )
-}
-
-class SyncComponent(
-    private val module: SyncModule
-) {
-//    fun sync(key: ChangeListKey) = module.synchronizer.sync(key)
-}
-
+)
 
 @Component
 abstract class InjectedSyncComponent(
     private val module: SyncModule,
     @Component val dataComponent: InjectedDataComponent,
 ) {
-    fun sync(key: ChangeListKey) = synchronizer.sync(key)
+    @Provides
+    fun sync(): Sync = synchronizer::sync
 
     @Provides
     fun networkMonitor(): NetworkMonitor = module.networkMonitor

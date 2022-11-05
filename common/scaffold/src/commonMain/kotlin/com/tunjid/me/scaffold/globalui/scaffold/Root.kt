@@ -25,15 +25,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiMutator
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.NavState
-import com.tunjid.me.scaffold.nav.Route404
-import com.tunjid.me.scaffold.nav.current
-import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
+import com.tunjid.me.scaffold.nav.*
 
 /**
  * Root scaffold for the app
@@ -41,11 +35,9 @@ import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 @Composable
 fun Scaffold(
     modifier: Modifier,
-    component: InjectedScaffoldComponent,
+    navMutator: NavMutator,
+    globalUiMutator: GlobalUiMutator,
 ) {
-    val navMutator = component.navMutator
-    val globalUiMutator = UiState().asNoOpStateFlowMutator<Mutation<UiState>, UiState>()
-
     CompositionLocalProvider(
         LocalGlobalUiMutator provides globalUiMutator,
     ) {

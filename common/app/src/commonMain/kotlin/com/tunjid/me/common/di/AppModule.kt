@@ -19,10 +19,18 @@ package com.tunjid.me.common.di
 import com.tunjid.me.AppDatabase
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.network.NetworkMonitor
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.lifecycle.LifecycleMutator
+import com.tunjid.me.scaffold.nav.NavMutator
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import kotlinx.coroutines.CoroutineScope
 import okio.Path
 
+interface MeApp {
+    val navMutator: NavMutator
+    val globalUiMutator: GlobalUiMutator
+    val lifecycleMap: LifecycleMutator
+}
 //fun createAppDependencies(
 //    appScope: CoroutineScope,
 //    database: AppDatabase,
@@ -42,7 +50,7 @@ import okio.Path
 /**
  * Manual dependency injection module
  */
-private class AppModule(
+private class MeApp(
     appDatabase: AppDatabase,
     savedStatePath: Path,
     permissionsProvider: PermissionsProvider,

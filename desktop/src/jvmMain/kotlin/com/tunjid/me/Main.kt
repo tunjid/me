@@ -73,6 +73,9 @@ import okio.Path
 import okio.Path.Companion.toOkioPath
 import java.io.File
 import com.tunjid.me.data.network.NetworkMonitor
+import com.tunjid.me.scaffold.globalui.NavMode
+import com.tunjid.mutator.mutation
+
 fun main() {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -109,37 +112,36 @@ fun main() {
         )
     )
 
-//    val injectedSyncComponent = InjectedSyncComponent::class.create(
-//        module = SyncModule(
-//            appScope = appScope,
-//            networkMonitor = NetworkMonitor(appScope),
-//            database = appDatabase,
-//            ),
-//        dataComponent = injectedDataComponent
-//    )
-
     val appScreenStateHolderComponent = AppScreenStateHolderComponent::class.create(
-        ArchiveListScreenHolderComponent::class.create(
+        syncComponent = InjectedSyncComponent::class.create(
+            module = SyncModule(
+                appScope = appScope,
+                networkMonitor = NetworkMonitor(appScope),
+                database = appDatabase,
+            ),
+            dataComponent = injectedDataComponent
+        ),
+        archiveListComponent = ArchiveListScreenHolderComponent::class.create(
             scaffoldComponent = injectedScaffoldComponent,
             dataComponent = injectedDataComponent,
         ),
-        ArchiveDetailScreenHolderComponent::class.create(
+        archiveDetailComponent = ArchiveDetailScreenHolderComponent::class.create(
             scaffoldComponent = injectedScaffoldComponent,
             dataComponent = injectedDataComponent,
         ),
-        ArchiveEditScreenHolderComponent::class.create(
+        archiveEditComponent = ArchiveEditScreenHolderComponent::class.create(
             scaffoldComponent = injectedScaffoldComponent,
             dataComponent = injectedDataComponent,
         ),
-        ProfileScreenHolderComponent::class.create(
+        profileComponent = ProfileScreenHolderComponent::class.create(
             scaffoldComponent = injectedScaffoldComponent,
             dataComponent = injectedDataComponent,
         ),
-        SettingsScreenHolderComponent::class.create(
+        settingsComponent = SettingsScreenHolderComponent::class.create(
             scaffoldComponent = injectedScaffoldComponent,
             dataComponent = injectedDataComponent,
         ),
-        SignInScreenHolderComponent::class.create(
+        signInComponent = SignInScreenHolderComponent::class.create(
             scaffoldComponent = injectedScaffoldComponent,
             dataComponent = injectedDataComponent,
         ),
@@ -170,7 +172,8 @@ fun main() {
                     ) {
                         Scaffold(
                             modifier = Modifier.then(dropParent),
-                            component = injectedScaffoldComponent,
+                            navMutator = routeMutatorFactory.navMutator,
+                            globalUiMutator = routeMutatorFactory.globalUiMutator,
                         )
                     }
                 }
@@ -181,9 +184,9 @@ fun main() {
                 snapshotFlow { currentWidth < 600.dp }
                     .distinctUntilChanged()
                     .collect { isInPortrait ->
-//                        scaffoldComponent.uiActions(mutation {
-//                            copy(navMode = if (isInPortrait) NavMode.BottomNav else NavMode.NavRail)
-//                        })
+                        routeMutatorFactory.globalUiMutator.accept(mutation {
+                            copy(navMode = if (isInPortrait) NavMode.BottomNav else NavMode.NavRail)
+                        })
                     }
             }
         }

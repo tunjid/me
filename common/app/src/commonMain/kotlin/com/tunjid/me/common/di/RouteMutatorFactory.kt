@@ -16,25 +16,28 @@
 
 package com.tunjid.me.common.di
 
+import com.tunjid.me.core.sync.changeListKey
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.toBytes
+import com.tunjid.me.data.local.databaseDispatcher
+import com.tunjid.me.data.network.ApiUrl
+import com.tunjid.me.data.network.modelEvents
 import com.tunjid.me.feature.RouteServiceLocator
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.NavState
-import com.tunjid.me.scaffold.nav.Route404
-import com.tunjid.me.scaffold.nav.removedRoutes
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.lifecycle.LifecycleMutator
+import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
+import com.tunjid.me.scaffold.nav.*
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
+import com.tunjid.me.sync.di.Sync
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Order
 import com.tunjid.treenav.flatten
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -43,6 +46,10 @@ class RouteMutatorFactory(
     byteSerializer: ByteSerializer,
     navStateStream: StateFlow<NavState>,
     savedStateRepository: SavedStateRepository,
+    sync: Sync,
+    val navMutator: NavMutator,
+    val globalUiMutator: GlobalUiMutator,
+    val lifecycleMutator: LifecycleMutator,
     private val allScreenStateHolders: Map<String, ScreenStateHolderCreator>
 ) : RouteServiceLocator {
     private val routeMutatorCache = mutableMapOf<AppRoute, ScopeHolder>()
@@ -65,6 +72,17 @@ class RouteMutatorFactory(
                 .map { it.mainNav }
                 .map { it.toSavedState(byteSerializer) }
                 .collectLatest(savedStateRepository::saveState)
+        }
+        appScope.launch {
+        modelEvents(
+            url = "$ApiUrl/",
+            dispatcher = databaseDispatcher()
+        )
+            // This is an Android concern. Remove this when this is firebase powered.
+            .monitorWhenActive(lifecycleMutator.state)
+            .map { it.model.changeListKey() }
+            .onEach(sync)
+            .launchIn(appScope)
         }
     }
 

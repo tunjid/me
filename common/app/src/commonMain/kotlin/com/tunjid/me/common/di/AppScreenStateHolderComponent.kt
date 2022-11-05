@@ -24,11 +24,13 @@ import com.tunjid.me.profile.di.ProfileScreenHolderComponent
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.settings.di.SettingsScreenHolderComponent
 import com.tunjid.me.signin.di.SignInScreenHolderComponent
+import com.tunjid.me.sync.di.InjectedSyncComponent
 import kotlinx.coroutines.*
 import me.tatarka.inject.annotations.Component
 
 @Component
 abstract class AppScreenStateHolderComponent(
+    @Component val syncComponent: InjectedSyncComponent,
     @Component val archiveListComponent: ArchiveListScreenHolderComponent,
     @Component val archiveDetailComponent: ArchiveDetailScreenHolderComponent,
     @Component val archiveEditComponent: ArchiveEditScreenHolderComponent,
