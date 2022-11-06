@@ -18,7 +18,10 @@ package com.tunjid.me.feature
 
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.lifecycle.LifecycleMutator
 import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.NavMutator
 
 const val FeatureWhileSubscribed = 2_000L
 
@@ -33,4 +36,10 @@ val LocalScreenStateHolderCache: ProvidableCompositionLocal<ScreenStateHolderCac
             TODO("Not yet implemented")
         }
     }
+}
+
+interface MeApp : ScreenStateHolderCache {
+    val navMutator: NavMutator
+    val globalUiMutator: GlobalUiMutator
+    val lifecycleMutator: LifecycleMutator
 }

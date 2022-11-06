@@ -23,6 +23,7 @@ import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.modelEvents
+import com.tunjid.me.feature.MeApp
 import com.tunjid.me.feature.ScreenStateHolderCache
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.globalui.GlobalUiMutator
@@ -41,17 +42,17 @@ import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class RouteMutatorFactory(
+class PersistedMeApp(
     appScope: CoroutineScope,
     byteSerializer: ByteSerializer,
     navStateStream: StateFlow<NavState>,
     savedStateRepository: SavedStateRepository,
     sync: Sync,
-    val navMutator: NavMutator,
-    val globalUiMutator: GlobalUiMutator,
-    val lifecycleMutator: LifecycleMutator,
+    override val navMutator: NavMutator,
+    override val globalUiMutator: GlobalUiMutator,
+    override val lifecycleMutator: LifecycleMutator,
     private val allScreenStateHolders: Map<String, ScreenStateHolderCreator>
-) : ScreenStateHolderCache {
+) : MeApp {
     private val routeMutatorCache = mutableMapOf<AppRoute, ScopeHolder>()
 
     init {

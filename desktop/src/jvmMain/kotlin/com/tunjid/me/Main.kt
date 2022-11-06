@@ -147,7 +147,7 @@ fun main() {
         ),
     )
 
-    val routeMutatorFactory = appScreenStateHolderComponent.routeMutatorFactory
+    val app = appScreenStateHolderComponent.app
 
     application {
         val windowState = rememberWindowState()
@@ -168,12 +168,12 @@ fun main() {
                     color = MaterialTheme.colors.background,
                 ) {
                     CompositionLocalProvider(
-                        LocalScreenStateHolderCache provides routeMutatorFactory,
+                        LocalScreenStateHolderCache provides app,
                     ) {
                         Scaffold(
                             modifier = Modifier.then(dropParent),
-                            navMutator = routeMutatorFactory.navMutator,
-                            globalUiMutator = routeMutatorFactory.globalUiMutator,
+                            navMutator = app.navMutator,
+                            globalUiMutator = app.globalUiMutator,
                         )
                     }
                 }
@@ -184,7 +184,7 @@ fun main() {
                 snapshotFlow { currentWidth < 600.dp }
                     .distinctUntilChanged()
                     .collect { isInPortrait ->
-                        routeMutatorFactory.globalUiMutator.accept(mutation {
+                        app.globalUiMutator.accept(mutation {
                             copy(navMode = if (isInPortrait) NavMode.BottomNav else NavMode.NavRail)
                         })
                     }
