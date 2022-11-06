@@ -19,11 +19,13 @@ package com.tunjid.me.archiveedit
 
 import com.tunjid.me.core.model.*
 import com.tunjid.me.core.ui.ChipAction
+import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
+import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
@@ -57,22 +59,23 @@ typealias ArchiveEditMutator = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
 class ArchiveEditMutatorCreator(
-    creator: (scope: CoroutineScope, route: ArchiveEditRoute) -> ArchiveEditMutator
+    creator: (scope: CoroutineScope,savedStae: ByteArray?, route: ArchiveEditRoute) -> ArchiveEditMutator
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
 class ActualArchiveEditMutator(
-    initialState: State? = null,
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
+    byteSerializer: ByteSerializer,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
     permissionsFlow: StateFlow<Permissions>,
     onPermissionRequested: (Permission) -> Unit,
     scope: CoroutineScope,
+    savedState: ByteArray?,
     route: ArchiveEditRoute,
 ) : ArchiveEditMutator by scope.actionStateFlowProducer(
-    initialState = initialState ?: State(
+    initialState = byteSerializer.restoreState(savedState) ?: State(
         kind = route.kind,
         upsert = ArchiveUpsert(id = route.archiveId),
         navBarSize = uiStateFlow.value.navBarSize,
@@ -287,7 +290,7 @@ private fun Flow<Action.Load>.loadMutations(
                     archiveId = monitor.id
                 )
 
-                is Action.Load.Submit -> flow<Mutation<State>> {
+                is Action.Load.Submit -> flow {
                     val (kind, upsert, headerPhoto) = monitor
                     emit(mutation { copy(isSubmitting = true) })
 

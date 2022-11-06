@@ -24,7 +24,7 @@ import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.modelEvents
 import com.tunjid.me.feature.MeApp
-import com.tunjid.me.feature.ScreenStateHolderCache
+import com.tunjid.me.scaffold.di.SavedStateCache
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.lifecycle.LifecycleMutator
@@ -51,6 +51,7 @@ class PersistedMeApp(
     override val navMutator: NavMutator,
     override val globalUiMutator: GlobalUiMutator,
     override val lifecycleMutator: LifecycleMutator,
+    private val savedStateCache: SavedStateCache,
     private val allScreenStateHolders: Map<String, ScreenStateHolderCreator>
 ) : MeApp {
     private val routeMutatorCache = mutableMapOf<AppRoute, ScopeHolder>()
@@ -75,15 +76,15 @@ class PersistedMeApp(
                 .collectLatest(savedStateRepository::saveState)
         }
         appScope.launch {
-        modelEvents(
-            url = "$ApiUrl/",
-            dispatcher = databaseDispatcher()
-        )
-            // This is an Android concern. Remove this when this is firebase powered.
-            .monitorWhenActive(lifecycleMutator.state)
-            .map { it.model.changeListKey() }
-            .onEach(sync)
-            .launchIn(appScope)
+            modelEvents(
+                url = "$ApiUrl/",
+                dispatcher = databaseDispatcher()
+            )
+                // This is an Android concern. Remove this when this is firebase powered.
+                .monitorWhenActive(lifecycleMutator.state)
+                .map { it.model.changeListKey() }
+                .onEach(sync)
+                .launchIn(appScope)
         }
     }
 
@@ -99,7 +100,7 @@ class PersistedMeApp(
                     is Route404 -> Route404
                     else -> allScreenStateHolders
                         .getValue(route::class.simpleName!!)
-                        .invoke(routeScope, route)
+                        .invoke(routeScope, savedStateCache(route),  route)
                 }
 
             )

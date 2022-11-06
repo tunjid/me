@@ -17,10 +17,12 @@
 package com.tunjid.me.settings
 
 
+import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
+import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.NavMutation
@@ -39,19 +41,21 @@ typealias SettingsMutator = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
 class SettingsMutatorCreator(
-    creator: (scope: CoroutineScope, route: SettingsRoute) -> SettingsMutator
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: SettingsRoute) -> SettingsMutator
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
 class ActualSettingsMutator(
-    initialState: State? = null,
     authRepository: AuthRepository,
+    byteSerializer: ByteSerializer,
     lifecycleStateFlow: StateFlow<Lifecycle>,
     navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
+    savedState: ByteArray?,
+    @Suppress("UNUSED_PARAMETER")
     route: SettingsRoute,
 ) : SettingsMutator by scope.actionStateFlowProducer(
-    initialState = initialState ?: State(),
+    initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
         authRepository.isSignedIn.map { isSignedIn ->

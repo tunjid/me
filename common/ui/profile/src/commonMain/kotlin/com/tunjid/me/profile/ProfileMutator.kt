@@ -18,10 +18,12 @@ package com.tunjid.me.profile
 
 
 import com.tunjid.me.core.ui.update
+import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
+import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.ActionStateProducer
@@ -37,19 +39,20 @@ typealias ProfileMutator = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
 class ProfileMutatorCreator(
-    creator: (scope: CoroutineScope, route: ProfileRoute) -> ProfileMutator
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ProfileRoute) -> ProfileMutator
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
 class ActualProfileMutator(
-    initialState: State? = null,
     authRepository: AuthRepository,
+    byteSerializer: ByteSerializer,
     lifecycleStateFlow: StateFlow<Lifecycle>,
     scope: CoroutineScope,
+    savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
     route: ProfileRoute,
 ) : ProfileMutator by scope.actionStateFlowProducer(
-    initialState = initialState ?: State(),
+    initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     actionTransform = { actions ->
         merge(

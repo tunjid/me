@@ -21,10 +21,12 @@ import com.tunjid.me.core.model.Result
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.update
+import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
+import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.NavContext
@@ -46,20 +48,21 @@ typealias SignInMutator = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
 class SignInMutatorCreator(
-    creator: (scope: CoroutineScope, route: SignInRoute) -> SignInMutator
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: SignInRoute) -> SignInMutator
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
 class ActualSignInMutator(
-    initialState: State? = null,
     authRepository: AuthRepository,
     lifecycleStateFlow: StateFlow<Lifecycle>,
     navActions: (NavMutation) -> Unit,
+    byteSerializer: ByteSerializer,
     scope: CoroutineScope,
+    savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
     route: SignInRoute,
 ) : SignInMutator by scope.actionStateFlowProducer(
-    initialState = initialState ?: State(),
+    initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf<Flow<Mutation<State>>>(
         authRepository.isSignedIn.map { mutation { copy(isSignedIn = it) } },

@@ -19,11 +19,13 @@ package com.tunjid.me.feature.archivelist
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
+import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
@@ -45,7 +47,7 @@ typealias ArchiveListMutator = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
 class ArchiveListMutatorCreator(
-    creator: (scope: CoroutineScope, route: ArchiveListRoute) -> ArchiveListMutator
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveListRoute) -> ArchiveListMutator
 ) : ScreenStateHolderCreator by creator.downcast()
 
 /**
@@ -53,17 +55,18 @@ class ArchiveListMutatorCreator(
  */
 @Inject
 class ActualArchiveListMutator(
-    initialState: State? = null,
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
+    byteSerializer: ByteSerializer,
     navStateFlow: StateFlow<NavState>,
     uiStateFlow: StateFlow<UiState>,
     lifecycleStateFlow: StateFlow<Lifecycle>,
     navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
+    savedState: ByteArray?,
     route: ArchiveListRoute,
 ) : ArchiveListMutator by scope.actionStateFlowProducer(
-    initialState = initialState ?: State(
+    initialState = byteSerializer.restoreState(savedState) ?: State(
         items = listOf(
             ArchiveItem.Loading(
                 isCircular = true,

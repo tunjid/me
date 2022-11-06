@@ -20,6 +20,7 @@ import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.UriConverter
+import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.scaffold.globalui.ActualGlobalUiMutator
 import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.UiState
@@ -43,12 +44,18 @@ import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 import okio.Path
 
-interface ScreenStateHolderCreator : (CoroutineScope, AppRoute) -> Any
+interface ScreenStateHolderCreator : (CoroutineScope, ByteArray?, AppRoute) -> Any
 
-inline fun <reified Route : AppRoute> ((CoroutineScope, Route) -> Any).downcast(): ScreenStateHolderCreator =
+inline fun <reified Route : AppRoute> ((CoroutineScope, ByteArray?, Route) -> Any).downcast(): ScreenStateHolderCreator =
     object : ScreenStateHolderCreator {
-        override fun invoke(scope: CoroutineScope, route: AppRoute): Any = this@downcast(scope, route as Route)
+        override fun invoke(scope: CoroutineScope, savedState: ByteArray?, route: AppRoute): Any = this@downcast(
+            scope,
+            savedState,
+            route as Route
+        )
     }
+
+typealias SavedStateCache = (AppRoute) -> ByteArray?
 
 /**
  * Wrapper for [ByteSerializer] to get around ksp compilation issues
@@ -65,15 +72,12 @@ class ScaffoldModule(
     val routeMatchers: List<UrlRouteMatcher<AppRoute>>,
     val permissionsProvider: PermissionsProvider,
     val byteSerializer: ByteSerializer,
-    val uriConverter: UriConverter
 )
 
-inline fun <reified T : ByteSerializable> InjectedScaffoldComponent.restoredState(route: AppRoute): T? {
+inline fun <reified T : ByteSerializable> ByteSerializer.restoreState(savedState: ByteArray?): T? {
     return try {
         // TODO: Figure out why this throws
-//        val serialized = savedStateRepository.savedState.value.routeStates[route.id]
-//        serialized?.let(byteSerializer::fromBytes)
-        null
+        if (savedState != null) fromBytes(savedState) else null
     } catch (e: Exception) {
         null
     }
@@ -99,6 +103,14 @@ abstract class InjectedScaffoldComponent(
     @SingletonScope
     @Provides
     fun routeParser(): RouteParser<AppRoute> = routeParserFrom(*(module.routeMatchers).toTypedArray())
+
+    @SingletonScope
+    @Provides
+    fun savedStateCache(
+        savedStateRepository: SavedStateRepository
+    ): SavedStateCache = { route ->
+        savedStateRepository.savedState.value.routeStates[route.id]
+    }
 
     @SingletonScope
     @Provides
