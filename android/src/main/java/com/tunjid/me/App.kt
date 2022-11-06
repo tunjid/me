@@ -19,44 +19,20 @@ package com.tunjid.me
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import com.tunjid.me.common.di.createAppDependencies
-import com.tunjid.me.core.utilities.ActualUriConverter
-import com.tunjid.me.data.local.DatabaseDriverFactory
-import com.tunjid.me.data.network.NetworkMonitor
-import com.tunjid.me.scaffold.permissions.PlatformPermissionsProvider
 import com.tunjid.mutator.mutation
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import okio.Path.Companion.toPath
 
 class App : Application() {
 
-    val appDependencies by lazy {
-        val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-        createAppDependencies(
-            appScope = appScope,
-            savedStatePath = filesDir.resolve("savedState").absolutePath.toPath(),
-            permissionsProvider = PlatformPermissionsProvider(appScope = appScope, context = this),
-            networkMonitor = NetworkMonitor(scope = appScope, context = this),
-            uriConverter = ActualUriConverter(),
-            database = AppDatabase(
-                DatabaseDriverFactory(
-                    context = this,
-                    schema = AppDatabase.Schema,
-                ).createDriver()
-            )
-        )
-    }
+    val meApp by lazy { createMeApp(this) }
 
     override fun onCreate() {
         super.onCreate()
 
-        val scaffoldComponent = appDependencies.scaffoldComponent
+        val lifecycleActions = meApp.lifecycleMutator.accept
 
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             private fun updateStatus(isInForeground: Boolean) =
-                scaffoldComponent.lifecycleActions(mutation {
+                lifecycleActions(mutation {
                     copy(isInForeground = isInForeground)
                 })
 
