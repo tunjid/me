@@ -58,7 +58,8 @@ fun GlobalUi(
             fabClickListener = rememberFunction {
                 onNavigate(Action.Navigate {
                     val kind = state.queryState.startQuery.kind
-                    mainNav.push("archives/${kind.type}/create".toRoute)
+                    val route = "archives/${kind.type}/create".toRoute
+                    mainNav.push(route)
                 })
             },
             navVisibility = NavVisibility.Visible,

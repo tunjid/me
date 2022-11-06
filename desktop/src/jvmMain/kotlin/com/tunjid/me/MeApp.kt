@@ -88,7 +88,7 @@ fun createMeApp(): MeApp {
             appScope = appScope,
             savedStatePath = savedStatePath(),
             permissionsProvider = PlatformPermissionsProvider(),
-            routeMatchers = appRouteComponent.allUrlRouteMatchers.toList(),
+            routeMatchers = appRouteComponent.allRouteMatchers,
             byteSerializer = appRouteComponent.byteSerializer,
         )
     )

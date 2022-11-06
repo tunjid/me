@@ -45,11 +45,15 @@ abstract class AppRouteComponent(
     @Component val settingsNavigationComponent: SettingsNavigationComponent,
     @Component val signInNavigationComponent: SignInNavigationComponent,
 ) {
+    internal abstract val routeMatcherSet: Set<UrlRouteMatcher<AppRoute>>
+
     abstract val allScreenStatePolymorphic: Set<SavedStateType>
 
-    abstract val allUrlRouteMatchers: Set<UrlRouteMatcher<AppRoute>>
-
     abstract val byteSerializer: ByteSerializer
+
+    val allRouteMatchers get() = routeMatcherSet
+        .toList()
+        .sortedBy { it.patterns.firstOrNull() }
 
     @Provides
     fun byteSerializer(): ByteSerializer = DelegatingByteSerializer(
