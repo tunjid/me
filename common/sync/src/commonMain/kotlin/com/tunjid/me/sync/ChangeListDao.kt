@@ -16,7 +16,6 @@
 
 package com.tunjid.me.sync
 
-import com.tunjid.me.common.sync.AppDatabase
 import com.tunjid.me.common.sync.ChangeListItemQueries
 import com.tunjid.me.core.model.ChangeListId
 import com.tunjid.me.core.model.ChangeListItem

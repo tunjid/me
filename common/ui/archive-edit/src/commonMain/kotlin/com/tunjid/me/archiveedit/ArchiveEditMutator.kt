@@ -59,7 +59,7 @@ typealias ArchiveEditMutator = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
 class ArchiveEditMutatorCreator(
-    creator: (scope: CoroutineScope,savedStae: ByteArray?, route: ArchiveEditRoute) -> ArchiveEditMutator
+    creator: (scope: CoroutineScope, savedStae: ByteArray?, route: ArchiveEditRoute) -> ArchiveEditMutator
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject

@@ -58,7 +58,7 @@ import okio.Path
 import okio.Path.Companion.toOkioPath
 import java.io.File
 
-fun meApp(): MeApp {
+fun createMeApp(): MeApp {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     val appRouteComponent = AppRouteComponent::class.create(

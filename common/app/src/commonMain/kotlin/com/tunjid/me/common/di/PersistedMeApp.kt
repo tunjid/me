@@ -100,7 +100,7 @@ class PersistedMeApp(
                     is Route404 -> Route404
                     else -> allScreenStateHolders
                         .getValue(route::class.simpleName!!)
-                        .invoke(routeScope, savedStateCache(route),  route)
+                        .invoke(routeScope, savedStateCache(route), route)
                 }
 
             )

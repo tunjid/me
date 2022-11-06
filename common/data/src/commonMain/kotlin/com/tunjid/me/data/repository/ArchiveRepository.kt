@@ -28,7 +28,6 @@ import com.tunjid.me.core.sync.Syncable
 import com.tunjid.me.core.sync.changeListKey
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.core.utilities.UriConverter
-import com.tunjid.me.data.di.UriConverterWrapper
 import com.tunjid.me.data.local.models.toExternalModel
 import com.tunjid.me.data.local.suspendingTransaction
 import com.tunjid.me.data.network.NetworkService

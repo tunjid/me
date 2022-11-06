@@ -24,7 +24,10 @@ import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.data.repository.ArchiveRepository
-import com.tunjid.me.sync.*
+import com.tunjid.me.sync.ChangeListDao
+import com.tunjid.me.sync.InMemorySynchronizer
+import com.tunjid.me.sync.SqlChangeListDao
+import com.tunjid.me.sync.Synchronizer
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import me.tatarka.inject.annotations.Component

@@ -18,7 +18,6 @@ package com.tunjid.me.data.di
 
 import com.tunjid.me.common.data.*
 import com.tunjid.me.core.di.SingletonScope
-import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
@@ -42,7 +41,7 @@ class DataModule(
 /**
  * Wrapper for [UriConverter] to get around ksp compilation issues
  */
-class UriConverterWrapper(uriConverter: UriConverter): UriConverter by uriConverter
+class UriConverterWrapper(uriConverter: UriConverter) : UriConverter by uriConverter
 
 @SingletonScope
 @Component

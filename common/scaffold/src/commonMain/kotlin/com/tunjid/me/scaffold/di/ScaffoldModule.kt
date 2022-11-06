@@ -19,7 +19,6 @@ package com.tunjid.me.scaffold.di
 import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
-import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.scaffold.globalui.ActualGlobalUiMutator
 import com.tunjid.me.scaffold.globalui.GlobalUiMutator
