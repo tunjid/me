@@ -29,8 +29,6 @@ import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
-import com.tunjid.me.scaffold.lifecycle.Lifecycle
-import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
@@ -58,7 +56,6 @@ class ActualArchiveDetailMutator(
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
     uiStateFlow: StateFlow<UiState>,
-    lifecycleStateFlow: StateFlow<Lifecycle>,
     navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
@@ -76,7 +73,7 @@ class ActualArchiveDetailMutator(
             kind = route.kind,
             id = route.archiveId
         )
-    ).monitorWhenActive(lifecycleStateFlow),
+    ),
     actionTransform = { actions ->
         actions.toMutationStream {
             when (val type = type()) {

@@ -37,7 +37,7 @@ fun <T, R> StateFlow<T>.mappedCollectAsState(
 
 infix fun Dp.countIf(condition: Boolean) = if (condition) this else 0.dp
 
-private fun <T, R> StateFlow<T>.mapState(
+fun <T, R> StateFlow<T>.mapState(
     scope: CoroutineScope,
     mapper: (T) -> R
 ): StateFlow<R> = map { mapper(it) }

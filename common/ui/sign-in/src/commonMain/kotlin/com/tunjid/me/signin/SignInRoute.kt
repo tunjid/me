@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.feature.LocalScreenStateHolderCache
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.AppRoute
 import kotlinx.serialization.Serializable
 
@@ -47,7 +48,7 @@ data class SignInRoute(
 
 @Composable
 private fun SignInScreen(mutator: SignInMutator) {
-    val state by mutator.state.collectAsState()
+    val state by mutator.state.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
     GlobalUi(

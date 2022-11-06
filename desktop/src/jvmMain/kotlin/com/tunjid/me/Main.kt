@@ -36,6 +36,7 @@ import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
 import com.tunjid.mutator.mutation
 import kotlinx.coroutines.flow.distinctUntilChanged
+import com.tunjid.me.scaffold.lifecycle.LocalLifecycleMutator
 
 fun main() {
 
@@ -60,6 +61,7 @@ fun main() {
                 ) {
                     CompositionLocalProvider(
                         LocalScreenStateHolderCache provides app.screenStateHolderCache,
+                        LocalLifecycleMutator provides app.lifecycleMutator,
                     ) {
                         Scaffold(
                             modifier = Modifier.then(dropParent),

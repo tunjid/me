@@ -18,6 +18,7 @@ with novel/experimental implementations of fundamental app architecture units in
 * UI State production
 * Dependency injection
 * Persistent animation
+* Large screen experiences
 
 All while targeting multiple platforms.
 
@@ -42,15 +43,16 @@ Some ideas explored include:
 🚨⚠️🚧👷🏿‍♂️🏗️🛠️🚨
 
 I try to keep the code at a near production quality, but this often takes a back seat to
-convenience and whim. I'm a huge proponent of dependency injection, yet the repository uses manual
-service location.
+convenience and whim.
 
 Again, the work presented here are the experiments of an immutable state and functional reactive programming zealot.
 It's far from objective, caveat emptor.
 
-## Arch
+## Architecture
 
-### Reactive architecture
+### Data layer
+
+#### Offline-first
 
 The app is a subscriber in a pub-sub liaison with the server. There is no pull to refresh, instead the app pulls diffs
 of `ChangeListItem` when the server notifies the app of changes made.
@@ -78,18 +80,26 @@ Pub sub in the app is backed by a change list invalidation based system. Its pre
 Real time updates are implemented with websockets via [socket.io](https://socket.io/). I intend to move the android
 client to FCM for efficiency reasons in the future.
 
-### Navigation
+
+### UI Layer
+
+#### State production
+
+All screen level state holders are 
+
+#### Navigation
 
 Each destination in the app is represented by an `AppRoute` that exposes a single `@Composable`
-`Render()` function. The backing data structure for navigation is the tree like `StackNav` and
-`MultiStackNav` immutable classes. The root of the app is a `MultiStackNav` and navigation is
+`Render()` function. The backing data structures for navigation are the tree like [`StackNav`](https://github.com/tunjid/treeNav/blob/develop/treenav/src/commonMain/kotlin/com/tunjid/treenav/StackNav.kt) and
+[`MultiStackNav`](https://github.com/tunjid/treeNav/blob/develop/treenav/src/commonMain/kotlin/com/tunjid/treenav/MultiStackNav.kt)
+immutable classes. The root of the app is a `MultiStackNav` and navigation is
 controlled by a `NavMutator` defined as:
 
 ```
 typealias NavMutator = ActionStateProducer<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
 ```
 
-### Global UI
+#### Global UI
 
 The app utilizes a single bottom nav, toolbar and a shared global UI state as defined by the
 `UiState` class. This is what allows for the app to have responsive navigation while accounting
@@ -101,7 +111,7 @@ The definition for the `GlobalUiMutator` is:
 typealias GlobalUiMutator = ActionStateProducer<Mutation<UiState>, StateFlow<UiState>>
 ```
 
-### Pagination
+#### Pagination
 
 Pagination is implemented as a function of the current page and grid size:
 
@@ -127,19 +137,19 @@ Pagination is implemented as a function of the current page and grid size:
 
 As the user scrolls, `currentPage` changes and new pages are observed to keep the UI relevant.
 
-### State restoration and process death
+#### State restoration and process death
 
 All types that need to be restored after process death implement the `ByteSerializable` interface.
-This allows them to de serialized compactly into a `ByteArray` which works excellently with
-Android's `Parcelable` type and a regular file system on Desktop. The bytes are read or written
-with a type called the `ByteSerializer`.
+This allows them to de serialized compactly into a `ByteArray` which can then be saved to disk with a
+[`DataStore`](https://developer.android.com/topic/libraries/architecture/datastore?gclid=CjwKCAjwtp2bBhAGEiwAOZZTuOs3XNmaNxY65HGo2wnRPqvKt1c18A1dhe4sETq_A3Iyx8DDv6uA1xoCv9kQAvD_BwE&gclsrc=aw.ds)
+instance. The bytes are read or written with a type called the `ByteSerializer`.
 
 Things restored after process death currently include:
 
 * App navigation
 * The state of each `AppRoute` at the time of process death
 
-### Lifecycles and component scoping
+#### Lifecycles and component scoping
 
 Lifecycles are one of the most important concepts on Android, however Jetpack Compose itself is
 pretty binary; a `Composable` is either in composition or not. Trying to expand this simplicity to

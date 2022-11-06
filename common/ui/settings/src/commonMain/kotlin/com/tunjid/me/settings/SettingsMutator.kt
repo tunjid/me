@@ -23,8 +23,6 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
-import com.tunjid.me.scaffold.lifecycle.Lifecycle
-import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
@@ -48,7 +46,6 @@ class SettingsMutatorCreator(
 class ActualSettingsMutator(
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
-    lifecycleStateFlow: StateFlow<Lifecycle>,
     navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
@@ -59,7 +56,7 @@ class ActualSettingsMutator(
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
         authRepository.isSignedIn.map { isSignedIn ->
-            mutation<State> {
+            mutation {
                 copy(
                     routes = listOfNotNull(
                         "profile".takeIf { isSignedIn },
@@ -68,7 +65,6 @@ class ActualSettingsMutator(
                 )
             }
         }
-            .monitorWhenActive(lifecycleStateFlow)
     ),
     actionTransform = { actions ->
         actions.toMutationStream {
@@ -78,6 +74,6 @@ class ActualSettingsMutator(
                     action = navActions
                 )
             }
-        }.monitorWhenActive(lifecycleStateFlow)
+        }
     }
 )

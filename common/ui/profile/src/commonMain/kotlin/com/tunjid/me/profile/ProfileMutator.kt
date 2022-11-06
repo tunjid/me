@@ -24,8 +24,6 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
-import com.tunjid.me.scaffold.lifecycle.Lifecycle
-import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
@@ -46,7 +44,6 @@ class ProfileMutatorCreator(
 class ActualProfileMutator(
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
-    lifecycleStateFlow: StateFlow<Lifecycle>,
     scope: CoroutineScope,
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
@@ -63,7 +60,6 @@ class ActualProfileMutator(
                 }
             }
         )
-            .monitorWhenActive(lifecycleStateFlow)
     }
 )
 

@@ -37,6 +37,7 @@ import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.snackbarPositionalState
+import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 
 /**
@@ -46,9 +47,9 @@ import kotlinx.coroutines.delay
 internal fun BoxScope.AppSnackBar(
     globalUiMutator: GlobalUiMutator,
 ) {
-    val queue by globalUiMutator.state.mappedCollectAsState(mapper = UiState::snackbarMessages)
-    val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::snackbarPositionalState)
-    val messageConsumer by globalUiMutator.state.mappedCollectAsState(mapper = UiState::snackbarMessageConsumer)
+    val queue by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::snackbarMessages)
+    val state by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::snackbarPositionalState)
+    val messageConsumer by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::snackbarMessageConsumer)
 
     var canShow by remember { mutableStateOf(true) }
     var snackbarHeight by remember { mutableStateOf(0) }

@@ -27,8 +27,6 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
-import com.tunjid.me.scaffold.lifecycle.Lifecycle
-import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.NavContext
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.canGoUp
@@ -54,7 +52,6 @@ class SignInMutatorCreator(
 @Inject
 class ActualSignInMutator(
     authRepository: AuthRepository,
-    lifecycleStateFlow: StateFlow<Lifecycle>,
     navActions: (NavMutation) -> Unit,
     byteSerializer: ByteSerializer,
     scope: CoroutineScope,
@@ -64,9 +61,9 @@ class ActualSignInMutator(
 ) : SignInMutator by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
-    mutationFlows = listOf<Flow<Mutation<State>>>(
+    mutationFlows = listOf(
         authRepository.isSignedIn.map { mutation { copy(isSignedIn = it) } },
-    ).monitorWhenActive(lifecycleStateFlow),
+    ),
     actionTransform = { actions ->
         actions.toMutationStream {
             when (val action = type()) {
@@ -77,7 +74,7 @@ class ActualSignInMutator(
                     navActions = navActions
                 )
             }
-        }.monitorWhenActive(lifecycleStateFlow)
+        }
     }
 )
 

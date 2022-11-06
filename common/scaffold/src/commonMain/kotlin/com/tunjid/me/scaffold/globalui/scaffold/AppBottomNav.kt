@@ -31,6 +31,7 @@ import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
+import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.NavMutator
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.navItemSelected
@@ -44,8 +45,8 @@ internal fun BoxScope.AppBottomNav(
     globalUiMutator: GlobalUiMutator,
     navMutator: NavMutator,
 ) {
-    val nav by navMutator.state.mappedCollectAsState(mapper = NavState::mainNav)
-    val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::bottomNavPositionalState)
+    val nav by navMutator.state.mappedCollectAsStateWithLifecycle(mapper = NavState::mainNav)
+    val state by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::bottomNavPositionalState)
 
     val bottomNavPosition by animateDpAsState(
         when {

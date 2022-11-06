@@ -41,6 +41,7 @@ import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.fabState
+import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 
 /**
  * Common motionally intelligent Floating Action button shared amongst nav routes in the app
@@ -50,8 +51,8 @@ import com.tunjid.me.scaffold.globalui.slices.fabState
 internal fun BoxScope.AppFab(
     globalUiMutator: GlobalUiMutator,
 ) {
-    val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::fabState)
-    val clicks by globalUiMutator.state.mappedCollectAsState(mapper = UiState::fabClickListener)
+    val state by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::fabState)
+    val clicks by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::fabClickListener)
     val enabled = state.enabled
     val position by animateDpAsState(
         when {

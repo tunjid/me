@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import com.tunjid.me.core.utilities.mappedCollectAsState
 import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiMutator
+import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.*
 
 /**
@@ -43,7 +44,7 @@ fun Scaffold(
     ) {
         val saveableStateHolder = rememberSaveableStateHolder()
 
-        val route by navMutator.state.mappedCollectAsState(mapper = NavState::current)
+        val route by navMutator.state.mappedCollectAsStateWithLifecycle(mapper = NavState::current)
         val renderedRoute = route as? AppRoute ?: Route404
 
         Box(

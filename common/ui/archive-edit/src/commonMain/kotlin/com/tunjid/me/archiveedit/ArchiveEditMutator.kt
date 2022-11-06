@@ -29,8 +29,6 @@ import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
-import com.tunjid.me.scaffold.lifecycle.Lifecycle
-import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.ActionStateProducer
@@ -68,7 +66,6 @@ class ActualArchiveEditMutator(
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
     uiStateFlow: StateFlow<UiState>,
-    lifecycleStateFlow: StateFlow<Lifecycle>,
     permissionsFlow: StateFlow<Permissions>,
     onPermissionRequested: (Permission) -> Unit,
     scope: CoroutineScope,
@@ -106,7 +103,7 @@ class ActualArchiveEditMutator(
                         )
                     }
                 }
-        ).monitorWhenActive(lifecycleStateFlow)
+        )
     },
 )
 

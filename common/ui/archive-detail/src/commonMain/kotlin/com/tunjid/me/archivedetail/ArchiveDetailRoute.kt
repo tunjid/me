@@ -39,6 +39,7 @@ import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.Thumbnail
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.*
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.push
@@ -62,7 +63,7 @@ data class ArchiveDetailRoute(
 
 @Composable
 private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
-    val state by mutator.state.collectAsState()
+    val state by mutator.state.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
 

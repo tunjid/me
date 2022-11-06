@@ -28,8 +28,6 @@ import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
-import com.tunjid.me.scaffold.lifecycle.Lifecycle
-import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.consumeNavActions
@@ -59,7 +57,6 @@ class ActualArchiveListMutator(
     byteSerializer: ByteSerializer,
     navStateFlow: StateFlow<NavState>,
     uiStateFlow: StateFlow<UiState>,
-    lifecycleStateFlow: StateFlow<Lifecycle>,
     navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
@@ -83,7 +80,7 @@ class ActualArchiveListMutator(
             uiStateFlow = uiStateFlow
         ),
         authRepository.authMutations(),
-    ).monitorWhenActive(lifecycleStateFlow),
+    ),
     actionTransform = { actions ->
         actions.toMutationStream(keySelector = Action::key) {
             when (val action = type()) {
@@ -101,7 +98,7 @@ class ActualArchiveListMutator(
                     action = navActions
                 )
             }
-        }.monitorWhenActive(lifecycleStateFlow)
+        }
     }
 )
 

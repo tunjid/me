@@ -40,6 +40,7 @@ import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.insetMutations
 import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
+import com.tunjid.me.scaffold.lifecycle.LocalLifecycleMutator
 import com.tunjid.mutator.mutation
 import com.tunjid.treenav.pop
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -64,6 +65,7 @@ class MainActivity : AppCompatActivity() {
                 Surface(color = MaterialTheme.colors.background) {
                     CompositionLocalProvider(
                         LocalScreenStateHolderCache provides meApp.screenStateHolderCache,
+                        LocalLifecycleMutator provides meApp.lifecycleMutator,
                     ) {
                         Scaffold(
                             modifier = Modifier.then(dropModifier),

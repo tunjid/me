@@ -40,6 +40,7 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.AppRoute
 import kotlinx.serialization.Serializable
 
@@ -57,7 +58,7 @@ data class ProfileRoute(
 
 @Composable
 private fun ProfileScreen(mutator: ProfileMutator) {
-    val state by mutator.state.collectAsState()
+    val state by mutator.state.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
     ScreenUiState(

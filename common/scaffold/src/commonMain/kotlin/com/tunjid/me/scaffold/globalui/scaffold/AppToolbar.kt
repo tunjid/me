@@ -37,6 +37,7 @@ import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.globalui.slices.toolbarState
+import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.NavMutator
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.Route404
@@ -54,7 +55,7 @@ internal fun BoxScope.AppToolbar(
     globalUiMutator: GlobalUiMutator,
     navMutator: NavMutator,
 ) {
-    val state by globalUiMutator.state.mappedCollectAsState(mapper = UiState::toolbarState)
+    val state by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::toolbarState)
     val items = state.items
     val title = state.toolbarTitle
     val alpha: Float by animateFloatAsState(if (state.visible) 1f else 0f)
@@ -93,7 +94,7 @@ internal fun BoxScope.AppToolbar(
 private fun UpButton(
     navMutator: NavMutator,
 ) {
-    val canGoUp by navMutator.state.mappedCollectAsState { it.mainNav.canGoUp }
+    val canGoUp by navMutator.state.mappedCollectAsStateWithLifecycle { it.mainNav.canGoUp }
 
     AnimatedVisibility(visible = canGoUp) {
         Button(
@@ -171,7 +172,7 @@ private fun ToolbarIcon(
     globalUiMutator: GlobalUiMutator
 ) {
     val clicks by globalUiMutator.state
-        .mappedCollectAsState(mapper = UiState::toolbarMenuClickListener)
+        .mappedCollectAsStateWithLifecycle(mapper = UiState::toolbarMenuClickListener)
 
     when (val vector = item.imageVector) {
         null -> TextButton(

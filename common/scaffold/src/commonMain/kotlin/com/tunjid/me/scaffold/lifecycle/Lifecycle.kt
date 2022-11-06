@@ -16,18 +16,31 @@
 
 package com.tunjid.me.scaffold.lifecycle
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.staticCompositionLocalOf
+import com.tunjid.me.core.utilities.mapState
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
+import kotlin.coroutines.CoroutineContext
 
 typealias LifecycleMutator = ActionStateProducer<Mutation<Lifecycle>, StateFlow<Lifecycle>>
 
 data class Lifecycle(
     val isInForeground: Boolean = true,
 )
+
+val LocalLifecycleMutator = staticCompositionLocalOf {
+    Lifecycle().asNoOpStateFlowMutator<Mutation<Lifecycle>, Lifecycle>()
+}
 
 fun <T> Flow<T>.monitorWhenActive(lifecycleStateFlow: StateFlow<Lifecycle>) =
     lifecycleStateFlow
@@ -38,16 +51,26 @@ fun <T> Flow<T>.monitorWhenActive(lifecycleStateFlow: StateFlow<Lifecycle>) =
             else emptyFlow()
         }
 
-fun <T> List<Flow<T>>.monitorWhenActive(lifecycleStateFlow: StateFlow<Lifecycle>) =
-    map {
-        lifecycleStateFlow
-            .map { it.isInForeground }
-            .distinctUntilChanged()
-            .flatMapLatest { isInForeground ->
-                if (isInForeground) it
-                else emptyFlow()
-            }
-    }
+@Composable
+fun <T, R> StateFlow<T>.mappedCollectAsStateWithLifecycle(
+    context: CoroutineContext = kotlin.coroutines.EmptyCoroutineContext,
+    mapper: (T) -> R
+): State<R> {
+    val lifecycle = LocalLifecycleMutator.current.state
+    val scope = rememberCoroutineScope()
+    val lifecycleBoundState = remember { mapState(scope = scope, mapper = mapper).monitorWhenActive(lifecycle) }
+    return lifecycleBoundState.collectAsState(context = context, initial = mapper(this.value))
+}
+
+@Composable
+fun <T> StateFlow<T>.collectAsStateWithLifecycle(
+    context: CoroutineContext = kotlin.coroutines.EmptyCoroutineContext,
+): State<T> {
+    val lifecycle = LocalLifecycleMutator.current.state
+    val scope = rememberCoroutineScope()
+    val lifecycleBoundState = remember { this.monitorWhenActive(lifecycle) }
+    return collectAsState(context = context)
+}
 
 @Inject
 class ActualLifecycleMutator(

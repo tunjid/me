@@ -36,6 +36,7 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
@@ -54,7 +55,7 @@ data class SettingsRoute(
 
 @Composable
 private fun SettingsScreen(mutator: SettingsMutator) {
-    val state by mutator.state.collectAsState()
+    val state by mutator.state.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
     ScreenUiState(

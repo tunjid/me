@@ -36,6 +36,7 @@ import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
+import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.*
 
 /**
@@ -48,10 +49,10 @@ fun AppNavRail(
     saveableStateHolder: SaveableStateHolder,
 ) {
     val navState by navMutator.state.collectAsState()
-    val containerState by globalUiMutator.state.mappedCollectAsState(mapper = UiState::routeContainerState)
+    val containerState by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::routeContainerState)
 
-    val hasRailRoute by navMutator.state.mappedCollectAsState { it.navRail != null }
-    val navRailVisible by globalUiMutator.state.mappedCollectAsState(mapper = UiState::navRailVisible)
+    val hasRailRoute by navMutator.state.mappedCollectAsStateWithLifecycle { it.navRail != null }
+    val navRailVisible by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::navRailVisible)
 
     val statusBarSize = with(LocalDensity.current) {
         containerState.statusBarSize.toDp()
