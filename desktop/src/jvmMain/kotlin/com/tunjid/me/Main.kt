@@ -44,7 +44,7 @@ import com.tunjid.me.data.di.DataModule
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.data.di.create
 import com.tunjid.me.data.local.DatabaseDriverFactory
-import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.feature.archivelist.di.ArchiveListNavigationComponent
 import com.tunjid.me.feature.archivelist.di.ArchiveListScreenHolderComponent
 import com.tunjid.me.feature.archivelist.di.create
@@ -168,7 +168,7 @@ fun main() {
                     color = MaterialTheme.colors.background,
                 ) {
                     CompositionLocalProvider(
-                        LocalRouteServiceLocator provides routeMutatorFactory,
+                        LocalScreenStateHolderCache provides routeMutatorFactory,
                     ) {
                         Scaffold(
                             modifier = Modifier.then(dropParent),

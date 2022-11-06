@@ -29,7 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
-import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.nav.AppRoute
 import kotlinx.serialization.Serializable
 
@@ -40,7 +40,7 @@ data class SignInRoute(
     @Composable
     override fun Render() {
         SignInScreen(
-            mutator = LocalRouteServiceLocator.current.locate(this),
+            mutator = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }

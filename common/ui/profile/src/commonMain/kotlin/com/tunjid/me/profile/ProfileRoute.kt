@@ -35,7 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.core.ui.RemoteImagePainter
-import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
@@ -50,7 +50,7 @@ data class ProfileRoute(
     @Composable
     override fun Render() {
         ProfileScreen(
-            mutator = LocalRouteServiceLocator.current.locate(this),
+            mutator = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }

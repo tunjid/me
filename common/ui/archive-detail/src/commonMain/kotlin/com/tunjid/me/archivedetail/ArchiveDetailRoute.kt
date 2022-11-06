@@ -37,7 +37,7 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.Thumbnail
-import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.treenav.pop
@@ -53,7 +53,7 @@ data class ArchiveDetailRoute(
     @Composable
     override fun Render() {
         ArchiveDetailScreen(
-            mutator = LocalRouteServiceLocator.current.locate(this),
+            mutator = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 

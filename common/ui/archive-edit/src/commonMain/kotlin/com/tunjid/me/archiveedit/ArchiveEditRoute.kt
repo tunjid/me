@@ -36,7 +36,7 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.ui.Thumbnail
 import com.tunjid.me.core.ui.dragdrop.dropTarget
-import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
 import kotlinx.serialization.Serializable
@@ -50,7 +50,7 @@ data class ArchiveEditRoute(
     @Composable
     override fun Render() {
         ArchiveEditScreen(
-            mutator = LocalRouteServiceLocator.current.locate(this),
+            mutator = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }

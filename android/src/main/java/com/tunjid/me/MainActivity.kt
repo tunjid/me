@@ -35,7 +35,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.me.core.ui.dragdrop.PlatformDropTargetModifier
-import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.di.ScaffoldComponent
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.insetMutations
@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
             AppTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     CompositionLocalProvider(
-                        LocalRouteServiceLocator provides appDependencies.routeServiceLocator,
+                        LocalScreenStateHolderCache provides appDependencies.routeServiceLocator,
                     ) {
                         Scaffold(
                             modifier = Modifier.then(dropModifier),

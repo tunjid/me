@@ -23,7 +23,7 @@ import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.modelEvents
-import com.tunjid.me.feature.RouteServiceLocator
+import com.tunjid.me.feature.ScreenStateHolderCache
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.globalui.GlobalUiMutator
 import com.tunjid.me.scaffold.lifecycle.LifecycleMutator
@@ -51,7 +51,7 @@ class RouteMutatorFactory(
     val globalUiMutator: GlobalUiMutator,
     val lifecycleMutator: LifecycleMutator,
     private val allScreenStateHolders: Map<String, ScreenStateHolderCreator>
-) : RouteServiceLocator {
+) : ScreenStateHolderCache {
     private val routeMutatorCache = mutableMapOf<AppRoute, ScopeHolder>()
 
     init {
@@ -87,7 +87,7 @@ class RouteMutatorFactory(
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T> locate(route: AppRoute): T =
+    override fun <T> screenStateHolderFor(route: AppRoute): T =
         routeMutatorCache.getOrPut(route) {
             val routeScope = CoroutineScope(
                 SupervisorJob() + Dispatchers.Main.immediate
@@ -122,7 +122,7 @@ class RouteMutatorFactory(
         routeStates = flatten(order = Order.BreadthFirst)
             .filterIsInstance<AppRoute>()
             .fold(mutableMapOf()) { map, route ->
-                val mutator = locate<Any>(route)
+                val mutator = screenStateHolderFor<Any>(route)
                 val state = (mutator as? ActionStateProducer<*, *>)?.state ?: return@fold map
                 val serializable = (state as? StateFlow<*>)?.value ?: return@fold map
                 if (serializable is ByteSerializable) map[route.id] =

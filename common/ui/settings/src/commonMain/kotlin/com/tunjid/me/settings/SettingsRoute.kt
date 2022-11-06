@@ -31,7 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
@@ -47,7 +47,7 @@ data class SettingsRoute(
     @Composable
     override fun Render() {
         SettingsScreen(
-            mutator = LocalRouteServiceLocator.current.locate(this),
+            mutator = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }

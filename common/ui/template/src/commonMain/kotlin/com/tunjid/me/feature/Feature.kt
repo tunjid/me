@@ -23,13 +23,13 @@ import com.tunjid.me.scaffold.nav.AppRoute
 const val FeatureWhileSubscribed = 2_000L
 
 
-interface RouteServiceLocator {
-    fun <T> locate(route: AppRoute): T
+interface ScreenStateHolderCache {
+    fun <T> screenStateHolderFor(route: AppRoute): T
 }
 
-val LocalRouteServiceLocator: ProvidableCompositionLocal<RouteServiceLocator> = staticCompositionLocalOf {
-    object : RouteServiceLocator {
-        override fun <T> locate(route: AppRoute): T {
+val LocalScreenStateHolderCache: ProvidableCompositionLocal<ScreenStateHolderCache> = staticCompositionLocalOf {
+    object : ScreenStateHolderCache {
+        override fun <T> screenStateHolderFor(route: AppRoute): T {
             TODO("Not yet implemented")
         }
     }

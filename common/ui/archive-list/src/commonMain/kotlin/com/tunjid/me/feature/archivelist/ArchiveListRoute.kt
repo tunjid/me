@@ -29,7 +29,7 @@ import androidx.compose.ui.zIndex
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.ui.StickyHeaderGrid
-import com.tunjid.me.feature.LocalRouteServiceLocator
+import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.push
@@ -49,7 +49,7 @@ data class ArchiveListRoute(
     @Composable
     override fun Render() {
         ArchiveScreen(
-            mutator = LocalRouteServiceLocator.current.locate(this),
+            mutator = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }
