@@ -24,6 +24,7 @@ import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.modelEvents
 import com.tunjid.me.feature.MeApp
+import com.tunjid.me.feature.ScreenStateHolderCache
 import com.tunjid.me.scaffold.di.SavedStateCache
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.globalui.GlobalUiMutator
@@ -88,24 +89,26 @@ class PersistedMeApp(
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T> screenStateHolderFor(route: AppRoute): T =
-        routeMutatorCache.getOrPut(route) {
-            val routeScope = CoroutineScope(
-                SupervisorJob() + Dispatchers.Main.immediate
-            )
-            ScopeHolder(
-                scope = routeScope,
-                mutator = when (route) {
-                    is Route404 -> Route404
-                    else -> allScreenStateHolders
-                        .getValue(route::class.simpleName!!)
-                        .invoke(routeScope, savedStateCache(route), route)
-                }
+    override val screenStateHolderCache: ScreenStateHolderCache = object : ScreenStateHolderCache {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T> screenStateHolderFor(route: AppRoute): T =
+            routeMutatorCache.getOrPut(route) {
+                val routeScope = CoroutineScope(
+                    SupervisorJob() + Dispatchers.Main.immediate
+                )
+                ScopeHolder(
+                    scope = routeScope,
+                    mutator = when (route) {
+                        is Route404 -> Route404
+                        else -> allScreenStateHolders
+                            .getValue(route::class.simpleName!!)
+                            .invoke(routeScope, savedStateCache(route), route)
+                    }
 
-            )
+                )
 
-        }.mutator as T
+            }.mutator as T
+    }
 
     private fun MultiStackNav.toSavedState(
         byteSerializer: ByteSerializer
@@ -124,7 +127,7 @@ class PersistedMeApp(
         routeStates = flatten(order = Order.BreadthFirst)
             .filterIsInstance<AppRoute>()
             .fold(mutableMapOf()) { map, route ->
-                val mutator = screenStateHolderFor<Any>(route)
+                val mutator = screenStateHolderCache.screenStateHolderFor<Any>(route)
                 val state = (mutator as? ActionStateProducer<*, *>)?.state ?: return@fold map
                 val serializable = (state as? StateFlow<*>)?.value ?: return@fold map
                 if (serializable is ByteSerializable) map[route.id] =

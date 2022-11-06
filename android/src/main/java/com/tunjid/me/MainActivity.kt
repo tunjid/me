@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
             AppTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     CompositionLocalProvider(
-                        LocalScreenStateHolderCache provides meApp,
+                        LocalScreenStateHolderCache provides meApp.screenStateHolderCache,
                     ) {
                         Scaffold(
                             modifier = Modifier.then(dropModifier),

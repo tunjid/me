@@ -38,8 +38,9 @@ val LocalScreenStateHolderCache: ProvidableCompositionLocal<ScreenStateHolderCac
     }
 }
 
-interface MeApp : ScreenStateHolderCache {
+interface MeApp {
     val navMutator: NavMutator
     val globalUiMutator: GlobalUiMutator
     val lifecycleMutator: LifecycleMutator
+    val screenStateHolderCache: ScreenStateHolderCache
 }

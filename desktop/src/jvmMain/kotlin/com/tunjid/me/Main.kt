@@ -59,7 +59,7 @@ fun main() {
                     color = MaterialTheme.colors.background,
                 ) {
                     CompositionLocalProvider(
-                        LocalScreenStateHolderCache provides app,
+                        LocalScreenStateHolderCache provides app.screenStateHolderCache,
                     ) {
                         Scaffold(
                             modifier = Modifier.then(dropParent),
