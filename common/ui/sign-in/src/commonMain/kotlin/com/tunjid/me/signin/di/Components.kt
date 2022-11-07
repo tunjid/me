@@ -21,7 +21,11 @@ import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.signin.*
+import com.tunjid.me.signin.ActualSignInMutator
+import com.tunjid.me.signin.SignInMutator
+import com.tunjid.me.signin.SignInMutatorCreator
+import com.tunjid.me.signin.SignInRoute
+import com.tunjid.me.signin.State
 import com.tunjid.treenav.strings.UrlRouteMatcher
 import com.tunjid.treenav.strings.urlRouteMatcher
 import kotlinx.serialization.modules.subclass
@@ -35,15 +39,14 @@ abstract class SignInNavigationComponent {
 
     @IntoSet
     @Provides
-    fun savedStatePolymorphicArg(): SavedStateType = SavedStateType {
+    fun savedStateType(): SavedStateType = SavedStateType {
         subclass(State::class)
     }
 
-    @IntoSet
+    @IntoMap
     @Provides
-    fun profileRouteParser(): UrlRouteMatcher<AppRoute> = urlRouteMatcher(
-        routePattern = "sign-in",
-        routeMapper = { (route: String) ->
+    fun profileRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> = "sign-in" to urlRouteMatcher(
+        routePattern = "sign-in", routeMapper = { (route: String) ->
             SignInRoute(
                 id = route,
             )

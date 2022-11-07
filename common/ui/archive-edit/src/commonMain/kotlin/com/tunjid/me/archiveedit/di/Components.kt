@@ -16,7 +16,11 @@
 
 package com.tunjid.me.archiveedit.di
 
-import com.tunjid.me.archiveedit.*
+import com.tunjid.me.archiveedit.ActualArchiveEditMutator
+import com.tunjid.me.archiveedit.ArchiveEditMutator
+import com.tunjid.me.archiveedit.ArchiveEditMutatorCreator
+import com.tunjid.me.archiveedit.ArchiveEditRoute
+import com.tunjid.me.archiveedit.State
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
@@ -37,38 +41,39 @@ abstract class ArchiveEditNavigationComponent {
 
     @IntoSet
     @Provides
-    fun savedStatePolymorphicArg(): SavedStateType = SavedStateType {
+    fun savedStateType(): SavedStateType = SavedStateType {
         subclass(State::class)
     }
 
-    @IntoSet
+    @IntoMap
     @Provides
-    fun archiveEditRouteParser(): UrlRouteMatcher<AppRoute> = urlRouteMatcher(
-        routePattern = "archives/{kind}/{id}/edit",
-        routeMapper = { (route: String, pathKeys: Map<String, String>) ->
-            val archiveId = ArchiveId(pathKeys["id"] ?: "")
-            val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
-            ArchiveEditRoute(
-                id = route,
-                kind = kind,
-                archiveId = archiveId
-            )
-        }
-    )
+    fun archiveEditRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
+        "archives/{kind}/{id}/edit" to urlRouteMatcher(
+            routePattern = "archives/{kind}/{id}/edit",
+            routeMapper = { (route: String, pathKeys: Map<String, String>) ->
+                val archiveId = ArchiveId(pathKeys["id"] ?: "")
+                val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
+                ArchiveEditRoute(
+                    id = route,
+                    kind = kind,
+                    archiveId = archiveId
+                )
+            }
+        )
 
-    @IntoSet
+    @IntoMap
     @Provides
-    fun archiveCreateRouteParser(): UrlRouteMatcher<AppRoute> = urlRouteMatcher(
-        routePattern = "archives/{kind}/create",
-        routeMapper = { (route, pathKeys) ->
-            val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
-            ArchiveEditRoute(
-                id = route,
-                kind = kind,
-                archiveId = null
-            )
-        }
-    )
+    fun archiveCreateRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
+        "archives/{kind}/create" to urlRouteMatcher(
+            routePattern = "archives/{kind}/create", routeMapper = { (route, pathKeys) ->
+                val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
+                ArchiveEditRoute(
+                    id = route,
+                    kind = kind,
+                    archiveId = null
+                )
+            }
+        )
 }
 
 @Component

@@ -18,7 +18,11 @@ package com.tunjid.me.feature.archivelist.di
 
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
-import com.tunjid.me.feature.archivelist.*
+import com.tunjid.me.feature.archivelist.ActualArchiveListMutator
+import com.tunjid.me.feature.archivelist.ArchiveListMutator
+import com.tunjid.me.feature.archivelist.ArchiveListMutatorCreator
+import com.tunjid.me.feature.archivelist.ArchiveListRoute
+import com.tunjid.me.feature.archivelist.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
@@ -36,25 +40,26 @@ abstract class ArchiveListNavigationComponent {
 
     @IntoSet
     @Provides
-    fun savedStatePolymorphicArg(): SavedStateType = SavedStateType {
+    fun savedStateType(): SavedStateType = SavedStateType {
         subclass(State::class)
     }
 
-    @IntoSet
+    @IntoMap
     @Provides
-    fun archiveListRouteParser(): UrlRouteMatcher<AppRoute> = urlRouteMatcher(
-        routePattern = "archives/{kind}",
-        routeMapper = { (route: String, pathKeys: Map<String, String>) ->
-            val kindString = pathKeys["kind"]
-            val kind = ArchiveKind.values()
-                .firstOrNull { it.type == kindString }
-                ?: ArchiveKind.Articles
-            ArchiveListRoute(
-                id = route,
-                kind = kind
-            )
-        }
-    )
+    fun archiveListRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> = "archives/{kind}" to
+        urlRouteMatcher(
+            routePattern = "archives/{kind}",
+            routeMapper = { (route: String, pathKeys: Map<String, String>) ->
+                val kindString = pathKeys["kind"]
+                val kind = ArchiveKind.values()
+                    .firstOrNull { it.type == kindString }
+                    ?: ArchiveKind.Articles
+                ArchiveListRoute(
+                    id = route,
+                    kind = kind
+                )
+            }
+        )
 }
 
 @Component

@@ -21,7 +21,11 @@ import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.settings.*
+import com.tunjid.me.settings.ActualSettingsMutator
+import com.tunjid.me.settings.SettingsMutator
+import com.tunjid.me.settings.SettingsMutatorCreator
+import com.tunjid.me.settings.SettingsRoute
+import com.tunjid.me.settings.State
 import com.tunjid.treenav.strings.UrlRouteMatcher
 import com.tunjid.treenav.strings.urlRouteMatcher
 import kotlinx.serialization.modules.subclass
@@ -35,15 +39,14 @@ abstract class SettingsNavigationComponent {
 
     @IntoSet
     @Provides
-    fun savedStatePolymorphicArg(): SavedStateType = SavedStateType {
+    fun savedStateType(): SavedStateType = SavedStateType {
         subclass(State::class)
     }
 
-    @IntoSet
+    @IntoMap
     @Provides
-    fun settingsRouteParser(): UrlRouteMatcher<AppRoute> = urlRouteMatcher(
-        routePattern = "settings",
-        routeMapper = { (route: String) ->
+    fun settingsRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> = "settings" to urlRouteMatcher(
+        routePattern = "settings", routeMapper = { (route: String) ->
             SettingsRoute(
                 id = route,
             )

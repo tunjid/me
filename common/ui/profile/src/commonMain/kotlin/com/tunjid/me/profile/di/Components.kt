@@ -17,7 +17,11 @@
 package com.tunjid.me.profile.di
 
 import com.tunjid.me.data.di.InjectedDataComponent
-import com.tunjid.me.profile.*
+import com.tunjid.me.profile.ActualProfileMutator
+import com.tunjid.me.profile.ProfileMutator
+import com.tunjid.me.profile.ProfileMutatorCreator
+import com.tunjid.me.profile.ProfileRoute
+import com.tunjid.me.profile.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
@@ -35,15 +39,14 @@ abstract class ProfileNavigationComponent {
 
     @IntoSet
     @Provides
-    fun savedStatePolymorphicArg(): SavedStateType = SavedStateType {
+    fun savedStateType(): SavedStateType = SavedStateType {
         subclass(State::class)
     }
 
-    @IntoSet
+    @IntoMap
     @Provides
-    fun profileRouteParser(): UrlRouteMatcher<AppRoute> = urlRouteMatcher(
-        routePattern = "profile",
-        routeMapper = { (route: String) ->
+    fun profileRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> = "profile" to urlRouteMatcher(
+        routePattern = "profile", routeMapper = { (route: String) ->
             ProfileRoute(
                 id = route,
             )

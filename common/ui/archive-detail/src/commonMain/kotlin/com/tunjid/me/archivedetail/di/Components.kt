@@ -16,7 +16,11 @@
 
 package com.tunjid.me.archivedetail.di
 
-import com.tunjid.me.archivedetail.*
+import com.tunjid.me.archivedetail.ActualArchiveDetailMutator
+import com.tunjid.me.archivedetail.ArchiveDetailMutator
+import com.tunjid.me.archivedetail.ArchiveDetailMutatorCreator
+import com.tunjid.me.archivedetail.ArchiveDetailRoute
+import com.tunjid.me.archivedetail.State
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
@@ -37,15 +41,14 @@ abstract class ArchiveDetailNavigationComponent {
 
     @IntoSet
     @Provides
-    fun savedStatePolymorphicArg(): SavedStateType = SavedStateType {
+    fun savedStateType(): SavedStateType = SavedStateType {
         subclass(State::class)
     }
 
-    @IntoSet
+    @IntoMap
     @Provides
-    fun archiveDetailRouteParser(): UrlRouteMatcher<AppRoute> = urlRouteMatcher(
-        routePattern = "archives/{kind}/{id}",
-        routeMapper = { (route: String, pathKeys: Map<String, String>) ->
+    fun archiveDetailRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> = "archives/{kind}/{id}" to urlRouteMatcher(
+        routePattern = "archives/{kind}/{id}", routeMapper = { (route: String, pathKeys: Map<String, String>) ->
             val archiveId = ArchiveId(pathKeys["id"] ?: "")
             val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
             ArchiveDetailRoute(

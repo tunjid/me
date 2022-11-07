@@ -45,15 +45,17 @@ abstract class AppRouteComponent(
     @Component val settingsNavigationComponent: SettingsNavigationComponent,
     @Component val signInNavigationComponent: SignInNavigationComponent,
 ) {
-    internal abstract val routeMatcherSet: Set<UrlRouteMatcher<AppRoute>>
+    internal abstract val routeMatcherMap: Map<String, UrlRouteMatcher<AppRoute>>
 
     abstract val allScreenStatePolymorphic: Set<SavedStateType>
 
     abstract val byteSerializer: ByteSerializer
 
-    val allRouteMatchers get() = routeMatcherSet
-        .toList()
-        .sortedBy { it.patterns.firstOrNull() }
+    val allRouteMatchers
+        get() = routeMatcherMap
+            .toList()
+            .sortedWith(routeMatchingComparator())
+            .map(Pair<String, UrlRouteMatcher<AppRoute>>::second)
 
     @Provides
     fun byteSerializer(): ByteSerializer = DelegatingByteSerializer(
@@ -66,3 +68,13 @@ abstract class AppRouteComponent(
         }
     )
 }
+
+private fun routeMatchingComparator() =
+    compareBy<Pair<String, UrlRouteMatcher<AppRoute>>>(
+        // Order by number of path segments firs
+        { (key) -> key.split("/").size },
+        // Match more specific segments first, route params should be matched later
+        { (key) -> -key.split("/").filter { it.startsWith("{") }.size },
+        // Finally sort alphabetically
+        { (key) -> key }
+    ).reversed()
