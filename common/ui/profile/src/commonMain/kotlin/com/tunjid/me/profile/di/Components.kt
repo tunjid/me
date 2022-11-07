@@ -25,6 +25,7 @@ import com.tunjid.me.profile.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
+import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.treenav.strings.UrlRouteMatcher
 import com.tunjid.treenav.strings.urlRouteMatcher
@@ -45,13 +46,15 @@ abstract class ProfileNavigationComponent {
 
     @IntoMap
     @Provides
-    fun profileRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> = "profile" to urlRouteMatcher(
-        routePattern = "profile", routeMapper = { (route: String) ->
-            ProfileRoute(
-                id = route,
-            )
-        }
-    )
+    fun profileRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
+        routeAndMatcher(
+            routePattern = "profile",
+            routeMapper = { (route: String) ->
+                ProfileRoute(
+                    id = route,
+                )
+            }
+        )
 }
 
 @Component

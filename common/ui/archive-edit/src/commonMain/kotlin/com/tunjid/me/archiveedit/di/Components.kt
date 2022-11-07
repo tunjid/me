@@ -27,6 +27,7 @@ import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
+import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.treenav.strings.UrlRouteMatcher
 import com.tunjid.treenav.strings.urlRouteMatcher
@@ -48,7 +49,7 @@ abstract class ArchiveEditNavigationComponent {
     @IntoMap
     @Provides
     fun archiveEditRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
-        "archives/{kind}/{id}/edit" to urlRouteMatcher(
+        routeAndMatcher(
             routePattern = "archives/{kind}/{id}/edit",
             routeMapper = { (route: String, pathKeys: Map<String, String>) ->
                 val archiveId = ArchiveId(pathKeys["id"] ?: "")

@@ -27,6 +27,7 @@ import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
+import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.treenav.strings.UrlRouteMatcher
 import com.tunjid.treenav.strings.urlRouteMatcher
@@ -47,17 +48,19 @@ abstract class ArchiveDetailNavigationComponent {
 
     @IntoMap
     @Provides
-    fun archiveDetailRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> = "archives/{kind}/{id}" to urlRouteMatcher(
-        routePattern = "archives/{kind}/{id}", routeMapper = { (route: String, pathKeys: Map<String, String>) ->
-            val archiveId = ArchiveId(pathKeys["id"] ?: "")
-            val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
-            ArchiveDetailRoute(
-                id = route,
-                kind = kind,
-                archiveId = archiveId
-            )
-        }
-    )
+    fun archiveDetailRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
+        routeAndMatcher(
+            routePattern = "archives/{kind}/{id}",
+            routeMapper = { (route: String, pathKeys: Map<String, String>) ->
+                val archiveId = ArchiveId(pathKeys["id"] ?: "")
+                val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
+                ArchiveDetailRoute(
+                    id = route,
+                    kind = kind,
+                    archiveId = archiveId
+                )
+            }
+        )
 }
 
 @Component

@@ -20,6 +20,7 @@ import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
+import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.signin.ActualSignInMutator
 import com.tunjid.me.signin.SignInMutator
@@ -45,13 +46,15 @@ abstract class SignInNavigationComponent {
 
     @IntoMap
     @Provides
-    fun profileRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> = "sign-in" to urlRouteMatcher(
-        routePattern = "sign-in", routeMapper = { (route: String) ->
-            SignInRoute(
-                id = route,
-            )
-        }
-    )
+    fun profileRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
+        routeAndMatcher(
+            routePattern = "sign-in",
+            routeMapper = { (route: String) ->
+                SignInRoute(
+                    id = route,
+                )
+            }
+        )
 }
 
 @Component

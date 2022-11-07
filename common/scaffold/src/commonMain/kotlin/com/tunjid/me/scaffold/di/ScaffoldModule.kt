@@ -17,6 +17,7 @@
 package com.tunjid.me.scaffold.di
 
 import com.tunjid.me.core.di.SingletonScope
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.fromBytes
@@ -33,9 +34,12 @@ import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.me.scaffold.savedstate.DataStoreSavedStateRepository
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.Mutation
+import com.tunjid.treenav.Route
+import com.tunjid.treenav.strings.RouteParams
 import com.tunjid.treenav.strings.RouteParser
 import com.tunjid.treenav.strings.UrlRouteMatcher
 import com.tunjid.treenav.strings.routeParserFrom
+import com.tunjid.treenav.strings.urlRouteMatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
@@ -55,6 +59,14 @@ inline fun <reified Route : AppRoute> ((CoroutineScope, ByteArray?, Route) -> An
     }
 
 typealias SavedStateCache = (AppRoute) -> ByteArray?
+
+fun <T : Route> routeAndMatcher(
+    routePattern: String,
+    routeMapper: (RouteParams) -> T
+) = routePattern to urlRouteMatcher(
+    routePattern = routePattern,
+    routeMapper = routeMapper
+)
 
 /**
  * Wrapper for [ByteSerializer] to get around ksp compilation issues

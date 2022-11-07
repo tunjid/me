@@ -20,6 +20,7 @@ import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
+import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.settings.ActualSettingsMutator
 import com.tunjid.me.settings.SettingsMutator
@@ -45,13 +46,15 @@ abstract class SettingsNavigationComponent {
 
     @IntoMap
     @Provides
-    fun settingsRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> = "settings" to urlRouteMatcher(
-        routePattern = "settings", routeMapper = { (route: String) ->
-            SettingsRoute(
-                id = route,
-            )
-        }
-    )
+    fun settingsRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
+        routeAndMatcher(
+            routePattern = "settings",
+            routeMapper = { (route: String) ->
+                SettingsRoute(
+                    id = route,
+                )
+            }
+        )
 }
 
 @Component
