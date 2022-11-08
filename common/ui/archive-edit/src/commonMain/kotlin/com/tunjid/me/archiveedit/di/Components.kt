@@ -65,8 +65,9 @@ abstract class ArchiveEditNavigationComponent {
     @IntoMap
     @Provides
     fun archiveCreateRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
-        "archives/{kind}/create" to urlRouteMatcher(
-            routePattern = "archives/{kind}/create", routeMapper = { (route, pathKeys) ->
+        routeAndMatcher(
+            routePattern = "archives/{kind}/create",
+            routeMapper = { (route, pathKeys) ->
                 val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
                 ArchiveEditRoute(
                     id = route,
