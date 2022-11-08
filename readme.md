@@ -85,7 +85,7 @@ client to FCM for efficiency reasons in the future.
 
 #### State production
 
-All screen level state holders are 
+All screen level state holders are implemented with [unidirectional data flow as a functional declaration](https://www.tunjid.com/articles/unidirectional-data-flow-as-a-functional-declaration-6230b74f5d785a7ebc8c2a43).
 
 #### Navigation
 
