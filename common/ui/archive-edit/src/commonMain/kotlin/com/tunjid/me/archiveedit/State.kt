@@ -62,6 +62,10 @@ sealed class Action(val key: String) {
             override val value: String
         ) : TextEdit()
 
+        data class VideoUrl(
+            override val value: String
+        ) : TextEdit()
+
         data class Body(
             override val value: String
         ) : TextEdit()
@@ -70,6 +74,7 @@ sealed class Action(val key: String) {
             get() = when (this) {
                 is Title -> mutation { copy(upsert = upsert.copy(title = value)) }
                 is Description -> mutation { copy(upsert = upsert.copy(description = value)) }
+                is VideoUrl -> mutation { copy(upsert = upsert.copy(videoUrl = value)) }
                 is Body -> mutation { copy(upsert = upsert.copy(body = value)) }
             }
     }

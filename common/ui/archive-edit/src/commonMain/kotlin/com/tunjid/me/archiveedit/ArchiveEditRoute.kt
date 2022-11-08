@@ -109,6 +109,12 @@ private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
         )
 
         Spacer(modifier = Modifier.padding(8.dp))
+        VideoUrlEditor(
+            videoUrl = upsert.videoUrl,
+            onEdit = mutator.accept
+        )
+
+        Spacer(modifier = Modifier.padding(8.dp))
         ChipsEditor(
             upsert = upsert,
             chipsState = state.chipsState,
@@ -206,6 +212,24 @@ private fun DescriptionEditor(
         ),
         label = { Text(text = "Description", fontSize = 18.sp) },
         onValueChange = { onEdit(Action.TextEdit.Description(it)) }
+    )
+}
+
+@Composable
+private fun VideoUrlEditor(
+    videoUrl: String?,
+    onEdit: (Action.TextEdit) -> Unit,
+) {
+    TextField(
+        value = videoUrl ?: "",
+        maxLines = 1,
+        colors = Unstyled(),
+        textStyle = LocalTextStyle.current.copy(
+            color = MaterialTheme.colors.onSurface,
+            fontSize = 16.sp
+        ),
+        label = { Text(text = "Video Url") },
+        onValueChange = { onEdit(Action.TextEdit.VideoUrl(it)) }
     )
 }
 

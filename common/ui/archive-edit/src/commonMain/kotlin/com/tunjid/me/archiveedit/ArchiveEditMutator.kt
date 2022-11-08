@@ -79,31 +79,31 @@ class ActualArchiveEditMutator(
         hasStoragePermissions = permissionsFlow.value.isGranted(Permission.ReadExternalStorage)
     ),
     started = SharingStarted.WhileSubscribed(),
+    mutationFlows = listOf(
+        uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
+        permissionsFlow.storagePermissionMutations(),
+        authRepository.authMutations(),
+    ),
     actionTransform = { actions ->
-        merge(
-            uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
-            permissionsFlow.storagePermissionMutations(),
-            authRepository.authMutations(),
-            actions
-                .withInitialLoad(route)
-                .toMutationStream(keySelector = Action::key) {
-                    when (val action = type()) {
-                        is Action.Drop -> action.flow.dropMutations()
-                        is Action.Drag -> action.flow.dragStatusMutations()
-                        is Action.TextEdit -> action.flow.textEditMutations()
-                        is Action.ChipEdit -> action.flow.chipEditMutations()
-                        is Action.ToggleEditView -> action.flow.viewToggleMutations()
-                        is Action.MessageConsumed -> action.flow.messageConsumptionMutations()
-                        is Action.RequestPermission -> action.flow.permissionRequestMutations(
-                            onPermissionRequested = onPermissionRequested
-                        )
+        actions
+            .withInitialLoad(route)
+            .toMutationStream(keySelector = Action::key) {
+                when (val action = type()) {
+                    is Action.Drop -> action.flow.dropMutations()
+                    is Action.Drag -> action.flow.dragStatusMutations()
+                    is Action.TextEdit -> action.flow.textEditMutations()
+                    is Action.ChipEdit -> action.flow.chipEditMutations()
+                    is Action.ToggleEditView -> action.flow.viewToggleMutations()
+                    is Action.MessageConsumed -> action.flow.messageConsumptionMutations()
+                    is Action.RequestPermission -> action.flow.permissionRequestMutations(
+                        onPermissionRequested = onPermissionRequested
+                    )
 
-                        is Action.Load -> action.flow.loadMutations(
-                            archiveRepository = archiveRepository,
-                        )
-                    }
+                    is Action.Load -> action.flow.loadMutations(
+                        archiveRepository = archiveRepository,
+                    )
                 }
-        )
+            }
     },
 )
 
@@ -343,6 +343,7 @@ private fun ArchiveRepository.textBodyMutations(
                     id = archive.id,
                     title = archive.title,
                     description = archive.description,
+                    videoUrl = archive.videoUrl,
                     body = archive.body,
                     categories = archive.categories,
                     tags = archive.tags,
