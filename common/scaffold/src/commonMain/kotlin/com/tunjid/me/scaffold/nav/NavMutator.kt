@@ -35,7 +35,7 @@ import me.tatarka.inject.annotations.Inject
 
 const val NavName = "App"
 
-typealias NavMutator = ActionStateProducer<NavMutation, StateFlow<NavState>>
+typealias NavStateHolder = ActionStateProducer<NavMutation, StateFlow<NavState>>
 typealias NavMutation = NavContext.() -> MultiStackNav
 
 interface AppRoute : Route {
@@ -77,11 +77,11 @@ val EmptyNavState = NavState(
 val NavState.current get() = mainNav.current
 
 @Inject
-class PersistedNavMutator(
+class PersistedNavStateHolder(
     appScope: CoroutineScope,
     savedStateRepository: SavedStateRepository,
     routeParser: RouteParser<AppRoute>,
-) : NavMutator by appScope.actionStateFlowProducer(
+) : NavStateHolder by appScope.actionStateFlowProducer(
     initialState = EmptyNavState,
     started = SharingStarted.Eagerly,
     actionTransform = { navMutations ->

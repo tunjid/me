@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -62,7 +61,7 @@ data class ArchiveDetailRoute(
 }
 
 @Composable
-private fun ArchiveDetailScreen(mutator: ArchiveDetailMutator) {
+private fun ArchiveDetailScreen(mutator: ArchiveDetailStateHolder) {
     val state by mutator.state.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }

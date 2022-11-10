@@ -42,15 +42,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
 
-typealias SignInMutator = ActionStateProducer<Action, StateFlow<State>>
+typealias SignInStateHolder = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
-class SignInMutatorCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: SignInRoute) -> SignInMutator
+class SignInStateHolderCreator(
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: SignInRoute) -> SignInStateHolder
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
-class ActualSignInMutator(
+class ActualSignInStateHolder(
     authRepository: AuthRepository,
     navActions: (NavMutation) -> Unit,
     byteSerializer: ByteSerializer,
@@ -58,7 +58,7 @@ class ActualSignInMutator(
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
     route: SignInRoute,
-) : SignInMutator by scope.actionStateFlowProducer(
+) : SignInStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(

@@ -53,15 +53,15 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
 import me.tatarka.inject.annotations.Inject
 
-typealias ArchiveEditMutator = ActionStateProducer<Action, StateFlow<State>>
+typealias ArchiveEditStateHolder = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
-class ArchiveEditMutatorCreator(
-    creator: (scope: CoroutineScope, savedStae: ByteArray?, route: ArchiveEditRoute) -> ArchiveEditMutator
+class ArchiveEditStateHolderCreator(
+    creator: (scope: CoroutineScope, savedStae: ByteArray?, route: ArchiveEditRoute) -> ArchiveEditStateHolder
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
-class ActualArchiveEditMutator(
+class ActualArchiveEditStateHolder(
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
@@ -71,7 +71,7 @@ class ActualArchiveEditMutator(
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveEditRoute,
-) : ArchiveEditMutator by scope.actionStateFlowProducer(
+) : ArchiveEditStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         kind = route.kind,
         upsert = ArchiveUpsert(id = route.archiveId),

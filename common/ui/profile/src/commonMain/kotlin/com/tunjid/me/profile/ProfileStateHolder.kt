@@ -14,66 +14,58 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.settings
+package com.tunjid.me.profile
 
 
+import com.tunjid.me.core.ui.update
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
-import com.tunjid.me.scaffold.nav.NavMutation
-import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
 
-typealias SettingsMutator = ActionStateProducer<Action, StateFlow<State>>
+typealias ProfileStateHolder = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
-class SettingsMutatorCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: SettingsRoute) -> SettingsMutator
+class ProfileStateHolderCreator(
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ProfileRoute) -> ProfileStateHolder
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
-class ActualSettingsMutator(
+class ActualProfileStateHolder(
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
-    navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
-    route: SettingsRoute,
-) : SettingsMutator by scope.actionStateFlowProducer(
+    route: ProfileRoute,
+) : ProfileStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
-        authRepository.isSignedIn.map { isSignedIn ->
-            mutation {
-                copy(
-                    routes = listOfNotNull(
-                        "profile".takeIf { isSignedIn },
-                        "sign-in".takeIf { !isSignedIn }
-                    )
-                )
-            }
-        }
+        authRepository.signedInUserStream.map { mutation { copy(signedInUser = it) } },
     ),
     actionTransform = { actions ->
         actions.toMutationStream {
-            when (val type = type()) {
-                is Action.Navigate -> type.flow.consumeNavActions<Action.Navigate, State>(
-                    mutationMapper = Action.Navigate::navMutation,
-                    action = navActions
-                )
+            when (val action = type()) {
+                is Action.FieldChanged -> action.flow.formEditMutations()
             }
         }
     }
 )
+
+private fun Flow<Action.FieldChanged>.formEditMutations(): Flow<Mutation<State>> =
+    map { (updatedField) ->
+        mutation {
+            copy(fields = fields.update(updatedField))
+        }
+    }

@@ -18,9 +18,9 @@ package com.tunjid.me.feature.archivelist.di
 
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
-import com.tunjid.me.feature.archivelist.ActualArchiveListMutator
-import com.tunjid.me.feature.archivelist.ArchiveListMutator
-import com.tunjid.me.feature.archivelist.ArchiveListMutatorCreator
+import com.tunjid.me.feature.archivelist.ActualArchiveListStateHolder
+import com.tunjid.me.feature.archivelist.ArchiveListStateHolder
+import com.tunjid.me.feature.archivelist.ArchiveListStateHolderCreator
 import com.tunjid.me.feature.archivelist.ArchiveListRoute
 import com.tunjid.me.feature.archivelist.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
@@ -68,13 +68,13 @@ abstract class ArchiveListScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualArchiveListMutator.bind: ArchiveListMutator
+    val ActualArchiveListStateHolder.bind: ArchiveListStateHolder
         @Provides get() = this
 
     @IntoMap
     @Provides
-    fun archiveListMutatorCreator(
-        assist: ArchiveListMutatorCreator
+    fun archiveListStateHolderCreator(
+        assist: ArchiveListStateHolderCreator
     ): Pair<String, ScreenStateHolderCreator> = Pair(
         first = ArchiveListRoute::class.simpleName!!,
         second = assist

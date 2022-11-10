@@ -18,10 +18,10 @@ package com.tunjid.me.feature
 
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.tunjid.me.scaffold.globalui.GlobalUiMutator
-import com.tunjid.me.scaffold.lifecycle.LifecycleMutator
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
+import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.NavMutator
+import com.tunjid.me.scaffold.nav.NavStateHolder
 
 const val FeatureWhileSubscribed = 2_000L
 
@@ -39,8 +39,8 @@ val LocalScreenStateHolderCache: ProvidableCompositionLocal<ScreenStateHolderCac
 }
 
 interface MeApp {
-    val navMutator: NavMutator
-    val globalUiMutator: GlobalUiMutator
-    val lifecycleMutator: LifecycleMutator
+    val navStateHolder: NavStateHolder
+    val globalUiStateHolder: GlobalUiStateHolder
+    val lifecycleStateHolder: LifecycleStateHolder
     val screenStateHolderCache: ScreenStateHolderCache
 }

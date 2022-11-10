@@ -27,8 +27,8 @@ import com.tunjid.me.feature.MeApp
 import com.tunjid.me.feature.ScreenStateHolderCache
 import com.tunjid.me.scaffold.di.SavedStateCache
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.globalui.GlobalUiMutator
-import com.tunjid.me.scaffold.lifecycle.LifecycleMutator
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
+import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.nav.*
 import com.tunjid.me.scaffold.savedstate.SavedState
@@ -49,13 +49,13 @@ class PersistedMeApp(
     navStateStream: StateFlow<NavState>,
     savedStateRepository: SavedStateRepository,
     sync: Sync,
-    override val navMutator: NavMutator,
-    override val globalUiMutator: GlobalUiMutator,
-    override val lifecycleMutator: LifecycleMutator,
+    override val navStateHolder: NavStateHolder,
+    override val globalUiStateHolder: GlobalUiStateHolder,
+    override val lifecycleStateHolder: LifecycleStateHolder,
     private val savedStateCache: SavedStateCache,
     private val allScreenStateHolders: Map<String, ScreenStateHolderCreator>
 ) : MeApp {
-    private val routeMutatorCache = mutableMapOf<AppRoute, ScopeHolder>()
+    private val routeStateHolderCache = mutableMapOf<AppRoute, ScopeHolder>()
 
     init {
         appScope.launch {
@@ -65,7 +65,7 @@ class PersistedMeApp(
                 .collect { removedRoutes ->
                     removedRoutes.forEach { route ->
                         println("Cleared ${route::class.simpleName}")
-                        val holder = routeMutatorCache.remove(route)
+                        val holder = routeStateHolderCache.remove(route)
                         holder?.scope?.cancel()
                     }
                 }
@@ -82,7 +82,7 @@ class PersistedMeApp(
                 dispatcher = databaseDispatcher()
             )
                 // This is an Android concern. Remove this when this is firebase powered.
-                .monitorWhenActive(lifecycleMutator.state)
+                .monitorWhenActive(lifecycleStateHolder.state)
                 .map { it.model.changeListKey() }
                 .onEach(sync)
                 .launchIn(appScope)
@@ -92,7 +92,7 @@ class PersistedMeApp(
     override val screenStateHolderCache: ScreenStateHolderCache = object : ScreenStateHolderCache {
         @Suppress("UNCHECKED_CAST")
         override fun <T> screenStateHolderFor(route: AppRoute): T =
-            routeMutatorCache.getOrPut(route) {
+            routeStateHolderCache.getOrPut(route) {
                 val routeScope = CoroutineScope(
                     SupervisorJob() + Dispatchers.Main.immediate
                 )

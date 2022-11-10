@@ -17,9 +17,9 @@
 package com.tunjid.me.profile.di
 
 import com.tunjid.me.data.di.InjectedDataComponent
-import com.tunjid.me.profile.ActualProfileMutator
-import com.tunjid.me.profile.ProfileMutator
-import com.tunjid.me.profile.ProfileMutatorCreator
+import com.tunjid.me.profile.ActualProfileStateHolder
+import com.tunjid.me.profile.ProfileStateHolder
+import com.tunjid.me.profile.ProfileStateHolderCreator
 import com.tunjid.me.profile.ProfileRoute
 import com.tunjid.me.profile.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
@@ -63,13 +63,13 @@ abstract class ProfileScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualProfileMutator.bind: ProfileMutator
+    val ActualProfileStateHolder.bind: ProfileStateHolder
         @Provides get() = this
 
     @IntoMap
     @Provides
-    fun settingsMutatorCreator(
-        assist: ProfileMutatorCreator
+    fun settingsStateHolderCreator(
+        assist: ProfileStateHolderCreator
     ): Pair<String, ScreenStateHolderCreator> = Pair(
         first = ProfileRoute::class.simpleName!!,
         second = assist

@@ -14,70 +14,62 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.archivedetail
+package com.tunjid.me.settings
 
 
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.utilities.ByteSerializer
-import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.navBarSize
-import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
-import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
-typealias ArchiveDetailMutator = ActionStateProducer<Action, StateFlow<State>>
+typealias SettingsStateHolder = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
-class ArchiveDetailMutatorCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveDetailRoute) -> ArchiveDetailMutator
+class SettingsStateHolderCreator(
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: SettingsRoute) -> SettingsStateHolder
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
-class ActualArchiveDetailMutator(
-    archiveRepository: ArchiveRepository,
+class ActualSettingsStateHolder(
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
-    uiStateFlow: StateFlow<UiState>,
     navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
-    route: ArchiveDetailRoute,
-) : ArchiveDetailMutator by scope.actionStateFlowProducer(
-    initialState = byteSerializer.restoreState(savedState) ?: State(
-        kind = route.kind,
-        navBarSize = uiStateFlow.value.navBarSize,
-    ),
+    @Suppress("UNUSED_PARAMETER")
+    route: SettingsRoute,
+) : SettingsStateHolder by scope.actionStateFlowProducer(
+    initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
-        uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
-        authRepository.authMutations(),
-        archiveRepository.archiveLoadMutations(
-            kind = route.kind,
-            id = route.archiveId
-        )
+        authRepository.isSignedIn.map { isSignedIn ->
+            mutation {
+                copy(
+                    routes = listOfNotNull(
+                        "profile".takeIf { isSignedIn },
+                        "sign-in".takeIf { !isSignedIn }
+                    )
+                )
+            }
+        }
     ),
     actionTransform = { actions ->
         actions.toMutationStream {
             when (val type = type()) {
-                is Action.Navigate -> type.flow.consumeNavActions(
+                is Action.Navigate -> type.flow.consumeNavActions<Action.Navigate, State>(
                     mutationMapper = Action.Navigate::navMutation,
                     action = navActions
                 )
@@ -85,29 +77,3 @@ class ActualArchiveDetailMutator(
         }
     }
 )
-
-private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
-    signedInUserStream.map {
-        mutation {
-            copy(
-                signedInUserId = it?.id,
-                hasFetchedAuthStatus = true,
-            )
-        }
-    }
-
-private fun ArchiveRepository.archiveLoadMutations(
-    id: ArchiveId,
-    kind: ArchiveKind
-): Flow<Mutation<State>> = monitorArchive(
-    kind = kind,
-    id = id
-)
-    .map { fetchedArchive ->
-        mutation {
-            copy(
-                wasDeleted = archive != null && fetchedArchive == null,
-                archive = fetchedArchive
-            )
-        }
-    }

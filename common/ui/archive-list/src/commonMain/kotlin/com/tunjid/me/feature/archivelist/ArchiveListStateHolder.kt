@@ -40,18 +40,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
 
-typealias ArchiveListMutator = ActionStateProducer<Action, StateFlow<State>>
+typealias ArchiveListStateHolder = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
-class ArchiveListMutatorCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveListRoute) -> ArchiveListMutator
+class ArchiveListStateHolderCreator(
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveListRoute) -> ArchiveListStateHolder
 ) : ScreenStateHolderCreator by creator.downcast()
 
 /**
  * Manages [State] for [ArchiveListRoute]
  */
 @Inject
-class ActualArchiveListMutator(
+class ActualArchiveListStateHolder(
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
@@ -61,7 +61,7 @@ class ActualArchiveListMutator(
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveListRoute,
-) : ArchiveListMutator by scope.actionStateFlowProducer(
+) : ArchiveListStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         items = listOf(
             ArchiveItem.Loading(

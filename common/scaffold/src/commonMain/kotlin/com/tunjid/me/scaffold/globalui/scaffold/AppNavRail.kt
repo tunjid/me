@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
@@ -44,15 +44,15 @@ import com.tunjid.me.scaffold.nav.*
  */
 @Composable
 fun AppNavRail(
-    globalUiMutator: GlobalUiMutator,
-    navMutator: NavMutator,
+    globalUiStateHolder: GlobalUiStateHolder,
+    navStateHolder: NavStateHolder,
     saveableStateHolder: SaveableStateHolder,
 ) {
-    val navState by navMutator.state.collectAsState()
-    val containerState by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::routeContainerState)
+    val navState by navStateHolder.state.collectAsState()
+    val containerState by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::routeContainerState)
 
-    val hasRailRoute by navMutator.state.mappedCollectAsStateWithLifecycle { it.navRail != null }
-    val navRailVisible by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::navRailVisible)
+    val hasRailRoute by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.navRail != null }
+    val navRailVisible by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::navRailVisible)
 
     val statusBarSize = with(LocalDensity.current) {
         containerState.statusBarSize.toDp()
@@ -82,13 +82,13 @@ fun AppNavRail(
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
                 navState.mainNav.navItems.forEach { navItem ->
-                    NavRailItem(item = navItem, navMutator = navMutator)
+                    NavRailItem(item = navItem, navStateHolder = navStateHolder)
                 }
             }
             Box(
                 modifier = Modifier.width(navRailContentWidth)
             ) {
-                val route by navMutator.state.mappedCollectAsState(mapper = NavState::navRail)
+                val route by navStateHolder.state.mappedCollectAsState(mapper = NavState::navRail)
                 saveableStateHolder.SaveableStateProvider(key = "nav-rail-${route?.id}") {
                     if (navRailVisible) route?.Render()
                 }
@@ -100,7 +100,7 @@ fun AppNavRail(
 @Composable
 private fun NavRailItem(
     item: NavItem,
-    navMutator: NavMutator,
+    navStateHolder: NavStateHolder,
 ) {
     Button(
         elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
@@ -111,7 +111,7 @@ private fun NavRailItem(
             bottom = 16.dp,
         ),
         onClick = {
-            navMutator.accept { mainNav.navItemSelected(item = item) }
+            navStateHolder.accept { mainNav.navItemSelected(item = item) }
         }
     ) {
         Column(

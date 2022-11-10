@@ -27,24 +27,24 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.max
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.nav.NavMutator
+import com.tunjid.me.scaffold.nav.NavStateHolder
 
 /**
  * Motionally intelligent container for the hosting the main navigation routes
  */
 @Composable
 internal fun AppRouteContainer(
-    globalUiMutator: GlobalUiMutator,
-    navMutator: NavMutator,
+    globalUiStateHolder: GlobalUiStateHolder,
+    navStateHolder: NavStateHolder,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val state by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::routeContainerState)
+    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::routeContainerState)
 
     val bottomNavHeight = UiSizes.bottomNavSize countIf state.bottomNavVisible
     val insetClearance = max(
@@ -64,7 +64,7 @@ internal fun AppRouteContainer(
 
     val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
 
-    val hasNavContent by navMutator.state.mappedCollectAsStateWithLifecycle { it.navRail != null }
+    val hasNavContent by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.navRail != null }
     val navRailVisible = state.navRailVisible
     val navRailSize = UiSizes.navRailWidth countIf navRailVisible
     val navRailContentWidth = UiSizes.navRailContentWidth countIf (hasNavContent && navRailVisible)

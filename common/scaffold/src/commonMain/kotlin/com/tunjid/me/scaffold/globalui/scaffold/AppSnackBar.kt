@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.peek
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.keyboardSize
@@ -45,11 +45,11 @@ import kotlinx.coroutines.delay
  */
 @Composable
 internal fun BoxScope.AppSnackBar(
-    globalUiMutator: GlobalUiMutator,
+    globalUiStateHolder: GlobalUiStateHolder,
 ) {
-    val queue by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::snackbarMessages)
-    val state by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::snackbarPositionalState)
-    val messageConsumer by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::snackbarMessageConsumer)
+    val queue by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::snackbarMessages)
+    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::snackbarPositionalState)
+    val messageConsumer by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::snackbarMessageConsumer)
 
     var canShow by remember { mutableStateOf(true) }
     var snackbarHeight by remember { mutableStateOf(0) }
@@ -98,6 +98,6 @@ internal fun BoxScope.AppSnackBar(
     }
 
     LaunchedEffect(fabOffset) {
-        globalUiMutator.accept { copy(snackbarOffset = fabOffset) }
+        globalUiStateHolder.accept { copy(snackbarOffset = fabOffset) }
     }
 }

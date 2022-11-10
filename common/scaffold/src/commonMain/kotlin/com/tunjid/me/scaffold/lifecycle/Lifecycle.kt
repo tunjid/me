@@ -32,13 +32,13 @@ import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
 import kotlin.coroutines.CoroutineContext
 
-typealias LifecycleMutator = ActionStateProducer<Mutation<Lifecycle>, StateFlow<Lifecycle>>
+typealias LifecycleStateHolder = ActionStateProducer<Mutation<Lifecycle>, StateFlow<Lifecycle>>
 
 data class Lifecycle(
     val isInForeground: Boolean = true,
 )
 
-val LocalLifecycleMutator = staticCompositionLocalOf {
+val LocalLifecycleStateHolder = staticCompositionLocalOf {
     Lifecycle().asNoOpStateFlowMutator<Mutation<Lifecycle>, Lifecycle>()
 }
 
@@ -56,7 +56,7 @@ fun <T, R> StateFlow<T>.mappedCollectAsStateWithLifecycle(
     context: CoroutineContext = kotlin.coroutines.EmptyCoroutineContext,
     mapper: (T) -> R
 ): State<R> {
-    val lifecycle = LocalLifecycleMutator.current.state
+    val lifecycle = LocalLifecycleStateHolder.current.state
     val scope = rememberCoroutineScope()
     val lifecycleBoundState = remember { mapState(scope = scope, mapper = mapper).monitorWhenActive(lifecycle) }
     return lifecycleBoundState.collectAsState(context = context, initial = mapper(this.value))
@@ -66,16 +66,16 @@ fun <T, R> StateFlow<T>.mappedCollectAsStateWithLifecycle(
 fun <T> StateFlow<T>.collectAsStateWithLifecycle(
     context: CoroutineContext = kotlin.coroutines.EmptyCoroutineContext,
 ): State<T> {
-    val lifecycle = LocalLifecycleMutator.current.state
+    val lifecycle = LocalLifecycleStateHolder.current.state
     val scope = rememberCoroutineScope()
     val lifecycleBoundState = remember { this.monitorWhenActive(lifecycle) }
     return collectAsState(context = context)
 }
 
 @Inject
-class ActualLifecycleMutator(
+class ActualLifecycleStateHolder(
     appScope: CoroutineScope,
-) : LifecycleMutator by appScope.actionStateFlowProducer(
+) : LifecycleStateHolder by appScope.actionStateFlowProducer(
     started = SharingStarted.Eagerly,
     initialState = Lifecycle(),
     actionTransform = { it }

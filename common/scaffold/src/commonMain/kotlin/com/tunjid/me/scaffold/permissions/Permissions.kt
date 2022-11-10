@@ -20,10 +20,10 @@ import com.tunjid.mutator.ActionStateProducer
 import kotlinx.coroutines.flow.StateFlow
 
 interface PermissionsProvider {
-    val mutator: PermissionsMutator
+    val mutator: PermissionsStateHolder
 }
 
-typealias PermissionsMutator = ActionStateProducer<Permission, StateFlow<Permissions>>
+typealias PermissionsStateHolder = ActionStateProducer<Permission, StateFlow<Permissions>>
 
 sealed class Permission {
     object ReadExternalStorage : Permission()

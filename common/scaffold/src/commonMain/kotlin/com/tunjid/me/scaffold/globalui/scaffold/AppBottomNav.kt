@@ -27,12 +27,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.nav.NavMutator
+import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.navItemSelected
 import com.tunjid.me.scaffold.nav.navItems
@@ -42,11 +42,11 @@ import com.tunjid.me.scaffold.nav.navItems
  */
 @Composable
 internal fun BoxScope.AppBottomNav(
-    globalUiMutator: GlobalUiMutator,
-    navMutator: NavMutator,
+    globalUiStateHolder: GlobalUiStateHolder,
+    navStateHolder: NavStateHolder,
 ) {
-    val nav by navMutator.state.mappedCollectAsStateWithLifecycle(mapper = NavState::mainNav)
-    val state by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::bottomNavPositionalState)
+    val nav by navStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = NavState::mainNav)
+    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::bottomNavPositionalState)
 
     val bottomNavPosition by animateDpAsState(
         when {
@@ -84,7 +84,7 @@ internal fun BoxScope.AppBottomNav(
                             label = { Text(navItem.name) },
                             selected = navItem.selected,
                             onClick = {
-                                navMutator.accept { mainNav.navItemSelected(item = navItem) }
+                                navStateHolder.accept { mainNav.navItemSelected(item = navItem) }
                             }
                         )
                     }

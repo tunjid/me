@@ -21,12 +21,12 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.fromBytes
-import com.tunjid.me.scaffold.globalui.ActualGlobalUiMutator
-import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.ActualGlobalUiStateHolder
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.lifecycle.ActualLifecycleMutator
+import com.tunjid.me.scaffold.lifecycle.ActualLifecycleStateHolder
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
-import com.tunjid.me.scaffold.lifecycle.LifecycleMutator
+import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
 import com.tunjid.me.scaffold.nav.*
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
@@ -136,39 +136,39 @@ abstract class InjectedScaffoldComponent(
     @SingletonScope
     @Provides
     fun navStateStream(
-        navMutator: NavMutator
-    ): StateFlow<NavState> = navMutator.state
+        navStateHolder: NavStateHolder
+    ): StateFlow<NavState> = navStateHolder.state
 
     @Provides
-    fun navActions(): (NavMutation) -> Unit = navMutator.accept
+    fun navActions(): (NavMutation) -> Unit = navStateHolder.accept
 
     @SingletonScope
     @Provides
     fun globalUiStateStream(
-        globalUiMutator: GlobalUiMutator
-    ): StateFlow<UiState> = globalUiMutator.state
+        globalUiStateHolder: GlobalUiStateHolder
+    ): StateFlow<UiState> = globalUiStateHolder.state
 
     @SingletonScope
     @Provides
     fun globalUiActions(
-        globalUiMutator: GlobalUiMutator
-    ): (Mutation<UiState>) -> Unit = globalUiMutator.accept
+        globalUiStateHolder: GlobalUiStateHolder
+    ): (Mutation<UiState>) -> Unit = globalUiStateHolder.accept
 
     @SingletonScope
     @Provides
     fun lifecycleStateStream(
-        lifecycleMutator: LifecycleMutator
-    ): StateFlow<Lifecycle> = lifecycleMutator.state
+        lifecycleStateHolder: LifecycleStateHolder
+    ): StateFlow<Lifecycle> = lifecycleStateHolder.state
 
-    val PersistedNavMutator.bind: NavMutator
+    val PersistedNavStateHolder.bind: NavStateHolder
         @SingletonScope
         @Provides get() = this
 
-    val ActualGlobalUiMutator.bind: GlobalUiMutator
+    val ActualGlobalUiStateHolder.bind: GlobalUiStateHolder
         @SingletonScope
         @Provides get() = this
 
-    val ActualLifecycleMutator.bind: LifecycleMutator
+    val ActualLifecycleStateHolder.bind: LifecycleStateHolder
         @SingletonScope
         @Provides get() = this
 
@@ -176,5 +176,5 @@ abstract class InjectedScaffoldComponent(
         @SingletonScope
         @Provides get() = this
 
-    abstract val navMutator: NavMutator
+    abstract val navStateHolder: NavStateHolder
 }

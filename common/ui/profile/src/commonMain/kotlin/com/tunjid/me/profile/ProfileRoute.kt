@@ -57,7 +57,7 @@ data class ProfileRoute(
 }
 
 @Composable
-private fun ProfileScreen(mutator: ProfileMutator) {
+private fun ProfileScreen(mutator: ProfileStateHolder) {
     val state by mutator.state.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 

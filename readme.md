@@ -93,10 +93,10 @@ Each destination in the app is represented by an `AppRoute` that exposes a singl
 `Render()` function. The backing data structures for navigation are the tree like [`StackNav`](https://github.com/tunjid/treeNav/blob/develop/treenav/src/commonMain/kotlin/com/tunjid/treenav/StackNav.kt) and
 [`MultiStackNav`](https://github.com/tunjid/treeNav/blob/develop/treenav/src/commonMain/kotlin/com/tunjid/treenav/MultiStackNav.kt)
 immutable classes. The root of the app is a `MultiStackNav` and navigation is
-controlled by a `NavMutator` defined as:
+controlled by a `NavStateHolder` defined as:
 
 ```
-typealias NavMutator = ActionStateProducer<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
+typealias NavStateHolder = ActionStateProducer<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
 ```
 
 #### Global UI
@@ -105,10 +105,10 @@ The app utilizes a single bottom nav, toolbar and a shared global UI state as de
 `UiState` class. This is what allows for the app to have responsive navigation while accounting
 for visual semantic differences between Android and desktop. Android for example uses the
 `WindowManager` API to drive it's responsiveness whereas desktop just watches it's `Window` size.
-The definition for the `GlobalUiMutator` is:
+The definition for the `GlobalUiStateHolder` is:
 
 ```
-typealias GlobalUiMutator = ActionStateProducer<Mutation<UiState>, StateFlow<UiState>>
+typealias GlobalUiStateHolder = ActionStateProducer<Mutation<UiState>, StateFlow<UiState>>
 ```
 
 #### Pagination
@@ -151,63 +151,32 @@ Things restored after process death currently include:
 
 #### Lifecycles and component scoping
 
-Lifecycles are one of the most important concepts on Android, however Jetpack Compose itself is
-pretty binary; a `Composable` is either in composition or not. Trying to expand this simplicity to
-Android; the app may either be in the foreground or not.
+Screen state holders are scoped to the navigation state. When a route is removed from the navigation state, it's
+state holder has it's `CoroutineScope` cancelled:
 
-The application state is defined in the `ScaffoldModule`:
-
-```
-class ScaffoldModule(
-    appScope: CoroutineScope,
-    ...
-) {
-    val navMutator: ActionStateProducer<Mutation<MultiStackNav>, StateFlow<MultiStackNav>> = ...
-    val globalUiMutator: ActionStateProducer<Mutation<UiState>, StateFlow<UiState>> = ...
-    val lifecycleMutator: ActionStateProducer<LifecycleAction, StateFlow<Lifecycle>> = ...
-}
-```
-
-where `Lifecycle` is:
-
-```
-data class Lifecycle(
-    val isInForeground: Boolean = true,
-    val routeIdsToSerializedStates: Map<String, ByteArray> = mapOf()
-)
-```
-
-With the above managing the lifecycle of components scoped to navigation destinations becomes as
-easy as:
-
-```
-internal class RouteMutatorFactory(
-    appScope: CoroutineScope,
-    private val scaffoldComponent: ScaffoldComponent,
-    ...
-) : RouteServiceLocator {
-    init {
-        appScope.launch {
-            scaffoldComponent
-                .navStateStream
+```kotlin
+appScope.launch {
+            navStateStream
+                .map { it.mainNav }
                 .removedRoutes()
                 .collect { removedRoutes ->
                     removedRoutes.forEach { route ->
-                        val holder = routeMutatorCache.remove(route)
+                        println("Cleared ${route::class.simpleName}")
+                        val holder = routeStateHolderCache.remove(route)
                         holder?.scope?.cancel()
                     }
                 }
         }
-    }
-}
 ```
 
-By watching the changes to the available routes in the `MultiStackNav` class, the scopes for
-`Mutators` for routes that have been removed can be cancelled.
+Lifecycles aware state collection is done with a custom `collectAsStateWithLifecycle` backed by the following lifecycle
+definition:
 
-Each navigation destination can also be informed when the app is in the background via the
-`isInForeground` field on `AppState`. It's `Mutator` can then opt to terminate it's backing flow
-if necessary.
+```kotlin
+data class Lifecycle(
+    val isInForeground: Boolean = true,
+)
+```
 
 ## Running
 

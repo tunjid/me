@@ -29,17 +29,17 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
-typealias GlobalUiMutator = ActionStateProducer<Mutation<UiState>, StateFlow<UiState>>
+typealias GlobalUiStateHolder = ActionStateProducer<Mutation<UiState>, StateFlow<UiState>>
 
 @Inject
-class ActualGlobalUiMutator(
+class ActualGlobalUiStateHolder(
     appScope: CoroutineScope,
-) : GlobalUiMutator by appScope.actionStateFlowProducer(
+) : GlobalUiStateHolder by appScope.actionStateFlowProducer(
     initialState = UiState(),
     actionTransform = { it }
 )
 
-internal val LocalGlobalUiMutator = staticCompositionLocalOf {
+internal val LocalGlobalUiStateHolder = staticCompositionLocalOf {
     UiState().asNoOpStateFlowMutator<Mutation<UiState>, UiState>()
 }
 

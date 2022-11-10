@@ -36,7 +36,7 @@ import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
 import com.tunjid.mutator.mutation
 import kotlinx.coroutines.flow.distinctUntilChanged
-import com.tunjid.me.scaffold.lifecycle.LocalLifecycleMutator
+import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
 
 fun main() {
 
@@ -61,12 +61,12 @@ fun main() {
                 ) {
                     CompositionLocalProvider(
                         LocalScreenStateHolderCache provides app.screenStateHolderCache,
-                        LocalLifecycleMutator provides app.lifecycleMutator,
+                        LocalLifecycleStateHolder provides app.lifecycleStateHolder,
                     ) {
                         Scaffold(
                             modifier = Modifier.then(dropParent),
-                            navMutator = app.navMutator,
-                            globalUiMutator = app.globalUiMutator,
+                            navStateHolder = app.navStateHolder,
+                            globalUiStateHolder = app.globalUiStateHolder,
                         )
                     }
                 }
@@ -77,7 +77,7 @@ fun main() {
                 snapshotFlow { currentWidth < 600.dp }
                     .distinctUntilChanged()
                     .collect { isInPortrait ->
-                        app.globalUiMutator.accept(mutation {
+                        app.globalUiStateHolder.accept(mutation {
                             copy(navMode = if (isInPortrait) NavMode.BottomNav else NavMode.NavRail)
                         })
                     }

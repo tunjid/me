@@ -36,7 +36,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.keyboardSize
@@ -49,10 +49,10 @@ import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
  */
 @Composable
 internal fun BoxScope.AppFab(
-    globalUiMutator: GlobalUiMutator,
+    globalUiStateHolder: GlobalUiStateHolder,
 ) {
-    val state by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::fabState)
-    val clicks by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::fabClickListener)
+    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::fabState)
+    val clicks by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::fabClickListener)
     val enabled = state.enabled
     val position by animateDpAsState(
         when {

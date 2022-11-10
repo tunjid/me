@@ -54,7 +54,7 @@ data class SettingsRoute(
 }
 
 @Composable
-private fun SettingsScreen(mutator: SettingsMutator) {
+private fun SettingsScreen(mutator: SettingsStateHolder) {
     val state by mutator.state.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 

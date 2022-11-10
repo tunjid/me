@@ -22,7 +22,7 @@ import com.tunjid.mutator.mutation
 val currentUiState
     @ReadOnlyComposable
     @Composable
-    get() = LocalGlobalUiMutator.current.state.value
+    get() = LocalGlobalUiStateHolder.current.state.value
 
 /**
  * Provides a way of composing the [UiState] on a global level.
@@ -30,7 +30,7 @@ val currentUiState
  */
 @Composable
 fun ScreenUiState(state: UiState) {
-    val uiMutator = LocalGlobalUiMutator.current
+    val uiStateHolder = LocalGlobalUiStateHolder.current
     var immutables by remember { mutableStateOf(state) }
 
     val fabClickListener = MutableFunction(state.fabClickListener)
@@ -46,7 +46,7 @@ fun ScreenUiState(state: UiState) {
     )
 
     LaunchedEffect(immutables) {
-        uiMutator.accept(mutation {
+        uiStateHolder.accept(mutation {
             // Preserve things that should not be overwritten
             immutables.copy(
                 navMode = navMode,

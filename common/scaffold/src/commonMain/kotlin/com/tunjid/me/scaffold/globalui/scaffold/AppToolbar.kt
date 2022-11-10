@@ -33,12 +33,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.scaffold.globalui.GlobalUiMutator
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.globalui.slices.toolbarState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.nav.NavMutator
+import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.Route404
 import com.tunjid.me.scaffold.nav.canGoUp
@@ -52,10 +52,10 @@ import com.tunjid.treenav.pop
  */
 @Composable
 internal fun BoxScope.AppToolbar(
-    globalUiMutator: GlobalUiMutator,
-    navMutator: NavMutator,
+    globalUiStateHolder: GlobalUiStateHolder,
+    navStateHolder: NavStateHolder,
 ) {
-    val state by globalUiMutator.state.mappedCollectAsStateWithLifecycle(mapper = UiState::toolbarState)
+    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::toolbarState)
     val items = state.items
     val title = state.toolbarTitle
     val alpha: Float by animateFloatAsState(if (state.visible) 1f else 0f)
@@ -71,7 +71,7 @@ internal fun BoxScope.AppToolbar(
             .align(Alignment.TopCenter)
             .fillMaxWidth(),
     ) {
-        UpButton(navMutator = navMutator)
+        UpButton(navStateHolder = navStateHolder)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -84,7 +84,7 @@ internal fun BoxScope.AppToolbar(
             ActionMenu(
                 modifier = Modifier.wrapContentSize(),
                 items = items,
-                globalUiMutator = globalUiMutator
+                globalUiStateHolder = globalUiStateHolder
             )
         }
     }
@@ -92,16 +92,16 @@ internal fun BoxScope.AppToolbar(
 
 @Composable
 private fun UpButton(
-    navMutator: NavMutator,
+    navStateHolder: NavStateHolder,
 ) {
-    val canGoUp by navMutator.state.mappedCollectAsStateWithLifecycle { it.mainNav.canGoUp }
+    val canGoUp by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.mainNav.canGoUp }
 
     AnimatedVisibility(visible = canGoUp) {
         Button(
             modifier = Modifier
                 .wrapContentSize()
                 .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
-            onClick = { navMutator.accept { mainNav.pop() } },
+            onClick = { navStateHolder.accept { mainNav.pop() } },
             elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
             // Uses ButtonDefaults.ContentPadding by default
             contentPadding = PaddingValues(
@@ -146,7 +146,7 @@ private fun Title(
 internal fun ActionMenu(
     modifier: Modifier = Modifier,
     items: List<ToolbarItem>,
-    globalUiMutator: GlobalUiMutator
+    globalUiStateHolder: GlobalUiStateHolder
 ) {
     val icons = when {
         items.size < 3 -> items
@@ -160,7 +160,7 @@ internal fun ActionMenu(
         icons.forEach {
             ToolbarIcon(
                 item = it,
-                globalUiMutator = globalUiMutator
+                globalUiStateHolder = globalUiStateHolder
             )
         }
     }
@@ -169,9 +169,9 @@ internal fun ActionMenu(
 @Composable
 private fun ToolbarIcon(
     item: ToolbarItem,
-    globalUiMutator: GlobalUiMutator
+    globalUiStateHolder: GlobalUiStateHolder
 ) {
-    val clicks by globalUiMutator.state
+    val clicks by globalUiStateHolder.state
         .mappedCollectAsStateWithLifecycle(mapper = UiState::toolbarMenuClickListener)
 
     when (val vector = item.imageVector) {
@@ -208,11 +208,11 @@ private fun ToolbarIcon(
 fun Test() {
     Box {
         AppToolbar(
-            globalUiMutator = UiState(
+            globalUiStateHolder = UiState(
                 toolbarTitle = "Hi",
                 toolbarShows = true
             ).asNoOpStateFlowMutator(),
-            navMutator = NavState(
+            navStateHolder = NavState(
                 mainNav = MultiStackNav(
                     name = "App",
                     currentIndex = 0,

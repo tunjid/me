@@ -47,7 +47,7 @@ data class SignInRoute(
 }
 
 @Composable
-private fun SignInScreen(mutator: SignInMutator) {
+private fun SignInScreen(mutator: SignInStateHolder) {
     val state by mutator.state.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 

@@ -68,7 +68,7 @@ data class ArchiveListRoute(
 
 @Composable
 private fun ArchiveScreen(
-    mutator: ArchiveListMutator,
+    mutator: ArchiveListStateHolder,
 ) {
     val state by mutator.state.collectAsStateWithLifecycle()
 

@@ -16,9 +16,9 @@
 
 package com.tunjid.me.archiveedit.di
 
-import com.tunjid.me.archiveedit.ActualArchiveEditMutator
-import com.tunjid.me.archiveedit.ArchiveEditMutator
-import com.tunjid.me.archiveedit.ArchiveEditMutatorCreator
+import com.tunjid.me.archiveedit.ActualArchiveEditStateHolder
+import com.tunjid.me.archiveedit.ArchiveEditStateHolder
+import com.tunjid.me.archiveedit.ArchiveEditStateHolderCreator
 import com.tunjid.me.archiveedit.ArchiveEditRoute
 import com.tunjid.me.archiveedit.State
 import com.tunjid.me.core.model.ArchiveId
@@ -30,7 +30,6 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.treenav.strings.UrlRouteMatcher
-import com.tunjid.treenav.strings.urlRouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
@@ -84,13 +83,13 @@ abstract class ArchiveEditScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualArchiveEditMutator.bind: ArchiveEditMutator
+    val ActualArchiveEditStateHolder.bind: ArchiveEditStateHolder
         @Provides get() = this
 
     @IntoMap
     @Provides
-    fun archiveListMutatorCreator(
-        assist: ArchiveEditMutatorCreator
+    fun archiveListStateHolderCreator(
+        assist: ArchiveEditStateHolderCreator
     ): Pair<String, ScreenStateHolderCreator> = Pair(
         first = ArchiveEditRoute::class.simpleName!!,
         second = assist

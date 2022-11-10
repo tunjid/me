@@ -28,7 +28,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        val lifecycleActions = meApp.lifecycleMutator.accept
+        val lifecycleActions = meApp.lifecycleStateHolder.accept
 
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             private fun updateStatus(isInForeground: Boolean) =

@@ -22,9 +22,9 @@ import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.signin.ActualSignInMutator
-import com.tunjid.me.signin.SignInMutator
-import com.tunjid.me.signin.SignInMutatorCreator
+import com.tunjid.me.signin.ActualSignInStateHolder
+import com.tunjid.me.signin.SignInStateHolder
+import com.tunjid.me.signin.SignInStateHolderCreator
 import com.tunjid.me.signin.SignInRoute
 import com.tunjid.me.signin.State
 import com.tunjid.treenav.strings.UrlRouteMatcher
@@ -63,13 +63,13 @@ abstract class SignInScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualSignInMutator.bind: SignInMutator
+    val ActualSignInStateHolder.bind: SignInStateHolder
         @Provides get() = this
 
     @IntoMap
     @Provides
-    fun settingsMutatorCreator(
-        assist: SignInMutatorCreator
+    fun settingsStateHolderCreator(
+        assist: SignInStateHolderCreator
     ): Pair<String, ScreenStateHolderCreator> = Pair(
         first = SignInRoute::class.simpleName!!,
         second = assist

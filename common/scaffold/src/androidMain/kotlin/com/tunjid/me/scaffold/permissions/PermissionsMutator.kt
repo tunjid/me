@@ -41,23 +41,23 @@ private data class PermissionsCache(
 )
 
 /**
- * Creates a [Mutator] whose state is a map of the requested [permissions] to their granted status.
- * The resulting [Mutator] is best used as an [Application] scoped instance registered before
+ * Creates a [StateHolder] whose state is a map of the requested [permissions] to their granted status.
+ * The resulting [StateHolder] is best used as an [Application] scoped instance registered before
  * the launcher [Activity] reaches its [Lifecycle.State.CREATED] [Lifecycle.State].
  */
-internal fun Context.permissionsMutator(
+internal fun Context.permissionsStateHolder(
     scope: CoroutineScope,
     permissions: List<Permission>
-): PermissionsMutator =
-    permissionsCacheMutator(permissions.mapNotNull(Permission::toManifestString)).let { permissionsCacheMutator ->
-        object : PermissionsMutator {
-            override val state: StateFlow<Permissions> = permissionsCacheMutator.state
+): PermissionsStateHolder =
+    permissionsCacheStateHolder(permissions.mapNotNull(Permission::toManifestString)).let { permissionsCacheStateHolder ->
+        object : PermissionsStateHolder {
+            override val state: StateFlow<Permissions> = permissionsCacheStateHolder.state
                 .flatMapLatest { cache ->
                     // Flatten output state of each individual permission mutator.
-                    val permissionsToMutators: Map<String, ActionStateProducer<Unit, StateFlow<Boolean>>>? =
+                    val permissionsToStateHolders: Map<String, ActionStateProducer<Unit, StateFlow<Boolean>>>? =
                         cache.activeActivity?.let(cache.map::get)
 
-                    val flows: List<Flow<Pair<String, Boolean>>>? = permissionsToMutators?.entries
+                    val flows: List<Flow<Pair<String, Boolean>>>? = permissionsToStateHolders?.entries
                         ?.map { (permission, stateHolder) -> stateHolder.state.map(permission::to) }
 
                     if (flows != null) combine(flows) {
@@ -78,16 +78,16 @@ internal fun Context.permissionsMutator(
                 )
 
             override val accept: (Permission) -> Unit = { permission ->
-                permission.toManifestString?.let(permissionsCacheMutator.accept)
+                permission.toManifestString?.let(permissionsCacheStateHolder.accept)
             }
         }
     }
 
 /**
- * Creates a [Mutator] which reduces the [permissions] and their granted status into a
+ * Creates a [StateHolder] which reduces the [permissions] and their granted status into a
  * [PermissionsCache].
  */
-private fun Context.permissionsCacheMutator(
+private fun Context.permissionsCacheStateHolder(
     permissions: List<String>
 ) = object : ActionStateProducer<String, StateFlow<PermissionsCache>> {
     val stateFlow = MutableStateFlow(PermissionsCache())
@@ -102,7 +102,7 @@ private fun Context.permissionsCacheMutator(
                 Lifecycle.Event.ON_CREATE -> permissionCache.copy(
                     activeActivity = lastChangedActivity,
                     map = permissionCache.map + (lastChangedActivity to permissions.map { permission ->
-                        permission to lastChangedActivity.permissionMutator(permission)
+                        permission to lastChangedActivity.permissionStateHolder(permission)
                     }.toMap())
                 )
 
@@ -139,9 +139,9 @@ private fun Context.permissionsCacheMutator(
 }
 
 /**
- * Creates a [Mutator] whose output is the state of a single [permissionString]'s granted status.
+ * Creates a [StateHolder] whose output is the state of a single [permissionString]'s granted status.
  */
-private fun ComponentActivity.permissionMutator(permissionString: String): ActionStateProducer<Unit, StateFlow<Boolean>> {
+private fun ComponentActivity.permissionStateHolder(permissionString: String): ActionStateProducer<Unit, StateFlow<Boolean>> {
     val permissionStateFlow = MutableStateFlow(hasPermission(permissionString))
     val isActiveStateFlow = MutableStateFlow(lifecycle.currentState != Lifecycle.State.DESTROYED)
 

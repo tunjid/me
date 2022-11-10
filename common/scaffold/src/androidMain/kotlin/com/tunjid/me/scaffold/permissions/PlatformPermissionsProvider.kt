@@ -26,7 +26,7 @@ actual class PlatformPermissionsProvider(
     appScope: CoroutineScope,
     context: Context
 ) : PermissionsProvider {
-    override val mutator: PermissionsMutator = context.permissionsMutator(
+    override val mutator: PermissionsStateHolder = context.permissionsStateHolder(
         scope = appScope,
         permissions = listOf(Permission.ReadExternalStorage)
     )

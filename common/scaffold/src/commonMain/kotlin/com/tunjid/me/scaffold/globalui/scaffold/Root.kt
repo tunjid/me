@@ -25,8 +25,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import com.tunjid.me.core.utilities.mappedCollectAsState
-import com.tunjid.me.scaffold.globalui.GlobalUiMutator
-import com.tunjid.me.scaffold.globalui.LocalGlobalUiMutator
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
+import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.*
 
@@ -36,33 +36,33 @@ import com.tunjid.me.scaffold.nav.*
 @Composable
 fun Scaffold(
     modifier: Modifier,
-    navMutator: NavMutator,
-    globalUiMutator: GlobalUiMutator,
+    navStateHolder: NavStateHolder,
+    globalUiStateHolder: GlobalUiStateHolder,
 ) {
     CompositionLocalProvider(
-        LocalGlobalUiMutator provides globalUiMutator,
+        LocalGlobalUiStateHolder provides globalUiStateHolder,
     ) {
         val saveableStateHolder = rememberSaveableStateHolder()
 
-        val route by navMutator.state.mappedCollectAsStateWithLifecycle(mapper = NavState::current)
+        val route by navStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = NavState::current)
         val renderedRoute = route as? AppRoute ?: Route404
 
         Box(
             modifier = modifier.fillMaxSize()
         ) {
             AppNavRail(
-                globalUiMutator = globalUiMutator,
-                navMutator = navMutator,
+                globalUiStateHolder = globalUiStateHolder,
+                navStateHolder = navStateHolder,
                 saveableStateHolder = saveableStateHolder,
             )
             AppToolbar(
-                globalUiMutator = globalUiMutator,
-                navMutator = navMutator,
+                globalUiStateHolder = globalUiStateHolder,
+                navStateHolder = navStateHolder,
             )
             saveableStateHolder.SaveableStateProvider(renderedRoute.id) {
                 AppRouteContainer(
-                    globalUiMutator = globalUiMutator,
-                    navMutator = navMutator,
+                    globalUiStateHolder = globalUiStateHolder,
+                    navStateHolder = navStateHolder,
                     content = {
                         Crossfade(
                             targetState = renderedRoute,
@@ -72,14 +72,14 @@ fun Scaffold(
                 )
             }
             AppFab(
-                globalUiMutator = globalUiMutator,
+                globalUiStateHolder = globalUiStateHolder,
             )
             AppBottomNav(
-                globalUiMutator = globalUiMutator,
-                navMutator = navMutator,
+                globalUiStateHolder = globalUiStateHolder,
+                navStateHolder = navStateHolder,
             )
             AppSnackBar(
-                globalUiMutator = globalUiMutator,
+                globalUiStateHolder = globalUiStateHolder,
             )
         }
     }

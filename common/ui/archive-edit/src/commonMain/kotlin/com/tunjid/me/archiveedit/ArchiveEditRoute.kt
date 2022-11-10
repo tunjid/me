@@ -57,7 +57,7 @@ data class ArchiveEditRoute(
 }
 
 @Composable
-private fun ArchiveEditScreen(mutator: ArchiveEditMutator) {
+private fun ArchiveEditScreen(mutator: ArchiveEditStateHolder) {
     val state by mutator.state.collectAsStateWithLifecycle()
     val upsert = state.upsert
     val scrollState = rememberScrollState()

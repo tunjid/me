@@ -22,9 +22,9 @@ import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.settings.ActualSettingsMutator
-import com.tunjid.me.settings.SettingsMutator
-import com.tunjid.me.settings.SettingsMutatorCreator
+import com.tunjid.me.settings.ActualSettingsStateHolder
+import com.tunjid.me.settings.SettingsStateHolder
+import com.tunjid.me.settings.SettingsStateHolderCreator
 import com.tunjid.me.settings.SettingsRoute
 import com.tunjid.me.settings.State
 import com.tunjid.treenav.strings.UrlRouteMatcher
@@ -63,13 +63,13 @@ abstract class SettingsScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualSettingsMutator.bind: SettingsMutator
+    val ActualSettingsStateHolder.bind: SettingsStateHolder
         @Provides get() = this
 
     @IntoMap
     @Provides
-    fun settingsMutatorCreator(
-        assist: SettingsMutatorCreator
+    fun settingsStateHolderCreator(
+        assist: SettingsStateHolderCreator
     ): Pair<String, ScreenStateHolderCreator> = Pair(
         first = SettingsRoute::class.simpleName!!,
         second = assist
