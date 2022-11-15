@@ -80,6 +80,20 @@ Pub sub in the app is backed by a change list invalidation based system. Its pre
 Real time updates are implemented with websockets via [socket.io](https://socket.io/). I intend to move the android
 client to FCM for efficiency reasons in the future.
 
+#### Models
+
+The app offers 3 main data types:
+
+* `Archive`: Content I've produced over the years: Articles, projects and talks.
+* `User`: The creator of the content shown. This is really just me.
+* `SavedState`: App saved state. This is navigation state, and screen sate of each navigation destination.
+
+### Domain Layer
+
+The domain layer offers abstractions that consolidate common patterns and business logic across each future and its screen. There are two main types here:
+
+* `NavStateHolder`: Manages the app navigation state and interacts with the `SavedStateRepository`. It provides Navigation as state.
+* `GlobalUiStateHolder`: Manages configuration for the app and adapts it over different form factors and screen sizes. It provides app level UI as state.
 
 ### UI Layer
 
@@ -87,7 +101,12 @@ client to FCM for efficiency reasons in the future.
 
 All screen level state holders are implemented with [unidirectional data flow as a functional declaration](https://www.tunjid.com/articles/unidirectional-data-flow-as-a-functional-declaration-6230b74f5d785a7ebc8c2a43).
 
-#### Navigation
+### X as state
+
+#### Navigation as state
+
+This app treats navigation as state, and as such, it is completely managed by business logic. The Navigation state
+is persisted in the data layer with the `SavedStateRepository` and exposed to the app via the `NavStateHolder`.
 
 Each destination in the app is represented by an `AppRoute` that exposes a single `@Composable`
 `Render()` function. The backing data structures for navigation are the tree like [`StackNav`](https://github.com/tunjid/treeNav/blob/develop/treenav/src/commonMain/kotlin/com/tunjid/treenav/StackNav.kt) and
@@ -99,7 +118,7 @@ controlled by a `NavStateHolder` defined as:
 typealias NavStateHolder = ActionStateProducer<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
 ```
 
-#### Global UI
+#### Global UI as state
 
 The app utilizes a single bottom nav, toolbar and a shared global UI state as defined by the
 `UiState` class. This is what allows for the app to have responsive navigation while accounting
@@ -111,7 +130,7 @@ The definition for the `GlobalUiStateHolder` is:
 typealias GlobalUiStateHolder = ActionStateProducer<Mutation<UiState>, StateFlow<UiState>>
 ```
 
-#### Pagination
+#### Paging as state
 
 Pagination is implemented as a function of the current page and grid size:
 
