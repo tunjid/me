@@ -24,6 +24,7 @@ import com.tunjid.me.archiveedit.di.ArchiveEditNavigationComponent
 import com.tunjid.me.archiveedit.di.ArchiveEditScreenHolderComponent
 import com.tunjid.me.archiveedit.di.create
 import com.tunjid.me.common.di.AppRouteComponent
+import com.tunjid.me.common.di.allRouteMatchers
 import com.tunjid.me.common.di.AppScreenStateHolderComponent
 import com.tunjid.me.common.di.create
 import com.tunjid.me.core.utilities.ActualUriConverter
@@ -92,7 +93,7 @@ fun createMeApp(context: Context): MeApp {
                 appScope = appScope,
                 context = context
             ),
-            routeMatchers = appRouteComponent.allUrlRouteMatchers.toList(),
+            routeMatchers = appRouteComponent.allRouteMatchers.toList(),
             byteSerializer = appRouteComponent.byteSerializer,
         )
     )

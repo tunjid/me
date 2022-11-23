@@ -58,13 +58,6 @@ fun org.gradle.api.Project.commonConfiguration(
         if (extensions.findByName(kotlinOptions) != null) {
             extensions.configure(kotlinOptions, Action<KotlinJvmOptions> {
                 jvmTarget = "11"
-                freeCompilerArgs = freeCompilerArgs + listOf(
-                    "-Xuse-experimental=androidx.compose.animation.ExperimentalAnimationApi",
-                    "-Xuse-experimental=androidx.compose.material.ExperimentalMaterialApi",
-                    "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi",
-                    "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                    "-Xuse-experimental=kotlinx.coroutines.FlowPreview"
-                )
             })
         }
     }

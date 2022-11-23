@@ -51,12 +51,6 @@ abstract class AppRouteComponent(
 
     abstract val byteSerializer: ByteSerializer
 
-    val allRouteMatchers
-        get() = routeMatcherMap
-            .toList()
-            .sortedWith(routeMatchingComparator())
-            .map(Pair<String, UrlRouteMatcher<AppRoute>>::second)
-
     @Provides
     fun byteSerializer(): ByteSerializer = DelegatingByteSerializer(
         format = ProtoBuf {
@@ -68,6 +62,12 @@ abstract class AppRouteComponent(
         }
     )
 }
+
+val AppRouteComponent.allRouteMatchers
+    get() = routeMatcherMap
+        .toList()
+        .sortedWith(routeMatchingComparator())
+        .map(Pair<String, UrlRouteMatcher<AppRoute>>::second)
 
 private fun routeMatchingComparator() =
     compareBy<Pair<String, UrlRouteMatcher<AppRoute>>>(
