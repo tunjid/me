@@ -72,7 +72,7 @@ private fun ArchiveRepository.archiveTiler(
         limiter = limiter,
         order = Tile.Order.PivotSorted(comparator = compareBy(ArchiveQuery::offset)),
         fetcher = { query ->
-            monitorArchives(query).map<List<Archive>, List<ArchiveItem>> { archives ->
+            archivesStream(query).map<List<Archive>, List<ArchiveItem>> { archives ->
                 archives.map { archive ->
                     ArchiveItem.Result(archive = archive, query = query)
                 }

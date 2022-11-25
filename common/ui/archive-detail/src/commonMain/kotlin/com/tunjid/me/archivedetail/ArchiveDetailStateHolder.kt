@@ -99,7 +99,7 @@ private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
 private fun ArchiveRepository.archiveLoadMutations(
     id: ArchiveId,
     kind: ArchiveKind
-): Flow<Mutation<State>> = monitorArchive(
+): Flow<Mutation<State>> = archiveStream(
     kind = kind,
     id = id
 )

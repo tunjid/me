@@ -330,7 +330,7 @@ private fun Flow<Action.Load>.loadMutations(
 private fun ArchiveRepository.textBodyMutations(
     kind: ArchiveKind,
     archiveId: ArchiveId
-): Flow<Mutation<State>> = monitorArchive(
+): Flow<Mutation<State>> = archiveStream(
     kind = kind,
     id = archiveId
 )

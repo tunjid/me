@@ -48,8 +48,8 @@ interface ArchiveRepository : Syncable {
         uri: Uri,
     ): Result<Unit>
 
-    fun monitorArchives(query: ArchiveQuery): Flow<List<Archive>>
-    fun monitorArchive(kind: ArchiveKind, id: ArchiveId): Flow<Archive?>
+    fun archivesStream(query: ArchiveQuery): Flow<List<Archive>>
+    fun archiveStream(kind: ArchiveKind, id: ArchiveId): Flow<Archive?>
 }
 
 /**
@@ -87,7 +87,7 @@ internal class OfflineFirstArchiveRepository(
         .toResult()
         .map { }
 
-    override fun monitorArchives(
+    override fun archivesStream(
         query: ArchiveQuery
     ): Flow<List<Archive>> = when {
         query.hasContentFilter -> archiveEntityQueries.findBy(
@@ -110,7 +110,7 @@ internal class OfflineFirstArchiveRepository(
         .flatMapLatest { archiveEntities -> archiveEntitiesToArchives(archiveEntities) }
         .distinctUntilChanged()
 
-    override fun monitorArchive(
+    override fun archiveStream(
         kind: ArchiveKind, id: ArchiveId
     ): Flow<Archive?> = archiveEntityQueries.get(
         id = id.value,
