@@ -39,18 +39,14 @@ data class State(
     val items: List<ArchiveItem> = listOf()
 ) : ByteSerializable
 
-val State.stickyHeader: ArchiveItem.Header?
-    get() = when (lastVisibleKey) {
-        null -> null
-        else -> when (val lastVisibleItem = items.find { it.key == lastVisibleKey }) {
-            is ArchiveItem.Header -> lastVisibleItem
-            is ArchiveItem.Result -> ArchiveItem.Header(
-                text = lastVisibleItem.headerText,
-                query = lastVisibleItem.query
-            )
-
-            else -> null
-        }
+val ArchiveItem.stickyHeader: ArchiveItem.Header?
+    get() = when (this) {
+        is ArchiveItem.Header -> this
+        is ArchiveItem.Result -> ArchiveItem.Header(
+            text = headerText,
+            query = query
+        )
+        else -> null
     }
 
 sealed class Action(val key: String) {
