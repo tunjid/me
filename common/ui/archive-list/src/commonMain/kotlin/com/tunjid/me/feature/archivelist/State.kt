@@ -103,15 +103,9 @@ sealed class ArchiveItem {
 
 val ArchiveItem.key: String
     get() = when (this) {
-        is ArchiveItem.Header -> "header-${query.offset}-$text"
+        is ArchiveItem.Header -> "header-$text"
         is ArchiveItem.Loading -> "loading-${query.offset}"
-        is ArchiveItem.Result -> "result-${query.offset}-${archive.id}"
-    }
-
-val Any.queryOffsetFromKey: Int?
-    get() = when (this) {
-        is String -> split("-").getOrNull(1)?.toIntOrNull()
-        else -> null
+        is ArchiveItem.Result -> "result-${archive.id}"
     }
 
 val Any.isHeaderKey: Boolean

@@ -148,7 +148,7 @@ private fun ArchiveScreen(
     EndlessScroll(
         gridState = gridState,
         gridSize = state.queryState.gridSize,
-        currentQuery = state.queryState.startQuery,
+        items = state.items,
         onAction = mutator.accept
     )
 
@@ -184,28 +184,27 @@ private fun GridCell(
 @Composable
 private fun EndlessScroll(
     gridSize: Int,
+    items: List<ArchiveItem>,
     gridState: LazyGridState,
-    currentQuery: ArchiveQuery,
     onAction: (Action) -> Unit
 ) {
     // Endless scrolling
-    LaunchedEffect(gridSize, gridState, currentQuery) {
+    LaunchedEffect(gridSize, items, gridState) {
         snapshotFlow {
             val visibleItems = gridState.layoutInfo.visibleItemsInfo
-            visibleItems.getOrNull(visibleItems.size / 2)?.key
+            val middleItemInfo = visibleItems.getOrNull(visibleItems.size / 2)
+            middleItemInfo?.index?.let(items::getOrNull)?.query
         }
             .filterNotNull()
             .distinctUntilChanged()
-            .collect { middleItemKey ->
+            .collect { query ->
                 onAction(Action.ToggleFilter(isExpanded = false))
-                middleItemKey.queryOffsetFromKey?.let { queryOffset ->
-                    onAction(
-                        Action.Fetch.LoadMore(
-                            query = currentQuery.copy(offset = queryOffset),
-                            gridSize = gridSize,
-                        )
+                onAction(
+                    Action.Fetch.LoadMore(
+                        query = query,
+                        gridSize = gridSize,
                     )
-                }
+                )
             }
     }
     LaunchedEffect(gridState) {
