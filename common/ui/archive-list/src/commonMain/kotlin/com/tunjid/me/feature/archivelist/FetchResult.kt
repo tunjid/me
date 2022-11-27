@@ -87,34 +87,3 @@ private val FetchResult.hasNoResults: Boolean
     get() = queriedArchives.isEmpty() || queriedArchives.all {
         it.all { items -> items is ArchiveItem.Loading }
     }
-
-
-private val FetchResult.flattenedArchives: List<ArchiveItem>
-    get() = queriedArchives
-        .flatten()
-        .distinctBy { it.key }
-
-fun FetchResult.m(default: List<ArchiveItem>): List<ArchiveItem> = when {
-    hasNoResults -> when (action) {
-        // Fetch action is reset, show a loading spinner
-        is Action.Fetch.Reset -> listOf(
-            ArchiveItem.Loading(
-                isCircular = true,
-                query = action.query
-            )
-        )
-        // The mutator was just resubscribed to, show existing items
-        else -> default
-    }
-
-    else -> flattenedArchives
-}
-    // Filtering is cheap because at most 4 * [DefaultQueryLimit] items
-    // are ever sent to the UI
-    .filter { item ->
-        when (item) {
-            is ArchiveItem.Header -> true
-            is ArchiveItem.Loading -> true
-            is ArchiveItem.Result -> item.query.contentFilter == action.query.contentFilter
-        }
-    }
