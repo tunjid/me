@@ -43,11 +43,11 @@ fun Flow<Action.Fetch>.toFetchResult(
     combine(
         flow = sharedFlow,
         flow2 = sharedFlow.distinctBy(Action.Fetch::gridSize)
-            .map { (fetchAction, fetchActionFlow) ->
-                fetchAction to fetchActionFlow.map { it.query }
+            .map { (gridSize, fetchActionFlow) ->
+                gridSize to fetchActionFlow.map { it.query }
             }
-            .flatMapLatest { (gridSize, flow) ->
-                flow.pivotWith(pivotRequest(gridSize))
+            .flatMapLatest { (gridSize, fetchActionFlow) ->
+                fetchActionFlow.pivotWith(pivotRequest(gridSize))
                     .toRequests<ArchiveQuery, List<ArchiveItem>>()
                     .toTiledList(repo.archiveTiler(Tile.Limiter.List { pages -> pages.size > 4 * gridSize }))
             },

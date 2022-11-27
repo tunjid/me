@@ -74,7 +74,6 @@ private fun ArchiveScreen(
     val gridState = rememberLazyGridState()
     val cardWidth = 350.dp
     val cardWidthPx = with(LocalDensity.current) { cardWidth.toPx() }.toInt()
-//    val stickyHeaderItem = state.stickyHeader
     val stickyHeaderItem by remember(state.items) {
         derivedStateOf {
             val firstIndex = gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
