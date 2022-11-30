@@ -20,10 +20,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
 import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
-import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun StickyHeaderGrid(
@@ -33,7 +35,23 @@ fun StickyHeaderGrid(
     stickyHeader: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
-    var headerOffset by remember { mutableStateOf(0) }
+    val headerOffset by remember(lazyState.layoutInfo) {
+        derivedStateOf {
+            val layoutInfo = lazyState.layoutInfo
+            val startOffset = layoutInfo.viewportStartOffset
+            val firstCompletelyVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull {
+                it.offset.y >= startOffset
+            } ?: return@derivedStateOf 0
+
+            when (headerMatcher(firstCompletelyVisibleItem)) {
+                false -> 0
+                true -> firstCompletelyVisibleItem.size
+                    .height
+                    .minus(firstCompletelyVisibleItem.offset.y)
+                    .let { difference -> if (difference < 0) 0 else -difference }
+            }
+        }
+    }
 
     Box(modifier = modifier) {
         content()
@@ -47,24 +65,5 @@ fun StickyHeaderGrid(
         ) {
             stickyHeader()
         }
-    }
-    LaunchedEffect(lazyState) {
-        snapshotFlow {
-            val layoutInfo = lazyState.layoutInfo
-            val startOffset = layoutInfo.viewportStartOffset
-            val firstCompletelyVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull {
-                it.offset.y >= startOffset
-            } ?: return@snapshotFlow 0
-
-            when (headerMatcher(firstCompletelyVisibleItem)) {
-                false -> 0
-                true -> firstCompletelyVisibleItem.size
-                    .height
-                    .minus(firstCompletelyVisibleItem.offset.y)
-                    .let { difference -> if (difference < 0) 0 else -difference }
-            }
-        }
-            .distinctUntilChanged()
-            .collect { headerOffset = it }
     }
 }
