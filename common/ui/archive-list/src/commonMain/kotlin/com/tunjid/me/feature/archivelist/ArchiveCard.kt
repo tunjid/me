@@ -85,7 +85,7 @@ fun ProgressBar(isCircular: Boolean) {
 fun ArchiveCard(
     archiveItem: ArchiveItem.Result,
     onArchiveSelected: (Archive) -> Unit,
-    onAction: (Action) -> Unit,
+    onCategoryClicked: (Descriptor.Category) -> Unit,
 ) {
     Card(
         modifier = Modifier
@@ -105,15 +105,7 @@ fun ArchiveCard(
                 ArchiveCategories(
                     categories = archiveItem.archive.categories,
                     published = archiveItem.prettyDate,
-                    onCategoryClicked = { category ->
-                        val query = archiveItem.query
-                        onAction(
-                            Action.Fetch.Reset(
-                                query = query.copy(offset = 0) + category,
-                                gridSize = 2 // TODO: This is an assumption, pass in the actual grid size
-                            )
-                        )
-                    }
+                    onCategoryClicked = onCategoryClicked
                 )
                 Spacer(Modifier.height(8.dp))
                 ArchiveBlurb(archiveItem = archiveItem)
@@ -217,7 +209,6 @@ private fun ArchiveCardFooter(
 }
 
 private val sampleArchiveItem = ArchiveItem.Result(
-    query = ArchiveQuery(kind = Articles),
     archive = Archive(
         id = ArchiveId(""),
         link = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",

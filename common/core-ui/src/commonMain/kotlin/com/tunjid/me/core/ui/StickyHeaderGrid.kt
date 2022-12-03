@@ -56,12 +56,7 @@ fun StickyHeaderGrid(
     Box(modifier = modifier) {
         content()
         Box(
-            modifier = Modifier.offset {
-                IntOffset(
-                    x = 0,
-                    y = headerOffset
-                )
-            }
+            modifier = Modifier.offset { IntOffset(x = 0, y = headerOffset) }
         ) {
             stickyHeader()
         }

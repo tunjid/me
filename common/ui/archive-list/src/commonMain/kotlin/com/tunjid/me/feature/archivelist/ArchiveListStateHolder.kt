@@ -36,6 +36,7 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
+import com.tunjid.tiler.buildTiledList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
@@ -63,12 +64,14 @@ class ActualArchiveListStateHolder(
     route: ArchiveListRoute,
 ) : ArchiveListStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
-        items = listOf(
-            ArchiveItem.Loading(
-                isCircular = true,
-                query = ArchiveQuery(kind = route.kind)
+        items = buildTiledList {
+            add(
+                ArchiveQuery(kind = route.kind),
+                ArchiveItem.Loading(
+                    isCircular = true,
+                )
             )
-        ),
+        },
         queryState = QueryState(
             startQuery = ArchiveQuery(kind = route.kind),
         )
@@ -217,7 +220,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
     scope = scope,
     repo = repo
 )
-    .map { fetchResult ->
+    .map { fetchResult: FetchResult ->
         mutation {
             val fetchAction = fetchResult.action
             val items = fetchResult.items(default = this.items)

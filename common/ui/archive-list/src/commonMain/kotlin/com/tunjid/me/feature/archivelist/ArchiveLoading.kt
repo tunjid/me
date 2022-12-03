@@ -18,6 +18,7 @@ package com.tunjid.me.feature.archivelist
 
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.core.model.DefaultQueryLimit
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.tiler.ListTiler
 import com.tunjid.tiler.Tile
@@ -48,8 +49,12 @@ fun Flow<Action.Fetch>.toFetchResult(
             }
             .flatMapLatest { (gridSize, fetchActionFlow) ->
                 fetchActionFlow.pivotWith(pivotRequest(gridSize))
-                    .toRequests<ArchiveQuery, List<ArchiveItem>>()
-                    .toTiledList(repo.archiveTiler(Tile.Limiter.List { pages -> pages.size > 4 * gridSize }))
+                    .toRequests<ArchiveQuery, ArchiveItem>()
+                    .toTiledList(
+                        repo.archiveTiler(
+                            Tile.Limiter { items -> items.size > 4 * gridSize * DefaultQueryLimit }
+                        )
+                    )
             },
         transform = ::FetchResult
     )
@@ -66,19 +71,17 @@ private fun pivotRequest(gridSize: Int) = PivotRequest<ArchiveQuery>(
 )
 
 private fun ArchiveRepository.archiveTiler(
-    limiter: Tile.Limiter.List<ArchiveQuery, List<ArchiveItem>>
-): ListTiler<ArchiveQuery, List<ArchiveItem>> =
+    limiter: Tile.Limiter<ArchiveQuery, ArchiveItem>
+): ListTiler<ArchiveQuery, ArchiveItem> =
     tiledList(
         limiter = limiter,
         order = Tile.Order.PivotSorted(comparator = compareBy(ArchiveQuery::offset)),
         fetcher = { query ->
             archivesStream(query).map<List<Archive>, List<ArchiveItem>> { archives ->
-                archives.map { archive ->
-                    ArchiveItem.Result(archive = archive, query = query)
-                }
+                archives.map(ArchiveItem::Result)
             }
                 .onStart {
-                    emit(listOf(ArchiveItem.Loading(isCircular = false, query = query)))
+                    emit(listOf(ArchiveItem.Loading(isCircular = false)))
                 }
         }
     )

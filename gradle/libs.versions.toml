@@ -36,7 +36,7 @@ socketio = "2.0.0"
 sqldelight = "2.0.0-alpha03"
 tartakaKotlinInject = "0.5.1"
 tunjidStateHolder = "0.0.7"
-tunjidTiler = "0.0.3"
+tunjidTiler = "0.0.6"
 tunjidTreeNav = "0.0.3"
 turbine = "0.7.0"
 
@@ -126,7 +126,6 @@ tunjid-mutator-core-jvm = { group = "com.tunjid.mutator", name = "core-jvm", ver
 tunjid-mutator-coroutines-common = { group = "com.tunjid.mutator", name = "coroutines", version.ref = "tunjidStateHolder" }
 tunjid-mutator-coroutines-jvm = { group = "com.tunjid.mutator", name = "coroutines-jvm", version.ref = "tunjidStateHolder" }
 tunjid-tiler-tiler = { group = "com.tunjid.tiler", name = "tiler", version.ref = "tunjidTiler" }
-tunjid-tiler-compose = { group = "com.tunjid.tiler", name = "compose", version.ref = "tunjidTiler" }
 tunjid-treenav-core-common = { group = "com.tunjid.treenav", name = "treenav", version.ref = "tunjidTreeNav" }
 tunjid-treenav-core-jvm = { group = "com.tunjid.treenav", name = "treenav-jvm", version.ref = "tunjidTreeNav" }
 tunjid-treenav-strings-common = { group = "com.tunjid.treenav", name = "strings", version.ref = "tunjidTreeNav" }

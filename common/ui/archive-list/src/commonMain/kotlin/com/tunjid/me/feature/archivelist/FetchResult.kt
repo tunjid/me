@@ -16,20 +16,26 @@
 
 package com.tunjid.me.feature.archivelist
 
+import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.tiler.MutableTiledList
+import com.tunjid.tiler.TiledList
+import com.tunjid.tiler.buildTiledList
+import com.tunjid.tiler.filterTransform
+
 data class FetchResult(
     val action: Action.Fetch,
-    val queriedArchives: List<List<ArchiveItem>>
+    val queriedArchives: TiledList<ArchiveQuery, ArchiveItem>
 )
 
-fun FetchResult.items(default: List<ArchiveItem>) = when {
+fun FetchResult.items(default: TiledList<ArchiveQuery, ArchiveItem>) = when {
     hasNoResults -> when (action) {
         // Fetch action is reset, show a loading spinner
-        is Action.Fetch.Reset -> listOf(
-            ArchiveItem.Loading(
-                isCircular = true,
-                query = action.query
+        is Action.Fetch.Reset -> buildTiledList {
+            add(
+                query = action.query,
+                item = ArchiveItem.Loading(isCircular = true,)
             )
-        )
+        }
         // The mutator was just resubscribed to, show existing items
         else -> default
     }
@@ -37,53 +43,31 @@ fun FetchResult.items(default: List<ArchiveItem>) = when {
     else -> items
 }
 
-private val FetchResult.items: List<ArchiveItem>
-    get() {
-        fun MutableList<ArchiveItem>.addIfNotPresent(
-            keySet: MutableSet<String>,
-            item: ArchiveItem
-        ) {
-            item.takeUnless {
-                keySet.contains(it.key) && it.query.contentFilter == action.query.contentFilter
-            }
-                ?.also { keySet.add(it.key) }
-                ?.also(::add)
-        }
-
+private val FetchResult.items: TiledList<ArchiveQuery, ArchiveItem>
+    get() = buildTiledList {
         var month = -1
         var year = -1
-        val keySet = mutableSetOf<String>()
-        return queriedArchives.flatMapIndexed { index, items ->
-            when (index) {
-                0, queriedArchives.lastIndex -> items
-                else -> items.filterNot { it is ArchiveItem.Loading }
-            }.flatMap { item ->
-                buildList {
-                    if (item is ArchiveItem.Result) {
-                        val dateTime = item.dateTime
-                        if (month != dateTime.monthNumber || year != dateTime.year) {
-                            month = dateTime.monthNumber
-                            year = dateTime.year
-                            addIfNotPresent(
-                                keySet = keySet,
-                                item = ArchiveItem.Header(
-                                    text = item.headerText,
-                                    query = item.query
-                                )
-                            )
-                        }
-                        addIfNotPresent(
-                            keySet = keySet,
-                            item = item
-                        )
-                    }
+        queriedArchives.forEachIndexed { index, item ->
+            if (item is ArchiveItem.Result) {
+                val query = queriedArchives.queryFor(index)
+                val dateTime = item.dateTime
+                if (month != dateTime.monthNumber || year != dateTime.year) {
+                    month = dateTime.monthNumber
+                    year = dateTime.year
+                    add(
+                        query = query,
+                        item = ArchiveItem.Header(text = item.headerText)
+                    )
                 }
+                add(
+                    query = query,
+                    item = item
+                )
             }
         }
-    }
-
+    }.filterTransform { distinctBy(ArchiveItem::key) }
 
 private val FetchResult.hasNoResults: Boolean
-    get() = queriedArchives.isEmpty() || queriedArchives.all {
-        it.all { items -> items is ArchiveItem.Loading }
+    get() = queriedArchives.isEmpty() || queriedArchives.all { item ->
+        item is ArchiveItem.Loading
     }

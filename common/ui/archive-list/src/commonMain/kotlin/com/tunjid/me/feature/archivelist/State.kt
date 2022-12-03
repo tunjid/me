@@ -21,6 +21,8 @@ import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.tiler.TiledList
+import com.tunjid.tiler.emptyTiledList
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
@@ -36,7 +38,7 @@ data class State(
     val queryState: QueryState,
     val lastVisibleKey: String? = null,
     @Transient
-    val items: List<ArchiveItem> = listOf()
+    val items: TiledList<ArchiveQuery, ArchiveItem> = emptyTiledList()
 ) : ByteSerializable
 
 val ArchiveItem.stickyHeader: ArchiveItem.Header?
@@ -44,7 +46,7 @@ val ArchiveItem.stickyHeader: ArchiveItem.Header?
         is ArchiveItem.Header -> this
         is ArchiveItem.Result -> ArchiveItem.Header(
             text = headerText,
-            query = query
+//            query = query
         )
         else -> null
     }
@@ -79,28 +81,24 @@ sealed class Action(val key: String) {
 }
 
 sealed class ArchiveItem {
-    abstract val query: ArchiveQuery
 
     data class Header(
         val text: String,
-        override val query: ArchiveQuery,
     ) : ArchiveItem()
 
     data class Result(
         val archive: Archive,
-        override val query: ArchiveQuery,
     ) : ArchiveItem()
 
     data class Loading(
         val isCircular: Boolean,
-        override val query: ArchiveQuery,
     ) : ArchiveItem()
 }
 
 val ArchiveItem.key: String
     get() = when (this) {
         is ArchiveItem.Header -> "header-$text"
-        is ArchiveItem.Loading -> "loading-${query.offset}"
+        is ArchiveItem.Loading -> "loading"
         is ArchiveItem.Result -> "result-${archive.id}"
     }
 

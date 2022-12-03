@@ -33,11 +33,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
+import com.tunjid.tiler.TiledList
+import com.tunjid.tiler.buildTiledList
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -120,7 +124,14 @@ private fun ArchiveScreen(
                         itemContent = { item ->
                             GridCell(
                                 item = item,
-                                onAction = mutator.accept,
+                                onCategoryClicked = {category ->
+                                    mutator.accept(
+                                        Action.Fetch.Reset(
+                                            query = state.queryState.startQuery.copy(offset = 0) + category,
+                                            gridSize = state.queryState.gridSize
+                                        )
+                                    )
+                                },
                                 navigate = { path ->
                                     mutator.accept(Action.Navigate {
                                         if (state.isInNavRail) mainNav.swap(route = path.toRoute)
@@ -159,7 +170,7 @@ private fun ArchiveScreen(
 @Composable
 private fun GridCell(
     item: ArchiveItem,
-    onAction: (Action) -> Unit,
+    onCategoryClicked: (Descriptor.Category) -> Unit,
     navigate: (String) -> Unit
 ) {
     when (item) {
@@ -173,10 +184,10 @@ private fun GridCell(
 
         is ArchiveItem.Result -> ArchiveCard(
             archiveItem = item,
-            onAction = onAction,
             onArchiveSelected = { archive ->
                 navigate("archives/${archive.kind.type}/${archive.id.value}")
-            }
+            },
+            onCategoryClicked = onCategoryClicked
         )
     }
 }
@@ -184,7 +195,7 @@ private fun GridCell(
 @Composable
 private fun EndlessScroll(
     gridSize: Int,
-    items: List<ArchiveItem>,
+    items: TiledList<ArchiveQuery, ArchiveItem>,
     gridState: LazyGridState,
     onAction: (Action) -> Unit
 ) {
@@ -193,7 +204,7 @@ private fun EndlessScroll(
         snapshotFlow {
             val visibleItems = gridState.layoutInfo.visibleItemsInfo
             val middleItemInfo = visibleItems.getOrNull(visibleItems.size / 2)
-            middleItemInfo?.index?.let(items::getOrNull)?.query
+            middleItemInfo?.index?.let(items::queryFor)
         }
             .filterNotNull()
             .distinctUntilChanged()
@@ -253,12 +264,14 @@ private fun PreviewLoadingState() {
             queryState = QueryState(
                 startQuery = ArchiveQuery(kind = ArchiveKind.Articles),
             ),
-            items = listOf(
-                ArchiveItem.Loading(
-                    isCircular = true,
-                    query = ArchiveQuery(kind = ArchiveKind.Articles)
-                )
-            )
+            items = buildTiledList {
+               add(
+                   query = ArchiveQuery(kind = ArchiveKind.Articles),
+                   item = ArchiveItem.Loading(
+                       isCircular = true,
+                   )
+               )
+            }
         ).asNoOpStateFlowMutator()
     )
 }
