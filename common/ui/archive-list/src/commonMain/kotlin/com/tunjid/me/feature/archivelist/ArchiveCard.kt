@@ -102,9 +102,10 @@ fun ArchiveCard(
                         .height(200.dp)
                 )
                 Spacer(Modifier.height(8.dp))
+                ArchiveDate(archiveItem.prettyDate)
+                Spacer(Modifier.height(4.dp))
                 ArchiveCategories(
                     categories = archiveItem.archive.categories,
-                    published = archiveItem.prettyDate,
                     onCategoryClicked = onCategoryClicked
                 )
                 Spacer(Modifier.height(8.dp))
@@ -123,28 +124,27 @@ fun ArchiveCard(
 }
 
 @Composable
+private fun ArchiveDate(prettyDate: String) {
+    Text(
+        modifier = Modifier
+            .padding(horizontal = 8.dp)
+            .wrapContentWidth(),
+        text = prettyDate,
+        fontSize = 12.sp,
+    )
+}
+
+@Composable
 private fun ArchiveCategories(
     categories: List<Descriptor.Category>,
-    published: String,
     onCategoryClicked: (Descriptor.Category) -> Unit
 ) {
-    Row(
+    Chips(
         modifier = Modifier.padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Chips(
-            modifier = Modifier.weight(1F),
-            chips = categories.map(Descriptor.Category::value),
-            color = MaterialTheme.colors.primaryVariant,
-            onClick = { onCategoryClicked(Descriptor.Category(it)) }
-        )
-        Text(
-            modifier = Modifier.wrapContentWidth(),
-            text = published,
-            fontSize = 12.sp,
-        )
-    }
+        chips = categories.map(Descriptor.Category::value),
+        color = MaterialTheme.colors.primaryVariant,
+        onClick = { onCategoryClicked(Descriptor.Category(it)) }
+    )
 }
 
 @Composable

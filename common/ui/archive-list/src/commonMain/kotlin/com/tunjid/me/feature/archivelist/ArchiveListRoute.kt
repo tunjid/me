@@ -149,7 +149,7 @@ private fun ArchiveScreen(
     // Initial load
     LaunchedEffect(true) {
         mutator.accept(
-            Action.Fetch.LoadMore(
+            Action.Fetch.LoadAround(
                 query = state.queryState.startQuery,
                 gridSize = state.queryState.gridSize,
             )
@@ -211,7 +211,7 @@ private fun EndlessScroll(
             .collect { query ->
                 onAction(Action.ToggleFilter(isExpanded = false))
                 onAction(
-                    Action.Fetch.LoadMore(
+                    Action.Fetch.LoadAround(
                         query = query,
                         gridSize = gridSize,
                     )

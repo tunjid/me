@@ -33,7 +33,7 @@ fun FetchResult.items(default: TiledList<ArchiveQuery, ArchiveItem>) = when {
         is Action.Fetch.Reset -> buildTiledList {
             add(
                 query = action.query,
-                item = ArchiveItem.Loading(isCircular = true,)
+                item = ArchiveItem.Loading(isCircular = true)
             )
         }
         // The mutator was just resubscribed to, show existing items

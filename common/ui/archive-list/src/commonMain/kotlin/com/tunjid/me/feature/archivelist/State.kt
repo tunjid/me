@@ -61,7 +61,7 @@ sealed class Action(val key: String) {
             override val gridSize: Int,
         ) : Fetch()
 
-        data class LoadMore(
+        data class LoadAround(
             override val query: ArchiveQuery,
             override val gridSize: Int,
         ) : Fetch()

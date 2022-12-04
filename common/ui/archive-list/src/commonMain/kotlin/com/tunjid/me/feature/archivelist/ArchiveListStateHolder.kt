@@ -229,7 +229,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
                 queryState = queryState.copy(
                     startQuery = fetchResult.action.query,
                     expanded = when (fetchAction) {
-                        is Action.Fetch.Reset -> true
+                        is Action.Fetch.Reset -> false
                         else -> queryState.expanded
                     }
                 )
