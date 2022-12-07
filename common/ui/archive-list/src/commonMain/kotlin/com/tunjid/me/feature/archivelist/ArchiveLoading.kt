@@ -16,58 +16,40 @@
 
 package com.tunjid.me.feature.archivelist
 
-import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.tiler.ListTiler
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.listTiler
-import com.tunjid.tiler.toTiledList
 import com.tunjid.tiler.utilities.PivotRequest
-import com.tunjid.tiler.utilities.pivotWith
-import com.tunjid.tiler.utilities.toTileInputs
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
-/**
- * Converts a query to output data for [State]
- */
-fun Flow<Action.Fetch>.toFetchResult(
-    repo: ArchiveRepository
-): Flow<FetchResult> {
-    val queries = map { it.query }
-        .distinctUntilChanged()
-
-    val pivotRequests = map { it.gridSize }
-        .map { pivotRequest(it) }
-        .distinctUntilChanged()
-
-    val limiters = distinctUntilChangedBy { it.gridSize }
-        .map { query ->
-            Tile.Limiter<ArchiveQuery, ArchiveItem> { items ->
-                items.size > 4 * query.gridSize * query.query.limit
+internal fun ArchiveRepository.archiveTiler(
+    kind: ArchiveKind,
+    limiter: Tile.Limiter<ArchiveQuery, ArchiveItem>
+): ListTiler<ArchiveQuery, ArchiveItem> =
+    listTiler(
+        limiter = limiter,
+        order = Tile.Order.PivotSorted(
+            query = ArchiveQuery(kind),
+            comparator = compareBy(ArchiveQuery::offset)
+        ),
+        fetcher = { query ->
+            flow {
+                emit(listOf(ArchiveItem.Loading(isCircular = false)))
+                emitAll(
+                    archivesStream(query).map { archives ->
+                        archives.map(ArchiveItem::Result)
+                    }
+                )
             }
         }
-
-    return combine(
-        flow = this,
-        flow2 = merge(
-            queries.pivotWith(pivotRequests).toTileInputs(),
-            limiters
-        )
-            .toTiledList(
-                repo.archiveTiler(
-                    kind = ArchiveKind.Articles,
-                    limiter = Tile.Limiter { items -> items.size > 100 }
-                )
-            )
-            // Allow database queries to settle
-            .debounce(150),
-        transform = ::FetchResult
     )
-}
 
-internal fun pivotRequest(gridSize: Int) = PivotRequest<ArchiveQuery>(
+internal fun pivotRequest(gridSize: Int) = PivotRequest(
     onCount = 3 * gridSize,
     offCount = 1 * gridSize,
     nextQuery = nextArchiveQuery,
@@ -80,25 +62,10 @@ private val nextArchiveQuery: ArchiveQuery.() -> ArchiveQuery? = {
 
 private val previousArchiveQuery: ArchiveQuery.() -> ArchiveQuery? = {
     if (offset == 0) null
-    else copy(offset = maxOf(0, offset - limit))
-}
-
-private fun ArchiveRepository.archiveTiler(
-    kind: ArchiveKind,
-    limiter: Tile.Limiter<ArchiveQuery, ArchiveItem>
-): ListTiler<ArchiveQuery, ArchiveItem> =
-    listTiler(
-        limiter = limiter,
-        order = Tile.Order.PivotSorted(
-            query = ArchiveQuery(kind),
-            comparator = compareBy(ArchiveQuery::offset)
-        ),
-        fetcher = { query ->
-            archivesStream(query).map<List<Archive>, List<ArchiveItem>> { archives ->
-                archives.map(ArchiveItem::Result)
-            }
-                .onStart {
-                    emit(listOf(ArchiveItem.Loading(isCircular = false)))
-                }
-        }
+    else copy(
+        offset = maxOf(
+            a = 0,
+            b = offset - limit
+        )
     )
+}

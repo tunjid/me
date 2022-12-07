@@ -36,7 +36,11 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
+import com.tunjid.tiler.Tile
 import com.tunjid.tiler.buildTiledList
+import com.tunjid.tiler.toTiledList
+import com.tunjid.tiler.utilities.pivotWith
+import com.tunjid.tiler.utilities.toTileInputs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
@@ -214,22 +218,51 @@ private fun Flow<Action.LastVisibleKey>.resetScrollMutations(): Flow<Mutation<St
  */
 private fun Flow<Action.Fetch>.fetchMutations(
     repo: ArchiveRepository
-): Flow<Mutation<State>> = toFetchResult(
-    repo = repo
-)
-    .map { fetchResult: FetchResult ->
-        mutation {
-            val fetchAction = fetchResult.action
-            val items = fetchResult.items(default = this.items)
-            copy(
-                items = items,
-                queryState = queryState.copy(
-                    startQuery = fetchResult.action.query,
-                    expanded = when (fetchAction) {
-                        is Action.Fetch.Reset -> false
-                        else -> queryState.expanded
-                    }
+): Flow<Mutation<State>> {
+    val queries = map { it.query }
+        .distinctUntilChanged()
+
+    val pivotRequests = map { it.gridSize }
+        .map(::pivotRequest)
+        .distinctUntilChanged()
+
+    val limiters = distinctUntilChangedBy { it.gridSize }
+        .map { query ->
+            Tile.Limiter<ArchiveQuery, ArchiveItem> { items ->
+                items.size > 4 * query.gridSize * query.query.limit
+            }
+        }
+
+    return combine(
+        flow = this,
+        flow2 = merge(
+            queries.pivotWith(pivotRequests).toTileInputs(),
+            limiters
+        )
+            .toTiledList(
+                repo.archiveTiler(
+                    kind = ArchiveKind.Articles,
+                    limiter = Tile.Limiter { items -> items.size > 100 }
                 )
             )
+            // Allow database queries to settle
+            .debounce(150),
+        transform = ::FetchResult
+    )
+        .map { fetchResult: FetchResult ->
+            mutation {
+                val fetchAction = fetchResult.action
+                val items = fetchResult.items(default = this.items)
+                copy(
+                    items = items,
+                    queryState = queryState.copy(
+                        startQuery = fetchResult.action.query,
+                        expanded = when (fetchAction) {
+                            is Action.Fetch.Reset -> false
+                            else -> queryState.expanded
+                        }
+                    )
+                )
+            }
         }
-    }
+}
