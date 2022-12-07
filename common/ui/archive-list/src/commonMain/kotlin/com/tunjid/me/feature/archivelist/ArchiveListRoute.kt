@@ -78,7 +78,6 @@ private fun ArchiveScreen(
 
     val gridState = rememberLazyGridState()
     val cardWidth = 350.dp
-    val cardWidthPx = with(LocalDensity.current) { cardWidth.toPx() }.toInt()
     val stickyHeaderItem by remember(state.items) {
         derivedStateOf {
             val firstIndex = gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
@@ -87,12 +86,7 @@ private fun ArchiveScreen(
         }
     }
 
-    Column(
-        modifier = Modifier.onGloballyPositioned {
-            val gridSize = it.size.width / cardWidthPx
-            mutator.accept(Action.GridSize(gridSize))
-        }
-    ) {
+    Column {
         Spacer(modifier = Modifier.height(16.dp))
         ArchiveFilters(
             item = state.queryState,
