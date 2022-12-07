@@ -17,16 +17,16 @@
 package com.tunjid.me.feature.archivelist
 
 import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
-import com.tunjid.me.core.model.DefaultQueryLimit
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.tiler.ListTiler
 import com.tunjid.tiler.Tile
-import com.tunjid.tiler.tiledList
+import com.tunjid.tiler.listTiler
 import com.tunjid.tiler.toTiledList
-import com.tunjid.utilities.PivotRequest
-import com.tunjid.utilities.pivotWith
-import com.tunjid.utilities.toRequests
+import com.tunjid.tiler.utilities.PivotRequest
+import com.tunjid.tiler.utilities.pivotWith
+import com.tunjid.tiler.utilities.toTileInputs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 
@@ -41,21 +41,37 @@ fun Flow<Action.Fetch>.toFetchResult(
     started = SharingStarted.WhileSubscribed(),
     replay = 1
 ).let { sharedFlow ->
+    val queries = sharedFlow
+        .map { it.query }
+        .distinctUntilChanged()
+
+    val pivotRequests = sharedFlow
+        .map { it.gridSize }
+        .map { pivotRequest(it) }
+        .distinctUntilChanged()
+
+    val limiters = sharedFlow
+        .distinctUntilChangedBy { it.gridSize }
+        .map { query ->
+            Tile.Limiter<ArchiveQuery, ArchiveItem> { items ->
+                items.size > 4 * query.gridSize * query.query.limit
+            }
+        }
+
     combine(
         flow = sharedFlow,
-        flow2 = sharedFlow.distinctBy(Action.Fetch::gridSize)
-            .map { (gridSize, fetchActionFlow) ->
-                gridSize to fetchActionFlow.map { it.query }
-            }
-            .flatMapLatest { (gridSize, fetchActionFlow) ->
-                fetchActionFlow.pivotWith(pivotRequest(gridSize))
-                    .toRequests<ArchiveQuery, ArchiveItem>()
-                    .toTiledList(
-                        repo.archiveTiler(
-                            Tile.Limiter { items -> items.size > 4 * gridSize * DefaultQueryLimit }
-                        )
-                    )
-            },
+        flow2 = merge(
+            queries.pivotWith(pivotRequests).toTileInputs(),
+            limiters
+        )
+            .toTiledList(
+                repo.archiveTiler(
+                    kind = ArchiveKind.Articles,
+                    limiter = Tile.Limiter { items -> items.size > 100 }
+                )
+            )
+            // Allow database queries to settle
+            .debounce(150),
         transform = ::FetchResult
     )
 }
@@ -63,19 +79,29 @@ fun Flow<Action.Fetch>.toFetchResult(
 private fun pivotRequest(gridSize: Int) = PivotRequest<ArchiveQuery>(
     onCount = 3 * gridSize,
     offCount = 1 * gridSize,
-    nextQuery = { copy(offset = offset + limit) },
-    previousQuery = {
-        if (offset == 0) null
-        else copy(offset = maxOf(0, offset - limit))
-    },
+    nextQuery = nextArchiveQuery,
+    previousQuery = previousArchiveQuery,
 )
 
+private val nextArchiveQuery: ArchiveQuery.() -> ArchiveQuery? = {
+    copy(offset = offset + limit)
+}
+
+private val previousArchiveQuery: ArchiveQuery.() -> ArchiveQuery? = {
+    if (offset == 0) null
+    else copy(offset = maxOf(0, offset - limit))
+}
+
 private fun ArchiveRepository.archiveTiler(
+    kind: ArchiveKind,
     limiter: Tile.Limiter<ArchiveQuery, ArchiveItem>
 ): ListTiler<ArchiveQuery, ArchiveItem> =
-    tiledList(
+    listTiler(
         limiter = limiter,
-        order = Tile.Order.PivotSorted(comparator = compareBy(ArchiveQuery::offset)),
+        order = Tile.Order.PivotSorted(
+            query = ArchiveQuery(kind),
+            comparator = compareBy(ArchiveQuery::offset)
+        ),
         fetcher = { query ->
             archivesStream(query).map<List<Archive>, List<ArchiveItem>> { archives ->
                 archives.map(ArchiveItem::Result)
@@ -85,27 +111,3 @@ private fun ArchiveRepository.archiveTiler(
                 }
         }
     )
-
-/**
- * Creates a [Flow] of [Flow] where each inner [Flow] has the same [R]. Changes to [R] emits new inner [Flow]s into
- * the stream.
- */
-private fun <T, R> Flow<T>.distinctBy(splitter: (T) -> R): Flow<Pair<R, Flow<T>>> =
-    channelFlow channel@{
-        var currentKey: R? = null
-        var currentFlow = MutableSharedFlow<T>()
-        this@distinctBy.collect { item ->
-            when (val emittedKey: R = splitter(item)) {
-                currentKey -> {
-                    currentFlow.subscriptionCount.first { it > 0 }
-                    currentFlow.emit(item)
-                }
-
-                else -> {
-                    currentKey = emittedKey
-                    currentFlow = MutableSharedFlow()
-                    channel.send(emittedKey to currentFlow.onStart { emit(item) })
-                }
-            }
-        }
-    }

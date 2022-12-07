@@ -37,10 +37,11 @@ import kotlinx.datetime.Clock.System
 
 @Composable
 fun StickyHeader(
+    modifier: Modifier = Modifier,
     item: ArchiveItem.Header
 ) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(0.dp),
@@ -59,9 +60,12 @@ fun StickyHeader(
 }
 
 @Composable
-fun ProgressBar(isCircular: Boolean) {
+fun ProgressBar(
+    modifier: Modifier = Modifier,
+    isCircular: Boolean
+) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .padding(vertical = 24.dp)
             .fillMaxWidth()
             .wrapContentHeight()
@@ -83,12 +87,13 @@ fun ProgressBar(isCircular: Boolean) {
 
 @Composable
 fun ArchiveCard(
+    modifier: Modifier = Modifier,
     archiveItem: ArchiveItem.Result,
     onArchiveSelected: (Archive) -> Unit,
     onCategoryClicked: (Descriptor.Category) -> Unit,
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .padding(16.dp),
         onClick = {
             onArchiveSelected(archiveItem.archive)

@@ -123,6 +123,7 @@ private fun ArchiveScreen(
                         },
                         itemContent = { item ->
                             GridCell(
+                                modifier = Modifier.animateItemPlacement(),
                                 item = item,
                                 onCategoryClicked = {category ->
                                     mutator.accept(
@@ -169,20 +170,24 @@ private fun ArchiveScreen(
 
 @Composable
 private fun GridCell(
+    modifier: Modifier = Modifier,
     item: ArchiveItem,
     onCategoryClicked: (Descriptor.Category) -> Unit,
     navigate: (String) -> Unit
 ) {
     when (item) {
         is ArchiveItem.Header -> StickyHeader(
+            modifier = modifier,
             item = item
         )
 
         is ArchiveItem.Loading -> ProgressBar(
+            modifier = modifier,
             isCircular = item.isCircular
         )
 
         is ArchiveItem.Result -> ArchiveCard(
+            modifier = modifier,
             archiveItem = item,
             onArchiveSelected = { archive ->
                 navigate("archives/${archive.kind.type}/${archive.id.value}")
@@ -234,26 +239,26 @@ private fun ListSync(
     state: State,
     gridState: LazyGridState
 ) {
-    var hasRun by remember { mutableStateOf(false) }
-    LaunchedEffect(state.items) {
-        if (hasRun || state.items.isEmpty()) return@LaunchedEffect
-
-        val key = state.lastVisibleKey ?: return@LaunchedEffect
-        // Item is on screen do nothing
-        if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) {
-            hasRun = true
-            return@LaunchedEffect
-        }
-
-        val indexOfKey = state.items.indexOfFirst { it.key == key }
-        if (indexOfKey < 0) return@LaunchedEffect
-
-        gridState.scrollToItem(
-            index = min(indexOfKey + 1, gridState.layoutInfo.totalItemsCount - 1),
-            scrollOffset = 400
-        )
-        hasRun = true
-    }
+//    var hasRun by remember { mutableStateOf(false) }
+//    LaunchedEffect(state.items) {
+//        if (hasRun || state.items.isEmpty()) return@LaunchedEffect
+//
+//        val key = state.lastVisibleKey ?: return@LaunchedEffect
+//        // Item is on screen do nothing
+//        if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) {
+//            hasRun = true
+//            return@LaunchedEffect
+//        }
+//
+//        val indexOfKey = state.items.indexOfFirst { it.key == key }
+//        if (indexOfKey < 0) return@LaunchedEffect
+//
+//        gridState.scrollToItem(
+//            index = min(indexOfKey + 1, gridState.layoutInfo.totalItemsCount - 1),
+//            scrollOffset = 400
+//        )
+//        hasRun = true
+//    }
 }
 
 //@Preview
