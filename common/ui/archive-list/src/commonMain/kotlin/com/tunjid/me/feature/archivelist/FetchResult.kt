@@ -17,18 +17,17 @@
 package com.tunjid.me.feature.archivelist
 
 import com.tunjid.me.core.model.ArchiveQuery
-import com.tunjid.tiler.MutableTiledList
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.filterTransform
 import com.tunjid.tiler.tiledList
 
 data class FetchResult(
-    val action: Action.Fetch,
+    val action: Action.Fetch.Load,
     val queriedArchives: TiledList<ArchiveQuery, ArchiveItem>
 )
 
-fun FetchResult.items(
+fun FetchResult.itemsWithHeaders(
     default: TiledList<ArchiveQuery, ArchiveItem>
 ): TiledList<ArchiveQuery, ArchiveItem> = when {
     hasNoResults -> when (action) {
@@ -40,10 +39,10 @@ fun FetchResult.items(
         else -> default
     }
 
-    else -> items
+    else -> itemsWithHeaders
 }
 
-private val FetchResult.items: TiledList<ArchiveQuery, ArchiveItem>
+private val FetchResult.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
     get() = buildTiledList {
         var month = -1
         var year = -1

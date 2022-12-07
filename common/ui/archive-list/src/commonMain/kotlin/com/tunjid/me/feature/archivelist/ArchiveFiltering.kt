@@ -154,15 +154,18 @@ private fun onChipFilterChanged(
     when (it) {
         ChipAction.Added -> onChanged(
             Action.Fetch.Reset(
-                gridSize = state.gridSize,
                 query = state.startQuery + reader(state),
             )
         )
 
-        is ChipAction.Changed -> onChanged(Action.FilterChanged(writer(it.text)))
+        is ChipAction.Changed -> onChanged(
+            Action.FilterChanged(
+                descriptor = writer(it.text)
+            )
+        )
+
         is ChipAction.Removed -> onChanged(
             Action.Fetch.Reset(
-                gridSize = state.gridSize,
                 query = state.startQuery - writer(it.text),
             )
         )

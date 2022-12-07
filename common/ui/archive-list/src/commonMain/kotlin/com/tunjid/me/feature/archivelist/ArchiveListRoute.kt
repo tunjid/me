@@ -27,8 +27,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.tunjid.me.core.model.ArchiveKind
@@ -41,7 +39,6 @@ import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.tiler.TiledList
-import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.tiledList
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
@@ -50,7 +47,6 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
-import kotlin.math.min
 
 @Serializable
 data class ArchiveListRoute(
@@ -109,7 +105,7 @@ private fun ArchiveScreen(
                         items = state.items,
                         key = { it.key },
                         span = { item ->
-                            mutator.accept(Action.GridSize(maxLineSpan))
+                            mutator.accept(Action.Fetch.NoColumnsChanged(maxLineSpan))
                             when (item) {
                                 is ArchiveItem.Result -> GridItemSpan(1)
                                 is ArchiveItem.Header,
@@ -124,7 +120,6 @@ private fun ArchiveScreen(
                                     mutator.accept(
                                         Action.Fetch.Reset(
                                             query = state.queryState.startQuery.copy(offset = 0) + category,
-                                            gridSize = state.queryState.gridSize
                                         )
                                     )
                                 },
@@ -147,15 +142,13 @@ private fun ArchiveScreen(
         mutator.accept(
             Action.Fetch.LoadAround(
                 query = state.queryState.startQuery,
-                gridSize = state.queryState.gridSize,
             )
         )
     }
 
     EndlessScroll(
-        gridState = gridState,
-        gridSize = state.queryState.gridSize,
         items = state.items,
+        gridState = gridState,
         onAction = mutator.accept
     )
 
@@ -194,28 +187,22 @@ private fun GridCell(
 
 @Composable
 private fun EndlessScroll(
-    gridSize: Int,
     items: TiledList<ArchiveQuery, ArchiveItem>,
     gridState: LazyGridState,
     onAction: (Action) -> Unit
 ) {
     // Endless scrolling
-    LaunchedEffect(gridSize, items, gridState) {
+    LaunchedEffect(items, gridState) {
         snapshotFlow {
             val visibleItems = gridState.layoutInfo.visibleItemsInfo
-            val middleItemInfo = visibleItems.getOrNull(visibleItems.size / 2)
-            middleItemInfo?.index?.let(items::queryFor)
+            val firstItemInfo = visibleItems.firstOrNull()
+            firstItemInfo?.index?.let(items::queryFor)
         }
             .filterNotNull()
             .distinctUntilChanged()
             .collect { query ->
                 onAction(Action.ToggleFilter(isExpanded = false))
-                onAction(
-                    Action.Fetch.LoadAround(
-                        query = query,
-                        gridSize = gridSize,
-                    )
-                )
+                onAction(Action.Fetch.LoadAround(query = query))
             }
     }
     LaunchedEffect(gridState) {

@@ -48,30 +48,27 @@ val ArchiveItem.stickyHeader: ArchiveItem.Header?
             text = headerText,
 //            query = query
         )
+
         else -> null
     }
 
 sealed class Action(val key: String) {
     sealed class Fetch : Action(key = "Fetch") {
-        abstract val query: ArchiveQuery
-        abstract val gridSize: Int
 
-        data class Reset(
-            override val query: ArchiveQuery,
-            override val gridSize: Int,
-        ) : Fetch()
+        sealed interface Load {
+            val query: ArchiveQuery
+        }
 
-        data class LoadAround(
-            override val query: ArchiveQuery,
-            override val gridSize: Int,
-        ) : Fetch()
+        data class Reset(override val query: ArchiveQuery) : Fetch(), Load
+
+        data class LoadAround(override val query: ArchiveQuery) : Fetch(), Load
+
+        data class NoColumnsChanged(val noColumns: Int) : Fetch()
     }
 
     data class FilterChanged(
         val descriptor: Descriptor
     ) : Action(key = "FilterChanged")
-
-    data class GridSize(val size: Int) : Action(key = "GridSize")
 
     data class ToggleFilter(val isExpanded: Boolean? = null) : Action(key = "ToggleFilter")
 
@@ -124,8 +121,9 @@ val ArchiveItem.Result.headerText
 
 @Serializable
 data class QueryState(
-    @ProtoNumber(1)
-    val gridSize: Int = 1,
+    // Deleted field
+    // @ProtoNumber(1)
+    // val gridSize: Int = 1,
     @ProtoNumber(2)
     val expanded: Boolean = false,
     @ProtoNumber(3)

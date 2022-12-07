@@ -92,13 +92,13 @@ class ActualArchiveListStateHolder(
         actions.toMutationStream(keySelector = Action::key) {
             when (val action = type()) {
                 is Action.Fetch -> action.flow.fetchMutations(
+                    scope = scope,
                     repo = archiveRepository
                 )
 
                 is Action.FilterChanged -> action.flow.filterChangedMutations()
                 is Action.ToggleFilter -> action.flow.filterToggleMutations()
                 is Action.LastVisibleKey -> action.flow.resetScrollMutations()
-                is Action.GridSize -> action.flow.gridSizeMutations()
                 is Action.Navigate -> action.flow.consumeNavActions(
                     mutationMapper = Action.Navigate::navMutation,
                     action = navActions
@@ -191,17 +191,6 @@ internal fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<St
         }
 
 /**
- * Updates [State] with the grid size of the app
- */
-private fun Flow<Action.GridSize>.gridSizeMutations(): Flow<Mutation<State>> =
-    distinctUntilChanged()
-        .map {
-            mutation {
-                copy(queryState = queryState.copy(gridSize = it.size))
-            }
-        }
-
-/**
  * Updates [State] with the key of the last item seen so when the route shows up in the nav rail,
  * it is in sync
  */
@@ -217,24 +206,42 @@ private fun Flow<Action.LastVisibleKey>.resetScrollMutations(): Flow<Mutation<St
  * Converts requests to fetch archives into a list of archives to render
  */
 private fun Flow<Action.Fetch>.fetchMutations(
+    scope: CoroutineScope,
     repo: ArchiveRepository
 ): Flow<Mutation<State>> {
-    val queries = map { it.query }
+    val loads = filterIsInstance<Action.Fetch.Load>()
+        .distinctUntilChanged()
+        .shareIn(
+            scope = scope,
+            started = SharingStarted.WhileSubscribed()
+        )
+    val columnChanges = filterIsInstance<Action.Fetch.NoColumnsChanged>()
+        .distinctUntilChanged()
+        .shareIn(
+            scope = scope,
+            started = SharingStarted.WhileSubscribed()
+        )
+
+    val queries = loads
+        .map { it.query }
         .distinctUntilChanged()
 
-    val pivotRequests = map { it.gridSize }
+    val pivotRequests = columnChanges
+        .map { it.noColumns }
         .map(::pivotRequest)
         .distinctUntilChanged()
 
-    val limiters = distinctUntilChangedBy { it.gridSize }
-        .map { query ->
+    val limiters = loads
+        .distinctUntilChangedBy { it.query }
+        .combine(columnChanges, ::Pair)
+        .map { (load, columnChange) ->
             Tile.Limiter<ArchiveQuery, ArchiveItem> { items ->
-                items.size > 4 * query.gridSize * query.query.limit
+                items.size > 4 * columnChange.noColumns * load.query.limit
             }
         }
 
     return combine(
-        flow = this,
+        flow = loads,
         flow2 = merge(
             queries.pivotWith(pivotRequests).toTileInputs(),
             limiters
@@ -252,7 +259,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
         .map { fetchResult: FetchResult ->
             mutation {
                 val fetchAction = fetchResult.action
-                val items = fetchResult.items(default = this.items)
+                val items = fetchResult.itemsWithHeaders(default = this.items)
                 copy(
                     items = items,
                     queryState = queryState.copy(
