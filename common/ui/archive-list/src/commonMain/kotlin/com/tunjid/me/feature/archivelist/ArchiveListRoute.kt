@@ -42,6 +42,7 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.buildTiledList
+import com.tunjid.tiler.tiledList
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -125,7 +126,7 @@ private fun ArchiveScreen(
                             GridCell(
                                 modifier = Modifier.animateItemPlacement(),
                                 item = item,
-                                onCategoryClicked = {category ->
+                                onCategoryClicked = { category ->
                                     mutator.accept(
                                         Action.Fetch.Reset(
                                             query = state.queryState.startQuery.copy(offset = 0) + category,
@@ -269,14 +270,10 @@ private fun PreviewLoadingState() {
             queryState = QueryState(
                 startQuery = ArchiveQuery(kind = ArchiveKind.Articles),
             ),
-            items = buildTiledList {
-               add(
-                   query = ArchiveQuery(kind = ArchiveKind.Articles),
-                   item = ArchiveItem.Loading(
-                       isCircular = true,
-                   )
-               )
-            }
+            items = tiledList(
+                ArchiveQuery(kind = ArchiveKind.Articles) to
+                    ArchiveItem.Loading(isCircular = true)
+            )
         ).asNoOpStateFlowMutator()
     )
 }

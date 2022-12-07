@@ -21,21 +21,21 @@ import com.tunjid.tiler.MutableTiledList
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.filterTransform
+import com.tunjid.tiler.tiledList
 
 data class FetchResult(
     val action: Action.Fetch,
     val queriedArchives: TiledList<ArchiveQuery, ArchiveItem>
 )
 
-fun FetchResult.items(default: TiledList<ArchiveQuery, ArchiveItem>) = when {
+fun FetchResult.items(
+    default: TiledList<ArchiveQuery, ArchiveItem>
+): TiledList<ArchiveQuery, ArchiveItem> = when {
     hasNoResults -> when (action) {
         // Fetch action is reset, show a loading spinner
-        is Action.Fetch.Reset -> buildTiledList {
-            add(
-                query = action.query,
-                item = ArchiveItem.Loading(isCircular = true)
-            )
-        }
+        is Action.Fetch.Reset -> tiledList(
+            action.query to ArchiveItem.Loading(isCircular = true)
+        )
         // The mutator was just resubscribed to, show existing items
         else -> default
     }

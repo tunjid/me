@@ -27,39 +27,30 @@ import com.tunjid.tiler.toTiledList
 import com.tunjid.tiler.utilities.PivotRequest
 import com.tunjid.tiler.utilities.pivotWith
 import com.tunjid.tiler.utilities.toTileInputs
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 
 /**
  * Converts a query to output data for [State]
  */
 fun Flow<Action.Fetch>.toFetchResult(
-    scope: CoroutineScope,
     repo: ArchiveRepository
-): Flow<FetchResult> = shareIn(
-    scope = scope,
-    started = SharingStarted.WhileSubscribed(),
-    replay = 1
-).let { sharedFlow ->
-    val queries = sharedFlow
-        .map { it.query }
+): Flow<FetchResult> {
+    val queries = map { it.query }
         .distinctUntilChanged()
 
-    val pivotRequests = sharedFlow
-        .map { it.gridSize }
+    val pivotRequests = map { it.gridSize }
         .map { pivotRequest(it) }
         .distinctUntilChanged()
 
-    val limiters = sharedFlow
-        .distinctUntilChangedBy { it.gridSize }
+    val limiters = distinctUntilChangedBy { it.gridSize }
         .map { query ->
             Tile.Limiter<ArchiveQuery, ArchiveItem> { items ->
                 items.size > 4 * query.gridSize * query.query.limit
             }
         }
 
-    combine(
-        flow = sharedFlow,
+    return combine(
+        flow = this,
         flow2 = merge(
             queries.pivotWith(pivotRequests).toTileInputs(),
             limiters
@@ -76,7 +67,7 @@ fun Flow<Action.Fetch>.toFetchResult(
     )
 }
 
-private fun pivotRequest(gridSize: Int) = PivotRequest<ArchiveQuery>(
+internal fun pivotRequest(gridSize: Int) = PivotRequest<ArchiveQuery>(
     onCount = 3 * gridSize,
     offCount = 1 * gridSize,
     nextQuery = nextArchiveQuery,

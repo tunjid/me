@@ -88,7 +88,6 @@ class ActualArchiveListStateHolder(
         actions.toMutationStream(keySelector = Action::key) {
             when (val action = type()) {
                 is Action.Fetch -> action.flow.fetchMutations(
-                    scope = scope,
                     repo = archiveRepository
                 )
 
@@ -214,10 +213,8 @@ private fun Flow<Action.LastVisibleKey>.resetScrollMutations(): Flow<Mutation<St
  * Converts requests to fetch archives into a list of archives to render
  */
 private fun Flow<Action.Fetch>.fetchMutations(
-    scope: CoroutineScope,
     repo: ArchiveRepository
 ): Flow<Mutation<State>> = toFetchResult(
-    scope = scope,
     repo = repo
 )
     .map { fetchResult: FetchResult ->
