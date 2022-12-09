@@ -60,7 +60,7 @@ fun GlobalUi(
                     imageVector = Icons.Default.AccountBox
                 ).takeIf { !isSignedIn }
             ),
-            toolbarMenuClickListener = rememberFunction(query) { item ->
+            toolbarMenuClickListener = rememberFunction(queryState) { item ->
                 when (item.id) {
                     SORT_ORDER -> onAction(
                         Action.Fetch.Reset(

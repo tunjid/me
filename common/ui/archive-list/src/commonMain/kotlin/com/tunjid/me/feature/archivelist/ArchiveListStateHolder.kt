@@ -38,6 +38,7 @@ import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.buildTiledList
+import com.tunjid.tiler.tiledList
 import com.tunjid.tiler.toTiledList
 import com.tunjid.tiler.utilities.pivotWith
 import com.tunjid.tiler.utilities.toTileInputs
@@ -68,14 +69,9 @@ class ActualArchiveListStateHolder(
     route: ArchiveListRoute,
 ) : ArchiveListStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
-        items = buildTiledList {
-            add(
-                ArchiveQuery(kind = route.kind),
-                ArchiveItem.Loading(
-                    isCircular = true,
-                )
-            )
-        },
+        items = tiledList(
+            ArchiveQuery(kind = route.kind) to ArchiveItem.Loading(isCircular = true)
+        ),
         queryState = QueryState(
             currentQuery = ArchiveQuery(kind = route.kind),
         )
@@ -257,7 +253,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
                 )
             )
             // Allow database queries to settle
-            .debounce(150),
+            .debounce(timeoutMillis = 250),
         transform = ::FetchResult
     )
         .map { fetchResult: FetchResult ->
