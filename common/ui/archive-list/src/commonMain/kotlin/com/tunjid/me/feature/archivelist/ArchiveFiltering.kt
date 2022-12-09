@@ -97,7 +97,7 @@ private fun FilterChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
-            chips = state.startQuery.contentFilter.categories.map(Descriptor.Category::value),
+            chips = state.currentQuery.contentFilter.categories.map(Descriptor.Category::value),
             color = MaterialTheme.colors.primaryVariant,
             editInfo = ChipEditInfo(
                 currentText = state.categoryText.value,
@@ -112,7 +112,7 @@ private fun FilterChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
-            chips = state.startQuery.contentFilter.tags.map(Descriptor.Tag::value),
+            chips = state.currentQuery.contentFilter.tags.map(Descriptor.Tag::value),
             color = MaterialTheme.colors.secondary,
             editInfo = ChipEditInfo(
                 currentText = state.tagText.value,
@@ -154,7 +154,7 @@ private fun onChipFilterChanged(
     when (it) {
         ChipAction.Added -> onChanged(
             Action.Fetch.Reset(
-                query = state.startQuery + reader(state),
+                query = state.currentQuery + reader(state),
             )
         )
 
@@ -166,7 +166,7 @@ private fun onChipFilterChanged(
 
         is ChipAction.Removed -> onChanged(
             Action.Fetch.Reset(
-                query = state.startQuery - writer(it.text),
+                query = state.currentQuery - writer(it.text),
             )
         )
     }

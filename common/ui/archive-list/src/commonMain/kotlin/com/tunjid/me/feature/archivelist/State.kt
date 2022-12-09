@@ -127,12 +127,14 @@ data class QueryState(
     @ProtoNumber(2)
     val expanded: Boolean = false,
     @ProtoNumber(3)
-    val startQuery: ArchiveQuery,
+    val currentQuery: ArchiveQuery,
     // Deleted field
     // val currentQuery: ArchiveQuery,
     @ProtoNumber(5)
     val categoryText: Descriptor.Category = Descriptor.Category(""),
     @ProtoNumber(6)
     val tagText: Descriptor.Tag = Descriptor.Tag(""),
+    @ProtoNumber(7)
+    val count: Long = 0,
 )
 

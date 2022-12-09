@@ -26,6 +26,22 @@ ORDER BY CASE WHEN :desc
 LIMIT :limit
 OFFSET :offset;
 
+count:
+SELECT COUNT(*)
+FROM archiveEntity
+WHERE kind = :kind
+AND CASE WHEN :useFilters
+         THEN id IN (
+                     SELECT DISTINCT innerArchiveEntity.id
+                     FROM archiveEntity AS innerArchiveEntity
+                     INNER JOIN archiveTag
+                     ON innerArchiveEntity.id = archiveTag.archive_id
+                     INNER JOIN archiveCategory
+                     ON innerArchiveEntity.id = archiveCategory.archive_id
+                     WHERE (archiveTag.tag IN :tagsOrCategories OR archiveCategory.category IN :tagsOrCategories)
+                     )
+        ELSE 1
+    END;
 
 idsForQuery:
 SELECT DISTINCT archiveEntity.id

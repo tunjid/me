@@ -67,9 +67,9 @@ private fun ArchiveScreen(
 ) {
     val state by mutator.state.collectAsStateWithLifecycle()
 
-    if (!state.isInNavRail) GlobalUi(
+    GlobalUi(
         state = state,
-        onNavigate = mutator.accept
+        onAction = mutator.accept
     )
 
     val gridState = rememberLazyGridState()
@@ -119,7 +119,7 @@ private fun ArchiveScreen(
                                 onCategoryClicked = { category ->
                                     mutator.accept(
                                         Action.Fetch.Reset(
-                                            query = state.queryState.startQuery.copy(offset = 0) + category,
+                                            query = state.queryState.currentQuery.copy(offset = 0) + category,
                                         )
                                     )
                                 },
@@ -141,7 +141,7 @@ private fun ArchiveScreen(
     LaunchedEffect(true) {
         mutator.accept(
             Action.Fetch.LoadAround(
-                query = state.queryState.startQuery,
+                query = state.queryState.currentQuery,
             )
         )
     }
@@ -249,7 +249,7 @@ private fun PreviewLoadingState() {
     ArchiveScreen(
         mutator = State(
             queryState = QueryState(
-                startQuery = ArchiveQuery(kind = ArchiveKind.Articles),
+                currentQuery = ArchiveQuery(kind = ArchiveKind.Articles),
             ),
             items = tiledList(
                 ArchiveQuery(kind = ArchiveKind.Articles) to

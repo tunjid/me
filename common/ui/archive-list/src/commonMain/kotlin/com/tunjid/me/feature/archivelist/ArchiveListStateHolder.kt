@@ -77,7 +77,7 @@ class ActualArchiveListStateHolder(
             )
         },
         queryState = QueryState(
-            startQuery = ArchiveQuery(kind = route.kind),
+            currentQuery = ArchiveQuery(kind = route.kind),
         )
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
@@ -226,6 +226,9 @@ private fun Flow<Action.Fetch>.fetchMutations(
         .map { it.query }
         .distinctUntilChanged()
 
+    val archivesAvailable = queries
+        .flatMapLatest(repo::count)
+
     val pivotRequests = columnChanges
         .map { it.noColumns }
         .map(::pivotRequest)
@@ -242,7 +245,8 @@ private fun Flow<Action.Fetch>.fetchMutations(
 
     return combine(
         flow = loads,
-        flow2 = merge(
+        flow2 = archivesAvailable,
+        flow3 = merge(
             queries.pivotWith(pivotRequests).toTileInputs(),
             limiters
         )
@@ -263,7 +267,8 @@ private fun Flow<Action.Fetch>.fetchMutations(
                 copy(
                     items = items,
                     queryState = queryState.copy(
-                        startQuery = fetchResult.action.query,
+                        currentQuery = fetchResult.action.query,
+                        count = fetchResult.archivesAvailable,
                         expanded = when (fetchAction) {
                             is Action.Fetch.Reset -> false
                             else -> queryState.expanded

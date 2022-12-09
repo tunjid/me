@@ -24,6 +24,7 @@ import com.tunjid.tiler.tiledList
 
 data class FetchResult(
     val action: Action.Fetch.Load,
+    val archivesAvailable: Long,
     val queriedArchives: TiledList<ArchiveQuery, ArchiveItem>
 )
 

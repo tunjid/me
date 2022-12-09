@@ -36,6 +36,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import me.tatarka.inject.annotations.Inject
@@ -47,6 +48,8 @@ interface ArchiveRepository : Syncable {
         id: ArchiveId,
         uri: Uri,
     ): Result<Unit>
+
+    fun count(query: ArchiveQuery): Flow<Long>
 
     fun archivesStream(query: ArchiveQuery): Flow<List<Archive>>
     fun archiveStream(kind: ArchiveKind, id: ArchiveId): Flow<Archive?>
@@ -103,6 +106,19 @@ internal class OfflineFirstArchiveRepository(
         .mapToList(context = dispatcher)
         .flatMapLatest { archiveEntities -> archiveEntitiesToArchives(archiveEntities) }
         .distinctUntilChanged()
+
+    override fun count(
+        query: ArchiveQuery
+    ): Flow<Long> = archiveEntityQueries.count(
+        kind = query.kind.type,
+        useFilters = query.hasContentFilter,
+        tagsOrCategories = query.contentFilter.tags.map(Descriptor.Tag::value)
+            .plus(query.contentFilter.categories.map(Descriptor.Category::value))
+            .distinct()
+    )
+        .asFlow()
+        .mapToOneOrNull(context = dispatcher)
+        .filterNotNull()
 
     override fun archiveStream(
         kind: ArchiveKind, id: ArchiveId
