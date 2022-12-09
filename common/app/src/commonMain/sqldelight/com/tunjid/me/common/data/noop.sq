@@ -1,7 +1,3 @@
-CREATE TABLE IF NOT EXISTS noop (
-    id TEXT PRIMARY KEY
-);
-
 find:
 SELECT *
 FROM noop

@@ -1,0 +1,3 @@
+-- Dummy migration for failed experiment with virtual column
+SELECT * FROM archiveEntity
+LIMIT 1;

@@ -80,5 +80,7 @@ sqldelight {
         dialect(libs.cashapp.sqldelight.dialect.get().toString())
         packageName = "com.tunjid.me.common.sync"
         schemaOutputDirectory = file("build/dbs")
+        deriveSchemaFromMigrations = true
+        verifyMigrations = true
     }
 }

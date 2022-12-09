@@ -89,22 +89,16 @@ internal class OfflineFirstArchiveRepository(
 
     override fun archivesStream(
         query: ArchiveQuery
-    ): Flow<List<Archive>> = when {
-        query.hasContentFilter -> archiveEntityQueries.findBy(
-            kind = query.kind.type,
-            limit = query.limit.toLong(),
-            offset = query.offset.toLong(),
-            tagsOrCategories = query.contentFilter.tags.map(Descriptor.Tag::value)
-                .plus(query.contentFilter.categories.map(Descriptor.Category::value))
-                .distinct()
-        )
-
-        else -> archiveEntityQueries.find(
-            kind = query.kind.type,
-            limit = query.limit.toLong(),
-            offset = query.offset.toLong(),
-        )
-    }
+    ): Flow<List<Archive>> = archiveEntityQueries.find(
+        kind = query.kind.type,
+        desc = query.desc,
+        limit = query.limit.toLong(),
+        offset = query.offset.toLong(),
+        useFilters = query.hasContentFilter,
+        tagsOrCategories = query.contentFilter.tags.map(Descriptor.Tag::value)
+            .plus(query.contentFilter.categories.map(Descriptor.Category::value))
+            .distinct()
+    )
         .asFlow()
         .mapToList(context = dispatcher)
         .flatMapLatest { archiveEntities -> archiveEntitiesToArchives(archiveEntities) }

@@ -1,11 +1,3 @@
-CREATE TABLE IF NOT EXISTS userEntity (
-    id TEXT PRIMARY KEY,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    full_name TEXT NOT NULL,
-    image_url TEXT NOT NULL
-);
-
 find:
 SELECT *
 FROM userEntity

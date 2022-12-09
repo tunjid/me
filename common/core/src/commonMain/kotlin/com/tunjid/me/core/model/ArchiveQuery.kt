@@ -28,10 +28,12 @@ import kotlinx.serialization.encoding.Encoder
 const val DefaultQueryLimit = 6
 
 @Serializable
-data class ArchiveQuery(
+data class
+ArchiveQuery(
     val kind: ArchiveKind,
     val temporalFilter: ArchiveTemporalFilter? = null,
     val contentFilter: ArchiveContentFilter = ArchiveContentFilter(),
+    val desc: Boolean = true,
     val offset: Int = 0,
     val limit: Int = DefaultQueryLimit
 )
