@@ -39,7 +39,8 @@ import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.tiler.TiledList
-import com.tunjid.tiler.tiledList
+import com.tunjid.tiler.queryAtOrNull
+import com.tunjid.tiler.tiledListOf
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -196,7 +197,7 @@ private fun EndlessScroll(
         snapshotFlow {
             val visibleItems = gridState.layoutInfo.visibleItemsInfo
             val firstItemInfo = visibleItems.firstOrNull()
-            firstItemInfo?.index?.let(items::queryFor)
+            firstItemInfo?.index?.let(items::queryAtOrNull)
         }
             .filterNotNull()
             .distinctUntilChanged()
@@ -251,7 +252,7 @@ private fun PreviewLoadingState() {
             queryState = QueryState(
                 currentQuery = ArchiveQuery(kind = ArchiveKind.Articles),
             ),
-            items = tiledList(
+            items = tiledListOf(
                 ArchiveQuery(kind = ArchiveKind.Articles) to
                     ArchiveItem.Loading(isCircular = true)
             )

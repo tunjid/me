@@ -20,7 +20,7 @@ import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.filterTransform
-import com.tunjid.tiler.tiledList
+import com.tunjid.tiler.tiledListOf
 
 data class FetchResult(
     val action: Action.Fetch.Load,
@@ -33,7 +33,7 @@ fun FetchResult.itemsWithHeaders(
 ): TiledList<ArchiveQuery, ArchiveItem> = when {
     hasNoResults -> when (action) {
         // Fetch action is reset, show a loading spinner
-        is Action.Fetch.Reset -> tiledList(
+        is Action.Fetch.Reset -> tiledListOf(
             action.query to ArchiveItem.Loading(isCircular = true)
         )
         // The mutator was just resubscribed to, show existing items
@@ -49,7 +49,7 @@ private val FetchResult.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
         var year = -1
         queriedArchives.forEachIndexed { index, item ->
             if (item is ArchiveItem.Result) {
-                val query = queriedArchives.queryFor(index)
+                val query = queriedArchives.queryAt(index)
                 val dateTime = item.dateTime
                 if (month != dateTime.monthNumber || year != dateTime.year) {
                     month = dateTime.monthNumber

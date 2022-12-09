@@ -132,7 +132,7 @@ typealias GlobalUiStateHolder = ActionStateProducer<Mutation<UiState>, StateFlow
 
 #### Paging as state
 
-Pagination is implemented as a function of the current page and grid size:
+Pagination is implemented as a function of the current page and number of columns in the grid:
 
 ```
 [out of bounds]                    -> Evict from memory

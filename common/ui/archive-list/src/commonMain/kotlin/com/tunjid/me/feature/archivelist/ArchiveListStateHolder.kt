@@ -37,8 +37,7 @@ import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
-import com.tunjid.tiler.buildTiledList
-import com.tunjid.tiler.tiledList
+import com.tunjid.tiler.tiledListOf
 import com.tunjid.tiler.toTiledList
 import com.tunjid.tiler.utilities.pivotWith
 import com.tunjid.tiler.utilities.toTileInputs
@@ -69,7 +68,7 @@ class ActualArchiveListStateHolder(
     route: ArchiveListRoute,
 ) : ArchiveListStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
-        items = tiledList(
+        items = tiledListOf(
             ArchiveQuery(kind = route.kind) to ArchiveItem.Loading(isCircular = true)
         ),
         queryState = QueryState(
