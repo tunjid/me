@@ -47,9 +47,15 @@ import kotlinx.coroutines.delay
 internal fun BoxScope.AppSnackBar(
     globalUiStateHolder: GlobalUiStateHolder,
 ) {
-    val queue by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::snackbarMessages)
-    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::snackbarPositionalState)
-    val messageConsumer by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::snackbarMessageConsumer)
+    val queue by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = UiState::snackbarMessages
+    )
+    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = UiState::snackbarPositionalState
+    )
+    val messageConsumer by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = UiState::snackbarMessageConsumer
+    )
 
     var canShow by remember { mutableStateOf(true) }
     var snackbarHeight by remember { mutableStateOf(0) }
