@@ -54,7 +54,10 @@ internal fun pivotRequest(gridSize: Int) = PivotRequest(
     offCount = 1 * gridSize,
     nextQuery = nextArchiveQuery,
     previousQuery = previousArchiveQuery,
+    comparator = archiveQueryComparator,
 )
+
+private val archiveQueryComparator = compareBy(ArchiveQuery::offset)
 
 private val nextArchiveQuery: ArchiveQuery.() -> ArchiveQuery? = {
     copy(offset = offset + limit)
