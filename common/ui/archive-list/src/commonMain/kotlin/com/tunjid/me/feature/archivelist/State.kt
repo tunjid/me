@@ -44,18 +44,20 @@ data class State(
 val ArchiveItem.stickyHeader: ArchiveItem.Header?
     get() = when (this) {
         is ArchiveItem.Header -> this
-        is ArchiveItem.Result -> ArchiveItem.Header(
-            text = headerText,
-//            query = query
-        )
-
+        is ArchiveItem.Result -> ArchiveItem.Header(text = headerText)
         else -> null
     }
 
 sealed class Action(val key: String) {
     sealed class Fetch : Action(key = "Fetch") {
 
-        data class LoadAround(val query: ArchiveQuery) : Fetch()
+        sealed interface QueriedFetch {
+            val query: ArchiveQuery
+        }
+
+        data class QueryChange(override val query: ArchiveQuery) : Fetch(), QueriedFetch
+
+        data class LoadAround(override val query: ArchiveQuery) : Fetch(), QueriedFetch
 
         data class NoColumnsChanged(val noColumns: Int) : Fetch()
     }

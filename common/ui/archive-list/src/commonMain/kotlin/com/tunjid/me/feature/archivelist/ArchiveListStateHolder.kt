@@ -204,12 +204,15 @@ private fun Flow<Action.Fetch>.fetchMutations(
     scope: CoroutineScope,
     repo: ArchiveRepository
 ): Flow<Mutation<State>> {
-    val loads = filterIsInstance<Action.Fetch.LoadAround>()
+    val queries = filterIsInstance<Action.Fetch.QueriedFetch>()
+        .scan(null, ArchiveQuery?::amendQuery)
+        .filterNotNull()
         .distinctUntilChanged()
         .shareIn(
             scope = scope,
             started = SharingStarted.WhileSubscribed()
         )
+
     val columnChanges = filterIsInstance<Action.Fetch.NoColumnsChanged>()
         .distinctUntilChanged()
         .shareIn(
@@ -217,54 +220,72 @@ private fun Flow<Action.Fetch>.fetchMutations(
             started = SharingStarted.WhileSubscribed()
         )
 
-    val queries = loads
-        .map { it.query }
-        .distinctUntilChanged()
-
     val archivesAvailable = queries
         .flatMapLatest(repo::count)
 
-    val pivotRequests = columnChanges
-        .map { it.noColumns }
-        .map(::pivotRequest)
-        .distinctUntilChanged()
+    val pivotInputs = queries.pivotWith(
+        columnChanges
+            .map { it.noColumns }
+            .map(::pivotRequest)
+            .distinctUntilChanged()
+    )
+        .toTileInputs<ArchiveQuery, ArchiveItem>()
 
-    val limiters = loads
-        .distinctUntilChangedBy { it.query }
+    val limitInputs = queries
         .combine(columnChanges, ::Pair)
-        .map { (load, columnChange) ->
+        .map { (query, columnChange) ->
             Tile.Limiter<ArchiveQuery, ArchiveItem> { items ->
-                items.size > 4 * columnChange.noColumns * load.query.limit
+                items.size > 4 * columnChange.noColumns * query.limit
             }
         }
 
-    return combine(
-        flow = loads,
-        flow2 = archivesAvailable,
-        flow3 = merge(
-            queries.pivotWith(pivotRequests).toTileInputs(),
-            limiters
-        )
-            .toTiledList(
-                repo.archiveTiler(
-                    kind = ArchiveKind.Articles,
-                    limiter = Tile.Limiter { items -> items.size > 100 }
-                )
+    val archiveItems = merge(
+        pivotInputs,
+        limitInputs
+    )
+        .toTiledList(
+            repo.archiveTiler(
+                limiter = Tile.Limiter { items -> items.size > 100 }
             )
-            // Allow database queries to settle
-            .debounce(timeoutMillis = 250),
+        )
+        // Allow database queries to settle
+        .debounce(timeoutMillis = 250)
+
+    return combine(
+        flow = queries,
+        flow2 = archivesAvailable,
+        flow3 = archiveItems,
         transform = ::FetchResult
     )
         .map { fetchResult: FetchResult ->
             mutation {
-                val items = fetchResult.itemsWithHeaders(default = this.items)
                 copy(
-                    items = items,
+                    items = fetchResult.itemsWithHeaders(default = this.items),
                     queryState = queryState.copy(
-                        currentQuery = fetchResult.action.query,
+                        currentQuery = fetchResult.query,
                         count = fetchResult.archivesAvailable,
                     )
                 )
             }
         }
 }
+
+private fun ArchiveQuery?.amendQuery(
+    queriedFetch: Action.Fetch.QueriedFetch
+) = when (this) {
+    null -> queriedFetch.query
+    else -> when (queriedFetch) {
+        is Action.Fetch.QueryChange -> queriedFetch.query
+        is Action.Fetch.LoadAround -> when {
+            queriedFetch.query.hasTheSameFilter(this) -> queriedFetch.query
+            else -> this
+        }
+    }
+}
+
+private fun ArchiveQuery.hasTheSameFilter(other: ArchiveQuery) =
+    kind == other.kind &&
+        desc == other.desc &&
+        temporalFilter == other.temporalFilter &&
+        contentFilter.tags.toSet() == other.contentFilter.tags.toSet() &&
+        contentFilter.categories.toSet() == other.contentFilter.categories.toSet()

@@ -119,7 +119,7 @@ private fun ArchiveScreen(
                                 item = item,
                                 onCategoryClicked = { category ->
                                     mutator.accept(
-                                        Action.Fetch.LoadAround(
+                                        Action.Fetch.QueryChange(
                                             query = state.queryState.currentQuery.copy(offset = 0) + category,
                                         )
                                     )

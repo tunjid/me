@@ -63,7 +63,7 @@ fun GlobalUi(
             toolbarMenuClickListener = rememberFunction(queryState) { item ->
                 when (item.id) {
                     SORT_ORDER -> onAction(
-                        Action.Fetch.LoadAround(
+                        Action.Fetch.QueryChange(
                             query = query.copy(
                                 desc = !query.desc,
                                 offset = (queryState.count - query.offset).toInt()

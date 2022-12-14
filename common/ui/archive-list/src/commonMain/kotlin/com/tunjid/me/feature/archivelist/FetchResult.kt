@@ -22,7 +22,7 @@ import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.filterTransform
 
 data class FetchResult(
-    val action: Action.Fetch.LoadAround,
+    val query: ArchiveQuery,
     val archivesAvailable: Long,
     val queriedArchives: TiledList<ArchiveQuery, ArchiveItem>
 )
