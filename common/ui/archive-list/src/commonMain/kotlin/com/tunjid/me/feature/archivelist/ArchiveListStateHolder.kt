@@ -204,7 +204,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
     scope: CoroutineScope,
     repo: ArchiveRepository
 ): Flow<Mutation<State>> {
-    val loads = filterIsInstance<Action.Fetch.Load>()
+    val loads = filterIsInstance<Action.Fetch.LoadAround>()
         .distinctUntilChanged()
         .shareIn(
             scope = scope,
@@ -257,17 +257,12 @@ private fun Flow<Action.Fetch>.fetchMutations(
     )
         .map { fetchResult: FetchResult ->
             mutation {
-                val fetchAction = fetchResult.action
                 val items = fetchResult.itemsWithHeaders(default = this.items)
                 copy(
                     items = items,
                     queryState = queryState.copy(
                         currentQuery = fetchResult.action.query,
                         count = fetchResult.archivesAvailable,
-                        expanded = when (fetchAction) {
-                            is Action.Fetch.Reset -> false
-                            else -> queryState.expanded
-                        }
                     )
                 )
             }

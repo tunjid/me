@@ -55,13 +55,7 @@ val ArchiveItem.stickyHeader: ArchiveItem.Header?
 sealed class Action(val key: String) {
     sealed class Fetch : Action(key = "Fetch") {
 
-        sealed interface Load {
-            val query: ArchiveQuery
-        }
-
-        data class Reset(override val query: ArchiveQuery) : Fetch(), Load
-
-        data class LoadAround(override val query: ArchiveQuery) : Fetch(), Load
+        data class LoadAround(val query: ArchiveQuery) : Fetch()
 
         data class NoColumnsChanged(val noColumns: Int) : Fetch()
     }

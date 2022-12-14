@@ -20,10 +20,9 @@ import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.filterTransform
-import com.tunjid.tiler.tiledListOf
 
 data class FetchResult(
-    val action: Action.Fetch.Load,
+    val action: Action.Fetch.LoadAround,
     val archivesAvailable: Long,
     val queriedArchives: TiledList<ArchiveQuery, ArchiveItem>
 )
@@ -31,15 +30,8 @@ data class FetchResult(
 fun FetchResult.itemsWithHeaders(
     default: TiledList<ArchiveQuery, ArchiveItem>
 ): TiledList<ArchiveQuery, ArchiveItem> = when {
-    hasNoResults -> when (action) {
-        // Fetch action is reset, show a loading spinner
-        is Action.Fetch.Reset -> tiledListOf(
-            action.query to ArchiveItem.Loading(isCircular = true)
-        )
-        // The mutator was just resubscribed to, show existing items
-        else -> default
-    }
-
+    // The mutator was just resubscribed to, show existing items
+    hasNoResults -> default
     else -> itemsWithHeaders
 }
 

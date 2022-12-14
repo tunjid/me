@@ -153,7 +153,7 @@ private fun onChipFilterChanged(
 ): (ChipAction) -> Unit = {
     when (it) {
         ChipAction.Added -> onChanged(
-            Action.Fetch.Reset(
+            Action.Fetch.LoadAround(
                 query = state.currentQuery + reader(state),
             )
         )
@@ -165,7 +165,7 @@ private fun onChipFilterChanged(
         )
 
         is ChipAction.Removed -> onChanged(
-            Action.Fetch.Reset(
+            Action.Fetch.LoadAround(
                 query = state.currentQuery - writer(it.text),
             )
         )
