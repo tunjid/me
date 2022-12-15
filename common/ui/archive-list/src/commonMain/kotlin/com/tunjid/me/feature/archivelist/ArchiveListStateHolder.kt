@@ -39,8 +39,7 @@ import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.tiledListOf
 import com.tunjid.tiler.toTiledList
-import com.tunjid.tiler.utilities.pivotWith
-import com.tunjid.tiler.utilities.toTileInputs
+import com.tunjid.tiler.utilities.toPivotedTileInputs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
@@ -88,6 +87,7 @@ class ActualArchiveListStateHolder(
             when (val action = type()) {
                 is Action.Fetch -> action.flow.fetchMutations(
                     scope = scope,
+                    kind = route.kind,
                     repo = archiveRepository
                 )
 
@@ -202,6 +202,7 @@ private fun Flow<Action.LastVisibleKey>.resetScrollMutations(): Flow<Mutation<St
  */
 private fun Flow<Action.Fetch>.fetchMutations(
     scope: CoroutineScope,
+    kind: ArchiveKind,
     repo: ArchiveRepository
 ): Flow<Mutation<State>> {
     val queries = filterIsInstance<Action.Fetch.QueriedFetch>()
@@ -223,13 +224,12 @@ private fun Flow<Action.Fetch>.fetchMutations(
     val archivesAvailable = queries
         .flatMapLatest(repo::count)
 
-    val pivotInputs = queries.pivotWith(
+    val pivotInputs = queries.toPivotedTileInputs<ArchiveQuery, ArchiveItem>(
         columnChanges
             .map { it.noColumns }
             .map(::pivotRequest)
             .distinctUntilChanged()
     )
-        .toTileInputs<ArchiveQuery, ArchiveItem>()
 
     val limitInputs = queries
         .combine(columnChanges, ::Pair)
@@ -245,6 +245,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
     )
         .toTiledList(
             repo.archiveTiler(
+                kind = kind,
                 limiter = Tile.Limiter { items -> items.size > 100 }
             )
         )
