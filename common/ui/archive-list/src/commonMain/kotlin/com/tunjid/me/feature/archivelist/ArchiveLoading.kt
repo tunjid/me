@@ -16,7 +16,6 @@
 
 package com.tunjid.me.feature.archivelist
 
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.tiler.ListTiler
@@ -28,13 +27,11 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 internal fun ArchiveRepository.archiveTiler(
-    kind: ArchiveKind,
     limiter: Tile.Limiter<ArchiveQuery, ArchiveItem>
 ): ListTiler<ArchiveQuery, ArchiveItem> =
     listTiler(
         limiter = limiter,
-        order = Tile.Order.PivotSorted(
-            query = ArchiveQuery(kind = kind),
+        order = Tile.Order.Sorted(
             comparator = archiveQueryComparator,
         ),
         fetcher = { query ->

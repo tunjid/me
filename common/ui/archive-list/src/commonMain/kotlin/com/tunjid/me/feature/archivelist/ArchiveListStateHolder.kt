@@ -87,7 +87,6 @@ class ActualArchiveListStateHolder(
             when (val action = type()) {
                 is Action.Fetch -> action.flow.fetchMutations(
                     scope = scope,
-                    kind = route.kind,
                     repo = archiveRepository
                 )
 
@@ -202,7 +201,6 @@ private fun Flow<Action.LastVisibleKey>.resetScrollMutations(): Flow<Mutation<St
  */
 private fun Flow<Action.Fetch>.fetchMutations(
     scope: CoroutineScope,
-    kind: ArchiveKind,
     repo: ArchiveRepository
 ): Flow<Mutation<State>> {
     val queries = filterIsInstance<Action.Fetch.QueriedFetch>()
@@ -245,7 +243,6 @@ private fun Flow<Action.Fetch>.fetchMutations(
     )
         .toTiledList(
             repo.archiveTiler(
-                kind = kind,
                 limiter = Tile.Limiter { items -> items.size > 100 }
             )
         )
