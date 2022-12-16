@@ -25,6 +25,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.core.utilities.mapState
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.StateProducer
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import kotlinx.coroutines.CoroutineScope
@@ -80,3 +81,11 @@ class ActualLifecycleStateHolder(
     initialState = Lifecycle(),
     actionTransform = { it }
 )
+
+@Composable
+fun <State> StateProducer<StateFlow<State>>.uiState(): androidx.compose.runtime.State<State> {
+    val stateFlow = remember {
+        state
+    }
+    return stateFlow.collectAsStateWithLifecycle()
+}

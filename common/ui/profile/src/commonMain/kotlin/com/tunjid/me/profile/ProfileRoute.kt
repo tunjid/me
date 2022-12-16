@@ -41,6 +41,7 @@ import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
+import com.tunjid.me.scaffold.lifecycle.uiState
 import com.tunjid.me.scaffold.nav.AppRoute
 import kotlinx.serialization.Serializable
 
@@ -58,7 +59,7 @@ data class ProfileRoute(
 
 @Composable
 private fun ProfileScreen(mutator: ProfileStateHolder) {
-    val state by mutator.state.collectAsStateWithLifecycle()
+    val state by mutator.uiState()
     val scrollState = rememberScrollState()
 
     ScreenUiState(

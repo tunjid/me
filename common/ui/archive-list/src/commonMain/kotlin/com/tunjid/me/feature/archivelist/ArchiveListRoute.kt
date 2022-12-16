@@ -35,7 +35,7 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
+import com.tunjid.me.scaffold.lifecycle.uiState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.tiler.TiledList
@@ -66,7 +66,7 @@ data class ArchiveListRoute(
 private fun ArchiveScreen(
     mutator: ArchiveListStateHolder,
 ) {
-    val state by mutator.state.collectAsStateWithLifecycle()
+    val state by mutator.uiState()
 
     GlobalUi(
         state = state,

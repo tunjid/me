@@ -38,6 +38,7 @@ import com.tunjid.me.core.ui.Thumbnail
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
+import com.tunjid.me.scaffold.lifecycle.uiState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
 import kotlinx.serialization.Serializable
@@ -58,7 +59,7 @@ data class ArchiveEditRoute(
 
 @Composable
 private fun ArchiveEditScreen(mutator: ArchiveEditStateHolder) {
-    val state by mutator.state.collectAsStateWithLifecycle()
+    val state by mutator.uiState()
     val upsert = state.upsert
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
