@@ -55,14 +55,14 @@ data class ProfileRoute(
     @Composable
     override fun Render() {
         ProfileScreen(
-            mutator = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
+            stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }
 
 @Composable
-private fun ProfileScreen(mutator: ProfileStateHolder) {
-    val screenUiState by mutator.toActionableState()
+private fun ProfileScreen(stateHolder: ProfileStateHolder) {
+    val screenUiState by stateHolder.toActionableState()
     val (state, actions) = screenUiState
     val scrollState = rememberScrollState()
 

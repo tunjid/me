@@ -40,14 +40,14 @@ data class SignInRoute(
     @Composable
     override fun Render() {
         SignInScreen(
-            mutator = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
+            stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }
 
 @Composable
-private fun SignInScreen(mutator: SignInStateHolder) {
-    val screenUiState by mutator.toActionableState()
+private fun SignInScreen(stateHolder: SignInStateHolder) {
+    val screenUiState by stateHolder.toActionableState()
     val (state, actions) = screenUiState
     val scrollState = rememberScrollState()
 

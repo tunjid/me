@@ -20,7 +20,7 @@ import com.tunjid.mutator.ActionStateProducer
 import kotlinx.coroutines.flow.StateFlow
 
 interface PermissionsProvider {
-    val mutator: PermissionsStateHolder
+    val stateHolder: PermissionsStateHolder
 }
 
 typealias PermissionsStateHolder = ActionStateProducer<Permission, StateFlow<Permissions>>

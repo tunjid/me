@@ -62,7 +62,7 @@ data class ArchiveDetailRoute(
     @Composable
     override fun Render() {
         ArchiveDetailScreen(
-            mutator = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
+            stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 
@@ -70,8 +70,8 @@ data class ArchiveDetailRoute(
 }
 
 @Composable
-private fun ArchiveDetailScreen(mutator: ArchiveDetailStateHolder) {
-    val screenUiState by mutator.toActionableState()
+private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
+    val screenUiState by stateHolder.toActionableState()
     val (state, actions) = screenUiState
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }

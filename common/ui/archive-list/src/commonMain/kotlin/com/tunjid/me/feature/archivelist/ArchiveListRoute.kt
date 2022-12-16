@@ -25,7 +25,12 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -57,16 +62,16 @@ data class ArchiveListRoute(
     @Composable
     override fun Render() {
         ArchiveScreen(
-            mutator = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
+            stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }
 
 @Composable
 private fun ArchiveScreen(
-    mutator: ArchiveListStateHolder,
+    stateHolder: ArchiveListStateHolder,
 ) {
-    val screenUiState by mutator.toActionableState()
+    val screenUiState by stateHolder.toActionableState()
     val (state, actions) = screenUiState
 
     GlobalUi(
@@ -219,7 +224,7 @@ private fun EndlessScroll(
 @Composable
 private fun PreviewLoadingState() {
     ArchiveScreen(
-        mutator = State(
+        stateHolder = State(
             queryState = QueryState(
                 currentQuery = ArchiveQuery(kind = ArchiveKind.Articles),
             ),

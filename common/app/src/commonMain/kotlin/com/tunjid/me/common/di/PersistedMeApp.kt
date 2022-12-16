@@ -98,7 +98,7 @@ class PersistedMeApp(
                 )
                 ScopeHolder(
                     scope = routeScope,
-                    mutator = when (route) {
+                    stateHolder = when (route) {
                         is Route404 -> Route404
                         else -> allScreenStateHolders
                             .getValue(route::class.simpleName!!)
@@ -127,7 +127,7 @@ class PersistedMeApp(
         routeStates = flatten(order = Order.BreadthFirst)
             .filterIsInstance<AppRoute>()
             .fold(mutableMapOf()) { map, route ->
-                val mutator = screenStateHolderCache.screenStateHolderFor<Any>(route)
+                val stateHolder = screenStateHolderCache.screenStateHolderFor<Any>(route)
                 val state = (mutator as? ActionStateProducer<*, *>)?.state ?: return@fold map
                 val serializable = (state as? StateFlow<*>)?.value ?: return@fold map
                 if (serializable is ByteSerializable) map[route.id] =
@@ -138,5 +138,5 @@ class PersistedMeApp(
 
 private data class ScopeHolder(
     val scope: CoroutineScope,
-    val mutator: Any
+    val stateHolder: Any
 )

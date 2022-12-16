@@ -62,14 +62,14 @@ data class ArchiveEditRoute(
     @Composable
     override fun Render() {
         ArchiveEditScreen(
-            mutator = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
+            stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }
 
 @Composable
-private fun ArchiveEditScreen(mutator: ArchiveEditStateHolder) {
-    val screenUiState by mutator.toActionableState()
+private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
+    val screenUiState by stateHolder.toActionableState()
     val (state, actions) = screenUiState
     val upsert = state.upsert
     val scrollState = rememberScrollState()

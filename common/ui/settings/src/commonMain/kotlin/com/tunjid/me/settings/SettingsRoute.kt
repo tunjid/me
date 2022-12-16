@@ -47,14 +47,14 @@ data class SettingsRoute(
     @Composable
     override fun Render() {
         SettingsScreen(
-            mutator = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
+            stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }
 
 @Composable
-private fun SettingsScreen(mutator: SettingsStateHolder) {
-    val screenUiState by mutator.toActionableState()
+private fun SettingsScreen(stateHolder: SettingsStateHolder) {
+    val screenUiState by stateHolder.toActionableState()
     val (state, actions) = screenUiState
     val scrollState = rememberScrollState()
 

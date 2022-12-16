@@ -22,7 +22,7 @@ import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
  * Assumes the Desktop has implicit permission to read files
  */
 actual class PlatformPermissionsProvider : PermissionsProvider {
-    override val mutator: PermissionsStateHolder =
+    override val stateHolder: PermissionsStateHolder =
         MapPermissions(
             permissionsMap = mapOf(
                 Permission.ReadExternalStorage to true
