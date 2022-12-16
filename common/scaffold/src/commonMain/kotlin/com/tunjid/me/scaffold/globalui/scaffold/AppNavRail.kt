@@ -46,13 +46,17 @@ import com.tunjid.me.scaffold.nav.*
 fun AppNavRail(
     globalUiStateHolder: GlobalUiStateHolder,
     navStateHolder: NavStateHolder,
-    saveableStateHolder: SaveableStateHolder,
+    content: @Composable () -> Unit,
 ) {
-    val navState by navStateHolder.state.collectAsState()
-    val containerState by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::routeContainerState)
+    val containerState by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = UiState::routeContainerState
+    )
+    val navRailVisible by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = UiState::navRailVisible
+    )
 
+    val navItems by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.mainNav.navItems }
     val hasRailRoute by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.navRail != null }
-    val navRailVisible by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::navRailVisible)
 
     val statusBarSize = with(LocalDensity.current) {
         containerState.statusBarSize.toDp()
@@ -81,17 +85,14 @@ fun AppNavRail(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
-                navState.mainNav.navItems.forEach { navItem ->
+                navItems.forEach { navItem ->
                     NavRailItem(item = navItem, navStateHolder = navStateHolder)
                 }
             }
             Box(
                 modifier = Modifier.width(navRailContentWidth)
             ) {
-                val route by navStateHolder.state.mappedCollectAsState(mapper = NavState::navRail)
-                saveableStateHolder.SaveableStateProvider(key = "nav-rail-${route?.id}") {
-                    if (navRailVisible) route?.Render()
-                }
+                content()
             }
         }
     }

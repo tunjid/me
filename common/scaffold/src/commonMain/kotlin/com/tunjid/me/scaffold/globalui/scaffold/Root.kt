@@ -19,15 +19,12 @@ package com.tunjid.me.scaffold.globalui.scaffold
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
-import com.tunjid.me.core.utilities.mappedCollectAsState
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
-import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.*
 
 /**
@@ -42,10 +39,34 @@ fun Scaffold(
     CompositionLocalProvider(
         LocalGlobalUiStateHolder provides globalUiStateHolder,
     ) {
-        val saveableStateHolder = rememberSaveableStateHolder()
+        val moveableNavFlow = remember {
+            navStateHolder.moveableNav()
+        }
+        val moveableNav by moveableNavFlow.collectAsState(MoveableNav())
 
-        val route by navStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = NavState::current)
-        val renderedRoute = route as? AppRoute ?: Route404
+        val slotOneRoute by remember(moveableNav) {
+            derivedStateOf { moveableNav.slotOneAndRoute.route }
+        }
+        val slotTwoRoute: AppRoute by remember(moveableNav) {
+            derivedStateOf { moveableNav.slotTwoAndRoute.route }
+        }
+        val mainSlot: SwapSlot? by remember(moveableNav) {
+            derivedStateOf { moveableNav.mainSlot }
+        }
+        val navSlot: SwapSlot? by remember(moveableNav) {
+            derivedStateOf { moveableNav.navSlot }
+        }
+
+        val saveableStateHolder: SaveableStateHolder = rememberSaveableStateHolder()
+
+        val slotOneContent = rememberMoveableNav(
+            saveableStateHolder = saveableStateHolder,
+            route = slotOneRoute
+        )
+        val slotTwoContent = rememberMoveableNav(
+            saveableStateHolder = saveableStateHolder,
+            route = slotTwoRoute
+        )
 
         Box(
             modifier = modifier.fillMaxSize()
@@ -53,24 +74,29 @@ fun Scaffold(
             AppNavRail(
                 globalUiStateHolder = globalUiStateHolder,
                 navStateHolder = navStateHolder,
-                saveableStateHolder = saveableStateHolder,
+                content = {
+                    when (navSlot) {
+                        SwapSlot.One -> slotOneContent()
+                        SwapSlot.Two -> slotTwoContent()
+                        else -> Unit
+                    }
+                },
             )
             AppToolbar(
                 globalUiStateHolder = globalUiStateHolder,
                 navStateHolder = navStateHolder,
             )
-            saveableStateHolder.SaveableStateProvider(renderedRoute.id) {
-                AppRouteContainer(
-                    globalUiStateHolder = globalUiStateHolder,
-                    navStateHolder = navStateHolder,
-                    content = {
-                        Crossfade(
-                            targetState = renderedRoute,
-                            content = { it.Render() }
-                        )
+            AppRouteContainer(
+                globalUiStateHolder = globalUiStateHolder,
+                navStateHolder = navStateHolder,
+                content = {
+                    when (mainSlot) {
+                        SwapSlot.One -> slotOneContent()
+                        SwapSlot.Two -> slotTwoContent()
+                        else -> Unit
                     }
-                )
-            }
+                }
+            )
             AppFab(
                 globalUiStateHolder = globalUiStateHolder,
             )
@@ -81,6 +107,25 @@ fun Scaffold(
             AppSnackBar(
                 globalUiStateHolder = globalUiStateHolder,
             )
+        }
+    }
+}
+
+@Composable
+private fun rememberMoveableNav(
+    saveableStateHolder: SaveableStateHolder,
+    route: AppRoute
+): @Composable () -> Unit {
+    return remember(route) {
+        movableContentOf {
+            saveableStateHolder.SaveableStateProvider(route.id) {
+                Crossfade(
+                    targetState = route,
+                    content = { fadedRoute ->
+                        fadedRoute.Render()
+                    }
+                )
+            }
         }
     }
 }
