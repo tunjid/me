@@ -23,15 +23,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.me.scaffold.lifecycle.uiState
+import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
 import kotlinx.serialization.Serializable
 
@@ -49,12 +47,13 @@ data class SignInRoute(
 
 @Composable
 private fun SignInScreen(mutator: SignInStateHolder) {
-    val state by mutator.uiState()
+    val screenUiState by mutator.toActionableState()
+    val (state, actions) = screenUiState
     val scrollState = rememberScrollState()
 
     GlobalUi(
         state = state,
-        onAction = mutator.accept
+        onAction = actions
     )
 
     Column(
@@ -70,7 +69,7 @@ private fun SignInScreen(mutator: SignInStateHolder) {
                     .fillMaxWidth(0.6f),
                 field = field,
                 onValueChange = {
-                    mutator.accept(Action.FieldChanged(field = field.copy(value = it)))
+                    actions(Action.FieldChanged(field = field.copy(value = it)))
                 }
             )
         }

@@ -16,20 +16,20 @@
 
 package com.tunjid.me.scaffold.lifecycle
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.*
 import com.tunjid.me.core.utilities.mapState
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.StateProducer
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -60,7 +60,12 @@ fun <T, R> StateFlow<T>.mappedCollectAsStateWithLifecycle(
     val lifecycle = LocalLifecycleStateHolder.current.state
     val scope = rememberCoroutineScope()
     val lifecycleBoundState = remember { mapState(scope = scope, mapper = mapper).monitorWhenActive(lifecycle) }
-    return lifecycleBoundState.collectAsState(context = context, initial = mapper(this.value))
+    val initial = remember { mapper(value) }
+
+    return lifecycleBoundState.collectAsState(
+        context = context,
+        initial = initial
+    )
 }
 
 @Composable
@@ -68,9 +73,12 @@ fun <T> StateFlow<T>.collectAsStateWithLifecycle(
     context: CoroutineContext = kotlin.coroutines.EmptyCoroutineContext,
 ): State<T> {
     val lifecycle = LocalLifecycleStateHolder.current.state
-    val scope = rememberCoroutineScope()
-    val lifecycleBoundState = remember { this.monitorWhenActive(lifecycle) }
-    return collectAsState(context = context)
+    val lifecycleBoundState = remember { monitorWhenActive(lifecycle) }
+    val initial = remember { value }
+    return lifecycleBoundState.collectAsState(
+        context = context,
+        initial = initial
+    )
 }
 
 @Inject
@@ -82,10 +90,32 @@ class ActualLifecycleStateHolder(
     actionTransform = { it }
 )
 
+/**
+ * [State] that can be mutated by [Action]
+ */
+data class ActionableState<Action : Any, State : Any>(
+    val state: State,
+    val actions: (Action) -> Unit
+)
+
 @Composable
-fun <State> StateProducer<StateFlow<State>>.uiState(): androidx.compose.runtime.State<State> {
+fun <Action : Any, State : Any> ActionStateProducer<Action, StateFlow<State>>.toActionableState(
+
+): androidx.compose.runtime.State<ActionableState<Action, State>> {
     val stateFlow = remember {
         state
     }
-    return stateFlow.collectAsStateWithLifecycle()
+    val actions = remember {
+        accept
+    }
+    val state by stateFlow.collectAsStateWithLifecycle()
+    val actionableState = remember(state) {
+        derivedStateOf {
+            ActionableState(
+                state = state,
+                actions = actions
+            )
+        }
+    }
+    return actionableState
 }

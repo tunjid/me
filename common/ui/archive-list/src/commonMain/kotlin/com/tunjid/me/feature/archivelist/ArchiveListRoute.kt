@@ -35,7 +35,7 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.scaffold.lifecycle.uiState
+import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.tiler.TiledList
@@ -66,11 +66,12 @@ data class ArchiveListRoute(
 private fun ArchiveScreen(
     mutator: ArchiveListStateHolder,
 ) {
-    val state by mutator.uiState()
+    val screenUiState by mutator.toActionableState()
+    val (state, actions) = screenUiState
 
     GlobalUi(
         state = state,
-        onAction = mutator.accept
+        onAction = actions
     )
 
     val gridState = rememberLazyGridState()
@@ -87,7 +88,7 @@ private fun ArchiveScreen(
         Spacer(modifier = Modifier.height(16.dp))
         ArchiveFilters(
             item = state.queryState,
-            onChanged = mutator.accept
+            onChanged = actions
         )
         Spacer(modifier = Modifier.height(16.dp))
         StickyHeaderGrid(
@@ -106,7 +107,7 @@ private fun ArchiveScreen(
                         items = state.items,
                         key = { it.key },
                         span = { item ->
-                            mutator.accept(Action.Fetch.NoColumnsChanged(maxLineSpan))
+                            actions(Action.Fetch.NoColumnsChanged(maxLineSpan))
                             when (item) {
                                 is ArchiveItem.Result -> GridItemSpan(1)
                                 is ArchiveItem.Header,
@@ -118,14 +119,14 @@ private fun ArchiveScreen(
                                 modifier = Modifier.animateItemPlacement(),
                                 item = item,
                                 onCategoryClicked = { category ->
-                                    mutator.accept(
+                                    actions(
                                         Action.Fetch.QueryChange(
                                             query = state.queryState.currentQuery.copy(offset = 0) + category,
                                         )
                                     )
                                 },
                                 navigate = { path ->
-                                    mutator.accept(Action.Navigate {
+                                    actions(Action.Navigate {
                                         if (state.isInNavRail) mainNav.swap(route = path.toRoute)
                                         else mainNav.push(route = path.toRoute)
                                     })
@@ -140,7 +141,7 @@ private fun ArchiveScreen(
 
     // Initial load
     LaunchedEffect(true) {
-        mutator.accept(
+        actions(
             Action.Fetch.LoadAround(
                 query = state.queryState.currentQuery,
             )
@@ -150,7 +151,7 @@ private fun ArchiveScreen(
     EndlessScroll(
         items = state.items,
         gridState = gridState,
-        onAction = mutator.accept
+        onAction = actions
     )
 }
 

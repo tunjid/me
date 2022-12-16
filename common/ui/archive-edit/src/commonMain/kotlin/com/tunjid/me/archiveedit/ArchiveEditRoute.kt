@@ -18,11 +18,22 @@ package com.tunjid.me.archiveedit
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
@@ -37,8 +48,7 @@ import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.ui.Thumbnail
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.me.scaffold.lifecycle.uiState
+import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
 import kotlinx.serialization.Serializable
@@ -59,14 +69,15 @@ data class ArchiveEditRoute(
 
 @Composable
 private fun ArchiveEditScreen(mutator: ArchiveEditStateHolder) {
-    val state by mutator.uiState()
+    val screenUiState by mutator.toActionableState()
+    val (state, actions) = screenUiState
     val upsert = state.upsert
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
 
     GlobalUi(
         state = state,
-        onAction = mutator.accept
+        onAction = actions
     )
     Column(
         modifier = Modifier
@@ -77,14 +88,14 @@ private fun ArchiveEditScreen(mutator: ArchiveEditStateHolder) {
                         true -> Action.Drag.Window(inside = true) to true
                         false -> Action.RequestPermission(Permission.ReadExternalStorage) to false
                     }
-                    mutator.accept(action)
+                    actions(action)
                     acceptedDrag
                 },
-                onDragEntered = { mutator.accept(Action.Drag.Window(inside = true)) },
-                onDragExited = { mutator.accept(Action.Drag.Window(inside = false)) },
-                onDragEnded = { mutator.accept(Action.Drag.Window(inside = false)) },
+                onDragEntered = { actions(Action.Drag.Window(inside = true)) },
+                onDragExited = { actions(Action.Drag.Window(inside = false)) },
+                onDragEnded = { actions(Action.Drag.Window(inside = false)) },
                 onDropped = { _, _ ->
-                    mutator.accept(Action.Drag.Window(inside = false))
+                    actions(Action.Drag.Window(inside = false))
                     false
                 }
             ),
@@ -94,39 +105,39 @@ private fun ArchiveEditScreen(mutator: ArchiveEditStateHolder) {
             thumbnail = state.thumbnail,
             hasStoragePermission = state.hasStoragePermissions,
             dragStatus = state.dragStatus,
-            onAction = mutator.accept
+            onAction = actions
         )
 
         Spacer(modifier = Modifier.padding(8.dp))
         TitleEditor(
             title = upsert.title,
-            onEdit = mutator.accept
+            onEdit = actions
         )
 
         Spacer(modifier = Modifier.padding(8.dp))
         DescriptionEditor(
             description = upsert.description,
-            onEdit = mutator.accept
+            onEdit = actions
         )
 
         Spacer(modifier = Modifier.padding(8.dp))
         VideoUrlEditor(
             videoUrl = upsert.videoUrl,
-            onEdit = mutator.accept
+            onEdit = actions
         )
 
         Spacer(modifier = Modifier.padding(8.dp))
         ChipsEditor(
             upsert = upsert,
             chipsState = state.chipsState,
-            onAction = mutator.accept
+            onAction = actions
         )
 
         Spacer(modifier = Modifier.padding(16.dp))
         when (state.isEditing) {
             true -> BodyEditor(
                 body = upsert.body,
-                onEdit = mutator.accept
+                onEdit = actions
             )
 
             false -> BodyPreview(
