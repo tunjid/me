@@ -152,9 +152,6 @@ private fun ArchiveScreen(
         gridState = gridState,
         onAction = mutator.accept
     )
-
-    // Keep list in sync between navbar and fullscreen views
-    ListSync(state, gridState)
 }
 
 @Composable
@@ -215,33 +212,6 @@ private fun EndlessScroll(
             .map(Action::LastVisibleKey)
             .collect(onAction)
     }
-}
-
-@Composable
-private fun ListSync(
-    state: State,
-    gridState: LazyGridState
-) {
-//    var hasRun by remember { mutableStateOf(false) }
-//    LaunchedEffect(state.items) {
-//        if (hasRun || state.items.isEmpty()) return@LaunchedEffect
-//
-//        val key = state.lastVisibleKey ?: return@LaunchedEffect
-//        // Item is on screen do nothing
-//        if (gridState.layoutInfo.visibleItemsInfo.any { it.key == key }) {
-//            hasRun = true
-//            return@LaunchedEffect
-//        }
-//
-//        val indexOfKey = state.items.indexOfFirst { it.key == key }
-//        if (indexOfKey < 0) return@LaunchedEffect
-//
-//        gridState.scrollToItem(
-//            index = min(indexOfKey + 1, gridState.layoutInfo.totalItemsCount - 1),
-//            scrollOffset = 400
-//        )
-//        hasRun = true
-//    }
 }
 
 //@Preview
