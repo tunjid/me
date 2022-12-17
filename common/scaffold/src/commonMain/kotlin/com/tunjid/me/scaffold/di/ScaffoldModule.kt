@@ -126,12 +126,12 @@ abstract class InjectedScaffoldComponent(
     @SingletonScope
     @Provides
     fun permissionsStateStream(
-    ): StateFlow<Permissions> = module.permissionsProvider.mutator.state
+    ): StateFlow<Permissions> = module.permissionsProvider.stateHolder.state
 
     @SingletonScope
     @Provides
     fun permissionsActions(
-    ): (Permission) -> Unit = module.permissionsProvider.mutator.accept
+    ): (Permission) -> Unit = module.permissionsProvider.stateHolder.accept
 
     @SingletonScope
     @Provides

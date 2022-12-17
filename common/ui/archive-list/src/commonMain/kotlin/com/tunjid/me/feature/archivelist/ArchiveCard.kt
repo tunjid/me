@@ -108,13 +108,13 @@ fun ArchiveCard(
                 )
                 Spacer(Modifier.height(8.dp))
                 ArchiveDate(archiveItem.prettyDate)
+                Spacer(Modifier.height(8.dp))
+                ArchiveBlurb(archiveItem = archiveItem)
                 Spacer(Modifier.height(4.dp))
                 ArchiveCategories(
                     categories = archiveItem.archive.categories,
                     onCategoryClicked = onCategoryClicked
                 )
-                Spacer(Modifier.height(8.dp))
-                ArchiveBlurb(archiveItem = archiveItem)
                 Spacer(Modifier.height(24.dp))
                 ArchiveCardFooter(
                     authorImageUrl = archiveItem.archive.author.imageUrl,

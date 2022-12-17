@@ -107,7 +107,7 @@ class PersistedMeApp(
 
                 )
 
-            }.mutator as T
+            }.stateHolder as T
     }
 
     private fun MultiStackNav.toSavedState(
@@ -128,7 +128,7 @@ class PersistedMeApp(
             .filterIsInstance<AppRoute>()
             .fold(mutableMapOf()) { map, route ->
                 val stateHolder = screenStateHolderCache.screenStateHolderFor<Any>(route)
-                val state = (mutator as? ActionStateProducer<*, *>)?.state ?: return@fold map
+                val state = (stateHolder as? ActionStateProducer<*, *>)?.state ?: return@fold map
                 val serializable = (state as? StateFlow<*>)?.value ?: return@fold map
                 if (serializable is ByteSerializable) map[route.id] =
                     byteSerializer.toBytes(serializable)
