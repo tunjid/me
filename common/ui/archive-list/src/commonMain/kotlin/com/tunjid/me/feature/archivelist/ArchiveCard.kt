@@ -109,9 +109,9 @@ fun ArchiveCard(
                 Spacer(Modifier.height(8.dp))
                 ArchiveDate(archiveItem.prettyDate)
                 Spacer(Modifier.height(8.dp))
-                ArchiveBlurb(archiveItem = archiveItem)
-                Spacer(Modifier.height(4.dp))
-                ArchiveCategories(
+                ArchiveDetails(
+                    title = archiveItem.archive.title,
+                    description = archiveItem.archive.description,
                     categories = archiveItem.archive.categories,
                     onCategoryClicked = onCategoryClicked
                 )
@@ -125,6 +125,24 @@ fun ArchiveCard(
                 Spacer(Modifier.height(8.dp))
             }
         }
+    )
+}
+
+@Composable
+private fun ArchiveDetails(
+    title: String,
+    description: String,
+    categories: List<Descriptor.Category>,
+    onCategoryClicked: (Descriptor.Category) -> Unit
+) {
+    ArchiveBlurb(
+        title = title,
+        description = description,
+    )
+    Spacer(Modifier.height(4.dp))
+    ArchiveCategories(
+        categories = categories,
+        onCategoryClicked = onCategoryClicked
     )
 }
 
@@ -153,17 +171,20 @@ private fun ArchiveCategories(
 }
 
 @Composable
-private fun ArchiveBlurb(archiveItem: ArchiveItem.Result) {
+private fun ArchiveBlurb(
+    title: String,
+    description: String
+) {
     Column(
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
         Text(
-            text = archiveItem.archive.title,
+            text = title,
             fontSize = 18.sp,
         )
         Spacer(modifier = Modifier.padding(vertical = 8.dp))
         Text(
-            text = archiveItem.archive.description,
+            text = description,
             fontSize = 15.sp,
         )
     }
