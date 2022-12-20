@@ -19,6 +19,7 @@ package com.tunjid.me.core.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
@@ -28,12 +29,17 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.skia.Bitmap
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 
 @Composable
 actual fun RemoteImagePainter(imageUri: String?): Painter? {
+    val cache = LocalBitmapCache.current
+    val cachedPainter = imageUri?.let(cache::get)?.let(::BitmapPainter)
+    if (cachedPainter != null) return cachedPainter
+
     val image: ImageBitmap? by produceState<ImageBitmap?>(
         initialValue = null,
         key1 = imageUri,
@@ -54,7 +60,10 @@ actual fun RemoteImagePainter(imageUri: String?): Painter? {
         }
     }
 
-    return image?.let { BitmapPainter(it) }
+    return image?.let {
+        if (imageUri != null) cache[imageUri] = it
+        BitmapPainter(it)
+    }
 }
 
 private suspend fun String.remoteInputStream() = HttpClient().use {
@@ -66,3 +75,7 @@ private fun String.fileInputStream() = File(this).inputStream()
 private fun InputStream.toBitMap() =
     buffered()
         .use(::loadImageBitmap)
+
+private val LocalBitmapCache = staticCompositionLocalOf {
+    mutableMapOf<String, ImageBitmap>()
+}
