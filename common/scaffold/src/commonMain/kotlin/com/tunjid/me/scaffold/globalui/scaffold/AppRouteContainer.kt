@@ -19,16 +19,15 @@ package com.tunjid.me.scaffold.globalui.scaffold
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
-import androidx.compose.ui.zIndex
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
@@ -36,29 +35,24 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.NavStateHolder
-import com.tunjid.me.scaffold.nav.SwapSlot
 
 /**
- * Motionally intelligent container for the hosting the main navigation routes
+ * Motionally intelligent container for the hosting the navigation routes
  */
 @Composable
 internal fun AppRouteContainer(
     globalUiStateHolder: GlobalUiStateHolder,
     navStateHolder: NavStateHolder,
-    navSlot: SwapSlot?,
-    mainSlot: SwapSlot?,
-    slotOneRoute: AppRoute,
-    slotTwoRoute: AppRoute,
-    slotOneContent: @Composable () -> Unit,
-    slotTwoContent: @Composable () -> Unit,
+    mainContent: @Composable () -> Unit,
+    navRailContent: @Composable () -> Unit,
 ) {
-    println("1: ${slotOneRoute.id}; 2: ${slotTwoRoute.id}; navSLot: $navSlot; mainSlot: $mainSlot")
-
-    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::routeContainerState)
+    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = UiState::routeContainerState
+    )
 
     val bottomNavHeight = UiSizes.bottomNavSize countIf state.bottomNavVisible
+
     val insetClearance = max(
         a = bottomNavHeight,
         b = with(LocalDensity.current) { state.keyboardSize.toDp() }
@@ -72,102 +66,57 @@ internal fun AppRouteContainer(
     val statusBarSize = with(LocalDensity.current) {
         state.statusBarSize.toDp()
     } countIf state.insetDescriptor.hasTopInset
-    val toolbarHeight = UiSizes.toolbarSize countIf !state.toolbarOverlaps
 
+    val toolbarHeight = UiSizes.toolbarSize countIf !state.toolbarOverlaps
     val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
 
     val hasNavContent by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.navRail != null }
     val navRailVisible = state.navRailVisible
+
     val navRailSize = UiSizes.navRailWidth countIf navRailVisible
 
     val startClearance by animateDpAsState(targetValue = navRailSize)
 
-    Box(
-        modifier = Modifier.padding(
-            start = startClearance,
-            top = topClearance,
-            bottom = bottomClearance
-        ),
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = startClearance,
+                top = topClearance,
+                bottom = bottomClearance
+            ),
         content = {
-            MoveableNavContent(
-                type = SwapSlot.One.type(
-                    hasNavContent = hasNavContent,
-                    mainSlot = mainSlot,
-                    navSlot = navSlot
-                ),
-                content = slotOneContent
+            ResizableRouteContent(
+                width = maxWidth,
+                startPadding = if (hasNavContent) UiSizes.navRailContentWidth else 0.dp,
+                content = mainContent
             )
-            MoveableNavContent(
-                type = SwapSlot.Two.type(
-                    hasNavContent = hasNavContent,
-                    mainSlot = mainSlot,
-                    navSlot = navSlot
-                ),
-                content = slotTwoContent
+            val navWidth by animateDpAsState(targetValue = when {
+                hasNavContent -> UiSizes.navRailContentWidth
+                else -> maxWidth
+            })
+            ResizableRouteContent(
+                width = navWidth,
+                content = navRailContent
             )
         }
     )
 }
 
 @Composable
-private fun MoveableNavContent(
-    type: Type,
+private fun ResizableRouteContent(
+    width: Dp? = null,
+    startPadding: Dp? = null,
     content: @Composable () -> Unit
 ) {
-    BoxWithConstraints(
-        modifier = Modifier
-
-    ) {
-        val width by animateDpAsState(
-            targetValue = when (type) {
-                Type.Main,
-                Type.Detail,
-                Type.None -> maxWidth
-
-                Type.Nav -> UiSizes.navRailContentWidth
-            },
-//            animationSpec = when(type) {
-//                Type.Main -> TODO()
-//                Type.Nav -> TODO()
-//                Type.Detail -> TODO()
-//                Type.None -> TODO()
-//            }
-        )
-        val startPadding = if (type == Type.Detail) UiSizes.navRailContentWidth else 0.dp
-        val zIndex = remember(type) {
-            when (type) {
-                Type.Detail,
-                Type.Main -> 2f
-
-                Type.Nav -> 1f
-                Type.None -> 0f
-            }
+    Box(
+        modifier = when (width) {
+            null -> Modifier.fillMaxWidth()
+            else -> Modifier.width(width)
         }
-
-
-
-        Box(
-            modifier = Modifier
-                .width(width)
-                .padding(start = startPadding)
-                .zIndex(zIndex)
-
-        ) {
-            if (type != Type.None) content()
+            .padding(start = startPadding ?: 0.dp),
+        content = {
+            content()
         }
-    }
-}
-
-private fun SwapSlot.type(
-    hasNavContent: Boolean,
-    mainSlot: SwapSlot?,
-    navSlot: SwapSlot?,
-) = when (this) {
-    mainSlot -> if (hasNavContent) Type.Detail else Type.Main
-    navSlot -> if (hasNavContent) Type.Nav else Type.None
-    else -> Type.None
-}
-
-enum class Type {
-    Main, Nav, Detail, None
+    )
 }

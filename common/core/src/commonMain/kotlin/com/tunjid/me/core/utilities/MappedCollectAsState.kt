@@ -26,20 +26,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlin.coroutines.CoroutineContext
 
-@Composable
-fun <T, R> StateFlow<T>.mappedCollectAsState(
-    context: CoroutineContext = kotlin.coroutines.EmptyCoroutineContext,
-    mapper: (T) -> R
-): State<R> {
-    val scope = rememberCoroutineScope()
-    return mapState(scope = scope, mapper = mapper).collectAsState(context = context)
-}
-
 infix fun Dp.countIf(condition: Boolean) = if (condition) this else 0.dp
 
-fun <T, R> StateFlow<T>.mapState(
+inline fun <T, R> StateFlow<T>.mapState(
     scope: CoroutineScope,
-    mapper: (T) -> R
+    crossinline mapper: (T) -> R
 ): StateFlow<R> = map { mapper(it) }
     .distinctUntilChanged()
     .stateIn(

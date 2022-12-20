@@ -53,13 +53,16 @@ fun <T> Flow<T>.monitorWhenActive(lifecycleStateFlow: StateFlow<Lifecycle>) =
         }
 
 @Composable
-fun <T, R> StateFlow<T>.mappedCollectAsStateWithLifecycle(
+inline fun <T, R> StateFlow<T>.mappedCollectAsStateWithLifecycle(
     context: CoroutineContext = kotlin.coroutines.EmptyCoroutineContext,
-    mapper: (T) -> R
+    crossinline mapper: @DisallowComposableCalls (T) -> R
 ): State<R> {
     val lifecycle = LocalLifecycleStateHolder.current.state
     val scope = rememberCoroutineScope()
-    val lifecycleBoundState = remember { mapState(scope = scope, mapper = mapper).monitorWhenActive(lifecycle) }
+    val lifecycleBoundState = remember {
+        mapState(scope = scope, mapper = mapper)
+            .monitorWhenActive(lifecycle)
+    }
     val initial = remember { mapper(value) }
 
     return lifecycleBoundState.collectAsState(
@@ -69,7 +72,7 @@ fun <T, R> StateFlow<T>.mappedCollectAsStateWithLifecycle(
 }
 
 @Composable
-fun <T> StateFlow<T>.collectAsStateWithLifecycle(
+inline fun <T> StateFlow<T>.collectAsStateWithLifecycle(
     context: CoroutineContext = kotlin.coroutines.EmptyCoroutineContext,
 ): State<T> {
     val lifecycle = LocalLifecycleStateHolder.current.state
@@ -99,7 +102,7 @@ data class ActionableState<Action : Any, State : Any>(
 )
 
 @Composable
-fun <Action : Any, State : Any> ActionStateProducer<Action, StateFlow<State>>.toActionableState(
+inline fun <Action : Any, State : Any> ActionStateProducer<Action, StateFlow<State>>.toActionableState(
 
 ): androidx.compose.runtime.State<ActionableState<Action, State>> {
     val stateFlow = remember {

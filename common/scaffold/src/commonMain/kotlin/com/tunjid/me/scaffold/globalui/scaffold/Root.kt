@@ -16,7 +16,6 @@
 
 package com.tunjid.me.scaffold.globalui.scaffold
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -53,7 +52,7 @@ fun Scaffold(
         val mainSlot: SwapSlot? by remember(moveableNav) {
             derivedStateOf { moveableNav.mainSlot }
         }
-        val navSlot: SwapSlot? by remember(moveableNav) {
+        val navRailSlot: SwapSlot? by remember(moveableNav) {
             derivedStateOf { moveableNav.navSlot }
         }
 
@@ -67,6 +66,8 @@ fun Scaffold(
             saveableStateHolder = saveableStateHolder,
             route = slotTwoRoute
         )
+        println("1: ${slotOneRoute.id}; 2: ${slotTwoRoute.id}; navSlot: $navRailSlot; mainSlot: $mainSlot")
+
 
         Box(
             modifier = modifier.fillMaxSize()
@@ -82,12 +83,18 @@ fun Scaffold(
             AppRouteContainer(
                 globalUiStateHolder = globalUiStateHolder,
                 navStateHolder = navStateHolder,
-                mainSlot = mainSlot,
-                navSlot = navSlot,
-                slotOneRoute = slotOneRoute,
-                slotTwoRoute = slotTwoRoute,
-                slotOneContent = slotOneContent,
-                slotTwoContent = slotTwoContent,
+                mainContent = {
+                    mainSlot.content(
+                        slotOneContent = slotOneContent,
+                        slotTwoContent = slotTwoContent
+                    )
+                },
+                navRailContent = {
+                    navRailSlot.content(
+                        slotOneContent = slotOneContent,
+                        slotTwoContent = slotTwoContent
+                    )
+                }
             )
             AppFab(
                 globalUiStateHolder = globalUiStateHolder,
@@ -100,6 +107,18 @@ fun Scaffold(
                 globalUiStateHolder = globalUiStateHolder,
             )
         }
+    }
+}
+
+@Composable
+private fun SwapSlot?.content(
+    slotOneContent: @Composable () -> Unit,
+    slotTwoContent: @Composable () -> Unit
+) {
+    when (this) {
+        SwapSlot.One -> slotOneContent()
+        SwapSlot.Two -> slotTwoContent()
+        null -> Unit
     }
 }
 
