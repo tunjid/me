@@ -46,3 +46,24 @@ object Route404 : AppRoute {
         }
     }
 }
+
+@Serializable
+object Route403 : AppRoute {
+    override val id: String
+        get() = "403"
+
+    @Composable
+    override fun Render() {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(),
+                text = "404",
+                fontSize = 40.sp
+            )
+        }
+    }
+}

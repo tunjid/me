@@ -17,12 +17,21 @@
 package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -30,23 +39,24 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.core.utilities.countIf
-import com.tunjid.me.core.utilities.mappedCollectAsState
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.nav.*
+import com.tunjid.me.scaffold.nav.NavItem
+import com.tunjid.me.scaffold.nav.NavStateHolder
+import com.tunjid.me.scaffold.nav.navItemSelected
+import com.tunjid.me.scaffold.nav.navItems
 
 /**
  * Motionally intelligent nav rail shared amongst nav routes in the app
  */
 @Composable
-fun AppNavRail(
+internal fun AppNavRail(
     globalUiStateHolder: GlobalUiStateHolder,
     navStateHolder: NavStateHolder,
-    content: @Composable () -> Unit,
 ) {
     val containerState by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
         mapper = UiState::routeContainerState
@@ -68,10 +78,6 @@ fun AppNavRail(
         targetValue = if (navRailVisible) UiSizes.navRailWidth
         else 0.dp
     )
-    val navRailContentWidth by animateDpAsState(
-        targetValue = if (navRailVisible && hasRailRoute) UiSizes.navRailContentWidth
-        else 0.dp
-    )
 
     Surface(
         modifier = Modifier
@@ -79,20 +85,13 @@ fun AppNavRail(
             .fillMaxHeight(),
         color = MaterialTheme.colors.primary
     ) {
-        Row {
-            Column(
-                modifier = Modifier.width(navRailWidth),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(24.dp))
-                navItems.forEach { navItem ->
-                    NavRailItem(item = navItem, navStateHolder = navStateHolder)
-                }
-            }
-            Box(
-                modifier = Modifier.width(navRailContentWidth)
-            ) {
-                content()
+        Column(
+            modifier = Modifier.width(navRailWidth),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(24.dp))
+            navItems.forEach { navItem ->
+                NavRailItem(item = navItem, navStateHolder = navStateHolder)
             }
         }
     }

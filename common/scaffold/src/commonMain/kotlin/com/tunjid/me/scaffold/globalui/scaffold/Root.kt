@@ -74,13 +74,6 @@ fun Scaffold(
             AppNavRail(
                 globalUiStateHolder = globalUiStateHolder,
                 navStateHolder = navStateHolder,
-                content = {
-                    when (navSlot) {
-                        SwapSlot.One -> slotOneContent()
-                        SwapSlot.Two -> slotTwoContent()
-                        else -> Unit
-                    }
-                },
             )
             AppToolbar(
                 globalUiStateHolder = globalUiStateHolder,
@@ -89,13 +82,12 @@ fun Scaffold(
             AppRouteContainer(
                 globalUiStateHolder = globalUiStateHolder,
                 navStateHolder = navStateHolder,
-                content = {
-                    when (mainSlot) {
-                        SwapSlot.One -> slotOneContent()
-                        SwapSlot.Two -> slotTwoContent()
-                        else -> Unit
-                    }
-                }
+                mainSlot = mainSlot,
+                navSlot = navSlot,
+                slotOneRoute = slotOneRoute,
+                slotTwoRoute = slotTwoRoute,
+                slotOneContent = slotOneContent,
+                slotTwoContent = slotTwoContent,
             )
             AppFab(
                 globalUiStateHolder = globalUiStateHolder,
@@ -119,12 +111,7 @@ private fun rememberMoveableNav(
     return remember(route) {
         movableContentOf {
             saveableStateHolder.SaveableStateProvider(route.id) {
-                Crossfade(
-                    targetState = route,
-                    content = { fadedRoute ->
-                        fadedRoute.Render()
-                    }
-                )
+                route.Render()
             }
         }
     }

@@ -25,7 +25,7 @@ internal data class MoveableNav(
     val mainRouteId: String = Route404.id,
     val navRouteId: String? = null,
     val slotOneAndRoute: SlotAndRoute = SlotAndRoute(slot = SwapSlot.One),
-    val slotTwoAndRoute: SlotAndRoute = SlotAndRoute(slot = SwapSlot.Two)
+    val slotTwoAndRoute: SlotAndRoute = SlotAndRoute(slot = SwapSlot.Two, route = Route403)
 )
 
 internal val MoveableNav.mainSlot
@@ -89,8 +89,9 @@ private class MoveableNavContext(
     var slotTwoAndRoute: SlotAndRoute
 )
 
-private fun MoveableNavContext.moveToFreeSpot(incoming: AppRoute?, outgoing: AppRoute?) =
-    when (incoming) {
+private fun MoveableNavContext.moveToFreeSpot(incoming: AppRoute?, outgoing: AppRoute?) {
+    println("incoming: ${incoming?.id}; outgoing: ${outgoing?.id}")
+    return when (incoming) {
         null -> Unit
         slotOneAndRoute.route -> slotOneAndRoute = slotOneAndRoute.copy(route = incoming)
         slotTwoAndRoute.route -> slotTwoAndRoute = slotTwoAndRoute.copy(route = incoming)
@@ -100,3 +101,4 @@ private fun MoveableNavContext.moveToFreeSpot(incoming: AppRoute?, outgoing: App
             else -> slotOneAndRoute = slotOneAndRoute.copy(route = incoming)
         }
     }
+}
