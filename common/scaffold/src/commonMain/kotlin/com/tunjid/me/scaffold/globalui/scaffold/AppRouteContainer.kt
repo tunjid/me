@@ -91,7 +91,7 @@ internal fun AppRouteContainer(
                 bottom = bottomClearance
             ),
         content = {
-            val hasNarrowWidth = maxWidth < UiSizes.navRailContentWidth * 2
+            val hasNarrowWidth = (maxWidth * 10) < (UiSizes.navRailContentWidth * 15)
             ResizableRouteContent(
                 zIndex = 2f,
                 width = maxWidth,
