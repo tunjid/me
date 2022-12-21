@@ -66,8 +66,6 @@ fun Scaffold(
             saveableStateHolder = saveableStateHolder,
             route = slotTwoRoute
         )
-        println("1: ${slotOneRoute.id}; 2: ${slotTwoRoute.id}; navSlot: $navRailSlot; mainSlot: $mainSlot")
-
 
         Box(
             modifier = modifier.fillMaxSize()

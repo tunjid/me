@@ -93,11 +93,13 @@ private fun UiState.reduceSystemInsets(
         )
 
         navBars.bottom < navBarHeightThreshold -> DelegateStaticSystemUI(
-            statusBarSize = currentStaticSystemUI.statusBarSize,
+            statusBarSize = statusBars.top,
             navBarSize = navBars.bottom
         )
 
-        else -> currentStaticSystemUI
+        else -> currentStaticSystemUI.copy(
+            statusBarSize = statusBars.top,
+        )
     }
 
     val updatedDynamicUI = DelegateDynamicSystemUI(
