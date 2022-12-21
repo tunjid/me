@@ -16,12 +16,16 @@
 
 package com.tunjid.me.scaffold.globalui.scaffold
 
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -88,13 +92,23 @@ internal fun AppRouteContainer(
         content = {
             ResizableRouteContent(
                 width = maxWidth,
-                startPadding = if (hasNavContent) UiSizes.navRailContentWidth else 0.dp,
+                startPadding = when {
+                    maxWidth < UiSizes.navRailContentWidth * 2 -> 0.dp
+                    hasNavContent -> UiSizes.navRailContentWidth
+                    else -> 0.dp
+                },
                 content = mainContent
             )
-            val navWidth by animateDpAsState(targetValue = when {
-                hasNavContent -> UiSizes.navRailContentWidth
-                else -> maxWidth
-            })
+            val navWidth by animateDpAsState(
+                targetValue = when {
+                    maxWidth < UiSizes.navRailContentWidth * 2 -> 0.dp
+                    hasNavContent -> UiSizes.navRailContentWidth
+                    else -> maxWidth
+                },
+                animationSpec = spring(
+                    stiffness = Spring.StiffnessLow
+                )
+            )
             ResizableRouteContent(
                 width = navWidth,
                 content = navRailContent
@@ -114,7 +128,8 @@ private fun ResizableRouteContent(
             null -> Modifier.fillMaxWidth()
             else -> Modifier.width(width)
         }
-            .padding(start = startPadding ?: 0.dp),
+            .padding(start = startPadding ?: 0.dp)
+            .background(color = MaterialTheme.colors.surface),
         content = {
             content()
         }
