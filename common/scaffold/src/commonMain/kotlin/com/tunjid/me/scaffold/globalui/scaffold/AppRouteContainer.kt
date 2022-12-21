@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
+import androidx.compose.ui.zIndex
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
@@ -90,10 +91,12 @@ internal fun AppRouteContainer(
                 bottom = bottomClearance
             ),
         content = {
+            val hasNarrowWidth = maxWidth < UiSizes.navRailContentWidth * 2
             ResizableRouteContent(
+                zIndex = 2f,
                 width = maxWidth,
                 startPadding = when {
-                    maxWidth < UiSizes.navRailContentWidth * 2 -> 0.dp
+                    hasNarrowWidth -> 0.dp
                     hasNavContent -> UiSizes.navRailContentWidth
                     else -> 0.dp
                 },
@@ -101,7 +104,7 @@ internal fun AppRouteContainer(
             )
             val navWidth by animateDpAsState(
                 targetValue = when {
-                    maxWidth < UiSizes.navRailContentWidth * 2 -> 0.dp
+                    hasNarrowWidth -> maxWidth
                     hasNavContent -> UiSizes.navRailContentWidth
                     else -> maxWidth
                 },
@@ -110,6 +113,7 @@ internal fun AppRouteContainer(
                 )
             )
             ResizableRouteContent(
+                zIndex = if (hasNarrowWidth) 1f else 3f,
                 width = navWidth,
                 content = navRailContent
             )
@@ -119,6 +123,7 @@ internal fun AppRouteContainer(
 
 @Composable
 private fun ResizableRouteContent(
+    zIndex: Float,
     width: Dp? = null,
     startPadding: Dp? = null,
     content: @Composable () -> Unit
@@ -128,6 +133,7 @@ private fun ResizableRouteContent(
             null -> Modifier.fillMaxWidth()
             else -> Modifier.width(width)
         }
+            .zIndex(zIndex)
             .padding(start = startPadding ?: 0.dp)
             .background(color = MaterialTheme.colors.surface),
         content = {
