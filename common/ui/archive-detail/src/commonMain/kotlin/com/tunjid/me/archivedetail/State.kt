@@ -22,6 +22,7 @@ import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.nav.NavMutation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.protobuf.ProtoNumber
 
 sealed class Action {
     data class Navigate(val navMutation: NavMutation) : Action()
@@ -29,11 +30,18 @@ sealed class Action {
 
 @Serializable
 data class State(
+    @ProtoNumber(1)
     val hasFetchedAuthStatus: Boolean = false,
+    @ProtoNumber(2)
     val signedInUserId: com.tunjid.me.core.model.UserId? = null,
+    @ProtoNumber(3)
     val navBarSize: Int,
+    @ProtoNumber(4)
     val wasDeleted: Boolean = false,
+    @ProtoNumber(5)
     val kind: ArchiveKind,
+    @ProtoNumber(6)
+    val isMainContent: Boolean = false,
     // Read this from the DB
     @Transient
     val archive: Archive? = null,

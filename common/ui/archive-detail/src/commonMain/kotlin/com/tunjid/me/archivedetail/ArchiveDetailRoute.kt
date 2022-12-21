@@ -79,7 +79,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
     val canEdit = state.canEdit
 
 //    val navigator = LocalNavigator.current
-    ScreenUiState(
+    if (state.isMainContent) ScreenUiState(
         UiState(
             toolbarShows = true,
             toolbarTitle = state.archive?.title ?: "Detail",

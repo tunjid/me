@@ -16,7 +16,6 @@
 
 package com.tunjid.me.feature.archivelist
 
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.utilities.ByteSerializer
@@ -76,7 +75,8 @@ class ActualArchiveListStateHolder(
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
-        navRailStatusMutations(
+        mainNavContentMutations(
+            route = route,
             navStateFlow = navStateFlow,
             uiStateFlow = uiStateFlow
         ),
@@ -115,28 +115,20 @@ internal fun AuthRepository.authMutations(): Flow<Mutation<State>> =
         }
 
 /**
- * Updates [State] with whether it is in the nav rail
+ * Updates [State] with whether it is the main navigation content
  */
-private fun navRailStatusMutations(
+private fun mainNavContentMutations(
+    route: ArchiveListRoute,
     navStateFlow: StateFlow<NavState>,
     uiStateFlow: StateFlow<UiState>,
 ) = combine(
-    navStateFlow.map {
-        val kindMatch = ArchiveKind.values()
-            .map(ArchiveKind::type)
-            .joinToString(separator = "|")
-        val pathMatch = "archive/$kindMatch".toRegex()
-        when (val navRailRoute = it.navRail?.id) {
-            null -> false
-            else -> pathMatch.matches(navRailRoute)
-        }
-    },
+    navStateFlow.map { route.id == it.navRail?.id },
     uiStateFlow.map { it.navRailVisible },
     Boolean::and,
 )
     .distinctUntilChanged()
     .map {
-        mutation<State> { copy(isInNavRail = it) }
+        mutation<State> { copy(isMainContent = !it) }
     }
 
 /**

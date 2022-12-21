@@ -32,7 +32,7 @@ import kotlinx.serialization.protobuf.ProtoNumber
 @Serializable
 data class State(
     val shouldScrollToTop: Boolean = true,
-    val isInNavRail: Boolean = false,
+    val isMainContent: Boolean = false,
     val hasFetchedAuthStatus: Boolean = false,
     val isSignedIn: Boolean = false,
     val queryState: QueryState,

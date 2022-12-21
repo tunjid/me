@@ -74,7 +74,7 @@ private fun ArchiveScreen(
     val screenUiState by stateHolder.toActionableState()
     val (state, actions) = screenUiState
 
-    GlobalUi(
+    if (state.isMainContent) GlobalUi(
         state = state,
         onAction = actions
     )
@@ -132,8 +132,8 @@ private fun ArchiveScreen(
                                 },
                                 navigate = { path ->
                                     actions(Action.Navigate {
-                                        if (state.isInNavRail) mainNav.swap(route = path.toRoute)
-                                        else mainNav.push(route = path.toRoute)
+                                        if (state.isMainContent) mainNav.push(route = path.toRoute)
+                                        else mainNav.swap(route = path.toRoute)
                                     })
                                 }
                             )

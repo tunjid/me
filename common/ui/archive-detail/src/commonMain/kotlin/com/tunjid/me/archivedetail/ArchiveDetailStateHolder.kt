@@ -29,7 +29,9 @@ import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
+import com.tunjid.me.scaffold.globalui.navRailVisible
 import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
@@ -40,6 +42,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
@@ -56,6 +60,7 @@ class ActualArchiveDetailStateHolder(
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
     uiStateFlow: StateFlow<UiState>,
+    navStateFlow: StateFlow<NavState>,
     navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
@@ -72,7 +77,12 @@ class ActualArchiveDetailStateHolder(
         archiveRepository.archiveLoadMutations(
             kind = route.kind,
             id = route.archiveId
-        )
+        ),
+        mainNavContentMutations(
+            route = route,
+            navStateFlow = navStateFlow,
+            uiStateFlow = uiStateFlow
+        ),
     ),
     actionTransform = { actions ->
         actions.toMutationStream {
@@ -110,4 +120,21 @@ private fun ArchiveRepository.archiveLoadMutations(
                 archive = fetchedArchive
             )
         }
+    }
+
+/**
+ * Updates [State] with whether it is the main navigation content
+ */
+private fun mainNavContentMutations(
+    route: ArchiveDetailRoute,
+    navStateFlow: StateFlow<NavState>,
+    uiStateFlow: StateFlow<UiState>,
+) = combine(
+    navStateFlow.map { route.id == it.navRail?.id },
+    uiStateFlow.map { it.navRailVisible },
+    Boolean::and,
+)
+    .distinctUntilChanged()
+    .map {
+        mutation<State> { copy(isMainContent = !it) }
     }
