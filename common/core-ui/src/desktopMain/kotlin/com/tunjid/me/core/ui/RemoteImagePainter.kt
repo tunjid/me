@@ -29,10 +29,11 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jetbrains.skia.Bitmap
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
+import java.net.URI
+
 
 @Composable
 actual fun RemoteImagePainter(imageUri: String?): Painter? {
@@ -44,20 +45,43 @@ actual fun RemoteImagePainter(imageUri: String?): Painter? {
         initialValue = null,
         key1 = imageUri,
     ) {
-        value = withContext(Dispatchers.IO) {
+        val imageSource = withContext(Dispatchers.IO) {
             try {
                 when {
                     imageUri == null -> null
-                    imageUri.startsWith("http") -> imageUri.remoteInputStream()
-                    else -> imageUri.fileInputStream()
-                }?.toBitMap()
+                    imageUri.startsWith("http") -> {
+                        val savedFile = savedImageFile(imageUri)
+                        if (!savedFile.exists()) ImageSource.Remote.Network(
+                            uri = imageUri,
+                            inputStream = imageUri.remoteInputStream()
+                        )
+                        else ImageSource.Remote.Cached(
+                            savedFile.inputStream()
+                        )
+                    }
+
+                    else -> ImageSource.Local(
+                        imageUri.fileInputStream()
+                    )
+                }
             } catch (e: Exception) {
-                // instead of printing to console, you can also write this to log,
-                // or show some error placeholder
 //                e.printStackTrace()
                 null
             }
         }
+
+        val inputStream = if (imageSource is ImageSource.Remote.Network) {
+            val destination = savedImageFile(uri = imageSource.uri)
+            File(destination.parent).mkdirs()
+            imageSource.inputStream.use { input ->
+                destination.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            destination.inputStream()
+        } else imageSource?.inputStream
+
+        value = inputStream?.toBitMap()
     }
 
     return image?.let {
@@ -76,6 +100,33 @@ private fun InputStream.toBitMap() =
     buffered()
         .use(::loadImageBitmap)
 
+private fun savedImageFile(uri: String) =
+    File(
+        System.getProperty("java.io.tmpdir"),
+        URI(uri).path
+    )
+
 private val LocalBitmapCache = staticCompositionLocalOf {
     mutableMapOf<String, ImageBitmap>()
+}
+
+sealed class ImageSource {
+    abstract val inputStream: InputStream
+
+    sealed class Remote : ImageSource() {
+        data class Network(
+            val uri: String,
+            override val inputStream: InputStream
+        ) : Remote()
+
+        data class Cached(
+            override val inputStream: InputStream
+        ) : Remote()
+    }
+
+
+    data class Local(
+        override val inputStream: InputStream
+    ) : ImageSource()
+
 }
