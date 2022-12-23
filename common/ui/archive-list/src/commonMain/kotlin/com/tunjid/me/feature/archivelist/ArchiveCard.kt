@@ -16,23 +16,42 @@
 
 package com.tunjid.me.feature.archivelist
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.core.model.*
+import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind.Articles
+import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.User
+import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.RemoteImagePainter
 import com.tunjid.me.core.ui.Thumbnail
+import com.tunjid.me.scaffold.globalui.scaffold.LocalNavigationAnimator
 import kotlinx.datetime.Clock.System
 
 @Composable
@@ -92,6 +111,17 @@ fun ArchiveCard(
     onArchiveSelected: (Archive) -> Unit,
     onCategoryClicked: (Descriptor.Category) -> Unit,
 ) {
+    var thumbnailWidth by remember { mutableStateOf(0) }
+    val isAnimatingNavRail by LocalNavigationAnimator.current.isAnimatingNavRail
+    val localDensity = LocalDensity.current
+    val thumbnailModifier = remember(isAnimatingNavRail) {
+        if (isAnimatingNavRail) Modifier
+            .width(with(localDensity) { thumbnailWidth.toDp() })
+        else modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { thumbnailWidth = it.size.width }
+    }
+
     Card(
         modifier = modifier
             .padding(16.dp),
@@ -102,9 +132,7 @@ fun ArchiveCard(
             Column {
                 Thumbnail(
                     imageUrl = archiveItem.archive.thumbnail,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
+                    modifier = thumbnailModifier.height(200.dp)
                 )
                 Spacer(Modifier.height(8.dp))
                 ArchiveDate(archiveItem.prettyDate)

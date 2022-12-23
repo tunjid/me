@@ -82,43 +82,59 @@ internal fun AppRouteContainer(
 
     val startClearance by animateDpAsState(targetValue = navRailSize)
 
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = startClearance,
-                top = topClearance,
-                bottom = bottomClearance
-            ),
-        content = {
-            val hasNarrowWidth = maxWidth - UiSizes.navRailContentWidth < 300.dp
-            ResizableRouteContent(
-                zIndex = 2f,
-                width = maxWidth,
-                startPadding = when {
-                    hasNarrowWidth -> 0.dp
-                    hasNavContent -> UiSizes.navRailContentWidth
-                    else -> 0.dp
-                },
-                content = mainContent
-            )
-            val navWidth by animateDpAsState(
-                targetValue = when {
+    val navAnimations = remember {
+        MutableNavAnimations()
+    }
+
+    CompositionLocalProvider(
+        LocalNavigationAnimator provides navAnimations,
+    ) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = startClearance,
+                    top = topClearance,
+                    bottom = bottomClearance
+                ),
+            content = {
+                val hasNarrowWidth = maxWidth - UiSizes.navRailContentWidth < 300.dp
+                val targetNavWidth = when {
                     hasNarrowWidth -> maxWidth
                     hasNavContent -> UiSizes.navRailContentWidth
                     else -> maxWidth
-                },
-                animationSpec = spring(
-                    stiffness = Spring.StiffnessLow
+                }
+
+                ResizableRouteContent(
+                    zIndex = 2f,
+                    width = maxWidth,
+                    startPadding = when {
+                        hasNarrowWidth -> 0.dp
+                        hasNavContent -> UiSizes.navRailContentWidth
+                        else -> 0.dp
+                    },
+                    content = mainContent
                 )
-            )
-            ResizableRouteContent(
-                zIndex = if (hasNarrowWidth) 1f else 3f,
-                width = navWidth,
-                content = navRailContent
-            )
-        }
-    )
+                val navWidth by animateDpAsState(
+                    targetValue = targetNavWidth,
+                    animationSpec = spring(
+                        stiffness = Spring.StiffnessLow
+                    )
+                )
+                ResizableRouteContent(
+                    zIndex = if (hasNarrowWidth) 1f else 3f,
+                    width = navWidth,
+                    content = navRailContent
+                )
+
+                LaunchedEffect(navWidth, hasNavContent) {
+                    val difference = (navWidth - targetNavWidth).let { if (it < 0.dp) it * -1 else it }
+                    val percentage = difference / targetNavWidth
+                    navAnimations.isAnimatingNavRail.value = percentage >= 0.05f
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -140,4 +156,18 @@ private fun ResizableRouteContent(
             content()
         }
     )
+}
+
+val LocalNavigationAnimator = staticCompositionLocalOf<NavAnimations> {
+    MutableNavAnimations().apply {
+        isAnimatingNavRail.value = false
+    }
+}
+
+interface NavAnimations {
+    val isAnimatingNavRail: State<Boolean>
+}
+
+private class MutableNavAnimations : NavAnimations {
+    override var isAnimatingNavRail = mutableStateOf(false)
 }
