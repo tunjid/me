@@ -74,9 +74,7 @@ actual fun RemoteImagePainter(imageUri: String?): Painter? {
             val destination = savedImageFile(uri = imageSource.uri)
             File(destination.parent).mkdirs()
             imageSource.inputStream.use { input ->
-                destination.outputStream().use { output ->
-                    input.copyTo(output)
-                }
+                destination.outputStream().use(input::copyTo)
             }
             destination.inputStream()
         } else imageSource?.inputStream
