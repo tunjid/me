@@ -17,11 +17,23 @@
 package com.tunjid.me.feature.archivelist
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
@@ -61,15 +73,16 @@ fun ArchiveFilters(
                     .defaultMinSize(minHeight = 48.dp)
                     .fillMaxWidth()
                     .clickable { onChanged(Action.ToggleFilter()) },
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    text = "Filters",
+                    text = "Filters:",
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp,
                 )
+                SortButton(onChanged, item)
+                Spacer(modifier = Modifier.weight(1f))
                 DropDownButton(isExpanded, onChanged)
             }
             AnimatedVisibility(visible = isExpanded) {
@@ -83,6 +96,54 @@ fun ArchiveFilters(
             }
         }
     }
+}
+
+@Composable
+private fun SortButton(
+    onChanged: (Action) -> Unit,
+    item: QueryState
+) {
+    val desc = item.currentQuery.desc
+    val rotation by animateFloatAsState(
+        targetValue = if (desc) 0f else 180f
+    )
+    Button(
+        modifier = Modifier
+            .animateContentSize()
+            .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
+        onClick = {
+            onChanged(
+                Action.Fetch.QueryChange(
+                    query = item.currentQuery.copy(
+                        desc = !item.currentQuery.desc,
+                        offset = (item.count - item.currentQuery.offset).toInt()
+                    )
+                )
+            )
+        },
+        shape = RoundedCornerShape(40.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.secondary
+        ),
+        contentPadding = PaddingValues(
+            vertical = 4.dp,
+            horizontal = 8.dp
+        ),
+        content = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Sorted")
+                Icon(
+                    modifier = Modifier
+                        .padding(horizontal = 1.dp)
+                        .rotate(rotation),
+                    imageVector = Filled.ArrowDropDown,
+                    contentDescription = "Arrow"
+                )
+                Text("by date")
+            }
+        })
 }
 
 @Composable
