@@ -30,6 +30,8 @@ sealed class NavMode {
     object NavRail : NavMode()
 }
 
+enum class WindowSizeClass { COMPACT, MEDIUM, EXPANDED }
+
 sealed class NavVisibility {
     object Visible : NavVisibility()
     object Gone : NavVisibility()
@@ -55,6 +57,7 @@ data class UiState(
     val navVisibility: NavVisibility = NavVisibility.Visible,
     val statusBarColor: Int = Color.Transparent.toArgb(),
     val insetFlags: InsetDescriptor = InsetFlags.ALL,
+    val windowSizeClass: WindowSizeClass = WindowSizeClass.COMPACT,
     val isImmersive: Boolean = false,
     val systemUI: SystemUI = NoOpSystemUI,
     val fabClickListener: (Unit) -> Unit = emptyCallback(),
@@ -64,6 +67,12 @@ data class UiState(
 )
 
 private fun <T> emptyCallback(): (T) -> Unit = {}
+
+fun Dp.toWindowSizeClass() = when {
+    this < 600.dp -> WindowSizeClass.COMPACT
+    this < 840.dp -> WindowSizeClass.MEDIUM
+    else -> WindowSizeClass.EXPANDED
+}
 
 val UiState.navBarSize get() = systemUI.static.navBarSize
 

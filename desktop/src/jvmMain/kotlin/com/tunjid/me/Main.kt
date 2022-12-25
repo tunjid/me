@@ -33,7 +33,9 @@ import com.tunjid.me.core.ui.dragdrop.PlatformDropTargetModifier
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.feature.MeApp
 import com.tunjid.me.scaffold.globalui.NavMode
+import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
+import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.mutator.mutation
 import kotlinx.coroutines.flow.distinctUntilChanged
 import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
@@ -74,11 +76,17 @@ fun main() {
 
             val currentWidth = windowState.size.width
             LaunchedEffect(currentWidth) {
-                snapshotFlow { currentWidth < 600.dp }
+                snapshotFlow(currentWidth::toWindowSizeClass)
                     .distinctUntilChanged()
-                    .collect { isInPortrait ->
+                    .collect { windowSizeClass ->
                         app.globalUiStateHolder.accept(mutation {
-                            copy(navMode = if (isInPortrait) NavMode.BottomNav else NavMode.NavRail)
+                            copy(
+                                windowSizeClass = windowSizeClass,
+                                navMode = when (windowSizeClass) {
+                                    WindowSizeClass.COMPACT -> NavMode.BottomNav
+                                    else -> NavMode.NavRail
+                                }
+                            )
                         })
                     }
             }

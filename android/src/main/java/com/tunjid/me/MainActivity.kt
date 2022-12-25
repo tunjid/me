@@ -38,8 +38,10 @@ import com.tunjid.me.core.ui.dragdrop.PlatformDropTargetModifier
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.NavMode
+import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.insetMutations
 import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
+import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
 import com.tunjid.mutator.mutation
 import com.tunjid.treenav.pop
@@ -95,8 +97,6 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-enum class WindowSizeClass { COMPACT, MEDIUM, EXPANDED }
-
 @Composable
 private fun MainActivity.AdaptNavigation(globalUiStateHolder: GlobalUiStateHolder) {
     val configuration = LocalConfiguration.current
@@ -107,11 +107,7 @@ private fun MainActivity.AdaptNavigation(globalUiStateHolder: GlobalUiStateHolde
     val windowDpSize = with(LocalDensity.current) {
         windowMetrics.bounds.toComposeRect().size.toDpSize()
     }
-    val widthWindowSizeClass = when {
-        windowDpSize.width < 600.dp -> WindowSizeClass.COMPACT
-        windowDpSize.width < 840.dp -> WindowSizeClass.MEDIUM
-        else -> WindowSizeClass.EXPANDED
-    }
+    val widthWindowSizeClass = windowDpSize.width.toWindowSizeClass()
 
 //    val heightWindowSizeClass = when {
 //        windowDpSize.height < 480.dp -> WindowSizeClass.COMPACT
@@ -122,6 +118,7 @@ private fun MainActivity.AdaptNavigation(globalUiStateHolder: GlobalUiStateHolde
     LaunchedEffect(widthWindowSizeClass) {
         globalUiStateHolder.accept(mutation {
             copy(
+                windowSizeClass = widthWindowSizeClass,
                 navMode = when (widthWindowSizeClass) {
                     WindowSizeClass.COMPACT -> NavMode.BottomNav
                     WindowSizeClass.MEDIUM -> NavMode.NavRail

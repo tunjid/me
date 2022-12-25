@@ -41,6 +41,7 @@ import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
@@ -61,7 +62,12 @@ internal fun AppRouteContainer(
     val paddingValues = routeContainerPadding(globalUiStateHolder)
     val (startClearance, topClearance, _, bottomClearance) = paddingValues
 
-    val hasNavContent by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.navRail != null }
+    val windowSizeClass by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle {
+        it.windowSizeClass
+    }
+    val hasNavContent by navStateHolder.state.mappedCollectAsStateWithLifecycle {
+        it.navRail != null
+    }
 
     val navAnimations = remember {
         MutableNavAnimations()
@@ -79,7 +85,7 @@ internal fun AppRouteContainer(
                     bottom = bottomClearance
                 ),
             content = {
-                val hasNarrowWidth = maxWidth - UiSizes.navRailContentWidth < 300.dp
+                val hasNarrowWidth = windowSizeClass != WindowSizeClass.EXPANDED
                 val targetNavWidth = when {
                     hasNarrowWidth -> maxWidth
                     hasNavContent -> UiSizes.navRailContentWidth

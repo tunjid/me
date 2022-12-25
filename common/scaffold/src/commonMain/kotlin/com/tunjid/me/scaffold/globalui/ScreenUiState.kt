@@ -50,6 +50,7 @@ fun ScreenUiState(state: UiState) {
             // Preserve things that should not be overwritten
             immutables.copy(
                 navMode = navMode,
+                windowSizeClass = windowSizeClass,
                 systemUI = systemUI,
             )
         })
