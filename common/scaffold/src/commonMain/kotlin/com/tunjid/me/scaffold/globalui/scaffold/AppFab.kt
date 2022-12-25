@@ -50,8 +50,12 @@ import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 internal fun BoxScope.AppFab(
     globalUiStateHolder: GlobalUiStateHolder,
 ) {
-    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::fabState)
-    val clicks by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::fabClickListener)
+    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = UiState::fabState
+    )
+    val clicks by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = UiState::fabClickListener
+    )
     val enabled = state.enabled
     val position by animateDpAsState(
         when {

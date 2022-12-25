@@ -43,16 +43,19 @@ fun Scaffold(
         }
         val moveableNav by moveableNavFlow.collectAsState(MoveableNav())
 
-        val slotOneRoute by remember(moveableNav) {
+        val moveKind by remember {
+            derivedStateOf { moveableNav.moveKind }
+        }
+        val slotOneRoute by remember {
             derivedStateOf { moveableNav.slotOneAndRoute.route }
         }
-        val slotTwoRoute: AppRoute by remember(moveableNav) {
+        val slotTwoRoute: AppRoute by remember {
             derivedStateOf { moveableNav.slotTwoAndRoute.route }
         }
-        val mainSlot: SwapSlot? by remember(moveableNav) {
+        val mainSlot: SwapSlot? by remember {
             derivedStateOf { moveableNav.mainSlot }
         }
-        val navRailSlot: SwapSlot? by remember(moveableNav) {
+        val navRailSlot: SwapSlot? by remember {
             derivedStateOf { moveableNav.navSlot }
         }
 
@@ -81,6 +84,7 @@ fun Scaffold(
             AppRouteContainer(
                 globalUiStateHolder = globalUiStateHolder,
                 navStateHolder = navStateHolder,
+                moveKind = moveKind,
                 mainContent = {
                     mainSlot.content(
                         slotOneContent = slotOneContent,

@@ -17,12 +17,14 @@
 package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.TargetBasedAnimation
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -42,6 +44,7 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
+import com.tunjid.me.scaffold.nav.MoveKind
 import com.tunjid.me.scaffold.nav.NavStateHolder
 
 /**
@@ -51,6 +54,7 @@ import com.tunjid.me.scaffold.nav.NavStateHolder
 internal fun AppRouteContainer(
     globalUiStateHolder: GlobalUiStateHolder,
     navStateHolder: NavStateHolder,
+    moveKind: MoveKind,
     mainContent: @Composable () -> Unit,
     navRailContent: @Composable () -> Unit,
 ) {
@@ -82,9 +86,10 @@ internal fun AppRouteContainer(
                     else -> maxWidth
                 }
 
+                val mainContentWidth by mainContentWidth(moveKind)
                 ResizableRouteContent(
                     zIndex = 2f,
-                    width = maxWidth,
+                    width = mainContentWidth,
                     startPadding = when {
                         hasNarrowWidth -> 0.dp
                         hasNavContent -> UiSizes.navRailContentWidth
@@ -92,12 +97,8 @@ internal fun AppRouteContainer(
                     },
                     content = mainContent
                 )
-                val navWidth by animateDpAsState(
-                    targetValue = targetNavWidth,
-                    animationSpec = spring(
-                        stiffness = Spring.StiffnessLow
-                    )
-                )
+
+                val navWidth by navContentWidth(targetNavWidth)
                 ResizableRouteContent(
                     zIndex = if (hasNarrowWidth) 1f else 3f,
                     width = navWidth,
@@ -113,6 +114,41 @@ internal fun AppRouteContainer(
         )
     }
 }
+
+@Composable
+private fun BoxWithConstraintsScope.mainContentWidth(moveKind: MoveKind): State<Dp> =
+    produceState(
+        initialValue = maxWidth,
+        key1 = moveKind
+    ) {
+        if (moveKind == MoveKind.NavRailToMain) {
+            var width = UiSizes.navRailContentWidth
+            value = width
+
+            val anim = TargetBasedAnimation(
+                animationSpec = navContentSizeSpring(),
+                typeConverter = Dp.VectorConverter,
+                initialValue = width,
+                targetValue = maxWidth
+            )
+
+            var playTime: Long
+            val startTime = withFrameNanos { it }
+
+            while (width < maxWidth) {
+                playTime = withFrameNanos { it } - startTime
+                width = anim.getValueFromNanos(playTime)
+                value = width
+            }
+
+        } else value = maxWidth
+    }
+
+@Composable
+private fun navContentWidth(targetNavWidth: Dp) = animateDpAsState(
+    targetValue = targetNavWidth,
+    animationSpec = navContentSizeSpring()
+)
 
 @Composable
 private fun ResizableRouteContent(
@@ -134,6 +170,10 @@ private fun ResizableRouteContent(
         }
     )
 }
+
+private fun navContentSizeSpring() = spring<Dp>(
+    stiffness = Spring.StiffnessLow
+)
 
 @Composable
 private fun routeContainerPadding(

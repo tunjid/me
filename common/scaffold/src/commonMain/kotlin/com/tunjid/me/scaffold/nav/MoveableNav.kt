@@ -21,9 +21,14 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 
+/**
+ *
+ * Class that allows moving navigation content between composables
+ */
 internal data class MoveableNav(
     val mainRouteId: String = Route404.id,
     val navRouteId: String? = null,
+    val moveKind: MoveKind = MoveKind.None,
     val slotOneAndRoute: SlotAndRoute = SlotAndRoute(slot = SwapSlot.One),
     val slotTwoAndRoute: SlotAndRoute = SlotAndRoute(slot = SwapSlot.Two, route = Route403)
 )
@@ -49,6 +54,10 @@ internal data class SlotAndRoute(
 
 internal enum class SwapSlot {
     One, Two
+}
+
+internal enum class MoveKind {
+    MainToNavRail, NavRailToMain, None
 }
 
 internal fun NavStateHolder.moveableNav(): Flow<MoveableNav> =
@@ -79,6 +88,11 @@ internal fun NavStateHolder.moveableNav(): Flow<MoveableNav> =
             MoveableNav(
                 mainRouteId = mainRoute.id,
                 navRouteId = navRailRoute?.id,
+                moveKind = when {
+                    oldSwap.mainRouteId == navRailRoute?.id -> MoveKind.MainToNavRail
+                    mainRoute.id == oldSwap.navRouteId -> MoveKind.NavRailToMain
+                    else -> MoveKind.None
+                },
                 slotOneAndRoute = moveableNavContext.slotOneAndRoute,
                 slotTwoAndRoute = moveableNavContext.slotTwoAndRoute,
             )
@@ -89,9 +103,8 @@ private class MoveableNavContext(
     var slotTwoAndRoute: SlotAndRoute
 )
 
-private fun MoveableNavContext.moveToFreeSpot(incoming: AppRoute?, outgoing: AppRoute?) {
-    println("incoming: ${incoming?.id}; outgoing: ${outgoing?.id}")
-    return when (incoming) {
+private fun MoveableNavContext.moveToFreeSpot(incoming: AppRoute?, outgoing: AppRoute?) =
+    when (incoming) {
         null -> Unit
         slotOneAndRoute.route -> slotOneAndRoute = slotOneAndRoute.copy(route = incoming)
         slotTwoAndRoute.route -> slotTwoAndRoute = slotTwoAndRoute.copy(route = incoming)
@@ -101,4 +114,3 @@ private fun MoveableNavContext.moveToFreeSpot(incoming: AppRoute?, outgoing: App
             else -> slotOneAndRoute = slotOneAndRoute.copy(route = incoming)
         }
     }
-}
