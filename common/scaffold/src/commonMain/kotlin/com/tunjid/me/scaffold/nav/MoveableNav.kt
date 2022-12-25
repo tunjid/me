@@ -62,13 +62,13 @@ internal enum class MoveKind {
 
 internal fun NavStateHolder.moveableNav(): Flow<MoveableNav> =
     state
-        .map { (it.current as? AppRoute ?: Route404) to it.navRail }
+        .map { it.current to it.navRail }
         .distinctUntilChanged()
         .scan(
             MoveableNav(
-                mainRouteId = (state.value.current as? AppRoute ?: Route404).id,
+                mainRouteId = state.value.current.id,
                 slotOneAndRoute = SlotAndRoute(
-                    route = state.value.current as? AppRoute ?: Route404,
+                    route = state.value.current,
                     slot = SwapSlot.One
                 ),
             )

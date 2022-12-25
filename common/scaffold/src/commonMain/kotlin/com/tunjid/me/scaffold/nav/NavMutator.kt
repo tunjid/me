@@ -74,7 +74,7 @@ val EmptyNavState = NavState(
     navRail = null
 )
 
-val NavState.current get() = mainNav.current
+val NavState.current: AppRoute get() = mainNav.current as? AppRoute ?: Route404
 
 @Inject
 class PersistedNavStateHolder(
