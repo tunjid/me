@@ -22,11 +22,13 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -52,35 +54,10 @@ internal fun AppRouteContainer(
     mainContent: @Composable () -> Unit,
     navRailContent: @Composable () -> Unit,
 ) {
-    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
-        mapper = UiState::routeContainerState
-    )
-
-    val bottomNavHeight = UiSizes.bottomNavSize countIf state.bottomNavVisible
-
-    val insetClearance = max(
-        a = bottomNavHeight,
-        b = with(LocalDensity.current) { state.keyboardSize.toDp() }
-    )
-    val navBarClearance = with(LocalDensity.current) {
-        state.navBarSize.toDp()
-    } countIf state.insetDescriptor.hasBottomInset
-
-    val bottomClearance by animateDpAsState(targetValue = insetClearance + navBarClearance)
-
-    val statusBarSize = with(LocalDensity.current) {
-        state.statusBarSize.toDp()
-    } countIf state.insetDescriptor.hasTopInset
-
-    val toolbarHeight = UiSizes.toolbarSize countIf !state.toolbarOverlaps
-    val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
+    val paddingValues = routeContainerPadding(globalUiStateHolder)
+    val (startClearance, topClearance, _, bottomClearance) = paddingValues
 
     val hasNavContent by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.navRail != null }
-    val navRailVisible = state.navRailVisible
-
-    val navRailSize = UiSizes.navRailWidth countIf navRailVisible
-
-    val startClearance by animateDpAsState(targetValue = navRailSize)
 
     val navAnimations = remember {
         MutableNavAnimations()
@@ -156,6 +133,49 @@ private fun ResizableRouteContent(
             content()
         }
     )
+}
+
+@Composable
+private fun routeContainerPadding(
+    globalUiStateHolder: GlobalUiStateHolder,
+): SnapshotStateList<Dp> {
+    val paddingValues = remember {
+        mutableStateListOf(0.dp, 0.dp, 0.dp, 0.dp)
+    }
+    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = UiState::routeContainerState
+    )
+
+    val bottomNavHeight = UiSizes.bottomNavSize countIf state.bottomNavVisible
+
+    val insetClearance = max(
+        a = bottomNavHeight,
+        b = with(LocalDensity.current) { state.keyboardSize.toDp() }
+    )
+    val navBarClearance = with(LocalDensity.current) {
+        state.navBarSize.toDp()
+    } countIf state.insetDescriptor.hasBottomInset
+
+    val bottomClearance by animateDpAsState(targetValue = insetClearance + navBarClearance)
+
+    val statusBarSize = with(LocalDensity.current) {
+        state.statusBarSize.toDp()
+    } countIf state.insetDescriptor.hasTopInset
+
+    val toolbarHeight = UiSizes.toolbarSize countIf !state.toolbarOverlaps
+    val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
+
+    val navRailVisible = state.navRailVisible
+
+    val navRailSize = UiSizes.navRailWidth countIf navRailVisible
+
+    val startClearance by animateDpAsState(targetValue = navRailSize)
+
+    paddingValues[0] = startClearance
+    paddingValues[1] = topClearance
+    paddingValues[3] = bottomClearance
+
+    return paddingValues
 }
 
 val LocalNavigationAnimator = staticCompositionLocalOf<NavAnimations> {
