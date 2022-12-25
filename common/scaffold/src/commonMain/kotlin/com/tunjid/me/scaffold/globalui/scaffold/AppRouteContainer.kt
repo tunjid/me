@@ -122,13 +122,17 @@ internal fun AppRouteContainer(
 }
 
 @Composable
-private fun BoxWithConstraintsScope.mainContentWidth(moveKind: MoveKind): State<Dp> =
-    produceState(
+private fun BoxWithConstraintsScope.mainContentWidth(moveKind: MoveKind): State<Dp> {
+    var moveComplete by remember(moveKind) {
+        mutableStateOf(false)
+    }
+    return produceState(
         initialValue = maxWidth,
         key1 = maxWidth,
         key2 = moveKind,
+        key3 = moveComplete,
     ) {
-        if (moveKind == MoveKind.NavRailToMain) {
+        if (moveKind == MoveKind.NavRailToMain && !moveComplete) {
             var width = UiSizes.navRailContentWidth
             value = width
 
@@ -147,9 +151,10 @@ private fun BoxWithConstraintsScope.mainContentWidth(moveKind: MoveKind): State<
                 width = anim.getValueFromNanos(playTime)
                 value = width
             }
-
+            moveComplete = true
         } else value = maxWidth
     }
+}
 
 @Composable
 private fun sideContentWidth(targetSideWidth: Dp) = animateDpAsState(
