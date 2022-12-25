@@ -20,13 +20,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -36,20 +30,22 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.ui.ChipEditInfo
 import com.tunjid.me.core.ui.Chips
+import com.tunjid.me.scaffold.nav.FilterList
+import com.tunjid.me.scaffold.nav.Sort
 
 @Composable
 fun ArchiveFilters(
@@ -75,13 +71,19 @@ fun ArchiveFilters(
                     .clickable { onChanged(Action.ToggleFilter()) },
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    text = "Filters:",
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp,
-                )
+                Spacer(modifier = Modifier.width(4.dp))
                 SortButton(onChanged, item)
+                Spacer(modifier = Modifier.width(12.dp))
+                Icon(
+                    modifier = Modifier
+                        .padding(horizontal = 1.dp),
+                    imageVector = Filled.FilterList,
+                    contentDescription = "Filter"
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                DescriptorDetailButton(item.currentQuery.contentFilter.categories)
+                Spacer(modifier = Modifier.width(4.dp))
+                DescriptorDetailButton(item.currentQuery.contentFilter.tags)
                 Spacer(modifier = Modifier.weight(1f))
                 DropDownButton(isExpanded, onChanged)
             }
@@ -123,7 +125,7 @@ private fun SortButton(
         },
         shape = RoundedCornerShape(40.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.secondary
+            backgroundColor = MaterialTheme.colors.primary
         ),
         contentPadding = PaddingValues(
             vertical = 4.dp,
@@ -141,8 +143,46 @@ private fun SortButton(
                     imageVector = Filled.ArrowDropDown,
                     contentDescription = "Arrow"
                 )
-                Text("by date")
+                Text("by")
+                Icon(
+                    modifier = Modifier
+                        .padding(horizontal = 2.dp)
+                        .scale(0.8f),
+                    imageVector = Filled.DateRange,
+                    contentDescription = "Date"
+                )
             }
+        })
+}
+
+@Composable
+private inline fun <reified T : Descriptor> DescriptorDetailButton(
+    descriptors: List<T>
+) {
+    Button(
+        modifier = Modifier
+            .animateContentSize()
+            .lilButton(),
+        onClick = {},
+        shape = RoundedCornerShape(40.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = when (T::class) {
+                Descriptor.Category::class -> MaterialTheme.colors.primaryVariant
+                Descriptor.Tag::class -> MaterialTheme.colors.secondary
+                else -> throw IllegalStateException()
+            }
+        ),
+        contentPadding = PaddingValues(
+            vertical = 4.dp,
+            horizontal = 8.dp
+        ),
+        content = {
+            Text(
+                when (descriptors.size) {
+                    0 -> "None"
+                    else -> "${descriptors.size}"
+                }
+            )
         })
 }
 
@@ -196,7 +236,7 @@ private fun DropDownButton(
     val rotation by animateFloatAsState(if (isExpanded) 0f else -90f)
     Button(
         modifier = Modifier
-            .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
+            .lilButton()
             .rotate(rotation),
         onClick = { onChanged(Action.ToggleFilter()) },
         shape = RoundedCornerShape(40.dp),
@@ -232,3 +272,5 @@ private fun onChipFilterChanged(
         )
     }
 }
+
+private fun Modifier.lilButton() = defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)

@@ -16,6 +16,7 @@
 
 package com.tunjid.me.scaffold.nav
 
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.materialPath
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -138,3 +139,67 @@ val com.tunjid.me.core.model.ArchiveKind.icon: ImageVector
     }
 
 private val iconMap = mutableMapOf<com.tunjid.me.core.model.ArchiveKind, ImageVector>()
+
+public val Icons.Filled.Sort: ImageVector
+    get() {
+        if (_sort != null) {
+            return _sort!!
+        }
+        _sort = materialIcon(name = "Filled.Sort") {
+            materialPath {
+                moveTo(3.0f, 18.0f)
+                horizontalLineToRelative(6.0f)
+                verticalLineToRelative(-2.0f)
+                lineTo(3.0f, 16.0f)
+                verticalLineToRelative(2.0f)
+                close()
+                moveTo(3.0f, 6.0f)
+                verticalLineToRelative(2.0f)
+                horizontalLineToRelative(18.0f)
+                lineTo(21.0f, 6.0f)
+                lineTo(3.0f, 6.0f)
+                close()
+                moveTo(3.0f, 13.0f)
+                horizontalLineToRelative(12.0f)
+                verticalLineToRelative(-2.0f)
+                lineTo(3.0f, 11.0f)
+                verticalLineToRelative(2.0f)
+                close()
+            }
+        }
+        return _sort!!
+    }
+
+private var _sort: ImageVector? = null
+
+public val Icons.Filled.FilterList: ImageVector
+    get() {
+        if (_filterList != null) {
+            return _filterList!!
+        }
+        _filterList = materialIcon(name = "Filled.FilterList") {
+            materialPath {
+                moveTo(10.0f, 18.0f)
+                horizontalLineToRelative(4.0f)
+                verticalLineToRelative(-2.0f)
+                horizontalLineToRelative(-4.0f)
+                verticalLineToRelative(2.0f)
+                close()
+                moveTo(3.0f, 6.0f)
+                verticalLineToRelative(2.0f)
+                horizontalLineToRelative(18.0f)
+                lineTo(21.0f, 6.0f)
+                lineTo(3.0f, 6.0f)
+                close()
+                moveTo(6.0f, 13.0f)
+                horizontalLineToRelative(12.0f)
+                verticalLineToRelative(-2.0f)
+                lineTo(6.0f, 11.0f)
+                verticalLineToRelative(2.0f)
+                close()
+            }
+        }
+        return _filterList!!
+    }
+
+private var _filterList: ImageVector? = null
