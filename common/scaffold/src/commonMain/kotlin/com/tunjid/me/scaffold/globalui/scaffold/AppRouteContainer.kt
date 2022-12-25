@@ -125,7 +125,8 @@ internal fun AppRouteContainer(
 private fun BoxWithConstraintsScope.mainContentWidth(moveKind: MoveKind): State<Dp> =
     produceState(
         initialValue = maxWidth,
-        key1 = moveKind
+        key1 = maxWidth,
+        key2 = moveKind,
     ) {
         if (moveKind == MoveKind.NavRailToMain) {
             var width = UiSizes.navRailContentWidth
