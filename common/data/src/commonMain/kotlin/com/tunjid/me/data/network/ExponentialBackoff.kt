@@ -16,7 +16,6 @@
 
 package com.tunjid.me.data.network
 
-import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.delay
 
 suspend fun <T> exponentialBackoff(
@@ -31,7 +30,7 @@ suspend fun <T> exponentialBackoff(
     repeat(times) {
         try {
             return block()
-        } catch (e: IOException) {
+        } catch (e: Exception) {
         }
         delay(currentDelay)
         currentDelay = (currentDelay * factor).toLong().coerceAtMost(maxDelay)
