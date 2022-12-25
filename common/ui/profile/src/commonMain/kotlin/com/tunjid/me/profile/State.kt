@@ -16,6 +16,7 @@
 
 package com.tunjid.me.profile
 
+import androidx.compose.ui.text.input.VisualTransformation
 import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.core.utilities.ByteSerializable
 import kotlinx.serialization.Serializable
@@ -29,10 +30,12 @@ data class State(
         FormField(
             id = "First Name",
             value = "",
+            transformation = VisualTransformation.None,
         ),
         FormField(
             id = "LastName",
             value = "",
+            transformation = VisualTransformation.None,
         )
     )
 ) : ByteSerializable

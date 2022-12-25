@@ -16,6 +16,8 @@
 
 package com.tunjid.me.signin
 
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import com.tunjid.me.core.model.Message
 import com.tunjid.me.core.model.MessageQueue
 import com.tunjid.me.core.ui.FormField
@@ -31,10 +33,12 @@ data class State(
         FormField(
             id = "username",
             value = "",
+            transformation = VisualTransformation.None,
         ),
         FormField(
             id = "password",
             value = "",
+            transformation = PasswordVisualTransformation()
         )
     ),
     @Transient

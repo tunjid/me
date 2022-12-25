@@ -20,11 +20,13 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.VisualTransformation
 
 @kotlinx.serialization.Serializable
 data class FormField(
     val id: String,
-    val value: String
+    val value: String,
+    val transformation: VisualTransformation,
 )
 
 @Composable
@@ -37,6 +39,7 @@ fun FormField(
         modifier = modifier,
         value = field.value,
         onValueChange = onValueChange,
+        visualTransformation = field.transformation,
         label = { Text(text = field.id) }
     )
 }
