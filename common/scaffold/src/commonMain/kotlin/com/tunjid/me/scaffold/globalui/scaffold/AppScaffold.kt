@@ -47,13 +47,13 @@ fun Scaffold(
             derivedStateOf { moveableNav.moveKind }
         }
         val slotOneRoute by remember {
-            derivedStateOf { moveableNav.slotOneAndRoute.route }
+            derivedStateOf { moveableNav.containerOneAndRoute.route }
         }
         val slotTwoRoute: AppRoute by remember {
-            derivedStateOf { moveableNav.slotTwoAndRoute.route }
+            derivedStateOf { moveableNav.containerTwoAndRoute.route }
         }
         val mainSlot: SwapSlot? by remember {
-            derivedStateOf { moveableNav.mainSlot }
+            derivedStateOf { moveableNav.mainContainer }
         }
         val navRailSlot: SwapSlot? by remember {
             derivedStateOf { moveableNav.navSlot }

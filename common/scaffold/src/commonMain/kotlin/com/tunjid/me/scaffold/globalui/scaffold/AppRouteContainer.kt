@@ -104,7 +104,7 @@ internal fun AppRouteContainer(
                     content = mainContent
                 )
 
-                val navWidth by navContentWidth(targetNavWidth)
+                val navWidth by sideContentWidth(targetNavWidth)
                 ResizableRouteContent(
                     zIndex = if (hasNarrowWidth) 1f else 3f,
                     width = navWidth,
@@ -152,8 +152,8 @@ private fun BoxWithConstraintsScope.mainContentWidth(moveKind: MoveKind): State<
     }
 
 @Composable
-private fun navContentWidth(targetNavWidth: Dp) = animateDpAsState(
-    targetValue = targetNavWidth,
+private fun sideContentWidth(targetSideWidth: Dp) = animateDpAsState(
+    targetValue = targetSideWidth,
     animationSpec = navContentSizeSpring()
 )
 

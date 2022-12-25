@@ -27,27 +27,27 @@ import kotlinx.coroutines.flow.scan
  */
 internal data class MoveableNav(
     val mainRouteId: String = Route404.id,
-    val navRouteId: String? = null,
+    val sideRouteId: String? = null,
     val moveKind: MoveKind = MoveKind.None,
-    val slotOneAndRoute: SlotAndRoute = SlotAndRoute(slot = SwapSlot.One),
-    val slotTwoAndRoute: SlotAndRoute = SlotAndRoute(slot = SwapSlot.Two, route = Route403)
+    val containerOneAndRoute: ContainerAndRoute = ContainerAndRoute(slot = SwapSlot.One),
+    val containerTwoAndRoute: ContainerAndRoute = ContainerAndRoute(slot = SwapSlot.Two, route = Route403)
 )
 
-internal val MoveableNav.mainSlot
+internal val MoveableNav.mainContainer
     get() = when (mainRouteId) {
-        slotOneAndRoute.route.id -> slotOneAndRoute.slot
-        slotTwoAndRoute.route.id -> slotTwoAndRoute.slot
+        containerOneAndRoute.route.id -> containerOneAndRoute.slot
+        containerTwoAndRoute.route.id -> containerTwoAndRoute.slot
         else -> throw IllegalArgumentException()
     }
 
 internal val MoveableNav.navSlot
-    get() = when (navRouteId) {
-        slotOneAndRoute.route.id -> slotOneAndRoute.slot
-        slotTwoAndRoute.route.id -> slotTwoAndRoute.slot
+    get() = when (sideRouteId) {
+        containerOneAndRoute.route.id -> containerOneAndRoute.slot
+        containerTwoAndRoute.route.id -> containerTwoAndRoute.slot
         else -> null
     }
 
-internal data class SlotAndRoute(
+internal data class ContainerAndRoute(
     val route: AppRoute = Route404,
     val slot: SwapSlot,
 )
@@ -67,15 +67,15 @@ internal fun NavStateHolder.moveableNav(): Flow<MoveableNav> =
         .scan(
             MoveableNav(
                 mainRouteId = state.value.current.id,
-                slotOneAndRoute = SlotAndRoute(
+                containerOneAndRoute = ContainerAndRoute(
                     route = state.value.current,
                     slot = SwapSlot.One
                 ),
             )
         ) { oldSwap, (mainRoute, navRailRoute) ->
             val moveableNavContext = MoveableNavContext(
-                slotOneAndRoute = oldSwap.slotOneAndRoute,
-                slotTwoAndRoute = oldSwap.slotTwoAndRoute
+                slotOneAndRoute = oldSwap.containerOneAndRoute,
+                slotTwoAndRoute = oldSwap.containerTwoAndRoute
             )
             moveableNavContext.moveToFreeSpot(
                 incoming = navRailRoute,
@@ -87,20 +87,20 @@ internal fun NavStateHolder.moveableNav(): Flow<MoveableNav> =
             )
             MoveableNav(
                 mainRouteId = mainRoute.id,
-                navRouteId = navRailRoute?.id,
+                sideRouteId = navRailRoute?.id,
                 moveKind = when {
                     oldSwap.mainRouteId == navRailRoute?.id -> MoveKind.MainToNavRail
-                    mainRoute.id == oldSwap.navRouteId -> MoveKind.NavRailToMain
+                    mainRoute.id == oldSwap.sideRouteId -> MoveKind.NavRailToMain
                     else -> MoveKind.None
                 },
-                slotOneAndRoute = moveableNavContext.slotOneAndRoute,
-                slotTwoAndRoute = moveableNavContext.slotTwoAndRoute,
+                containerOneAndRoute = moveableNavContext.slotOneAndRoute,
+                containerTwoAndRoute = moveableNavContext.slotTwoAndRoute,
             )
         }
 
 private class MoveableNavContext(
-    var slotOneAndRoute: SlotAndRoute,
-    var slotTwoAndRoute: SlotAndRoute
+    var slotOneAndRoute: ContainerAndRoute,
+    var slotTwoAndRoute: ContainerAndRoute
 )
 
 private fun MoveableNavContext.moveToFreeSpot(incoming: AppRoute?, outgoing: AppRoute?) =

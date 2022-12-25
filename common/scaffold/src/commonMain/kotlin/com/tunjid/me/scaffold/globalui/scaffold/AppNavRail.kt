@@ -66,7 +66,6 @@ internal fun AppNavRail(
     )
 
     val navItems by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.mainNav.navItems }
-    val hasRailRoute by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.navRail != null }
 
     val statusBarSize = with(LocalDensity.current) {
         containerState.statusBarSize.toDp()
