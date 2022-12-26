@@ -29,30 +29,30 @@ internal data class MoveableNav(
     val mainRouteId: String = Route404.id,
     val sideRouteId: String? = null,
     val moveKind: MoveKind = MoveKind.None,
-    val containerOneAndRoute: ContainerAndRoute = ContainerAndRoute(slot = SwapSlot.One),
-    val containerTwoAndRoute: ContainerAndRoute = ContainerAndRoute(slot = SwapSlot.Two, route = Route403)
+    val containerOneAndRoute: ContainerAndRoute = ContainerAndRoute(container = ContentContainer.One),
+    val containerTwoAndRoute: ContainerAndRoute = ContainerAndRoute(container = ContentContainer.Two, route = Route403)
 )
 
-internal val MoveableNav.mainContainer
+internal val MoveableNav.mainContainer: ContentContainer
     get() = when (mainRouteId) {
-        containerOneAndRoute.route.id -> containerOneAndRoute.slot
-        containerTwoAndRoute.route.id -> containerTwoAndRoute.slot
+        containerOneAndRoute.route.id -> containerOneAndRoute.container
+        containerTwoAndRoute.route.id -> containerTwoAndRoute.container
         else -> throw IllegalArgumentException()
     }
 
-internal val MoveableNav.navSlot
+internal val MoveableNav.sideContainer: ContentContainer?
     get() = when (sideRouteId) {
-        containerOneAndRoute.route.id -> containerOneAndRoute.slot
-        containerTwoAndRoute.route.id -> containerTwoAndRoute.slot
+        containerOneAndRoute.route.id -> containerOneAndRoute.container
+        containerTwoAndRoute.route.id -> containerTwoAndRoute.container
         else -> null
     }
 
 internal data class ContainerAndRoute(
     val route: AppRoute = Route404,
-    val slot: SwapSlot,
+    val container: ContentContainer,
 )
 
-internal enum class SwapSlot {
+internal enum class ContentContainer {
     One, Two
 }
 
@@ -69,7 +69,7 @@ internal fun NavStateHolder.moveableNav(): Flow<MoveableNav> =
                 mainRouteId = state.value.current.id,
                 containerOneAndRoute = ContainerAndRoute(
                     route = state.value.current,
-                    slot = SwapSlot.One
+                    container = ContentContainer.One
                 ),
             )
         ) { oldSwap, (mainRoute, navRailRoute) ->

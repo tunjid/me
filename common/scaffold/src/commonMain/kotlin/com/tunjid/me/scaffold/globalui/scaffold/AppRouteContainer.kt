@@ -57,7 +57,7 @@ internal fun AppRouteContainer(
     navStateHolder: NavStateHolder,
     moveKind: MoveKind,
     mainContent: @Composable () -> Unit,
-    navRailContent: @Composable () -> Unit,
+    supportingContent: @Composable () -> Unit,
 ) {
     val paddingValues = routeContainerPadding(globalUiStateHolder)
     val (startClearance, topClearance, _, bottomClearance) = paddingValues
@@ -86,7 +86,7 @@ internal fun AppRouteContainer(
                 ),
             content = {
                 val hasNarrowWidth = windowSizeClass != WindowSizeClass.EXPANDED
-                val targetNavWidth = when {
+                val targetSupportingContentWidth = when {
                     hasNarrowWidth -> maxWidth
                     hasNavContent -> UiSizes.navRailContentWidth
                     else -> maxWidth
@@ -107,17 +107,19 @@ internal fun AppRouteContainer(
                     content = mainContent
                 )
 
-                val navWidth by sideContentWidth(targetNavWidth)
+                val supportingContentWidth by supportingContentWidth(targetSupportingContentWidth)
                 ResizableRouteContent(
                     zIndex = if (hasNarrowWidth) 1f else 3f,
-                    width = navWidth,
-                    content = navRailContent
+                    width = supportingContentWidth,
+                    content = supportingContent
                 )
 
-                LaunchedEffect(navWidth, hasNavContent) {
-                    val difference = (navWidth - targetNavWidth).let { if (it < 0.dp) it * -1 else it }
-                    val percentage = difference / targetNavWidth
-                    navAnimations.isAnimatingNavRail.value = percentage >= 0.05f
+                LaunchedEffect(supportingContentWidth, hasNavContent) {
+                    val difference = (supportingContentWidth - targetSupportingContentWidth).let {
+                        if (it < 0.dp) it * -1 else it
+                    }
+                    val percentage = difference / targetSupportingContentWidth
+                    navAnimations.isAnimatingSupportingContent.value = percentage >= 0.05f
                 }
             }
         )
@@ -165,7 +167,7 @@ private fun BoxWithConstraintsScope.mainContentWidth(
 }
 
 @Composable
-private fun sideContentWidth(targetSideWidth: Dp) = animateDpAsState(
+private fun supportingContentWidth(targetSideWidth: Dp) = animateDpAsState(
     targetValue = targetSideWidth,
     animationSpec = navContentSizeSpring()
 )
@@ -238,14 +240,14 @@ private fun routeContainerPadding(
 
 val LocalNavigationAnimator = staticCompositionLocalOf<NavAnimations> {
     MutableNavAnimations().apply {
-        isAnimatingNavRail.value = false
+        isAnimatingSupportingContent.value = false
     }
 }
 
 interface NavAnimations {
-    val isAnimatingNavRail: State<Boolean>
+    val isAnimatingSupportingContent: State<Boolean>
 }
 
 private class MutableNavAnimations : NavAnimations {
-    override var isAnimatingNavRail = mutableStateOf(false)
+    override var isAnimatingSupportingContent = mutableStateOf(false)
 }

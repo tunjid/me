@@ -16,9 +16,6 @@
 
 package com.tunjid.me.feature.archivelist
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -112,7 +109,7 @@ fun ArchiveCard(
     onCategoryClicked: (Descriptor.Category) -> Unit,
 ) {
     var thumbnailWidth by remember { mutableStateOf(0) }
-    val isAnimatingNavRail by LocalNavigationAnimator.current.isAnimatingNavRail
+    val isAnimatingNavRail by LocalNavigationAnimator.current.isAnimatingSupportingContent
     val localDensity = LocalDensity.current
     val thumbnailModifier = remember(isAnimatingNavRail) {
         if (isAnimatingNavRail) Modifier

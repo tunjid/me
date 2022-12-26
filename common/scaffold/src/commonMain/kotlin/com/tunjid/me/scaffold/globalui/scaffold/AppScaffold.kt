@@ -52,20 +52,20 @@ fun Scaffold(
         val slotTwoRoute: AppRoute by remember {
             derivedStateOf { moveableNav.containerTwoAndRoute.route }
         }
-        val mainSlot: SwapSlot? by remember {
+        val mainContainer: ContentContainer? by remember {
             derivedStateOf { moveableNav.mainContainer }
         }
-        val navRailSlot: SwapSlot? by remember {
-            derivedStateOf { moveableNav.navSlot }
+        val supportingContainer: ContentContainer? by remember {
+            derivedStateOf { moveableNav.sideContainer }
         }
 
         val saveableStateHolder: SaveableStateHolder = rememberSaveableStateHolder()
 
-        val slotOneContent = rememberMoveableNav(
+        val containerOneContent = rememberContainerContent(
             saveableStateHolder = saveableStateHolder,
             route = slotOneRoute
         )
-        val slotTwoContent = rememberMoveableNav(
+        val containerTwoContent = rememberContainerContent(
             saveableStateHolder = saveableStateHolder,
             route = slotTwoRoute
         )
@@ -86,15 +86,15 @@ fun Scaffold(
                 navStateHolder = navStateHolder,
                 moveKind = moveKind,
                 mainContent = {
-                    mainSlot.content(
-                        slotOneContent = slotOneContent,
-                        slotTwoContent = slotTwoContent
+                    mainContainer.content(
+                        containerOneContent = containerOneContent,
+                        containerTwoContent = containerTwoContent
                     )
                 },
-                navRailContent = {
-                    navRailSlot.content(
-                        slotOneContent = slotOneContent,
-                        slotTwoContent = slotTwoContent
+                supportingContent = {
+                    supportingContainer.content(
+                        containerOneContent = containerOneContent,
+                        containerTwoContent = containerTwoContent
                     )
                 }
             )
@@ -113,19 +113,19 @@ fun Scaffold(
 }
 
 @Composable
-private fun SwapSlot?.content(
-    slotOneContent: @Composable () -> Unit,
-    slotTwoContent: @Composable () -> Unit
+private fun ContentContainer?.content(
+    containerOneContent: @Composable () -> Unit,
+    containerTwoContent: @Composable () -> Unit
 ) {
     when (this) {
-        SwapSlot.One -> slotOneContent()
-        SwapSlot.Two -> slotTwoContent()
+        ContentContainer.One -> containerOneContent()
+        ContentContainer.Two -> containerTwoContent()
         null -> Unit
     }
 }
 
 @Composable
-private fun rememberMoveableNav(
+private fun rememberContainerContent(
     saveableStateHolder: SaveableStateHolder,
     route: AppRoute
 ): @Composable () -> Unit {
