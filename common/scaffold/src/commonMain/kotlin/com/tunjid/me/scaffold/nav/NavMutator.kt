@@ -43,9 +43,9 @@ interface AppRoute : Route {
     fun Render()
 
     /**
-     * Defines what route to show in the nav rail alongside this route
+     * Defines what route to show in the supporting panel alongside this route
      */
-    val navRailRoute: String?
+    val supportingRoute: String?
         get() = null
 }
 
@@ -58,7 +58,7 @@ data class NavItem(
 
 data class NavState(
     val mainNav: MultiStackNav,
-    val navRail: AppRoute?
+    val supportingRoute: AppRoute?
 )
 
 val EmptyNavState = NavState(
@@ -71,10 +71,10 @@ val EmptyNavState = NavState(
             )
         )
     ),
-    navRail = null
+    supportingRoute = null
 )
 
-val NavState.current: AppRoute get() = mainNav.current as? AppRoute ?: Route404
+val NavState.mainRoute: AppRoute get() = mainNav.current as? AppRoute ?: Route404
 
 @Inject
 class PersistedNavStateHolder(
@@ -121,7 +121,7 @@ private fun RouteParser<AppRoute>.parseNavState(
     newMultiStackNav: MultiStackNav
 ) = NavState(
     mainNav = newMultiStackNav,
-    navRail = newMultiStackNav.navRailRoute?.let(this::parse)
+    supportingRoute = newMultiStackNav.navRailRoute?.let(this::parse)
 )
 
 fun RouteParser<AppRoute>.parseMultiStackNav(savedState: SavedState) =

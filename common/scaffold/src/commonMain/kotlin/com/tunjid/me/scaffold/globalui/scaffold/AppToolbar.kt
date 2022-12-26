@@ -225,7 +225,7 @@ fun Test() {
                         )
                     )
                 ),
-                navRail = null
+                supportingRoute = null
             ).asNoOpStateFlowMutator(),
         )
     }

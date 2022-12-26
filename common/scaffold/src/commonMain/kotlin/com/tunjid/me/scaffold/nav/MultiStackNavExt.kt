@@ -44,7 +44,7 @@ val MultiStackNav.navItems
 
 val MultiStackNav.navRailRoute: String?
     get() = when (val current = current) {
-        is AppRoute -> current.navRailRoute
+        is AppRoute -> current.supportingRoute
         else -> null
     }
 

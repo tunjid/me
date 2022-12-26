@@ -66,7 +66,7 @@ data class ArchiveDetailRoute(
         )
     }
 
-    override val navRailRoute get() = "archives/${kind.type}"
+    override val supportingRoute get() = "archives/${kind.type}"
 }
 
 @Composable

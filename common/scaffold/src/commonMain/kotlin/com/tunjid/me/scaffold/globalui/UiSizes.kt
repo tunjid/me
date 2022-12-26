@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 internal object UiSizes {
     val toolbarSize = 56.dp
     val navRailWidth = 72.dp
-    val navRailContentWidth = 400.dp
+    val supportingPanelWidth = 400.dp
     val bottomNavSize = 56.dp
     val snackbarPeek = 56.dp
 }

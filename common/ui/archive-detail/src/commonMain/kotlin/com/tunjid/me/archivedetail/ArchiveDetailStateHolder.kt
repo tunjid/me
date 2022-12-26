@@ -130,7 +130,7 @@ private fun mainNavContentMutations(
     navStateFlow: StateFlow<NavState>,
     uiStateFlow: StateFlow<UiState>,
 ) = combine(
-    navStateFlow.map { route.id == it.navRail?.id },
+    navStateFlow.map { route.id == it.supportingRoute?.id },
     uiStateFlow.map { it.navRailVisible },
     Boolean::and,
 )

@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.scan
  */
 internal data class MoveableNav(
     val mainRouteId: String = Route404.id,
-    val sideRouteId: String? = null,
+    val supportingRouteId: String? = null,
     val moveKind: MoveKind = MoveKind.None,
     val containerOneAndRoute: ContainerAndRoute = ContainerAndRoute(container = ContentContainer.One),
     val containerTwoAndRoute: ContainerAndRoute = ContainerAndRoute(container = ContentContainer.Two, route = Route403)
@@ -40,8 +40,8 @@ internal val MoveableNav.mainContainer: ContentContainer
         else -> throw IllegalArgumentException()
     }
 
-internal val MoveableNav.sideContainer: ContentContainer?
-    get() = when (sideRouteId) {
+internal val MoveableNav.supportingContainer: ContentContainer?
+    get() = when (supportingRouteId) {
         containerOneAndRoute.route.id -> containerOneAndRoute.container
         containerTwoAndRoute.route.id -> containerTwoAndRoute.container
         else -> null
@@ -57,40 +57,40 @@ internal enum class ContentContainer {
 }
 
 internal enum class MoveKind {
-    MainToNavRail, NavRailToMain, None
+    MainToSupporting, SupportingToMain, None
 }
 
 internal fun NavStateHolder.moveableNav(): Flow<MoveableNav> =
     state
-        .map { it.current to it.navRail }
+        .map { it.mainRoute to it.supportingRoute }
         .distinctUntilChanged()
         .scan(
             MoveableNav(
-                mainRouteId = state.value.current.id,
+                mainRouteId = state.value.mainRoute.id,
                 containerOneAndRoute = ContainerAndRoute(
-                    route = state.value.current,
+                    route = state.value.mainRoute,
                     container = ContentContainer.One
                 ),
             )
-        ) { oldSwap, (mainRoute, navRailRoute) ->
+        ) { oldSwap, (mainRoute, supportingRoute) ->
             val moveableNavContext = MoveableNavContext(
                 slotOneAndRoute = oldSwap.containerOneAndRoute,
                 slotTwoAndRoute = oldSwap.containerTwoAndRoute
             )
-            moveableNavContext.moveToFreeSpot(
-                incoming = navRailRoute,
+            moveableNavContext.moveToFreeContainer(
+                incoming = supportingRoute,
                 outgoing = mainRoute,
             )
-            moveableNavContext.moveToFreeSpot(
+            moveableNavContext.moveToFreeContainer(
                 incoming = mainRoute,
-                outgoing = navRailRoute,
+                outgoing = supportingRoute,
             )
             MoveableNav(
                 mainRouteId = mainRoute.id,
-                sideRouteId = navRailRoute?.id,
+                supportingRouteId = supportingRoute?.id,
                 moveKind = when {
-                    oldSwap.mainRouteId == navRailRoute?.id -> MoveKind.MainToNavRail
-                    mainRoute.id == oldSwap.sideRouteId -> MoveKind.NavRailToMain
+                    oldSwap.mainRouteId == supportingRoute?.id -> MoveKind.MainToSupporting
+                    mainRoute.id == oldSwap.supportingRouteId -> MoveKind.SupportingToMain
                     else -> MoveKind.None
                 },
                 containerOneAndRoute = moveableNavContext.slotOneAndRoute,
@@ -103,7 +103,7 @@ private class MoveableNavContext(
     var slotTwoAndRoute: ContainerAndRoute
 )
 
-private fun MoveableNavContext.moveToFreeSpot(incoming: AppRoute?, outgoing: AppRoute?) =
+private fun MoveableNavContext.moveToFreeContainer(incoming: AppRoute?, outgoing: AppRoute?) =
     when (incoming) {
         null -> Unit
         slotOneAndRoute.route -> slotOneAndRoute = slotOneAndRoute.copy(route = incoming)

@@ -56,7 +56,7 @@ fun Scaffold(
             derivedStateOf { moveableNav.mainContainer }
         }
         val supportingContainer: ContentContainer? by remember {
-            derivedStateOf { moveableNav.sideContainer }
+            derivedStateOf { moveableNav.supportingContainer }
         }
 
         val saveableStateHolder: SaveableStateHolder = rememberSaveableStateHolder()

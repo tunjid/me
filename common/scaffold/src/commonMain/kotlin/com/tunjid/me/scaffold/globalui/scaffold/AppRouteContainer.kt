@@ -66,7 +66,7 @@ internal fun AppRouteContainer(
         it.windowSizeClass
     }
     val hasNavContent by navStateHolder.state.mappedCollectAsStateWithLifecycle {
-        it.navRail != null
+        it.supportingRoute != null
     }
 
     val navAnimations = remember {
@@ -88,7 +88,7 @@ internal fun AppRouteContainer(
                 val hasNarrowWidth = windowSizeClass != WindowSizeClass.EXPANDED
                 val targetSupportingContentWidth = when {
                     hasNarrowWidth -> maxWidth
-                    hasNavContent -> UiSizes.navRailContentWidth
+                    hasNavContent -> UiSizes.supportingPanelWidth
                     else -> maxWidth
                 }
 
@@ -101,7 +101,7 @@ internal fun AppRouteContainer(
                     width = mainContentWidth,
                     startPadding = when {
                         hasNarrowWidth -> 0.dp
-                        hasNavContent -> UiSizes.navRailContentWidth
+                        hasNavContent -> UiSizes.supportingPanelWidth
                         else -> 0.dp
                     },
                     content = mainContent
@@ -142,8 +142,8 @@ private fun BoxWithConstraintsScope.mainContentWidth(
         key2 = moveKind,
         key3 = moveComplete,
     ) {
-        if (moveKind == MoveKind.NavRailToMain && !moveComplete) {
-            var width = UiSizes.navRailContentWidth
+        if (moveKind == MoveKind.SupportingToMain && !moveComplete) {
+            var width = UiSizes.supportingPanelWidth
             value = width
 
             val anim = TargetBasedAnimation(
