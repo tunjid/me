@@ -42,6 +42,7 @@ import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
+import com.tunjid.me.scaffold.globalui.isNotExpanded
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
@@ -68,7 +69,6 @@ internal fun AppRouteContainer(
     val hasNavContent by navStateHolder.state.mappedCollectAsStateWithLifecycle {
         it.supportingRoute != null
     }
-
     val navAnimations = remember {
         MutableNavAnimations()
     }
@@ -85,13 +85,6 @@ internal fun AppRouteContainer(
                     bottom = bottomClearance
                 ),
             content = {
-                val hasNarrowWidth = windowSizeClass != WindowSizeClass.EXPANDED
-                val targetSupportingContentWidth = when {
-                    hasNarrowWidth -> maxWidth
-                    hasNavContent -> UiSizes.supportingPanelWidth
-                    else -> maxWidth
-                }
-
                 val mainContentWidth by mainContentWidth(
                     windowSizeClass = windowSizeClass,
                     moveKind = moveKind
@@ -100,16 +93,21 @@ internal fun AppRouteContainer(
                     zIndex = 2f,
                     width = mainContentWidth,
                     startPadding = when {
-                        hasNarrowWidth -> 0.dp
+                        windowSizeClass.isNotExpanded -> 0.dp
                         hasNavContent -> UiSizes.supportingPanelWidth
                         else -> 0.dp
                     },
                     content = mainContent
                 )
 
+                val targetSupportingContentWidth = when {
+                    windowSizeClass.isNotExpanded -> maxWidth
+                    hasNavContent -> UiSizes.supportingPanelWidth
+                    else -> maxWidth
+                }
                 val supportingContentWidth by supportingContentWidth(targetSupportingContentWidth)
                 ResizableRouteContent(
-                    zIndex = if (hasNarrowWidth) 1f else 3f,
+                    zIndex = if (windowSizeClass.isNotExpanded) 1f else 3f,
                     width = supportingContentWidth,
                     content = supportingContent
                 )
@@ -131,7 +129,10 @@ private fun BoxWithConstraintsScope.mainContentWidth(
     windowSizeClass: WindowSizeClass,
     moveKind: MoveKind
 ): State<Dp> {
-    if (windowSizeClass != WindowSizeClass.EXPANDED) return mutableStateOf(maxWidth)
+    val nonExpanded = remember(maxWidth) {
+        mutableStateOf(maxWidth)
+    }
+    if (windowSizeClass.isNotExpanded) return nonExpanded
 
     var moveComplete by remember(moveKind) {
         mutableStateOf(false)
@@ -143,23 +144,21 @@ private fun BoxWithConstraintsScope.mainContentWidth(
         key3 = moveComplete,
     ) {
         if (moveKind == MoveKind.SupportingToMain && !moveComplete) {
-            var width = UiSizes.supportingPanelWidth
-            value = width
+            value = UiSizes.supportingPanelWidth
 
             val anim = TargetBasedAnimation(
                 animationSpec = navContentSizeSpring(),
                 typeConverter = Dp.VectorConverter,
-                initialValue = width,
+                initialValue = value,
                 targetValue = maxWidth
             )
 
             var playTime: Long
             val startTime = withFrameNanos { it }
 
-            while (width < maxWidth) {
+            while (value < maxWidth) {
                 playTime = withFrameNanos { it } - startTime
-                width = anim.getValueFromNanos(playTime)
-                value = width
+                value = anim.getValueFromNanos(playTime)
             }
             moveComplete = true
         } else value = maxWidth

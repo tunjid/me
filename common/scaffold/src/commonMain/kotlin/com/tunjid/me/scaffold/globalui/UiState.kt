@@ -32,6 +32,8 @@ sealed class NavMode {
 
 enum class WindowSizeClass { COMPACT, MEDIUM, EXPANDED }
 
+val WindowSizeClass.isNotExpanded get() = this != WindowSizeClass.EXPANDED
+
 sealed class NavVisibility {
     object Visible : NavVisibility()
     object Gone : NavVisibility()
