@@ -36,7 +36,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
-import androidx.compose.ui.zIndex
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
@@ -90,7 +89,6 @@ internal fun AppRouteContainer(
                     moveKind = moveKind
                 )
                 ResizableRouteContent(
-                    zIndex = 2f,
                     width = mainContentWidth,
                     startPadding = when {
                         windowSizeClass.isNotExpanded -> 0.dp
@@ -105,9 +103,10 @@ internal fun AppRouteContainer(
                     hasNavContent -> UiSizes.supportingPanelWidth
                     else -> maxWidth
                 }
-                val supportingContentWidth by supportingContentWidth(targetSupportingContentWidth)
+                val supportingContentWidth by supportingContentWidth(
+                    targetSupportingContentWidth
+                )
                 ResizableRouteContent(
-                    zIndex = if (windowSizeClass.isNotExpanded) 1f else 3f,
                     width = supportingContentWidth,
                     content = supportingContent
                 )
@@ -117,7 +116,7 @@ internal fun AppRouteContainer(
                         if (it < 0.dp) it * -1 else it
                     }
                     val percentage = difference / targetSupportingContentWidth
-                    navAnimations.isAnimatingSupportingContent.value = percentage >= 0.05f
+                    navAnimations.isAnimatingSupportingContent.value = percentage >= 0.01f
                 }
             }
         )
@@ -173,7 +172,6 @@ private fun supportingContentWidth(targetSideWidth: Dp) = animateDpAsState(
 
 @Composable
 private fun ResizableRouteContent(
-    zIndex: Float,
     width: Dp,
     startPadding: Dp? = null,
     content: @Composable () -> Unit
@@ -181,7 +179,6 @@ private fun ResizableRouteContent(
     Box(
         modifier = Modifier
             .width(width)
-            .zIndex(zIndex)
             .padding(start = startPadding ?: 0.dp)
             .background(color = MaterialTheme.colors.surface),
         content = {

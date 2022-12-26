@@ -109,10 +109,10 @@ fun ArchiveCard(
     onCategoryClicked: (Descriptor.Category) -> Unit,
 ) {
     var thumbnailWidth by remember { mutableStateOf(0) }
-    val isAnimatingNavRail by LocalNavigationAnimator.current.isAnimatingSupportingContent
+    val isAnimatingSupportingContent by LocalNavigationAnimator.current.isAnimatingSupportingContent
     val localDensity = LocalDensity.current
-    val thumbnailModifier = remember(isAnimatingNavRail) {
-        if (isAnimatingNavRail) Modifier
+    val thumbnailModifier = remember(isAnimatingSupportingContent) {
+        if (isAnimatingSupportingContent) Modifier
             .width(with(localDensity) { thumbnailWidth.toDp() })
         else modifier
             .fillMaxWidth()
