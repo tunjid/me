@@ -92,7 +92,10 @@ internal fun AppRouteContainer(
                     else -> maxWidth
                 }
 
-                val mainContentWidth by mainContentWidth(moveKind)
+                val mainContentWidth by mainContentWidth(
+                    windowSizeClass = windowSizeClass,
+                    moveKind = moveKind
+                )
                 ResizableRouteContent(
                     zIndex = 2f,
                     width = mainContentWidth,
@@ -122,7 +125,12 @@ internal fun AppRouteContainer(
 }
 
 @Composable
-private fun BoxWithConstraintsScope.mainContentWidth(moveKind: MoveKind): State<Dp> {
+private fun BoxWithConstraintsScope.mainContentWidth(
+    windowSizeClass: WindowSizeClass,
+    moveKind: MoveKind
+): State<Dp> {
+    if (windowSizeClass != WindowSizeClass.EXPANDED) return mutableStateOf(maxWidth)
+
     var moveComplete by remember(moveKind) {
         mutableStateOf(false)
     }
