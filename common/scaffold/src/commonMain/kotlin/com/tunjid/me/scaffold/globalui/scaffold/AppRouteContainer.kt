@@ -165,15 +165,13 @@ private fun sideContentWidth(targetSideWidth: Dp) = animateDpAsState(
 @Composable
 private fun ResizableRouteContent(
     zIndex: Float,
-    width: Dp? = null,
+    width: Dp,
     startPadding: Dp? = null,
     content: @Composable () -> Unit
 ) {
     Box(
-        modifier = when (width) {
-            null -> Modifier.fillMaxWidth()
-            else -> Modifier.width(width)
-        }
+        modifier = Modifier
+            .width(width)
             .zIndex(zIndex)
             .padding(start = startPadding ?: 0.dp)
             .background(color = MaterialTheme.colors.surface),
