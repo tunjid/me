@@ -99,14 +99,14 @@ internal fun AppRouteContainer(
                 )
 
                 val targetSupportingContentWidth = when {
-                    windowSizeClass.isNotExpanded -> maxWidth
+                    windowSizeClass.isNotExpanded -> 0.dp
                     hasNavContent -> UiSizes.supportingPanelWidth
                     else -> maxWidth
                 }
                 val supportingContentWidth by supportingContentWidth(
                     targetSupportingContentWidth
                 )
-                ResizableRouteContent(
+                if (supportingContentWidth != 0.dp) ResizableRouteContent(
                     width = supportingContentWidth,
                     content = supportingContent
                 )
