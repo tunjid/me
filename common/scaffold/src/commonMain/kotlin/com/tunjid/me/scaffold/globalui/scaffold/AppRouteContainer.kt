@@ -121,10 +121,7 @@ private fun BoxWithConstraintsScope.mainContentWidth(
     windowSizeClass: WindowSizeClass,
     moveKind: MoveKind
 ): State<Dp> {
-    val nonExpanded = remember(maxWidth) {
-        mutableStateOf(maxWidth)
-    }
-    if (windowSizeClass.isNotExpanded) return nonExpanded
+    if (windowSizeClass.isNotExpanded) return mutableStateOf(maxWidth)
 
     var moveComplete by remember(moveKind) {
         mutableStateOf(false)
