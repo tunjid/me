@@ -20,6 +20,7 @@ import com.tunjid.me.scaffold.globalui.Ingress
 import com.tunjid.me.scaffold.globalui.InsetDescriptor
 import com.tunjid.me.scaffold.globalui.KeyboardAware
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.bottomNavVisible
 import com.tunjid.me.scaffold.globalui.navRailVisible
 
@@ -28,6 +29,7 @@ internal data class RouteContainerPositionalState(
     val toolbarOverlaps: Boolean,
     val navRailVisible: Boolean,
     val bottomNavVisible: Boolean,
+    val windowSizeClass: WindowSizeClass,
     override val ime: Ingress,
     override val navBarSize: Int,
     override val insetDescriptor: InsetDescriptor
@@ -40,6 +42,7 @@ internal val UiState.routeContainerState
         toolbarOverlaps = toolbarOverlaps,
         bottomNavVisible = bottomNavVisible,
         navRailVisible = navRailVisible,
+        windowSizeClass = windowSizeClass,
         ime = systemUI.dynamic.ime,
         navBarSize = systemUI.static.navBarSize
     )

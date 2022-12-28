@@ -42,8 +42,11 @@ import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.navRailVisible
+import com.tunjid.me.scaffold.globalui.navRailWidth
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
+import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.NavItem
 import com.tunjid.me.scaffold.nav.NavStateHolder
@@ -61,8 +64,8 @@ internal fun AppNavRail(
     val containerState by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
         mapper = UiState::routeContainerState
     )
-    val navRailVisible by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
-        mapper = UiState::navRailVisible
+    val windowSizeClass by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = UiState::windowSizeClass
     )
 
     val navItems by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.mainNav.navItems }
@@ -70,22 +73,20 @@ internal fun AppNavRail(
     val statusBarSize = with(LocalDensity.current) {
         containerState.statusBarSize.toDp()
     } countIf containerState.insetDescriptor.hasTopInset
-    val toolbarHeight = UiSizes.toolbarSize countIf !containerState.toolbarOverlaps
+    val toolbarHeight = windowSizeClass.toolbarSize() countIf !containerState.toolbarOverlaps
 
     val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
-    val navRailWidth by animateDpAsState(
-        targetValue = if (navRailVisible) UiSizes.navRailWidth
-        else 0.dp
-    )
+    val navRailWidth by animateDpAsState(windowSizeClass.navRailWidth())
 
     Surface(
         modifier = Modifier
-            .padding(top = topClearance)
             .fillMaxHeight(),
         color = MaterialTheme.colors.primary
     ) {
         Column(
-            modifier = Modifier.width(navRailWidth),
+            modifier = Modifier
+                .padding(top = topClearance)
+                .width(navRailWidth),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(24.dp))

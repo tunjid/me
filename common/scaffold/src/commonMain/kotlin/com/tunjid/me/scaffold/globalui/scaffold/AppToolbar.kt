@@ -17,28 +17,39 @@
 package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.navRailWidth
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.globalui.slices.toolbarState
+import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.NavState
+import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.Route404
 import com.tunjid.me.scaffold.nav.canGoUp
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
@@ -55,22 +66,41 @@ internal fun BoxScope.AppToolbar(
     navStateHolder: NavStateHolder,
 ) {
     val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::toolbarState)
+    val windowSizeClass by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle {
+        it.windowSizeClass
+    }
+    val canGoUp by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.mainNav.canGoUp }
+    val onUpPressed = remember {
+        { navStateHolder.accept { mainNav.pop() } }
+    }
+
     val items = state.items
     val title = state.toolbarTitle
     val alpha: Float by animateFloatAsState(if (state.visible) 1f else 0f)
+    val upButtonSize = if (canGoUp) windowSizeClass.toolbarSize() else 0.dp
+    val navRailWidth by animateDpAsState(windowSizeClass.navRailWidth())
 
     Row(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .offset(y = with(LocalDensity.current) { state.statusBarSize.toDp() })
-            .height(56.dp)
-            .background(color = MaterialTheme.colors.primary)
+            .height(windowSizeClass.toolbarSize())
             .alpha(alpha)
             .align(Alignment.TopCenter)
             .fillMaxWidth(),
     ) {
-        UpButton(navStateHolder = navStateHolder)
+        Box(
+            modifier = Modifier
+                .width(navRailWidth)
+                .height(upButtonSize)
+        ) {
+            UpButton(
+                upButtonSize = upButtonSize,
+                canGoUp = canGoUp,
+                onUpPressed = onUpPressed,
+            )
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -91,17 +121,20 @@ internal fun BoxScope.AppToolbar(
 
 @Composable
 private fun UpButton(
-    navStateHolder: NavStateHolder,
+    upButtonSize: Dp,
+    canGoUp: Boolean,
+    onUpPressed: () -> Unit,
 ) {
-    val canGoUp by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.mainNav.canGoUp }
 
     AnimatedVisibility(visible = canGoUp) {
         Button(
             modifier = Modifier
-                .wrapContentSize()
-                .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
-            onClick = { navStateHolder.accept { mainNav.pop() } },
+                .size(upButtonSize),
+            onClick = onUpPressed,
             elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent
+            ),
             // Uses ButtonDefaults.ContentPadding by default
             contentPadding = PaddingValues(
                 start = 16.dp,

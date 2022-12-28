@@ -19,9 +19,36 @@ package com.tunjid.me.scaffold.globalui
 import androidx.compose.ui.unit.dp
 
 internal object UiSizes {
-    val toolbarSize = 56.dp
-    val navRailWidth = 72.dp
     val supportingPanelWidth = 400.dp
     val bottomNavSize = 56.dp
     val snackbarPeek = 56.dp
 }
+
+fun WindowSizeClass.navRailWidth() =
+    when (this) {
+        WindowSizeClass.COMPACT -> 0.dp
+        WindowSizeClass.MEDIUM,
+        WindowSizeClass.EXPANDED -> 72.dp
+    }
+
+
+fun WindowSizeClass.toolbarSize() =
+    when (this) {
+        WindowSizeClass.COMPACT -> 56.dp
+        WindowSizeClass.MEDIUM,
+        WindowSizeClass.EXPANDED -> 72.dp
+    }
+
+fun WindowSizeClass.bottomNavSize() =
+    when (this) {
+        WindowSizeClass.COMPACT -> 56.dp
+        WindowSizeClass.MEDIUM,
+        WindowSizeClass.EXPANDED -> 0.dp
+    }
+
+fun WindowSizeClass.supportingPanelWidth() =
+    when (this) {
+        WindowSizeClass.COMPACT -> 0.dp
+        WindowSizeClass.MEDIUM,
+        WindowSizeClass.EXPANDED -> 400.dp
+    }

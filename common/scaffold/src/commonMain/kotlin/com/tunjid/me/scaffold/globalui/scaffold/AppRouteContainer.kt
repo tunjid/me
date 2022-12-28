@@ -37,12 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import com.tunjid.me.core.utilities.countIf
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.UiSizes
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.WindowSizeClass
-import com.tunjid.me.scaffold.globalui.isNotExpanded
-import com.tunjid.me.scaffold.globalui.keyboardSize
+import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.MoveKind
@@ -91,16 +86,14 @@ internal fun AppRouteContainer(
                 ResizableRouteContent(
                     width = mainContentWidth,
                     startPadding = when {
-                        windowSizeClass.isNotExpanded -> 0.dp
-                        hasNavContent -> UiSizes.supportingPanelWidth
+                        hasNavContent -> windowSizeClass.supportingPanelWidth()
                         else -> 0.dp
                     },
                     content = mainContent
                 )
 
                 val targetSupportingContentWidth = when {
-                    windowSizeClass.isNotExpanded -> 0.dp
-                    hasNavContent -> UiSizes.supportingPanelWidth
+                    hasNavContent -> windowSizeClass.supportingPanelWidth()
                     else -> maxWidth
                 }
                 val supportingContentWidth by supportingContentWidth(
@@ -143,7 +136,7 @@ private fun BoxWithConstraintsScope.mainContentWidth(
         key3 = moveComplete,
     ) {
         if (moveKind == MoveKind.SupportingToMain && !moveComplete) {
-            value = UiSizes.supportingPanelWidth
+            value = windowSizeClass.supportingPanelWidth()
 
             val anim = TargetBasedAnimation(
                 animationSpec = navContentSizeSpring(),
@@ -202,7 +195,7 @@ private fun routeContainerPadding(
         mapper = UiState::routeContainerState
     )
 
-    val bottomNavHeight = UiSizes.bottomNavSize countIf state.bottomNavVisible
+    val bottomNavHeight = state.windowSizeClass.bottomNavSize() countIf state.bottomNavVisible
 
     val insetClearance = max(
         a = bottomNavHeight,
@@ -218,12 +211,10 @@ private fun routeContainerPadding(
         state.statusBarSize.toDp()
     } countIf state.insetDescriptor.hasTopInset
 
-    val toolbarHeight = UiSizes.toolbarSize countIf !state.toolbarOverlaps
+    val toolbarHeight = state.windowSizeClass.toolbarSize() countIf !state.toolbarOverlaps
     val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
 
-    val navRailVisible = state.navRailVisible
-
-    val navRailSize = UiSizes.navRailWidth countIf navRailVisible
+    val navRailSize = state.windowSizeClass.navRailWidth()
 
     val startClearance by animateDpAsState(targetValue = navRailSize)
 

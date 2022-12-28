@@ -34,6 +34,7 @@ import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.snackbarPositionalState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
@@ -63,7 +64,7 @@ internal fun BoxScope.AppSnackBar(
 
     val showing = head != null
     val position by animateDpAsState(
-        if (showing) -(16.dp + (UiSizes.bottomNavSize countIf state.bottomNavVisible))
+        if (showing) -(16.dp + (state.windowSizeClass.bottomNavSize() countIf state.bottomNavVisible))
         else UiSizes.snackbarPeek
     )
     val fabOffset by animateDpAsState(
