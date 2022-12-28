@@ -39,17 +39,17 @@ fun Scaffold(
         LocalGlobalUiStateHolder provides globalUiStateHolder,
     ) {
         val moveableNavFlow = remember {
-            navStateHolder.moveableNav()
+            navStateHolder.state.moveableNav()
         }
         val moveableNav by moveableNavFlow.collectAsState(MoveableNav())
 
         val moveKind by remember {
             derivedStateOf { moveableNav.moveKind }
         }
-        val slotOneRoute by remember {
+        val containerOneRoute by remember {
             derivedStateOf { moveableNav.containerOneAndRoute.route }
         }
-        val slotTwoRoute: AppRoute by remember {
+        val containerTwoRoute: AppRoute by remember {
             derivedStateOf { moveableNav.containerTwoAndRoute.route }
         }
         val mainContainer: ContentContainer? by remember {
@@ -61,13 +61,13 @@ fun Scaffold(
 
         val saveableStateHolder: SaveableStateHolder = rememberSaveableStateHolder()
 
-        val containerOneContent = rememberContainerContent(
+        val containerOneContent = rememberMoveableContainerContent(
             saveableStateHolder = saveableStateHolder,
-            route = slotOneRoute
+            route = containerOneRoute
         )
-        val containerTwoContent = rememberContainerContent(
+        val containerTwoContent = rememberMoveableContainerContent(
             saveableStateHolder = saveableStateHolder,
-            route = slotTwoRoute
+            route = containerTwoRoute
         )
 
         Box(
@@ -125,7 +125,7 @@ private fun ContentContainer?.content(
 }
 
 @Composable
-private fun rememberContainerContent(
+private fun rememberMoveableContainerContent(
     saveableStateHolder: SaveableStateHolder,
     route: AppRoute
 ): @Composable () -> Unit {

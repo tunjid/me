@@ -17,6 +17,7 @@
 package com.tunjid.me.scaffold.nav
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
@@ -60,22 +61,22 @@ internal enum class MoveKind {
     MainToSupporting, SupportingToMain, None
 }
 
-internal fun NavStateHolder.moveableNav(): Flow<MoveableNav> =
-    state
+internal fun StateFlow<NavState>.moveableNav(): Flow<MoveableNav> =
+    this
         .map { it.mainRoute to it.supportingRoute }
         .distinctUntilChanged()
         .scan(
             MoveableNav(
-                mainRouteId = state.value.mainRoute.id,
+                mainRouteId = value.mainRoute.id,
                 containerOneAndRoute = ContainerAndRoute(
-                    route = state.value.mainRoute,
+                    route = value.mainRoute,
                     container = ContentContainer.One
                 ),
             )
-        ) { oldSwap, (mainRoute, supportingRoute) ->
+        ) { previousMoveableNav, (mainRoute, supportingRoute) ->
             val moveableNavContext = MoveableNavContext(
-                slotOneAndRoute = oldSwap.containerOneAndRoute,
-                slotTwoAndRoute = oldSwap.containerTwoAndRoute
+                slotOneAndRoute = previousMoveableNav.containerOneAndRoute,
+                slotTwoAndRoute = previousMoveableNav.containerTwoAndRoute
             )
             moveableNavContext.moveToFreeContainer(
                 incoming = supportingRoute,
@@ -89,8 +90,8 @@ internal fun NavStateHolder.moveableNav(): Flow<MoveableNav> =
                 mainRouteId = mainRoute.id,
                 supportingRouteId = supportingRoute?.id,
                 moveKind = when {
-                    oldSwap.mainRouteId == supportingRoute?.id -> MoveKind.MainToSupporting
-                    mainRoute.id == oldSwap.supportingRouteId -> MoveKind.SupportingToMain
+                    previousMoveableNav.mainRouteId == supportingRoute?.id -> MoveKind.MainToSupporting
+                    mainRoute.id == previousMoveableNav.supportingRouteId -> MoveKind.SupportingToMain
                     else -> MoveKind.None
                 },
                 containerOneAndRoute = moveableNavContext.slotOneAndRoute,
@@ -105,9 +106,9 @@ private class MoveableNavContext(
 
 private fun MoveableNavContext.moveToFreeContainer(incoming: AppRoute?, outgoing: AppRoute?) =
     when (incoming) {
-        null -> Unit
-        slotOneAndRoute.route -> slotOneAndRoute = slotOneAndRoute.copy(route = incoming)
-        slotTwoAndRoute.route -> slotTwoAndRoute = slotTwoAndRoute.copy(route = incoming)
+        null,
+        slotOneAndRoute.route,
+        slotTwoAndRoute.route -> Unit
         else -> when (outgoing) {
             slotOneAndRoute.route -> slotTwoAndRoute = slotTwoAndRoute.copy(route = incoming)
             slotTwoAndRoute.route -> slotOneAndRoute = slotOneAndRoute.copy(route = incoming)
