@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
@@ -79,6 +80,7 @@ internal fun BoxScope.AppToolbar(
     val alpha: Float by animateFloatAsState(if (state.visible) 1f else 0f)
     val upButtonSize = if (canGoUp) windowSizeClass.toolbarSize() else 0.dp
     val navRailWidth by animateDpAsState(windowSizeClass.navRailWidth())
+    val navRailClearance by animateDpAsState(max(upButtonSize, navRailWidth))
 
     Row(
         horizontalArrangement = Arrangement.Start,
@@ -92,7 +94,7 @@ internal fun BoxScope.AppToolbar(
     ) {
         Box(
             modifier = Modifier
-                .width(navRailWidth)
+                .width(navRailClearance)
                 .height(upButtonSize)
         ) {
             UpButton(
