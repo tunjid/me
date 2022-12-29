@@ -169,7 +169,7 @@ private fun Title(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             fontSize = 18.sp,
-            color = MaterialTheme.colorScheme.onPrimary
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
