@@ -16,6 +16,8 @@
 
 package com.tunjid.me.archivedetail
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
@@ -52,17 +54,18 @@ data class State(
 
 val State.canEdit: Boolean get() = signedInUserId != null && signedInUserId == archive?.author?.id
 
+@Composable
 inline fun <reified T : Descriptor> State.descriptorChips() =
     when (archive) {
         null -> listOf()
         else -> when (T::class) {
-            Descriptor.Tag::class -> archive.tags
-            Descriptor.Category::class -> archive.categories
+            Descriptor.Tag::class -> archive.tags.map { it to MaterialTheme.colorScheme.tertiaryContainer }
+            Descriptor.Category::class -> archive.categories.map { it to MaterialTheme.colorScheme.secondaryContainer }
             else -> throw IllegalArgumentException("Invalid descriptor class: ${T::class.qualifiedName}")
-        }.map {
+        }.map { (descriptor, tint) ->
             ChipInfo(
-                text = it.value,
-                kind = ChipKind.Assist
+                text = descriptor.value,
+                kind = ChipKind.Assist(tint = tint)
             )
         }
     }

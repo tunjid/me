@@ -129,6 +129,6 @@ inline fun <reified T : Descriptor> ArchiveUpsert.descriptorChips() =
     }.map {
         ChipInfo(
             text = it.value,
-            kind = ChipKind.Assist
+            kind = ChipKind.Assist()
         )
     }

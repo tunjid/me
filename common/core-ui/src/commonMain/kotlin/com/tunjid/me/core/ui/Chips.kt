@@ -52,7 +52,9 @@ data class ChipInfo(
 )
 
 sealed class ChipKind {
-    object Assist : ChipKind()
+    data class Assist(
+        val tint: Color? = null
+    ) : ChipKind()
     data class Filter(val selected: Boolean) : ChipKind()
     data class Input(val selected: Boolean) : ChipKind()
     object Suggestion : ChipKind()
@@ -84,7 +86,6 @@ fun Chips(
             chipInfo.forEach { info ->
                 Chip(
                     info = info,
-                    color = color,
                     onClick = onClick,
                     editInfo = editInfo,
                 )
@@ -123,7 +124,6 @@ fun Chips(
 @Composable
 fun Chip(
     info: ChipInfo,
-    color: Color = MaterialTheme.colorScheme.tertiary,
     onClick: ((String) -> Unit)? = null,
     editInfo: ChipEditInfo? = null
 ) {
@@ -145,8 +145,12 @@ fun Chip(
     }
     Row {
         when (val kind = info.kind) {
-            ChipKind.Assist -> AssistChip(
+            is ChipKind.Assist -> AssistChip(
                 onClick = { onClick?.invoke(info.text) },
+                colors = when (val tint = kind.tint) {
+                    null -> AssistChipDefaults.assistChipColors()
+                    else -> AssistChipDefaults.assistChipColors(containerColor = tint)
+                },
                 label = chipLabel,
                 trailingIcon = trailingIcon
             )
@@ -196,7 +200,7 @@ private fun PreviewStaticChips() {
             "123",
             "456",
             "thi is a long one"
-        ).map { ChipInfo(text = it, kind = ChipKind.Assist) }
+        ).map { ChipInfo(text = it, kind = ChipKind.Assist()) }
     )
 }
 
@@ -218,7 +222,7 @@ private fun PreviewEditableChips() {
             "123",
             "456",
             "thi is a long one"
-        ).map { ChipInfo(text = it, kind = ChipKind.Assist) },
+        ).map { ChipInfo(text = it, kind = ChipKind.Assist()) },
         editInfo = ChipEditInfo(currentText = "Test", onChipChanged = {})
     )
 }
