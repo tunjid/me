@@ -83,7 +83,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
         UiState(
             toolbarShows = true,
             toolbarTitle = state.archive?.title ?: "Detail",
-            navVisibility = NavVisibility.GoneIfBottomNav,
+            navVisibility = NavVisibility.Visible,
             // Prevents UI from jittering as load starts
             fabShows = if (state.hasFetchedAuthStatus) canEdit else currentUiState.fabShows,
             fabExtended = true,
