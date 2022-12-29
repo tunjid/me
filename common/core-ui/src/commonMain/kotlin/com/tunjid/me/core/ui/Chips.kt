@@ -173,29 +173,6 @@ fun Chip(
         }
         Spacer(Modifier.width(4.dp))
     }
-//    Button(
-//        modifier = Modifier
-//            .wrapContentSize()
-//            .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
-//        onClick = { onClick?.invoke(text) },
-//        colors = ButtonDefaults.buttonColors(containerColor = color),
-//        shape = RoundedCornerShape(20.dp),
-//        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
-//    ) {
-//        Text(
-//            text = text,
-//            fontSize = 12.sp,
-//            maxLines = 1
-//        )
-//        if (editInfo != null) Icon(
-//            modifier = Modifier
-//                .scale(0.6f)
-//                .clickable { editInfo.onChipChanged(ChipAction.Removed(text)) },
-//            imageVector = Icons.Filled.Close,
-//            contentDescription = "Close"
-//        )
-//    }
-//    Spacer(Modifier.width(4.dp))
 }
 
 @Composable

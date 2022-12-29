@@ -127,21 +127,10 @@ private fun UpButton(
 ) {
 
     AnimatedVisibility(visible = canGoUp) {
-        Button(
+        IconButton(
             modifier = Modifier
                 .size(upButtonSize),
             onClick = onUpPressed,
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent
-            ),
-            // Uses ButtonDefaults.ContentPadding by default
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = 16.dp,
-            )
         ) {
             // Inner content including an icon and a text label
             Icon(
@@ -215,7 +204,6 @@ private fun ToolbarIcon(
             content = {
                 Text(
                     text = item.text,
-                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         )
@@ -229,7 +217,6 @@ private fun ToolbarIcon(
             Icon(
                 imageVector = vector,
                 contentDescription = item.text,
-                tint = MaterialTheme.colorScheme.onPrimary
             )
         }
     }

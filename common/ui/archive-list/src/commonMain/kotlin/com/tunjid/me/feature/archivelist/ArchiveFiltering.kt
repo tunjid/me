@@ -22,15 +22,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -73,16 +68,9 @@ fun ArchiveFilters(
                 Spacer(modifier = Modifier.width(8.dp))
                 SortButton(onChanged, item)
                 Spacer(modifier = Modifier.width(12.dp))
-                Icon(
-                    modifier = Modifier
-                        .padding(horizontal = 1.dp),
-                    imageVector = Filled.FilterList,
-                    contentDescription = "Filter"
+                DescriptorDetailButton(
+                    item.currentQuery.contentFilter.categories + item.currentQuery.contentFilter.tags
                 )
-                Spacer(modifier = Modifier.width(4.dp))
-                DescriptorDetailButton(item.currentQuery.contentFilter.categories)
-                Spacer(modifier = Modifier.width(4.dp))
-                DescriptorDetailButton(item.currentQuery.contentFilter.tags)
                 Spacer(modifier = Modifier.weight(1f))
                 DropDownButton(isExpanded, onChanged)
             }
@@ -108,7 +96,7 @@ private fun SortButton(
     val rotation by animateFloatAsState(
         targetValue = if (desc) 0f else 180f
     )
-    Button(
+    FilledTonalButton(
         modifier = Modifier
             .animateContentSize()
             .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
@@ -122,10 +110,6 @@ private fun SortButton(
                 )
             )
         },
-        shape = RoundedCornerShape(40.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary
-        ),
         contentPadding = PaddingValues(
             vertical = 4.dp,
             horizontal = 8.dp
@@ -155,8 +139,8 @@ private fun SortButton(
 }
 
 @Composable
-private inline fun <reified T : Descriptor> DescriptorDetailButton(
-    descriptors: List<T>
+private inline fun  DescriptorDetailButton(
+    descriptors: List<Descriptor>
 ) {
     Button(
         modifier = Modifier
@@ -164,13 +148,6 @@ private inline fun <reified T : Descriptor> DescriptorDetailButton(
             .lilButton(),
         onClick = {},
         shape = RoundedCornerShape(40.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = when (T::class) {
-                Descriptor.Category::class -> MaterialTheme.colorScheme.secondary
-                Descriptor.Tag::class -> MaterialTheme.colorScheme.tertiary
-                else -> throw IllegalStateException()
-            }
-        ),
         contentPadding = PaddingValues(
             vertical = 4.dp,
             horizontal = 8.dp
@@ -178,8 +155,8 @@ private inline fun <reified T : Descriptor> DescriptorDetailButton(
         content = {
             Text(
                 when (descriptors.size) {
-                    0 -> "None"
-                    else -> "${descriptors.size}"
+                    0 -> "No filters"
+                    else -> "${descriptors.size} filters"
                 }
             )
         })
@@ -233,7 +210,7 @@ private fun DropDownButton(
     onChanged: (Action) -> Unit
 ) {
     val rotation by animateFloatAsState(if (isExpanded) 0f else -90f)
-    Button(
+    FilledTonalButton(
         modifier = Modifier
             .lilButton()
             .rotate(rotation),
