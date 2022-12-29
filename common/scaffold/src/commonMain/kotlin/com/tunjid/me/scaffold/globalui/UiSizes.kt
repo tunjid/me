@@ -47,7 +47,7 @@ fun WindowSizeClass.bottomNavSize() =
 
 fun WindowSizeClass.supportingPanelWidth() =
     when (this) {
-        WindowSizeClass.COMPACT -> 0.dp
-        WindowSizeClass.MEDIUM,
+        WindowSizeClass.COMPACT,
+        WindowSizeClass.MEDIUM  -> 0.dp
         WindowSizeClass.EXPANDED -> 400.dp
     }
