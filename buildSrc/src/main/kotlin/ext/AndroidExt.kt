@@ -64,8 +64,9 @@ fun org.gradle.api.Project.commonConfiguration(
 }
 
 fun org.gradle.api.Project.coerceComposeVersion(configuration: Configuration) {
+    val independentGroups = setOf("compiler", "material3")
     configuration.resolutionStrategy.eachDependency {
-        if (requested.group.startsWith("androidx.compose") && !requested.group.contains("compiler")) {
+        if (requested.group.startsWith("androidx.compose") && independentGroups.none(requested.group::contains)) {
             useVersion(versionCatalog.findVersion("androidxCompose").get().requiredVersion)
             because("I need the changes in lazyGrid")
         }

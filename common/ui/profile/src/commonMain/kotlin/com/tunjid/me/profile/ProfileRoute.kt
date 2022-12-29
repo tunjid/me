@@ -72,7 +72,7 @@ private fun ProfileScreen(stateHolder: ProfileStateHolder) {
             toolbarTitle = "Profile",
             navVisibility = NavVisibility.Gone,
             insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colorScheme.primary.toArgb(),
+            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
         )
     )
 

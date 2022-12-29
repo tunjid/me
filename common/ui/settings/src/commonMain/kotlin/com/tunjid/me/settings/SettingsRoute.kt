@@ -64,7 +64,7 @@ private fun SettingsScreen(stateHolder: SettingsStateHolder) {
             toolbarTitle = "Settings",
             navVisibility = NavVisibility.Visible,
             insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colorScheme.primary.toArgb(),
+            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
         )
     )
 

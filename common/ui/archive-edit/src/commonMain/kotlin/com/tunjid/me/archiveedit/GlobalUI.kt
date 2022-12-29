@@ -70,7 +70,7 @@ internal fun GlobalUi(
             },
             navVisibility = NavVisibility.GoneIfBottomNav,
             insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colorScheme.primary.toArgb(),
+            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
         )
     )
 }

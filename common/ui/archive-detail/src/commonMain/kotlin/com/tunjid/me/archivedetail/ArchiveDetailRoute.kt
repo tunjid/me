@@ -96,7 +96,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
                 })
             },
             insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colorScheme.primary.toArgb(),
+            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
         )
     )
 

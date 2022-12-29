@@ -84,13 +84,12 @@ internal fun BoxScope.AppBottomNav(
                     )
                 }
         }
-        Spacer(
+        BottomAppBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(with(LocalDensity.current) {
                     state.navBarSize.toDp()
                 })
-                .background(color = MaterialTheme.colorScheme.primary)
-        )
+        ){}
     }
 }

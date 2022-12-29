@@ -90,7 +90,7 @@ fun GlobalUi(
                 })
             },
             navVisibility = NavVisibility.Visible,
-            statusBarColor = MaterialTheme.colorScheme.primary.toArgb(),
+            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
         )
     )
 }
