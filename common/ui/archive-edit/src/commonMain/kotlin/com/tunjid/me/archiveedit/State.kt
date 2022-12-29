@@ -18,6 +18,8 @@ package com.tunjid.me.archiveedit
 
 import com.tunjid.me.core.model.*
 import com.tunjid.me.core.ui.ChipAction
+import com.tunjid.me.core.ui.ChipInfo
+import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.scaffold.permissions.Permission
@@ -118,3 +120,15 @@ data class ChipsState(
     val categoryText: Descriptor.Category = Descriptor.Category(""),
     val tagText: Descriptor.Tag = Descriptor.Tag(""),
 )
+
+inline fun <reified T : Descriptor> ArchiveUpsert.descriptorChips() =
+    when (T::class) {
+        Descriptor.Tag::class -> tags
+        Descriptor.Category::class -> categories
+        else -> throw IllegalArgumentException("Invalid descriptor class: ${T::class.qualifiedName}")
+    }.map {
+        ChipInfo(
+            text = it.value,
+            kind = ChipKind.Assist
+        )
+    }

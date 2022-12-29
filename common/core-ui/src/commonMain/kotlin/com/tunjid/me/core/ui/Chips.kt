@@ -18,7 +18,6 @@ package com.tunjid.me.core.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -47,12 +46,24 @@ data class ChipEditInfo(
     val onChipChanged: (ChipAction) -> Unit,
 )
 
+data class ChipInfo(
+    val text: String,
+    val kind: ChipKind,
+)
+
+sealed class ChipKind {
+    object Assist : ChipKind()
+    data class Filter(val selected: Boolean) : ChipKind()
+    data class Input(val selected: Boolean) : ChipKind()
+    object Suggestion : ChipKind()
+}
+
 @Composable
 fun Chips(
     modifier: Modifier = Modifier,
     name: String? = null,
     color: Color,
-    chips: List<String>,
+    chipInfo: List<ChipInfo>,
     onClick: ((String) -> Unit)? = null,
     editInfo: ChipEditInfo? = null
 ) {
@@ -70,9 +81,9 @@ fun Chips(
             Spacer(modifier = Modifier.width(8.dp))
         }
         ChipRow {
-            chips.forEach { text ->
+            chipInfo.forEach { info ->
                 Chip(
-                    text = text,
+                    info = info,
                     color = color,
                     onClick = onClick,
                     editInfo = editInfo,
@@ -111,32 +122,55 @@ fun Chips(
 
 @Composable
 fun Chip(
-    text: String,
+    info: ChipInfo,
     color: Color = MaterialTheme.colorScheme.tertiary,
     onClick: ((String) -> Unit)? = null,
     editInfo: ChipEditInfo? = null
 ) {
-    Row {
-        FilterChip(
-            selected = false,
-            onClick = { onClick?.invoke(text) },
-            label = {
-                Text(
-                    text = text,
-                    fontSize = 12.sp,
-                    maxLines = 1
-                )
-            },
-            trailingIcon = {
-                if (editInfo != null) Icon(
-                    modifier = Modifier
-                        .scale(0.6f)
-                        .clickable { editInfo.onChipChanged(ChipAction.Removed(text)) },
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = "Close"
-                )
-            }
+    val chipLabel = @Composable {
+        Text(
+            text = info.text,
+            fontSize = 12.sp,
+            maxLines = 1
         )
+    }
+    val trailingIcon = @Composable {
+        if (editInfo != null) Icon(
+            modifier = Modifier
+                .scale(0.6f)
+                .clickable { editInfo.onChipChanged(ChipAction.Removed(info.text)) },
+            imageVector = Icons.Filled.Close,
+            contentDescription = "Close"
+        )
+    }
+    Row {
+        when (val kind = info.kind) {
+            ChipKind.Assist -> AssistChip(
+                onClick = { onClick?.invoke(info.text) },
+                label = chipLabel,
+                trailingIcon = trailingIcon
+            )
+
+            is ChipKind.Filter -> FilterChip(
+                selected = kind.selected,
+                onClick = { onClick?.invoke(info.text) },
+                label = chipLabel,
+                trailingIcon = trailingIcon
+            )
+
+            is ChipKind.Input -> InputChip(
+                selected = kind.selected,
+                onClick = { onClick?.invoke(info.text) },
+                label = chipLabel,
+                trailingIcon = trailingIcon
+
+            )
+
+            ChipKind.Suggestion -> SuggestionChip(
+                onClick = { onClick?.invoke(info.text) },
+                label = chipLabel,
+            )
+        }
         Spacer(Modifier.width(4.dp))
     }
 //    Button(
@@ -172,7 +206,7 @@ expect fun ChipRow(content: @Composable () -> Unit)
 private fun PreviewStaticChips() {
     Chips(
         color = Color.Blue,
-        chips = listOf(
+        chipInfo = listOf(
             "abc",
             "def",
             "ghi",
@@ -185,7 +219,7 @@ private fun PreviewStaticChips() {
             "123",
             "456",
             "thi is a long one"
-        )
+        ).map { ChipInfo(text = it, kind = ChipKind.Assist) }
     )
 }
 
@@ -194,7 +228,7 @@ private fun PreviewStaticChips() {
 private fun PreviewEditableChips() {
     Chips(
         color = Color.Blue,
-        chips = listOf(
+        chipInfo = listOf(
             "abc",
             "def",
             "ghi",
@@ -207,7 +241,7 @@ private fun PreviewEditableChips() {
             "123",
             "456",
             "thi is a long one"
-        ),
+        ).map { ChipInfo(text = it, kind = ChipKind.Assist) },
         editInfo = ChipEditInfo(currentText = "Test", onChipChanged = {})
     )
 }

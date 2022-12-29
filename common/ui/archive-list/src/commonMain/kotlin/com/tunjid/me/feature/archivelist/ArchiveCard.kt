@@ -37,9 +37,11 @@ import androidx.compose.ui.unit.sp
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind.Articles
+import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.User
 import com.tunjid.me.core.model.UserId
+import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.RemoteImagePainter
 import com.tunjid.me.core.ui.Thumbnail
@@ -99,6 +101,7 @@ fun ProgressBar(
 @Composable
 fun ArchiveCard(
     modifier: Modifier = Modifier,
+    query: ArchiveQuery,
     archiveItem: ArchiveItem.Result,
     onArchiveSelected: (Archive) -> Unit,
     onCategoryClicked: (Descriptor.Category) -> Unit,
@@ -132,7 +135,7 @@ fun ArchiveCard(
                 ArchiveDetails(
                     title = archiveItem.archive.title,
                     description = archiveItem.archive.description,
-                    categories = archiveItem.archive.categories,
+                    chipInfoList = archiveItem.descriptorChips<Descriptor.Category>(query = query),
                     onCategoryClicked = onCategoryClicked
                 )
                 Spacer(Modifier.height(24.dp))
@@ -152,7 +155,7 @@ fun ArchiveCard(
 private fun ArchiveDetails(
     title: String,
     description: String,
-    categories: List<Descriptor.Category>,
+    chipInfoList: List<ChipInfo>,
     onCategoryClicked: (Descriptor.Category) -> Unit
 ) {
     ArchiveBlurb(
@@ -161,7 +164,7 @@ private fun ArchiveDetails(
     )
     Spacer(Modifier.height(4.dp))
     ArchiveCategories(
-        categories = categories,
+        chipInfoList = chipInfoList,
         onCategoryClicked = onCategoryClicked
     )
 }
@@ -179,12 +182,12 @@ private fun ArchiveDate(prettyDate: String) {
 
 @Composable
 private fun ArchiveCategories(
-    categories: List<Descriptor.Category>,
+    chipInfoList: List<ChipInfo>,
     onCategoryClicked: (Descriptor.Category) -> Unit
 ) {
     Chips(
         modifier = Modifier.padding(horizontal = 8.dp),
-        chips = categories.map(Descriptor.Category::value),
+        chipInfo = chipInfoList,
         color = MaterialTheme.colorScheme.secondary,
         onClick = { onCategoryClicked(Descriptor.Category(it)) }
     )

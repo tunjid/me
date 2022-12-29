@@ -40,7 +40,7 @@ fun EditChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
-            chips = upsert.categories.map(Descriptor.Category::value),
+            chipInfo = upsert.descriptorChips<Descriptor.Category>(),
             color = MaterialTheme.colorScheme.secondary,
             editInfo = ChipEditInfo(
                 currentText = state.categoryText.value,
@@ -55,7 +55,7 @@ fun EditChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
-            chips = upsert.tags.map(Descriptor.Tag::value),
+            chipInfo = upsert.descriptorChips<Descriptor.Tag>(),
             color = MaterialTheme.colorScheme.tertiary,
             editInfo = ChipEditInfo(
                 currentText = state.tagText.value,

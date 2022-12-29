@@ -45,7 +45,6 @@ import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.ui.ChipEditInfo
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.scaffold.nav.FilterList
-import com.tunjid.me.scaffold.nav.Sort
 
 @Composable
 fun ArchiveFilters(
@@ -198,7 +197,7 @@ private fun FilterChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
-            chips = state.currentQuery.contentFilter.categories.map(Descriptor.Category::value),
+            chipInfo = state.currentQuery.descriptorChips<Descriptor.Category>(),
             color = MaterialTheme.colorScheme.secondary,
             editInfo = ChipEditInfo(
                 currentText = state.categoryText.value,
@@ -213,7 +212,7 @@ private fun FilterChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
-            chips = state.currentQuery.contentFilter.tags.map(Descriptor.Tag::value),
+            chipInfo = state.currentQuery.descriptorChips<Descriptor.Tag>(),
             color = MaterialTheme.colorScheme.tertiary,
             editInfo = ChipEditInfo(
                 currentText = state.tagText.value,

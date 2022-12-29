@@ -18,6 +18,9 @@ package com.tunjid.me.archivedetail
 
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.ui.ChipInfo
+import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.nav.NavMutation
 import kotlinx.serialization.Serializable
@@ -48,3 +51,18 @@ data class State(
 ) : ByteSerializable
 
 val State.canEdit: Boolean get() = signedInUserId != null && signedInUserId == archive?.author?.id
+
+inline fun <reified T : Descriptor> State.descriptorChips() =
+    when (archive) {
+        null -> listOf()
+        else -> when (T::class) {
+            Descriptor.Tag::class -> archive.tags
+            Descriptor.Category::class -> archive.categories
+            else -> throw IllegalArgumentException("Invalid descriptor class: ${T::class.qualifiedName}")
+        }.map {
+            ChipInfo(
+                text = it.value,
+                kind = ChipKind.Assist
+            )
+        }
+    }

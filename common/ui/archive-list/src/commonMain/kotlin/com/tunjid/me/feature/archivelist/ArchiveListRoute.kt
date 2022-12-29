@@ -38,6 +38,7 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.plus
+import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
@@ -123,10 +124,14 @@ private fun ArchiveScreen(
                             GridCell(
                                 modifier = Modifier.animateItemPlacement(),
                                 item = item,
+                                query = state.queryState.currentQuery,
                                 onCategoryClicked = { category ->
                                     actions(
                                         Action.Fetch.QueryChange(
-                                            query = state.queryState.currentQuery.copy(offset = 0) + category,
+                                            query = state.queryState.currentQuery.copy(offset = 0).let { query ->
+                                                if (query.contentFilter.categories.contains(category)) query - category
+                                                else query + category
+                                            },
                                         )
                                     )
                                 },
@@ -164,6 +169,7 @@ private fun ArchiveScreen(
 private fun GridCell(
     modifier: Modifier = Modifier,
     item: ArchiveItem,
+    query: ArchiveQuery,
     onCategoryClicked: (Descriptor.Category) -> Unit,
     navigate: (String) -> Unit
 ) {
@@ -180,6 +186,7 @@ private fun GridCell(
 
         is ArchiveItem.Result -> ArchiveCard(
             modifier = modifier,
+            query = query,
             archiveItem = item,
             onArchiveSelected = { archive ->
                 navigate("archives/${archive.kind.type}/${archive.id.value}")

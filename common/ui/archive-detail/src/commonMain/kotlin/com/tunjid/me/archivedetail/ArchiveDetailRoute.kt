@@ -119,7 +119,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             name = "Categories:",
-            chips = state.archive?.categories?.map(Descriptor.Category::value) ?: listOf(),
+            chipInfo = state.descriptorChips<Descriptor.Category>(),
             color = MaterialTheme.colorScheme.secondary,
         )
 
@@ -140,7 +140,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             name = "Tags:",
-            chips = state.archive?.tags?.map(Descriptor.Tag::value) ?: listOf(),
+            chipInfo = state.descriptorChips<Descriptor.Tag>(),
             color = MaterialTheme.colorScheme.tertiary,
         )
 

@@ -18,7 +18,10 @@ package com.tunjid.me.feature.archivelist
 
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.ui.ChipInfo
+import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.tiler.TiledList
@@ -134,3 +137,30 @@ data class QueryState(
     val count: Long = 0,
 )
 
+inline fun <reified T : Descriptor> ArchiveItem.Result.descriptorChips(
+    query: ArchiveQuery
+) =
+    when (T::class) {
+        Descriptor.Tag::class -> archive.tags.map { it to query.contentFilter.tags.contains(it) }
+        Descriptor.Category::class -> archive.categories.map { it to query.contentFilter.categories.contains(it) }
+        else -> throw IllegalArgumentException("Invalid descriptor class: ${T::class.qualifiedName}")
+    }.map { (descriptor, selected) ->
+        ChipInfo(
+            text = descriptor.value,
+            kind = ChipKind.Filter(
+                selected = selected
+            )
+        )
+    }
+
+inline fun <reified T : Descriptor> ArchiveQuery.descriptorChips() =
+    when (T::class) {
+        Descriptor.Tag::class -> contentFilter.tags
+        Descriptor.Category::class -> contentFilter.categories
+        else -> throw IllegalArgumentException("Invalid descriptor class")
+    }.map {
+        ChipInfo(
+            text = it.value,
+            kind = ChipKind.Input(selected = true)
+        )
+    }
