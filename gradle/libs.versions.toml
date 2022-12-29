@@ -18,7 +18,7 @@ androidxWork = "2.7.1"
 googleMaterial = "1.7.0-beta01"
 gradleKotlinDsl = "3.1.0"
 jakeWhartonRetrofit = "0.8.0"
-jetbrainsCompose = "1.3.0-beta02"
+jetbrainsCompose = "1.3.0-rc01"
 junit4 = "4.13.2"
 kinject = "2.0.0"
 kotlin = "1.7.20"
@@ -31,7 +31,7 @@ mockk = "1.12.3"
 okhttp = "4.10.0"
 okio = "3.2.0"
 retrofit = "2.9.0"
-richtext = "0.13.0"
+richtext = "0.16.0"
 socketio = "2.0.0"
 sqldelight = "2.0.0-alpha03"
 tartakaKotlinInject = "0.5.1"
@@ -82,7 +82,7 @@ jakewharton-retrofit-serializationconverter = { group = "com.jakewharton.retrofi
 jetbrains-compose-animation = { group = "org.jetbrains.compose.animation", name = "animation", version.ref = "jetbrainsCompose" }
 jetbrains-compose-foundation-foundation = { group = "org.jetbrains.compose.foundation", name = "foundation", version.ref = "jetbrainsCompose" }
 jetbrains-compose-foundation-layout = { group = "org.jetbrains.compose.foundation", name = "foundation-layout", version.ref = "jetbrainsCompose" }
-jetbrains-compose-material = { group = "org.jetbrains.compose.material", name = "material", version.ref = "jetbrainsCompose" }
+jetbrains-compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "jetbrainsCompose" }
 jetbrains-compose-gradlePlugin = { group = "org.jetbrains.compose", name = "compose-gradle-plugin", version.ref = "jetbrainsCompose" }
 jetbrains-compose-runtime = { group = "org.jetbrains.compose.runtime", name = "runtime", version.ref = "jetbrainsCompose" }
 jetbrains-compose-ui-test = { group = "org.jetbrains.compose.ui", name = "ui-test-junit4", version.ref = "jetbrainsCompose" }
@@ -116,7 +116,7 @@ mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 richtext-commonmark = { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "richtext" }
-richtext-material = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material", version.ref = "richtext" }
+richtext-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "richtext" }
 socketio-client-jvm = { group = "io.socket", name = "socket.io-client", version.ref = "socketio" }
 squareup-okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 tartaka-kotlin-inject-compiler = { group = "me.tatarka.inject", name = "kotlin-inject-compiler-ksp", version.ref = "tartakaKotlinInject" }

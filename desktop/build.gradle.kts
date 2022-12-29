@@ -33,7 +33,7 @@ kotlin {
 
                 implementation(compose.desktop.currentOs)
 
-                implementation(libs.jetbrains.compose.material)
+                implementation(libs.jetbrains.compose.material3)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.coroutines.swing)
 

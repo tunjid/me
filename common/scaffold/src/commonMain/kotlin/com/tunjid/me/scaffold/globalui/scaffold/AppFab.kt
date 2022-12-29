@@ -23,7 +23,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -82,7 +82,7 @@ internal fun BoxScope.AppFab(
         enabled = enabled,
         onClick = { if (enabled) clicks(Unit) },
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.secondary
+            containerColor = MaterialTheme.colorScheme.tertiary
         ),
         contentPadding = PaddingValues(
             horizontal = 16.dp,

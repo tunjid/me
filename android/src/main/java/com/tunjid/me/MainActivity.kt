@@ -19,8 +19,7 @@ package com.tunjid.me
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -30,7 +29,6 @@ import androidx.compose.ui.graphics.toComposeRect
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
 import com.tunjid.me.common.ui.theme.AppTheme
@@ -64,17 +62,15 @@ class MainActivity : AppCompatActivity() {
 
         composeView.setContent {
             AppTheme {
-                Surface(color = MaterialTheme.colors.background) {
-                    CompositionLocalProvider(
-                        LocalScreenStateHolderCache provides meApp.screenStateHolderCache,
-                        LocalLifecycleStateHolder provides meApp.lifecycleStateHolder,
-                    ) {
-                        Scaffold(
-                            modifier = Modifier.then(dropModifier),
-                            navStateHolder = meApp.navStateHolder,
-                            globalUiStateHolder = meApp.globalUiStateHolder,
-                        )
-                    }
+                CompositionLocalProvider(
+                    LocalScreenStateHolderCache provides meApp.screenStateHolderCache,
+                    LocalLifecycleStateHolder provides meApp.lifecycleStateHolder,
+                ) {
+                    Scaffold(
+                        modifier = Modifier.then(dropModifier),
+                        navStateHolder = meApp.navStateHolder,
+                        globalUiStateHolder = meApp.globalUiStateHolder,
+                    )
                 }
                 AdaptNavigation(globalUiStateHolder = meApp.globalUiStateHolder)
             }

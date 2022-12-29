@@ -28,7 +28,7 @@ import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
@@ -170,7 +170,7 @@ private fun ResizableRouteContent(
         modifier = Modifier
             .width(width)
             .padding(start = startPadding ?: 0.dp)
-            .background(color = MaterialTheme.colors.surface),
+            .background(color = MaterialTheme.colorScheme.surface),
         content = {
             content()
         }

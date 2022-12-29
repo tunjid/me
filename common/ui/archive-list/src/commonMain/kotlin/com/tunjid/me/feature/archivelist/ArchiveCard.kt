@@ -20,12 +20,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,7 +56,7 @@ fun StickyHeader(
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(0.dp),
-        elevation = 1.dp
+        tonalElevation = 0.dp
     ) {
         Text(
             modifier = Modifier
@@ -90,13 +85,13 @@ fun ProgressBar(
             modifier = Modifier
                 .size(60.dp)
                 .align(Alignment.Center),
-            color = MaterialTheme.colors.onSurface
+            color = MaterialTheme.colorScheme.onSurface
         )
         else LinearProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .align(Alignment.Center),
-            color = MaterialTheme.colors.onSurface
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -119,7 +114,7 @@ fun ArchiveCard(
             .onGloballyPositioned { thumbnailWidth = it.size.width }
     }
 
-    Card(
+    ElevatedCard(
         modifier = modifier
             .padding(16.dp),
         onClick = {
@@ -190,7 +185,7 @@ private fun ArchiveCategories(
     Chips(
         modifier = Modifier.padding(horizontal = 8.dp),
         chips = categories.map(Descriptor.Category::value),
-        color = MaterialTheme.colors.primaryVariant,
+        color = MaterialTheme.colorScheme.secondary,
         onClick = { onCategoryClicked(Descriptor.Category(it)) }
     )
 }

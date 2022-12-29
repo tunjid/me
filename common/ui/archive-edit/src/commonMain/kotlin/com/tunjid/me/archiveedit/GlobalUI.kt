@@ -16,7 +16,7 @@
 
 package com.tunjid.me.archiveedit
 
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
@@ -70,7 +70,7 @@ internal fun GlobalUi(
             },
             navVisibility = NavVisibility.GoneIfBottomNav,
             insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colors.primary.toArgb(),
+            statusBarColor = MaterialTheme.colorScheme.primary.toArgb(),
         )
     )
 }

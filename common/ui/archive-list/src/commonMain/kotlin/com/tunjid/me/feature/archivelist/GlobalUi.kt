@@ -16,7 +16,7 @@
 
 package com.tunjid.me.feature.archivelist
 
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
@@ -90,7 +90,7 @@ fun GlobalUi(
                 })
             },
             navVisibility = NavVisibility.Visible,
-            statusBarColor = MaterialTheme.colors.primary.toArgb(),
+            statusBarColor = MaterialTheme.colorScheme.primary.toArgb(),
         )
     )
 }

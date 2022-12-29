@@ -31,7 +31,7 @@ kotlin {
 
                 implementation(libs.jetbrains.compose.runtime)
                 implementation(libs.jetbrains.compose.animation)
-                implementation(libs.jetbrains.compose.material)
+                implementation(libs.jetbrains.compose.material3)
                 implementation(libs.jetbrains.compose.foundation.layout)
 
                 implementation(libs.kotlinx.coroutines.core)
@@ -42,7 +42,7 @@ kotlin {
                 implementation(libs.ktor.io.core)
 
                 implementation(libs.richtext.commonmark)
-                implementation(libs.richtext.material)
+                implementation(libs.richtext.material3)
 
                 implementation(libs.tunjid.tiler.tiler)
 

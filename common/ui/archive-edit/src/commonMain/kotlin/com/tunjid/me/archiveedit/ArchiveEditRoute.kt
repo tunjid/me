@@ -25,11 +25,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,7 +41,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.halilibo.richtext.markdown.Markdown
-import com.halilibo.richtext.ui.material.MaterialRichText
+import com.halilibo.richtext.ui.material3.Material3RichText
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveUpsert
@@ -201,7 +201,7 @@ private fun TitleEditor(
         maxLines = 2,
         colors = Unstyled(),
         textStyle = LocalTextStyle.current.copy(
-            color = MaterialTheme.colors.onSurface,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 24.sp
         ),
         label = { Text(text = "Title", fontSize = 24.sp) },
@@ -219,7 +219,7 @@ private fun DescriptionEditor(
         maxLines = 2,
         colors = Unstyled(),
         textStyle = LocalTextStyle.current.copy(
-            color = MaterialTheme.colors.onSurface,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 18.sp
         ),
         label = { Text(text = "Description", fontSize = 18.sp) },
@@ -237,7 +237,7 @@ private fun VideoUrlEditor(
         maxLines = 1,
         colors = Unstyled(),
         textStyle = LocalTextStyle.current.copy(
-            color = MaterialTheme.colors.onSurface,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 16.sp
         ),
         label = { Text(text = "Video Url") },
@@ -254,7 +254,7 @@ private fun BodyEditor(
         value = body,
         colors = Unstyled(),
         textStyle = LocalTextStyle.current.copy(
-            color = MaterialTheme.colors.onSurface,
+            color = MaterialTheme.colorScheme.onSurface,
             fontFamily = FontFamily.Monospace,
             fontSize = 16.sp,
             lineHeight = 24.sp
@@ -266,7 +266,7 @@ private fun BodyEditor(
 
 @Composable
 private fun BodyPreview(body: String) {
-    MaterialRichText(
+    Material3RichText(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
         Markdown(
@@ -292,9 +292,9 @@ private fun ChipsEditor(
 
 @Composable
 private fun Unstyled() = TextFieldDefaults.textFieldColors(
-    backgroundColor = Color.Transparent,
+    containerColor = Color.Transparent,
     focusedIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = Color.Transparent,
-    cursorColor = MaterialTheme.colors.onSurface,
+    cursorColor = MaterialTheme.colorScheme.onSurface,
 )

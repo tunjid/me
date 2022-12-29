@@ -19,7 +19,7 @@ package com.tunjid.me.scaffold.globalui.scaffold
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -65,29 +65,24 @@ internal fun BoxScope.AppBottomNav(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
-            backgroundColor = MaterialTheme.colors.primary,
         ) {
 
-            BottomNavigation(
-                backgroundColor = MaterialTheme.colors.primary,
-            ) {
-                nav.navItems
-                    .forEach { navItem ->
-                        BottomNavigationItem(
-                            icon = {
-                                Icon(
-                                    imageVector = navItem.icon,
-                                    contentDescription = navItem.name
-                                )
-                            },
-                            label = { Text(navItem.name) },
-                            selected = navItem.selected,
-                            onClick = {
-                                navStateHolder.accept { mainNav.navItemSelected(item = navItem) }
-                            }
-                        )
-                    }
-            }
+            nav.navItems
+                .forEach { navItem ->
+                    NavigationBarItem(
+                        icon = {
+                            Icon(
+                                imageVector = navItem.icon,
+                                contentDescription = navItem.name
+                            )
+                        },
+                        label = { Text(navItem.name) },
+                        selected = navItem.selected,
+                        onClick = {
+                            navStateHolder.accept { mainNav.navItemSelected(item = navItem) }
+                        }
+                    )
+                }
         }
         Spacer(
             modifier = Modifier
@@ -95,7 +90,7 @@ internal fun BoxScope.AppBottomNav(
                 .height(with(LocalDensity.current) {
                     state.navBarSize.toDp()
                 })
-                .background(color = MaterialTheme.colors.primary)
+                .background(color = MaterialTheme.colorScheme.primary)
         )
     }
 }

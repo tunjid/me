@@ -18,6 +18,7 @@ package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
@@ -69,45 +70,46 @@ fun Scaffold(
             saveableStateHolder = saveableStateHolder,
             route = containerTwoRoute
         )
-
-        Box(
-            modifier = modifier.fillMaxSize()
-        ) {
-            AppNavRail(
-                globalUiStateHolder = globalUiStateHolder,
-                navStateHolder = navStateHolder,
-            )
-            AppToolbar(
-                globalUiStateHolder = globalUiStateHolder,
-                navStateHolder = navStateHolder,
-            )
-            AppRouteContainer(
-                globalUiStateHolder = globalUiStateHolder,
-                navStateHolder = navStateHolder,
-                moveKind = moveKind,
-                mainContent = {
-                    mainContainer.content(
-                        containerOneContent = containerOneContent,
-                        containerTwoContent = containerTwoContent
-                    )
-                },
-                supportingContent = {
-                    supportingContainer.content(
-                        containerOneContent = containerOneContent,
-                        containerTwoContent = containerTwoContent
-                    )
-                }
-            )
-            AppFab(
-                globalUiStateHolder = globalUiStateHolder,
-            )
-            AppBottomNav(
-                globalUiStateHolder = globalUiStateHolder,
-                navStateHolder = navStateHolder,
-            )
-            AppSnackBar(
-                globalUiStateHolder = globalUiStateHolder,
-            )
+        Surface {
+            Box(
+                modifier = modifier.fillMaxSize()
+            ) {
+                AppNavRail(
+                    globalUiStateHolder = globalUiStateHolder,
+                    navStateHolder = navStateHolder,
+                )
+                AppToolbar(
+                    globalUiStateHolder = globalUiStateHolder,
+                    navStateHolder = navStateHolder,
+                )
+                AppRouteContainer(
+                    globalUiStateHolder = globalUiStateHolder,
+                    navStateHolder = navStateHolder,
+                    moveKind = moveKind,
+                    mainContent = {
+                        mainContainer.content(
+                            containerOneContent = containerOneContent,
+                            containerTwoContent = containerTwoContent
+                        )
+                    },
+                    supportingContent = {
+                        supportingContainer.content(
+                            containerOneContent = containerOneContent,
+                            containerTwoContent = containerTwoContent
+                        )
+                    }
+                )
+                AppFab(
+                    globalUiStateHolder = globalUiStateHolder,
+                )
+                AppBottomNav(
+                    globalUiStateHolder = globalUiStateHolder,
+                    navStateHolder = navStateHolder,
+                )
+                AppSnackBar(
+                    globalUiStateHolder = globalUiStateHolder,
+                )
+            }
         }
     }
 }

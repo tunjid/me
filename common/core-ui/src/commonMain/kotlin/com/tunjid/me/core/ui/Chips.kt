@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
@@ -97,11 +97,11 @@ fun Chips(
                         onAny = { editInfo.onChipChanged(ChipAction.Added) },
                     ),
                     colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = Color.Transparent,
+                        containerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colors.onSurface,
+                        cursorColor = MaterialTheme.colorScheme.onSurface,
                     )
                 )
             }
@@ -112,33 +112,56 @@ fun Chips(
 @Composable
 fun Chip(
     text: String,
-    color: Color = MaterialTheme.colors.secondary,
+    color: Color = MaterialTheme.colorScheme.tertiary,
     onClick: ((String) -> Unit)? = null,
     editInfo: ChipEditInfo? = null
 ) {
-    Button(
-        modifier = Modifier
-            .wrapContentSize()
-            .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
-        onClick = { onClick?.invoke(text) },
-        colors = ButtonDefaults.buttonColors(backgroundColor = color),
-        shape = RoundedCornerShape(20.dp),
-        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
-    ) {
-        Text(
-            text = text,
-            fontSize = 12.sp,
-            maxLines = 1
+    Row {
+        FilterChip(
+            selected = false,
+            onClick = { onClick?.invoke(text) },
+            label = {
+                Text(
+                    text = text,
+                    fontSize = 12.sp,
+                    maxLines = 1
+                )
+            },
+            trailingIcon = {
+                if (editInfo != null) Icon(
+                    modifier = Modifier
+                        .scale(0.6f)
+                        .clickable { editInfo.onChipChanged(ChipAction.Removed(text)) },
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Close"
+                )
+            }
         )
-        if (editInfo != null) Icon(
-            modifier = Modifier
-                .scale(0.6f)
-                .clickable { editInfo.onChipChanged(ChipAction.Removed(text)) },
-            imageVector = Icons.Filled.Close,
-            contentDescription = "Close"
-        )
+        Spacer(Modifier.width(4.dp))
     }
-    Spacer(Modifier.width(4.dp))
+//    Button(
+//        modifier = Modifier
+//            .wrapContentSize()
+//            .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
+//        onClick = { onClick?.invoke(text) },
+//        colors = ButtonDefaults.buttonColors(containerColor = color),
+//        shape = RoundedCornerShape(20.dp),
+//        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
+//    ) {
+//        Text(
+//            text = text,
+//            fontSize = 12.sp,
+//            maxLines = 1
+//        )
+//        if (editInfo != null) Icon(
+//            modifier = Modifier
+//                .scale(0.6f)
+//                .clickable { editInfo.onChipChanged(ChipAction.Removed(text)) },
+//            imageVector = Icons.Filled.Close,
+//            contentDescription = "Close"
+//        )
+//    }
+//    Spacer(Modifier.width(4.dp))
 }
 
 @Composable

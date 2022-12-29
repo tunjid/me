@@ -24,12 +24,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.*
+import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -40,10 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.WindowSizeClass
-import com.tunjid.me.scaffold.globalui.navRailVisible
 import com.tunjid.me.scaffold.globalui.navRailWidth
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.globalui.toolbarSize
@@ -78,21 +71,17 @@ internal fun AppNavRail(
     val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
     val navRailWidth by animateDpAsState(windowSizeClass.navRailWidth())
 
-    Surface(
+    NavigationRail(
         modifier = Modifier
-            .fillMaxHeight(),
-        color = MaterialTheme.colors.primary
+            .fillMaxHeight()
+            .width(navRailWidth),
     ) {
-        Column(
-            modifier = Modifier
-                .padding(top = topClearance)
-                .width(navRailWidth),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
-            navItems.forEach { navItem ->
-                NavRailItem(item = navItem, navStateHolder = navStateHolder)
-            }
+        Spacer(modifier = Modifier
+            .padding(top = topClearance)
+            .height(24.dp)
+        )
+        navItems.forEach { navItem ->
+            NavRailItem(item = navItem, navStateHolder = navStateHolder)
         }
     }
 }
@@ -102,36 +91,24 @@ private fun NavRailItem(
     item: NavItem,
     navStateHolder: NavStateHolder,
 ) {
-    Button(
-        elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
-        contentPadding = PaddingValues(
-            start = 8.dp,
-            end = 8.dp,
-            top = 16.dp,
-            bottom = 16.dp,
-        ),
-        onClick = {
-            navStateHolder.accept { mainNav.navItemSelected(item = item) }
-        }
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val alpha = if (item.selected) 1f else 0.6f
+    val alpha = if (item.selected) 1f else 0.6f
+    NavigationRailItem(
+        selected = item.selected,
+        icon = {
             Icon(
                 imageVector = item.icon,
                 contentDescription = item.name,
-                tint = MaterialTheme.colors.onSurface.copy(
-                    alpha = alpha
-                )
             )
-            Spacer(modifier = Modifier.height(8.dp))
+        },
+        label = {
             Text(
                 modifier = Modifier.alpha(alpha),
                 text = item.name,
                 fontSize = 12.sp
             )
+        },
+        onClick = {
+            navStateHolder.accept { mainNav.navItemSelected(item = item) }
         }
-    }
-    Spacer(modifier = Modifier.height(24.dp))
+    )
 }

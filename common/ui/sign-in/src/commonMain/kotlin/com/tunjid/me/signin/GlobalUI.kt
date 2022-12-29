@@ -16,7 +16,7 @@
 
 package com.tunjid.me.signin
 
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
 import com.tunjid.me.scaffold.globalui.*
@@ -44,7 +44,7 @@ internal fun GlobalUi(
             },
             navVisibility = NavVisibility.Gone,
             insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colors.primary.toArgb(),
+            statusBarColor = MaterialTheme.colorScheme.primary.toArgb(),
         )
 
     )

@@ -33,7 +33,7 @@ fun org.gradle.api.Project.configureUiModule(
 
                 implementation(libs.findLibrary("jetbrains-compose-runtime").get())
                 implementation(libs.findLibrary("jetbrains-compose-animation").get())
-                implementation(libs.findLibrary("jetbrains-compose-material").get())
+                implementation(libs.findLibrary("jetbrains-compose-material3").get())
                 implementation(libs.findLibrary("jetbrains-compose-foundation-layout").get())
 
                 implementation(libs.findLibrary("kotlinx-coroutines-core").get())

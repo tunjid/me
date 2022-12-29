@@ -58,19 +58,15 @@ fun main() {
                 )
             }
             AppTheme {
-                Surface(
-                    color = MaterialTheme.colors.background,
+                CompositionLocalProvider(
+                    LocalScreenStateHolderCache provides app.screenStateHolderCache,
+                    LocalLifecycleStateHolder provides app.lifecycleStateHolder,
                 ) {
-                    CompositionLocalProvider(
-                        LocalScreenStateHolderCache provides app.screenStateHolderCache,
-                        LocalLifecycleStateHolder provides app.lifecycleStateHolder,
-                    ) {
-                        Scaffold(
-                            modifier = Modifier.then(dropParent),
-                            navStateHolder = app.navStateHolder,
-                            globalUiStateHolder = app.globalUiStateHolder,
-                        )
-                    }
+                    Scaffold(
+                        modifier = Modifier.then(dropParent),
+                        navStateHolder = app.navStateHolder,
+                        globalUiStateHolder = app.globalUiStateHolder,
+                    )
                 }
             }
 

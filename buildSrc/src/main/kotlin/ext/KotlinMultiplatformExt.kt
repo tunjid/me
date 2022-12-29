@@ -34,6 +34,7 @@ fun org.gradle.api.Project.configureKotlinMultiplatform(
                 languageSettings.apply {
                     optIn("androidx.compose.animation.ExperimentalAnimationApi")
                     optIn("androidx.compose.foundation.ExperimentalFoundationApi")
+                    optIn("androidx.compose.material3.ExperimentalMaterial3Api")
                     optIn("androidx.compose.material.ExperimentalMaterialApi")
                     optIn("androidx.compose.ui.ExperimentalComposeUiApi")
                     optIn("kotlinx.serialization.ExperimentalSerializationApi")

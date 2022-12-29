@@ -40,7 +40,7 @@ kotlin {
                 api(project(":common:ui:settings"))
                 api(project(":common:ui:sign-in"))
 
-                implementation(libs.jetbrains.compose.material)
+                implementation(libs.jetbrains.compose.material3)
 
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.protobuf)

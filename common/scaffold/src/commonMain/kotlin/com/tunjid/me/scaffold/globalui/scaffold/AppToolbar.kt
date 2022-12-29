@@ -20,13 +20,13 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -131,9 +131,9 @@ private fun UpButton(
             modifier = Modifier
                 .size(upButtonSize),
             onClick = onUpPressed,
-            elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Transparent
+                containerColor = Color.Transparent
             ),
             // Uses ButtonDefaults.ContentPadding by default
             contentPadding = PaddingValues(
@@ -169,7 +169,7 @@ private fun Title(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             fontSize = 18.sp,
-            color = MaterialTheme.colors.onPrimary
+            color = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
@@ -215,7 +215,7 @@ private fun ToolbarIcon(
             content = {
                 Text(
                     text = item.text,
-                    color = MaterialTheme.colors.onPrimary
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         )
@@ -229,7 +229,7 @@ private fun ToolbarIcon(
             Icon(
                 imageVector = vector,
                 contentDescription = item.text,
-                tint = MaterialTheme.colors.onPrimary
+                tint = MaterialTheme.colorScheme.onPrimary
             )
         }
     }

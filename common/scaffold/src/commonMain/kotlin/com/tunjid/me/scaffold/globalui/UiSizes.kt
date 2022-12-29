@@ -19,8 +19,7 @@ package com.tunjid.me.scaffold.globalui
 import androidx.compose.ui.unit.dp
 
 internal object UiSizes {
-    val supportingPanelWidth = 400.dp
-    val bottomNavSize = 56.dp
+    val bottomNavSize = 80.dp
     val snackbarPeek = 56.dp
 }
 

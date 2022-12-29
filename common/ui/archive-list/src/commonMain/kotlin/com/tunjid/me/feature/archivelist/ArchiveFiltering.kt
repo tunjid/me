@@ -22,12 +22,12 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
@@ -58,7 +58,7 @@ fun ArchiveFilters(
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = MaterialTheme.shapes.medium,
-        elevation = 1.dp,
+        tonalElevation = 1.dp,
     ) {
 
         Column(
@@ -125,7 +125,7 @@ private fun SortButton(
         },
         shape = RoundedCornerShape(40.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.primary
+            containerColor = MaterialTheme.colorScheme.primary
         ),
         contentPadding = PaddingValues(
             vertical = 4.dp,
@@ -166,9 +166,9 @@ private inline fun <reified T : Descriptor> DescriptorDetailButton(
         onClick = {},
         shape = RoundedCornerShape(40.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = when (T::class) {
-                Descriptor.Category::class -> MaterialTheme.colors.primaryVariant
-                Descriptor.Tag::class -> MaterialTheme.colors.secondary
+            containerColor = when (T::class) {
+                Descriptor.Category::class -> MaterialTheme.colorScheme.secondary
+                Descriptor.Tag::class -> MaterialTheme.colorScheme.tertiary
                 else -> throw IllegalStateException()
             }
         ),
@@ -199,7 +199,7 @@ private fun FilterChips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
             chips = state.currentQuery.contentFilter.categories.map(Descriptor.Category::value),
-            color = MaterialTheme.colors.primaryVariant,
+            color = MaterialTheme.colorScheme.secondary,
             editInfo = ChipEditInfo(
                 currentText = state.categoryText.value,
                 onChipChanged = onChipFilterChanged(
@@ -214,7 +214,7 @@ private fun FilterChips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
             chips = state.currentQuery.contentFilter.tags.map(Descriptor.Tag::value),
-            color = MaterialTheme.colors.secondary,
+            color = MaterialTheme.colorScheme.tertiary,
             editInfo = ChipEditInfo(
                 currentText = state.tagText.value,
                 onChipChanged = onChipFilterChanged(

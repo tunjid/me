@@ -32,7 +32,7 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
 
                 implementation(libs.richtext.commonmark)
-                implementation(libs.richtext.material)
+                implementation(libs.richtext.material3)
 
                 implementation(libs.tunjid.mutator.core.common)
                 implementation(libs.tunjid.mutator.coroutines.common)

@@ -23,7 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
@@ -34,7 +34,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.Markdown
-import com.halilibo.richtext.ui.material.MaterialRichText
+import com.halilibo.richtext.ui.material3.Material3RichText
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
@@ -96,7 +96,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
                 })
             },
             insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colors.primary.toArgb(),
+            statusBarColor = MaterialTheme.colorScheme.primary.toArgb(),
         )
     )
 
@@ -120,12 +120,12 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
                 .padding(horizontal = 16.dp),
             name = "Categories:",
             chips = state.archive?.categories?.map(Descriptor.Category::value) ?: listOf(),
-            color = MaterialTheme.colors.primaryVariant,
+            color = MaterialTheme.colorScheme.secondary,
         )
 
         Spacer(modifier = Modifier.padding(16.dp))
 
-        MaterialRichText(
+        Material3RichText(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
             if (archive != null) Markdown(
@@ -141,7 +141,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
                 .padding(horizontal = 16.dp),
             name = "Tags:",
             chips = state.archive?.tags?.map(Descriptor.Tag::value) ?: listOf(),
-            color = MaterialTheme.colors.secondary,
+            color = MaterialTheme.colorScheme.tertiary,
         )
 
         Spacer(modifier = Modifier.padding(64.dp + navBarSizeDp))

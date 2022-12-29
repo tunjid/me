@@ -26,7 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
@@ -72,7 +72,7 @@ private fun ProfileScreen(stateHolder: ProfileStateHolder) {
             toolbarTitle = "Profile",
             navVisibility = NavVisibility.Gone,
             insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colors.primary.toArgb(),
+            statusBarColor = MaterialTheme.colorScheme.primary.toArgb(),
         )
     )
 
