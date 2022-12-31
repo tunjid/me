@@ -39,12 +39,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.ui.ChipEditInfo
 import com.tunjid.me.core.ui.Chips
+import com.tunjid.me.scaffold.nav.icon
 
 @Composable
 fun ArchiveFilters(
@@ -77,7 +79,7 @@ fun ArchiveFilters(
                     item.currentQuery.contentFilter.categories + item.currentQuery.contentFilter.tags
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                ArchiveCountButton(count = item.count)
+                ArchiveCountButton(count = item.count, kind = item.currentQuery.kind)
                 Spacer(modifier = Modifier.weight(1f))
                 DropDownButton(isExpanded, onChanged)
             }
@@ -103,10 +105,11 @@ private fun SortButton(
     val rotation by animateFloatAsState(
         targetValue = if (desc) 0f else 180f
     )
-    FilledTonalButton(
+
+    FilterChip(
         modifier = Modifier
-            .animateContentSize()
-            .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
+            .animateContentSize(),
+        selected = true,
         onClick = {
             onChanged(
                 Action.Fetch.QueryChange(
@@ -117,32 +120,31 @@ private fun SortButton(
                 )
             )
         },
-        contentPadding = PaddingValues(
-            vertical = 4.dp,
-            horizontal = 8.dp
-        ),
-        content = {
+        shape = MaterialTheme.shapes.small,
+        leadingIcon = {
+            Icon(
+                modifier = Modifier
+                    .rotate(rotation),
+                imageVector = Filled.ArrowDropDown,
+                contentDescription = "Arrow"
+            )
+        },
+        label = {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Sorted")
-                Icon(
-                    modifier = Modifier
-                        .padding(horizontal = 1.dp)
-                        .rotate(rotation),
-                    imageVector = Filled.ArrowDropDown,
-                    contentDescription = "Arrow"
-                )
                 Text("by")
-                Icon(
-                    modifier = Modifier
-                        .padding(horizontal = 2.dp)
-                        .scale(0.8f),
-                    imageVector = Filled.DateRange,
-                    contentDescription = "Date"
-                )
             }
-        })
+        },
+        trailingIcon = {
+            Icon(
+                modifier = Modifier
+                    .scale(0.8f),
+                imageVector = Filled.DateRange,
+                contentDescription = "Date"
+            )
+        }
+    )
 }
 
 @Composable
@@ -169,7 +171,8 @@ private inline fun DescriptorDetailButton(
 
 @Composable
 private fun ArchiveCountButton(
-    count: Long
+    count: Long,
+    kind: ArchiveKind
 ) {
     AssistChip(
         modifier = Modifier
@@ -177,11 +180,14 @@ private fun ArchiveCountButton(
         onClick = {},
         shape = MaterialTheme.shapes.small,
         label = {
-            Text(
-                when (count) {
-                    1L -> "1 archive"
-                    else -> "$count archives"
-                }
+            Text("$count")
+        },
+        trailingIcon = {
+            Icon(
+                modifier = Modifier
+                    .scale(0.8f),
+                imageVector = kind.icon,
+                contentDescription = "Date"
             )
         }
     )
