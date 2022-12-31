@@ -25,7 +25,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.*
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,7 +45,6 @@ import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.ui.ChipEditInfo
 import com.tunjid.me.core.ui.Chips
-import com.tunjid.me.scaffold.nav.FilterList
 
 @Composable
 fun ArchiveFilters(
@@ -71,6 +76,8 @@ fun ArchiveFilters(
                 DescriptorDetailButton(
                     item.currentQuery.contentFilter.categories + item.currentQuery.contentFilter.tags
                 )
+                Spacer(modifier = Modifier.width(8.dp))
+                ArchiveCountButton(count = item.count)
                 Spacer(modifier = Modifier.weight(1f))
                 DropDownButton(isExpanded, onChanged)
             }
@@ -139,27 +146,45 @@ private fun SortButton(
 }
 
 @Composable
-private inline fun  DescriptorDetailButton(
+private inline fun DescriptorDetailButton(
     descriptors: List<Descriptor>
 ) {
-    Button(
+    FilterChip(
         modifier = Modifier
-            .animateContentSize()
-            .lilButton(),
+            .animateContentSize(),
+        selected = descriptors.isNotEmpty(),
         onClick = {},
-        shape = RoundedCornerShape(40.dp),
-        contentPadding = PaddingValues(
-            vertical = 4.dp,
-            horizontal = 8.dp
-        ),
-        content = {
+        shape = MaterialTheme.shapes.small,
+        label = {
             Text(
                 when (descriptors.size) {
                     0 -> "No filters"
+                    1 -> "1 filter"
                     else -> "${descriptors.size} filters"
                 }
             )
-        })
+        }
+    )
+}
+
+@Composable
+private fun ArchiveCountButton(
+    count: Long
+) {
+    AssistChip(
+        modifier = Modifier
+            .animateContentSize(),
+        onClick = {},
+        shape = MaterialTheme.shapes.small,
+        label = {
+            Text(
+                when (count) {
+                    1L -> "1 archive"
+                    else -> "$count archives"
+                }
+            )
+        }
+    )
 }
 
 @Composable
@@ -175,7 +200,6 @@ private fun FilterChips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
             chipInfo = state.currentQuery.descriptorChips<Descriptor.Category>(),
-            color = MaterialTheme.colorScheme.secondary,
             editInfo = ChipEditInfo(
                 currentText = state.categoryText.value,
                 onChipChanged = onChipFilterChanged(
@@ -190,7 +214,6 @@ private fun FilterChips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
             chipInfo = state.currentQuery.descriptorChips<Descriptor.Tag>(),
-            color = MaterialTheme.colorScheme.tertiary,
             editInfo = ChipEditInfo(
                 currentText = state.tagText.value,
                 onChipChanged = onChipFilterChanged(

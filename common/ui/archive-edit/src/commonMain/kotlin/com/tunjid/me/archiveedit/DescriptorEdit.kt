@@ -18,7 +18,6 @@ package com.tunjid.me.archiveedit
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.tunjid.me.core.model.ArchiveUpsert
@@ -41,7 +40,6 @@ fun EditChips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
             chipInfo = upsert.descriptorChips<Descriptor.Category>(),
-            color = MaterialTheme.colorScheme.secondary,
             editInfo = ChipEditInfo(
                 currentText = state.categoryText.value,
                 onChipChanged = onChipFilterChanged(
@@ -56,7 +54,6 @@ fun EditChips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
             chipInfo = upsert.descriptorChips<Descriptor.Tag>(),
-            color = MaterialTheme.colorScheme.tertiary,
             editInfo = ChipEditInfo(
                 currentText = state.tagText.value,
                 onChipChanged = onChipFilterChanged(

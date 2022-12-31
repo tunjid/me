@@ -188,7 +188,6 @@ private fun ArchiveCategories(
     Chips(
         modifier = Modifier.padding(horizontal = 8.dp),
         chipInfo = chipInfoList,
-        color = MaterialTheme.colorScheme.secondary,
         onClick = { onCategoryClicked(Descriptor.Category(it)) }
     )
 }

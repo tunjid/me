@@ -64,7 +64,6 @@ sealed class ChipKind {
 fun Chips(
     modifier: Modifier = Modifier,
     name: String? = null,
-    color: Color,
     chipInfo: List<ChipInfo>,
     onClick: ((String) -> Unit)? = null,
     editInfo: ChipEditInfo? = null
@@ -146,6 +145,7 @@ fun Chip(
     Row {
         when (val kind = info.kind) {
             is ChipKind.Assist -> AssistChip(
+                shape = MaterialTheme.shapes.small,
                 onClick = { onClick?.invoke(info.text) },
                 colors = when (val tint = kind.tint) {
                     null -> AssistChipDefaults.assistChipColors()
@@ -157,6 +157,7 @@ fun Chip(
 
             is ChipKind.Filter -> FilterChip(
                 selected = kind.selected,
+                shape = MaterialTheme.shapes.small,
                 onClick = { onClick?.invoke(info.text) },
                 label = chipLabel,
                 trailingIcon = trailingIcon
@@ -164,6 +165,7 @@ fun Chip(
 
             is ChipKind.Input -> InputChip(
                 selected = kind.selected,
+                shape = MaterialTheme.shapes.small,
                 onClick = { onClick?.invoke(info.text) },
                 label = chipLabel,
                 trailingIcon = trailingIcon
@@ -171,6 +173,7 @@ fun Chip(
             )
 
             ChipKind.Suggestion -> SuggestionChip(
+                shape = MaterialTheme.shapes.small,
                 onClick = { onClick?.invoke(info.text) },
                 label = chipLabel,
             )
@@ -186,7 +189,6 @@ expect fun ChipRow(content: @Composable () -> Unit)
 @Composable
 private fun PreviewStaticChips() {
     Chips(
-        color = Color.Blue,
         chipInfo = listOf(
             "abc",
             "def",
@@ -208,7 +210,6 @@ private fun PreviewStaticChips() {
 @Composable
 private fun PreviewEditableChips() {
     Chips(
-        color = Color.Blue,
         chipInfo = listOf(
             "abc",
             "def",

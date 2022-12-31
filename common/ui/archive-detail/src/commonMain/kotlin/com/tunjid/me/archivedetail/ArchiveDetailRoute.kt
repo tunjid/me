@@ -120,7 +120,6 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
                 .padding(horizontal = 16.dp),
             name = "Categories:",
             chipInfo = state.descriptorChips<Descriptor.Category>(),
-            color = MaterialTheme.colorScheme.secondary,
         )
 
         Spacer(modifier = Modifier.padding(16.dp))
@@ -141,7 +140,6 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
                 .padding(horizontal = 16.dp),
             name = "Tags:",
             chipInfo = state.descriptorChips<Descriptor.Tag>(),
-            color = MaterialTheme.colorScheme.tertiary,
         )
 
         Spacer(modifier = Modifier.padding(64.dp + navBarSizeDp))
