@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
@@ -164,8 +165,8 @@ private fun DragDropThumbnail(
 
     val borderColor by animateColorAsState(
         when (dragStatus) {
-            DragStatus.InWindow -> Color.Red
-            DragStatus.InThumbnail -> Color.Green
+            DragStatus.InWindow -> MaterialTheme.colorScheme.errorContainer
+            DragStatus.InThumbnail -> MaterialTheme.colorScheme.primaryContainer
             DragStatus.None -> Color.Transparent
         }
     )
@@ -175,9 +176,11 @@ private fun DragDropThumbnail(
             .heightIn(max = 300.dp)
             .aspectRatio(ratio = 16f/9f)
             .padding(horizontal = 16.dp)
+            .clip(MaterialTheme.shapes.medium)
             .border(
                 width = 2.dp,
-                color = borderColor
+                color = borderColor,
+                shape = MaterialTheme.shapes.medium,
             )
             .dropTarget(
                 onDragStarted = { _, _ -> permissionState.value },

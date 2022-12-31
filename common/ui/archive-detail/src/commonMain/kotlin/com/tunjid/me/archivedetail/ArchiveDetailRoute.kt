@@ -27,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -111,6 +112,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
                 .heightIn(max = 300.dp)
                 .aspectRatio(ratio = 16f/9f)
                 .padding(horizontal = 16.dp)
+                .clip(MaterialTheme.shapes.medium)
         )
         Chips(
             modifier = Modifier
