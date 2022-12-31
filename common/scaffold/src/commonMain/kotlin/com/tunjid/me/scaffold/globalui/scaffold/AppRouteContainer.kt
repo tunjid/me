@@ -178,7 +178,7 @@ private fun ResizableRouteContent(
 }
 
 private fun navContentSizeSpring() = spring<Dp>(
-    stiffness = Spring.StiffnessLow
+    stiffness = Spring.StiffnessMediumLow
 )
 
 @Composable
