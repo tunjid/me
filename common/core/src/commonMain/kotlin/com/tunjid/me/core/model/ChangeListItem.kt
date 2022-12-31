@@ -16,10 +16,12 @@
 
 package com.tunjid.me.core.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ChangeListItem(
+    @SerialName("_id")
     val id: String,
     val changeId: ChangeListId,
     val changeType: String,
