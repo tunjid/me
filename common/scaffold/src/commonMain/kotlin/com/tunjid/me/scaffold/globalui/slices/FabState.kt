@@ -22,11 +22,13 @@ import com.tunjid.me.scaffold.globalui.Ingress
 import com.tunjid.me.scaffold.globalui.InsetDescriptor
 import com.tunjid.me.scaffold.globalui.KeyboardAware
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.bottomNavVisible
 
 internal data class FabState(
     val fabVisible: Boolean,
     val bottomNavVisible: Boolean,
+    val windowSizeClass: WindowSizeClass,
     val snackbarOffset: Dp,
     val icon: ImageVector,
     val extended: Boolean,
@@ -42,6 +44,7 @@ internal val UiState.fabState
         fabVisible = fabShows,
         snackbarOffset = snackbarOffset,
         bottomNavVisible = bottomNavVisible,
+        windowSizeClass = windowSizeClass,
         icon = fabIcon,
         text = fabText,
         extended = fabExtended,

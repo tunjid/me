@@ -32,13 +32,14 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.peek
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.snackbarPositionalState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import kotlinx.coroutines.delay
+
+private val snackbarPeek = 56.dp
 
 /**
  * Motionally intelligent Snackbar shared amongst nav routes in the app
@@ -65,7 +66,7 @@ internal fun BoxScope.AppSnackBar(
     val showing = head != null
     val position by animateDpAsState(
         if (showing) -(16.dp + (state.windowSizeClass.bottomNavSize() countIf state.bottomNavVisible))
-        else UiSizes.snackbarPeek
+        else snackbarPeek
     )
     val fabOffset by animateDpAsState(
         if (showing) with(LocalDensity.current) {
@@ -73,7 +74,7 @@ internal fun BoxScope.AppSnackBar(
                 state.keyboardSize > 0 -> state.keyboardSize.toDp() +
                         snackbarHeight.toDp()
 
-                else -> (UiSizes.bottomNavSize countIf state.bottomNavVisible) +
+                else -> (state.windowSizeClass.bottomNavSize() countIf state.bottomNavVisible) +
                         state.navBarSize.toDp() +
                         snackbarHeight.toDp()
             }
@@ -100,7 +101,7 @@ internal fun BoxScope.AppSnackBar(
     }
 
     LaunchedEffect(position) {
-        if (position == UiSizes.snackbarPeek && !canShow) canShow = true
+        if (position == snackbarPeek && !canShow) canShow = true
     }
 
     LaunchedEffect(fabOffset) {

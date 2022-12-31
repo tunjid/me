@@ -27,8 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.NavStateHolder
@@ -45,12 +45,15 @@ internal fun BoxScope.AppBottomNav(
     navStateHolder: NavStateHolder,
 ) {
     val nav by navStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = NavState::mainNav)
-    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::bottomNavPositionalState)
+    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = UiState::bottomNavPositionalState
+    )
+    val windowSizeClass = state.windowSizeClass
 
     val bottomNavPosition by animateDpAsState(
         when {
             state.bottomNavVisible -> 0.dp
-            else -> UiSizes.bottomNavSize + with(LocalDensity.current) { state.navBarSize.toDp() }
+            else -> windowSizeClass.bottomNavSize() + with(LocalDensity.current) { state.navBarSize.toDp() }
         }
     )
 

@@ -18,10 +18,9 @@ package com.tunjid.me.scaffold.globalui
 
 import androidx.compose.ui.unit.dp
 
-internal object UiSizes {
-    val bottomNavSize = 80.dp
-    val snackbarPeek = 56.dp
-}
+enum class WindowSizeClass { COMPACT, MEDIUM, EXPANDED }
+
+val WindowSizeClass.isNotExpanded get() = this != WindowSizeClass.EXPANDED
 
 fun WindowSizeClass.navRailWidth() =
     when (this) {
@@ -40,9 +39,9 @@ fun WindowSizeClass.toolbarSize() =
 
 fun WindowSizeClass.bottomNavSize() =
     when (this) {
-        WindowSizeClass.COMPACT -> 56.dp
+        WindowSizeClass.COMPACT,
         WindowSizeClass.MEDIUM,
-        WindowSizeClass.EXPANDED -> 0.dp
+        WindowSizeClass.EXPANDED -> 80.dp
     }
 
 fun WindowSizeClass.supportingPanelWidth() =

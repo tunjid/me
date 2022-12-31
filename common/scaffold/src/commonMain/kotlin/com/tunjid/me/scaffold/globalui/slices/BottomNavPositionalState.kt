@@ -18,11 +18,13 @@ package com.tunjid.me.scaffold.globalui.slices
 
 import com.tunjid.me.scaffold.globalui.InsetDescriptor
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.bottomNavVisible
 
 internal data class BottomNavPositionalState(
     val insetDescriptor: InsetDescriptor,
     val bottomNavVisible: Boolean,
+    val windowSizeClass: WindowSizeClass,
     val navBarSize: Int
 )
 
@@ -30,5 +32,6 @@ internal val UiState.bottomNavPositionalState
     get() = BottomNavPositionalState(
         bottomNavVisible = bottomNavVisible,
         navBarSize = systemUI.static.navBarSize,
+        windowSizeClass = windowSizeClass,
         insetDescriptor = insetFlags
     )

@@ -36,8 +36,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.UiSizes
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.slices.fabState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
@@ -57,6 +57,7 @@ internal fun BoxScope.AppFab(
         mapper = UiState::fabClickListener
     )
     val enabled = state.enabled
+    val windowSizeClass = state.windowSizeClass
     val position by animateDpAsState(
         when {
             state.fabVisible -> -with(LocalDensity.current) {
@@ -64,13 +65,13 @@ internal fun BoxScope.AppFab(
                     state.keyboardSize > 0 -> state.keyboardSize.toDp() +
                             state.snackbarOffset
 
-                    else -> (UiSizes.bottomNavSize countIf state.bottomNavVisible) +
+                    else -> (windowSizeClass.bottomNavSize() countIf state.bottomNavVisible) +
                             state.navBarSize.toDp() +
                             state.snackbarOffset
                 }
             }
 
-            else -> UiSizes.bottomNavSize
+            else -> windowSizeClass.bottomNavSize()
         }
     )
 
