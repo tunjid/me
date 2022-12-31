@@ -16,11 +16,7 @@
 
 package com.tunjid.me.archivedetail
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +25,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
@@ -105,13 +102,14 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
     Column(
         modifier = Modifier
             .verticalScroll(state = scrollState),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier = Modifier.padding(16.dp))
         Thumbnail(
             imageUrl = state.archive?.thumbnail,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
+                .heightIn(max = 300.dp)
+                .aspectRatio(ratio = 16f/9f)
                 .padding(horizontal = 16.dp)
         )
         Chips(
@@ -125,7 +123,9 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
         Spacer(modifier = Modifier.padding(16.dp))
 
         Material3RichText(
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         ) {
             if (archive != null) Markdown(
                 content = archive.body

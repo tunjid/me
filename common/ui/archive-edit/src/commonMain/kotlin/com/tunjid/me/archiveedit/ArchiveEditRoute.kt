@@ -20,8 +20,10 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -170,8 +172,8 @@ private fun DragDropThumbnail(
     Thumbnail(
         imageUrl = thumbnail,
         modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
+            .heightIn(max = 300.dp)
+            .aspectRatio(ratio = 16f/9f)
             .padding(horizontal = 16.dp)
             .border(
                 width = 2.dp,

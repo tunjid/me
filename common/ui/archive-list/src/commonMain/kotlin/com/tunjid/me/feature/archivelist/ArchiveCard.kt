@@ -127,7 +127,7 @@ fun ArchiveCard(
             Column {
                 Thumbnail(
                     imageUrl = archiveItem.archive.thumbnail,
-                    modifier = thumbnailModifier.height(200.dp)
+                    modifier = thumbnailModifier.aspectRatio(16f/9f)
                 )
                 Spacer(Modifier.height(8.dp))
                 ArchiveDate(archiveItem.prettyDate)
