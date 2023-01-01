@@ -280,6 +280,13 @@ private fun Flow<Action.Fetch>.fetchMutations(
                     queryState = queryState.copy(
                         currentQuery = fetchResult.query,
                         count = fetchResult.archivesAvailable,
+                        suggestedDescriptors = queryState.suggestedDescriptors.filterNot { descriptor ->
+                            val contentFilter = queryState.currentQuery.contentFilter
+                            when (descriptor) {
+                                is Descriptor.Category -> contentFilter.categories.contains(descriptor)
+                                is Descriptor.Tag -> contentFilter.tags.contains(descriptor)
+                            }
+                        },
                     )
                 )
             }

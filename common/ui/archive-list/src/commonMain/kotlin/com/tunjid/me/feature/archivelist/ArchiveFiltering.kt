@@ -19,11 +19,14 @@ package com.tunjid.me.feature.archivelist
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilledTonalButton
@@ -39,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
+import com.tunjid.me.core.model.ArchiveContentFilter
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.minus
@@ -76,7 +80,14 @@ fun ArchiveFilters(
                 SortButton(onChanged, item)
                 Spacer(modifier = Modifier.width(12.dp))
                 DescriptorDetailButton(
-                    item.currentQuery.contentFilter.categories + item.currentQuery.contentFilter.tags
+                    descriptors = item.currentQuery.contentFilter.categories + item.currentQuery.contentFilter.tags,
+                    onClearClicked = {
+                        onChanged(
+                            Action.Fetch.QueryChange(
+                                item.currentQuery.copy(contentFilter = ArchiveContentFilter())
+                            )
+                        )
+                    }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 ArchiveCountButton(count = item.count, kind = item.currentQuery.kind)
@@ -149,13 +160,14 @@ private fun SortButton(
 
 @Composable
 private inline fun DescriptorDetailButton(
-    descriptors: List<Descriptor>
+    descriptors: List<Descriptor>,
+    noinline onClearClicked: () -> Unit
 ) {
     FilterChip(
         modifier = Modifier
             .animateContentSize(),
         selected = descriptors.isNotEmpty(),
-        onClick = {},
+        onClick = onClearClicked,
         shape = MaterialTheme.shapes.small,
         label = {
             Text(
@@ -164,6 +176,14 @@ private inline fun DescriptorDetailButton(
                     1 -> "1 filter"
                     else -> "${descriptors.size} filters"
                 }
+            )
+        },
+        trailingIcon = {
+            if (descriptors.isNotEmpty()) Icon(
+                modifier = Modifier
+                    .scale(0.8f),
+                imageVector = Filled.Close,
+                contentDescription = "Clear"
             )
         }
     )
@@ -203,7 +223,9 @@ private fun FilterChips(
         modifier = modifier
     ) {
         Chips(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .heightIn(min = 56.dp)
+                .fillMaxWidth(),
             name = "Categories:",
             chipInfoList = state.currentQuery.descriptorChips<Descriptor.Category>(),
             editInfo = ChipEditInfo(
@@ -217,7 +239,9 @@ private fun FilterChips(
             )
         )
         Chips(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .heightIn(min = 56.dp)
+                .fillMaxWidth(),
             name = "Tags:",
             chipInfoList = state.currentQuery.descriptorChips<Descriptor.Tag>(),
             editInfo = ChipEditInfo(
@@ -231,7 +255,9 @@ private fun FilterChips(
             )
         )
         Chips(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .heightIn(min = 56.dp)
+                .fillMaxWidth(),
             name = "Suggestions:",
             chipInfoList = state.suggestedDescriptorChips(),
             onClick = onClick@{
