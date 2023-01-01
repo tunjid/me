@@ -205,7 +205,7 @@ private fun FilterChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
-            chipInfo = state.currentQuery.descriptorChips<Descriptor.Category>(),
+            chipInfoList = state.currentQuery.descriptorChips<Descriptor.Category>(),
             editInfo = ChipEditInfo(
                 currentText = state.categoryText.value,
                 onChipChanged = onChipFilterChanged(
@@ -219,7 +219,7 @@ private fun FilterChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
-            chipInfo = state.currentQuery.descriptorChips<Descriptor.Tag>(),
+            chipInfoList = state.currentQuery.descriptorChips<Descriptor.Tag>(),
             editInfo = ChipEditInfo(
                 currentText = state.tagText.value,
                 onChipChanged = onChipFilterChanged(
@@ -229,6 +229,19 @@ private fun FilterChips(
                     onChanged = onChanged
                 )
             )
+        )
+        Chips(
+            modifier = Modifier.fillMaxWidth(),
+            name = "Suggestions:",
+            chipInfoList = state.suggestedDescriptorChips(),
+            onClick = onClick@{
+                val descriptor = it.key as? Descriptor ?: return@onClick
+                onChanged(
+                    Action.Fetch.QueryChange(
+                        query = state.currentQuery + descriptor,
+                    )
+                )
+            }
         )
     }
 }

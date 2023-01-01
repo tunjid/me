@@ -3,6 +3,13 @@ SELECT tag
 FROM archiveTag
 WHERE archive_id = :archive_id;
 
+tagsContaining:
+SELECT tag, COUNT(*)
+FROM archiveTag
+WHERE (lower(tag) LIKE :subString)
+GROUP BY tag
+ORDER BY 2;
+
 upsert:
 INSERT OR IGNORE INTO archiveTag (archive_id, tag)
 VALUES (:archive_id, :tag);

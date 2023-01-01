@@ -16,6 +16,8 @@
 
 package com.tunjid.me.feature.archivelist
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.ArchiveUpsert
@@ -135,6 +137,8 @@ data class QueryState(
     val tagText: Descriptor.Tag = Descriptor.Tag(""),
     @ProtoNumber(7)
     val count: Long = 0,
+    @Transient
+    val suggestedDescriptors: List<Descriptor> = emptyList(),
 )
 
 inline fun <reified T : Descriptor> ArchiveItem.Result.descriptorChips(
@@ -162,5 +166,20 @@ inline fun <reified T : Descriptor> ArchiveQuery.descriptorChips() =
         ChipInfo(
             text = it.value,
             kind = ChipKind.Input(selected = true)
+        )
+    }
+
+@Composable
+inline fun QueryState.suggestedDescriptorChips() =
+    suggestedDescriptors.map {
+        ChipInfo(
+            key = it,
+            text = it.value,
+            kind = ChipKind.Suggestion(
+                tint = when (it) {
+                    is Descriptor.Category -> MaterialTheme.colorScheme.secondaryContainer
+                    is Descriptor.Tag -> MaterialTheme.colorScheme.tertiaryContainer
+                }
+            )
         )
     }

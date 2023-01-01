@@ -187,8 +187,8 @@ private fun ArchiveCategories(
 ) {
     Chips(
         modifier = Modifier.padding(horizontal = 8.dp),
-        chipInfo = chipInfoList,
-        onClick = { onCategoryClicked(Descriptor.Category(it)) }
+        chipInfoList = chipInfoList,
+        onClick = { onCategoryClicked(Descriptor.Category(it.text)) }
     )
 }
 

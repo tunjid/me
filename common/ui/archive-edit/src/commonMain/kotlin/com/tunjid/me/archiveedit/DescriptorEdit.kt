@@ -39,7 +39,7 @@ fun EditChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Categories:",
-            chipInfo = upsert.descriptorChips<Descriptor.Category>(),
+            chipInfoList = upsert.descriptorChips<Descriptor.Category>(),
             editInfo = ChipEditInfo(
                 currentText = state.categoryText.value,
                 onChipChanged = onChipFilterChanged(
@@ -53,7 +53,7 @@ fun EditChips(
         Chips(
             modifier = Modifier.fillMaxWidth(),
             name = "Tags:",
-            chipInfo = upsert.descriptorChips<Descriptor.Tag>(),
+            chipInfoList = upsert.descriptorChips<Descriptor.Tag>(),
             editInfo = ChipEditInfo(
                 currentText = state.tagText.value,
                 onChipChanged = onChipFilterChanged(

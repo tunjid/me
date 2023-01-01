@@ -119,7 +119,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             name = "Categories:",
-            chipInfo = state.descriptorChips<Descriptor.Category>(),
+            chipInfoList = state.descriptorChips<Descriptor.Category>(),
         )
 
         Spacer(modifier = Modifier.padding(16.dp))
@@ -141,7 +141,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             name = "Tags:",
-            chipInfo = state.descriptorChips<Descriptor.Tag>(),
+            chipInfoList = state.descriptorChips<Descriptor.Tag>(),
         )
 
         Spacer(modifier = Modifier.padding(64.dp + navBarSizeDp))

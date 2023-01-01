@@ -3,6 +3,13 @@ SELECT category
 FROM archiveCategory
 WHERE archive_id = :archive_id;
 
+categoriesContaining:
+SELECT category, COUNT(*)
+FROM archiveCategory
+WHERE (lower(category) LIKE :subString)
+GROUP BY category
+ORDER BY 2;
+
 upsert:
 INSERT OR IGNORE INTO archiveCategory (archive_id, category)
 VALUES (:archive_id, :category);

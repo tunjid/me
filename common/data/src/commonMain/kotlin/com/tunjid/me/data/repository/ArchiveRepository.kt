@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
 interface ArchiveRepository : Syncable {
@@ -51,8 +52,18 @@ interface ArchiveRepository : Syncable {
 
     fun count(query: ArchiveQuery): Flow<Long>
 
-    fun archivesStream(query: ArchiveQuery): Flow<List<Archive>>
-    fun archiveStream(kind: ArchiveKind, id: ArchiveId): Flow<Archive?>
+    fun descriptorsMatching(
+        descriptor: Descriptor
+    ): Flow<List<Descriptor>>
+
+    fun archivesStream(
+        query: ArchiveQuery
+    ): Flow<List<Archive>>
+
+    fun archiveStream(
+        kind: ArchiveKind,
+        id: ArchiveId
+    ): Flow<Archive?>
 }
 
 /**
@@ -119,6 +130,26 @@ internal class OfflineFirstArchiveRepository(
         .asFlow()
         .mapToOneOrNull(context = dispatcher)
         .filterNotNull()
+
+    override fun descriptorsMatching(
+        descriptor: Descriptor
+    ): Flow<List<Descriptor>> =
+        combine(
+            flow = archiveCategoryQueries.categoriesContaining(subString = "%${descriptor.value}%")
+                .asFlow()
+                .mapToList(context = dispatcher)
+                .map { categoriesContainingList -> categoriesContainingList.map { Descriptor.Category(it.category) } },
+            flow2 = archiveTagQueries.tagsContaining(subString = "%${descriptor.value}%")
+                .asFlow()
+                .mapToList(context = dispatcher)
+                .map { tagsContainingList -> tagsContainingList.map { Descriptor.Tag(it.tag) } },
+            transform = { categories, tags  ->
+                when(descriptor)  {
+                    is Descriptor.Category -> categories + tags
+                    is Descriptor.Tag -> tags + categories
+                }
+            }
+        )
 
     override fun archiveStream(
         kind: ArchiveKind, id: ArchiveId
