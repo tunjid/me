@@ -212,7 +212,6 @@ private fun EndlessScroll(
             .filterNotNull()
             .distinctUntilChanged()
             .collect { query ->
-                onAction(Action.ToggleFilter(isExpanded = false))
                 onAction(Action.Fetch.LoadAround(query = query))
             }
     }

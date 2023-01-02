@@ -81,6 +81,11 @@ fun ArchiveFilters(
                 Spacer(modifier = Modifier.width(12.dp))
                 DescriptorDetailButton(
                     descriptors = item.currentQuery.contentFilter.categories + item.currentQuery.contentFilter.tags,
+                    onExpandClicked = {
+                        onChanged(
+                            Action.ToggleFilter(isExpanded = true)
+                        )
+                    },
                     onClearClicked = {
                         onChanged(
                             Action.Fetch.QueryChange(
@@ -161,13 +166,17 @@ private fun SortButton(
 @Composable
 private inline fun DescriptorDetailButton(
     descriptors: List<Descriptor>,
+    noinline onExpandClicked: () -> Unit,
     noinline onClearClicked: () -> Unit
 ) {
     FilterChip(
         modifier = Modifier
             .animateContentSize(),
         selected = descriptors.isNotEmpty(),
-        onClick = onClearClicked,
+        onClick = {
+            if (descriptors.isEmpty()) onExpandClicked()
+            else onClearClicked()
+        },
         shape = MaterialTheme.shapes.small,
         label = {
             Text(
