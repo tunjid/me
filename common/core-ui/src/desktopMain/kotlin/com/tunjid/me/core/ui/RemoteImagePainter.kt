@@ -45,9 +45,9 @@ actual fun RemoteImagePainter(imageUri: String?): Painter? {
         initialValue = null,
         key1 = imageUri,
     ) {
-        val imageSource = withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             try {
-                when {
+                val imageSource = when {
                     imageUri == null -> null
                     imageUri.startsWith("http") -> {
                         val savedFile = savedImageFile(imageUri)
@@ -64,22 +64,22 @@ actual fun RemoteImagePainter(imageUri: String?): Painter? {
                         imageUri.fileInputStream()
                     )
                 }
+
+                val inputStream = if (imageSource is ImageSource.Remote.Network) {
+                    val destination = savedImageFile(uri = imageSource.uri)
+                    File(destination.parent).mkdirs()
+                    imageSource.inputStream.use { input ->
+                        destination.outputStream().use(input::copyTo)
+                    }
+                    destination.inputStream()
+                } else imageSource?.inputStream
+
+                value = inputStream?.toBitmap()
             } catch (e: Exception) {
 //                e.printStackTrace()
                 null
             }
         }
-
-        val inputStream = if (imageSource is ImageSource.Remote.Network) {
-            val destination = savedImageFile(uri = imageSource.uri)
-            File(destination.parent).mkdirs()
-            imageSource.inputStream.use { input ->
-                destination.outputStream().use(input::copyTo)
-            }
-            destination.inputStream()
-        } else imageSource?.inputStream
-
-        value = inputStream?.toBitMap()
     }
 
     return image?.let {
@@ -94,7 +94,7 @@ private suspend fun String.remoteInputStream() = HttpClient().use {
 
 private fun String.fileInputStream() = File(this).inputStream()
 
-private fun InputStream.toBitMap() =
+private fun InputStream.toBitmap() =
     buffered()
         .use(::loadImageBitmap)
 
