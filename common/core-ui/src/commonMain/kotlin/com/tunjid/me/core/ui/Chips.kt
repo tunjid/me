@@ -56,7 +56,10 @@ sealed class ChipKind {
     data class Assist(
         val tint: Color? = null
     ) : ChipKind()
-    data class Filter(val selected: Boolean) : ChipKind()
+    data class Filter(
+        val selected: Boolean,
+        val tint: Color? = null
+    ) : ChipKind()
     data class Input(
         val selected: Boolean,
         val tint: Color? = null
@@ -164,6 +167,10 @@ fun Chip(
             is ChipKind.Filter -> FilterChip(
                 selected = kind.selected,
                 shape = MaterialTheme.shapes.small,
+                colors = when (val tint = kind.tint) {
+                    null -> FilterChipDefaults.filterChipColors()
+                    else -> FilterChipDefaults.filterChipColors(containerColor = tint)
+                },
                 onClick = { onClick?.invoke(info) },
                 label = chipLabel,
                 trailingIcon = trailingIcon
@@ -172,6 +179,10 @@ fun Chip(
             is ChipKind.Input -> InputChip(
                 selected = kind.selected,
                 shape = MaterialTheme.shapes.small,
+                colors = when (val tint = kind.tint) {
+                    null -> InputChipDefaults.inputChipColors()
+                    else -> InputChipDefaults.inputChipColors(containerColor = tint)
+                },
                 onClick = { onClick?.invoke(info) },
                 label = chipLabel,
                 trailingIcon = trailingIcon

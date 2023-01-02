@@ -20,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveQuery
-import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
@@ -141,6 +140,7 @@ data class QueryState(
     val suggestedDescriptors: List<Descriptor> = emptyList(),
 )
 
+@Composable
 inline fun <reified T : Descriptor> ArchiveItem.Result.descriptorChips(
     query: ArchiveQuery
 ) =
@@ -152,11 +152,13 @@ inline fun <reified T : Descriptor> ArchiveItem.Result.descriptorChips(
         ChipInfo(
             text = descriptor.value,
             kind = ChipKind.Filter(
-                selected = selected
+                selected = selected,
+                tint = descriptor.tint()
             )
         )
     }
 
+@Composable
 inline fun <reified T : Descriptor> ArchiveQuery.descriptorChips() =
     when (T::class) {
         Descriptor.Tag::class -> contentFilter.tags
@@ -165,7 +167,10 @@ inline fun <reified T : Descriptor> ArchiveQuery.descriptorChips() =
     }.map {
         ChipInfo(
             text = it.value,
-            kind = ChipKind.Input(selected = true)
+            kind = ChipKind.Input(
+                selected = true,
+                tint = it.tint()
+            )
         )
     }
 
@@ -176,10 +181,13 @@ inline fun QueryState.suggestedDescriptorChips() =
             key = it,
             text = it.value,
             kind = ChipKind.Suggestion(
-                tint = when (it) {
-                    is Descriptor.Category -> MaterialTheme.colorScheme.secondaryContainer
-                    is Descriptor.Tag -> MaterialTheme.colorScheme.tertiaryContainer
-                }
+                tint = it.tint()
             )
         )
     }
+
+@Composable
+fun Descriptor.tint() = when (this) {
+    is Descriptor.Category -> MaterialTheme.colorScheme.secondaryContainer
+    is Descriptor.Tag -> MaterialTheme.colorScheme.tertiaryContainer
+}
