@@ -16,6 +16,7 @@
 
 package com.tunjid.me.feature.archivelist
 
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.utilities.ByteSerializer
@@ -91,7 +92,8 @@ class ActualArchiveListStateHolder(
                 )
 
                 is Action.FilterChanged -> action.flow.filterChangedMutations(
-                    repo = archiveRepository
+                    repo = archiveRepository,
+                    kind = route.kind
                 )
 
                 is Action.ToggleFilter -> action.flow.filterToggleMutations()
@@ -138,7 +140,8 @@ private fun mainNavContentMutations(
  * Notifies of updates in the archive filter
  */
 private fun Flow<Action.FilterChanged>.filterChangedMutations(
-    repo: ArchiveRepository
+    repo: ArchiveRepository,
+    kind: ArchiveKind,
 ): Flow<Mutation<State>> =
     flatMapLatest { (descriptor) ->
         flow {
@@ -159,7 +162,7 @@ private fun Flow<Action.FilterChanged>.filterChangedMutations(
             }
             // Then asynchronously fetch suggestions
             emitAll(
-                repo.descriptorsMatching(descriptor).map { descriptors ->
+                repo.descriptorsMatching(descriptor = descriptor, kind = kind).map { descriptors ->
                     mutation {
                         copy(
                             queryState = queryState.copy(

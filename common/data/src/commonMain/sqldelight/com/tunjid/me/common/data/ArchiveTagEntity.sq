@@ -6,7 +6,10 @@ WHERE archive_id = :archive_id;
 tagsContaining:
 SELECT tag, COUNT(*)
 FROM archiveTag
+INNER JOIN archiveEntity
+ON archiveTag.archive_id = archiveEntity.id
 WHERE (lower(tag) LIKE :subString)
+AND archiveEntity.kind = :kind
 GROUP BY tag
 ORDER BY 2;
 

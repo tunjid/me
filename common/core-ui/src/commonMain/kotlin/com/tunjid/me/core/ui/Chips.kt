@@ -169,7 +169,7 @@ fun Chip(
                 shape = MaterialTheme.shapes.small,
                 colors = when (val tint = kind.tint) {
                     null -> FilterChipDefaults.filterChipColors()
-                    else -> FilterChipDefaults.filterChipColors(containerColor = tint)
+                    else -> FilterChipDefaults.filterChipColors(selectedContainerColor = tint)
                 },
                 onClick = { onClick?.invoke(info) },
                 label = chipLabel,
@@ -181,7 +181,7 @@ fun Chip(
                 shape = MaterialTheme.shapes.small,
                 colors = when (val tint = kind.tint) {
                     null -> InputChipDefaults.inputChipColors()
-                    else -> InputChipDefaults.inputChipColors(containerColor = tint)
+                    else -> InputChipDefaults.inputChipColors(selectedContainerColor = tint)
                 },
                 onClick = { onClick?.invoke(info) },
                 label = chipLabel,

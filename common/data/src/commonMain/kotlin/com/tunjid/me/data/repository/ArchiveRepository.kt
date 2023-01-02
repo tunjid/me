@@ -53,7 +53,8 @@ interface ArchiveRepository : Syncable {
     fun count(query: ArchiveQuery): Flow<Long>
 
     fun descriptorsMatching(
-        descriptor: Descriptor
+        descriptor: Descriptor,
+        kind: ArchiveKind,
     ): Flow<List<Descriptor>>
 
     fun archivesStream(
@@ -132,19 +133,26 @@ internal class OfflineFirstArchiveRepository(
         .filterNotNull()
 
     override fun descriptorsMatching(
-        descriptor: Descriptor
+        descriptor: Descriptor,
+        kind: ArchiveKind,
     ): Flow<List<Descriptor>> =
         combine(
-            flow = archiveCategoryQueries.categoriesContaining(subString = "%${descriptor.value}%")
+            flow = archiveCategoryQueries.categoriesContaining(
+                subString = "%${descriptor.value}%",
+                kind = kind.type,
+            )
                 .asFlow()
                 .mapToList(context = dispatcher)
                 .map { categoriesContainingList -> categoriesContainingList.map { Descriptor.Category(it.category) } },
-            flow2 = archiveTagQueries.tagsContaining(subString = "%${descriptor.value}%")
+            flow2 = archiveTagQueries.tagsContaining(
+                subString = "%${descriptor.value}%",
+                kind = kind.type,
+            )
                 .asFlow()
                 .mapToList(context = dispatcher)
                 .map { tagsContainingList -> tagsContainingList.map { Descriptor.Tag(it.tag) } },
-            transform = { categories, tags  ->
-                when(descriptor)  {
+            transform = { categories, tags ->
+                when (descriptor) {
                     is Descriptor.Category -> categories + tags
                     is Descriptor.Tag -> tags + categories
                 }
