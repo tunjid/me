@@ -23,6 +23,7 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -54,7 +55,7 @@ fun <T> Flow<T>.monitorWhenActive(lifecycleStateFlow: StateFlow<Lifecycle>) =
 
 @Composable
 inline fun <T, R> StateFlow<T>.mappedCollectAsStateWithLifecycle(
-    context: CoroutineContext = kotlin.coroutines.EmptyCoroutineContext,
+    context: CoroutineContext = Dispatchers.Main.immediate,
     crossinline mapper: @DisallowComposableCalls (T) -> R
 ): State<R> {
     val lifecycle = LocalLifecycleStateHolder.current.state
@@ -73,7 +74,7 @@ inline fun <T, R> StateFlow<T>.mappedCollectAsStateWithLifecycle(
 
 @Composable
 inline fun <T> StateFlow<T>.collectAsStateWithLifecycle(
-    context: CoroutineContext = kotlin.coroutines.EmptyCoroutineContext,
+    context: CoroutineContext = Dispatchers.Main.immediate,
 ): State<T> {
     val lifecycle = LocalLifecycleStateHolder.current.state
     val lifecycleBoundState = remember { monitorWhenActive(lifecycle) }
