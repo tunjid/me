@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -37,8 +38,8 @@ import androidx.compose.ui.zIndex
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.model.minus
+import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
@@ -50,10 +51,11 @@ import com.tunjid.tiler.tiledListOf
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.scan
 import kotlinx.serialization.Serializable
+import kotlin.math.abs
 
 @Serializable
 data class ArchiveListRoute(
@@ -215,14 +217,26 @@ private fun EndlessScroll(
                 onAction(Action.Fetch.LoadAround(query = query))
             }
     }
+    // Close filters when scrolling
     LaunchedEffect(gridState) {
         snapshotFlow {
-            gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.key
+            gridState.layoutInfo.visibleItemsInfo.firstOrNull()
         }
-            .filterIsInstance<String>()
-            .distinctUntilChanged()
-            .map(Action::LastVisibleKey)
-            .collect(onAction)
+            .scan<LazyGridItemInfo?, Pair<LazyGridItemInfo, LazyGridItemInfo>?>(null) { oldAndNewInfo, newInfo ->
+                when {
+                    newInfo == null -> null
+                    oldAndNewInfo == null -> newInfo to newInfo
+                    else -> oldAndNewInfo.copy(first = oldAndNewInfo.second, second = newInfo)
+                }
+            }
+            .filterNotNull()
+            .collect {(oldInfo, newInfo) ->
+              val dy =  when (oldInfo.index) {
+                    newInfo.index -> abs(oldInfo.offset.y - newInfo.offset.y)
+                    else -> null
+                }
+                if (dy != null && dy > 6) onAction(Action.ToggleFilter(isExpanded = false))
+            }
     }
 }
 

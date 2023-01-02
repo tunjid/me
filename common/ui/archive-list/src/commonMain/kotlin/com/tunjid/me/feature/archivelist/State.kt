@@ -35,12 +35,17 @@ import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
 data class State(
+    @ProtoNumber(1)
     val shouldScrollToTop: Boolean = true,
+    @ProtoNumber(2)
     val isMainContent: Boolean = false,
+    @ProtoNumber(3)
     val hasFetchedAuthStatus: Boolean = false,
+    @ProtoNumber(4)
     val isSignedIn: Boolean = false,
+    @ProtoNumber(5)
     val queryState: QueryState,
-    val lastVisibleKey: String? = null,
+//    @ProtoNumber(6) Deprecated key
     @Transient
     val items: TiledList<ArchiveQuery, ArchiveItem> = emptyTiledList()
 ) : ByteSerializable
@@ -71,8 +76,6 @@ sealed class Action(val key: String) {
     ) : Action(key = "FilterChanged")
 
     data class ToggleFilter(val isExpanded: Boolean? = null) : Action(key = "ToggleFilter")
-
-    data class LastVisibleKey(val itemKey: String) : Action(key = "LastVisibleKey")
 
     data class Navigate(val navMutation: NavMutation) : Action(key = "Navigate")
 }

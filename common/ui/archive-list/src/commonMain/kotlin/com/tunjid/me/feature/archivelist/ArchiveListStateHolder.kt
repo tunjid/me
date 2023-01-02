@@ -97,7 +97,6 @@ class ActualArchiveListStateHolder(
                 )
 
                 is Action.ToggleFilter -> action.flow.filterToggleMutations()
-                is Action.LastVisibleKey -> action.flow.resetScrollMutations()
                 is Action.Navigate -> action.flow.consumeNavActions(
                     mutationMapper = Action.Navigate::navMutation,
                     action = navActions
@@ -202,18 +201,6 @@ internal fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<St
         .map { isExpanded ->
             mutation {
                 copy(queryState = queryState.copy(expanded = isExpanded ?: !queryState.expanded))
-            }
-        }
-
-/**
- * Updates [State] with the key of the last item seen so when the route shows up in the nav rail,
- * it is in sync
- */
-private fun Flow<Action.LastVisibleKey>.resetScrollMutations(): Flow<Mutation<State>> =
-    distinctUntilChanged()
-        .map {
-            mutation {
-                copy(lastVisibleKey = it.itemKey)
             }
         }
 
