@@ -17,20 +17,28 @@
 package com.tunjid.me.core.ui
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,18 +62,21 @@ data class ChipInfo(
 
 sealed class ChipKind {
     data class Assist(
-        val tint: Color? = null
+        val tint: Color? = null,
     ) : ChipKind()
+
     data class Filter(
         val selected: Boolean,
-        val tint: Color? = null
+        val tint: Color? = null,
     ) : ChipKind()
+
     data class Input(
         val selected: Boolean,
-        val tint: Color? = null
+        val tint: Color? = null,
     ) : ChipKind()
+
     data class Suggestion(
-        val tint: Color? = null
+        val tint: Color? = null,
     ) : ChipKind()
 }
 
@@ -75,20 +86,19 @@ fun Chips(
     name: String? = null,
     chipInfoList: List<ChipInfo>,
     onClick: ((ChipInfo) -> Unit)? = null,
-    editInfo: ChipEditInfo? = null
+    editInfo: ChipEditInfo? = null,
 ) {
-    Row(
+    Column(
         modifier = modifier,
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically,
     ) {
         if (name != null) {
             Text(
-                modifier = Modifier.wrapContentWidth(),
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .wrapContentWidth(),
                 text = name,
                 fontSize = 14.sp,
             )
-            Spacer(modifier = Modifier.width(8.dp))
         }
         ChipRow {
             chipInfoList.forEach { info ->
@@ -99,7 +109,8 @@ fun Chips(
                 )
             }
             if (editInfo != null) {
-                TextField(
+                val textStyle = LocalTextStyle.current.merge(TextStyle(color = MaterialTheme.colorScheme.onSurface))
+                BasicTextField(
                     modifier = Modifier
                         .wrapContentWidth()
                         .defaultMinSize(minWidth = 40.dp, minHeight = 48.dp)
@@ -112,17 +123,19 @@ fun Chips(
                     maxLines = 1,
                     value = editInfo.currentText,
                     onValueChange = { editInfo.onChipChanged(ChipAction.Changed(it)) },
+                    textStyle = textStyle,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(
                         onAny = { editInfo.onChipChanged(ChipAction.Added) },
                     ),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colorScheme.onSurface,
-                    )
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
+//                    colors = TextFieldDefaults.textFieldColors(
+//                        containerColor = Color.Transparent,
+//                        focusedIndicatorColor = Color.Transparent,
+//                        unfocusedIndicatorColor = Color.Transparent,
+//                        disabledIndicatorColor = Color.Transparent,
+//                        cursorColor = MaterialTheme.colorScheme.onSurface,
+//                    )
                 )
             }
         }
@@ -133,7 +146,7 @@ fun Chips(
 fun Chip(
     info: ChipInfo,
     onClick: ((ChipInfo) -> Unit)? = null,
-    editInfo: ChipEditInfo? = null
+    editInfo: ChipEditInfo? = null,
 ) {
     val chipLabel = @Composable {
         Text(
