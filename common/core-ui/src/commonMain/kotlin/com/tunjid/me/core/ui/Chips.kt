@@ -18,9 +18,16 @@ package com.tunjid.me.core.ui
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -37,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -107,53 +115,50 @@ fun Chips(
                 fontSize = 14.sp,
             )
         }
-        val scrollState = rememberScrollState()
-        Row(
-            modifier = Modifier.horizontalScroll(scrollState),
+        var interactedWith by remember { mutableStateOf(false) }
+        var hasFocus by remember { mutableStateOf(false) }
+        val listState = rememberLazyListState()
+
+        val focusRequester = remember { FocusRequester() }
+
+        LaunchedEffect(hasFocus, chipInfoList) {
+            if (hasFocus && chipInfoList.isNotEmpty()) listState.scrollToItem(index = chipInfoList.lastIndex)
+        }
+
+        LazyRow(
+            state = listState,
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            var interactedWith by remember { mutableStateOf(false) }
-
-            chipInfoList.forEach { info ->
-                Chip(
-                    info = info,
-                    onClick = click@{
-                        if (onClick == null) return@click
-                        onClick.invoke(it)
-                        interactedWith = true
-                    },
-                    editInfo = editInfo,
-                )
-            }
-            if (editInfo != null) {
-                val focusRequester = remember { FocusRequester() }
-
-                val textStyle = LocalTextStyle.current.merge(
-                    TextStyle(color = MaterialTheme.colorScheme.onSurface)
-                )
-
-                BasicTextField(
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .focusRequester(focusRequester = focusRequester)
-                        .onFocusChanged { if (it.isFocused) interactedWith = true }
-                        .onKeyEvent {
-                            if (it.key != Key.Enter) return@onKeyEvent false
-
-                            editInfo.onChipChanged(ChipAction.Added)
-                            true
+            items(
+                items = chipInfoList,
+                key = { "${it.text}-${it.kind}" },
+                itemContent = { info ->
+                    Chip(
+                        modifier = Modifier.animateItemPlacement(),
+                        info = info,
+                        onClick = click@{
+                            if (onClick == null) return@click
+                            onClick.invoke(it)
+                            interactedWith = true
                         },
-                    maxLines = 1,
-                    value = editInfo.currentText,
-                    onValueChange = { editInfo.onChipChanged(ChipAction.Changed(it)) },
-                    textStyle = textStyle,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(
-                        onAny = { editInfo.onChipChanged(ChipAction.Added) },
-                    ),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
-                )
+                        editInfo = editInfo,
+                    )
+                }
+            )
+            if (editInfo != null) item(
+                key = "Input"
+            ) {
+                ChipInputField(
+                    modifier = Modifier
+                        .animateItemPlacement()
+                        .focusRequester(focusRequester = focusRequester),
+                    currentText = editInfo.currentText,
+                    editInfo.onChipChanged
+                ) {
+                    hasFocus = it.isFocused
+                    if (it.isFocused) interactedWith = true
+                }
 
                 LaunchedEffect(focusRequester) {
                     if (editInfo.requestFocusOnStart) focusRequester.requestFocus()
@@ -167,7 +172,41 @@ fun Chips(
 }
 
 @Composable
+private fun ChipInputField(
+    modifier: Modifier = Modifier,
+    currentText: String,
+    onChipChanged: (ChipAction) -> Unit,
+    onFocusChanged: (FocusState) -> Unit,
+) {
+    val textStyle = LocalTextStyle.current.merge(
+        TextStyle(color = MaterialTheme.colorScheme.onSurface)
+    )
+
+    BasicTextField(
+        modifier = modifier
+            .wrapContentWidth()
+            .onFocusChanged(onFocusChanged)
+            .onKeyEvent {
+                if (it.key != Key.Enter) return@onKeyEvent false
+
+                onChipChanged(ChipAction.Added)
+                true
+            },
+        maxLines = 1,
+        value = currentText,
+        onValueChange = { onChipChanged(ChipAction.Changed(it)) },
+        textStyle = textStyle,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(
+            onAny = { onChipChanged(ChipAction.Added) },
+        ),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
+    )
+}
+
+@Composable
 private fun Chip(
+    modifier: Modifier = Modifier,
     info: ChipInfo,
     onClick: ((ChipInfo) -> Unit)? = null,
     editInfo: ChipEditInfo? = null,
@@ -188,7 +227,7 @@ private fun Chip(
             contentDescription = "Close"
         )
     }
-    Row {
+    Row(modifier = modifier) {
         when (val kind = info.kind) {
             is ChipKind.Assist -> AssistChip(
                 shape = MaterialTheme.shapes.small,
@@ -238,9 +277,6 @@ private fun Chip(
         Spacer(Modifier.width(4.dp))
     }
 }
-
-@Composable
-expect fun ChipRow(content: @Composable () -> Unit)
 
 //@Preview
 @Composable
