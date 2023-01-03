@@ -101,4 +101,4 @@ interface KeyboardAware {
     val insetDescriptor: InsetDescriptor
 }
 
-internal val KeyboardAware.keyboardSize get() = ime.bottom - navBarSize
+internal val KeyboardAware.keyboardSize get() = ime.bottom
