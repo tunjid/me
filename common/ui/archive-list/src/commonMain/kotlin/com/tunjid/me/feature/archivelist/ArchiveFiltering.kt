@@ -239,6 +239,7 @@ private fun FilterChips(
             chipInfoList = state.currentQuery.descriptorChips<Descriptor.Category>(),
             editInfo = ChipEditInfo(
                 currentText = state.categoryText.value,
+                requestFocusOnStart = true,
                 onChipChanged = onChipFilterChanged(
                     state = state,
                     reader = QueryState::categoryText,

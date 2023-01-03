@@ -18,13 +18,9 @@ package com.tunjid.me.core.ui
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -32,8 +28,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
@@ -52,6 +57,7 @@ sealed class ChipAction {
 
 data class ChipEditInfo(
     val currentText: String,
+    val requestFocusOnStart: Boolean = false,
     val onChipChanged: (ChipAction) -> Unit,
 )
 
@@ -101,19 +107,37 @@ fun Chips(
                 fontSize = 14.sp,
             )
         }
-        ChipRow {
+        val scrollState = rememberScrollState()
+        Row(
+            modifier = Modifier.horizontalScroll(scrollState),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            var interactedWith by remember { mutableStateOf(false) }
+
             chipInfoList.forEach { info ->
                 Chip(
                     info = info,
-                    onClick = onClick,
+                    onClick = click@{
+                        if (onClick == null) return@click
+                        onClick.invoke(it)
+                        interactedWith = true
+                    },
                     editInfo = editInfo,
                 )
             }
             if (editInfo != null) {
-                val textStyle = LocalTextStyle.current.merge(TextStyle(color = MaterialTheme.colorScheme.onSurface))
+                val focusRequester = remember { FocusRequester() }
+
+                val textStyle = LocalTextStyle.current.merge(
+                    TextStyle(color = MaterialTheme.colorScheme.onSurface)
+                )
+
                 BasicTextField(
                     modifier = Modifier
                         .wrapContentWidth()
+                        .focusRequester(focusRequester = focusRequester)
+                        .onFocusChanged { if (it.isFocused) interactedWith = true }
                         .onKeyEvent {
                             if (it.key != Key.Enter) return@onKeyEvent false
 
@@ -129,21 +153,21 @@ fun Chips(
                         onAny = { editInfo.onChipChanged(ChipAction.Added) },
                     ),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
-//                    colors = TextFieldDefaults.textFieldColors(
-//                        containerColor = Color.Transparent,
-//                        focusedIndicatorColor = Color.Transparent,
-//                        unfocusedIndicatorColor = Color.Transparent,
-//                        disabledIndicatorColor = Color.Transparent,
-//                        cursorColor = MaterialTheme.colorScheme.onSurface,
-//                    )
                 )
+
+                LaunchedEffect(focusRequester) {
+                    if (editInfo.requestFocusOnStart) focusRequester.requestFocus()
+                }
+                LaunchedEffect(chipInfoList, interactedWith) {
+                    if (interactedWith) focusRequester.requestFocus()
+                }
             }
         }
     }
 }
 
 @Composable
-fun Chip(
+private fun Chip(
     info: ChipInfo,
     onClick: ((ChipInfo) -> Unit)? = null,
     editInfo: ChipEditInfo? = null,
