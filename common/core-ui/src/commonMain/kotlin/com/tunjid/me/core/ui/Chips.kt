@@ -122,7 +122,9 @@ fun Chips(
         val focusRequester = remember { FocusRequester() }
 
         LaunchedEffect(hasFocus, chipInfoList) {
-            if (hasFocus && chipInfoList.isNotEmpty()) listState.scrollToItem(index = chipInfoList.lastIndex)
+            if (hasFocus && chipInfoList.isNotEmpty()) listState.animateScrollToItem(
+                index = chipInfoList.lastIndex
+            )
         }
 
         LazyRow(
