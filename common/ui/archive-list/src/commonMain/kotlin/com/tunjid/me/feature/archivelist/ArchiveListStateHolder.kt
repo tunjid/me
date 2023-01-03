@@ -161,17 +161,22 @@ private fun Flow<Action.FilterChanged>.filterChangedMutations(
             }
             // Then asynchronously fetch suggestions
             emitAll(
-                repo.descriptorsMatching(descriptor = descriptor, kind = kind).map { descriptors ->
+                repo.descriptorsMatching(
+                    descriptor = descriptor,
+                    kind = kind
+                ).map { descriptors ->
                     mutation {
                         copy(
                             queryState = queryState.copy(
-                                suggestedDescriptors = descriptors.filterNot { descriptor ->
-                                    val contentFilter = queryState.currentQuery.contentFilter
-                                    when (descriptor) {
-                                        is Descriptor.Category -> contentFilter.categories.contains(descriptor)
-                                        is Descriptor.Tag -> contentFilter.tags.contains(descriptor)
+                                suggestedDescriptors = descriptors
+                                    .filterNot { descriptor ->
+                                        val contentFilter = queryState.currentQuery.contentFilter
+                                        when (descriptor) {
+                                            is Descriptor.Category -> contentFilter.categories.contains(descriptor)
+                                            is Descriptor.Tag -> contentFilter.tags.contains(descriptor)
+                                        }
                                     }
-                                },
+                                    .take(10),
                             )
                         )
                     }
