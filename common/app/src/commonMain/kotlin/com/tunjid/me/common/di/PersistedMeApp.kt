@@ -53,40 +53,38 @@ class PersistedMeApp(
     override val globalUiStateHolder: GlobalUiStateHolder,
     override val lifecycleStateHolder: LifecycleStateHolder,
     private val savedStateCache: SavedStateCache,
-    private val allScreenStateHolders: Map<String, ScreenStateHolderCreator>
+    private val allScreenStateHolders: Map<String, ScreenStateHolderCreator>,
 ) : MeApp {
     private val routeStateHolderCache = mutableMapOf<AppRoute, ScopeHolder>()
 
     init {
-        appScope.launch {
-            navStateStream
-                .map { it.mainNav }
-                .removedRoutes()
-                .collect { removedRoutes ->
-                    removedRoutes.forEach { route ->
-                        println("Cleared ${route::class.simpleName}")
-                        val holder = routeStateHolderCache.remove(route)
-                        holder?.scope?.cancel()
-                    }
+        navStateStream
+            .map { it.mainNav }
+            .removedRoutes()
+            .onEach { removedRoutes ->
+                removedRoutes.forEach { route ->
+                    println("Cleared ${route::class.simpleName}")
+                    val holder = routeStateHolderCache.remove(route)
+                    holder?.scope?.cancel()
                 }
-        }
-        appScope.launch {
-            navStateStream
-                .map { it.mainNav }
-                .map { it.toSavedState(byteSerializer) }
-                .collectLatest(savedStateRepository::saveState)
-        }
-        appScope.launch {
-            modelEvents(
-                url = "$ApiUrl/",
-                dispatcher = databaseDispatcher()
-            )
-                // This is an Android concern. Remove this when this is firebase powered.
-                .monitorWhenActive(lifecycleStateHolder.state)
-                .map { it.model.changeListKey() }
-                .onEach(sync)
-                .launchIn(appScope)
-        }
+            }
+            .launchIn(appScope)
+
+        navStateStream
+            .map { it.mainNav }
+            .mapLatest { it.toSavedState(byteSerializer) }
+            .onEach(savedStateRepository::saveState)
+            .launchIn(appScope)
+
+        modelEvents(
+            url = "$ApiUrl/",
+            dispatcher = databaseDispatcher()
+        )
+            // This is an Android concern. Remove this when this is firebase powered.
+            .monitorWhenActive(lifecycleStateHolder.state)
+            .map { it.model.changeListKey() }
+            .onEach(sync)
+            .launchIn(appScope)
     }
 
     override val screenStateHolderCache: ScreenStateHolderCache = object : ScreenStateHolderCache {
@@ -104,14 +102,13 @@ class PersistedMeApp(
                             .getValue(route::class.simpleName!!)
                             .invoke(routeScope, savedStateCache(route), route)
                     }
-
                 )
 
             }.stateHolder as T
     }
 
     private fun MultiStackNav.toSavedState(
-        byteSerializer: ByteSerializer
+        byteSerializer: ByteSerializer,
     ) = SavedState(
         isEmpty = false,
         activeNav = currentIndex,
@@ -138,5 +135,5 @@ class PersistedMeApp(
 
 private data class ScopeHolder(
     val scope: CoroutineScope,
-    val stateHolder: Any
+    val stateHolder: Any,
 )
