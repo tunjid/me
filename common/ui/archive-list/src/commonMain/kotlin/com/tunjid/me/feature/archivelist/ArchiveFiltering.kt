@@ -89,7 +89,10 @@ fun ArchiveFilters(
                     onClearClicked = {
                         onChanged(
                             Action.Fetch.QueryChange(
-                                item.currentQuery.copy(contentFilter = ArchiveContentFilter())
+                                item.currentQuery.copy(
+                                    offset = 0,
+                                    contentFilter = ArchiveContentFilter()
+                                )
                             )
                         )
                     }
@@ -274,7 +277,7 @@ private fun FilterChips(
                 val descriptor = it.key as? Descriptor ?: return@onClick
                 onChanged(
                     Action.Fetch.QueryChange(
-                        query = state.currentQuery + descriptor,
+                        query = state.currentQuery.copy(offset = 0) + descriptor,
                     )
                 )
             }
@@ -309,7 +312,7 @@ private fun onChipFilterChanged(
     when (it) {
         ChipAction.Added -> onChanged(
             Action.Fetch.QueryChange(
-                query = state.currentQuery + reader(state),
+                query = state.currentQuery.copy(offset = 0) + reader(state),
             )
         )
 
@@ -321,7 +324,7 @@ private fun onChipFilterChanged(
 
         is ChipAction.Removed -> onChanged(
             Action.Fetch.QueryChange(
-                query = state.currentQuery - writer(it.text),
+                query = state.currentQuery.copy(offset = 0) - writer(it.text),
             )
         )
     }
