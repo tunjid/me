@@ -16,6 +16,7 @@
 
 package com.tunjid.me.core.ui
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -89,7 +90,7 @@ fun Chips(
     editInfo: ChipEditInfo? = null,
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.animateContentSize(),
     ) {
         if (name != null) {
             Text(
@@ -113,7 +114,6 @@ fun Chips(
                 BasicTextField(
                     modifier = Modifier
                         .wrapContentWidth()
-                        .defaultMinSize(minWidth = 40.dp, minHeight = 48.dp)
                         .onKeyEvent {
                             if (it.key != Key.Enter) return@onKeyEvent false
 
