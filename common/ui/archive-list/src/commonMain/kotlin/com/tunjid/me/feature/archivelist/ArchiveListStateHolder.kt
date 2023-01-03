@@ -271,7 +271,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
         .map { fetchResult: FetchResult ->
             mutation {
                 copy(
-                    items = fetchResult.itemsWithHeaders(default = this.items),
+                    items = fetchResult.itemsWithHeaders,
                     queryState = queryState.copy(
                         currentQuery = fetchResult.query,
                         count = fetchResult.archivesAvailable,

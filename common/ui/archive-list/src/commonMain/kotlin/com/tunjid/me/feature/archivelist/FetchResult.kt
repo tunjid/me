@@ -27,15 +27,7 @@ data class FetchResult(
     val queriedArchives: TiledList<ArchiveQuery, ArchiveItem>
 )
 
-fun FetchResult.itemsWithHeaders(
-    default: TiledList<ArchiveQuery, ArchiveItem>
-): TiledList<ArchiveQuery, ArchiveItem> = when {
-    // The mutator was just resubscribed to, show existing items
-    hasNoResults -> default
-    else -> itemsWithHeaders
-}
-
-private val FetchResult.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
+val FetchResult.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
     get() = buildTiledList {
         var month = -1
         var year = -1
@@ -58,8 +50,3 @@ private val FetchResult.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
             }
         }
     }.filterTransform { distinctBy(ArchiveItem::key) }
-
-private val FetchResult.hasNoResults: Boolean
-    get() = queriedArchives.isEmpty() || queriedArchives.all { item ->
-        item is ArchiveItem.Loading
-    }
