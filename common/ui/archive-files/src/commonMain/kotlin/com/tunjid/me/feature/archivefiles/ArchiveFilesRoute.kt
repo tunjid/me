@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.ui.Thumbnail
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
@@ -72,8 +73,9 @@ private fun ArchiveFilesScreen(
                     Box(
                         modifier = Modifier.aspectRatio(1f)
                     ) {
-                        Text(
-                            it.url
+                        Thumbnail(
+                            imageUrl = it.url,
+                            modifier = Modifier
                         )
                     }
                 }

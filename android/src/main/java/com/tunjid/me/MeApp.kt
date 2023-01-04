@@ -34,6 +34,9 @@ import com.tunjid.me.data.di.create
 import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.feature.MeApp
+import com.tunjid.me.feature.archivefiles.di.ArchiveFilesNavigationComponent
+import com.tunjid.me.feature.archivefiles.di.ArchiveFilesScreenHolderComponent
+import com.tunjid.me.feature.archivefiles.di.create
 import com.tunjid.me.feature.archivelist.di.ArchiveListNavigationComponent
 import com.tunjid.me.feature.archivelist.di.ArchiveListScreenHolderComponent
 import com.tunjid.me.feature.archivelist.di.create
@@ -66,6 +69,7 @@ fun createMeApp(context: Context): MeApp {
         archiveListNavigationComponent = ArchiveListNavigationComponent::class.create(),
         archiveDetailNavigationComponent = ArchiveDetailNavigationComponent::class.create(),
         archiveEditNavigationComponent = ArchiveEditNavigationComponent::class.create(),
+        archiveFilesNavigationComponent = ArchiveFilesNavigationComponent::class.create(),
         profileNavigationComponent = ProfileNavigationComponent::class.create(),
         settingsNavigationComponent = SettingsNavigationComponent::class.create(),
         signInNavigationComponent = SignInNavigationComponent::class.create(),
@@ -119,6 +123,10 @@ fun createMeApp(context: Context): MeApp {
             dataComponent = injectedDataComponent,
         ),
         archiveEditComponent = ArchiveEditScreenHolderComponent::class.create(
+            scaffoldComponent = injectedScaffoldComponent,
+            dataComponent = injectedDataComponent,
+        ),
+        archiveFilesComponent = ArchiveFilesScreenHolderComponent::class.create(
             scaffoldComponent = injectedScaffoldComponent,
             dataComponent = injectedDataComponent,
         ),
