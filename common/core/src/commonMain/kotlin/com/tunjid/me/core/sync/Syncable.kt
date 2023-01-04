@@ -46,6 +46,9 @@ fun String.changeListKey() = when (this) {
     ChangeListKey.Archive.Articles.model -> ChangeListKey.Archive.Articles
     ChangeListKey.Archive.Projects.model -> ChangeListKey.Archive.Projects
     ChangeListKey.Archive.Talks.model -> ChangeListKey.Archive.Talks
+    ChangeListKey.ArchiveFile.Articles.model -> ChangeListKey.ArchiveFile.Articles
+    ChangeListKey.ArchiveFile.Projects.model -> ChangeListKey.ArchiveFile.Projects
+    ChangeListKey.ArchiveFile.Talks.model -> ChangeListKey.ArchiveFile.Talks
     else -> throw IllegalArgumentException("Unknown model")
 }
 
@@ -86,19 +89,19 @@ sealed class ChangeListKey(
         model: String,
         val kind: ArchiveKind,
     ) : ChangeListKey(path = path, model = model) {
-        object Articles : Archive(
+        object Articles : ArchiveFile(
             path = "articlefiles",
             kind = ArchiveKind.Articles,
             model = "articlefiles",
         )
 
-        object Projects : Archive(
+        object Projects : ArchiveFile(
             path = "projectfiles",
             kind = ArchiveKind.Projects,
             model = "projectfiles",
         )
 
-        object Talks : Archive(
+        object Talks : ArchiveFile(
             path = "talkfiles",
             kind = ArchiveKind.Talks,
             model = "talkfiles",

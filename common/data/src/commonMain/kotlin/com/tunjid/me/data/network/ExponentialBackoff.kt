@@ -31,6 +31,8 @@ suspend fun <T> exponentialBackoff(
         try {
             return block()
         } catch (e: Exception) {
+            println("Exponential backoff error")
+            e.printStackTrace()
         }
         delay(currentDelay)
         currentDelay = (currentDelay * factor).toLong().coerceAtMost(maxDelay)

@@ -55,7 +55,6 @@ class ActualArchiveFilesStateHolder(
     byteSerializer: ByteSerializer,
     navStateFlow: StateFlow<NavState>,
     uiStateFlow: StateFlow<UiState>,
-    navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveFilesRoute,

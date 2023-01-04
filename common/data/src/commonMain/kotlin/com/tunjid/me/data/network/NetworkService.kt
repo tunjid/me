@@ -216,7 +216,7 @@ internal class KtorNetworkService(
         kind: ArchiveKind,
         ids: List<ArchiveFileId>?,
     ): NetworkResponse<List<NetworkArchiveFile>> = json.parseServerErrors {
-        client.get("$baseUrl/api/${kind.type}files") {
+        client.get("$baseUrl/api/${kind.singular}files") {
             ids?.map(ArchiveFileId::value)?.forEach {
                 parameter("id", it)
             }
@@ -256,7 +256,7 @@ internal class KtorNetworkService(
     }
 }
 
-private suspend fun <T> Json.parseServerErrors(body: suspend () -> T): NetworkResponse<T> = try {
+private suspend inline fun <reified T> Json.parseServerErrors(body: suspend () -> T): NetworkResponse<T> = try {
     NetworkResponse.Success(body())
 } catch (exception: Exception) {
     exception.printStackTrace()
