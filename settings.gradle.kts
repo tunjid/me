@@ -41,6 +41,7 @@ include(
     ":common:ui:archive-list",
     ":common:ui:archive-detail",
     ":common:ui:archive-edit",
+    ":common:ui:archive-files",
     ":common:ui:profile",
     ":common:ui:settings",
     ":common:ui:sign-in",

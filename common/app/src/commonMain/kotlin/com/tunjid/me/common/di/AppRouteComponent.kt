@@ -22,6 +22,7 @@ import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.DelegatingByteSerializer
+import com.tunjid.me.feature.archivefiles.di.ArchiveFilesNavigationComponent
 import com.tunjid.me.feature.archivelist.di.ArchiveListNavigationComponent
 import com.tunjid.me.profile.di.ProfileNavigationComponent
 import com.tunjid.me.scaffold.di.SavedStateType
@@ -41,6 +42,7 @@ abstract class AppRouteComponent(
     @Component val archiveListNavigationComponent: ArchiveListNavigationComponent,
     @Component val archiveDetailNavigationComponent: ArchiveDetailNavigationComponent,
     @Component val archiveEditNavigationComponent: ArchiveEditNavigationComponent,
+    @Component val archiveFilesNavigationComponent: ArchiveFilesNavigationComponent,
     @Component val profileNavigationComponent: ProfileNavigationComponent,
     @Component val settingsNavigationComponent: SettingsNavigationComponent,
     @Component val signInNavigationComponent: SignInNavigationComponent,

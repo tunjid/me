@@ -36,6 +36,7 @@ kotlin {
                 api(project(":common:ui:archive-list"))
                 api(project(":common:ui:archive-detail"))
                 api(project(":common:ui:archive-edit"))
+                api(project(":common:ui:archive-files"))
                 api(project(":common:ui:profile"))
                 api(project(":common:ui:settings"))
                 api(project(":common:ui:sign-in"))

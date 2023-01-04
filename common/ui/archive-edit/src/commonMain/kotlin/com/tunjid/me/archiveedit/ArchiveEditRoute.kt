@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -60,7 +59,7 @@ import kotlinx.serialization.Serializable
 data class ArchiveEditRoute(
     override val id: String,
     val kind: ArchiveKind,
-    val archiveId: ArchiveId?
+    val archiveId: ArchiveId?,
 ) : AppRoute {
     @Composable
     override fun Render() {
@@ -68,6 +67,12 @@ data class ArchiveEditRoute(
             stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
+
+    override val supportingRoute
+        get() = when (archiveId) {
+            null -> null
+            else -> "archives/${kind.type}/${archiveId.value}/files"
+        }
 }
 
 @Composable
@@ -157,7 +162,7 @@ private fun DragDropThumbnail(
     thumbnail: String?,
     hasStoragePermission: Boolean,
     dragStatus: DragStatus,
-    onAction: (Action) -> Unit
+    onAction: (Action) -> Unit,
 ) {
     // Create a var so edits can be captured
     val permissionState = remember { mutableStateOf(hasStoragePermission) }
@@ -174,7 +179,7 @@ private fun DragDropThumbnail(
         imageUrl = thumbnail,
         modifier = Modifier
             .heightIn(max = 300.dp)
-            .aspectRatio(ratio = 16f/9f)
+            .aspectRatio(ratio = 16f / 9f)
             .padding(horizontal = 16.dp)
             .clip(MaterialTheme.shapes.medium)
             .border(
