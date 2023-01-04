@@ -19,7 +19,10 @@ package com.tunjid.me.data.network
 import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.core.model.*
 import com.tunjid.me.core.sync.SyncRequest
+import com.tunjid.me.core.utilities.FileDesc
 import com.tunjid.me.data.network.models.NetworkArchive
+import com.tunjid.me.data.network.models.NetworkArchiveFile
+import com.tunjid.me.data.network.models.NetworkMessage
 import com.tunjid.me.data.network.models.NetworkResponse
 import com.tunjid.me.data.network.models.NetworkUser
 import com.tunjid.me.data.network.models.UpsertResponse
@@ -34,6 +37,7 @@ import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.client.utils.*
 import io.ktor.http.*
+import io.ktor.http.content.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CoroutineDispatcher
@@ -67,19 +71,33 @@ internal interface NetworkService {
     suspend fun uploadArchiveHeaderPhoto(
         kind: ArchiveKind,
         id: ArchiveId,
-        name: String,
-        mime: String,
-        photo: Input,
+        fileDesc: FileDesc,
     ): NetworkResponse<NetworkArchive>
 
+    suspend fun uploadArchiveFile(
+        kind: ArchiveKind,
+        id: ArchiveId,
+        fileDesc: FileDesc,
+    ): NetworkResponse<NetworkMessage>
+
+    suspend fun fetchArchiveFiles(
+        kind: ArchiveKind,
+        ids: List<ArchiveFileId>? = null,
+    ): NetworkResponse<List<NetworkArchiveFile>>
+
+    suspend fun deleteArchiveFile(
+        kind: ArchiveKind,
+        id: ArchiveFileId,
+    ): NetworkResponse<NetworkMessage>
+
     suspend fun signIn(
-        sessionRequest: SessionRequest
+        sessionRequest: SessionRequest,
     ): NetworkResponse<NetworkUser>
 
     suspend fun session(): NetworkResponse<NetworkUser>
 
     suspend fun changeList(
-        request: SyncRequest
+        request: SyncRequest,
     ): NetworkResponse<List<ChangeListItem>>
 }
 
@@ -165,22 +183,11 @@ internal class KtorNetworkService(
     override suspend fun uploadArchiveHeaderPhoto(
         kind: ArchiveKind,
         id: ArchiveId,
-        name: String,
-        mime: String,
-        photo: Input
+        fileDesc: FileDesc,
     ): NetworkResponse<NetworkArchive> = json.parseServerErrors {
         client.submitFormWithBinaryData(
             url = "$baseUrl/api/${kind.type}/${id.value}",
-            formData = formData {
-                append(
-                    key = "photo",
-                    value = InputProvider { photo },
-                    headers = buildHeaders {
-                        append(HttpHeaders.ContentType, mime)
-                        append(HttpHeaders.ContentDisposition, "filename=$name")
-                    }
-                )
-            },
+            formData = fileDesc.toFormData("photo"),
         ) {
             // TODO, make this a flow of upload progress so the UI can display a progress bar
             onUpload { bytesSentTotal, _ ->
@@ -189,8 +196,44 @@ internal class KtorNetworkService(
         }.body()
     }
 
+    override suspend fun uploadArchiveFile(
+        kind: ArchiveKind,
+        id: ArchiveId,
+        fileDesc: FileDesc,
+    ): NetworkResponse<NetworkMessage> = json.parseServerErrors {
+        client.submitFormWithBinaryData(
+            url = "$baseUrl/api/${kind.type}/${id.value}",
+            formData = fileDesc.toFormData("file"),
+        ) {
+            // TODO, make this a flow of upload progress so the UI can display a progress bar
+            onUpload { bytesSentTotal, _ ->
+                println("Uploaded $bytesSentTotal for header photo")
+            }
+        }.body()
+    }
+
+    override suspend fun fetchArchiveFiles(
+        kind: ArchiveKind,
+        ids: List<ArchiveFileId>?,
+    ): NetworkResponse<List<NetworkArchiveFile>> = json.parseServerErrors {
+        client.get("$baseUrl/api/${kind.type}files") {
+            ids?.map(ArchiveFileId::value)?.forEach {
+                parameter("id", it)
+            }
+        }.body()
+    }
+
+    override suspend fun deleteArchiveFile(
+        kind: ArchiveKind,
+        id: ArchiveFileId,
+    ): NetworkResponse<NetworkMessage> = json.parseServerErrors {
+        client.delete("$baseUrl/api/${kind.type}files") {
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+        }.body()
+    }
+
     override suspend fun signIn(
-        sessionRequest: SessionRequest
+        sessionRequest: SessionRequest,
     ): NetworkResponse<NetworkUser> = json.parseServerErrors {
         client.post("$baseUrl/api/sign-in") {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
@@ -203,7 +246,7 @@ internal class KtorNetworkService(
     }
 
     override suspend fun changeList(
-        request: SyncRequest
+        request: SyncRequest,
     ): NetworkResponse<List<ChangeListItem>> = json.parseServerErrors {
         client.get("$baseUrl/api/${request.model}/changelist") {
             request.after?.let { changeListItem ->
@@ -226,4 +269,15 @@ private suspend fun <T> Json.parseServerErrors(body: suspend () -> T): NetworkRe
 
         else -> NetworkResponse.Error(message = exception.message)
     }
+}
+
+private fun FileDesc.toFormData(key: String): List<PartData> = formData {
+    append(
+        key = key,
+        value = InputProvider { binaryData },
+        headers = buildHeaders {
+            append(HttpHeaders.ContentType, mimetype)
+            append(HttpHeaders.ContentDisposition, "filename=$name")
+        }
+    )
 }

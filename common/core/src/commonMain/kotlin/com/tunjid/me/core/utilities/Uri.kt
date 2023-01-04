@@ -29,4 +29,16 @@ interface UriConverter {
     suspend fun name(uri: Uri): String
 }
 
+data class FileDesc(
+    val mimetype: String,
+    val name: String,
+    val binaryData: Input,
+)
+
+suspend fun UriConverter.fileDesc(uri: Uri) = FileDesc(
+    mimetype = uri.mimeType ?: "",
+    name = name(uri),
+    binaryData = toInput(uri)
+)
+
 expect class ActualUriConverter : UriConverter

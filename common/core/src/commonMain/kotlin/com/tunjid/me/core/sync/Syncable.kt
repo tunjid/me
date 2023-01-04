@@ -81,6 +81,30 @@ sealed class ChangeListKey(
         )
     }
 
+    sealed class ArchiveFile(
+        path: String,
+        model: String,
+        val kind: ArchiveKind,
+    ) : ChangeListKey(path = path, model = model) {
+        object Articles : Archive(
+            path = "articlefiles",
+            kind = ArchiveKind.Articles,
+            model = "articlefiles",
+        )
+
+        object Projects : Archive(
+            path = "projectfiles",
+            kind = ArchiveKind.Projects,
+            model = "projectfiles",
+        )
+
+        object Talks : Archive(
+            path = "talkfiles",
+            kind = ArchiveKind.Talks,
+            model = "talkfiles",
+        )
+    }
+
     object User : ChangeListKey(
         path = "users",
         model = "user",

@@ -70,6 +70,9 @@ internal fun commonSynchronizer(
 )
 
 private val allChangeListKey = listOf(
+    ChangeListKey.ArchiveFile.Articles,
+    ChangeListKey.ArchiveFile.Projects,
+    ChangeListKey.ArchiveFile.Talks,
     ChangeListKey.Archive.Articles,
     ChangeListKey.Archive.Projects,
     ChangeListKey.Archive.Talks,

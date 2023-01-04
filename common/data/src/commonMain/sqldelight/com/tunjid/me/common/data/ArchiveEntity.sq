@@ -61,6 +61,10 @@ SELECT *
 FROM archiveEntity
 WHERE id IN :ids;
 
+insertOrIgnore:
+INSERT OR IGNORE INTO archiveEntity
+VALUES ?;
+
 upsert:
 INSERT INTO archiveEntity
 VALUES ?

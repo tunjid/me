@@ -28,6 +28,7 @@ import com.tunjid.me.core.sync.Syncable
 import com.tunjid.me.core.sync.changeListKey
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.core.utilities.UriConverter
+import com.tunjid.me.core.utilities.fileDesc
 import com.tunjid.me.data.local.models.toExternalModel
 import com.tunjid.me.data.local.suspendingTransaction
 import com.tunjid.me.data.network.NetworkService
@@ -95,9 +96,7 @@ internal class OfflineFirstArchiveRepository(
     ): Result<Unit> = networkService.uploadArchiveHeaderPhoto(
         kind = kind,
         id = id,
-        mime = uri.mimeType ?: "",
-        name = uriConverter.name(uri),
-        photo = uriConverter.toInput(uri)
+        fileDesc = uriConverter.fileDesc(uri)
     )
         .toResult()
         .map { }

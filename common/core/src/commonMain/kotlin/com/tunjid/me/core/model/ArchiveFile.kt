@@ -16,20 +16,28 @@
 
 package com.tunjid.me.core.model
 
+import com.tunjid.me.core.model.ArchiveKind.*
+import com.tunjid.me.core.utilities.LocalDateTimeSerializer
+import kotlinx.datetime.Instant
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@JvmInline
-value class UserId(val value: String)
+data class
+ArchiveFileQuery(
+    val archiveId: ArchiveId,
+    val desc: Boolean = true,
+    val offset: Int = 0,
+    val limit: Int = DefaultQueryLimit,
+)
 
 @Serializable
-@JvmInline
-value class ArchiveId(val value: String)
-
-@Serializable
-@JvmInline
-value class ArchiveFileId(val value: String)
-
-@Serializable
-@JvmInline
-value class ChangeListId(val value: String)
+data class ArchiveFile(
+    @SerialName("_id")
+    val id: ArchiveFileId,
+    val url: String,
+    val mimeType: String,
+    val archiveId: ArchiveId,
+    @Serializable(LocalDateTimeSerializer::class)
+    val created: Instant,
+)

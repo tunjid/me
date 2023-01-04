@@ -24,8 +24,10 @@ import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.BaseUrl
 import com.tunjid.me.data.network.KtorNetworkService
 import com.tunjid.me.data.network.NetworkService
+import com.tunjid.me.data.repository.ArchiveFileRepository
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.data.repository.OfflineFirstArchiveFileRepository
 import com.tunjid.me.data.repository.OfflineFirstArchiveRepository
 import com.tunjid.me.data.repository.SessionCookieAuthRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -87,6 +89,11 @@ abstract class InjectedDataComponent(
     internal fun archiveCategoryEntityQueries(): ArchiveCategoryEntityQueries =
         module.database.archiveCategoryEntityQueries
 
+    @SingletonScope
+    @Provides
+    internal fun archiveFileEntityQueries(): ArchiveFileEntityQueries =
+        module.database.archiveFileEntityQueries
+
     internal val KtorNetworkService.bind: NetworkService
         @SingletonScope
         @Provides get() = this
@@ -95,11 +102,17 @@ abstract class InjectedDataComponent(
         @SingletonScope
         @Provides get() = this
 
+    internal val OfflineFirstArchiveFileRepository.bind: ArchiveFileRepository
+        @SingletonScope
+        @Provides get() = this
+
     internal val SessionCookieAuthRepository.bind: AuthRepository
         @SingletonScope
         @Provides get() = this
 
     abstract val archiveRepository: ArchiveRepository
+
+    abstract val archiveFileRepository: ArchiveFileRepository
 
     abstract val authRepository: AuthRepository
 }

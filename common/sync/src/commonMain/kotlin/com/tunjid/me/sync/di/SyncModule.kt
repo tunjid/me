@@ -23,6 +23,7 @@ import com.tunjid.me.core.sync.Syncable
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.NetworkMonitor
+import com.tunjid.me.data.repository.ArchiveFileRepository
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.sync.ChangeListDao
 import com.tunjid.me.sync.InMemorySynchronizer
@@ -64,12 +65,16 @@ abstract class InjectedSyncComponent(
 
     @Provides
     fun provideSyncableLocator(
-        archiveRepository: ArchiveRepository
+        archiveRepository: ArchiveRepository,
+        archiveFileRepository: ArchiveFileRepository
     ): SyncableLocator = mapOf(
         ChangeListKey.User to Syncable { _, _ -> },
         ChangeListKey.Archive.Articles to archiveRepository,
         ChangeListKey.Archive.Projects to archiveRepository,
         ChangeListKey.Archive.Talks to archiveRepository,
+        ChangeListKey.ArchiveFile.Articles to archiveFileRepository,
+        ChangeListKey.ArchiveFile.Projects to archiveFileRepository,
+        ChangeListKey.ArchiveFile.Talks to archiveFileRepository,
     )
 
     internal val InMemorySynchronizer.bind: Synchronizer

@@ -1,0 +1,26 @@
+
+photos:
+SELECT *
+FROM archiveFileEntity
+WHERE archive_id = :archiveId
+AND mimetype IN ("image/jpeg", "image/png", "image/gif")
+ORDER BY CASE WHEN :desc
+              THEN created
+              ELSE (-1 * created)
+              END DESC
+LIMIT :limit
+OFFSET :offset;
+
+upsert:
+INSERT INTO archiveFileEntity
+VALUES ?
+ON CONFLICT(id) DO UPDATE SET
+    url=excluded.url,
+    mimetype=excluded.mimetype,
+    uploader=excluded.uploader,
+    created=excluded.created,
+    archive_id=excluded.archive_id;
+
+delete:
+DELETE FROM archiveFileEntity
+WHERE id = :id;
