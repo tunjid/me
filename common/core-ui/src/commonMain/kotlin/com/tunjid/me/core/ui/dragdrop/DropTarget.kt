@@ -57,8 +57,8 @@ fun Modifier.dropTarget(
         val node = remember {
             DragDropContainer { uris, offset ->
                 when (onDragStarted(uris, offset)) {
-                    false -> DragAction.Reject
-                    true -> DragAction.Accept(
+                    false -> DragDropAction.Reject
+                    true -> DragDropAction.Drop(
                         object : DropTarget {
                             override fun onDragStarted(uris: List<Uri>, position: Offset): Boolean = onDragStarted(
                                 uris,

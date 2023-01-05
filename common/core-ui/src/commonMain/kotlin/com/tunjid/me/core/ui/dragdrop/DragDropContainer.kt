@@ -35,25 +35,25 @@ internal val ModifierLocalDropTargetParent = modifierLocalOf<DropTargetParent?> 
 interface DragDropModifier : DropTarget, Modifier.Element
 
 internal fun dragDropModifier(): DragDropModifier = DragDropContainer(
-    onDragStarted = { _, _ -> DragAction.Reject }
+    onDragStarted = { _, _ -> DragDropAction.Reject }
 )
 
 expect class PlatformDragDropModifier : DragDropModifier
 
-internal sealed class DragAction {
-    object Reject : DragAction()
+internal sealed class DragDropAction {
+    object Reject : DragDropAction()
 
-    data class Accept(val dropTarget: DropTarget) : DragAction()
+    data class Drop(val dropTarget: DropTarget) : DragDropAction()
 
     internal val target: DropTarget?
         get() = when (this) {
             Reject -> null
-            is Accept -> dropTarget
+            is Drop -> dropTarget
         }
 }
 
 internal class DragDropContainer(
-    private val onDragStarted: (uris: List<Uri>, Offset) -> DragAction
+    private val onDragStarted: (uris: List<Uri>, Offset) -> DragDropAction
 ) : Modifier.Element,
     ModifierLocalConsumer,
     ModifierLocalProvider<DropTargetParent?>,
