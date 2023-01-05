@@ -19,7 +19,6 @@ package com.tunjid.me
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -32,7 +31,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
 import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.me.core.ui.dragdrop.PlatformDropTargetModifier
+import com.tunjid.me.core.ui.dragdrop.PlatformDragDropModifier
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.NavMode
@@ -58,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val composeView = ComposeView(this)
-        val dropModifier = PlatformDropTargetModifier(view = composeView)
+        val dropModifier = PlatformDragDropModifier(view = composeView)
 
         composeView.setContent {
             AppTheme {

@@ -25,15 +25,15 @@ import java.awt.dnd.*
 import java.io.File
 import java.awt.dnd.DropTarget as AwtDropTarget
 
-actual class PlatformDropTargetModifier(
+actual class PlatformDragDropModifier(
     density: Float,
     window: ComposeWindow,
-) : DropTargetModifier by dropTargetModifier() {
+) : DragDropModifier by dragDropModifier() {
     init {
         val awtDropTarget = AwtDropTarget()
         awtDropTarget.addDropTargetListener(
             dropTargetListener(
-                dropTargetModifier = this,
+                dragDropModifier = this,
                 density = density
             )
         )
@@ -42,24 +42,24 @@ actual class PlatformDropTargetModifier(
 }
 
 private fun dropTargetListener(
-    dropTargetModifier: DropTargetModifier,
+    dragDropModifier: DragDropModifier,
     density: Float
 ) = object : DropTargetListener {
     override fun dragEnter(dtde: DropTargetDragEvent?) {
         if (dtde == null) return
-        dropTargetModifier.onDragStarted(
+        dragDropModifier.onDragStarted(
             listOf(),
             Offset(
                 dtde.location.x * density,
                 dtde.location.y * density
             )
         )
-        dropTargetModifier.onDragEntered()
+        dragDropModifier.onDragEntered()
     }
 
     override fun dragOver(dtde: DropTargetDragEvent?) {
         if (dtde == null) return
-        dropTargetModifier.onDragMoved(
+        dragDropModifier.onDragMoved(
             Offset(
                 dtde.location.x * density,
                 dtde.location.y * density
@@ -70,16 +70,16 @@ private fun dropTargetListener(
     override fun dropActionChanged(dtde: DropTargetDragEvent?) = Unit
 
     override fun dragExit(dte: DropTargetEvent?) {
-        dropTargetModifier.onDragExited()
-        dropTargetModifier.onDragEnded()
+        dragDropModifier.onDragExited()
+        dragDropModifier.onDragEnded()
     }
 
     override fun drop(dtde: DropTargetDropEvent?) {
-        if (dtde == null) return dropTargetModifier.onDragEnded()
+        if (dtde == null) return dragDropModifier.onDragEnded()
 
         dtde.acceptDrop(DnDConstants.ACTION_REFERENCE)
         dtde.dropComplete(
-            dropTargetModifier.onDropped(
+            dragDropModifier.onDropped(
                 dtde.fileUris(),
                 Offset(
                     dtde.location.x * density,
@@ -87,7 +87,7 @@ private fun dropTargetListener(
                 )
             )
         )
-        dropTargetModifier.onDragEnded()
+        dragDropModifier.onDragEnded()
     }
 }
 

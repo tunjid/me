@@ -16,20 +16,17 @@
 
 package com.tunjid.me
 
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.me.core.ui.dragdrop.PlatformDropTargetModifier
+import com.tunjid.me.core.ui.dragdrop.PlatformDragDropModifier
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.feature.MeApp
 import com.tunjid.me.scaffold.globalui.NavMode
@@ -52,7 +49,7 @@ fun main() {
         ) {
             val density = LocalDensity.current.density
             val dropParent = remember(density) {
-                PlatformDropTargetModifier(
+                PlatformDragDropModifier(
                     density = density,
                     window = window,
                 )

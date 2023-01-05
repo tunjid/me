@@ -32,13 +32,13 @@ import com.tunjid.me.core.utilities.Uri
 
 internal val ModifierLocalDropTargetParent = modifierLocalOf<DropTargetParent?> { null }
 
-interface DropTargetModifier : DropTarget, Modifier.Element
+interface DragDropModifier : DropTarget, Modifier.Element
 
-internal fun dropTargetModifier(): DropTargetModifier = DropTargetContainer(
+internal fun dragDropModifier(): DragDropModifier = DragDropContainer(
     onDragStarted = { _, _ -> DragAction.Reject }
 )
 
-expect class PlatformDropTargetModifier : DropTargetModifier
+expect class PlatformDragDropModifier : DragDropModifier
 
 internal sealed class DragAction {
     object Reject : DragAction()
@@ -52,7 +52,7 @@ internal sealed class DragAction {
         }
 }
 
-internal class DropTargetContainer(
+internal class DragDropContainer(
     private val onDragStarted: (uris: List<Uri>, Offset) -> DragAction
 ) : Modifier.Element,
     ModifierLocalConsumer,
@@ -61,7 +61,7 @@ internal class DropTargetContainer(
     RememberObserver,
     DropTargetParent,
     DropTargetChild,
-    DropTargetModifier,
+    DragDropModifier,
     InspectorValueInfo(debugInspectorInfo {
         name = "dropTarget"
         properties["onDragStarted"] = onDragStarted
@@ -84,7 +84,7 @@ internal class DropTargetContainer(
     override val key: ProvidableModifierLocal<DropTargetParent?>
         get() = ModifierLocalDropTargetParent
 
-    override val value: DropTargetContainer
+    override val value: DragDropContainer
         get() = this
     // end ModifierLocalProvider
 

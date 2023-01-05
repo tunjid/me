@@ -22,20 +22,20 @@ import androidx.compose.ui.geometry.Offset
 import com.tunjid.me.core.utilities.ClipItemUri
 import com.tunjid.me.core.utilities.Uri
 
-actual class PlatformDropTargetModifier(
+actual class PlatformDragDropModifier(
     view: View,
-) : DropTargetModifier by dropTargetModifier() {
+) : DragDropModifier by dragDropModifier() {
     init {
         view.setOnDragListener(dragListener(this))
     }
 }
 
 fun dragListener(
-    dropTargetModifier: DropTargetModifier,
+    dragDropModifier: DragDropModifier,
 ): View.OnDragListener = View.OnDragListener { _, event ->
     when (event.action) {
         DragEvent.ACTION_DRAG_STARTED -> {
-            dropTargetModifier.onDragStarted(
+            dragDropModifier.onDragStarted(
                 uris = listOf(),
                 position = Offset(event.x, event.y)
             )
@@ -43,29 +43,29 @@ fun dragListener(
         }
 
         DragEvent.ACTION_DRAG_ENTERED -> {
-            dropTargetModifier.onDragEntered()
+            dragDropModifier.onDragEntered()
             true
         }
 
         DragEvent.ACTION_DRAG_LOCATION -> {
-            dropTargetModifier.onDragMoved(Offset(event.x, event.y))
+            dragDropModifier.onDragMoved(Offset(event.x, event.y))
             true
         }
 
         DragEvent.ACTION_DRAG_EXITED -> {
-            dropTargetModifier.onDragExited()
+            dragDropModifier.onDragExited()
             true
         }
 
         DragEvent.ACTION_DROP -> {
-            dropTargetModifier.onDropped(
+            dragDropModifier.onDropped(
                 uris = event.clipItemUris(),
                 position = Offset(event.x, event.y)
             )
         }
 
         DragEvent.ACTION_DRAG_ENDED -> {
-            dropTargetModifier.onDragEnded()
+            dragDropModifier.onDragEnded()
             true
         }
 
