@@ -33,7 +33,6 @@ interface DragSource {
     fun dragStatus(offset: Offset): DragStatus
 }
 
-
 fun Modifier.dragSource(
     dragStatus: () -> DragStatus,
 ): Modifier = composed(
@@ -45,8 +44,8 @@ fun Modifier.dragSource(
         val node = remember {
             DragDropContainer { start ->
                 when (start) {
-                    is Start.Drop -> DragDropAction.Reject
-                    is Start.Drag -> when (dragStatus()) {
+                    is DragDrop.Drop -> DragDropAction.Reject
+                    is DragDrop.Drag -> when (dragStatus()) {
                         DragStatus.Static -> DragDropAction.Reject
                         is DragStatus.Draggable -> DragDropAction.Drag(
                             object : DragSource {

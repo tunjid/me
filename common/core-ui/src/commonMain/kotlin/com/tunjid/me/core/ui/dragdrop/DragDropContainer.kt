@@ -30,70 +30,22 @@ import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
 import com.tunjid.me.core.utilities.Uri
 
-internal val ModifierLocalDropTargetParent = modifierLocalOf<DropTargetParent?> { null }
-
-interface DragDropModifier : DragSource, DropTarget, Modifier.Element
-
-/**
- * Root level [DragDropModifier], it always rejects leaving acceptance to its children
- */
-internal fun rootDragDropModifier(): DragDropModifier = DragDropContainer(
-    onDragDropStarted = { _ -> DragDropAction.Reject }
-)
-
-expect class PlatformDragDropModifier : DragDropModifier
-
-internal sealed class DragDropAction {
-    object Reject : DragDropAction()
-
-    data class Drag(val dragSource: DragSource) : DragDropAction()
-
-    data class Drop(val dropTarget: DropTarget) : DragDropAction()
-
-
-    internal val target: DropTarget?
-        get() = when (this) {
-            Reject -> null
-            is Drag -> null
-            is Drop -> dropTarget
-        }
-
-    internal val source: DragSource?
-        get() = when (this) {
-            Reject -> null
-            is Drop -> null
-            is Drag -> dragSource
-        }
-}
-
-internal sealed class Start {
-
-    data class Drag(
-        val offset: Offset,
-    ) : Start()
-
-    data class Drop(
-        val uris: List<Uri>,
-        val offset: Offset,
-    ) : Start()
-}
-
 internal class DragDropContainer(
-    private val onDragDropStarted: (Start) -> DragDropAction,
+    private val onDragDropStarted: (DragDrop) -> DragDropAction,
 ) : Modifier.Element,
     ModifierLocalConsumer,
-    ModifierLocalProvider<DropTargetParent?>,
+    ModifierLocalProvider<DragDropParent?>,
     OnGloballyPositionedModifier,
     RememberObserver,
-    DropTargetParent,
-    DropTargetChild,
+    DragDropParent,
+    DragDropChild,
     DragDropModifier,
     InspectorValueInfo(debugInspectorInfo {
         name = "dropTarget"
         properties["onDragStarted"] = onDragDropStarted
     }) {
 
-    private var parent: DropTargetParent? = null
+    private var parent: DragDropParent? = null
         set(value) {
             if (value != field) {
                 field?.unregisterChild(this)
@@ -101,14 +53,14 @@ internal class DragDropContainer(
                 field?.registerChild(this)
             }
         }
-    private val children = mutableListOf<DropTargetChild>()
+    private val children = mutableListOf<DragDropChild>()
     private var coordinates: LayoutCoordinates? = null
-    private var activeChild: DropTargetChild? = null
+    private var activeChild: DragDropChild? = null
     private var currentTarget: DropTarget? = null
 
     // start ModifierLocalProvider
-    override val key: ProvidableModifierLocal<DropTargetParent?>
-        get() = ModifierLocalDropTargetParent
+    override val key: ProvidableModifierLocal<DragDropParent?>
+        get() = ModifierLocalDragDropParent
 
     override val value: DragDropContainer
         get() = this
@@ -132,12 +84,12 @@ internal class DragDropContainer(
     // end RememberObserver
 
     // start DropTargetParent
-    override fun registerChild(child: DropTargetChild) {
+    override fun registerChild(child: DragDropChild) {
         children += child
         // TODO if a drag is in progress, check if we need to send events
     }
 
-    override fun unregisterChild(child: DropTargetChild) {
+    override fun unregisterChild(child: DragDropChild) {
         children -= child
     }
     // end DropTargetParent
@@ -149,7 +101,7 @@ internal class DragDropContainer(
             null -> 0
             else -> coordinates.size.width * coordinates.size.height
         }
-    override val allChildren: List<DropTargetChild>
+    override val allChildren: List<DragDropChild>
         get() = buildList {
             children.fastForEach { child ->
                 add(child)
@@ -173,7 +125,7 @@ internal class DragDropContainer(
         coordinates ?: return false
 
         check(currentTarget == null)
-        currentTarget = onDragDropStarted.invoke(Start.Drop(uris, position)).target
+        currentTarget = onDragDropStarted.invoke(DragDrop.Drop(uris, position)).target
 
         var handledByChild = false
 
@@ -197,7 +149,7 @@ internal class DragDropContainer(
             .minByOrNull { it.area }
 
         return draggedChild?.dragStatus(offset)
-            ?: onDragDropStarted.invoke(Start.Drag(offset)).source?.dragStatus(offset)
+            ?: onDragDropStarted.invoke(DragDrop.Drag(offset)).source?.dragStatus(offset)
             ?: DragStatus.Static
     }
 
@@ -216,9 +168,9 @@ internal class DragDropContainer(
 
     override fun onDragMoved(position: Offset) {
         coordinates ?: return
-        val currentActiveChild: DropTargetChild? = activeChild
+        val currentActiveChild: DragDropChild? = activeChild
 
-        val newChild: DropTargetChild? = when (currentActiveChild != null && currentActiveChild.contains(position)) {
+        val newChild: DragDropChild? = when (currentActiveChild != null && currentActiveChild.contains(position)) {
             // Moved within child.
             true -> currentActiveChild
             // Position is now outside active child, maybe it entered a different one.

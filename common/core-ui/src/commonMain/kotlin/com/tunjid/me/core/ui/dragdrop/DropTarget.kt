@@ -32,21 +32,6 @@ interface DropTarget {
     fun onDragEnded()
 }
 
-internal interface DropTargetParent {
-
-    val allChildren: List<DropTargetChild>
-
-    fun registerChild(child: DropTargetChild)
-    fun unregisterChild(child: DropTargetChild)
-}
-
-internal interface DropTargetChild : DragSource, DropTarget, DropTargetParent {
-
-    val area: Int
-
-    fun contains(position: Offset): Boolean
-}
-
 fun Modifier.dropTarget(
     onDragStarted: (uris: List<Uri>, Offset) -> Boolean,
     onDragEntered: () -> Unit = { },
@@ -63,8 +48,10 @@ fun Modifier.dropTarget(
         val node = remember {
             DragDropContainer { start ->
                 when (start) {
-                    is Start.Drag -> DragDropAction.Reject
-                    is Start.Drop -> when (onDragStarted(start.uris, start.offset)) {
+                    is DragDrop.Drag -> DragDropAction.Reject
+                    is DragDrop.Drop -> when (
+                        onDragStarted(start.uris, start.offset)
+                    ) {
                         false -> DragDropAction.Reject
                         true -> DragDropAction.Drop(
                             object : DropTarget {
