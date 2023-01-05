@@ -32,13 +32,14 @@ interface DropTarget {
     fun onDragEnded()
 }
 
-interface DropTargetModifier : DropTarget, Modifier.Element
+internal interface DropTargetParent {
+    fun registerChild(child: DropTargetChild)
+    fun unregisterChild(child: DropTargetChild)
+}
 
-internal fun dropTargetModifier(): DropTargetModifier = DropTargetContainer(
-    onDragStarted = { _, _ -> DragAction.Reject }
-)
-
-expect class PlatformDropTargetModifier : DropTargetModifier
+internal interface DropTargetChild : DropTarget {
+    fun contains(position: Offset): Boolean
+}
 
 fun Modifier.dropTarget(
     onDragStarted: (uris: List<Uri>, Offset) -> Boolean,

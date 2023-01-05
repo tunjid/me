@@ -32,14 +32,13 @@ import com.tunjid.me.core.utilities.Uri
 
 internal val ModifierLocalDropTargetParent = modifierLocalOf<DropTargetParent?> { null }
 
-internal interface DropTargetParent {
-    fun registerChild(child: DropTargetChild)
-    fun unregisterChild(child: DropTargetChild)
-}
+interface DropTargetModifier : DropTarget, Modifier.Element
 
-internal interface DropTargetChild : DropTarget {
-    fun contains(position: Offset): Boolean
-}
+internal fun dropTargetModifier(): DropTargetModifier = DropTargetContainer(
+    onDragStarted = { _, _ -> DragAction.Reject }
+)
+
+expect class PlatformDropTargetModifier : DropTargetModifier
 
 internal sealed class DragAction {
     object Reject : DragAction()
