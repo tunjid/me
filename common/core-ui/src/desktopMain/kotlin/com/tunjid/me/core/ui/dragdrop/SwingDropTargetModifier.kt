@@ -20,9 +20,18 @@ import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.geometry.Offset
 import com.tunjid.me.core.utilities.FileUri
 import com.tunjid.me.core.utilities.Uri
+import java.awt.Cursor
 import java.awt.datatransfer.DataFlavor
-import java.awt.dnd.*
+import java.awt.datatransfer.Transferable
+import java.awt.dnd.DnDConstants
+import java.awt.dnd.DragGestureEvent
+import java.awt.dnd.DragGestureListener
+import java.awt.dnd.DropTargetDragEvent
+import java.awt.dnd.DropTargetDropEvent
+import java.awt.dnd.DropTargetEvent
+import java.awt.dnd.DropTargetListener
 import java.io.File
+import java.awt.dnd.DragSource as AwtDragSource
 import java.awt.dnd.DropTarget as AwtDropTarget
 
 actual class PlatformDragDropModifier(
@@ -30,20 +39,29 @@ actual class PlatformDragDropModifier(
     window: ComposeWindow,
 ) : DragDropModifier by rootDragDropModifier() {
     init {
-        val awtDropTarget = AwtDropTarget()
-        awtDropTarget.addDropTargetListener(
-            dropTargetListener(
-                dragDropModifier = this,
+        window.contentPane.dropTarget = AwtDropTarget().apply {
+            addDropTargetListener(
+                dropTargetListener(
+                    dragDropModifier = this@PlatformDragDropModifier,
+                    density = density
+                )
+            )
+        }
+
+        AwtDragSource.getDefaultDragSource().createDefaultDragGestureRecognizer(
+            window,
+            DnDConstants.ACTION_COPY,
+            dragGestureListener(
+                dragDropModifier = this@PlatformDragDropModifier,
                 density = density
             )
         )
-        window.contentPane.dropTarget = awtDropTarget
     }
 }
 
 private fun dropTargetListener(
     dragDropModifier: DragDropModifier,
-    density: Float
+    density: Float,
 ) = object : DropTargetListener {
     override fun dragEnter(dtde: DropTargetDragEvent?) {
         if (dtde == null) return
@@ -88,6 +106,34 @@ private fun dropTargetListener(
             )
         )
         dragDropModifier.onDragEnded()
+    }
+}
+
+private fun dragGestureListener(
+    dragDropModifier: DragDropModifier,
+    density: Float,
+    ) = DragGestureListener { event: DragGestureEvent ->
+    when (val dragStatus = dragDropModifier.dragStatus(
+        Offset(
+            x = event.dragOrigin.x * density,
+            y = event.dragOrigin.y * density
+        )
+    )) {
+        DragStatus.Static -> Unit
+        is DragStatus.Draggable -> event.startDrag(
+            Cursor(Cursor.HAND_CURSOR),
+            object : Transferable {
+                override fun getTransferDataFlavors(): Array<DataFlavor> =
+                    arrayOf(DataFlavor.javaFileListFlavor)
+
+                override fun isDataFlavorSupported(flavor: DataFlavor?): Boolean =
+                    flavor == DataFlavor.javaFileListFlavor
+
+                override fun getTransferData(flavor: DataFlavor?): Any =
+//                    dragStatus.uris.filterIsInstance<FileUri>().map(FileUri::file)
+                    listOf(File("/Users/adetunjidahunsi/Desktop/scooby.jpeg"))
+            }
+        )
     }
 }
 

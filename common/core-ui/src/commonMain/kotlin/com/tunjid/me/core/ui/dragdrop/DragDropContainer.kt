@@ -32,13 +32,13 @@ import com.tunjid.me.core.utilities.Uri
 
 internal val ModifierLocalDropTargetParent = modifierLocalOf<DropTargetParent?> { null }
 
-interface DragDropModifier : DropTarget, Modifier.Element
+interface DragDropModifier : DragSource, DropTarget, Modifier.Element
 
 /**
  * Root level [DragDropModifier], it always rejects leaving acceptance to its children
  */
 internal fun rootDragDropModifier(): DragDropModifier = DragDropContainer(
-    onDragStarted = { _, _ -> DragDropAction.Reject }
+    onDragDropStarted = { _ -> DragDropAction.Reject }
 )
 
 expect class PlatformDragDropModifier : DragDropModifier
@@ -46,17 +46,40 @@ expect class PlatformDragDropModifier : DragDropModifier
 internal sealed class DragDropAction {
     object Reject : DragDropAction()
 
+    data class Drag(val dragSource: DragSource) : DragDropAction()
+
     data class Drop(val dropTarget: DropTarget) : DragDropAction()
+
 
     internal val target: DropTarget?
         get() = when (this) {
             Reject -> null
+            is Drag -> null
             is Drop -> dropTarget
+        }
+
+    internal val source: DragSource?
+        get() = when (this) {
+            Reject -> null
+            is Drop -> null
+            is Drag -> dragSource
         }
 }
 
+internal sealed class Start {
+
+    data class Drag(
+        val offset: Offset,
+    ) : Start()
+
+    data class Drop(
+        val uris: List<Uri>,
+        val offset: Offset,
+    ) : Start()
+}
+
 internal class DragDropContainer(
-    private val onDragStarted: (uris: List<Uri>, Offset) -> DragDropAction
+    private val onDragDropStarted: (Start) -> DragDropAction,
 ) : Modifier.Element,
     ModifierLocalConsumer,
     ModifierLocalProvider<DropTargetParent?>,
@@ -67,7 +90,7 @@ internal class DragDropContainer(
     DragDropModifier,
     InspectorValueInfo(debugInspectorInfo {
         name = "dropTarget"
-        properties["onDragStarted"] = onDragStarted
+        properties["onDragStarted"] = onDragDropStarted
     }) {
 
     private var parent: DropTargetParent? = null
@@ -120,6 +143,20 @@ internal class DragDropContainer(
     // end DropTargetParent
 
     // start DropTargetNode
+
+    override val area: Int
+        get() = when (val coordinates = coordinates) {
+            null -> 0
+            else -> coordinates.size.width * coordinates.size.height
+        }
+    override val allChildren: List<DropTargetChild>
+        get() = buildList {
+            children.fastForEach { child ->
+                add(child)
+                addAll(child.allChildren)
+            }
+        }
+
     override fun contains(position: Offset): Boolean {
         val currentCoordinates = coordinates ?: return false
         if (!currentCoordinates.isAttached) return false
@@ -136,7 +173,7 @@ internal class DragDropContainer(
         coordinates ?: return false
 
         check(currentTarget == null)
-        currentTarget = onDragStarted.invoke(uris, position).target
+        currentTarget = onDragDropStarted.invoke(Start.Drop(uris, position)).target
 
         var handledByChild = false
 
@@ -149,6 +186,22 @@ internal class DragDropContainer(
         return handledByChild || currentTarget != null
     }
     // end DropTargetNode
+
+
+    // start DragSource
+    override fun dragStatus(offset: Offset): DragStatus {
+        coordinates ?: return DragStatus.Static
+
+        val draggedChild = allChildren
+            .filter { it.contains(offset) }
+            .minByOrNull { it.area }
+
+        return draggedChild?.dragStatus(offset)
+            ?: onDragDropStarted.invoke(Start.Drag(offset)).source?.dragStatus(offset)
+            ?: DragStatus.Static
+    }
+
+    // end DragSource
 
     // start OnGloballyPositionedModifier
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {

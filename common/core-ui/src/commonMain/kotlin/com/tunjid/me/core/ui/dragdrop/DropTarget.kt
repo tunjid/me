@@ -33,11 +33,17 @@ interface DropTarget {
 }
 
 internal interface DropTargetParent {
+
+    val allChildren: List<DropTargetChild>
+
     fun registerChild(child: DropTargetChild)
     fun unregisterChild(child: DropTargetChild)
 }
 
-internal interface DropTargetChild : DropTarget {
+internal interface DropTargetChild : DragSource, DropTarget, DropTargetParent {
+
+    val area: Int
+
     fun contains(position: Offset): Boolean
 }
 
@@ -55,30 +61,33 @@ fun Modifier.dropTarget(
     },
     factory = {
         val node = remember {
-            DragDropContainer { uris, offset ->
-                when (onDragStarted(uris, offset)) {
-                    false -> DragDropAction.Reject
-                    true -> DragDropAction.Drop(
-                        object : DropTarget {
-                            override fun onDragStarted(uris: List<Uri>, position: Offset): Boolean = onDragStarted(
-                                uris,
-                                position
-                            )
+            DragDropContainer { start ->
+                when (start) {
+                    is Start.Drag -> DragDropAction.Reject
+                    is Start.Drop -> when (onDragStarted(start.uris, start.offset)) {
+                        false -> DragDropAction.Reject
+                        true -> DragDropAction.Drop(
+                            object : DropTarget {
+                                override fun onDragStarted(uris: List<Uri>, position: Offset): Boolean = onDragStarted(
+                                    uris,
+                                    position
+                                )
 
-                            override fun onDragEntered() = onDragEntered()
+                                override fun onDragEntered() = onDragEntered()
 
-                            override fun onDragMoved(position: Offset) = onDragMoved(position)
+                                override fun onDragMoved(position: Offset) = onDragMoved(position)
 
-                            override fun onDragExited() = onDragExited()
+                                override fun onDragExited() = onDragExited()
 
-                            override fun onDropped(uris: List<Uri>, position: Offset): Boolean = onDropped(
-                                uris,
-                                position
-                            )
+                                override fun onDropped(uris: List<Uri>, position: Offset): Boolean = onDropped(
+                                    uris,
+                                    position
+                                )
 
-                            override fun onDragEnded() = onDragEnded()
-                        }
-                    )
+                                override fun onDragEnded() = onDragEnded()
+                            }
+                        )
+                    }
                 }
             }
         }
