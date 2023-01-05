@@ -34,7 +34,10 @@ internal val ModifierLocalDropTargetParent = modifierLocalOf<DropTargetParent?> 
 
 interface DragDropModifier : DropTarget, Modifier.Element
 
-internal fun dragDropModifier(): DragDropModifier = DragDropContainer(
+/**
+ * Root level [DragDropModifier], it always rejects leaving acceptance to its children
+ */
+internal fun rootDragDropModifier(): DragDropModifier = DragDropContainer(
     onDragStarted = { _, _ -> DragDropAction.Reject }
 )
 

@@ -28,7 +28,7 @@ import java.awt.dnd.DropTarget as AwtDropTarget
 actual class PlatformDragDropModifier(
     density: Float,
     window: ComposeWindow,
-) : DragDropModifier by dragDropModifier() {
+) : DragDropModifier by rootDragDropModifier() {
     init {
         val awtDropTarget = AwtDropTarget()
         awtDropTarget.addDropTargetListener(

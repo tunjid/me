@@ -24,7 +24,7 @@ import com.tunjid.me.core.utilities.Uri
 
 actual class PlatformDragDropModifier(
     view: View,
-) : DragDropModifier by dragDropModifier() {
+) : DragDropModifier by rootDragDropModifier() {
     init {
         view.setOnDragListener(dragListener(this))
     }
