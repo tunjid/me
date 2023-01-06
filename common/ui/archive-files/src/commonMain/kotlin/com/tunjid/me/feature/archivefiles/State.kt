@@ -17,22 +17,38 @@
 package com.tunjid.me.feature.archivefiles
 
 import com.tunjid.me.core.model.ArchiveFile
+import com.tunjid.me.core.model.MessageQueue
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.permissions.Permission
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+
+
+enum class DragLocation {
+    Outside, Inside
+}
 
 @Serializable
 data class State(
     val isSignedIn: Boolean = false,
     val hasFetchedAuthStatus: Boolean = false,
     val isMainContent: Boolean = true,
+    val hasStoragePermissions: Boolean = false,
+    @Transient
+    val messages: MessageQueue = MessageQueue(),
+    @Transient
+    val dragLocation: DragLocation = DragLocation.Outside,
     @Transient
     val files: List<ArchiveFile> = emptyList(),
 ) : ByteSerializable
 
 
 sealed class Action(val key: String) {
+    data class Drag(val location: DragLocation) : Action("Drag")
 
-    data class Navigate(val navMutation: NavMutation) : Action(key = "Navigate")
+    data class Drop(val uris: List<Uri>) : Action("Drop")
+
+    data class RequestPermission(val permission: Permission) : Action("RequestPermission")
 }

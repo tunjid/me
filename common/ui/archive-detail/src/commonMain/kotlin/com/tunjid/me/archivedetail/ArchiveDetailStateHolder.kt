@@ -18,7 +18,6 @@ package com.tunjid.me.archivedetail
 
 
 import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
@@ -75,7 +74,6 @@ class ActualArchiveDetailStateHolder(
         uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
         authRepository.authMutations(),
         archiveRepository.archiveLoadMutations(
-            kind = route.kind,
             id = route.archiveId
         ),
         mainNavContentMutations(
@@ -107,10 +105,8 @@ private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     }
 
 private fun ArchiveRepository.archiveLoadMutations(
-    id: ArchiveId,
-    kind: ArchiveKind
+    id: ArchiveId
 ): Flow<Mutation<State>> = archiveStream(
-    kind = kind,
     id = id
 )
     .map { fetchedArchive ->

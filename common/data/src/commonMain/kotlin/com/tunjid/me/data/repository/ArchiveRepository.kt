@@ -63,7 +63,6 @@ interface ArchiveRepository : Syncable {
     ): Flow<List<Archive>>
 
     fun archiveStream(
-        kind: ArchiveKind,
         id: ArchiveId,
     ): Flow<Archive?>
 }
@@ -159,10 +158,9 @@ internal class OfflineFirstArchiveRepository(
         )
 
     override fun archiveStream(
-        kind: ArchiveKind, id: ArchiveId,
+     id: ArchiveId,
     ): Flow<Archive?> = archiveEntityQueries.get(
         id = id.value,
-        kind = kind.type
     )
         .asFlow()
         .mapToOneOrNull(context = dispatcher)

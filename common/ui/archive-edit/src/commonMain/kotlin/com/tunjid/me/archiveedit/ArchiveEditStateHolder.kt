@@ -300,7 +300,6 @@ private fun Flow<Action.Load>.loadMutations(
         .flatMapLatest { monitor ->
             when (monitor) {
                 is Action.Load.InitialLoad -> archiveRepository.textBodyMutations(
-                    kind = monitor.kind,
                     archiveId = monitor.id
                 )
 
@@ -334,7 +333,6 @@ private fun Flow<Action.Load>.loadMutations(
                                 )
                             },
                             archiveRepository.textBodyMutations(
-                                kind = kind,
                                 archiveId = id
                             )
                         ).merge()
@@ -347,10 +345,8 @@ private fun Flow<Action.Load>.loadMutations(
  * Mutations from monitoring the archive
  */
 private fun ArchiveRepository.textBodyMutations(
-    kind: ArchiveKind,
     archiveId: ArchiveId,
 ): Flow<Mutation<State>> = archiveStream(
-    kind = kind,
     id = archiveId
 )
     .filterNotNull()

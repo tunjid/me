@@ -25,7 +25,7 @@ import com.tunjid.me.core.utilities.uuid
  *
  */
 data class MessageQueue(
-    val items: List<Message> = listOf()
+    val items: List<Message> = listOf(),
 )
 
 data class Message(
@@ -34,6 +34,10 @@ data class Message(
 )
 
 fun MessageQueue.peek(): Message? = items.firstOrNull()
+
+fun MessageQueue.filter(predicate: (Message) -> Boolean): MessageQueue = copy(
+    items = items.filter(predicate)
+)
 
 operator fun MessageQueue.plus(message: Message): MessageQueue = copy(
     items = items + message

@@ -1,7 +1,7 @@
 get:
 SELECT *
 FROM archiveEntity
-WHERE id = :id AND kind = :kind;
+WHERE id = :id;
 
 find:
 SELECT *

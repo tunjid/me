@@ -16,16 +16,21 @@
 
 package com.tunjid.me.feature.archivefiles
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveId
@@ -33,10 +38,12 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.ui.Thumbnail
 import com.tunjid.me.core.ui.dragdrop.DragStatus
 import com.tunjid.me.core.ui.dragdrop.dragSource
+import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.permissions.Permission
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -65,7 +72,40 @@ private fun ArchiveFilesScreen(
         onAction = actions
     )
 
-    Column {
+    val borderColor by animateColorAsState(
+        when (state.dragLocation) {
+            DragLocation.Inside -> MaterialTheme.colorScheme.primaryContainer
+            DragLocation.Outside -> Color.Transparent
+        }
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .border(
+                width = 2.dp,
+                color = borderColor,
+                shape = MaterialTheme.shapes.medium,
+            )
+            .dropTarget(
+                onDragStarted = { _, _ ->
+                    val (action, acceptedDrag) = when (state.hasStoragePermissions) {
+                        true -> Action.Drag(location = DragLocation.Inside) to true
+                        false -> Action.RequestPermission(Permission.ReadExternalStorage) to false
+                    }
+                    actions(action)
+                    acceptedDrag
+                },
+                onDragEntered = { actions(Action.Drag(location = DragLocation.Inside)) },
+                onDragExited = { actions(Action.Drag(location = DragLocation.Outside)) },
+                onDragEnded = { actions(Action.Drag(location = DragLocation.Outside)) },
+                onDropped = { uris, _ ->
+                    actions(Action.Drag(location = DragLocation.Outside))
+                    actions(Action.Drop(uris = uris))
+                    false
+                }
+            ),
+    ) {
         Text("Upload items here")
         LazyVerticalGrid(
             columns = GridCells.Adaptive(100.dp)
@@ -74,21 +114,29 @@ private fun ArchiveFilesScreen(
                 items = state.files,
                 key = ArchiveFile::url,
                 itemContent = { archiveFile ->
-                    Box(
-                        modifier = Modifier.aspectRatio(1f)
-                    ) {
-                        Thumbnail(
-                            imageUrl = archiveFile.url,
-                            modifier = Modifier.dragSource {
-                                DragStatus.Draggable(
-                                    uris = listOf(RemoteUri(path = archiveFile.url))
-                                )
-                            }
-                        )
-                    }
+
+                    GalleryItem(archiveFile)
                 }
             )
         }
     }
 
+}
+
+@Composable
+private fun GalleryItem(
+    archiveFile: ArchiveFile,
+) {
+    Box(
+        modifier = Modifier.aspectRatio(1f)
+    ) {
+        Thumbnail(
+            imageUrl = archiveFile.url,
+            modifier = Modifier.dragSource {
+                DragStatus.Draggable(
+                    uris = listOf(RemoteUri(path = archiveFile.url))
+                )
+            }
+        )
+    }
 }

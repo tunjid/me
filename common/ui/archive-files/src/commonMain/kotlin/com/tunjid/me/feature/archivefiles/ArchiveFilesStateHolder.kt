@@ -18,8 +18,14 @@ package com.tunjid.me.feature.archivefiles
 
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.filter
+import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.utilities.ByteSerializer
+import com.tunjid.me.core.utilities.LocalUri
+import com.tunjid.me.core.utilities.Uri
+import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.repository.ArchiveFileRepository
+import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
@@ -29,6 +35,8 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.NavState
+import com.tunjid.me.scaffold.permissions.Permission
+import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
@@ -42,7 +50,7 @@ typealias ArchiveFilesStateHolder = ActionStateProducer<Action, StateFlow<State>
 
 @Inject
 class ArchiveFilesStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveFilesRoute) -> ArchiveFilesStateHolder
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveFilesRoute) -> ArchiveFilesStateHolder,
 ) : ScreenStateHolderCreator by creator.downcast()
 
 /**
@@ -51,10 +59,13 @@ class ArchiveFilesStateHolderCreator(
 @Inject
 class ActualArchiveFilesStateHolder(
     authRepository: AuthRepository,
+    archiveRepository: ArchiveRepository,
     archiveFileRepository: ArchiveFileRepository,
     byteSerializer: ByteSerializer,
+    permissionsFlow: StateFlow<Permissions>,
     navStateFlow: StateFlow<NavState>,
     uiStateFlow: StateFlow<UiState>,
+    onPermissionRequested: (Permission) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveFilesRoute,
@@ -71,11 +82,23 @@ class ActualArchiveFilesStateHolder(
         authRepository.authMutations(),
         archiveFileRepository.fileMutations(
             archiveId = route.archiveId
-        )
+        ),
+        permissionsFlow.storagePermissionMutations(),
     ),
     actionTransform = { actions ->
         actions.toMutationStream(keySelector = Action::key) {
-            emptyFlow()
+            when (val action = type()) {
+                is Action.Drop -> action.flow.dropMutations(
+                    archiveId = route.archiveId,
+                    archiveRepository = archiveRepository,
+                    archiveFileRepository = archiveFileRepository
+                )
+
+                is Action.Drag -> action.flow.dragStatusMutations()
+                is Action.RequestPermission -> action.flow.permissionRequestMutations(
+                    onPermissionRequested = onPermissionRequested
+                )
+            }
         }
     }
 )
@@ -104,6 +127,25 @@ private fun ArchiveFileRepository.fileMutations(archiveId: ArchiveId): Flow<Muta
         }
 
 /**
+ * Empty mutations proxied to [onPermissionRequested] to request permissions
+ */
+private fun Flow<Action.RequestPermission>.permissionRequestMutations(
+    onPermissionRequested: (Permission) -> Unit,
+): Flow<Mutation<State>> =
+    flatMapLatest { (permission) ->
+        onPermissionRequested(permission)
+        emptyFlow()
+    }
+
+/**
+ * Mutations for permission status for reading from storage
+ */
+private fun Flow<Permissions>.storagePermissionMutations(): Flow<Mutation<State>> =
+    map { it.isGranted(Permission.ReadExternalStorage) }
+        .distinctUntilChanged()
+        .map { mutation { copy(hasStoragePermissions = it) } }
+
+/**
  * Updates [State] with whether it is the main navigation content
  */
 private fun mainNavContentMutations(
@@ -119,3 +161,57 @@ private fun mainNavContentMutations(
     .map {
         mutation<State> { copy(isMainContent = !it) }
     }
+
+
+/**
+ * Mutations from use drag events
+ */
+private fun Flow<Action.Drag>.dragStatusMutations(): Flow<Mutation<State>> =
+    distinctUntilChanged()
+        .map { (dragLocation) ->
+            mutation { copy(dragLocation = dragLocation) }
+        }
+
+/**
+ * Mutations from drop events
+ */
+private fun Flow<Action.Drop>.dropMutations(
+    archiveId: ArchiveId,
+    archiveRepository: ArchiveRepository,
+    archiveFileRepository: ArchiveFileRepository,
+): Flow<Mutation<State>> =
+    channelFlow {
+        val kind = archiveRepository.archiveStream(archiveId)
+            .filterNotNull()
+            .first()
+            .kind
+
+        var toUpload = listOf<Uri>()
+        val uploaded = mutableSetOf<String>()
+
+        map { it.uris.filterIsInstance<LocalUri>() }
+            .collectLatest { uris ->
+                toUpload = (toUpload + uris)
+                    .distinctBy { it.path }
+                    .filterNot { uploaded.contains(it.path) }
+
+                uris.forEachIndexed { index, uri ->
+                    channel.send {
+                        copy(messages = messages.filter { it.value.contains("Upload") } + "Uploading $index of ${uris.size}")
+                    }
+                    archiveFileRepository.uploadArchiveFile(
+                        kind = kind,
+                        id = archiveId,
+                        uri = uri,
+                    )
+                    uploaded.add(uri.path)
+                }
+
+                if (uris.isNotEmpty()) channel.send {
+                    val message = if (uris.size == 1) "Uploaded 1 image"
+                    else "Uploaded ${uris.size} images"
+                    copy(messages = messages.filter { it.value.contains("Upload") } + message)
+                }
+            }
+    }
+
