@@ -1,0 +1,3 @@
+
+ALTER TABLE sessionEntity
+ADD user_id TEXT DEFAULT NULL;

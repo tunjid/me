@@ -43,19 +43,20 @@ interface AuthRepository {
 internal class SessionCookieAuthRepository(
     private val networkService: NetworkService,
     private val userEntityQueries: UserEntityQueries,
-    sessionEntityQueries: SessionEntityQueries,
+    private val sessionEntityQueries: SessionEntityQueries,
     dispatcher: CoroutineDispatcher,
 ) : AuthRepository {
 
     override val signedInUserStream: Flow<User?> =
-        sessionEntityQueries.cookie()
+        sessionEntityQueries.session()
             .asFlow()
             .mapToList(context = dispatcher)
-            .map { networkService.session().item() }
             .distinctUntilChanged()
-            .flatMapLatest { networkUser ->
-                if (networkUser == null) flowOf(null)
-                else userEntityQueries.find(networkUser.id.value)
+            .flatMapLatest { sessions ->
+                val session = sessions?.firstOrNull()
+                val userId = session?.user_id
+                if (userId == null) flowOf(null)
+                else userEntityQueries.find(userId)
                     .asFlow()
                     .mapToOneOrNull(context = dispatcher)
                     .map { it?.toExternalModel() }
@@ -68,9 +69,9 @@ internal class SessionCookieAuthRepository(
         networkService.signIn(request)
             .toResult()
             .also { networkUserResult ->
-                if (networkUserResult is Result.Success) userEntityQueries.upsert(
-                    networkUserResult.item.toEntity()
-                )
+                if (networkUserResult !is Result.Success) return@also
+                userEntityQueries.upsert(networkUserResult.item.toEntity())
+                sessionEntityQueries.updateCookieUser(networkUserResult.item.id.value)
             }
             .map(NetworkUser::id)
 }

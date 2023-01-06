@@ -34,7 +34,7 @@ internal class SessionCookiesStorage(
         requestUrl: Url
     ): List<Cookie> = withContext(dispatcher) {
         listOfNotNull(
-            sessionEntityQueries.cookie()
+            sessionEntityQueries.session()
                 .executeAsOneOrNull()
                 ?.cookie
                 ?.let(::parseServerSetCookieHeader)

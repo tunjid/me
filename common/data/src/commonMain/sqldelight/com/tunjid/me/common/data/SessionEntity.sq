@@ -1,10 +1,16 @@
-cookie:
-SELECT cookie
+session:
+SELECT cookie, user_id
 FROM sessionEntity
 WHERE id = "current";
 
 updateCookie:
 INSERT INTO sessionEntity
+(id, cookie)
 VALUES ("current", :cookie)
 ON CONFLICT(id) DO UPDATE SET
     cookie=excluded.cookie;
+
+updateCookieUser:
+UPDATE sessionEntity
+SET user_id = :userId
+WHERE id = "current";
