@@ -19,6 +19,7 @@ package com.tunjid.me.core.ui.dragdrop
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.geometry.Offset
 import com.tunjid.me.core.utilities.FileUri
+import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.core.utilities.Uri
 import java.awt.Cursor
 import java.awt.datatransfer.DataFlavor
@@ -98,7 +99,7 @@ private fun dropTargetListener(
         dtde.acceptDrop(DnDConstants.ACTION_REFERENCE)
         dtde.dropComplete(
             dragDropModifier.onDropped(
-                dtde.fileUris(),
+                dtde.uris(),
                 Offset(
                     dtde.location.x * density,
                     dtde.location.y * density
@@ -112,33 +113,50 @@ private fun dropTargetListener(
 private fun dragGestureListener(
     dragDropModifier: DragDropModifier,
     density: Float,
-    ) = DragGestureListener { event: DragGestureEvent ->
-    when (val dragStatus = dragDropModifier.dragStatus(
-        Offset(
-            x = event.dragOrigin.x * density,
-            y = event.dragOrigin.y * density
-        )
-    )) {
+) = DragGestureListener { event: DragGestureEvent ->
+    val offset = Offset(
+        x = event.dragOrigin.x * density,
+        y = event.dragOrigin.y * density
+    )
+
+    when (val dragStatus = dragDropModifier.dragStatus(offset)) {
         DragStatus.Static -> Unit
-        is DragStatus.Draggable -> event.startDrag(
-            Cursor(Cursor.HAND_CURSOR),
+        is DragStatus.Draggable -> if (dragStatus.uris.isNotEmpty()) event.startDrag(
+            Cursor(Cursor.MOVE_CURSOR),
             object : Transferable {
                 override fun getTransferDataFlavors(): Array<DataFlavor> =
-                    arrayOf(DataFlavor.javaFileListFlavor)
+                    arrayOf(DataFlavor.stringFlavor)
 
                 override fun isDataFlavorSupported(flavor: DataFlavor?): Boolean =
-                    flavor == DataFlavor.javaFileListFlavor
+                    flavor == DataFlavor.stringFlavor
 
                 override fun getTransferData(flavor: DataFlavor?): Any =
-//                    dragStatus.uris.filterIsInstance<FileUri>().map(FileUri::file)
-                    listOf(File("/Users/adetunjidahunsi/Desktop/scooby.jpeg"))
+                    dragStatus.uris.first().path
             }
         )
     }
 }
 
-private fun DropTargetDropEvent.fileUris(): List<Uri> = transferable
-    .getTransferData(DataFlavor.javaFileListFlavor)
-    .let { it as? List<*> ?: listOf<File>() }
-    .filterIsInstance<File>()
-    .map(::FileUri)
+private fun DropTargetDropEvent.uris(): List<Uri> =
+    listOf(
+        DataFlavor.javaFileListFlavor,
+        DataFlavor.stringFlavor
+    )
+        .filter { transferable.isDataFlavorSupported(it) }
+        .map { dataFlavor ->
+            when (dataFlavor) {
+                DataFlavor.javaFileListFlavor ->
+                    transferable.getTransferData(DataFlavor.javaFileListFlavor)
+                        .let { it as? List<*> ?: listOf<File>() }
+                        .filterIsInstance<File>()
+                        .map(::FileUri)
+
+                DataFlavor.stringFlavor ->
+                    listOfNotNull(transferable.getTransferData(DataFlavor.stringFlavor) as? String)
+                        .map(::RemoteUri)
+
+                else -> listOf()
+            }
+        }
+        .flatten()
+

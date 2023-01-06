@@ -27,11 +27,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.ui.Thumbnail
 import com.tunjid.me.core.ui.dragdrop.DragStatus
 import com.tunjid.me.core.ui.dragdrop.dragSource
+import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
@@ -70,16 +72,16 @@ private fun ArchiveFilesScreen(
         ) {
             items(
                 items = state.files,
-                key = { it.url },
-                itemContent = {
+                key = ArchiveFile::url,
+                itemContent = { archiveFile ->
                     Box(
                         modifier = Modifier.aspectRatio(1f)
                     ) {
                         Thumbnail(
-                            imageUrl = it.url,
+                            imageUrl = archiveFile.url,
                             modifier = Modifier.dragSource {
                                 DragStatus.Draggable(
-                                    uris = listOf()
+                                    uris = listOf(RemoteUri(path = archiveFile.url))
                                 )
                             }
                         )

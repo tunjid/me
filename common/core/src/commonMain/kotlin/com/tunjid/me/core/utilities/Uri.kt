@@ -25,6 +25,10 @@ interface Uri {
 
 interface LocalUri : Uri
 
+data class RemoteUri(
+    override val path: String,
+) : Uri
+
 interface UriConverter {
     fun toInput(uri: LocalUri): Input
     suspend fun name(uri: LocalUri): String
