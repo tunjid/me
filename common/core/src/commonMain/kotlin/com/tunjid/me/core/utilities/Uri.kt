@@ -21,12 +21,14 @@ import io.ktor.utils.io.core.*
 
 interface Uri {
     val path: String
+    val mimetype: String
 }
 
 interface LocalUri : Uri
 
 data class RemoteUri(
     override val path: String,
+    override val mimetype: String,
 ) : Uri
 
 interface UriConverter {

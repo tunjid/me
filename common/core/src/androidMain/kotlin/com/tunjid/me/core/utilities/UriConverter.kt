@@ -58,9 +58,9 @@ actual class ActualUriConverter(
 
     override suspend fun mimeType(uri: LocalUri): String =
         when (uri) {
-            is ClipItemUri -> uri.mimeType
+            is ClipItemUri -> uri.mimetype
                 ?: context.contentResolver.getType(AndroidUri.parse(uri.path))
-                ?: throw NullPointerException("Unknown mime tipe for $uri")
+                ?: throw NullPointerException("Unknown mime type for $uri")
 
             else -> throw IllegalArgumentException("Unknown URI type")
         }
@@ -111,7 +111,7 @@ actual class ActualUriConverter(
 
 data class ClipItemUri(
     val item: ClipData.Item,
-    val mimeType: String?,
+   override val mimetype: String,
 ) : LocalUri {
     override val path: String
         get() = item.uri?.toString() ?: item.toString()

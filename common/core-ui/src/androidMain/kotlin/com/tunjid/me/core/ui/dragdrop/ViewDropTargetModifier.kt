@@ -16,6 +16,7 @@
 
 package com.tunjid.me.core.ui.dragdrop
 
+import android.content.ClipData
 import android.view.DragEvent
 import android.view.View
 import androidx.compose.ui.geometry.Offset
@@ -32,13 +33,28 @@ actual class PlatformDragDropModifier(
 
 fun dragListener(
     dragDropModifier: DragDropModifier,
-): View.OnDragListener = View.OnDragListener { _, event ->
+): View.OnDragListener = View.OnDragListener { view, event ->
     when (event.action) {
         DragEvent.ACTION_DRAG_STARTED -> {
-            dragDropModifier.onDragStarted(
-                uris = listOf(),
-                position = Offset(event.x, event.y)
-            )
+            when (val dragStatus = dragDropModifier.dragStatus(Offset(event.x, event.y))) {
+                is DragStatus.Draggable -> {
+                    val dragData = dragStatus.clipData()
+
+                    if (dragData != null) view.startDrag(
+                        dragData,
+                        View.DragShadowBuilder(view),
+                        null,
+                        0
+                    )
+                }
+
+                DragStatus.Static -> {
+                    dragDropModifier.onDragStarted(
+                        uris = listOf(),
+                        position = Offset(event.x, event.y)
+                    )
+                }
+            }
             true
         }
 
@@ -59,7 +75,7 @@ fun dragListener(
 
         DragEvent.ACTION_DROP -> {
             dragDropModifier.onDropped(
-                uris = event.clipItemUris(),
+                uris = event.uris(),
                 position = Offset(event.x, event.y)
             )
         }
@@ -73,13 +89,28 @@ fun dragListener(
     }
 }
 
-private fun DragEvent.clipItemUris(): List<Uri> = with(clipData) {
+private fun DragStatus.Draggable.clipData(): ClipData? {
+    if (uris.isEmpty()) return null
+
+    val mimeTypes = uris.map(Uri::mimetype).distinct().toTypedArray()
+    val dragData = ClipData(
+        "Drag drop",
+        mimeTypes,
+        ClipData.Item(uris.first().path)
+    )
+    uris.drop(1).forEach { uri ->
+        dragData.addItem(ClipData.Item(uri.path))
+    }
+    return dragData
+}
+
+private fun DragEvent.uris(): List<Uri> = with(clipData) {
     0.until(itemCount).map { itemIndex ->
         with(description) {
             0.until(mimeTypeCount).map { mimeTypeIndex ->
                 ClipItemUri(
                     item = getItemAt(itemIndex),
-                    mimeType = getMimeType(mimeTypeIndex)
+                    mimetype = getMimeType(mimeTypeIndex)
                 )
             }
         }

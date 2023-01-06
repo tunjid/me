@@ -139,7 +139,12 @@ private fun GalleryItem(
             imageUrl = archiveFile.url,
             modifier = Modifier.dragSource {
                 DragStatus.Draggable(
-                    uris = listOf(RemoteUri(path = archiveFile.url))
+                    uris = listOf(
+                        RemoteUri(
+                            path = archiveFile.url,
+                            mimetype = archiveFile.mimeType,
+                        )
+                    )
                 )
             }
         )

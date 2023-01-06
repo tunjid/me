@@ -48,4 +48,7 @@ data class FileUri(
 ) : LocalUri {
     override val path: String
         get() = file.path
+
+    override val mimetype: String
+        get() = Files.probeContentType(file.toPath())
 }

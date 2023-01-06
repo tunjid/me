@@ -32,6 +32,7 @@ import java.awt.dnd.DropTargetDropEvent
 import java.awt.dnd.DropTargetEvent
 import java.awt.dnd.DropTargetListener
 import java.io.File
+import java.io.Serializable
 import java.awt.dnd.DragSource as AwtDragSource
 import java.awt.dnd.DropTarget as AwtDropTarget
 
@@ -125,13 +126,13 @@ private fun dragGestureListener(
             Cursor(Cursor.MOVE_CURSOR),
             object : Transferable {
                 override fun getTransferDataFlavors(): Array<DataFlavor> =
-                    arrayOf(DataFlavor.stringFlavor)
+                    arrayOf(ArrayListFlavor)
 
                 override fun isDataFlavorSupported(flavor: DataFlavor?): Boolean =
-                    flavor == DataFlavor.stringFlavor
+                    flavor == ArrayListFlavor
 
                 override fun getTransferData(flavor: DataFlavor?): Any =
-                    dragStatus.uris.first().path
+                    dragStatus.uris.toSerializableList()
             }
         )
     }
@@ -140,7 +141,7 @@ private fun dragGestureListener(
 private fun DropTargetDropEvent.uris(): List<Uri> =
     listOf(
         DataFlavor.javaFileListFlavor,
-        DataFlavor.stringFlavor
+        ArrayListFlavor
     )
         .filter { transferable.isDataFlavorSupported(it) }
         .map { dataFlavor ->
@@ -151,12 +152,25 @@ private fun DropTargetDropEvent.uris(): List<Uri> =
                         .filterIsInstance<File>()
                         .map(::FileUri)
 
-                DataFlavor.stringFlavor ->
-                    listOfNotNull(transferable.getTransferData(DataFlavor.stringFlavor) as? String)
-                        .map(::RemoteUri)
+                ArrayListFlavor ->
+                    transferable.getTransferData(ArrayListFlavor)
+                        .let { it as? List<*> ?: listOf<SerializableUri>() }
+                        .filterIsInstance<SerializableUri>()
 
                 else -> listOf()
             }
         }
         .flatten()
 
+val ArrayListFlavor = DataFlavor(
+    java.util.ArrayList::class.java,
+    "ArrayList"
+)
+
+private fun List<Uri>.toSerializableList() = java.util.ArrayList(
+    map { SerializableUri(path = it.path, mimetype = it.mimetype) }
+)
+private class SerializableUri(
+    override val path: String,
+    override val mimetype: String
+): Uri, Serializable
