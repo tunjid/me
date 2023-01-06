@@ -30,18 +30,18 @@ enum class NetworkErrorCodes(val code: String) {
     RateLimited("rate-limited"),
 }
 
-internal sealed class NetworkResponse<T> {
+internal sealed class NetworkResponse<out T> {
     data class Success<T>(
         val item: T
     ) : NetworkResponse<T>()
 
     @Serializable
-    data class Error<T>(
+    data class Error(
         @Serializable(NetworkErrorCodesSerializer::class)
         val errorCode: NetworkErrorCodes? = null,
         val message: String? = null,
         val model: String? = null,
-    ) : NetworkResponse<T>()
+    ) : NetworkResponse<Nothing>()
 }
 
 internal fun <T> NetworkResponse<T>.item(): T? = when (this) {

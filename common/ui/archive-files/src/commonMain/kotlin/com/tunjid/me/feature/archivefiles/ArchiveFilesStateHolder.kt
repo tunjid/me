@@ -23,7 +23,7 @@ import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
-import com.tunjid.me.core.utilities.UriConverter
+import com.tunjid.me.data.network.models.TransferStatus
 import com.tunjid.me.data.repository.ArchiveFileRepository
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
@@ -33,7 +33,6 @@ import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
-import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
@@ -197,21 +196,44 @@ private fun Flow<Action.Drop>.dropMutations(
 
                 uris.forEachIndexed { index, uri ->
                     channel.send {
-                        copy(messages = messages.filter { it.value.contains("Upload") } + "Uploading $index of ${uris.size}")
+                        copy(messages = nonUploadMessages() + "Uploading $index of ${uris.size}")
                     }
                     archiveFileRepository.uploadArchiveFile(
                         kind = kind,
                         id = archiveId,
                         uri = uri,
-                    )
-                    uploaded.add(uri.path)
+                    ).collect { status ->
+                        channel.send {
+                            when (status) {
+                                is TransferStatus.Done -> {
+                                    uploaded.add(uri.path)
+                                    copy(
+                                        uploadProgress = null,
+                                        messages = nonUploadMessages() + "Uploaded $index of ${uris.size}"
+                                    )
+                                }
+
+                                is TransferStatus.Error -> copy(
+                                    uploadProgress = null,
+                                    messages = nonUploadMessages() + "Failed to upload $index of ${uris.size}"
+                                )
+
+                                is TransferStatus.Uploading -> copy(
+                                    uploadProgress = status.progress,
+                                    messages = nonUploadMessages() + "Uploaded ${status.progress} $index of ${uris.size}"
+                                )
+                            }
+                        }
+                    }
                 }
 
                 if (uris.isNotEmpty()) channel.send {
                     val message = if (uris.size == 1) "Uploaded 1 image"
                     else "Uploaded ${uris.size} images"
-                    copy(messages = messages.filter { it.value.contains("Upload") } + message)
+                    copy(messages = nonUploadMessages() + message)
                 }
             }
     }
+
+private fun State.nonUploadMessages() = messages.filter { !it.value.contains("pload") }
 

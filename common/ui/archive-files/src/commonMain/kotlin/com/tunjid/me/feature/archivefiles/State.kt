@@ -37,6 +37,8 @@ data class State(
     val isMainContent: Boolean = true,
     val hasStoragePermissions: Boolean = false,
     @Transient
+    val uploadProgress: Float? = null,
+    @Transient
     val messages: MessageQueue = MessageQueue(),
     @Transient
     val dragLocation: DragLocation = DragLocation.Outside,

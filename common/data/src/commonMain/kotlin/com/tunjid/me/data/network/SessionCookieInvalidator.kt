@@ -27,7 +27,7 @@ import io.ktor.http.*
 import io.ktor.util.*
 
 class ErrorInterceptorConfig {
-    internal var networkErrorConverter: ((String) -> NetworkResponse.Error<Any>)? = null
+    internal var networkErrorConverter: ((String) -> NetworkResponse.Error)? = null
     internal var sessionEntityQueries: SessionEntityQueries? = null
 }
 
@@ -35,7 +35,7 @@ class ErrorInterceptorConfig {
  * Invalidates session cookies that have expired or are otherwise invalid
  */
 internal class SessionCookieInvalidator(
-    private val networkErrorConverter: ((String) -> NetworkResponse.Error<Any>)?,
+    private val networkErrorConverter: ((String) -> NetworkResponse.Error)?,
     private val sessionEntityQueries: SessionEntityQueries?
 ) {
 

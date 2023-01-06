@@ -22,9 +22,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -102,11 +104,11 @@ private fun ArchiveFilesScreen(
                 onDropped = { uris, _ ->
                     actions(Action.Drag(location = DragLocation.Outside))
                     actions(Action.Drop(uris = uris))
-                    false
+                    true
                 }
             ),
     ) {
-        Text("Upload items here")
+        val uploadProgress = state.uploadProgress
         LazyVerticalGrid(
             columns = GridCells.Adaptive(100.dp)
         ) {
@@ -114,11 +116,14 @@ private fun ArchiveFilesScreen(
                 items = state.files,
                 key = ArchiveFile::url,
                 itemContent = { archiveFile ->
-
                     GalleryItem(archiveFile)
                 }
             )
         }
+        if (uploadProgress != null) LinearProgressIndicator(
+            modifier = Modifier.fillMaxWidth(),
+            progress = uploadProgress,
+        )
     }
 
 }

@@ -47,34 +47,10 @@ actual class ActualUriConverter(
 
     override suspend fun name(uri: LocalUri): String = withContext(dispatcher) {
         when (uri) {
-            is ClipItemUri -> {
-                val androidUri = AndroidUri.parse(uri.path)
-                var result: String? = null
-                if (androidUri.scheme.equals("content")) {
-                    val cursor = context.contentResolver.query(
-                        androidUri,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
-                    cursor?.use {
-                        if (it.moveToFirst()) {
-                            @SuppressLint("Range")
-                            result = it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME))
-                        }
-                    }
-                }
-                var finalResult = result
-                if (finalResult == null) {
-                    finalResult = androidUri.path
-                    val cut = finalResult?.lastIndexOf('/')
-                    if (finalResult != null && cut != null && cut != -1) {
-                        finalResult = finalResult.substring(cut + 1)
-                    }
-                }
-                finalResult ?: "unknown-name"
-            }
+            is ClipItemUri -> readColumn(
+                uri = uri,
+                openableColumns = OpenableColumns.DISPLAY_NAME
+            )
 
             else -> throw IllegalArgumentException("Unknown URI type")
         }
@@ -87,6 +63,49 @@ actual class ActualUriConverter(
                 ?: throw NullPointerException("Unknown mime tipe for $uri")
 
             else -> throw IllegalArgumentException("Unknown URI type")
+        }
+
+    override suspend fun contentLength(uri: LocalUri): Long? = withContext(dispatcher) {
+        when (uri) {
+            is ClipItemUri -> readColumn(
+                uri = uri,
+                openableColumns = OpenableColumns.SIZE
+            )
+
+            else -> throw IllegalArgumentException("Unknown URI type")
+        }
+    }
+
+    @SuppressLint("Range")
+    private suspend inline fun <reified T> readColumn(uri: LocalUri, openableColumns: String): T =
+        withContext(dispatcher) {
+            when (uri) {
+                is ClipItemUri -> {
+                    val androidUri = AndroidUri.parse(uri.path)
+                    if (!androidUri.scheme.equals("content"))
+                        throw IllegalArgumentException("Cannot read cursor with ${T::class.qualifiedName}")
+
+                    val cursor = context.contentResolver.query(
+                        androidUri,
+                        null,
+                        null,
+                        null,
+                        null
+                    ) ?: throw NullPointerException("No cursor")
+
+                    cursor.use {
+                        if (!it.moveToFirst()) throw NullPointerException("No matching data")
+                        when (T::class) {
+                            String::class -> it.getString(it.getColumnIndex(openableColumns))
+                            Long::class -> it.getLong(it.getColumnIndex(openableColumns))
+                            Int::class -> it.getInt(it.getColumnIndex(openableColumns))
+                            else -> throw IllegalArgumentException("Cannot read type ${T::class.qualifiedName} from cursor")
+                        } as T
+                    }
+                }
+
+                else -> throw IllegalArgumentException("Unknown URI type")
+            }
         }
 }
 

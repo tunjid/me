@@ -20,12 +20,8 @@ import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.core.model.*
 import com.tunjid.me.core.sync.SyncRequest
 import com.tunjid.me.core.utilities.FileDesc
-import com.tunjid.me.data.network.models.NetworkArchive
-import com.tunjid.me.data.network.models.NetworkArchiveFile
-import com.tunjid.me.data.network.models.NetworkMessage
+import com.tunjid.me.data.network.models.*
 import com.tunjid.me.data.network.models.NetworkResponse
-import com.tunjid.me.data.network.models.NetworkUser
-import com.tunjid.me.data.network.models.UpsertResponse
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -41,6 +37,7 @@ import io.ktor.http.content.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
@@ -78,7 +75,7 @@ internal interface NetworkService {
         kind: ArchiveKind,
         id: ArchiveId,
         fileDesc: FileDesc,
-    ): NetworkResponse<NetworkMessage>
+    ): Flow<TransferStatus<NetworkMessage>>
 
     suspend fun fetchArchiveFiles(
         kind: ArchiveKind,
@@ -200,17 +197,11 @@ internal class KtorNetworkService(
         kind: ArchiveKind,
         id: ArchiveId,
         fileDesc: FileDesc,
-    ): NetworkResponse<NetworkMessage> = json.parseServerErrors {
-        client.submitFormWithBinaryData(
-            url = "$baseUrl/api/${kind.type}/${id.value}",
+    ): Flow<TransferStatus<NetworkMessage>> =
+        client.upload(
+            url = "$baseUrl/api/${kind.type}/${id.value}/files",
             formData = fileDesc.toFormData("file"),
-        ) {
-            // TODO, make this a flow of upload progress so the UI can display a progress bar
-            onUpload { bytesSentTotal, _ ->
-                println("Uploaded $bytesSentTotal for header photo")
-            }
-        }.body()
-    }
+        )
 
     override suspend fun fetchArchiveFiles(
         kind: ArchiveKind,
@@ -260,6 +251,10 @@ private suspend inline fun <reified T> Json.parseServerErrors(body: suspend () -
     NetworkResponse.Success(body())
 } catch (exception: Exception) {
     exception.printStackTrace()
+    parseErrorResponse(exception)
+}
+
+private suspend  fun  Json.parseErrorResponse(exception: Exception): NetworkResponse.Error =
     when (exception) {
         is ResponseException -> try {
             decodeFromString(exception.response.bodyAsText())
@@ -269,12 +264,11 @@ private suspend inline fun <reified T> Json.parseServerErrors(body: suspend () -
 
         else -> NetworkResponse.Error(message = exception.message)
     }
-}
 
 private fun FileDesc.toFormData(key: String): List<PartData> = formData {
     append(
         key = key,
-        value = InputProvider { binaryData },
+        value = InputProvider(size = contentSize) { binaryData },
         headers = buildHeaders {
             append(HttpHeaders.ContentType, mimetype)
             append(HttpHeaders.ContentDisposition, "filename=$name")

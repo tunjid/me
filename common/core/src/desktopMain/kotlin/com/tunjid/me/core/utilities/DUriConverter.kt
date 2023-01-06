@@ -22,24 +22,29 @@ import java.io.File
 import java.nio.file.Files
 
 actual class ActualUriConverter : UriConverter {
-    override fun toInput(uri: LocalUri): Input = when(uri) {
+    override fun toInput(uri: LocalUri): Input = when (uri) {
         is FileUri -> File(uri.path).inputStream().asInput()
         else -> throw IllegalArgumentException("Unknown URI type")
     }
 
-    override suspend fun name(uri: LocalUri): String = when(uri) {
+    override suspend fun name(uri: LocalUri): String = when (uri) {
         is FileUri -> File(uri.path).name
         else -> throw IllegalArgumentException("Unknown URI type")
     }
 
-    override suspend fun mimeType(uri: LocalUri): String = when(uri) {
+    override suspend fun mimeType(uri: LocalUri): String = when (uri) {
         is FileUri -> Files.probeContentType(uri.file.toPath())
+        else -> throw IllegalArgumentException("Unknown URI type")
+    }
+
+    override suspend fun contentLength(uri: LocalUri): Long? = when (uri) {
+        is FileUri -> uri.file.length()
         else -> throw IllegalArgumentException("Unknown URI type")
     }
 }
 
 data class FileUri(
-    val file: File
+    val file: File,
 ) : LocalUri {
     override val path: String
         get() = file.path

@@ -21,7 +21,13 @@ import app.cash.sqldelight.coroutines.mapToList
 import com.tunjid.me.common.data.ArchiveEntityQueries
 import com.tunjid.me.common.data.ArchiveFileEntityQueries
 import com.tunjid.me.common.data.UserEntityQueries
-import com.tunjid.me.core.model.*
+import com.tunjid.me.core.model.ArchiveFile
+import com.tunjid.me.core.model.ArchiveFileId
+import com.tunjid.me.core.model.ArchiveFileQuery
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.ChangeListItem
+import com.tunjid.me.core.model.isDelete
 import com.tunjid.me.core.sync.ChangeListKey
 import com.tunjid.me.core.sync.SyncRequest
 import com.tunjid.me.core.sync.Syncable
@@ -33,10 +39,10 @@ import com.tunjid.me.data.local.suspendingTransaction
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.models.NetworkArchiveFile
 import com.tunjid.me.data.network.models.NetworkResponse
+import com.tunjid.me.data.network.models.TransferStatus
 import com.tunjid.me.data.network.models.archiveShell
 import com.tunjid.me.data.network.models.item
 import com.tunjid.me.data.network.models.toEntity
-import com.tunjid.me.data.network.models.toResult
 import com.tunjid.me.data.network.models.uploaderShell
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -54,7 +60,7 @@ interface ArchiveFileRepository : Syncable {
         kind: ArchiveKind,
         id: ArchiveId,
         uri: LocalUri,
-    ): Result<Unit>
+    ): Flow<TransferStatus<Unit>>
 }
 
 /**
@@ -99,13 +105,18 @@ internal class OfflineFirstArchiveFileRepository(
         kind: ArchiveKind,
         id: ArchiveId,
         uri: LocalUri,
-    ): Result<Unit> = networkService.uploadArchiveHeaderPhoto(
+    ): Flow<TransferStatus<Unit>> = networkService.uploadArchiveFile(
         kind = kind,
         id = id,
         fileDesc = uriConverter.fileDesc(uri)
     )
-        .toResult()
-        .map { }
+        .map {
+            when (it) {
+                is TransferStatus.Done -> TransferStatus.Done(Unit)
+                is TransferStatus.Error -> it
+                is TransferStatus.Uploading -> it
+            }
+        }
 
     override suspend fun syncWith(
         request: SyncRequest,
