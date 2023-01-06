@@ -20,6 +20,7 @@ import android.content.ClipData
 import android.content.Context
 import android.view.DragEvent
 import android.view.GestureDetector
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
@@ -54,7 +55,7 @@ actual class PlatformDragDropModifier(
     )
 
     override fun onInterceptTouchEvent(motionEvent: MotionEvent): Boolean {
-        // Spy on events and tetect long presses
+        // Spy on events and detect long presses
         longPressDragGestureDetector.onTouchEvent(motionEvent)
         return false
     }
@@ -68,9 +69,10 @@ private fun longPressDragGestureListener(
         val dragStatus = dragDropModifier.dragStatus(Offset(event.x, event.y))
         if (dragStatus !is DragStatus.Draggable) return
 
-        val dragData = dragStatus.clipData()
+        val dragData = dragStatus.clipData() ?: return
 
-        if (dragData != null) view.startDrag(
+        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        view.startDrag(
             dragData,
             View.DragShadowBuilder(view),
             null,
