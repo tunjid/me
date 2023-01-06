@@ -21,6 +21,7 @@ import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.mutator.Mutation
@@ -45,7 +46,7 @@ data class State(
     val upsert: ArchiveUpsert = ArchiveUpsert(),
     val chipsState: ChipsState = ChipsState(),
     @Transient
-    val toUpload: Uri? = null,
+    val toUpload: LocalUri? = null,
     @Transient
     val dragStatus: DragStatus = DragStatus.None,
     @Transient
@@ -101,7 +102,7 @@ sealed class Action(val key: String) {
         data class Submit(
             val kind: ArchiveKind,
             val upsert: ArchiveUpsert,
-            val headerPhoto: Uri? = null
+            val headerPhoto: LocalUri? = null
         ) : Load()
     }
 

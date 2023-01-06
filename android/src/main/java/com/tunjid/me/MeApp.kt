@@ -32,6 +32,7 @@ import com.tunjid.me.data.di.DataModule
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.data.di.create
 import com.tunjid.me.data.local.DatabaseDriverFactory
+import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.feature.MeApp
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesNavigationComponent
@@ -85,7 +86,10 @@ fun createMeApp(context: Context): MeApp {
     val injectedDataComponent = InjectedDataComponent::class.create(
         DataModule(
             database = appDatabase,
-            uriConverter = ActualUriConverter(),
+            uriConverter = ActualUriConverter(
+                context = context,
+                dispatcher = databaseDispatcher()
+            ),
         )
     )
 

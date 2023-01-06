@@ -62,7 +62,7 @@ abstract class InjectedDataComponent(
 
     @SingletonScope
     @Provides
-    internal fun uriConverter(): UriConverter = module.uriConverter
+    fun uriConverter(): UriConverter = module.uriConverter
 
     @SingletonScope
     @Provides

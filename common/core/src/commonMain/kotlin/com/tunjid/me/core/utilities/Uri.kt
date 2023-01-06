@@ -21,12 +21,15 @@ import io.ktor.utils.io.core.*
 
 interface Uri {
     val path: String
-    val mimeType: String?
 }
 
+interface LocalUri : Uri
+
 interface UriConverter {
-    fun toInput(uri: Uri): Input
-    suspend fun name(uri: Uri): String
+    fun toInput(uri: LocalUri): Input
+    suspend fun name(uri: LocalUri): String
+
+    suspend fun mimeType(uri: LocalUri): String
 }
 
 data class FileDesc(
@@ -35,9 +38,9 @@ data class FileDesc(
     val binaryData: Input,
 )
 
-suspend fun UriConverter.fileDesc(uri: Uri) = FileDesc(
-    mimetype = uri.mimeType ?: "",
+suspend fun UriConverter.fileDesc(uri: LocalUri) = FileDesc(
     name = name(uri),
+    mimetype = mimeType(uri),
     binaryData = toInput(uri)
 )
 

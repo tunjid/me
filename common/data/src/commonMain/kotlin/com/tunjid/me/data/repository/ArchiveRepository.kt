@@ -26,7 +26,7 @@ import com.tunjid.me.core.sync.ChangeListKey
 import com.tunjid.me.core.sync.SyncRequest
 import com.tunjid.me.core.sync.Syncable
 import com.tunjid.me.core.sync.changeListKey
-import com.tunjid.me.core.utilities.Uri
+import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.core.utilities.fileDesc
 import com.tunjid.me.data.local.models.toExternalModel
@@ -48,7 +48,7 @@ interface ArchiveRepository : Syncable {
     suspend fun uploadArchiveHeaderPhoto(
         kind: ArchiveKind,
         id: ArchiveId,
-        uri: Uri,
+        uri: LocalUri,
     ): Result<Unit>
 
     fun count(query: ArchiveQuery): Flow<Long>
@@ -59,12 +59,12 @@ interface ArchiveRepository : Syncable {
     ): Flow<List<Descriptor>>
 
     fun archivesStream(
-        query: ArchiveQuery
+        query: ArchiveQuery,
     ): Flow<List<Archive>>
 
     fun archiveStream(
         kind: ArchiveKind,
-        id: ArchiveId
+        id: ArchiveId,
     ): Flow<Archive?>
 }
 
@@ -92,7 +92,7 @@ internal class OfflineFirstArchiveRepository(
     override suspend fun uploadArchiveHeaderPhoto(
         kind: ArchiveKind,
         id: ArchiveId,
-        uri: Uri,
+        uri: LocalUri,
     ): Result<Unit> = networkService.uploadArchiveHeaderPhoto(
         kind = kind,
         id = id,
@@ -102,7 +102,7 @@ internal class OfflineFirstArchiveRepository(
         .map { }
 
     override fun archivesStream(
-        query: ArchiveQuery
+        query: ArchiveQuery,
     ): Flow<List<Archive>> = archiveEntityQueries.find(
         kind = query.kind.type,
         desc = query.desc,
@@ -119,7 +119,7 @@ internal class OfflineFirstArchiveRepository(
         .distinctUntilChanged()
 
     override fun count(
-        query: ArchiveQuery
+        query: ArchiveQuery,
     ): Flow<Long> = archiveEntityQueries.count(
         kind = query.kind.type,
         useFilters = query.hasContentFilter,
@@ -159,7 +159,7 @@ internal class OfflineFirstArchiveRepository(
         )
 
     override fun archiveStream(
-        kind: ArchiveKind, id: ArchiveId
+        kind: ArchiveKind, id: ArchiveId,
     ): Flow<Archive?> = archiveEntityQueries.get(
         id = id.value,
         kind = kind.type
@@ -171,7 +171,7 @@ internal class OfflineFirstArchiveRepository(
 
     override suspend fun syncWith(
         request: SyncRequest,
-        onVersionUpdated: suspend (ChangeListItem) -> Unit
+        onVersionUpdated: suspend (ChangeListItem) -> Unit,
     ) {
         val changeList = when (val response = networkService.changeList(request)) {
             is NetworkResponse.Success -> response.item

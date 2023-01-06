@@ -16,20 +16,84 @@
 
 package com.tunjid.me.core.utilities
 
+import android.annotation.SuppressLint
 import android.content.ClipData
+import android.content.Context
+import android.provider.OpenableColumns
 import io.ktor.utils.io.core.*
+import io.ktor.utils.io.errors.*
+import io.ktor.utils.io.streams.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+import android.net.Uri as AndroidUri
 
 
-actual class ActualUriConverter : UriConverter {
-    // TODO Use Android context to get a safe input stream to read from and convert to [Input]
-    override fun toInput(uri: Uri): Input = TODO()
-    override suspend fun name(uri: Uri): String = TODO()
+actual class ActualUriConverter(
+    private val context: Context,
+    private val dispatcher: CoroutineDispatcher,
+) : UriConverter {
+
+    @SuppressLint("Recycle")
+    override fun toInput(uri: LocalUri): Input =
+        when (uri) {
+            is ClipItemUri -> context
+                .contentResolver
+                .openInputStream(AndroidUri.parse(uri.path))
+                ?.asInput()
+                ?: throw IOException("Cannot convert URI to binary stream")
+
+            else -> throw IllegalArgumentException("Unknown URI type")
+        }
+
+    override suspend fun name(uri: LocalUri): String = withContext(dispatcher) {
+        when (uri) {
+            is ClipItemUri -> {
+                val androidUri = AndroidUri.parse(uri.path)
+                var result: String? = null
+                if (androidUri.scheme.equals("content")) {
+                    val cursor = context.contentResolver.query(
+                        androidUri,
+                        null,
+                        null,
+                        null,
+                        null
+                    )
+                    cursor?.use {
+                        if (it.moveToFirst()) {
+                            @SuppressLint("Range")
+                            result = it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                        }
+                    }
+                }
+                var finalResult = result
+                if (finalResult == null) {
+                    finalResult = androidUri.path
+                    val cut = finalResult?.lastIndexOf('/')
+                    if (finalResult != null && cut != null && cut != -1) {
+                        finalResult = finalResult.substring(cut + 1)
+                    }
+                }
+                finalResult ?: "unknown-name"
+            }
+
+            else -> throw IllegalArgumentException("Unknown URI type")
+        }
+    }
+
+    override suspend fun mimeType(uri: LocalUri): String =
+        when (uri) {
+            is ClipItemUri -> uri.mimeType
+                ?: context.contentResolver.getType(AndroidUri.parse(uri.path))
+                ?: throw NullPointerException("Unknown mime tipe for $uri")
+
+            else -> throw IllegalArgumentException("Unknown URI type")
+        }
 }
 
 data class ClipItemUri(
     val item: ClipData.Item,
-    override val mimeType: String?
-) : Uri {
+    val mimeType: String?,
+) : LocalUri {
     override val path: String
         get() = item.uri?.toString() ?: item.toString()
 }

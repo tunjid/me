@@ -20,7 +20,9 @@ package com.tunjid.me.archiveedit
 import com.tunjid.me.core.model.*
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.utilities.ByteSerializer
+import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
+import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
@@ -57,7 +59,7 @@ typealias ArchiveEditStateHolder = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
 class ArchiveEditStateHolderCreator(
-    creator: (scope: CoroutineScope, savedStae: ByteArray?, route: ArchiveEditRoute) -> ArchiveEditStateHolder
+    creator: (scope: CoroutineScope, savedStae: ByteArray?, route: ArchiveEditRoute) -> ArchiveEditStateHolder,
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
@@ -65,6 +67,7 @@ class ActualArchiveEditStateHolder(
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
+    uriConverter: UriConverter,
     uiStateFlow: StateFlow<UiState>,
     permissionsFlow: StateFlow<Permissions>,
     onPermissionRequested: (Permission) -> Unit,
@@ -89,7 +92,10 @@ class ActualArchiveEditStateHolder(
             .withInitialLoad(route)
             .toMutationStream(keySelector = Action::key) {
                 when (val action = type()) {
-                    is Action.Drop -> action.flow.dropMutations()
+                    is Action.Drop -> action.flow.dropMutations(
+                        uriConverter = uriConverter
+                    )
+
                     is Action.Drag -> action.flow.dragStatusMutations()
                     is Action.TextEdit -> action.flow.textEditMutations()
                     is Action.ChipEdit -> action.flow.chipEditMutations()
@@ -111,7 +117,7 @@ class ActualArchiveEditStateHolder(
  * Start the load by monitoring the archive if it exists already
  */
 private fun Flow<Action>.withInitialLoad(
-    route: ArchiveEditRoute
+    route: ArchiveEditRoute,
 ) = onStart {
     if (route.archiveId != null) emit(
         Action.Load.InitialLoad(
@@ -180,16 +186,27 @@ private fun Flow<Action.Drag>.dragStatusMutations(): Flow<Mutation<State>> =
 /**
  * Mutations from drop events
  */
-private val validMimeTypes = listOf("jpeg", "jpg", "png")
-private fun Flow<Action.Drop>.dropMutations(): Flow<Mutation<State>> =
+private val validMimeTypes = listOf("jpeg", "jpg", "png", "gif")
+private fun Flow<Action.Drop>.dropMutations(
+    uriConverter: UriConverter,
+): Flow<Mutation<State>> =
     map { (uris) ->
-        val uri = uris.filter {
-            val mimeType = it.mimeType ?: return@filter false
-            mimeType.contains("image") && validMimeTypes.any(mimeType::contains)
-        }.firstOrNull()
+        val uri = uris.firstOrNull { uri ->
+            when (uri) {
+                is LocalUri -> {
+                    val mimeType = uriConverter.mimeType(uri)
+                    mimeType.contains("image") && validMimeTypes.any(mimeType::contains)
+                }
+
+                else -> validMimeTypes.any { it.contains(uri.path.split(".").lastOrNull() ?: "") }
+            }
+        }
         mutation {
-            if (uri != null) copy(toUpload = uri, thumbnail = uri.path)
-            else copy(toUpload = null, messages = messages + "Only png and jpg uploads are supported")
+            when (uri) {
+                is LocalUri -> copy(toUpload = uri, thumbnail = uri.path)
+                is Uri -> copy(toUpload = null, thumbnail = uri.path)
+                else -> copy(toUpload = null, messages = messages + "Only png and jpg uploads are supported")
+            }
         }
     }
 
@@ -265,7 +282,7 @@ private fun Flow<Action.MessageConsumed>.messageConsumptionMutations(): Flow<Mut
  * Empty mutations proxied to [onPermissionRequested] to request permissions
  */
 private fun Flow<Action.RequestPermission>.permissionRequestMutations(
-    onPermissionRequested: (Permission) -> Unit
+    onPermissionRequested: (Permission) -> Unit,
 ): Flow<Mutation<State>> =
     flatMapLatest { (permission) ->
         onPermissionRequested(permission)
@@ -308,17 +325,19 @@ private fun Flow<Action.Load>.loadMutations(
                     val id = upsert.id ?: (result as? Result.Success)?.item ?: return@flow
 
                     emitAll(
-                        merge(
-                            archiveRepository.headerUploadMutations(
-                                headerPhoto = headerPhoto,
-                                id = id,
-                                kind = kind
-                            ),
+                        listOfNotNull(
+                            headerPhoto?.let {
+                                archiveRepository.headerUploadMutations(
+                                    headerPhoto = it,
+                                    id = id,
+                                    kind = kind
+                                )
+                            },
                             archiveRepository.textBodyMutations(
                                 kind = kind,
                                 archiveId = id
                             )
-                        )
+                        ).merge()
                     )
                 }
             }
@@ -329,7 +348,7 @@ private fun Flow<Action.Load>.loadMutations(
  */
 private fun ArchiveRepository.textBodyMutations(
     kind: ArchiveKind,
-    archiveId: ArchiveId
+    archiveId: ArchiveId,
 ): Flow<Mutation<State>> = archiveStream(
     kind = kind,
     id = archiveId
@@ -344,6 +363,7 @@ private fun ArchiveRepository.textBodyMutations(
                     title = archive.title,
                     description = archive.description,
                     videoUrl = archive.videoUrl,
+                    thumbnail = archive.thumbnail,
                     body = archive.body,
                     categories = archive.categories,
                     tags = archive.tags,
@@ -356,23 +376,20 @@ private fun ArchiveRepository.textBodyMutations(
  * Mutations from header image uploads
  */
 private fun ArchiveRepository.headerUploadMutations(
-    headerPhoto: Uri?,
+    headerPhoto: LocalUri,
     id: ArchiveId,
-    kind: ArchiveKind
+    kind: ArchiveKind,
 ): Flow<Mutation<State>> =
-    when (headerPhoto) {
-        null -> emptyFlow()
-        else -> flow {
-            when (val result = uploadArchiveHeaderPhoto(
-                kind = kind,
-                id = id,
-                uri = headerPhoto
-            )) {
-                // Do nothing on success
-                is Result.Success -> Unit
-                is Result.Error -> emit(mutation {
-                    copy(messages = messages + "Error uploading header: ${result.message ?: "Unknown error"}")
-                })
-            }
+    flow {
+        when (val result = uploadArchiveHeaderPhoto(
+            kind = kind,
+            id = id,
+            uri = headerPhoto
+        )) {
+            // Do nothing on success
+            is Result.Success -> Unit
+            is Result.Error -> emit(mutation {
+                copy(messages = messages + "Error uploading header: ${result.message ?: "Unknown error"}")
+            })
         }
     }

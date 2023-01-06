@@ -25,6 +25,7 @@ data class ArchiveUpsert(
     val body: String = "",
     val description: String = "",
     val videoUrl: String? = "",
+    val thumbnail: String? = "",
     val tags: List<Descriptor.Tag> = listOf(),
     val categories: List<Descriptor.Category> = listOf(),
 )

@@ -18,25 +18,29 @@ package com.tunjid.me.data.repository
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
-import app.cash.sqldelight.coroutines.mapToOne
-import com.tunjid.me.common.data.*
+import com.tunjid.me.common.data.ArchiveEntityQueries
+import com.tunjid.me.common.data.ArchiveFileEntityQueries
+import com.tunjid.me.common.data.UserEntityQueries
 import com.tunjid.me.core.model.*
 import com.tunjid.me.core.sync.ChangeListKey
 import com.tunjid.me.core.sync.SyncRequest
 import com.tunjid.me.core.sync.Syncable
 import com.tunjid.me.core.sync.changeListKey
-import com.tunjid.me.core.utilities.Uri
+import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.core.utilities.fileDesc
-import com.tunjid.me.data.local.models.toExternalModel
 import com.tunjid.me.data.local.suspendingTransaction
 import com.tunjid.me.data.network.NetworkService
-import com.tunjid.me.data.network.models.*
+import com.tunjid.me.data.network.models.NetworkArchiveFile
+import com.tunjid.me.data.network.models.NetworkResponse
+import com.tunjid.me.data.network.models.archiveShell
+import com.tunjid.me.data.network.models.item
+import com.tunjid.me.data.network.models.toEntity
+import com.tunjid.me.data.network.models.toResult
+import com.tunjid.me.data.network.models.uploaderShell
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Inject
@@ -49,7 +53,7 @@ interface ArchiveFileRepository : Syncable {
     suspend fun uploadArchiveFile(
         kind: ArchiveKind,
         id: ArchiveId,
-        uri: Uri,
+        uri: LocalUri,
     ): Result<Unit>
 }
 
@@ -94,7 +98,7 @@ internal class OfflineFirstArchiveFileRepository(
     override suspend fun uploadArchiveFile(
         kind: ArchiveKind,
         id: ArchiveId,
-        uri: Uri,
+        uri: LocalUri,
     ): Result<Unit> = networkService.uploadArchiveHeaderPhoto(
         kind = kind,
         id = id,
