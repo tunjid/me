@@ -17,44 +17,77 @@
 package com.tunjid.me.core.ui.dragdrop
 
 import android.content.ClipData
+import android.content.Context
 import android.view.DragEvent
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
+import android.widget.FrameLayout
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
-import com.tunjid.me.core.utilities.ClipItemUri
+import androidx.compose.ui.platform.ComposeView
+import androidx.core.view.GestureDetectorCompat
+import com.tunjid.me.core.utilities.ContentUri
+import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.core.utilities.Uri
+import android.net.Uri as AndroidUri
 
 actual class PlatformDragDropModifier(
-    view: View,
-) : DragDropModifier by rootDragDropModifier() {
+    context: Context,
+) : FrameLayout(context), DragDropModifier by rootDragDropModifier() {
+
+    private val composeView = ComposeView(context)
+
     init {
-        view.setOnDragListener(dragListener(this))
+        composeView.setOnDragListener(dragListener(this))
+        addView(composeView)
+    }
+
+    fun setContent(content: @Composable () -> Unit) = composeView.setContent(content)
+
+    private val longPressDragGestureDetector = GestureDetectorCompat(
+        context,
+        longPressDragGestureListener(
+            view = this,
+            dragDropModifier = this
+        )
+    )
+
+    override fun onInterceptTouchEvent(motionEvent: MotionEvent): Boolean {
+        // Spy on events and tetect long presses
+        longPressDragGestureDetector.onTouchEvent(motionEvent)
+        return false
     }
 }
 
-fun dragListener(
+private fun longPressDragGestureListener(
+    view: View,
     dragDropModifier: DragDropModifier,
-): View.OnDragListener = View.OnDragListener { view, event ->
+) = object : GestureDetector.SimpleOnGestureListener() {
+    override fun onLongPress(event: MotionEvent) {
+        val dragStatus = dragDropModifier.dragStatus(Offset(event.x, event.y))
+        if (dragStatus !is DragStatus.Draggable) return
+
+        val dragData = dragStatus.clipData()
+
+        if (dragData != null) view.startDrag(
+            dragData,
+            View.DragShadowBuilder(view),
+            null,
+            0
+        )
+    }
+}
+
+private fun dragListener(
+    dragDropModifier: DragDropModifier,
+): View.OnDragListener = View.OnDragListener { _, event ->
     when (event.action) {
         DragEvent.ACTION_DRAG_STARTED -> {
-            when (val dragStatus = dragDropModifier.dragStatus(Offset(event.x, event.y))) {
-                is DragStatus.Draggable -> {
-                    val dragData = dragStatus.clipData()
-
-                    if (dragData != null) view.startDrag(
-                        dragData,
-                        View.DragShadowBuilder(view),
-                        null,
-                        0
-                    )
-                }
-
-                DragStatus.Static -> {
-                    dragDropModifier.onDragStarted(
-                        uris = listOf(),
-                        position = Offset(event.x, event.y)
-                    )
-                }
-            }
+            dragDropModifier.onDragStarted(
+                uris = listOf(),
+                position = Offset(event.x, event.y)
+            )
             true
         }
 
@@ -96,20 +129,29 @@ private fun DragStatus.Draggable.clipData(): ClipData? {
     val dragData = ClipData(
         "Drag drop",
         mimeTypes,
-        ClipData.Item(uris.first().path)
+        ClipData.Item(AndroidUri.parse(uris.first().path))
     )
     uris.drop(1).forEach { uri ->
-        dragData.addItem(ClipData.Item(uri.path))
+        dragData.addItem(ClipData.Item(AndroidUri.parse(uri.path)))
     }
+    println("mimeTypes: $mimeTypes; uris: $uris")
     return dragData
 }
 
 private fun DragEvent.uris(): List<Uri> = with(clipData) {
     0.until(itemCount).map { itemIndex ->
         with(description) {
-            0.until(mimeTypeCount).map { mimeTypeIndex ->
-                ClipItemUri(
-                    item = getItemAt(itemIndex),
+            0.until(mimeTypeCount).mapNotNull { mimeTypeIndex ->
+                val path = getItemAt(itemIndex)?.uri?.toString() ?: return@mapNotNull null
+                val mimeType = getMimeType(mimeTypeIndex)
+                when {
+                    path.startsWith("http") -> RemoteUri(
+                        path = path,
+                        mimetype = mimeType
+                    )
+                }
+                ContentUri(
+                    path = path,
                     mimetype = getMimeType(mimeTypeIndex)
                 )
             }

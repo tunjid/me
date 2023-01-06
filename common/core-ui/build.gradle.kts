@@ -39,6 +39,7 @@ kotlin {
         }
         named("androidMain") {
             dependencies {
+                implementation(libs.androidx.core.ktx)
                 implementation(libs.accompanist.flowlayout)
                 implementation(libs.androidx.compose.foundation.layout)
 

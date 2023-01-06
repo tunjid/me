@@ -25,7 +25,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toComposeRect
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.lifecycleScope
@@ -56,17 +55,16 @@ class MainActivity : AppCompatActivity() {
             meApp.navStateHolder.accept { mainNav.pop() }
         }
 
-        val composeView = ComposeView(this)
-        val dropModifier = PlatformDragDropModifier(view = composeView)
+        val contentView = PlatformDragDropModifier(context = this)
 
-        composeView.setContent {
+        contentView.setContent {
             AppTheme {
                 CompositionLocalProvider(
                     LocalScreenStateHolderCache provides meApp.screenStateHolderCache,
                     LocalLifecycleStateHolder provides meApp.lifecycleStateHolder,
                 ) {
                     Scaffold(
-                        modifier = Modifier.then(dropModifier),
+                        modifier = Modifier.then(contentView),
                         navStateHolder = meApp.navStateHolder,
                         globalUiStateHolder = meApp.globalUiStateHolder,
                     )
@@ -75,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        setContentView(composeView)
+        setContentView(contentView)
 
         lifecycleScope.launch {
             insetMutations().collect(meApp.globalUiStateHolder.accept)

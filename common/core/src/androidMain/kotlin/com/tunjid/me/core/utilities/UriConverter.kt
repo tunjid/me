@@ -17,7 +17,6 @@
 package com.tunjid.me.core.utilities
 
 import android.annotation.SuppressLint
-import android.content.ClipData
 import android.content.Context
 import android.provider.OpenableColumns
 import io.ktor.utils.io.core.*
@@ -36,7 +35,7 @@ actual class ActualUriConverter(
     @SuppressLint("Recycle")
     override fun toInput(uri: LocalUri): Input =
         when (uri) {
-            is ClipItemUri -> context
+            is ContentUri -> context
                 .contentResolver
                 .openInputStream(AndroidUri.parse(uri.path))
                 ?.asInput()
@@ -47,7 +46,7 @@ actual class ActualUriConverter(
 
     override suspend fun name(uri: LocalUri): String = withContext(dispatcher) {
         when (uri) {
-            is ClipItemUri -> readColumn(
+            is ContentUri -> readColumn(
                 uri = uri,
                 openableColumns = OpenableColumns.DISPLAY_NAME
             )
@@ -58,7 +57,7 @@ actual class ActualUriConverter(
 
     override suspend fun mimeType(uri: LocalUri): String =
         when (uri) {
-            is ClipItemUri -> uri.mimetype
+            is ContentUri -> uri.mimetype
                 ?: context.contentResolver.getType(AndroidUri.parse(uri.path))
                 ?: throw NullPointerException("Unknown mime type for $uri")
 
@@ -67,7 +66,7 @@ actual class ActualUriConverter(
 
     override suspend fun contentLength(uri: LocalUri): Long? = withContext(dispatcher) {
         when (uri) {
-            is ClipItemUri -> readColumn(
+            is ContentUri -> readColumn(
                 uri = uri,
                 openableColumns = OpenableColumns.SIZE
             )
@@ -80,7 +79,7 @@ actual class ActualUriConverter(
     private suspend inline fun <reified T> readColumn(uri: LocalUri, openableColumns: String): T =
         withContext(dispatcher) {
             when (uri) {
-                is ClipItemUri -> {
+                is ContentUri -> {
                     val androidUri = AndroidUri.parse(uri.path)
                     if (!androidUri.scheme.equals("content"))
                         throw IllegalArgumentException("Cannot read cursor with ${T::class.qualifiedName}")
@@ -109,10 +108,8 @@ actual class ActualUriConverter(
         }
 }
 
-data class ClipItemUri(
-    val item: ClipData.Item,
-   override val mimetype: String,
-) : LocalUri {
-    override val path: String
-        get() = item.uri?.toString() ?: item.toString()
-}
+data class ContentUri(
+    override val path: String,
+    override val mimetype: String,
+) : LocalUri
+
