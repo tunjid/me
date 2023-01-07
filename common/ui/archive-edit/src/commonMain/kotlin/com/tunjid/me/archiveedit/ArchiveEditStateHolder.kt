@@ -31,6 +31,8 @@ import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
+import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.ActionStateProducer
@@ -71,6 +73,7 @@ class ActualArchiveEditStateHolder(
     uiStateFlow: StateFlow<UiState>,
     permissionsFlow: StateFlow<Permissions>,
     onPermissionRequested: (Permission) -> Unit,
+    navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveEditRoute,
@@ -103,6 +106,11 @@ class ActualArchiveEditStateHolder(
                     is Action.MessageConsumed -> action.flow.messageConsumptionMutations()
                     is Action.RequestPermission -> action.flow.permissionRequestMutations(
                         onPermissionRequested = onPermissionRequested
+                    )
+
+                    is Action.Navigate -> action.flow.consumeNavActions(
+                        mutationMapper = Action.Navigate::navMutation,
+                        action = navActions
                     )
 
                     is Action.Load -> action.flow.loadMutations(

@@ -18,18 +18,23 @@ package com.tunjid.me.archiveedit
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
 import com.tunjid.me.core.ui.icons.Preview
 import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
+import com.tunjid.treenav.push
 
 @Composable
 internal fun GlobalUi(
     state: State,
-    onAction: (Action) -> Unit
+    onAction: (Action) -> Unit,
 ) {
     ScreenUiState(
         UiState(
@@ -45,10 +50,22 @@ internal fun GlobalUi(
                     id = "edit",
                     text = "Edit",
                     imageVector = Icons.Default.Edit
-                ).takeIf { !state.isEditing }
+                ).takeIf { !state.isEditing },
+                ToolbarItem(
+                    id = "gallery",
+                    text = "Gallery",
+                    imageVector = Icons.Default.Face
+                )
             ),
             toolbarMenuClickListener = rememberFunction {
-                onAction(Action.ToggleEditView)
+                when (it.id) {
+                    "preview", "edit" -> onAction(Action.ToggleEditView)
+                    "gallery" -> onAction(Action.Navigate {
+                        mainNav.push(
+                            "archives/${state.kind.type}/${state.upsert.id?.value}/files".toRoute
+                        )
+                    })
+                }
             },
             fabShows = true,
             fabText = if (state.upsert.id == null) "Create" else "Save",

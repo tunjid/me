@@ -23,6 +23,7 @@ import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
+import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
@@ -125,6 +126,8 @@ sealed class Action(val key: String) {
     data class Drop(val uris: List<Uri>) : Action("Drop")
 
     data class RequestPermission(val permission: Permission) : Action("RequestPermission")
+
+    data class Navigate(val navMutation: NavMutation) : Action(key = "Navigate")
 }
 
 @Serializable
