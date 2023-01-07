@@ -1,3 +1,12 @@
+CREATE TABLE IF NOT EXISTS archiveCategory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    archive_id TEXT NOT NULL,
+    category TEXT NOT NULL,
+    FOREIGN KEY(archive_id) REFERENCES archiveEntity(id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS archiveCategory_category ON archiveCategory(archive_id, category);
+
 find:
 SELECT category
 FROM archiveCategory

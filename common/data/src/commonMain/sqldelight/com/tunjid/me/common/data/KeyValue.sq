@@ -1,3 +1,8 @@
+CREATE TABLE IF NOT EXISTS keyData (
+    id TEXT PRIMARY KEY,
+    data TEXT
+);
+
 find:
 SELECT *
 FROM keyData

@@ -1,11 +1,1 @@
-
-CREATE TABLE IF NOT EXISTS archiveFileEntity (
-    id TEXT PRIMARY KEY,
-    url TEXT NOT NULL,
-    mimetype TEXT NOT NULL,
-    archive_id TEXT NOT NULL,
-    uploader TEXT NOT NULL,
-    created INTEGER NOT NULL,
-    FOREIGN KEY(archive_id) REFERENCES archiveEntity(id),
-    FOREIGN KEY(uploader) REFERENCES userEntity(id)
-);
+-- Empty migration from when deriveSchemaFromMigrations was true

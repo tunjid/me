@@ -1,7 +1,0 @@
-CREATE TABLE IF NOT EXISTS changeListItem (
-    model TEXT PRIMARY KEY,
-    id TEXT NOT NULL,
-    changeId TEXT NOT NULL,
-    changeType TEXT NOT NULL,
-    modelId TEXT NOT NULL
-);

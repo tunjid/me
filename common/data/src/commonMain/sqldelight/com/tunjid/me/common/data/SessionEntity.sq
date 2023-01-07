@@ -1,3 +1,9 @@
+CREATE TABLE IF NOT EXISTS sessionEntity (
+    id TEXT PRIMARY KEY,
+    cookie TEXT,
+    user_id TEXT
+);
+
 session:
 SELECT cookie, user_id
 FROM sessionEntity

@@ -1,3 +1,7 @@
+CREATE TABLE IF NOT EXISTS sessionEntity (
+    id TEXT PRIMARY KEY,
+    cookie TEXT
+);
 
 ALTER TABLE sessionEntity
 ADD user_id TEXT DEFAULT NULL;

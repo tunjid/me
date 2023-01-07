@@ -1,5 +1,1 @@
--- Dummy migration for failed experiment with virtual column
-
-CREATE TABLE IF NOT EXISTS archiveEntity (
-    id TEXT PRIMARY KEY
-);
+-- Empty migration from when deriveSchemaFromMigrations was true

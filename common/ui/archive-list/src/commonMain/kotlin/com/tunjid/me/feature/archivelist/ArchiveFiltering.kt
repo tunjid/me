@@ -55,7 +55,7 @@ import com.tunjid.me.scaffold.nav.icon
 @Composable
 fun ArchiveFilters(
     item: QueryState,
-    onChanged: (Action) -> Unit
+    onChanged: (Action) -> Unit,
 ) {
     val isExpanded = item.expanded
     Surface(
@@ -79,6 +79,8 @@ fun ArchiveFilters(
                 Spacer(modifier = Modifier.width(8.dp))
                 SortButton(onChanged, item)
                 Spacer(modifier = Modifier.width(12.dp))
+                ArchiveCountButton(count = item.count, kind = item.currentQuery.kind)
+                Spacer(modifier = Modifier.width(8.dp))
                 DescriptorDetailButton(
                     descriptors = item.currentQuery.contentFilter.categories + item.currentQuery.contentFilter.tags,
                     onExpandClicked = {
@@ -97,8 +99,6 @@ fun ArchiveFilters(
                         )
                     }
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                ArchiveCountButton(count = item.count, kind = item.currentQuery.kind)
                 Spacer(modifier = Modifier.weight(1f))
                 DropDownButton(isExpanded, onChanged)
             }
@@ -118,7 +118,7 @@ fun ArchiveFilters(
 @Composable
 private fun SortButton(
     onChanged: (Action) -> Unit,
-    item: QueryState
+    item: QueryState,
 ) {
     val desc = item.currentQuery.desc
     val rotation by animateFloatAsState(
@@ -167,10 +167,10 @@ private fun SortButton(
 }
 
 @Composable
-private inline fun DescriptorDetailButton(
+private fun DescriptorDetailButton(
     descriptors: List<Descriptor>,
-    noinline onExpandClicked: () -> Unit,
-    noinline onClearClicked: () -> Unit
+    onExpandClicked: () -> Unit,
+    onClearClicked: () -> Unit,
 ) {
     FilterChip(
         modifier = Modifier
@@ -204,7 +204,7 @@ private inline fun DescriptorDetailButton(
 @Composable
 private fun ArchiveCountButton(
     count: Long,
-    kind: ArchiveKind
+    kind: ArchiveKind,
 ) {
     AssistChip(
         modifier = Modifier
@@ -229,7 +229,7 @@ private fun ArchiveCountButton(
 private fun FilterChips(
     modifier: Modifier,
     state: QueryState,
-    onChanged: (Action) -> Unit
+    onChanged: (Action) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -288,7 +288,7 @@ private fun FilterChips(
 @Composable
 private fun DropDownButton(
     isExpanded: Boolean,
-    onChanged: (Action) -> Unit
+    onChanged: (Action) -> Unit,
 ) {
     val rotation by animateFloatAsState(if (isExpanded) 0f else -90f)
     FilledTonalButton(
@@ -307,7 +307,7 @@ private fun onChipFilterChanged(
     state: QueryState,
     reader: (QueryState) -> Descriptor,
     writer: (String) -> Descriptor,
-    onChanged: (Action) -> Unit
+    onChanged: (Action) -> Unit,
 ): (ChipAction) -> Unit = {
     when (it) {
         ChipAction.Added -> onChanged(
