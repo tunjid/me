@@ -28,6 +28,7 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.protobuf.ProtoNumber
 
 enum class DragStatus {
     None, InWindow, InThumbnail
@@ -35,15 +36,25 @@ enum class DragStatus {
 
 @Serializable
 data class State(
+    @ProtoNumber(1)
     val hasFetchedAuthStatus: Boolean = false,
+    @ProtoNumber(2)
     val isSignedIn: Boolean = false,
+    @ProtoNumber(3)
     val isEditing: Boolean = true,
+    @ProtoNumber(4)
     val isSubmitting: Boolean = false,
+    @Transient
     val hasStoragePermissions: Boolean = false,
+    @ProtoNumber(6)
     val navBarSize: Int,
+    @ProtoNumber(7)
     val kind: ArchiveKind,
+    @Transient
     val thumbnail: String? = null,
+    @Transient
     val upsert: ArchiveUpsert = ArchiveUpsert(),
+    @ProtoNumber(10)
     val chipsState: ChipsState = ChipsState(),
     @Transient
     val toUpload: LocalUri? = null,
