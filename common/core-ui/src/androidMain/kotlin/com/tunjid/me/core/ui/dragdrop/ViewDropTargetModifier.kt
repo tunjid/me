@@ -66,15 +66,15 @@ private fun longPressDragGestureListener(
     dragDropModifier: DragDropModifier,
 ) = object : GestureDetector.SimpleOnGestureListener() {
     override fun onLongPress(event: MotionEvent) {
-        val dragStatus = dragDropModifier.dragStatus(Offset(event.x, event.y))
-        if (dragStatus !is DragStatus.Draggable) return
-
-        val dragData = dragStatus.clipData() ?: return
+        val dragInfo = dragDropModifier.dragInfo(Offset(event.x, event.y)) ?: return
+        val clipData = dragInfo.clipData() ?: return
 
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         view.startDrag(
-            dragData,
-            View.DragShadowBuilder(view),
+            clipData,
+            PainterDragShadowBuilder(
+                dragInfo = dragInfo,
+            ),
             null,
             0
         )
@@ -124,7 +124,7 @@ private fun dragListener(
     }
 }
 
-private fun DragStatus.Draggable.clipData(): ClipData? {
+private fun DragInfo.clipData(): ClipData? {
     if (uris.isEmpty()) return null
 
     val mimeTypes = uris.map(Uri::mimetype).distinct().toTypedArray()

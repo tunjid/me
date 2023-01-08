@@ -20,6 +20,8 @@ package com.tunjid.me.core.ui.dragdrop
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.OnGloballyPositionedModifier
 import androidx.compose.ui.layout.positionInRoot
@@ -31,7 +33,7 @@ import androidx.compose.ui.util.fastForEach
 import com.tunjid.me.core.utilities.Uri
 
 internal class DragDropContainer(
-    private val onDragDropStarted: (DragDrop) -> DragDropAction,
+    private val onDragDropStarted: DragSource.(DragDrop) -> DragDropAction,
 ) : Modifier.Element,
     ModifierLocalConsumer,
     ModifierLocalProvider<DragDropParent?>,
@@ -96,11 +98,17 @@ internal class DragDropContainer(
 
     // start DropTargetNode
 
-    override val area: Int
+    override val size: Size
         get() = when (val coordinates = coordinates) {
-            null -> 0
-            else -> coordinates.size.width * coordinates.size.height
+            null -> Size.Zero
+            else -> with(coordinates.size) {
+                Size(
+                    width = width.toFloat(),
+                    height = height.toFloat()
+                )
+            }
         }
+
     override val allChildren: List<DragDropChild>
         get() = buildList {
             children.fastForEach { child ->
@@ -125,7 +133,7 @@ internal class DragDropContainer(
         coordinates ?: return false
 
         check(currentTarget == null)
-        currentTarget = onDragDropStarted.invoke(DragDrop.Drop(uris, position)).target
+        currentTarget = onDragDropStarted(DragDrop.Drop(uris, position)).target
 
         var handledByChild = false
 
@@ -141,16 +149,24 @@ internal class DragDropContainer(
 
 
     // start DragSource
-    override fun dragStatus(offset: Offset): DragStatus {
-        coordinates ?: return DragStatus.Static
+
+    override val dragShadowPainter: Painter?
+        get() = null
+
+    override fun dragInfo(offset: Offset): DragInfo? {
+        coordinates ?: return null
 
         val draggedChild = allChildren
             .filter { it.contains(offset) }
             .minByOrNull { it.area }
 
-        return draggedChild?.dragStatus(offset)
-            ?: onDragDropStarted.invoke(DragDrop.Drag(offset)).source?.dragStatus(offset)
-            ?: DragStatus.Static
+
+        // Attempt to drag the smallest child within the bounds first
+        val childDragStatus = draggedChild?.dragInfo(offset)
+        if (childDragStatus != null) return childDragStatus
+
+        // No draggable child, attempt to drag self
+        return onDragDropStarted(DragDrop.Drag(offset)).source?.dragInfo(offset)
     }
 
     // end DragSource

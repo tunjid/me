@@ -20,20 +20,40 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.debugInspectorInfo
 import com.tunjid.me.core.utilities.Uri
 
 sealed class DragStatus {
-    object Static : DragStatus()
+    internal object Static : DragStatus()
 
-    data class Draggable(val uris: List<Uri>) : DragStatus()
+    internal data class Draggable(val uris: List<Uri>) : DragStatus()
+
+    companion object {
+
+        fun static(): DragStatus = Static
+        fun draggable(uris: List<Uri>): DragStatus = Draggable(uris)
+    }
 }
 
-interface DragSource {
-    fun dragStatus(offset: Offset): DragStatus
+internal data class DragInfo(
+    val size: Size,
+    val uris: List<Uri>,
+    val dragShadowPainter: Painter?,
+)
+
+internal interface DragSource {
+
+    val size: Size
+
+    val dragShadowPainter: Painter?
+
+    fun dragInfo(offset: Offset): DragInfo?
 }
 
 fun Modifier.dragSource(
+    dragShadowPainter: Painter? = null,
     dragStatus: () -> DragStatus,
 ): Modifier = composed(
     inspectorInfo = debugInspectorInfo {
@@ -48,8 +68,21 @@ fun Modifier.dragSource(
                     is DragDrop.Drag -> when (dragStatus()) {
                         DragStatus.Static -> DragDropAction.Reject
                         is DragStatus.Draggable -> DragDropAction.Drag(
-                            object : DragSource {
-                                override fun dragStatus(offset: Offset): DragStatus = dragStatus()
+                            dragSource = object : DragSource {
+                                override val size: Size
+                                    // Get the size from the modifier after it measures
+                                    get() = this@DragDropContainer.size
+                                override val dragShadowPainter: Painter? get() = dragShadowPainter
+
+                                override fun dragInfo(offset: Offset): DragInfo? =
+                                    when (val dragStatus = dragStatus()) {
+                                        DragStatus.Static -> null
+                                        is DragStatus.Draggable -> DragInfo(
+                                            uris = dragStatus.uris,
+                                            size = this@DragDropContainer.size,
+                                            dragShadowPainter = dragShadowPainter
+                                        )
+                                    }
                             }
                         )
                     }

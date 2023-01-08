@@ -19,7 +19,6 @@ package com.tunjid.me.core.ui.dragdrop
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.geometry.Offset
 import com.tunjid.me.core.utilities.FileUri
-import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.core.utilities.Uri
 import java.awt.Cursor
 import java.awt.datatransfer.DataFlavor
@@ -120,7 +119,7 @@ private fun dragGestureListener(
         y = event.dragOrigin.y * density
     )
 
-    when (val dragStatus = dragDropModifier.dragStatus(offset)) {
+    when (val dragStatus = dragDropModifier.dragInfo(offset)) {
         DragStatus.Static -> Unit
         is DragStatus.Draggable -> if (dragStatus.uris.isNotEmpty()) event.startDrag(
             Cursor(Cursor.MOVE_CURSOR),

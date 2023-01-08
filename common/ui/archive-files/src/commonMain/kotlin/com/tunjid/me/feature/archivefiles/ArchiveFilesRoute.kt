@@ -17,6 +17,7 @@
 package com.tunjid.me.feature.archivefiles
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,16 +29,16 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.ui.Thumbnail
+import com.tunjid.me.core.ui.RemoteImagePainter
 import com.tunjid.me.core.ui.dragdrop.DragStatus
 import com.tunjid.me.core.ui.dragdrop.dragSource
 import com.tunjid.me.core.ui.dragdrop.dropTarget
@@ -128,25 +129,31 @@ private fun ArchiveFilesScreen(
 
 }
 
+
 @Composable
 private fun GalleryItem(
     archiveFile: ArchiveFile,
 ) {
-    Box(
-        modifier = Modifier.aspectRatio(1f)
-    ) {
-        Thumbnail(
-            imageUrl = archiveFile.url,
-            modifier = Modifier.dragSource {
-                DragStatus.Draggable(
-                    uris = listOf(
-                        RemoteUri(
-                            path = archiveFile.url,
-                            mimetype = archiveFile.mimeType,
-                        )
+    Box(modifier = Modifier.aspectRatio(1f)) {
+        when (val imagePainter = RemoteImagePainter(archiveFile.url)) {
+            null -> Unit
+            else -> Image(
+                painter = imagePainter,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.dragSource(
+                    dragShadowPainter = imagePainter
+                ) {
+                    DragStatus.draggable(
+                        uris = listOf(
+                            RemoteUri(
+                                path = archiveFile.url,
+                                mimetype = archiveFile.mimeType,
+                            )
+                        ),
                     )
-                )
-            }
-        )
+                }
+            )
+        }
     }
 }
