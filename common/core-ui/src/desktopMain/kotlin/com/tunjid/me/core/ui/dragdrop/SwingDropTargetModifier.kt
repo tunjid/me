@@ -18,18 +18,16 @@ package com.tunjid.me.core.ui.dragdrop
 
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import com.tunjid.me.core.utilities.FileUri
 import com.tunjid.me.core.utilities.Uri
 import java.awt.Cursor
+import java.awt.Point
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
-import java.awt.dnd.DnDConstants
-import java.awt.dnd.DragGestureEvent
-import java.awt.dnd.DragGestureListener
-import java.awt.dnd.DropTargetDragEvent
-import java.awt.dnd.DropTargetDropEvent
-import java.awt.dnd.DropTargetEvent
-import java.awt.dnd.DropTargetListener
+import java.awt.dnd.*
 import java.io.File
 import java.io.Serializable
 import java.awt.dnd.DragSource as AwtDragSource
@@ -121,19 +119,26 @@ private fun dragGestureListener(
 
     val dragInfo = dragDropModifier.dragInfo(offset) ?: return@DragGestureListener
 
-    if (dragInfo.uris.isNotEmpty()) event.startDrag(
-        Cursor(Cursor.MOVE_CURSOR),
-        object : Transferable {
-            override fun getTransferDataFlavors(): Array<DataFlavor> =
-                arrayOf(ArrayListFlavor)
+    if (dragInfo.uris.isNotEmpty()) when (val shadowPainter = dragInfo.dragShadowPainter) {
+        null -> event.startDrag(
+            /* dragCursor = */ Cursor.getDefaultCursor(),
+            /* transferable = */ dragInfo.transferable()
+        )
 
-            override fun isDataFlavorSupported(flavor: DataFlavor?): Boolean =
-                flavor == ArrayListFlavor
+        else -> event.startDrag(
+            /* dragCursor = */ Cursor.getDefaultCursor(),
+            /* dragImage = */ shadowPainter.toAwtImage(
+                density = Density(density),
+                layoutDirection = LayoutDirection.Ltr,
+                size = dragInfo.size
+            ),
+            /* imageOffset = */ Point(-dragInfo.size.width.toInt() / 2, -dragInfo.size.height.toInt() / 2),
+            /* transferable = */ dragInfo.transferable(),
+            /* dsl = */ object : DragSourceAdapter() {
 
-            override fun getTransferData(flavor: DataFlavor?): Any =
-                dragInfo.uris.toSerializableList()
-        }
-    )
+            }
+        )
+    }
 }
 
 private fun DropTargetDropEvent.uris(): List<Uri> =
@@ -165,10 +170,22 @@ val ArrayListFlavor = DataFlavor(
     "ArrayList"
 )
 
+private fun DragInfo.transferable() = object : Transferable {
+    override fun getTransferDataFlavors(): Array<DataFlavor> =
+        arrayOf(ArrayListFlavor)
+
+    override fun isDataFlavorSupported(flavor: DataFlavor?): Boolean =
+        flavor == ArrayListFlavor
+
+    override fun getTransferData(flavor: DataFlavor?): Any =
+        uris.toSerializableList()
+}
+
 private fun List<Uri>.toSerializableList() = java.util.ArrayList(
     map { SerializableUri(path = it.path, mimetype = it.mimetype) }
 )
+
 private class SerializableUri(
     override val path: String,
-    override val mimetype: String
-): Uri, Serializable
+    override val mimetype: String,
+) : Uri, Serializable
