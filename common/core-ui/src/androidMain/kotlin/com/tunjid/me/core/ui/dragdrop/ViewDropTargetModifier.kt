@@ -151,11 +151,14 @@ private fun DragEvent.uris(): List<Uri> = with(clipData) {
                         path = path,
                         mimetype = mimeType
                     )
+
+                    path.startsWith("content") -> ContentUri(
+                        path = path,
+                        mimetype = mimeType
+                    )
+
+                    else -> null
                 }
-                ContentUri(
-                    path = path,
-                    mimetype = getMimeType(mimeTypeIndex)
-                )
             }
         }
     }

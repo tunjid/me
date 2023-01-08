@@ -119,22 +119,21 @@ private fun dragGestureListener(
         y = event.dragOrigin.y * density
     )
 
-    when (val dragStatus = dragDropModifier.dragInfo(offset)) {
-        DragStatus.Static -> Unit
-        is DragStatus.Draggable -> if (dragStatus.uris.isNotEmpty()) event.startDrag(
-            Cursor(Cursor.MOVE_CURSOR),
-            object : Transferable {
-                override fun getTransferDataFlavors(): Array<DataFlavor> =
-                    arrayOf(ArrayListFlavor)
+    val dragInfo = dragDropModifier.dragInfo(offset) ?: return@DragGestureListener
 
-                override fun isDataFlavorSupported(flavor: DataFlavor?): Boolean =
-                    flavor == ArrayListFlavor
+    if (dragInfo.uris.isNotEmpty()) event.startDrag(
+        Cursor(Cursor.MOVE_CURSOR),
+        object : Transferable {
+            override fun getTransferDataFlavors(): Array<DataFlavor> =
+                arrayOf(ArrayListFlavor)
 
-                override fun getTransferData(flavor: DataFlavor?): Any =
-                    dragStatus.uris.toSerializableList()
-            }
-        )
-    }
+            override fun isDataFlavorSupported(flavor: DataFlavor?): Boolean =
+                flavor == ArrayListFlavor
+
+            override fun getTransferData(flavor: DataFlavor?): Any =
+                dragInfo.uris.toSerializableList()
+        }
+    )
 }
 
 private fun DropTargetDropEvent.uris(): List<Uri> =
