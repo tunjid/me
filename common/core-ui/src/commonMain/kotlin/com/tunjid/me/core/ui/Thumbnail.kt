@@ -17,22 +17,46 @@
 package com.tunjid.me.core.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun Thumbnail(
     imageUrl: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val painter = RemoteImagePainter(imageUrl)
-    if (painter != null) Image(
-        painter = painter,
+    var size by remember { mutableStateOf<IntSize?>(null) }
+
+    val painter = RemoteImagePainter(
+        imageUri = imageUrl,
         contentScale = ContentScale.Crop,
-        contentDescription = null,
-        modifier = modifier
+        size = size,
     )
-    else Box(modifier = modifier)
+    BoxWithConstraints(
+        modifier = modifier
+    ) {
+        if (maxWidth > 0.dp && maxHeight > 0.dp) size = with(LocalDensity.current) {
+            IntSize(
+                width = maxWidth.roundToPx(),
+                height = maxHeight.roundToPx()
+            )
+        }
+
+        if (painter != null) Image(
+            modifier = Modifier.fillMaxSize(),
+            painter = painter,
+            contentScale = ContentScale.Crop,
+            contentDescription = "Thumbnail",
+        )
+    }
 }
