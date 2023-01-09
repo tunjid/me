@@ -41,7 +41,7 @@ import java.net.URI
 @Composable
 actual fun RemoteImagePainter(
     imageUri: String?,
-    size: IntSize?
+    size: IntSize?,
     contentScale: ContentScale
 ): Painter? {
     val cache = LocalBitmapCache.current
