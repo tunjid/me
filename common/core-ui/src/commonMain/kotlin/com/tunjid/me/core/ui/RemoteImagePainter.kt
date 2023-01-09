@@ -17,8 +17,15 @@
 package com.tunjid.me.core.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.IntSize
 
 
 @Composable
-expect fun RemoteImagePainter(imageUri: String?): Painter?
+expect fun RemoteImagePainter(
+    imageUri: String?,
+    size: IntSize? = null,
+    contentScale: ContentScale = ContentScale.Crop,
+): Painter?

@@ -20,10 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.loadImageBitmap
+import androidx.compose.ui.unit.IntSize
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -36,7 +39,11 @@ import java.net.URI
 
 
 @Composable
-actual fun RemoteImagePainter(imageUri: String?): Painter? {
+actual fun RemoteImagePainter(
+    imageUri: String?,
+    size: IntSize?
+    contentScale: ContentScale
+): Painter? {
     val cache = LocalBitmapCache.current
     val cachedPainter = imageUri?.let(cache::get)?.let(::BitmapPainter)
     if (cachedPainter != null) return cachedPainter
