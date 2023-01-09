@@ -31,7 +31,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.protobuf.ProtoNumber
 
-enum class DragStatus {
+enum class DragLocation {
     None, InWindow, InThumbnail
 }
 
@@ -60,7 +60,7 @@ data class State(
     @Transient
     val toUpload: LocalUri? = null,
     @Transient
-    val dragStatus: DragStatus = DragStatus.None,
+    val dragLocation: DragLocation = DragLocation.None,
     @Transient
     val messages: MessageQueue = MessageQueue(),
 ) : ByteSerializable

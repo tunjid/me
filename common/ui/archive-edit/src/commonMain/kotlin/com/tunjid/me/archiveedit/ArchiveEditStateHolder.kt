@@ -182,10 +182,10 @@ private fun Flow<Action.Drag>.dragStatusMutations(): Flow<Mutation<State>> =
         .map { (inWindow, inThumbnail) ->
             mutation {
                 copy(
-                    dragStatus = when {
-                        inThumbnail -> DragStatus.InThumbnail
-                        inWindow -> DragStatus.InWindow
-                        else -> DragStatus.None
+                    dragLocation = when {
+                        inThumbnail -> DragLocation.InThumbnail
+                        inWindow -> DragLocation.InWindow
+                        else -> DragLocation.None
                     }
                 )
             }

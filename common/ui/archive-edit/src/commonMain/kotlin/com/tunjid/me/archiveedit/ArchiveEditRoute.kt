@@ -112,7 +112,7 @@ private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
         DragDropThumbnail(
             thumbnail = state.thumbnail,
             hasStoragePermission = state.hasStoragePermissions,
-            dragStatus = state.dragStatus,
+            dragLocation = state.dragLocation,
             onAction = actions
         )
 
@@ -161,7 +161,7 @@ private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
 private fun DragDropThumbnail(
     thumbnail: String?,
     hasStoragePermission: Boolean,
-    dragStatus: DragStatus,
+    dragLocation: DragLocation,
     onAction: (Action) -> Unit,
 ) {
     // Create a var so edits can be captured
@@ -169,10 +169,10 @@ private fun DragDropThumbnail(
     permissionState.value = hasStoragePermission
 
     val borderColor by animateColorAsState(
-        when (dragStatus) {
-            DragStatus.InWindow -> MaterialTheme.colorScheme.errorContainer
-            DragStatus.InThumbnail -> MaterialTheme.colorScheme.primaryContainer
-            DragStatus.None -> Color.Transparent
+        when (dragLocation) {
+            DragLocation.InWindow -> MaterialTheme.colorScheme.errorContainer
+            DragLocation.InThumbnail -> MaterialTheme.colorScheme.primaryContainer
+            DragLocation.None -> Color.Transparent
         }
     )
     AsyncRasterImage(
