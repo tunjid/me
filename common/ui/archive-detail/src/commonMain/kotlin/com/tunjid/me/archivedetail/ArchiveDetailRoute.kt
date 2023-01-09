@@ -37,7 +37,7 @@ import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.Chips
-import com.tunjid.me.core.ui.Thumbnail
+import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
@@ -106,7 +106,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier = Modifier.padding(16.dp))
-        Thumbnail(
+        AsyncRasterImage(
             imageUrl = state.archive?.thumbnail,
             modifier = Modifier
                 .heightIn(max = 300.dp)

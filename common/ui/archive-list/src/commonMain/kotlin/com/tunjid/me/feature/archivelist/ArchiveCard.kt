@@ -44,7 +44,7 @@ import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.asyncRasterPainter
-import com.tunjid.me.core.ui.Thumbnail
+import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.scaffold.globalui.scaffold.LocalNavigationAnimator
 import kotlinx.datetime.Clock.System
 
@@ -125,7 +125,7 @@ fun ArchiveCard(
         },
         content = {
             Column {
-                Thumbnail(
+                AsyncRasterImage(
                     imageUrl = archiveItem.archive.thumbnail,
                     modifier = thumbnailModifier.aspectRatio(16f/9f)
                 )

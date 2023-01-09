@@ -47,7 +47,7 @@ import com.halilibo.richtext.ui.material3.Material3RichText
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveUpsert
-import com.tunjid.me.core.ui.Thumbnail
+import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
@@ -175,7 +175,7 @@ private fun DragDropThumbnail(
             DragStatus.None -> Color.Transparent
         }
     )
-    Thumbnail(
+    AsyncRasterImage(
         imageUrl = thumbnail,
         modifier = Modifier
             .heightIn(max = 300.dp)

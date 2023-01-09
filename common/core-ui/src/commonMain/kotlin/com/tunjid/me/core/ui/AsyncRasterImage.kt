@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Thumbnail(
+fun AsyncRasterImage(
     imageUrl: String?,
     modifier: Modifier = Modifier,
 ) {
