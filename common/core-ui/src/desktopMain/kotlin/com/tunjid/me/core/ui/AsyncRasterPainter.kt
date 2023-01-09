@@ -38,7 +38,7 @@ import java.net.URI
 
 
 @Composable
-actual fun AsyncRasterPainter(
+actual fun asyncRasterPainter(
     imageUri: String?,
     size: IntSize?,
     contentScale: ContentScale

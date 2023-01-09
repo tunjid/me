@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.ui.AsyncRasterPainter
+import com.tunjid.me.core.ui.asyncRasterPainter
 import com.tunjid.me.core.ui.dragdrop.DragStatus
 import com.tunjid.me.core.ui.dragdrop.dragSource
 import com.tunjid.me.core.ui.dragdrop.dropTarget
@@ -135,7 +135,7 @@ private fun GalleryItem(
     archiveFile: ArchiveFile,
 ) {
     Box(modifier = Modifier.aspectRatio(1f)) {
-        when (val imagePainter = AsyncRasterPainter(archiveFile.url)) {
+        when (val imagePainter = asyncRasterPainter(archiveFile.url)) {
             null -> Unit
             else -> Image(
                 painter = imagePainter,

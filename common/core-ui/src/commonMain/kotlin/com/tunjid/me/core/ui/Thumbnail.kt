@@ -37,7 +37,7 @@ fun Thumbnail(
 ) {
     var size by remember { mutableStateOf<IntSize?>(null) }
 
-    val painter = AsyncRasterPainter(
+    val painter = asyncRasterPainter(
         imageUri = imageUrl,
         contentScale = ContentScale.Crop,
         size = size,

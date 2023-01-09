@@ -27,7 +27,7 @@ import coil.size.Scale
 import coil.size.Size
 
 @Composable
-actual fun AsyncRasterPainter(
+actual fun asyncRasterPainter(
     imageUri: String?,
     size: IntSize?,
     contentScale: ContentScale,
