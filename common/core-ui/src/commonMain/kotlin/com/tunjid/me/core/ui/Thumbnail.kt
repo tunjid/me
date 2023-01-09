@@ -37,7 +37,7 @@ fun Thumbnail(
 ) {
     var size by remember { mutableStateOf<IntSize?>(null) }
 
-    val painter = RemoteImagePainter(
+    val painter = AsyncRasterPainter(
         imageUri = imageUrl,
         contentScale = ContentScale.Crop,
         size = size,

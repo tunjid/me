@@ -43,7 +43,7 @@ import com.tunjid.me.core.model.User
 import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.Chips
-import com.tunjid.me.core.ui.RemoteImagePainter
+import com.tunjid.me.core.ui.AsyncRasterPainter
 import com.tunjid.me.core.ui.Thumbnail
 import com.tunjid.me.scaffold.globalui.scaffold.LocalNavigationAnimator
 import kotlinx.datetime.Clock.System
@@ -227,7 +227,7 @@ private fun ArchiveCardFooter(
         val height = 40.dp
         val modifier = Modifier
             .size(height)
-        val painter = RemoteImagePainter(authorImageUrl)
+        val painter = AsyncRasterPainter(authorImageUrl)
 
         if (painter != null) {
             Image(

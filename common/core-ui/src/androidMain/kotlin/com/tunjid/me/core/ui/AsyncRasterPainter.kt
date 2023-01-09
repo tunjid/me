@@ -27,7 +27,7 @@ import coil.size.Scale
 import coil.size.Size
 
 @Composable
-actual fun RemoteImagePainter(
+actual fun AsyncRasterPainter(
     imageUri: String?,
     size: IntSize?,
     contentScale: ContentScale,

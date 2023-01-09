@@ -17,14 +17,16 @@
 package com.tunjid.me.core.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntSize
 
 
+/**
+ * Returns a [Painter] for paintings raster images located at [imageUri]
+ */
 @Composable
-expect fun RemoteImagePainter(
+expect fun AsyncRasterPainter(
     imageUri: String?,
     size: IntSize? = null,
     contentScale: ContentScale = ContentScale.Crop,

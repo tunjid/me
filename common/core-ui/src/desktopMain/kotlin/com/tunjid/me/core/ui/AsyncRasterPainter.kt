@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
@@ -39,7 +38,7 @@ import java.net.URI
 
 
 @Composable
-actual fun RemoteImagePainter(
+actual fun AsyncRasterPainter(
     imageUri: String?,
     size: IntSize?,
     contentScale: ContentScale
