@@ -27,7 +27,7 @@ import kotlinx.serialization.Transient
 
 
 enum class DragLocation {
-    Outside, Inside
+    Inactive, Outside, Inside
 }
 
 @Serializable
@@ -41,7 +41,7 @@ data class State(
     @Transient
     val messages: MessageQueue = MessageQueue(),
     @Transient
-    val dragLocation: DragLocation = DragLocation.Outside,
+    val dragLocation: DragLocation = DragLocation.Inactive,
     @Transient
     val files: List<ArchiveFile> = emptyList(),
 ) : ByteSerializable

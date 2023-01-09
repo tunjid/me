@@ -78,7 +78,8 @@ private fun ArchiveFilesScreen(
     val borderColor by animateColorAsState(
         when (state.dragLocation) {
             DragLocation.Inside -> MaterialTheme.colorScheme.primaryContainer
-            DragLocation.Outside -> Color.Transparent
+            DragLocation.Outside -> MaterialTheme.colorScheme.errorContainer
+            DragLocation.Inactive -> Color.Transparent
         }
     )
 
@@ -93,7 +94,7 @@ private fun ArchiveFilesScreen(
             .dropTarget(
                 onDragStarted = { _, _ ->
                     val (action, acceptedDrag) = when (state.hasStoragePermissions) {
-                        true -> Action.Drag(location = DragLocation.Inside) to true
+                        true -> Action.Drag(location = DragLocation.Outside) to true
                         false -> Action.RequestPermission(Permission.ReadExternalStorage) to false
                     }
                     actions(action)
@@ -101,9 +102,9 @@ private fun ArchiveFilesScreen(
                 },
                 onDragEntered = { actions(Action.Drag(location = DragLocation.Inside)) },
                 onDragExited = { actions(Action.Drag(location = DragLocation.Outside)) },
-                onDragEnded = { actions(Action.Drag(location = DragLocation.Outside)) },
+                onDragEnded = { actions(Action.Drag(location = DragLocation.Inactive)) },
                 onDropped = { uris, _ ->
-                    actions(Action.Drag(location = DragLocation.Outside))
+                    actions(Action.Drag(location = DragLocation.Inactive))
                     actions(Action.Drop(uris = uris))
                     true
                 }
