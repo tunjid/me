@@ -18,6 +18,7 @@ package com.tunjid.me.core.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,13 +46,7 @@ fun Thumbnail(
     BoxWithConstraints(
         modifier = modifier
     ) {
-        if (maxWidth > 0.dp && maxHeight > 0.dp) size = with(LocalDensity.current) {
-            IntSize(
-                width = maxWidth.roundToPx(),
-                height = maxHeight.roundToPx()
-            )
-        }
-
+        size = maxSize()
         if (painter != null) Image(
             modifier = Modifier.fillMaxSize(),
             painter = painter,
@@ -60,3 +55,13 @@ fun Thumbnail(
         )
     }
 }
+
+@Composable
+fun BoxWithConstraintsScope.maxSize(): IntSize? =
+    if (maxWidth > 0.dp && maxHeight > 0.dp) with(LocalDensity.current) {
+        IntSize(
+            width = maxWidth.roundToPx(),
+            height = maxHeight.roundToPx()
+        )
+    }
+    else null

@@ -17,14 +17,13 @@
 package com.tunjid.me.core.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.toPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.unit.IntSize
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -36,18 +35,22 @@ import java.io.File
 import java.io.InputStream
 import java.net.URI
 
+import javax.imageio.ImageIO;
 
+/*
+An implementation of an aysnc raster painter with an in memory LRU cache and temp disk cache.
+*/
 @Composable
 actual fun asyncRasterPainter(
     imageUri: String?,
     size: IntSize?,
-    contentScale: ContentScale
+    contentScale: ContentScale,
 ): Painter? {
-    val cache = LocalBitmapCache.current
-    val cachedPainter = imageUri?.let(cache::get)?.let(::BitmapPainter)
+    val cache = LocalPainterCache.current
+    val cachedPainter = cache[imageUri to size]
     if (cachedPainter != null) return cachedPainter
 
-    val image: ImageBitmap? by produceState<ImageBitmap?>(
+    val inputStream by produceState<InputStream?>(
         initialValue = null,
         key1 = imageUri,
     ) {
@@ -71,7 +74,7 @@ actual fun asyncRasterPainter(
                     )
                 }
 
-                val inputStream = if (imageSource is ImageSource.Remote.Network) {
+                value = if (imageSource is ImageSource.Remote.Network) {
                     val destination = savedImageFile(uri = imageSource.uri)
                     File(destination.parent).mkdirs()
                     imageSource.inputStream.use { input ->
@@ -79,19 +82,34 @@ actual fun asyncRasterPainter(
                     }
                     destination.inputStream()
                 } else imageSource?.inputStream
-
-                value = inputStream?.toBitmap()
             } catch (e: Exception) {
 //                e.printStackTrace()
-                null
             }
         }
     }
 
-    return image?.let {
-        if (imageUri != null) cache[imageUri] = it
-        BitmapPainter(it)
+    val painter by produceState<Painter?>(
+        initialValue = null,
+        key1 = inputStream,
+        key2 = size
+    ) {
+        value = cache.getOrPut(imageUri to size) {
+            when (val readImage = inputStream?.buffered()?.let(ImageIO::read)) {
+                null -> null
+                else -> when (size) {
+                    null -> readImage.toPainter()
+                    else -> readImage
+                        .adjustTo(
+                            contentScale = contentScale,
+                            size = size
+                        )
+                        .toPainter()
+                }
+            }
+        }
     }
+
+    return painter
 }
 
 private suspend fun String.remoteInputStream() = HttpClient().use {
@@ -100,19 +118,22 @@ private suspend fun String.remoteInputStream() = HttpClient().use {
 
 private fun String.fileInputStream() = File(this).inputStream()
 
-private fun InputStream.toBitmap() =
-    buffered()
-        .use(::loadImageBitmap)
-
 private fun savedImageFile(uri: String) =
     File(
         System.getProperty("java.io.tmpdir"),
         URI(uri).path
     )
 
-private val LocalBitmapCache = staticCompositionLocalOf {
-    mutableMapOf<String, ImageBitmap>()
-}
+private val LocalPainterCache: ProvidableCompositionLocal<MutableMap<Pair<String?, IntSize?>, Painter?>> =
+    staticCompositionLocalOf {
+        object : LinkedHashMap<Key, Painter?>(0, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Key, Painter?>?): Boolean {
+                return size > 20
+            }
+        }
+    }
+
+private typealias Key = Pair<String?, IntSize?>
 
 sealed class ImageSource {
     abstract val inputStream: InputStream
@@ -120,17 +141,17 @@ sealed class ImageSource {
     sealed class Remote : ImageSource() {
         data class Network(
             val uri: String,
-            override val inputStream: InputStream
+            override val inputStream: InputStream,
         ) : Remote()
 
         data class Cached(
-            override val inputStream: InputStream
+            override val inputStream: InputStream,
         ) : Remote()
     }
 
 
     data class Local(
-        override val inputStream: InputStream
+        override val inputStream: InputStream,
     ) : ImageSource()
 
 }

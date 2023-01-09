@@ -20,6 +20,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +43,7 @@ import com.tunjid.me.core.ui.asyncRasterPainter
 import com.tunjid.me.core.ui.dragdrop.DragStatus
 import com.tunjid.me.core.ui.dragdrop.dragSource
 import com.tunjid.me.core.ui.dragdrop.dropTarget
+import com.tunjid.me.core.ui.maxSize
 import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
@@ -135,8 +137,13 @@ private fun ArchiveFilesScreen(
 private fun GalleryItem(
     archiveFile: ArchiveFile,
 ) {
-    Box(modifier = Modifier.aspectRatio(1f)) {
-        when (val imagePainter = asyncRasterPainter(archiveFile.url)) {
+    BoxWithConstraints(modifier = Modifier.aspectRatio(1f)) {
+        when (
+            val imagePainter = asyncRasterPainter(
+                imageUri = archiveFile.url,
+                size = maxSize()
+            )
+        ) {
             null -> Unit
             else -> Image(
                 painter = imagePainter,
