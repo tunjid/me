@@ -20,8 +20,8 @@ import kotlinx.coroutines.delay
 
 suspend fun <T> exponentialBackoff(
     times: Int = Int.MAX_VALUE,
-    initialDelay: Long = 100,
-    maxDelay: Long = 1000,
+    initialDelay: Long = 1_000,
+    maxDelay: Long = 1_000 * 60 * 60,
     factor: Double = 2.0,
     default: T,
     block: suspend () -> T
@@ -31,8 +31,8 @@ suspend fun <T> exponentialBackoff(
         try {
             return block()
         } catch (e: Exception) {
-            println("Exponential backoff error")
-            e.printStackTrace()
+//            println("Exponential backoff error")
+//            e.printStackTrace()
         }
         delay(currentDelay)
         currentDelay = (currentDelay * factor).toLong().coerceAtMost(maxDelay)

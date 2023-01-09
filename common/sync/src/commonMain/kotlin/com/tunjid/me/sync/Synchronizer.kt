@@ -101,7 +101,7 @@ internal class InMemorySynchronizer(
                     val latestItem = changeListDao.latestItem(key)
                     exponentialBackoff(
                         initialDelay = 1_000,
-                        maxDelay = 20_000,
+                        maxDelay = 1_000 * 60 * 60 * 24,
                         default = Unit,
                     ) {
                         locator[key]?.sync(
