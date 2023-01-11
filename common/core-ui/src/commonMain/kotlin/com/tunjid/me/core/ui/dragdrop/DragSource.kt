@@ -25,13 +25,23 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.debugInspectorInfo
 import com.tunjid.me.core.utilities.Uri
 
+internal interface DragSource {
+
+    val size: Size
+
+    val dragShadowPainter: Painter?
+
+    fun dragInfo(offset: Offset): DragInfo?
+}
+
 sealed class DragStatus {
+
     internal object Static : DragStatus()
 
     internal data class Draggable(val uris: List<Uri>) : DragStatus()
 
-    companion object {
 
+    companion object {
         fun static(): DragStatus = Static
         fun draggable(uris: List<Uri>): DragStatus = Draggable(uris)
     }
@@ -42,15 +52,6 @@ internal data class DragInfo(
     val uris: List<Uri>,
     val dragShadowPainter: Painter?,
 )
-
-internal interface DragSource {
-
-    val size: Size
-
-    val dragShadowPainter: Painter?
-
-    fun dragInfo(offset: Offset): DragInfo?
-}
 
 fun Modifier.dragSource(
     dragShadowPainter: Painter? = null,
