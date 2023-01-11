@@ -86,7 +86,7 @@ private fun dragListener(
 ): View.OnDragListener = View.OnDragListener { _, event ->
     when (event.action) {
         DragEvent.ACTION_DRAG_STARTED -> {
-            dragDropModifier.onDragStarted(
+            dragDropModifier.onStarted(
                 uris = listOf(),
                 position = Offset(event.x, event.y)
             )
@@ -94,17 +94,17 @@ private fun dragListener(
         }
 
         DragEvent.ACTION_DRAG_ENTERED -> {
-            dragDropModifier.onDragEntered()
+            dragDropModifier.onEntered()
             true
         }
 
         DragEvent.ACTION_DRAG_LOCATION -> {
-            dragDropModifier.onDragMoved(Offset(event.x, event.y))
+            dragDropModifier.onMoved(Offset(event.x, event.y))
             true
         }
 
         DragEvent.ACTION_DRAG_EXITED -> {
-            dragDropModifier.onDragExited()
+            dragDropModifier.onExited()
             true
         }
 
@@ -116,7 +116,7 @@ private fun dragListener(
         }
 
         DragEvent.ACTION_DRAG_ENDED -> {
-            dragDropModifier.onDragEnded()
+            dragDropModifier.onEnded()
             true
         }
 

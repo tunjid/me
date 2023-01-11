@@ -91,7 +91,7 @@ private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
         modifier = Modifier
             .verticalScroll(state = scrollState)
             .dropTarget(
-                onDragStarted = { _, _ ->
+                onStarted = { _, _ ->
                     val (action, acceptedDrag) = when (state.hasStoragePermissions) {
                         true -> Action.Drag.Window(inside = true) to true
                         false -> Action.RequestPermission(Permission.ReadExternalStorage) to false
@@ -99,9 +99,9 @@ private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
                     actions(action)
                     acceptedDrag
                 },
-                onDragEntered = { actions(Action.Drag.Window(inside = true)) },
-                onDragExited = { actions(Action.Drag.Window(inside = false)) },
-                onDragEnded = { actions(Action.Drag.Window(inside = false)) },
+                onEntered = { actions(Action.Drag.Window(inside = true)) },
+                onExited = { actions(Action.Drag.Window(inside = false)) },
+                onEnded = { actions(Action.Drag.Window(inside = false)) },
                 onDropped = { _, _ ->
                     actions(Action.Drag.Window(inside = false))
                     false
@@ -188,15 +188,15 @@ private fun DragDropThumbnail(
                 shape = MaterialTheme.shapes.medium,
             )
             .dropTarget(
-                onDragStarted = { _, _ -> permissionState.value },
-                onDragEntered = { onAction(Action.Drag.Thumbnail(inside = true)) },
-                onDragExited = { onAction(Action.Drag.Thumbnail(inside = false)) },
+                onStarted = { _, _ -> permissionState.value },
+                onEntered = { onAction(Action.Drag.Thumbnail(inside = true)) },
+                onExited = { onAction(Action.Drag.Thumbnail(inside = false)) },
                 onDropped = { uris, _ ->
                     onAction(Action.Drag.Thumbnail(inside = false))
                     onAction(Action.Drop(uris = uris))
                     true
                 },
-                onDragEnded = { onAction(Action.Drag.Thumbnail(inside = false)) },
+                onEnded = { onAction(Action.Drag.Thumbnail(inside = false)) },
             )
     )
 }

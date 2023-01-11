@@ -19,7 +19,6 @@ package com.tunjid.me.feature.archivefiles
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -94,7 +93,7 @@ private fun ArchiveFilesScreen(
                 shape = MaterialTheme.shapes.medium,
             )
             .dropTarget(
-                onDragStarted = { _, _ ->
+                onStarted = { _, _ ->
                     val (action, acceptedDrag) = when (state.hasStoragePermissions) {
                         true -> Action.Drag(location = DragLocation.Outside) to true
                         false -> Action.RequestPermission(Permission.ReadExternalStorage) to false
@@ -102,9 +101,9 @@ private fun ArchiveFilesScreen(
                     actions(action)
                     acceptedDrag
                 },
-                onDragEntered = { actions(Action.Drag(location = DragLocation.Inside)) },
-                onDragExited = { actions(Action.Drag(location = DragLocation.Outside)) },
-                onDragEnded = { actions(Action.Drag(location = DragLocation.Inactive)) },
+                onEntered = { actions(Action.Drag(location = DragLocation.Inside)) },
+                onExited = { actions(Action.Drag(location = DragLocation.Outside)) },
+                onEnded = { actions(Action.Drag(location = DragLocation.Inactive)) },
                 onDropped = { uris, _ ->
                     actions(Action.Drag(location = DragLocation.Inactive))
                     actions(Action.Drop(uris = uris))

@@ -24,25 +24,25 @@ import androidx.compose.ui.platform.debugInspectorInfo
 import com.tunjid.me.core.utilities.Uri
 
 interface DropTarget {
-    fun onDragStarted(uris: List<Uri>, position: Offset): Boolean
-    fun onDragEntered()
-    fun onDragMoved(position: Offset) {}
-    fun onDragExited()
+    fun onStarted(uris: List<Uri>, position: Offset): Boolean
+    fun onEntered()
+    fun onMoved(position: Offset) {}
+    fun onExited()
     fun onDropped(uris: List<Uri>, position: Offset): Boolean
-    fun onDragEnded()
+    fun onEnded()
 }
 
 fun Modifier.dropTarget(
-    onDragStarted: (uris: List<Uri>, Offset) -> Boolean,
-    onDragEntered: () -> Unit = { },
-    onDragMoved: (position: Offset) -> Unit = {},
-    onDragExited: () -> Unit = { },
+    onStarted: (uris: List<Uri>, Offset) -> Boolean,
+    onEntered: () -> Unit = { },
+    onMoved: (position: Offset) -> Unit = {},
+    onExited: () -> Unit = { },
     onDropped: (uris: List<Uri>, position: Offset) -> Boolean,
-    onDragEnded: () -> Unit = {},
+    onEnded: () -> Unit = {},
 ): Modifier = composed(
     inspectorInfo = debugInspectorInfo {
         name = "dropTarget"
-        properties["onDragStarted"] = onDragStarted
+        properties["onDragStarted"] = onStarted
     },
     factory = {
         val node = remember {
@@ -50,28 +50,28 @@ fun Modifier.dropTarget(
                 when (start) {
                     is DragDrop.Drag -> DragDropAction.Reject
                     is DragDrop.Drop -> when (
-                        onDragStarted(start.uris, start.offset)
+                        onStarted(start.uris, start.offset)
                     ) {
                         false -> DragDropAction.Reject
                         true -> DragDropAction.Drop(
                             object : DropTarget {
-                                override fun onDragStarted(uris: List<Uri>, position: Offset): Boolean = onDragStarted(
+                                override fun onStarted(uris: List<Uri>, position: Offset): Boolean = onStarted(
                                     uris,
                                     position
                                 )
 
-                                override fun onDragEntered() = onDragEntered()
+                                override fun onEntered() = onEntered()
 
-                                override fun onDragMoved(position: Offset) = onDragMoved(position)
+                                override fun onMoved(position: Offset) = onMoved(position)
 
-                                override fun onDragExited() = onDragExited()
+                                override fun onExited() = onExited()
 
                                 override fun onDropped(uris: List<Uri>, position: Offset): Boolean = onDropped(
                                     uris,
                                     position
                                 )
 
-                                override fun onDragEnded() = onDragEnded()
+                                override fun onEnded() = onEnded()
                             }
                         )
                     }

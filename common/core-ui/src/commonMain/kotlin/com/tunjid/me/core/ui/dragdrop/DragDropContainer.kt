@@ -121,22 +121,6 @@ internal class DragDropContainer(
         return position.x in x1..x2 && position.y in y1..y2
     }
 
-    override fun onDragStarted(uris: List<Uri>, position: Offset): Boolean {
-        coordinates ?: return false
-
-        check(currentTarget == null)
-        currentTarget = onDragDropStarted(DragDrop.Drop(uris, position)).target
-
-        var handledByChild = false
-
-        children.fastForEach { child ->
-            handledByChild = handledByChild or child.onDragStarted(
-                uris = uris,
-                position = position
-            )
-        }
-        return handledByChild || currentTarget != null
-    }
     // end DropTargetNode
 
 
@@ -167,18 +151,29 @@ internal class DragDropContainer(
 
     // end DragSource
 
-    // start OnGloballyPositionedModifier
-    override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
-        this.coordinates = coordinates
-    }
-    // end OnGloballyPositionedModifier
-
     // start DropTarget
-    override fun onDragEntered() {
-        currentTarget?.onDragEntered()
+    override fun onStarted(uris: List<Uri>, position: Offset): Boolean {
+        coordinates ?: return false
+
+        check(currentTarget == null)
+        currentTarget = onDragDropStarted(DragDrop.Drop(uris, position)).target
+
+        var handledByChild = false
+
+        children.fastForEach { child ->
+            handledByChild = handledByChild or child.onStarted(
+                uris = uris,
+                position = position
+            )
+        }
+        return handledByChild || currentTarget != null
     }
 
-    override fun onDragMoved(position: Offset) {
+    override fun onEntered() {
+        currentTarget?.onEntered()
+    }
+
+    override fun onMoved(position: Offset) {
         coordinates ?: return
         val currentActiveChild: DragDropChild? = activeChild
 
@@ -191,32 +186,32 @@ internal class DragDropContainer(
         when {
             // Left us and went to a child.
             newChild != null && currentActiveChild == null -> {
-                currentTarget?.onDragExited()
+                currentTarget?.onExited()
                 newChild.dispatchEntered(position)
             }
             // Left the child and returned to us.
             newChild == null && currentActiveChild != null -> {
-                currentActiveChild.onDragExited()
+                currentActiveChild.onExited()
                 currentTarget?.dispatchEntered(position)
             }
             // Left one child and entered another.
             newChild != currentActiveChild -> {
-                currentActiveChild?.onDragExited()
+                currentActiveChild?.onExited()
                 newChild?.dispatchEntered(position)
             }
             // Stayed in the same child.
-            newChild != null -> newChild.onDragMoved(position)
+            newChild != null -> newChild.onMoved(position)
             // Stayed in us.
-            else -> currentTarget?.onDragMoved(position)
+            else -> currentTarget?.onMoved(position)
         }
 
         this.activeChild = newChild
     }
 
-    override fun onDragExited() {
+    override fun onExited() {
 //        activeChild?.onDragExited()
 //        activeChild = null
-        currentTarget?.onDragExited()
+        currentTarget?.onExited()
     }
 
     override fun onDropped(uris: List<Uri>, position: Offset): Boolean =
@@ -232,19 +227,26 @@ internal class DragDropContainer(
             )
         }
 
-    override fun onDragEnded() {
+    override fun onEnded() {
         children.fastForEach {
-            it.onDragEnded()
+            it.onEnded()
         }
-        currentTarget?.onDragEnded()
+        currentTarget?.onEnded()
         currentTarget = null
     }
     // end DropTarget
 
-    private fun DropTarget.dispatchEntered(position: Offset) {
-        onDragEntered()
-        onDragMoved(position)
+    // start OnGloballyPositionedModifier
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+        this.coordinates = coordinates
     }
+    // end OnGloballyPositionedModifier
+
+}
+
+private fun DropTarget.dispatchEntered(position: Offset) {
+    onEntered()
+    onMoved(position)
 }
 
 private fun DragDropChild.depthFirstSearch(visitor: (DragDropChild) -> Unit) {

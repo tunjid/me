@@ -64,19 +64,19 @@ private fun dropTargetListener(
 ) = object : DropTargetListener {
     override fun dragEnter(dtde: DropTargetDragEvent?) {
         if (dtde == null) return
-        dragDropModifier.onDragStarted(
+        dragDropModifier.onStarted(
             listOf(),
             Offset(
                 dtde.location.x * density,
                 dtde.location.y * density
             )
         )
-        dragDropModifier.onDragEntered()
+        dragDropModifier.onEntered()
     }
 
     override fun dragOver(dtde: DropTargetDragEvent?) {
         if (dtde == null) return
-        dragDropModifier.onDragMoved(
+        dragDropModifier.onMoved(
             Offset(
                 dtde.location.x * density,
                 dtde.location.y * density
@@ -87,12 +87,12 @@ private fun dropTargetListener(
     override fun dropActionChanged(dtde: DropTargetDragEvent?) = Unit
 
     override fun dragExit(dte: DropTargetEvent?) {
-        dragDropModifier.onDragExited()
-        dragDropModifier.onDragEnded()
+        dragDropModifier.onExited()
+        dragDropModifier.onEnded()
     }
 
     override fun drop(dtde: DropTargetDropEvent?) {
-        if (dtde == null) return dragDropModifier.onDragEnded()
+        if (dtde == null) return dragDropModifier.onEnded()
 
         dtde.acceptDrop(DnDConstants.ACTION_REFERENCE)
         dtde.dropComplete(
@@ -104,7 +104,7 @@ private fun dropTargetListener(
                 )
             )
         )
-        dragDropModifier.onDragEnded()
+        dragDropModifier.onEnded()
     }
 }
 
