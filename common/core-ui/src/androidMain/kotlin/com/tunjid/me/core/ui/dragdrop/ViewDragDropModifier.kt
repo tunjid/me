@@ -87,7 +87,7 @@ private fun dragListener(
     when (event.action) {
         DragEvent.ACTION_DRAG_STARTED -> {
             dragDropModifier.onStarted(
-                uris = listOf(),
+                mimeTypes = event.startDropMimetypes(),
                 position = Offset(event.x, event.y)
             )
             true
@@ -110,7 +110,7 @@ private fun dragListener(
 
         DragEvent.ACTION_DROP -> {
             dragDropModifier.onDropped(
-                uris = event.uris(),
+                uris = event.endDropUris(),
                 position = Offset(event.x, event.y)
             )
         }
@@ -140,7 +140,13 @@ private fun DragInfo.clipData(): ClipData? {
     return dragData
 }
 
-private fun DragEvent.uris(): List<Uri> = with(clipData) {
+private fun DragEvent.startDropMimetypes() = with(clipDescription) {
+    (0 until mimeTypeCount)
+        .map(::getMimeType)
+        .toSet()
+}
+
+private fun DragEvent.endDropUris(): List<Uri> = with(clipData) {
     0.until(itemCount).map { itemIndex ->
         with(description) {
             0.until(mimeTypeCount).mapNotNull { mimeTypeIndex ->

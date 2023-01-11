@@ -18,7 +18,6 @@ package com.tunjid.me.core.ui.dragdrop
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.modifier.modifierLocalOf
 import com.tunjid.me.core.utilities.Uri
 
@@ -79,7 +78,7 @@ internal sealed class DragDrop {
     ) : DragDrop()
 
     data class Drop(
-        val uris: List<Uri>,
+        val mimeTypes: Set<String>,
         val offset: Offset,
     ) : DragDrop()
 }

@@ -152,17 +152,17 @@ internal class DragDropContainer(
     // end DragSource
 
     // start DropTarget
-    override fun onStarted(uris: List<Uri>, position: Offset): Boolean {
+    override fun onStarted(mimeTypes: Set<String>, position: Offset): Boolean {
         coordinates ?: return false
 
         check(currentTarget == null)
-        currentTarget = onDragDropStarted(DragDrop.Drop(uris, position)).target
+        currentTarget = onDragDropStarted(DragDrop.Drop(mimeTypes, position)).target
 
         var handledByChild = false
 
         children.fastForEach { child ->
             handledByChild = handledByChild or child.onStarted(
-                uris = uris,
+                mimeTypes = mimeTypes,
                 position = position
             )
         }

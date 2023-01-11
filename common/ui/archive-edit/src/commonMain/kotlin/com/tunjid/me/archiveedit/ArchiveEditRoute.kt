@@ -196,8 +196,7 @@ private fun DragDropThumbnail(
                     onAction(Action.Drop(uris = uris))
                     true
                 },
-                onEnded = { onAction(Action.Drag.Thumbnail(inside = false)) },
-            )
+            ) { onAction(Action.Drag.Thumbnail(inside = false)) }
     )
 }
 

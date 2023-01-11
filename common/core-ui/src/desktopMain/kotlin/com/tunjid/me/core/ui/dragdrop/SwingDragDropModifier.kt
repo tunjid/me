@@ -65,7 +65,7 @@ private fun dropTargetListener(
     override fun dragEnter(dtde: DropTargetDragEvent?) {
         if (dtde == null) return
         dragDropModifier.onStarted(
-            listOf(),
+            dtde.startDragMimeTypes().also { println("STARTED WITH $it") },
             Offset(
                 dtde.location.x * density,
                 dtde.location.y * density
@@ -97,7 +97,7 @@ private fun dropTargetListener(
         dtde.acceptDrop(DnDConstants.ACTION_REFERENCE)
         dtde.dropComplete(
             dragDropModifier.onDropped(
-                dtde.uris(),
+                dtde.endDropUris(),
                 Offset(
                     dtde.location.x * density,
                     dtde.location.y * density
@@ -141,29 +141,45 @@ private fun dragGestureListener(
     }
 }
 
-private fun DropTargetDropEvent.uris(): List<Uri> =
+private fun DropTargetDragEvent.startDragMimeTypes(): Set<String> =
+    transferable.transferDataFlavors
+        .filter(transferable::isDataFlavorSupported)
+        .map(::uris)
+        .flatten()
+        .map(Uri::mimetype)
+        .toSet()
+
+private fun DropTargetDropEvent.endDropUris(): List<Uri> =
     listOf(
         DataFlavor.javaFileListFlavor,
         ArrayListFlavor
     )
-        .filter { transferable.isDataFlavorSupported(it) }
-        .map { dataFlavor ->
-            when (dataFlavor) {
-                DataFlavor.javaFileListFlavor ->
-                    transferable.getTransferData(DataFlavor.javaFileListFlavor)
-                        .let { it as? List<*> ?: listOf<File>() }
-                        .filterIsInstance<File>()
-                        .map(::FileUri)
-
-                ArrayListFlavor ->
-                    transferable.getTransferData(ArrayListFlavor)
-                        .let { it as? List<*> ?: listOf<SerializableUri>() }
-                        .filterIsInstance<SerializableUri>()
-
-                else -> listOf()
-            }
-        }
+        .filter(transferable::isDataFlavorSupported)
+        .map(::uris)
         .flatten()
+
+private fun DropTargetEvent.uris(dataFlavor: DataFlavor?): List<Uri> {
+    val transferable = when (this) {
+        is DropTargetDragEvent -> transferable
+        is DropTargetDropEvent -> transferable
+        else -> null
+    } ?: return emptyList()
+
+    return when (dataFlavor) {
+        DataFlavor.javaFileListFlavor ->
+            transferable.getTransferData(DataFlavor.javaFileListFlavor)
+                .let { it as? List<*> ?: listOf<File>() }
+                .filterIsInstance<File>()
+                .map(::FileUri)
+
+        ArrayListFlavor ->
+            transferable.getTransferData(ArrayListFlavor)
+                .let { it as? List<*> ?: listOf<SerializableUri>() }
+                .filterIsInstance<SerializableUri>()
+
+        else -> listOf()
+    }
+}
 
 val ArrayListFlavor = DataFlavor(
     java.util.ArrayList::class.java,

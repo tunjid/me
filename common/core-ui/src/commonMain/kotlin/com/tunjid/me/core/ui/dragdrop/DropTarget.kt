@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.debugInspectorInfo
 import com.tunjid.me.core.utilities.Uri
 
 interface DropTarget {
-    fun onStarted(uris: List<Uri>, position: Offset): Boolean
+    fun onStarted(mimeTypes: Set<String>, position: Offset): Boolean
     fun onEntered()
     fun onMoved(position: Offset) {}
     fun onExited()
@@ -33,7 +33,7 @@ interface DropTarget {
 }
 
 fun Modifier.dropTarget(
-    onStarted: (uris: List<Uri>, Offset) -> Boolean,
+    onStarted: (mimeTypes: Set<String>, Offset) -> Boolean,
     onEntered: () -> Unit = { },
     onMoved: (position: Offset) -> Unit = {},
     onExited: () -> Unit = { },
@@ -50,13 +50,13 @@ fun Modifier.dropTarget(
                 when (start) {
                     is DragDrop.Drag -> DragDropAction.Reject
                     is DragDrop.Drop -> when (
-                        onStarted(start.uris, start.offset)
+                        onStarted(start.mimeTypes, start.offset)
                     ) {
                         false -> DragDropAction.Reject
                         true -> DragDropAction.Drop(
                             object : DropTarget {
-                                override fun onStarted(uris: List<Uri>, position: Offset): Boolean = onStarted(
-                                    uris,
+                                override fun onStarted(mimeTypes: Set<String>, position: Offset): Boolean = onStarted(
+                                    mimeTypes,
                                     position
                                 )
 
