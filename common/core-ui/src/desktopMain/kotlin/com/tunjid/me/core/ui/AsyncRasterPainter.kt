@@ -58,30 +58,36 @@ actual fun asyncRasterPainter(
             try {
                 val imageSource = when {
                     imageUri == null -> null
-                    imageUri.startsWith("http") -> {
-                        val savedFile = savedImageFile(imageUri)
-                        if (!savedFile.exists()) ImageSource.Remote.Network(
+                    imageUri.startsWith("http") -> when (
+                        val savedFile = savedImageFile(imageUri).takeIf(File::exists)
+                    ) {
+                        null -> ImageSource.Remote.Network(
                             uri = imageUri,
                             inputStream = imageUri.remoteInputStream()
                         )
-                        else ImageSource.Remote.Cached(
-                            savedFile.inputStream()
+
+                        else -> ImageSource.Remote.Cached(
+                            inputStream = savedFile.inputStream()
                         )
                     }
 
                     else -> ImageSource.Local(
-                        imageUri.fileInputStream()
+                        inputStream = imageUri.fileInputStream()
                     )
                 }
 
-                value = if (imageSource is ImageSource.Remote.Network) {
-                    val destination = savedImageFile(uri = imageSource.uri)
-                    File(destination.parent).mkdirs()
-                    imageSource.inputStream.use { input ->
-                        destination.outputStream().use(input::copyTo)
+                value = when (imageSource) {
+                    is ImageSource.Remote.Network -> {
+                        val destination = savedImageFile(uri = imageSource.uri)
+                        File(destination.parent).mkdirs()
+                        imageSource.inputStream.use { input ->
+                            destination.outputStream().use(input::copyTo)
+                        }
+                        destination.inputStream()
                     }
-                    destination.inputStream()
-                } else imageSource?.inputStream
+
+                    else -> imageSource?.inputStream
+                }
             } catch (e: Exception) {
 //                e.printStackTrace()
             }

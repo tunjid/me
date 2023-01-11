@@ -108,24 +108,29 @@ private fun IntSize.cropTo(
 ): IntSize {
     val srcSize = this
     val dstAspectRatio = dstSize.aspectRatio()
+    var plausibleWidth: Int
+    var plausibleHeight: Int
 
-    return if (dstAspectRatio > 1) {
-        var plausibleWidth = srcSize.width
-        var plausibleHeight = (plausibleWidth / dstAspectRatio).toInt()
+    if (dstAspectRatio > 1) {
+        plausibleWidth = srcSize.width
+        plausibleHeight = (plausibleWidth / dstAspectRatio).toInt()
         if (plausibleHeight > srcSize.height) {
             plausibleHeight = srcSize.height
             plausibleWidth = (plausibleHeight * dstAspectRatio).toInt()
         }
-        IntSize(plausibleWidth, plausibleHeight)
     } else {
-        var plausibleHeight = srcSize.height
-        var plausibleWidth = (dstAspectRatio * plausibleHeight).toInt()
+        plausibleHeight = srcSize.height
+        plausibleWidth = (dstAspectRatio * plausibleHeight).toInt()
         if (plausibleWidth > srcSize.width) {
             plausibleWidth = srcSize.width
             plausibleHeight = (plausibleWidth / dstAspectRatio).toInt()
         }
-        IntSize(plausibleWidth, plausibleHeight)
     }
+
+    return IntSize(
+        width = plausibleWidth,
+        height = plausibleHeight
+    )
 }
 
 private fun BufferedImage.scaleFactor(
