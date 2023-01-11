@@ -37,7 +37,7 @@ internal fun rootDragDropModifier(): DragDropModifier = DragDropContainer(
 
 internal interface DragDropParent {
 
-    val allChildren: List<DragDropChild>
+    val children: List<DragDropChild>
 
     fun registerChild(child: DragDropChild)
     fun unregisterChild(child: DragDropChild)

@@ -55,7 +55,7 @@ internal class DragDropContainer(
                 field?.registerChild(this)
             }
         }
-    private val children = mutableListOf<DragDropChild>()
+    override val children = mutableListOf<DragDropChild>()
     private var coordinates: LayoutCoordinates? = null
     private var activeChild: DragDropChild? = null
     private var currentTarget: DropTarget? = null
@@ -109,14 +109,6 @@ internal class DragDropContainer(
             }
         }
 
-    override val allChildren: List<DragDropChild>
-        get() = buildList {
-            children.fastForEach { child ->
-                add(child)
-                addAll(child.allChildren)
-            }
-        }
-
     override fun contains(position: Offset): Boolean {
         val currentCoordinates = coordinates ?: return false
         if (!currentCoordinates.isAttached) return false
@@ -156,13 +148,17 @@ internal class DragDropContainer(
     override fun dragInfo(offset: Offset): DragInfo? {
         coordinates ?: return null
 
-        val draggedChild = allChildren
-            .filter { it.contains(offset) }
-            .minByOrNull { it.area }
-
+        var smallestDraggedChild: DragDropChild? = null
+        depthFirstSearch { child ->
+            if (child != this &&
+                child.contains(offset) &&
+                child.area < (smallestDraggedChild?.area ?: Float.MAX_VALUE)) {
+                smallestDraggedChild = child
+            }
+        }
 
         // Attempt to drag the smallest child within the bounds first
-        val childDragStatus = draggedChild?.dragInfo(offset)
+        val childDragStatus = smallestDraggedChild?.dragInfo(offset)
         if (childDragStatus != null) return childDragStatus
 
         // No draggable child, attempt to drag self
@@ -248,5 +244,12 @@ internal class DragDropContainer(
     private fun DropTarget.dispatchEntered(position: Offset) {
         onDragEntered()
         onDragMoved(position)
+    }
+}
+
+private fun DragDropChild.depthFirstSearch(visitor: (DragDropChild) -> Unit) {
+    visitor(this)
+    children.fastForEach { child ->
+        child.depthFirstSearch(visitor)
     }
 }
