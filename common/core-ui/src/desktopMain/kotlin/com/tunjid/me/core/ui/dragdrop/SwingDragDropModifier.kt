@@ -65,7 +65,7 @@ private fun dropTargetListener(
     override fun dragEnter(dtde: DropTargetDragEvent?) {
         if (dtde == null) return
         dragDropModifier.onStarted(
-            dtde.startDragMimeTypes().also { println("STARTED WITH $it") },
+            dtde.startDragMimeTypes(),
             Offset(
                 dtde.location.x * density,
                 dtde.location.y * density
@@ -142,7 +142,8 @@ private fun dragGestureListener(
 }
 
 private fun DropTargetDragEvent.startDragMimeTypes(): Set<String> =
-    transferable.transferDataFlavors
+    transferable
+        .transferDataFlavors
         .filter(transferable::isDataFlavorSupported)
         .map(::uris)
         .flatten()
@@ -150,10 +151,8 @@ private fun DropTargetDragEvent.startDragMimeTypes(): Set<String> =
         .toSet()
 
 private fun DropTargetDropEvent.endDropUris(): List<Uri> =
-    listOf(
-        DataFlavor.javaFileListFlavor,
-        ArrayListFlavor
-    )
+    transferable
+        .transferDataFlavors
         .filter(transferable::isDataFlavorSupported)
         .map(::uris)
         .flatten()
@@ -167,13 +166,13 @@ private fun DropTargetEvent.uris(dataFlavor: DataFlavor?): List<Uri> {
 
     return when (dataFlavor) {
         DataFlavor.javaFileListFlavor ->
-            transferable.getTransferData(DataFlavor.javaFileListFlavor)
+            transferable.getTransferData(dataFlavor)
                 .let { it as? List<*> ?: listOf<File>() }
                 .filterIsInstance<File>()
                 .map(::FileUri)
 
         ArrayListFlavor ->
-            transferable.getTransferData(ArrayListFlavor)
+            transferable.getTransferData(dataFlavor)
                 .let { it as? List<*> ?: listOf<SerializableUri>() }
                 .filterIsInstance<SerializableUri>()
 
