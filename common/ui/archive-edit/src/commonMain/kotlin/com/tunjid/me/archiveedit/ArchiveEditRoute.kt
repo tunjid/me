@@ -18,28 +18,38 @@ package com.tunjid.me.archiveedit
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.halilibo.richtext.markdown.Markdown
@@ -53,7 +63,10 @@ import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+
+private const val BODY_KEY = "body"
 
 @Serializable
 data class ArchiveEditRoute(
@@ -80,16 +93,23 @@ private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
     val screenUiState by stateHolder.toActionableState()
     val (state, actions) = screenUiState
     val upsert = state.upsert
-    val scrollState = rememberScrollState()
-    val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
+    val scrollState = rememberLazyListState()
+
+    // Disable body text field from scrolling until all items are offscreen
+    val canConsumeScrollEventsInBody by remember {
+        derivedStateOf {
+            scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key == BODY_KEY
+        }
+    }
+    val scope = rememberCoroutineScope()
 
     GlobalUi(
         state = state,
         onAction = actions
     )
-    Column(
+
+    LazyColumn(
         modifier = Modifier
-            .verticalScroll(state = scrollState)
             .dropTarget(
                 onStarted = { _, _ ->
                     val (action, acceptedDrag) = when (state.hasStoragePermissions) {
@@ -107,63 +127,63 @@ private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
                     false
                 }
             ),
+        state = scrollState,
     ) {
-        Spacer(modifier = Modifier.padding(8.dp))
-        DragDropThumbnail(
+        spacer(8.dp)
+        dragDropThumbnail(
             thumbnail = state.thumbnail,
             hasStoragePermission = state.hasStoragePermissions,
             dragLocation = state.dragLocation,
             onAction = actions
         )
 
-        Spacer(modifier = Modifier.padding(8.dp))
-        TitleEditor(
+        spacer(8.dp)
+        titleEditor(
             title = upsert.title,
             onEdit = actions
         )
 
-        Spacer(modifier = Modifier.padding(8.dp))
-        DescriptionEditor(
+        spacer(8.dp)
+        descriptionEditor(
             description = upsert.description,
             onEdit = actions
         )
 
-        Spacer(modifier = Modifier.padding(8.dp))
-        VideoUrlEditor(
+        spacer(8.dp)
+        videoUrlEditor(
             videoUrl = upsert.videoUrl,
             onEdit = actions
         )
 
-        Spacer(modifier = Modifier.padding(8.dp))
-        ChipsEditor(
+        spacer(8.dp)
+        chipsEditor(
             upsert = upsert,
             chipsState = state.chipsState,
             onAction = actions
         )
 
-        Spacer(modifier = Modifier.padding(16.dp))
-        when (state.isEditing) {
-            true -> BodyEditor(
-                body = upsert.body,
-                onEdit = actions
-            )
-
-            false -> BodyPreview(
-                body = upsert.body
-            )
-        }
-
-        Spacer(modifier = Modifier.padding(64.dp + navBarSizeDp))
+        spacer(16.dp)
+        if (state.isEditing) bodyEditor(
+            body = upsert.body,
+            canConsumeScrollEvents = canConsumeScrollEventsInBody,
+            onScrolled = scrollState::dispatchRawDelta,
+            onInteractedWith = {
+                scope.launch { scrollState.animateScrollToItem(11) }
+            },
+            onEdit = actions
+        )
+        else bodyPreview(
+            body = upsert.body
+        )
     }
 }
 
-@Composable
-private fun DragDropThumbnail(
+private fun LazyListScope.dragDropThumbnail(
     thumbnail: String?,
     hasStoragePermission: Boolean,
     dragLocation: DragLocation,
     onAction: (Action) -> Unit,
-) {
+) = item {
     // Create a var so edits can be captured
     val permissionState = remember { mutableStateOf(hasStoragePermission) }
     permissionState.value = hasStoragePermission
@@ -200,11 +220,10 @@ private fun DragDropThumbnail(
     )
 }
 
-@Composable
-private fun TitleEditor(
+private fun LazyListScope.titleEditor(
     title: String,
     onEdit: (Action.TextEdit) -> Unit,
-) {
+) = item {
     TextField(
         value = title,
         maxLines = 2,
@@ -218,11 +237,10 @@ private fun TitleEditor(
     )
 }
 
-@Composable
-private fun DescriptionEditor(
+private fun LazyListScope.descriptionEditor(
     description: String,
     onEdit: (Action.TextEdit) -> Unit,
-) {
+) = item {
     TextField(
         value = description,
         maxLines = 2,
@@ -236,11 +254,10 @@ private fun DescriptionEditor(
     )
 }
 
-@Composable
-private fun VideoUrlEditor(
+private fun LazyListScope.videoUrlEditor(
     videoUrl: String?,
     onEdit: (Action.TextEdit) -> Unit,
-) {
+) = item {
     TextField(
         value = videoUrl ?: "",
         maxLines = 1,
@@ -254,27 +271,52 @@ private fun VideoUrlEditor(
     )
 }
 
-@Composable
-private fun BodyEditor(
+private fun LazyListScope.bodyEditor(
     body: String,
+    canConsumeScrollEvents: Boolean,
+    onScrolled: (Float) -> Float,
+    onInteractedWith: () -> Unit,
     onEdit: (Action.TextEdit) -> Unit,
-) {
-    TextField(
-        value = body,
-        colors = Unstyled(),
-        textStyle = LocalTextStyle.current.copy(
-            color = MaterialTheme.colorScheme.onSurface,
-            fontFamily = FontFamily.Monospace,
-            fontSize = 16.sp,
-            lineHeight = 24.sp
-        ),
-        label = { Text(text = "Body") },
-        onValueChange = { onEdit(Action.TextEdit.Body(it)) }
-    )
+) = item(key = BODY_KEY) {
+    Box(
+        modifier = Modifier
+            .fillParentMaxSize()
+    ) {
+        TextField(
+            modifier = Modifier
+                .onFocusChanged { if (it.hasFocus) onInteractedWith() },
+            value = body,
+            colors = Unstyled(),
+            textStyle = LocalTextStyle.current.copy(
+                color = MaterialTheme.colorScheme.onSurface,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 16.sp,
+                lineHeight = 24.sp
+            ),
+            label = { Text(text = "Body") },
+            onValueChange = { onEdit(Action.TextEdit.Body(it)) }
+        )
+
+        // Overlay a box over the TextField to intercept scroll events
+        Spacer(
+            modifier = Modifier
+                .fillMaxSize(if (canConsumeScrollEvents) 0f else 1f)
+                .scrollable(
+                    orientation = Orientation.Vertical,
+                    reverseDirection = true,
+                    // Pass the scroll events up the tree to the parent lazy list state to consume
+                    state = rememberScrollableState(onScrolled)
+                )
+                .pointerInput(Unit) {
+                    detectTapGestures {
+                        onInteractedWith()
+                    }
+                }
+        )
+    }
 }
 
-@Composable
-private fun BodyPreview(body: String) {
+private fun LazyListScope.bodyPreview(body: String) = item {
     Material3RichText(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
@@ -284,12 +326,11 @@ private fun BodyPreview(body: String) {
     }
 }
 
-@Composable
-private fun ChipsEditor(
+private fun LazyListScope.chipsEditor(
     upsert: ArchiveUpsert,
     chipsState: ChipsState,
     onAction: (Action) -> Unit,
-) {
+) = item {
     EditChips(
         modifier = Modifier.fillMaxWidth()
             .padding(horizontal = 16.dp),
@@ -297,6 +338,10 @@ private fun ChipsEditor(
         state = chipsState,
         onChanged = onAction
     )
+}
+
+private fun LazyListScope.spacer(size: Dp) = item {
+    Spacer(modifier = Modifier.padding(size))
 }
 
 @Composable
