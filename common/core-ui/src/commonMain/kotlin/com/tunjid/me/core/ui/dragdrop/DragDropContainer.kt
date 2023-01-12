@@ -133,7 +133,7 @@ internal class DragDropContainer(
         coordinates ?: return null
 
         var smallestDraggedChild: DragDropChild? = null
-        depthFirstSearch { child ->
+        depthFirstTraversal { child ->
             if (child != this &&
                 child.contains(offset) &&
                 child.area < (smallestDraggedChild?.area ?: Float.MAX_VALUE)) {
@@ -249,9 +249,9 @@ private fun DropTarget.dispatchEntered(position: Offset) {
     onMoved(position)
 }
 
-private fun DragDropChild.depthFirstSearch(visitor: (DragDropChild) -> Unit) {
+private fun DragDropChild.depthFirstTraversal(visitor: (DragDropChild) -> Unit) {
     visitor(this)
     children.fastForEach { child ->
-        child.depthFirstSearch(visitor)
+        child.depthFirstTraversal(visitor)
     }
 }
