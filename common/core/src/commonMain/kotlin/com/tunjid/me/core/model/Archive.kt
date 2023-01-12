@@ -38,7 +38,7 @@ val ArchiveKind.singular
     get() = when (this) {
         Articles -> "article"
         Projects -> "project"
-        Talks -> "talks"
+        Talks -> "talk"
     }
 
 @Serializable
