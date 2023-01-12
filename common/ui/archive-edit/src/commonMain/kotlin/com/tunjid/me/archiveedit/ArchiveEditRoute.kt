@@ -66,7 +66,7 @@ import com.tunjid.me.scaffold.permissions.Permission
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
-private const val BODY_KEY = "body"
+private const val BODY_INDEX = 11
 
 @Serializable
 data class ArchiveEditRoute(
@@ -98,7 +98,7 @@ private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
     // Disable body text field from scrolling until all items are offscreen
     val canConsumeScrollEventsInBody by remember {
         derivedStateOf {
-            scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key == BODY_KEY
+            scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key == BODY_INDEX
         }
     }
     val scope = rememberCoroutineScope()
@@ -168,7 +168,7 @@ private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
             canConsumeScrollEvents = canConsumeScrollEventsInBody,
             onScrolled = scrollState::dispatchRawDelta,
             onInteractedWith = {
-                scope.launch { scrollState.animateScrollToItem(11) }
+                scope.launch { scrollState.animateScrollToItem(BODY_INDEX) }
             },
             onEdit = actions
         )
@@ -277,7 +277,7 @@ private fun LazyListScope.bodyEditor(
     onScrolled: (Float) -> Float,
     onInteractedWith: () -> Unit,
     onEdit: (Action.TextEdit) -> Unit,
-) = item(key = BODY_KEY) {
+) = item(key = BODY_INDEX) {
     Box(
         modifier = Modifier
             .fillParentMaxSize()
