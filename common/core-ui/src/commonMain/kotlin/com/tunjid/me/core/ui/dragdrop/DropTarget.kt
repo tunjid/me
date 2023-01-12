@@ -16,6 +16,7 @@
 
 package com.tunjid.me.core.ui.dragdrop
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -43,41 +44,73 @@ fun Modifier.dropTarget(
     inspectorInfo = debugInspectorInfo {
         name = "dropTarget"
         properties["onDragStarted"] = onStarted
+        properties["onEntered"] = onEntered
+        properties["onMoved"] = onMoved
+        properties["onExited"] = onExited
+        properties["onDropped"] = onDropped
+        properties["onEnded"] = onEnded
     },
     factory = {
+        val dropTarget = remember {
+            MutableDropTarget(
+                onStarted = onStarted,
+                onEntered = onEntered,
+                onMoved = onMoved,
+                onExited = onExited,
+                onDropped = onDropped,
+                onEnded = onEnded
+            )
+        }
+
         val node = remember {
             DragDropContainer { start ->
                 when (start) {
                     is DragDrop.Drag -> DragDropAction.Reject
                     is DragDrop.Drop -> when (
-                        onStarted(start.mimeTypes, start.offset)
+                        dropTarget.onStarted(start.mimeTypes, start.offset)
                     ) {
                         false -> DragDropAction.Reject
-                        true -> DragDropAction.Drop(
-                            object : DropTarget {
-                                override fun onStarted(mimeTypes: Set<String>, position: Offset): Boolean = onStarted(
-                                    mimeTypes,
-                                    position
-                                )
-
-                                override fun onEntered() = onEntered()
-
-                                override fun onMoved(position: Offset) = onMoved(position)
-
-                                override fun onExited() = onExited()
-
-                                override fun onDropped(uris: List<Uri>, position: Offset): Boolean = onDropped(
-                                    uris,
-                                    position
-                                )
-
-                                override fun onEnded() = onEnded()
-                            }
-                        )
+                        true -> DragDropAction.Drop(dropTarget)
                     }
                 }
             }
         }
+
+        dropTarget.onStarted = onStarted
+        dropTarget.onEntered = onEntered
+        dropTarget.onMoved = onMoved
+        dropTarget.onExited = onExited
+        dropTarget.onDropped = onDropped
+        dropTarget.onEnded = onEnded
+
         this.then(node)
     })
+
+private class MutableDropTarget(
+     var onStarted: (mimeTypes: Set<String>, Offset) -> Boolean,
+     var onEntered: () -> Unit,
+     var onMoved: (position: Offset) -> Unit,
+     var onExited: () -> Unit,
+     var onDropped: (uris: List<Uri>, position: Offset) -> Boolean,
+     var onEnded: () -> Unit,
+) : DropTarget {
+
+    override fun onStarted(mimeTypes: Set<String>, position: Offset): Boolean = onStarted.invoke(
+        mimeTypes,
+        position
+    )
+
+    override fun onEntered() = onEntered.invoke()
+
+    override fun onMoved(position: Offset) = onMoved.invoke(position)
+
+    override fun onExited() = onExited.invoke()
+
+    override fun onDropped(uris: List<Uri>, position: Offset): Boolean = onDropped.invoke(
+        uris,
+        position
+    )
+
+    override fun onEnded() = onEnded.invoke()
+}
 
