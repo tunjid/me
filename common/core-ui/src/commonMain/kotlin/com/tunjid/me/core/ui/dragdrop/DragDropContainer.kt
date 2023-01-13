@@ -128,7 +128,7 @@ internal class DragDropContainer(
         coordinates ?: return null
 
         var smallestDraggedChild: DragDropChild? = smallestChildWithin(offset)
-            ?.takeUnless { it.equals(this) }
+            ?.takeUnless(this::equals)
 
         // Attempt to drag the smallest child within the bounds first
         val childDragStatus = smallestDraggedChild?.dragInfo(offset)
