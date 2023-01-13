@@ -34,6 +34,7 @@ import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navRailVisible
 import com.tunjid.me.scaffold.nav.NavState
+import com.tunjid.me.scaffold.nav.mainRoute
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.ActionStateProducer
@@ -152,13 +153,13 @@ private fun mainNavContentMutations(
     navStateFlow: StateFlow<NavState>,
     uiStateFlow: StateFlow<UiState>,
 ) = combine(
-    navStateFlow.map { route.id == it.supportingRoute?.id },
+    navStateFlow.map { route.id == it.mainRoute.id },
     uiStateFlow.map { it.navRailVisible },
     Boolean::and,
 )
     .distinctUntilChanged()
     .map {
-        mutation<State> { copy(isMainContent = !it) }
+        mutation<State> { copy(isMainContent = it) }
     }
 
 

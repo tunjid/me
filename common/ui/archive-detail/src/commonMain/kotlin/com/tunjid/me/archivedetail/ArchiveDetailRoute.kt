@@ -77,25 +77,9 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
     val canEdit = state.canEdit
 
 //    val navigator = LocalNavigator.current
-    if (state.isMainContent) ScreenUiState(
-        UiState(
-            toolbarShows = true,
-            toolbarTitle = state.archive?.title ?: "Detail",
-            navVisibility = NavVisibility.Visible,
-            // Prevents UI from jittering as load starts
-            fabShows = if (state.hasFetchedAuthStatus) canEdit else currentUiState.fabShows,
-            fabExtended = true,
-            fabText = "Edit",
-            fabIcon = Icons.Default.Edit,
-            fabClickListener = rememberFunction(state.archive?.id) {
-                val archiveId = state.archive?.id
-                if (archiveId != null) actions(Action.Navigate {
-                    mainNav.push("archives/${state.kind.type}/${archiveId.value}/edit".toRoute)
-                })
-            },
-            insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
-        )
+    if (state.isMainContent) GlobalUi(
+        state = state,
+        actions = actions
     )
 
     val archive = state.archive
