@@ -49,7 +49,6 @@ import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.queryAtOrNull
 import com.tunjid.tiler.tiledListOf
 import com.tunjid.treenav.push
-import com.tunjid.treenav.swap
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.scan
@@ -59,7 +58,7 @@ import kotlin.math.abs
 @Serializable
 data class ArchiveListRoute(
     override val id: String,
-    val kind: ArchiveKind
+    val kind: ArchiveKind,
 ) : AppRoute {
     @Composable
     override fun Render() {
@@ -118,7 +117,8 @@ private fun ArchiveScreen(
                             when (item) {
                                 is ArchiveItem.Result -> GridItemSpan(1)
                                 is ArchiveItem.Header,
-                                is ArchiveItem.Loading -> GridItemSpan(maxLineSpan)
+                                is ArchiveItem.Loading,
+                                -> GridItemSpan(maxLineSpan)
                             }
                         },
                         itemContent = { item ->
@@ -138,8 +138,7 @@ private fun ArchiveScreen(
                                 },
                                 navigate = { path ->
                                     actions(Action.Navigate {
-                                        if (state.isInMainNav) mainNav.push(route = path.toRoute)
-                                        else mainNav.swap(route = path.toRoute)
+                                        mainNav.push(route = path.toRoute)
                                     })
                                 }
                             )
@@ -172,7 +171,7 @@ private fun GridCell(
     item: ArchiveItem,
     query: ArchiveQuery,
     onCategoryClicked: (Descriptor.Category) -> Unit,
-    navigate: (String) -> Unit
+    navigate: (String) -> Unit,
 ) {
     when (item) {
         is ArchiveItem.Header -> StickyHeader(
@@ -201,7 +200,7 @@ private fun GridCell(
 private fun EndlessScroll(
     items: TiledList<ArchiveQuery, ArchiveItem>,
     gridState: LazyGridState,
-    onAction: (Action) -> Unit
+    onAction: (Action) -> Unit,
 ) {
     // Endless scrolling
     LaunchedEffect(items, gridState) {
@@ -229,8 +228,8 @@ private fun EndlessScroll(
                 }
             }
             .filterNotNull()
-            .collect {(oldInfo, newInfo) ->
-              val dy =  when (oldInfo.index) {
+            .collect { (oldInfo, newInfo) ->
+                val dy = when (oldInfo.index) {
                     newInfo.index -> abs(oldInfo.offset.y - newInfo.offset.y)
                     else -> null
                 }
