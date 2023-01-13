@@ -38,7 +38,7 @@ fun AsyncRasterImage(
 ) {
     var size by remember { mutableStateOf<IntSize?>(null) }
 
-    val painter = asyncRasterPainter(
+    val painter = rememberAsyncRasterPainter(
         imageUri = imageUrl,
         contentScale = ContentScale.Crop,
         size = size,

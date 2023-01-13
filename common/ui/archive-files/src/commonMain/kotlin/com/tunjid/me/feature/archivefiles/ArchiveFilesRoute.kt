@@ -19,8 +19,9 @@ package com.tunjid.me.feature.archivefiles
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -38,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.ui.asyncRasterPainter
+import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.core.ui.dragdrop.DragStatus
 import com.tunjid.me.core.ui.dragdrop.dragSource
 import com.tunjid.me.core.ui.dragdrop.dropTarget
@@ -76,15 +78,54 @@ private fun ArchiveFilesScreen(
         onAction = actions
     )
 
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        FilesGrid(state)
+        FilesDrop(
+            dragLocation = state.dragLocation,
+            hasStoragePermissions = state.hasStoragePermissions,
+            actions = actions
+        )
+        val uploadProgress = state.uploadProgress
+        if (uploadProgress != null) LinearProgressIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter),
+            progress = uploadProgress,
+        )
+    }
+}
+
+@Composable
+private fun FilesGrid(state: State) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(100.dp)
+    ) {
+        items(
+            items = state.files,
+            key = ArchiveFile::url,
+            itemContent = { archiveFile ->
+                GalleryItem(archiveFile)
+            }
+        )
+    }
+}
+
+@Composable
+private fun FilesDrop(
+    dragLocation: DragLocation,
+    hasStoragePermissions: Boolean,
+    actions: (Action) -> Unit,
+) {
     val borderColor by animateColorAsState(
-        when (state.dragLocation) {
+        when (dragLocation) {
             DragLocation.Inside -> MaterialTheme.colorScheme.primaryContainer
             DragLocation.Outside -> MaterialTheme.colorScheme.errorContainer
             DragLocation.Inactive -> Color.Transparent
         }
     )
-
-    Column(
+    Spacer(
         modifier = Modifier
             .fillMaxSize()
             .border(
@@ -94,7 +135,7 @@ private fun ArchiveFilesScreen(
             )
             .dropTarget(
                 onStarted = { _, _ ->
-                    val (action, acceptedDrag) = when (state.hasStoragePermissions) {
+                    val (action, acceptedDrag) = when (hasStoragePermissions) {
                         true -> Action.Drag(location = DragLocation.Outside) to true
                         false -> Action.RequestPermission(Permission.ReadExternalStorage) to false
                     }
@@ -109,48 +150,26 @@ private fun ArchiveFilesScreen(
                     actions(Action.Drop(uris = uris))
                     true
                 }
-            ),
-    ) {
-        val uploadProgress = state.uploadProgress
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(100.dp)
-        ) {
-            items(
-                items = state.files,
-                key = ArchiveFile::url,
-                itemContent = { archiveFile ->
-                    GalleryItem(archiveFile)
-                }
             )
-        }
-        if (uploadProgress != null) LinearProgressIndicator(
-            modifier = Modifier.fillMaxWidth(),
-            progress = uploadProgress,
-        )
-    }
-
+    )
 }
-
 
 @Composable
 private fun GalleryItem(
     archiveFile: ArchiveFile,
 ) {
     BoxWithConstraints(modifier = Modifier.aspectRatio(1f)) {
-        when (
-            val imagePainter = asyncRasterPainter(
-                imageUri = archiveFile.url,
-                size = maxSize()
-            )
-        ) {
-            null -> Unit
-            else -> Image(
-                painter = imagePainter,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.dragSource(
-                    dragShadowPainter = imagePainter
-                ) {
+        val imagePainter = rememberAsyncRasterPainter(
+            imageUri = archiveFile.url,
+            size = maxSize()
+        )
+        if (imagePainter != null) Image(
+            painter = imagePainter,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.dragSource(
+                dragShadowPainter = imagePainter,
+                dragStatus = {
                     DragStatus.draggable(
                         uris = listOf(
                             RemoteUri(
@@ -161,6 +180,6 @@ private fun GalleryItem(
                     )
                 }
             )
-        }
+        )
     }
 }

@@ -42,7 +42,7 @@ private data class Key(
 An implementation of an aysnc raster painter with an in memory LRU cache and temp disk cache.
 */
 @Composable
-actual fun asyncRasterPainter(
+actual fun rememberAsyncRasterPainter(
     imageUri: String?,
     size: IntSize?,
     contentScale: ContentScale,

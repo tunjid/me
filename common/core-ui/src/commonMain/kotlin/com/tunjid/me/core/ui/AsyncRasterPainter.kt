@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.IntSize
  * Returns a [Painter] for paintings raster images located at [imageUri]
  */
 @Composable
-expect fun asyncRasterPainter(
+expect fun rememberAsyncRasterPainter(
     imageUri: String?,
     size: IntSize? = null,
     contentScale: ContentScale = ContentScale.Crop,
