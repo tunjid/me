@@ -28,6 +28,7 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.modifier.*
 import androidx.compose.ui.platform.InspectorValueInfo
 import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
 import com.tunjid.me.core.utilities.Uri
@@ -98,15 +99,10 @@ internal class DragDropContainer(
 
     // start DropTargetNode
 
-    override val size: Size
+    override val size: IntSize
         get() = when (val coordinates = coordinates) {
-            null -> Size.Zero
-            else -> with(coordinates.size) {
-                Size(
-                    width = width.toFloat(),
-                    height = height.toFloat()
-                )
-            }
+            null -> IntSize.Zero
+            else -> coordinates.size
         }
 
     override fun contains(position: Offset): Boolean {
@@ -136,7 +132,7 @@ internal class DragDropContainer(
         depthFirstTraversal { child ->
             if (child != this &&
                 child.contains(offset) &&
-                child.area < (smallestDraggedChild?.area ?: Float.MAX_VALUE)) {
+                child.area < (smallestDraggedChild?.area ?: Int.MAX_VALUE)) {
                 smallestDraggedChild = child
             }
         }

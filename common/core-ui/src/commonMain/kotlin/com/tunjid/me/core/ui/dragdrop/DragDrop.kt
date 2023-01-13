@@ -19,7 +19,6 @@ package com.tunjid.me.core.ui.dragdrop
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.modifier.modifierLocalOf
-import com.tunjid.me.core.utilities.Uri
 
 internal val ModifierLocalDragDropParent = modifierLocalOf<DragDropParent?> { null }
 
