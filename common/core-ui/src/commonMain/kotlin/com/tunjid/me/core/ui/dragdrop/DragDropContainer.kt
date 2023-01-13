@@ -20,7 +20,6 @@ package com.tunjid.me.core.ui.dragdrop
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.OnGloballyPositionedModifier
@@ -128,14 +127,8 @@ internal class DragDropContainer(
     override fun dragInfo(offset: Offset): DragInfo? {
         coordinates ?: return null
 
-        var smallestDraggedChild: DragDropChild? = null
-        depthFirstTraversal { child ->
-            if (child != this &&
-                child.contains(offset) &&
-                child.area < (smallestDraggedChild?.area ?: Int.MAX_VALUE)) {
-                smallestDraggedChild = child
-            }
-        }
+        var smallestDraggedChild: DragDropChild? = smallestChildWithin(offset)
+            ?.takeUnless { it.equals(this) }
 
         // Attempt to drag the smallest child within the bounds first
         val childDragStatus = smallestDraggedChild?.dragInfo(offset)
@@ -245,9 +238,17 @@ private fun DropTarget.dispatchEntered(position: Offset) {
     onMoved(position)
 }
 
-private fun DragDropChild.depthFirstTraversal(visitor: (DragDropChild) -> Unit) {
-    visitor(this)
+private fun DragDropChild.smallestChildWithin(offset: Offset): DragDropChild? {
+    if (children.isEmpty() && contains(offset)) return this
+
+    var smallestChild: DragDropChild? = null
     children.fastForEach { child ->
-        child.depthFirstTraversal(visitor)
+        val smallestInnerChild = child.smallestChildWithin(offset)
+        if (
+            smallestInnerChild != null &&
+            smallestInnerChild.area < (smallestChild?.area ?: Int.MAX_VALUE)
+        ) smallestChild = child
     }
+
+    return smallestChild
 }
