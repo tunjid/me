@@ -22,20 +22,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.toPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntSize
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayInputStream
-import java.io.File
 import java.io.InputStream
-import java.net.URI
 
-import javax.imageio.ImageIO;
+private enum class SizeBucket {
+    Small, Medium, Large;
+}
+
+private data class Key(
+    val imageUri: String?,
+    val contentScale: ContentScale,
+    val sizeBucket: SizeBucket,
+)
 
 /*
 An implementation of an aysnc raster painter with an in memory LRU cache and temp disk cache.
@@ -47,90 +48,57 @@ actual fun asyncRasterPainter(
     contentScale: ContentScale,
 ): Painter? {
     val cache = LocalPainterCache.current
-    val cachedPainter = cache[imageUri to size]
+    val cachedPainter = cache[
+        Key(
+            imageUri = imageUri,
+            contentScale = contentScale,
+            sizeBucket = size.toBucket()
+        )
+    ]
     if (cachedPainter != null) return cachedPainter
 
     val inputStream by produceState<InputStream?>(
         initialValue = null,
         key1 = imageUri,
     ) {
-        withContext(Dispatchers.IO) {
-            try {
-                val imageSource = when {
-                    imageUri == null -> null
-                    imageUri.startsWith("http") -> when (
-                        val savedFile = savedImageFile(imageUri).takeIf(File::exists)
-                    ) {
-                        null -> ImageSource.Remote.Network(
-                            uri = imageUri,
-                            inputStream = imageUri.remoteInputStream()
-                        )
-
-                        else -> ImageSource.Remote.Cached(
-                            inputStream = savedFile.inputStream()
-                        )
-                    }
-
-                    else -> ImageSource.Local(
-                        inputStream = imageUri.fileInputStream()
-                    )
-                }
-
-                value = when (imageSource) {
-                    is ImageSource.Remote.Network -> {
-                        val destination = savedImageFile(uri = imageSource.uri)
-                        File(destination.parent).mkdirs()
-                        imageSource.inputStream.use { input ->
-                            destination.outputStream().use(input::copyTo)
-                        }
-                        destination.inputStream()
-                    }
-
-                    else -> imageSource?.inputStream
-                }
-            } catch (e: Exception) {
-//                e.printStackTrace()
-            }
-        }
+        value = imageUri.toInputStream()
     }
 
     val painter by produceState<Painter?>(
         initialValue = null,
         key1 = inputStream,
-        key2 = size
+        key2 = contentScale,
+        key3 = size
     ) {
-        value = cache.getOrPut(imageUri to size) {
-            when (val readImage = inputStream?.buffered()?.let(ImageIO::read)) {
-                null -> null
-                else -> when (size) {
-                    null -> readImage.toPainter()
-                    else -> readImage
-                        .adjustTo(
-                            contentScale = contentScale,
-                            size = size
-                        )
-                        .toPainter()
-                }
+        // Do image manipulation on an IO thread
+        val painter = withContext(Dispatchers.IO) {
+            inputStream.toPainter(size, contentScale)
+        }
+        // Write to value on the main thread
+        withContext(Dispatchers.Main) {
+            if (painter != null) value = cache.getOrPut(
+                Key(
+                    imageUri = imageUri,
+                    contentScale = contentScale,
+                    sizeBucket = size.toBucket()
+                )
+            ) {
+                painter
             }
         }
     }
 
-    return painter
+    // Use the painter created or the smallest existing one
+    return painter ?: cache.entries
+        .filter { it.key.imageUri == imageUri }
+        .minByOrNull { it.key.sizeBucket }
+        ?.value
 }
 
-private suspend fun String.remoteInputStream() = HttpClient().use {
-    ByteArrayInputStream(it.get(this).readBytes())
-}
+private fun IntSize?.area() = if (this == null) Int.MAX_VALUE else width * height
 
-private fun String.fileInputStream() = File(this).inputStream()
 
-private fun savedImageFile(uri: String) =
-    File(
-        System.getProperty("java.io.tmpdir"),
-        URI(uri).path
-    )
-
-private val LocalPainterCache: ProvidableCompositionLocal<MutableMap<Pair<String?, IntSize?>, Painter?>> =
+private val LocalPainterCache: ProvidableCompositionLocal<MutableMap<Key, Painter?>> =
     staticCompositionLocalOf {
         object : LinkedHashMap<Key, Painter?>(0, 0.75f, true) {
             override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Key, Painter?>?): Boolean {
@@ -139,25 +107,10 @@ private val LocalPainterCache: ProvidableCompositionLocal<MutableMap<Pair<String
         }
     }
 
-private typealias Key = Pair<String?, IntSize?>
-
-sealed class ImageSource {
-    abstract val inputStream: InputStream
-
-    sealed class Remote : ImageSource() {
-        data class Network(
-            val uri: String,
-            override val inputStream: InputStream,
-        ) : Remote()
-
-        data class Cached(
-            override val inputStream: InputStream,
-        ) : Remote()
+private fun IntSize?.toBucket() =
+    if (this == null) SizeBucket.Large
+    else when (area()) {
+        in 0..352 * 240 -> SizeBucket.Small
+        in 0..640 * 480 -> SizeBucket.Medium
+        else -> SizeBucket.Large
     }
-
-
-    data class Local(
-        override val inputStream: InputStream,
-    ) : ImageSource()
-
-}
