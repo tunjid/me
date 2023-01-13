@@ -37,12 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
@@ -63,6 +58,8 @@ import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -96,11 +93,17 @@ private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
     val scrollState = rememberLazyListState()
 
     // Disable body text field from scrolling until all items are offscreen
-    val canConsumeScrollEventsInBody by remember {
-        derivedStateOf {
-            scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key == BODY_INDEX
-        }
+    var canConsumeScrollEventsInBody by remember {
+        mutableStateOf(false)
     }
+
+    LaunchedEffect(scrollState) {
+        snapshotFlow { scrollState.layoutInfo }
+            .map { it.visibleItemsInfo.firstOrNull()?.key == BODY_INDEX }
+            .distinctUntilChanged()
+            .collect { canConsumeScrollEventsInBody = it }
+    }
+
     val scope = rememberCoroutineScope()
 
     GlobalUi(
@@ -184,10 +187,6 @@ private fun LazyListScope.dragDropThumbnail(
     dragLocation: DragLocation,
     onAction: (Action) -> Unit,
 ) = item {
-    // Create a var so edits can be captured
-    val permissionState = remember { mutableStateOf(hasStoragePermission) }
-    permissionState.value = hasStoragePermission
-
     val borderColor by animateColorAsState(
         when (dragLocation) {
             DragLocation.InWindow -> MaterialTheme.colorScheme.errorContainer
@@ -208,7 +207,7 @@ private fun LazyListScope.dragDropThumbnail(
                 shape = MaterialTheme.shapes.medium,
             )
             .dropTarget(
-                onStarted = { _, _ -> permissionState.value },
+                onStarted = { _, _ -> hasStoragePermission },
                 onEntered = { onAction(Action.Drag.Thumbnail(inside = true)) },
                 onExited = { onAction(Action.Drag.Thumbnail(inside = false)) },
                 onDropped = { uris, _ ->
