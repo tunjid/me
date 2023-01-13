@@ -35,7 +35,7 @@ fun StickyHeaderGrid(
     stickyHeader: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
-    val headerOffset by remember(lazyState.layoutInfo) {
+    val headerOffset by remember(lazyState) {
         derivedStateOf {
             val layoutInfo = lazyState.layoutInfo
             val startOffset = layoutInfo.viewportStartOffset
