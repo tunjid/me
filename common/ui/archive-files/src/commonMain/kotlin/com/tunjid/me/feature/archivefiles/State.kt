@@ -20,7 +20,6 @@ import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.MessageQueue
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.Uri
-import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.permissions.Permission
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -34,7 +33,7 @@ enum class DragLocation {
 data class State(
     val isSignedIn: Boolean = false,
     val hasFetchedAuthStatus: Boolean = false,
-    val isMainContent: Boolean = true,
+    val isInMainNav: Boolean = true,
     val hasStoragePermissions: Boolean = false,
     @Transient
     val uploadProgress: Float? = null,

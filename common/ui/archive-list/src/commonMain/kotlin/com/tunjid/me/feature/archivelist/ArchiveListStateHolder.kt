@@ -27,11 +27,10 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.navRailVisible
+import com.tunjid.me.scaffold.isInMainNavMutations
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.consumeNavActions
-import com.tunjid.me.scaffold.nav.mainRoute
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
@@ -77,12 +76,12 @@ class ActualArchiveListStateHolder(
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
-        mainNavContentMutations(
-            route = route,
-            navStateFlow = navStateFlow,
-            uiStateFlow = uiStateFlow
-        ),
         authRepository.authMutations(),
+        route.isInMainNavMutations(
+            navStateFlow = navStateFlow,
+            uiStateFlow = uiStateFlow,
+            mutation = { copy(isInMainNav = it) }
+        ),
     ),
     actionTransform = { actions ->
         actions.toMutationStream(keySelector = Action::key) {
@@ -118,23 +117,6 @@ internal fun AuthRepository.authMutations(): Flow<Mutation<State>> =
                 )
             }
         }
-
-/**
- * Updates [State] with whether it is the main navigation content
- */
-private fun mainNavContentMutations(
-    route: ArchiveListRoute,
-    navStateFlow: StateFlow<NavState>,
-    uiStateFlow: StateFlow<UiState>,
-) = combine(
-    navStateFlow.map { route.id == it.mainRoute.id },
-    uiStateFlow.map { it.navRailVisible },
-    Boolean::and,
-)
-    .distinctUntilChanged()
-    .map {
-        mutation<State> { copy(isMainContent = it) }
-    }
 
 /**
  * Notifies of updates in the archive filter

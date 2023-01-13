@@ -71,7 +71,7 @@ private fun ArchiveFilesScreen(
     val screenUiState by stateHolder.toActionableState()
     val (state, actions) = screenUiState
 
-    if (state.isMainContent) GlobalUi(
+    if (state.isInMainNav) GlobalUi(
         state = state,
         onAction = actions
     )

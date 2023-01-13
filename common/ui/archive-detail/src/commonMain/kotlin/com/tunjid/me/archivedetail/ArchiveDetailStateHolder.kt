@@ -28,11 +28,10 @@ import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
-import com.tunjid.me.scaffold.globalui.navRailVisible
+import com.tunjid.me.scaffold.isInMainNavMutations
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.consumeNavActions
-import com.tunjid.me.scaffold.nav.mainRoute
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
@@ -42,8 +41,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
@@ -51,7 +48,7 @@ typealias ArchiveDetailStateHolder = ActionStateProducer<Action, StateFlow<State
 
 @Inject
 class ArchiveDetailStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveDetailRoute) -> ArchiveDetailStateHolder
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveDetailRoute) -> ArchiveDetailStateHolder,
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
@@ -77,10 +74,10 @@ class ActualArchiveDetailStateHolder(
         archiveRepository.archiveLoadMutations(
             id = route.archiveId
         ),
-        mainNavContentMutations(
-            route = route,
+        route.isInMainNavMutations(
             navStateFlow = navStateFlow,
-            uiStateFlow = uiStateFlow
+            uiStateFlow = uiStateFlow,
+            mutation = { copy(isInMainNav = it) }
         ),
     ),
     actionTransform = { actions ->
@@ -106,7 +103,7 @@ private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     }
 
 private fun ArchiveRepository.archiveLoadMutations(
-    id: ArchiveId
+    id: ArchiveId,
 ): Flow<Mutation<State>> = archiveStream(
     id = id
 )
@@ -117,21 +114,4 @@ private fun ArchiveRepository.archiveLoadMutations(
                 archive = fetchedArchive
             )
         }
-    }
-
-/**
- * Updates [State] with whether it is the main navigation content
- */
-private fun mainNavContentMutations(
-    route: ArchiveDetailRoute,
-    navStateFlow: StateFlow<NavState>,
-    uiStateFlow: StateFlow<UiState>,
-) = combine(
-    navStateFlow.map { route.id == it.mainRoute.id },
-    uiStateFlow.map { it.navRailVisible },
-    Boolean::and,
-)
-    .distinctUntilChanged()
-    .map {
-        mutation<State> { copy(isMainContent = it) }
     }

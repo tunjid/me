@@ -38,7 +38,7 @@ data class State(
     @ProtoNumber(1)
     val shouldScrollToTop: Boolean = true,
     @ProtoNumber(2)
-    val isMainContent: Boolean = false,
+    val isInMainNav: Boolean = false,
     @ProtoNumber(3)
     val hasFetchedAuthStatus: Boolean = false,
     @ProtoNumber(4)

@@ -20,15 +20,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.Markdown
@@ -39,16 +36,9 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.scaffold.globalui.InsetFlags
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.currentUiState
-import com.tunjid.me.scaffold.globalui.rememberFunction
 import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.treenav.pop
-import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -77,7 +67,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
     val canEdit = state.canEdit
 
 //    val navigator = LocalNavigator.current
-    if (state.isMainContent) GlobalUi(
+    if (state.isInMainNav) GlobalUi(
         state = state,
         actions = actions
     )

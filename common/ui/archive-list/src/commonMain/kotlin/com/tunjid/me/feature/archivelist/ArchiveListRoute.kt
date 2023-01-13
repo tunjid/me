@@ -52,7 +52,6 @@ import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
@@ -77,7 +76,7 @@ private fun ArchiveScreen(
     val screenUiState by stateHolder.toActionableState()
     val (state, actions) = screenUiState
 
-    if (state.isMainContent) GlobalUi(
+    if (state.isInMainNav) GlobalUi(
         state = state,
         onAction = actions
     )
@@ -139,7 +138,7 @@ private fun ArchiveScreen(
                                 },
                                 navigate = { path ->
                                     actions(Action.Navigate {
-                                        if (state.isMainContent) mainNav.push(route = path.toRoute)
+                                        if (state.isInMainNav) mainNav.push(route = path.toRoute)
                                         else mainNav.swap(route = path.toRoute)
                                     })
                                 }
