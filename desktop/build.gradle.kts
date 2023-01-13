@@ -55,14 +55,14 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "MeAsAComposition"
+            packageName = "Tj's Blog"
             packageVersion = "1.0.0"
 
             macOS {
                 iconFile.set(project.file("icon.icns"))
             }
             windows {
-                menuGroup = "Compose Examples"
+                menuGroup = "Tj's Blog"
                 // see https://wixtoolset.org/documentation/manual/v3/howtos/general/generate_guids.html
                 upgradeUuid = "BF9CDA6A-1391-46D5-9ED5-383D6E68CCEB"
                 iconFile.set(project.file("icon.ico"))
