@@ -49,6 +49,8 @@ kotlin {
         named("desktopMain") {
             dependencies {
                 implementation(libs.ktor.client.java)
+                implementation(libs.apache.commons.imaging)
+                implementation(libs.image.io)
             }
         }
         named("commonTest") {

@@ -25,10 +25,7 @@ private const val SORT_ORDER = "SORT_ORDER"
 private const val SIGN_IN = "SIGN_IN"
 
 @Composable
-fun GlobalUi(
-    state: State,
-    onAction: (Action) -> Unit
-) {
+fun GlobalUi() {
     ScreenUiState(
         UiState(
             toolbarShows = true,

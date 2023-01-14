@@ -29,6 +29,19 @@ enum class DragLocation {
     Inactive, Outside, Inside
 }
 
+sealed class UploadInfo {
+    object None: UploadInfo()
+
+    data class Message(
+        val message: String
+    ): UploadInfo()
+
+    data class Progress(
+        val message: String,
+        val progress: Float
+    ): UploadInfo()
+}
+
 @Serializable
 data class State(
     val isSignedIn: Boolean = false,
@@ -36,9 +49,7 @@ data class State(
     val isInMainNav: Boolean = true,
     val hasStoragePermissions: Boolean = false,
     @Transient
-    val uploadProgress: Float? = null,
-    @Transient
-    val messages: MessageQueue = MessageQueue(),
+    val uploadInfo: UploadInfo = UploadInfo.None,
     @Transient
     val dragLocation: DragLocation = DragLocation.Inactive,
     @Transient

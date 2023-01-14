@@ -17,19 +17,17 @@
 package com.tunjid.me.feature.archivefiles
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -73,10 +71,7 @@ private fun ArchiveFilesScreen(
     val screenUiState by stateHolder.toActionableState()
     val (state, actions) = screenUiState
 
-    if (state.isInMainNav) GlobalUi(
-        state = state,
-        onAction = actions
-    )
+    if (state.isInMainNav) GlobalUi()
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -87,13 +82,7 @@ private fun ArchiveFilesScreen(
             hasStoragePermissions = state.hasStoragePermissions,
             actions = actions
         )
-        val uploadProgress = state.uploadProgress
-        if (uploadProgress != null) LinearProgressIndicator(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter),
-            progress = uploadProgress,
-        )
+        UploadInfo(state.uploadInfo)
     }
 }
 
@@ -181,5 +170,38 @@ private fun GalleryItem(
                 }
             )
         )
+    }
+}
+
+@Composable
+fun BoxScope.UploadInfo(info: UploadInfo) {
+    val message = when (info) {
+        UploadInfo.None -> return
+        is UploadInfo.Message -> info.message
+        is UploadInfo.Progress -> info.message
+    }
+    val progress = if (info is UploadInfo.Progress) info.progress else null
+
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth(.8f)
+            .padding(8.dp)
+            .align(Alignment.BottomCenter),
+    ) {
+        Column(
+            modifier = Modifier.animateContentSize()
+        ) {
+            Text(
+                modifier = Modifier.padding(16.dp),
+                text = message
+            )
+            if (progress != null) LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                progress = progress,
+            )
+        }
+
     }
 }

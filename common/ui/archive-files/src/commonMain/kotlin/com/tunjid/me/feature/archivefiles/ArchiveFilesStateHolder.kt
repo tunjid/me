@@ -42,6 +42,7 @@ import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
 
@@ -178,7 +179,9 @@ private fun Flow<Action.Drop>.dropMutations(
 
                 uris.forEachIndexed { index, uri ->
                     channel.send {
-                        copy(messages = nonUploadMessages() + "Uploading $index of ${uris.size}")
+                        copy(
+                            uploadInfo = UploadInfo.Message("Uploading ${index + 1} of ${uris.size} files.")
+                        )
                     }
                     archiveFileRepository.uploadArchiveFile(
                         kind = kind,
@@ -190,19 +193,19 @@ private fun Flow<Action.Drop>.dropMutations(
                                 is TransferStatus.Done -> {
                                     uploaded.add(uri.path)
                                     copy(
-                                        uploadProgress = null,
-                                        messages = nonUploadMessages() + "Uploaded $index of ${uris.size}"
+                                        uploadInfo = UploadInfo.Message("Uploaded ${index + 1} of ${uris.size} files.")
                                     )
                                 }
 
                                 is TransferStatus.Error -> copy(
-                                    uploadProgress = null,
-                                    messages = nonUploadMessages() + "Failed to upload $index of ${uris.size}"
+                                    uploadInfo = UploadInfo.Message("Failed to upload ${index + 1} of ${uris.size} files.")
                                 )
 
                                 is TransferStatus.Uploading -> copy(
-                                    uploadProgress = status.progress,
-                                    messages = nonUploadMessages() + "Uploaded ${status.progress} $index of ${uris.size}"
+                                    uploadInfo = UploadInfo.Progress(
+                                        progress = status.progress,
+                                        message = "Uploaded ${(status.progress * 100).toInt()}% of file ${index + 1} of ${uris.size}."
+                                    )
                                 )
                             }
                         }
@@ -212,10 +215,12 @@ private fun Flow<Action.Drop>.dropMutations(
                 if (uris.isNotEmpty()) channel.send {
                     val message = if (uris.size == 1) "Uploaded 1 image"
                     else "Uploaded ${uris.size} images"
-                    copy(messages = nonUploadMessages() + message)
+                    copy(uploadInfo = UploadInfo.Message(message))
+                }
+
+                delay(2000)
+                channel.send {
+                    copy(uploadInfo = UploadInfo.None)
                 }
             }
     }
-
-private fun State.nonUploadMessages() = messages.filter { !it.value.contains("pload") }
-
