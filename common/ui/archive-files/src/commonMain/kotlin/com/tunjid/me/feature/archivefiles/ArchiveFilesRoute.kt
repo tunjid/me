@@ -19,6 +19,7 @@ package com.tunjid.me.feature.archivefiles
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -28,6 +29,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -89,7 +91,9 @@ private fun ArchiveFilesScreen(
 @Composable
 private fun FilesGrid(state: State) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(100.dp)
+        columns = GridCells.Adaptive(100.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         items(
             items = state.files,
@@ -147,7 +151,11 @@ private fun FilesDrop(
 private fun GalleryItem(
     archiveFile: ArchiveFile,
 ) {
-    BoxWithConstraints(modifier = Modifier.aspectRatio(1f)) {
+    BoxWithConstraints(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
+            .aspectRatio(1f)
+    ) {
         val imagePainter = rememberAsyncRasterPainter(
             imageUri = archiveFile.url,
             size = maxSize()
