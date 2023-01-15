@@ -23,21 +23,27 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveFile
+import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
@@ -50,6 +56,11 @@ import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
+import com.tunjid.tiler.TiledList
+import com.tunjid.tiler.queryAtOrNull
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -72,13 +83,24 @@ private fun ArchiveFilesScreen(
 ) {
     val screenUiState by stateHolder.toActionableState()
     val (state, actions) = screenUiState
+    val gridState = rememberLazyGridState()
 
     if (state.isInMainNav) GlobalUi()
 
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        FilesGrid(state)
+        FilesGrid(
+            files = state.files,
+            lazyGridState = gridState,
+            actions = actions
+        )
+        FilesTiling(
+            archiveId = state.archiveId,
+            files = state.files,
+            lazyGridState = gridState,
+            actions = actions
+        )
         FilesDrop(
             dragLocation = state.dragLocation,
             hasStoragePermissions = state.hasStoragePermissions,
@@ -89,19 +111,54 @@ private fun ArchiveFilesScreen(
 }
 
 @Composable
-private fun FilesGrid(state: State) {
+private fun FilesGrid(
+    lazyGridState: LazyGridState,
+    files: List<ArchiveFile>,
+    actions: (Action.Fetch.ColumnSizeChanged) -> Unit,
+) {
     LazyVerticalGrid(
+        state = lazyGridState,
         columns = GridCells.Adaptive(100.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         items(
-            items = state.files,
+            items = files,
             key = ArchiveFile::url,
+            span = {
+                actions(Action.Fetch.ColumnSizeChanged(maxLineSpan))
+                GridItemSpan(1)
+            },
             itemContent = { archiveFile ->
-                GalleryItem(archiveFile)
+                GalleryItem(
+                    modifier = Modifier.animateItemPlacement(),
+                    archiveFile = archiveFile
+                )
             }
         )
+    }
+}
+
+@Composable
+private fun FilesTiling(
+    archiveId: ArchiveId,
+    lazyGridState: LazyGridState,
+    files: TiledList<ArchiveFileQuery, ArchiveFile>,
+    actions: (Action.Fetch.LoadAround) -> Unit,
+) {
+    LaunchedEffect(Unit) {
+        actions(
+            Action.Fetch.LoadAround(
+                files.queryAtOrNull(0)
+                    ?: ArchiveFileQuery(archiveId = archiveId)
+            )
+        )
+    }
+    LaunchedEffect(lazyGridState, files) {
+        snapshotFlow { lazyGridState.layoutInfo.visibleItemsInfo.firstOrNull()?.index }
+            .filterNotNull()
+            .map(files::queryAt)
+            .collectLatest { actions(Action.Fetch.LoadAround(it)) }
     }
 }
 
@@ -149,10 +206,11 @@ private fun FilesDrop(
 
 @Composable
 private fun GalleryItem(
+    modifier: Modifier = Modifier,
     archiveFile: ArchiveFile,
 ) {
     BoxWithConstraints(
-        modifier = Modifier
+        modifier = modifier
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
             .aspectRatio(1f)
     ) {

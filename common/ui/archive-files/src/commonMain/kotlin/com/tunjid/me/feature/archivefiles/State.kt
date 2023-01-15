@@ -17,12 +17,16 @@
 package com.tunjid.me.feature.archivefiles
 
 import com.tunjid.me.core.model.ArchiveFile
-import com.tunjid.me.core.model.MessageQueue
+import com.tunjid.me.core.model.ArchiveFileQuery
+import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.scaffold.permissions.Permission
+import com.tunjid.tiler.TiledList
+import com.tunjid.tiler.emptyTiledList
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.protobuf.ProtoNumber
 
 
 enum class DragLocation {
@@ -44,16 +48,22 @@ sealed class UploadInfo {
 
 @Serializable
 data class State(
+    @ProtoNumber(4)
+    val archiveId: ArchiveId,
+    @ProtoNumber(0)
     val isSignedIn: Boolean = false,
+    @ProtoNumber(1)
     val hasFetchedAuthStatus: Boolean = false,
+    @ProtoNumber(2)
     val isInMainNav: Boolean = true,
+    @ProtoNumber(3)
     val hasStoragePermissions: Boolean = false,
     @Transient
     val uploadInfo: UploadInfo = UploadInfo.None,
     @Transient
     val dragLocation: DragLocation = DragLocation.Inactive,
     @Transient
-    val files: List<ArchiveFile> = emptyList(),
+    val files: TiledList<ArchiveFileQuery, ArchiveFile> = emptyTiledList(),
 ) : ByteSerializable
 
 
@@ -63,4 +73,10 @@ sealed class Action(val key: String) {
     data class Drop(val uris: List<Uri>) : Action("Drop")
 
     data class RequestPermission(val permission: Permission) : Action("RequestPermission")
+
+    sealed class Fetch : Action("Fetch") {
+        data class LoadAround(val query: ArchiveFileQuery) : Fetch()
+
+        data class ColumnSizeChanged(val size: Int) : Fetch()
+    }
 }

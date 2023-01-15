@@ -16,10 +16,9 @@
 
 package com.tunjid.me.feature.archivefiles
 
+import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.filter
-import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
@@ -41,6 +40,9 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
+import com.tunjid.tiler.Tile
+import com.tunjid.tiler.toTiledList
+import com.tunjid.tiler.utilities.toPivotedTileInputs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -71,13 +73,11 @@ class ActualArchiveFilesStateHolder(
     route: ArchiveFilesRoute,
 ) : ArchiveFilesStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
+        archiveId = route.archiveId
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
         authRepository.authMutations(),
-        archiveFileRepository.fileMutations(
-            archiveId = route.archiveId
-        ),
         route.isInMainNavMutations(
             navStateFlow = navStateFlow,
             uiStateFlow = uiStateFlow,
@@ -98,6 +98,11 @@ class ActualArchiveFilesStateHolder(
                 is Action.RequestPermission -> action.flow.permissionRequestMutations(
                     onPermissionRequested = onPermissionRequested
                 )
+
+                is Action.Fetch -> action.flow.loadMutations(
+                    scope = scope,
+                    archiveFileRepository = archiveFileRepository
+                )
             }
         }
     }
@@ -115,16 +120,41 @@ private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
             }
         }
 
-private fun ArchiveFileRepository.fileMutations(archiveId: ArchiveId): Flow<Mutation<State>> =
-    photos(ArchiveFileQuery(archiveId = archiveId))
-        .distinctUntilChanged()
-        .map {
-            mutation {
-                copy(
-                    files = it,
-                )
-            }
+private fun Flow<Action.Fetch>.loadMutations(
+    scope: CoroutineScope,
+    archiveFileRepository: ArchiveFileRepository,
+): Flow<Mutation<State>> {
+    val columnSizes =
+        filterIsInstance<Action.Fetch.ColumnSizeChanged>()
+            .map { it.size }
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
+                initialValue = 1
+            )
+
+    val pivotInputs: Flow<Tile.Input<ArchiveFileQuery, ArchiveFile>> =
+        filterIsInstance<Action.Fetch.LoadAround>()
+            .map { it.query }
+            .toPivotedTileInputs(columnSizes.map(::pivotRequest))
+
+    val limitInputs: Flow<Tile.Limiter<ArchiveFileQuery, ArchiveFile>> = columnSizes
+        .map { columnSize ->
+            Tile.Limiter { it.size > columnSize * 10 }
         }
+
+    return merge(
+        pivotInputs,
+        limitInputs
+    ).toTiledList(
+        archiveFileRepository.archiveFilesTiler(
+            limiter = Tile.Limiter { it.size > 100 }
+        )
+    )
+        .map {
+            mutation { copy(files = it) }
+        }
+}
 
 /**
  * Empty mutations proxied to [onPermissionRequested] to request permissions

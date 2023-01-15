@@ -52,7 +52,7 @@ import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Inject
 
 interface ArchiveFileRepository : Syncable {
-    fun photos(
+    fun files(
         query: ArchiveFileQuery,
     ): Flow<List<ArchiveFile>>
 
@@ -78,7 +78,7 @@ internal class OfflineFirstArchiveFileRepository(
     private val dispatcher: CoroutineDispatcher,
 ) : ArchiveFileRepository {
 
-    override fun photos(
+    override fun files(
         query: ArchiveFileQuery,
     ): Flow<List<ArchiveFile>> = archiveFileEntityQueries.photos(
         archiveId = query.archiveId.value,

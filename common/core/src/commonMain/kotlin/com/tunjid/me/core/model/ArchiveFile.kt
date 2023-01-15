@@ -22,13 +22,15 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+private const val DEFAULT_QUERY_LIMIT = 30
+
 @Serializable
 data class
 ArchiveFileQuery(
     val archiveId: ArchiveId,
     val desc: Boolean = true,
     val offset: Int = 0,
-    val limit: Int = DefaultQueryLimit,
+    val limit: Int = DEFAULT_QUERY_LIMIT,
 )
 
 @Serializable
