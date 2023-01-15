@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.tunjid.me.core.model.ArchiveKind
@@ -49,6 +50,7 @@ import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.queryAtOrNull
 import com.tunjid.tiler.tiledListOf
 import com.tunjid.treenav.push
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.scan
@@ -105,63 +107,70 @@ private fun ArchiveScreen(
                 stickyHeaderItem?.let { StickyHeader(item = it) }
             }
         ) {
-            LazyVerticalGrid(
-                state = gridState,
-                columns = GridCells.Adaptive(cardWidth),
-                content = {
-                    items(
-                        items = state.items,
-                        key = { it.key },
-                        span = { item ->
-                            actions(Action.Fetch.NoColumnsChanged(maxLineSpan))
-                            when (item) {
-                                is ArchiveItem.Result -> GridItemSpan(1)
-                                is ArchiveItem.Header,
-                                is ArchiveItem.Loading,
-                                -> GridItemSpan(maxLineSpan)
-                            }
-                        },
-                        itemContent = { item ->
-                            GridCell(
-                                modifier = Modifier.animateItemPlacement(),
-                                item = item,
-                                query = state.queryState.currentQuery,
-                                onCategoryClicked = { category ->
-                                    actions(
-                                        Action.Fetch.QueryChange(
-                                            query = state.queryState.currentQuery.copy(offset = 0).let { query ->
-                                                if (query.contentFilter.categories.contains(category)) query - category
-                                                else query + category
-                                            },
-                                        )
-                                    )
-                                },
-                                navigate = { path ->
-                                    actions(Action.Navigate {
-                                        mainNav.push(route = path.toRoute)
-                                    })
-                                }
+            ArchiveList(
+                gridState = gridState,
+                cardWidth = cardWidth,
+                state = state,
+                actions = actions
+            )
+        }
+    }
+
+    ArchiveTiling(
+        currentQuery = state.queryState.currentQuery,
+        items = state.items,
+        gridState = gridState,
+        onAction = actions
+    )
+}
+
+@Composable
+private fun ArchiveList(
+    gridState: LazyGridState,
+    cardWidth: Dp,
+    state: State,
+    actions: (Action) -> Unit,
+) {
+    LazyVerticalGrid(
+        state = gridState,
+        columns = GridCells.Adaptive(cardWidth),
+        content = {
+            items(
+                items = state.items,
+                key = { it.key },
+                span = { item ->
+                    actions(Action.Fetch.NoColumnsChanged(maxLineSpan))
+                    when (item) {
+                        is ArchiveItem.Result -> GridItemSpan(1)
+                        is ArchiveItem.Header,
+                        is ArchiveItem.Loading,
+                        -> GridItemSpan(maxLineSpan)
+                    }
+                },
+                itemContent = { item ->
+                    GridCell(
+                        modifier = Modifier.animateItemPlacement(),
+                        item = item,
+                        query = state.queryState.currentQuery,
+                        onCategoryClicked = { category ->
+                            actions(
+                                Action.Fetch.QueryChange(
+                                    query = state.queryState.currentQuery.copy(offset = 0).let { query ->
+                                        if (query.contentFilter.categories.contains(category)) query - category
+                                        else query + category
+                                    },
+                                )
                             )
+                        },
+                        navigate = { path ->
+                            actions(Action.Navigate {
+                                mainNav.push(route = path.toRoute)
+                            })
                         }
                     )
                 }
             )
         }
-    }
-
-    // Initial load
-    LaunchedEffect(true) {
-        actions(
-            Action.Fetch.LoadAround(
-                query = state.queryState.currentQuery,
-            )
-        )
-    }
-
-    EndlessScroll(
-        items = state.items,
-        gridState = gridState,
-        onAction = actions
     )
 }
 
@@ -197,11 +206,21 @@ private fun GridCell(
 }
 
 @Composable
-private fun EndlessScroll(
+private fun ArchiveTiling(
+    currentQuery: ArchiveQuery,
     items: TiledList<ArchiveQuery, ArchiveItem>,
     gridState: LazyGridState,
     onAction: (Action) -> Unit,
 ) {
+    // Initial load
+    LaunchedEffect(Unit) {
+        onAction(
+            Action.Fetch.LoadAround(
+                query = currentQuery,
+            )
+        )
+    }
+    
     // Endless scrolling
     LaunchedEffect(items, gridState) {
         snapshotFlow {
@@ -211,7 +230,7 @@ private fun EndlessScroll(
         }
             .filterNotNull()
             .distinctUntilChanged()
-            .collect { query ->
+            .collectLatest { query ->
                 onAction(Action.Fetch.LoadAround(query = query))
             }
     }
