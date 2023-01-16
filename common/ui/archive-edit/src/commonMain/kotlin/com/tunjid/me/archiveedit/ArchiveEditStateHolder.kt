@@ -212,7 +212,11 @@ private fun Flow<Action.Drop>.dropMutations(
         mutation {
             when (uri) {
                 is LocalUri -> copy(toUpload = uri, thumbnail = uri.path)
-                is Uri -> copy(toUpload = null, thumbnail = uri.path)
+                is Uri -> copy(
+                    toUpload = null,
+                    thumbnail = uri.path,
+                    upsert = upsert.copy(thumbnail = uri.path)
+                )
                 else -> copy(toUpload = null, messages = messages + "Only png, jpg and gif uploads are supported")
             }
         }
