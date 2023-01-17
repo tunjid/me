@@ -19,8 +19,13 @@ package com.tunjid.me.core.ui.dragdrop
 import android.graphics.Canvas
 import android.graphics.Point
 import android.view.View
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.graphics.Canvas as ComposeCanvas
 
 internal class PainterDragShadowBuilder(
+    private val density: Density,
     private val dragInfo: DragInfo,
 ) : View.DragShadowBuilder() {
 
@@ -32,15 +37,14 @@ internal class PainterDragShadowBuilder(
     override fun onDrawShadow(canvas: Canvas) {
         when (val painter = dragInfo.dragShadowPainter) {
             null -> super.onDrawShadow(canvas)
-            else -> {
-                val size = dragInfo.size
-                ProvidedCanvasDrawScope(
-                    androidCanvas = canvas,
-                    size = size
-                ).apply {
-                    with(painter) {
-                        draw(size)
-                    }
+            else -> CanvasDrawScope().draw(
+                density = density,
+                size = dragInfo.size,
+                layoutDirection = LayoutDirection.Ltr,
+                canvas = ComposeCanvas(canvas)
+            ) {
+                with(painter) {
+                    draw(dragInfo.size)
                 }
             }
         }

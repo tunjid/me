@@ -27,6 +27,7 @@ import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.Density
 import androidx.core.view.GestureDetectorCompat
 import com.tunjid.me.core.utilities.ContentUri
 import com.tunjid.me.core.utilities.RemoteUri
@@ -68,11 +69,18 @@ private fun longPressDragGestureListener(
     override fun onLongPress(event: MotionEvent) {
         val dragInfo = dragDropModifier.dragInfo(Offset(event.x, event.y)) ?: return
         val clipData = dragInfo.clipData() ?: return
+        val density = with(view.context.resources) {
+            Density(
+                density = displayMetrics.density,
+                fontScale = configuration.fontScale
+            )
+        }
 
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         view.startDrag(
             clipData,
             PainterDragShadowBuilder(
+                density = density,
                 dragInfo = dragInfo,
             ),
             null,
