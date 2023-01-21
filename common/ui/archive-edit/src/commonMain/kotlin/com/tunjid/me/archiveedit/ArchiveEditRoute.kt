@@ -270,12 +270,13 @@ private fun LazyListScope.bodyEditor(
     onInteractedWith: () -> Unit,
     onEdit: (Action.TextEdit) -> Unit,
 ) = item(key = BODY_INDEX) {
-   if(isEditing) Box(
+    if (isEditing) Box(
         modifier = Modifier
             .fillParentMaxSize()
+            .padding(horizontal = 16.dp)
     ) {
         var layoutResult: TextLayoutResult? by remember { mutableStateOf(null) }
-       // TODO: Revert to TextField when b/240975569 and b/235383908 are fixed
+        // TODO: Revert to TextField when b/240975569 and b/235383908 are fixed
         BasicTextField(
             modifier = Modifier
                 .fillMaxSize()
@@ -338,14 +339,14 @@ private fun LazyListScope.bodyEditor(
         )
     }
     else Material3RichText(
-       modifier = Modifier
-           .fillParentMaxSize()
-           .padding(horizontal = 16.dp)
-   ) {
-       Markdown(
-           content = body.text
-       )
-   }
+        modifier = Modifier
+            .fillParentMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        Markdown(
+            content = body.text
+        )
+    }
 }
 
 private fun LazyListScope.chipsEditor(
