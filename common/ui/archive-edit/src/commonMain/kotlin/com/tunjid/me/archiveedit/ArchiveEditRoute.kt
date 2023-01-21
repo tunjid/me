@@ -281,6 +281,7 @@ private fun LazyListScope.bodyEditor(
                 .fillMaxSize()
                 .dropTarget(
                     onStarted = { _, _ -> true },
+                    onEntered = onInteractedWith,
                     onMoved = { offset ->
                         layoutResult
                             ?.getOffsetForPosition(offset)
