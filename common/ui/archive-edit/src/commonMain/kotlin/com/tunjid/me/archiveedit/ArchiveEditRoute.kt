@@ -160,17 +160,15 @@ private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
         )
 
         spacer(16.dp)
-        if (state.isEditing) bodyEditor(
+        bodyEditor(
             body = state.body,
+            isEditing = state.isEditing,
             canConsumeScrollEvents = canConsumeScrollEventsInBody,
             onScrolled = scrollState::dispatchRawDelta,
             onInteractedWith = {
                 scope.launch { scrollState.animateScrollToItem(BODY_INDEX) }
             },
             onEdit = actions
-        )
-        else bodyPreview(
-            body = upsert.body
         )
     }
 }
@@ -266,16 +264,18 @@ private fun LazyListScope.videoUrlEditor(
 
 private fun LazyListScope.bodyEditor(
     body: TextFieldValue,
+    isEditing: Boolean,
     canConsumeScrollEvents: Boolean,
     onScrolled: (Float) -> Float,
     onInteractedWith: () -> Unit,
     onEdit: (Action.TextEdit) -> Unit,
 ) = item(key = BODY_INDEX) {
-    Box(
+   if(isEditing) Box(
         modifier = Modifier
             .fillParentMaxSize()
     ) {
         var layoutResult: TextLayoutResult? by remember { mutableStateOf(null) }
+       // TODO: Revert to TextField when b/240975569 and b/235383908 are fixed
         BasicTextField(
             modifier = Modifier
                 .fillMaxSize()
@@ -337,18 +337,15 @@ private fun LazyListScope.bodyEditor(
                 }
         )
     }
-}
-
-private fun LazyListScope.bodyPreview(body: String) = item {
-    Material3RichText(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-    ) {
-        Markdown(
-            content = body
-        )
-    }
+    else Material3RichText(
+       modifier = Modifier
+           .fillParentMaxSize()
+           .padding(horizontal = 16.dp)
+   ) {
+       Markdown(
+           content = body.text
+       )
+   }
 }
 
 private fun LazyListScope.chipsEditor(
