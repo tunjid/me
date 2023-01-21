@@ -16,6 +16,8 @@
 
 package com.tunjid.me.archiveedit
 
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import com.tunjid.me.core.model.*
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.ui.ChipInfo
@@ -54,6 +56,8 @@ data class State(
     @Transient
     val thumbnail: String? = null,
     @Transient
+    val body: TextFieldValue = TextFieldValue(),
+    @Transient
     val upsert: ArchiveUpsert = ArchiveUpsert(),
     @ProtoNumber(10)
     val chipsState: ChipsState = ChipsState(),
@@ -67,30 +71,68 @@ data class State(
 
 sealed class Action(val key: String) {
     sealed class TextEdit : Action("TextEdit") {
-        abstract val value: String
 
         data class Title(
-            override val value: String
+             val value: String
         ) : TextEdit()
 
         data class Description(
-            override val value: String
+             val value: String
         ) : TextEdit()
 
         data class VideoUrl(
-            override val value: String
+             val value: String
         ) : TextEdit()
 
-        data class Body(
-            override val value: String
-        ) : TextEdit()
+        sealed class Body : TextEdit() {
+            data class Edit(
+                val textFieldValue: TextFieldValue,
+            ) : TextEdit()
+
+            data class CursorIndex(
+                val index: Int,
+            ) : TextEdit()
+
+            data class ImageDrop(
+                val index: Int,
+                val uri: Uri,
+            ) : TextEdit()
+        }
 
         val mutation: Mutation<State>
             get() = when (this) {
                 is Title -> mutation { copy(upsert = upsert.copy(title = value)) }
                 is Description -> mutation { copy(upsert = upsert.copy(description = value)) }
                 is VideoUrl -> mutation { copy(upsert = upsert.copy(videoUrl = value)) }
-                is Body -> mutation { copy(upsert = upsert.copy(body = value)) }
+                is Body.Edit -> mutation {
+                    copy(
+                        body = textFieldValue,
+                        upsert = upsert.copy(body = textFieldValue.text)
+                    )
+                }
+                is Body.CursorIndex -> mutation {
+                    copy(body = body.copy(selection = TextRange(index = index)))
+                }
+                is Body.ImageDrop -> mutation {
+                    val existingText = body.text
+                    val startSubstring = existingText.substring(
+                        startIndex = 0,
+                        endIndex = index
+                    )
+                    val imageMarkDown = "\n![image](${uri.path})\n"
+                    val endSubstring = existingText.substring(
+                        startIndex = index,
+                        endIndex = existingText.length
+                    )
+                    val text = startSubstring + imageMarkDown + endSubstring
+                    copy(
+                        body = TextFieldValue(
+                            text = text,
+                            selection = TextRange(index = index + imageMarkDown.length)
+                        ),
+                        upsert = upsert.copy(body = text)
+                    )
+                }
             }
     }
 

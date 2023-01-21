@@ -17,6 +17,7 @@
 package com.tunjid.me.archiveedit
 
 
+import androidx.compose.ui.text.input.TextFieldValue
 import com.tunjid.me.core.model.*
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.utilities.ByteSerializer
@@ -366,6 +367,9 @@ private fun ArchiveRepository.textBodyMutations(
         mutation {
             copy(
                 thumbnail = archive.thumbnail,
+                body = TextFieldValue(
+                    text = archive.body
+                ),
                 upsert = upsert.copy(
                     id = archive.id,
                     title = archive.title,

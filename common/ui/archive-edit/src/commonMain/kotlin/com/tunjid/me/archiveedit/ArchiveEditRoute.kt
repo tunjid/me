@@ -22,28 +22,22 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -167,7 +161,7 @@ private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
 
         spacer(16.dp)
         if (state.isEditing) bodyEditor(
-            body = upsert.body,
+            body = state.body,
             canConsumeScrollEvents = canConsumeScrollEventsInBody,
             onScrolled = scrollState::dispatchRawDelta,
             onInteractedWith = {
@@ -271,7 +265,7 @@ private fun LazyListScope.videoUrlEditor(
 }
 
 private fun LazyListScope.bodyEditor(
-    body: String,
+    body: TextFieldValue,
     canConsumeScrollEvents: Boolean,
     onScrolled: (Float) -> Float,
     onInteractedWith: () -> Unit,
@@ -281,19 +275,48 @@ private fun LazyListScope.bodyEditor(
         modifier = Modifier
             .fillParentMaxSize()
     ) {
-        TextField(
+        var layoutResult: TextLayoutResult? by remember { mutableStateOf(null) }
+        BasicTextField(
             modifier = Modifier
+                .fillMaxSize()
+                .dropTarget(
+                    onStarted = { _, _ -> true },
+                    onMoved = { offset ->
+                        layoutResult
+                            ?.getOffsetForPosition(offset)
+                            ?.let { cursorIndex ->
+                                onEdit(
+                                    Action.TextEdit.Body.CursorIndex(cursorIndex)
+                                )
+                            }
+                    },
+                    onDropped = { uris, offset ->
+                        if (uris.isNotEmpty()) layoutResult
+                            ?.getOffsetForPosition(offset)
+                            ?.let { cursorIndex ->
+                                onEdit(
+                                    Action.TextEdit.Body.ImageDrop(
+                                        index = cursorIndex,
+                                        uri = uris.first()
+                                    )
+                                )
+                            }
+                        true
+                    },
+                )
                 .onFocusChanged { if (it.hasFocus) onInteractedWith() },
             value = body,
-            colors = Unstyled(),
+//            colors = Unstyled(),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
+            onTextLayout = { layoutResult = it },
             textStyle = LocalTextStyle.current.copy(
                 color = MaterialTheme.colorScheme.onSurface,
                 fontFamily = FontFamily.Monospace,
                 fontSize = 16.sp,
                 lineHeight = 24.sp
             ),
-            label = { Text(text = "Body") },
-            onValueChange = { onEdit(Action.TextEdit.Body(it)) }
+//            label = { Text(text = "Body") },
+            onValueChange = { onEdit(Action.TextEdit.Body.Edit(it)) }
         )
 
         // Overlay a box over the TextField to intercept scroll events
@@ -317,7 +340,9 @@ private fun LazyListScope.bodyEditor(
 
 private fun LazyListScope.bodyPreview(body: String) = item {
     Material3RichText(
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
     ) {
         Markdown(
             content = body
