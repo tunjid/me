@@ -18,6 +18,7 @@ package com.tunjid.me.core.ui.dragdrop
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.modifier.modifierLocalOf
 
 internal val ModifierLocalDragDropParent = modifierLocalOf<DragDropParent?> { null }
@@ -42,9 +43,9 @@ internal interface DragDropParent {
 }
 
 internal interface DragDropChild : DragSource, DropTarget, DragDropParent {
-
-    fun contains(position: Offset): Boolean
+    val coordinates: LayoutCoordinates?
 }
+
 internal val DragDropChild.area get() =
     size.width * size.height
 

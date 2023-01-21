@@ -56,7 +56,7 @@ internal class DragDropContainer(
             }
         }
     override val children = mutableListOf<DragDropChild>()
-    private var coordinates: LayoutCoordinates? = null
+    override var coordinates: LayoutCoordinates? = null
     private var activeChild: DragDropChild? = null
     private var currentTarget: DropTarget? = null
 
@@ -103,18 +103,6 @@ internal class DragDropContainer(
             null -> IntSize.Zero
             else -> coordinates.size
         }
-
-    override fun contains(position: Offset): Boolean {
-        val currentCoordinates = coordinates ?: return false
-        if (!currentCoordinates.isAttached) return false
-
-        val (width, height) = currentCoordinates.size
-        val (x1, y1) = currentCoordinates.positionInRoot()
-        val x2 = x1 + width
-        val y2 = y1 + height
-
-        return position.x in x1..x2 && position.y in y1..y2
-    }
 
     // end DropTargetNode
 
@@ -236,6 +224,33 @@ internal class DragDropContainer(
 private fun DropTarget.dispatchEntered(position: Offset) {
     onEntered()
     onMoved(position)
+}
+
+private fun DragDropChild.onRelativeMove(position: Offset) {
+    when (val currentCoordinates = coordinates) {
+        null -> onMoved(position)
+        else -> {
+          val o =  Offset(
+                x = position.x - currentCoordinates.size.width,
+                y = position.y - currentCoordinates.size.height
+            )
+            println("p: $position; o: $o")
+
+            onMoved(position)
+        }
+    }
+}
+
+private fun DragDropChild.contains(position: Offset): Boolean {
+    val currentCoordinates = coordinates ?: return false
+    if (!currentCoordinates.isAttached) return false
+
+    val (width, height) = currentCoordinates.size
+    val (x1, y1) = currentCoordinates.positionInRoot()
+    val x2 = x1 + width
+    val y2 = y1 + height
+
+    return position.x in x1..x2 && position.y in y1..y2
 }
 
 private fun DragDropChild.smallestChildWithin(offset: Offset): DragDropChild? {

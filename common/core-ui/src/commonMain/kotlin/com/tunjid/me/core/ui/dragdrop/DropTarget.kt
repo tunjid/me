@@ -21,6 +21,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.OnGloballyPositionedModifier
 import androidx.compose.ui.platform.debugInspectorInfo
 import com.tunjid.me.core.utilities.Uri
 
@@ -83,34 +85,42 @@ fun Modifier.dropTarget(
         dropTarget.onDropped = onDropped
         dropTarget.onEnded = onEnded
 
-        this.then(node)
+        this.then(node).then(dropTarget)
     })
 
 private class MutableDropTarget(
-     var onStarted: (mimeTypes: Set<String>, Offset) -> Boolean,
-     var onEntered: () -> Unit,
-     var onMoved: (position: Offset) -> Unit,
-     var onExited: () -> Unit,
-     var onDropped: (uris: List<Uri>, position: Offset) -> Boolean,
-     var onEnded: () -> Unit,
-) : DropTarget {
+    var onStarted: (mimeTypes: Set<String>, Offset) -> Boolean,
+    var onEntered: () -> Unit,
+    var onMoved: (position: Offset) -> Unit,
+    var onExited: () -> Unit,
+    var onDropped: (uris: List<Uri>, position: Offset) -> Boolean,
+    var onEnded: () -> Unit,
+) : DropTarget, OnGloballyPositionedModifier {
+
+    private var coordinates: LayoutCoordinates? = null
 
     override fun onStarted(mimeTypes: Set<String>, position: Offset): Boolean = onStarted.invoke(
         mimeTypes,
-        position
+        coordinates?.windowToLocal(position) ?: position
     )
 
     override fun onEntered() = onEntered.invoke()
 
-    override fun onMoved(position: Offset) = onMoved.invoke(position)
+    override fun onMoved(position: Offset) = onMoved.invoke(
+        coordinates?.windowToLocal(position) ?: position
+    )
 
     override fun onExited() = onExited.invoke()
 
     override fun onDropped(uris: List<Uri>, position: Offset): Boolean = onDropped.invoke(
         uris,
-        position
+        coordinates?.windowToLocal(position) ?: position
     )
 
     override fun onEnded() = onEnded.invoke()
+
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+        this.coordinates = coordinates
+    }
 }
 
