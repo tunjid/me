@@ -160,15 +160,17 @@ private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
         )
 
         spacer(16.dp)
-        bodyEditor(
+        if (state.isEditing) bodyEditor(
             body = state.body,
-            isEditing = state.isEditing,
             canConsumeScrollEvents = canConsumeScrollEventsInBody,
             onScrolled = scrollState::dispatchRawDelta,
             onInteractedWith = {
                 scope.launch { scrollState.animateScrollToItem(BODY_INDEX) }
             },
             onEdit = actions
+        )
+        else bodyPreview(
+            body = upsert.body
         )
     }
 }
@@ -264,13 +266,12 @@ private fun LazyListScope.videoUrlEditor(
 
 private fun LazyListScope.bodyEditor(
     body: TextFieldValue,
-    isEditing: Boolean,
     canConsumeScrollEvents: Boolean,
     onScrolled: (Float) -> Float,
     onInteractedWith: () -> Unit,
     onEdit: (Action.TextEdit) -> Unit,
 ) = item(key = BODY_INDEX) {
-    if (isEditing) Box(
+    Box(
         modifier = Modifier
             .fillParentMaxSize()
             .padding(horizontal = 16.dp)
@@ -338,13 +339,18 @@ private fun LazyListScope.bodyEditor(
                 }
         )
     }
-    else Material3RichText(
+}
+
+private fun LazyListScope.bodyPreview(body: String) = item(
+    key = BODY_INDEX
+) {
+    Material3RichText(
         modifier = Modifier
-            .fillParentMaxSize()
+            .defaultMinSize(minHeight = 500.dp)
             .padding(horizontal = 16.dp)
     ) {
         Markdown(
-            content = body.text
+            content = body
         )
     }
 }
