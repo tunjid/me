@@ -226,21 +226,6 @@ private fun DropTarget.dispatchEntered(position: Offset) {
     onMoved(position)
 }
 
-private fun DragDropChild.onRelativeMove(position: Offset) {
-    when (val currentCoordinates = coordinates) {
-        null -> onMoved(position)
-        else -> {
-          val o =  Offset(
-                x = position.x - currentCoordinates.size.width,
-                y = position.y - currentCoordinates.size.height
-            )
-            println("p: $position; o: $o")
-
-            onMoved(position)
-        }
-    }
-}
-
 private fun DragDropChild.contains(position: Offset): Boolean {
     val currentCoordinates = coordinates ?: return false
     if (!currentCoordinates.isAttached) return false
