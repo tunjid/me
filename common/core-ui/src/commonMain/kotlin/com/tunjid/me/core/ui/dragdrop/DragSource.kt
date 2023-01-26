@@ -16,15 +16,16 @@
 
 package com.tunjid.me.core.ui.dragdrop
 
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.OnGloballyPositionedModifier
-import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.compose.ui.modifier.ModifierLocalMap
+import androidx.compose.ui.modifier.ModifierLocalNode
+import androidx.compose.ui.node.DelegatingNode
+import androidx.compose.ui.node.GlobalPositionAwareModifierNode
+import androidx.compose.ui.node.modifierElementOf
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toSize
 import com.tunjid.me.core.utilities.Uri
@@ -60,45 +61,51 @@ internal data class DragInfo(
 fun Modifier.dragSource(
     dragShadowPainter: Painter? = null,
     dragStatus: () -> DragStatus,
-): Modifier = composed(
-    inspectorInfo = debugInspectorInfo {
-        name = "dragSource"
+): Modifier = this then modifierElementOf(
+    params = listOf(dragShadowPainter, dragStatus),
+    create = {
+        DragSourceNode(
+            dragShadowPainter = dragShadowPainter,
+            dragStatus = dragStatus
+        )
+    },
+    update = { dragSource ->
+        dragSource.dragShadowPainter = dragShadowPainter
+        dragSource.dragStatus = dragStatus
+    },
+    definitions = {
+        this.name = "dragSource"
         properties["dragShadowPainter"] = dragShadowPainter
         properties["dragStatus"] = dragStatus
     },
-    factory = {
-        val dragSource = remember {
-            MutableDragSource(
-                dragShadowPainter = dragShadowPainter,
-                dragStatus = dragStatus
-            )
-        }
-        val node = remember {
-            DragDropContainer { start ->
-                when (start) {
-                    is DragDrop.Drop -> DragDropAction.Reject
-                    is DragDrop.Drag -> when (dragSource.dragStatus()) {
-                        DragStatus.Static -> DragDropAction.Reject
-                        is DragStatus.Draggable -> DragDropAction.Drag(
-                            dragSource = dragSource
-                        )
-                    }
+)
+
+private class DragSourceNode(
+    override var dragShadowPainter: Painter?,
+    var dragStatus: () -> DragStatus,
+) : DelegatingNode(),
+    ModifierLocalNode,
+    GlobalPositionAwareModifierNode,
+    DragSource {
+
+    private val dragDropNode = delegated {
+        DragDropNode { start ->
+            when (start) {
+                is DragDrop.Drop -> DragDropAction.Reject
+                is DragDrop.Drag -> when (dragStatus()) {
+                    DragStatus.Static -> DragDropAction.Reject
+                    is DragStatus.Draggable -> DragDropAction.Drag(
+                        dragSource = this@DragSourceNode
+                    )
                 }
             }
         }
+    }
 
-        dragSource.dragShadowPainter = dragShadowPainter
-        dragSource.dragStatus = dragStatus
-
-        this.then(node).then(dragSource)
-    })
-
-private class MutableDragSource(
-    override var dragShadowPainter: Painter?,
-    var dragStatus: () -> DragStatus,
-) : DragSource, OnGloballyPositionedModifier {
+    override val providedValues: ModifierLocalMap = dragDropNode.providedValues
 
     private var coordinates: LayoutCoordinates? = null
+
     override val size: IntSize
         get() = when (val coordinates = coordinates) {
             null -> IntSize.Zero
@@ -116,6 +123,7 @@ private class MutableDragSource(
         }
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+        dragDropNode.onGloballyPositioned(coordinates)
         this.coordinates = coordinates
     }
 }

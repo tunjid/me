@@ -17,73 +17,54 @@
 package com.tunjid.me.core.ui.dragdrop
 
 
-import androidx.compose.runtime.RememberObserver
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.OnGloballyPositionedModifier
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.modifier.*
-import androidx.compose.ui.platform.InspectorValueInfo
-import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.compose.ui.modifier.ModifierLocalMap
+import androidx.compose.ui.modifier.ModifierLocalNode
+import androidx.compose.ui.modifier.modifierLocalMapOf
+import androidx.compose.ui.modifier.modifierLocalOf
+import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
 import com.tunjid.me.core.utilities.Uri
 
-internal class DragDropContainer(
+private val ModifierLocalDragDropParent = modifierLocalOf<DragDropParent?> { null }
+
+internal class DragDropNode(
     private val onDragDropStarted: DragSource.(DragDrop) -> DragDropAction,
-) : Modifier.Element,
-    ModifierLocalConsumer,
-    ModifierLocalProvider<DragDropParent?>,
-    OnGloballyPositionedModifier,
-    RememberObserver,
+) : Modifier.Node(),
+    GlobalPositionAwareModifierNode,
+    ModifierLocalNode,
     DragDropParent,
     DragDropChild,
-    DragDropModifier,
-    InspectorValueInfo(debugInspectorInfo {
-        name = "dropTarget"
-        properties["onDragStarted"] = onDragDropStarted
-    }) {
+    DragDroppable {
 
-    private var parent: DragDropParent? = null
-        set(value) {
-            if (value != field) {
-                field?.unregisterChild(this)
-                field = value
-                field?.registerChild(this)
-            }
-        }
+    private val parent: DragDropParent?
+        get() = ModifierLocalDragDropParent.current
+
     override val children = mutableListOf<DragDropChild>()
     override var coordinates: LayoutCoordinates? = null
     private var activeChild: DragDropChild? = null
     private var currentTarget: DropTarget? = null
 
-    // start ModifierLocalProvider
-    override val key: ProvidableModifierLocal<DragDropParent?>
-        get() = ModifierLocalDragDropParent
+    override val providedValues: ModifierLocalMap = modifierLocalMapOf(ModifierLocalDragDropParent to this)
 
-    override val value: DragDropContainer
-        get() = this
-    // end ModifierLocalProvider
-
-    // start ModifierLocalConsumer
-    override fun onModifierLocalsUpdated(scope: ModifierLocalReadScope) {
-        parent = with(scope) { key.current }
+    // start Node
+    override fun onAttach() {
+        parent?.registerChild(this)
+        super.onAttach()
     }
-    // end ModifierLocalConsumer
 
-    // start RememberObserver
-    override fun onRemembered() {}
-
-    override fun onForgotten() {
-        parent = null
+    override fun onDetach() {
+        parent?.unregisterChild(this)
         currentTarget = null
+        super.onDetach()
     }
-
-    override fun onAbandoned() {}
-    // end RememberObserver
+    // end Node
 
     // start DropTargetParent
     override fun registerChild(child: DragDropChild) {
@@ -97,18 +78,15 @@ internal class DragDropContainer(
     // end DropTargetParent
 
     // start DropTargetNode
-
     override val size: IntSize
         get() = when (val coordinates = coordinates) {
             null -> IntSize.Zero
             else -> coordinates.size
         }
-
     // end DropTargetNode
 
 
     // start DragSource
-
     override val dragShadowPainter: Painter?
         get() = null
 
@@ -125,7 +103,6 @@ internal class DragDropContainer(
         // No draggable child, attempt to drag self
         return onDragDropStarted(DragDrop.Drag(offset)).source?.dragInfo(offset)
     }
-
     // end DragSource
 
     // start DropTarget
@@ -224,21 +201,6 @@ internal class DragDropContainer(
 private fun DropTarget.dispatchEntered(position: Offset) {
     onEntered()
     onMoved(position)
-}
-
-private fun DragDropChild.onRelativeMove(position: Offset) {
-    when (val currentCoordinates = coordinates) {
-        null -> onMoved(position)
-        else -> {
-          val o =  Offset(
-                x = position.x - currentCoordinates.size.width,
-                y = position.y - currentCoordinates.size.height
-            )
-            println("p: $position; o: $o")
-
-            onMoved(position)
-        }
-    }
 }
 
 private fun DragDropChild.contains(position: Offset): Boolean {

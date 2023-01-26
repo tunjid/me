@@ -17,16 +17,13 @@
 package com.tunjid.me.core.ui.dragdrop
 
 import android.content.ClipData
-import android.content.Context
-import android.view.DragEvent
-import android.view.GestureDetector
-import android.view.HapticFeedbackConstants
-import android.view.MotionEvent
-import android.view.View
-import android.widget.FrameLayout
-import androidx.compose.runtime.Composable
+import android.view.*
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.modifier.ModifierLocalMap
+import androidx.compose.ui.modifier.ModifierLocalNode
+import androidx.compose.ui.node.DelegatingNode
+import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.unit.Density
 import androidx.core.view.GestureDetectorCompat
 import com.tunjid.me.core.utilities.ContentUri
@@ -34,67 +31,73 @@ import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.core.utilities.Uri
 import android.net.Uri as AndroidUri
 
-actual class PlatformDragDropModifier(
-    context: Context,
-) : FrameLayout(context), DragDropModifier by rootDragDropModifier() {
+actual class RootDragDropNode : DelegatingNode(),
+    ModifierLocalNode,
+    GlobalPositionAwareModifierNode,
+    View.OnAttachStateChangeListener {
 
-    private val composeView = ComposeView(context)
+    private val dragDropNode: DragDropNode = delegated { rootDragDropNode() }
 
-    init {
-        composeView.setOnDragListener(dragListener(this))
-        addView(composeView)
-    }
+    override val providedValues: ModifierLocalMap = dragDropNode.providedValues
 
-    fun setContent(content: @Composable () -> Unit) = composeView.setContent(content)
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) =
+        dragDropNode.onGloballyPositioned(coordinates)
 
-    private val longPressDragGestureDetector = GestureDetectorCompat(
-        context,
-        longPressDragGestureListener(
-            view = this,
-            dragDropModifier = this
+    override fun onViewAttachedToWindow(view: View) {
+        check(view is ContentView)
+        view.onAttached(
+            dragListener = dragListener(
+                dragDroppable = dragDropNode
+            ),
+            touchListener = longPressDragGestureListener(
+                view = view,
+                dragDroppable = dragDropNode
+            )
         )
-    )
-
-    override fun onInterceptTouchEvent(motionEvent: MotionEvent): Boolean {
-        // Spy on events and detect long presses
-        longPressDragGestureDetector.onTouchEvent(motionEvent)
-        return false
     }
+
+    override fun onViewDetachedFromWindow(view: View) = Unit
 }
 
 private fun longPressDragGestureListener(
     view: View,
-    dragDropModifier: DragDropModifier,
-) = object : GestureDetector.SimpleOnGestureListener() {
-    override fun onLongPress(event: MotionEvent) {
-        val dragInfo = dragDropModifier.dragInfo(Offset(event.x, event.y)) ?: return
-        val clipData = dragInfo.clipData() ?: return
-        val density = with(view.context.resources) {
-            Density(
-                density = displayMetrics.density,
-                fontScale = configuration.fontScale
-            )
-        }
+    dragDroppable: DragDroppable,
+): View.OnTouchListener {
+    val gestureDetector = GestureDetectorCompat(
+        view.context,
+        object : GestureDetector.SimpleOnGestureListener() {
+            override fun onLongPress(event: MotionEvent) {
+                val dragInfo = dragDroppable.dragInfo(Offset(event.x, event.y)) ?: return
+                val clipData = dragInfo.clipData() ?: return
+                val density = with(view.context.resources) {
+                    Density(
+                        density = displayMetrics.density,
+                        fontScale = configuration.fontScale
+                    )
+                }
 
-        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-        view.startDrag(
-            clipData,
-            PainterDragShadowBuilder(
-                density = density,
-                dragInfo = dragInfo,
-            ),
-            null,
-            0
-        )
-    }
+                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                view.startDrag(
+                    clipData,
+                    PainterDragShadowBuilder(
+                        density = density,
+                        dragInfo = dragInfo,
+                    ),
+                    null,
+                    0
+                )
+            }
+        }
+    )
+    return View.OnTouchListener { _, motionEvent -> gestureDetector.onTouchEvent(motionEvent) }
 }
 
 private fun dragListener(
-    dragDropModifier: DragDropModifier,
+    dragDroppable: DragDroppable,
 ): View.OnDragListener = View.OnDragListener { _, event ->
     when (event.action) {
         DragEvent.ACTION_DRAG_STARTED -> {
-            dragDropModifier.onStarted(
+            dragDroppable.onStarted(
                 mimeTypes = event.startDropMimetypes(),
                 position = Offset(event.x, event.y)
             )
@@ -102,29 +105,29 @@ private fun dragListener(
         }
 
         DragEvent.ACTION_DRAG_ENTERED -> {
-            dragDropModifier.onEntered()
+            dragDroppable.onEntered()
             true
         }
 
         DragEvent.ACTION_DRAG_LOCATION -> {
-            dragDropModifier.onMoved(Offset(event.x, event.y))
+            dragDroppable.onMoved(Offset(event.x, event.y))
             true
         }
 
         DragEvent.ACTION_DRAG_EXITED -> {
-            dragDropModifier.onExited()
+            dragDroppable.onExited()
             true
         }
 
         DragEvent.ACTION_DROP -> {
-            dragDropModifier.onDropped(
+            dragDroppable.onDropped(
                 uris = event.endDropUris(),
                 position = Offset(event.x, event.y)
             )
         }
 
         DragEvent.ACTION_DRAG_ENDED -> {
-            dragDropModifier.onEnded()
+            dragDroppable.onEnded()
             true
         }
 
