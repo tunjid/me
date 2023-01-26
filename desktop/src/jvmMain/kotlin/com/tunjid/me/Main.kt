@@ -26,7 +26,8 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.me.core.ui.dragdrop.PlatformDragDropModifier
+import com.tunjid.me.core.ui.dragdrop.RootDragDropNode
+import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.feature.MeApp
 import com.tunjid.me.scaffold.globalui.NavMode
@@ -49,7 +50,7 @@ fun main() {
         ) {
             val density = LocalDensity.current.density
             val dropParent = remember(density) {
-                PlatformDragDropModifier(
+                RootDragDropNode(
                     density = density,
                     window = window,
                 )
@@ -60,7 +61,7 @@ fun main() {
                     LocalLifecycleStateHolder provides app.lifecycleStateHolder,
                 ) {
                     Scaffold(
-                        modifier = Modifier.then(dropParent),
+                        modifier = Modifier.rootDragDropModifier(dropParent),
                         navStateHolder = app.navStateHolder,
                         globalUiStateHolder = app.globalUiStateHolder,
                     )

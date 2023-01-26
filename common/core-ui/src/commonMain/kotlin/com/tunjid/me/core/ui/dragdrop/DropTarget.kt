@@ -16,13 +16,14 @@
 
 package com.tunjid.me.core.ui.dragdrop
 
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.OnGloballyPositionedModifier
-import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.compose.ui.modifier.ModifierLocalMap
+import androidx.compose.ui.modifier.ModifierLocalNode
+import androidx.compose.ui.node.DelegatingNode
+import androidx.compose.ui.node.GlobalPositionAwareModifierNode
+import androidx.compose.ui.node.modifierElementOf
 import com.tunjid.me.core.utilities.Uri
 
 interface DropTarget {
@@ -41,9 +42,28 @@ fun Modifier.dropTarget(
     onExited: () -> Unit = { },
     onDropped: (uris: List<Uri>, position: Offset) -> Boolean,
     onEnded: () -> Unit = {},
-): Modifier = composed(
-    inspectorInfo = debugInspectorInfo {
-        name = "dropTarget"
+): Modifier = this then modifierElementOf(
+    params = listOf(onStarted, onEntered, onMoved, onExited, onDropped, onEnded),
+    create = {
+        DropTargetNode(
+            onStarted = onStarted,
+            onEntered = onEntered,
+            onMoved = onMoved,
+            onExited = onExited,
+            onDropped = onDropped,
+            onEnded = onEnded
+        )
+    },
+    update = { dropTarget ->
+        dropTarget.onStarted = onStarted
+        dropTarget.onEntered = onEntered
+        dropTarget.onMoved = onMoved
+        dropTarget.onExited = onExited
+        dropTarget.onDropped = onDropped
+        dropTarget.onEnded = onEnded
+    },
+    definitions = {
+        this.name = "dropTarget"
         properties["onDragStarted"] = onStarted
         properties["onEntered"] = onEntered
         properties["onMoved"] = onMoved
@@ -51,50 +71,38 @@ fun Modifier.dropTarget(
         properties["onDropped"] = onDropped
         properties["onEnded"] = onEnded
     },
-    factory = {
-        val dropTarget = remember {
-            MutableDropTarget(
-                onStarted = onStarted,
-                onEntered = onEntered,
-                onMoved = onMoved,
-                onExited = onExited,
-                onDropped = onDropped,
-                onEnded = onEnded
-            )
-        }
+)
 
-        val node = remember {
-            DragDropContainer { start ->
-                when (start) {
-                    is DragDrop.Drag -> DragDropAction.Reject
-                    is DragDrop.Drop -> when (
-                        dropTarget.onStarted(start.mimeTypes, start.offset)
-                    ) {
-                        false -> DragDropAction.Reject
-                        true -> DragDropAction.Drop(dropTarget)
-                    }
-                }
-            }
-        }
-
-        dropTarget.onStarted = onStarted
-        dropTarget.onEntered = onEntered
-        dropTarget.onMoved = onMoved
-        dropTarget.onExited = onExited
-        dropTarget.onDropped = onDropped
-        dropTarget.onEnded = onEnded
-
-        this.then(node).then(dropTarget)
-    })
-
-private class MutableDropTarget(
+private class DropTargetNode(
     var onStarted: (mimeTypes: Set<String>, Offset) -> Boolean,
     var onEntered: () -> Unit,
     var onMoved: (position: Offset) -> Unit,
     var onExited: () -> Unit,
     var onDropped: (uris: List<Uri>, position: Offset) -> Boolean,
     var onEnded: () -> Unit,
-) : DropTarget, OnGloballyPositionedModifier {
+) : DelegatingNode(),
+    ModifierLocalNode,
+    GlobalPositionAwareModifierNode,
+    DropTarget {
+
+    private val dragDropNode = delegated {
+        DragDropNode { start ->
+            when (start) {
+                is DragDrop.Drag -> DragDropAction.Reject
+                is DragDrop.Drop -> when (
+                    onStarted(start.mimeTypes, start.offset)
+                ) {
+                    false -> DragDropAction.Reject
+                    true -> DragDropAction.Drop(
+                        dropTarget = this@DropTargetNode
+                    )
+                }
+            }
+        }
+    }
+
+    override val providedValues: ModifierLocalMap = dragDropNode.providedValues
+
 
     private var coordinates: LayoutCoordinates? = null
 
@@ -119,6 +127,7 @@ private class MutableDropTarget(
     override fun onEnded() = onEnded.invoke()
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+        dragDropNode.onGloballyPositioned(coordinates)
         this.coordinates = coordinates
     }
 }

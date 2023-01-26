@@ -30,7 +30,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
 import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.me.core.ui.dragdrop.PlatformDragDropModifier
+import com.tunjid.me.core.ui.dragdrop.RootDragDropNode
+import com.tunjid.me.core.ui.dragdrop.ContentView
+import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.NavMode
@@ -55,7 +57,9 @@ class MainActivity : AppCompatActivity() {
             meApp.navStateHolder.accept { mainNav.pop() }
         }
 
-        val contentView = PlatformDragDropModifier(context = this)
+        val rootDragDropNode = RootDragDropNode()
+        val contentView = ContentView(context = this)
+        contentView.addOnAttachStateChangeListener(rootDragDropNode)
 
         contentView.setContent {
             AppTheme {
@@ -64,7 +68,7 @@ class MainActivity : AppCompatActivity() {
                     LocalLifecycleStateHolder provides meApp.lifecycleStateHolder,
                 ) {
                     Scaffold(
-                        modifier = Modifier.then(contentView),
+                        modifier = Modifier.rootDragDropModifier(rootDragDropNode),
                         navStateHolder = meApp.navStateHolder,
                         globalUiStateHolder = meApp.globalUiStateHolder,
                     )

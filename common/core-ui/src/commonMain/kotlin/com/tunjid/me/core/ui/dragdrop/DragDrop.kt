@@ -19,18 +19,24 @@ package com.tunjid.me.core.ui.dragdrop
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.modifier.modifierLocalOf
+import androidx.compose.ui.node.DelegatingNode
+import androidx.compose.ui.node.modifierElementOf
 
-internal val ModifierLocalDragDropParent = modifierLocalOf<DragDropParent?> { null }
+expect class RootDragDropNode : DelegatingNode
 
-expect class PlatformDragDropModifier : DragDropModifier
+fun Modifier.rootDragDropModifier(
+    rootDragDropNode: RootDragDropNode
+): Modifier = this then modifierElementOf(
+    create = { rootDragDropNode },
+    definitions = {}
+)
 
-internal interface DragDropModifier : DragSource, DropTarget, Modifier.Element
+internal interface DragDroppable : DragSource, DropTarget
 
 /**
- * Root level [DragDropModifier], it always rejects leaving acceptance to its children
+ * Root level [Modifier.Node], it always rejects leaving acceptance to its children
  */
-internal fun rootDragDropModifier(): DragDropModifier = DragDropContainer(
+internal fun rootDragDropNode() = DragDropNode(
     onDragDropStarted = { _ -> DragDropAction.Reject }
 )
 
@@ -46,8 +52,9 @@ internal interface DragDropChild : DragSource, DropTarget, DragDropParent {
     val coordinates: LayoutCoordinates?
 }
 
-internal val DragDropChild.area get() =
-    size.width * size.height
+internal val DragDropChild.area
+    get() =
+        size.width * size.height
 
 internal sealed class DragDropAction {
     object Reject : DragDropAction()

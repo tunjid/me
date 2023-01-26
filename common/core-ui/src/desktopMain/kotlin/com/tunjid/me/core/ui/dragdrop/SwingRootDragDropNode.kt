@@ -19,6 +19,11 @@ package com.tunjid.me.core.ui.dragdrop
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.modifier.ModifierLocalMap
+import androidx.compose.ui.modifier.ModifierLocalNode
+import androidx.compose.ui.node.DelegatingNode
+import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import com.tunjid.me.core.utilities.FileUri
@@ -33,15 +38,20 @@ import java.io.Serializable
 import java.awt.dnd.DragSource as AwtDragSource
 import java.awt.dnd.DropTarget as AwtDropTarget
 
-actual class PlatformDragDropModifier(
+actual class RootDragDropNode(
     density: Float,
     window: ComposeWindow,
-) : DragDropModifier by rootDragDropModifier() {
+) : DelegatingNode(),
+    ModifierLocalNode,
+    GlobalPositionAwareModifierNode {
+
+    private val dragDropNode: DragDropNode = delegated { rootDragDropNode() }
+
     init {
         window.contentPane.dropTarget = AwtDropTarget().apply {
             addDropTargetListener(
                 dropTargetListener(
-                    dragDropModifier = this@PlatformDragDropModifier,
+                    dragDropNode = dragDropNode,
                     density = density
                 )
             )
@@ -51,32 +61,37 @@ actual class PlatformDragDropModifier(
             window,
             DnDConstants.ACTION_COPY,
             dragGestureListener(
-                dragDropModifier = this@PlatformDragDropModifier,
+                dragDroppable = dragDropNode,
                 density = density
             )
         )
     }
+
+    override val providedValues: ModifierLocalMap = dragDropNode.providedValues
+
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) =
+        dragDropNode.onGloballyPositioned(coordinates)
 }
 
 private fun dropTargetListener(
-    dragDropModifier: DragDropModifier,
+    dragDropNode: DragDroppable,
     density: Float,
 ) = object : DropTargetListener {
     override fun dragEnter(dtde: DropTargetDragEvent?) {
         if (dtde == null) return
-        dragDropModifier.onStarted(
+        dragDropNode.onStarted(
             dtde.startDragMimeTypes(),
             Offset(
                 dtde.location.x * density,
                 dtde.location.y * density
             )
         )
-        dragDropModifier.onEntered()
+        dragDropNode.onEntered()
     }
 
     override fun dragOver(dtde: DropTargetDragEvent?) {
         if (dtde == null) return
-        dragDropModifier.onMoved(
+        dragDropNode.onMoved(
             Offset(
                 dtde.location.x * density,
                 dtde.location.y * density
@@ -87,16 +102,16 @@ private fun dropTargetListener(
     override fun dropActionChanged(dtde: DropTargetDragEvent?) = Unit
 
     override fun dragExit(dte: DropTargetEvent?) {
-        dragDropModifier.onExited()
-        dragDropModifier.onEnded()
+        dragDropNode.onExited()
+        dragDropNode.onEnded()
     }
 
     override fun drop(dtde: DropTargetDropEvent?) {
-        if (dtde == null) return dragDropModifier.onEnded()
+        if (dtde == null) return dragDropNode.onEnded()
 
         dtde.acceptDrop(DnDConstants.ACTION_REFERENCE)
         dtde.dropComplete(
-            dragDropModifier.onDropped(
+            dragDropNode.onDropped(
                 dtde.endDropUris(),
                 Offset(
                     dtde.location.x * density,
@@ -104,12 +119,12 @@ private fun dropTargetListener(
                 )
             )
         )
-        dragDropModifier.onEnded()
+        dragDropNode.onEnded()
     }
 }
 
 private fun dragGestureListener(
-    dragDropModifier: DragDropModifier,
+    dragDroppable: DragDroppable,
     density: Float,
 ) = DragGestureListener { event: DragGestureEvent ->
     val offset = Offset(
@@ -117,7 +132,8 @@ private fun dragGestureListener(
         y = event.dragOrigin.y * density
     )
 
-    val dragInfo = dragDropModifier.dragInfo(offset) ?: return@DragGestureListener
+    println("Dragging")
+    val dragInfo = dragDroppable.dragInfo(offset) ?: return@DragGestureListener
 
     if (dragInfo.uris.isNotEmpty()) when (val shadowPainter = dragInfo.dragShadowPainter) {
         null -> event.startDrag(
