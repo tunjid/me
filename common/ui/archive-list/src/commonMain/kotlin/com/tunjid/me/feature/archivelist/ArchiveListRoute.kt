@@ -47,6 +47,7 @@ import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.push
+import com.tunjid.treenav.swap
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.scan
 import kotlinx.serialization.Serializable
@@ -106,6 +107,7 @@ private fun ArchiveScreen(
                 gridState = gridState,
                 cardWidth = cardWidth,
                 items = state.items,
+                isInMainNav = state.isInMainNav,
                 currentQuery = state.queryState.currentQuery,
                 actions = actions
             )
@@ -130,6 +132,7 @@ private fun ArchiveList(
     gridState: LazyGridState,
     items: List<ArchiveItem>,
     currentQuery: ArchiveQuery,
+    isInMainNav: Boolean,
     cardWidth: Dp,
     actions: (Action) -> Unit,
 ) {
@@ -166,7 +169,8 @@ private fun ArchiveList(
                         },
                         navigate = { path ->
                             actions(Action.Navigate {
-                                mainNav.push(route = path.toRoute)
+                                if (isInMainNav) mainNav.push(route = path.toRoute)
+                                else mainNav.swap(route = path.toRoute)
                             })
                         }
                     )
