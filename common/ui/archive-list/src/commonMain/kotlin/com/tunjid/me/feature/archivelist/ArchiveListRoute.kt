@@ -45,9 +45,7 @@ import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.tiler.compose.PivotedTilingEffect
-import com.tunjid.tiler.tiledListOf
 import com.tunjid.treenav.push
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.scan
@@ -107,7 +105,8 @@ private fun ArchiveScreen(
             ArchiveList(
                 gridState = gridState,
                 cardWidth = cardWidth,
-                state = state,
+                items = state.items,
+                currentQuery = state.queryState.currentQuery,
                 actions = actions
             )
         }
@@ -129,8 +128,9 @@ private fun ArchiveScreen(
 @Composable
 private fun ArchiveList(
     gridState: LazyGridState,
+    items: List<ArchiveItem>,
+    currentQuery: ArchiveQuery,
     cardWidth: Dp,
-    state: State,
     actions: (Action) -> Unit,
 ) {
     LazyVerticalGrid(
@@ -138,7 +138,7 @@ private fun ArchiveList(
         columns = GridCells.Adaptive(cardWidth),
         content = {
             items(
-                items = state.items,
+                items = items,
                 key = { it.key },
                 span = { item ->
                     actions(Action.Fetch.NoColumnsChanged(maxLineSpan))
@@ -153,11 +153,11 @@ private fun ArchiveList(
                     GridCell(
                         modifier = Modifier.animateItemPlacement(),
                         item = item,
-                        query = state.queryState.currentQuery,
+                        query = currentQuery,
                         onCategoryClicked = { category ->
                             actions(
                                 Action.Fetch.QueryChange(
-                                    query = state.queryState.currentQuery.copy(offset = 0).let { query ->
+                                    query = currentQuery.copy(offset = 0).let { query ->
                                         if (query.contentFilter.categories.contains(category)) query - category
                                         else query + category
                                     },
