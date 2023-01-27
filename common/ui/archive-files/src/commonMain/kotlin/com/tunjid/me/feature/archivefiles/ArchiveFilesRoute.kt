@@ -57,6 +57,7 @@ import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.tiler.TiledList
+import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.tiler.queryAtOrNull
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
@@ -95,18 +96,23 @@ private fun ArchiveFilesScreen(
             lazyGridState = gridState,
             actions = actions
         )
-        FilesTiling(
-            archiveId = state.archiveId,
-            files = state.files,
-            lazyGridState = gridState,
-            actions = actions
-        )
         FilesDrop(
             dragLocation = state.dragLocation,
             hasStoragePermissions = state.hasStoragePermissions,
             actions = actions
         )
         UploadInfo(state.uploadInfo)
+
+        gridState.PivotedTilingEffect(
+            items = state.files,
+            onQueryChanged = { query ->
+                actions(
+                    Action.Fetch.LoadAround(
+                        query ?: ArchiveFileQuery(archiveId = state.archiveId)
+                    )
+                )
+            }
+        )
     }
 }
 
@@ -136,29 +142,6 @@ private fun FilesGrid(
                 )
             }
         )
-    }
-}
-
-@Composable
-private fun FilesTiling(
-    archiveId: ArchiveId,
-    lazyGridState: LazyGridState,
-    files: TiledList<ArchiveFileQuery, ArchiveFile>,
-    actions: (Action.Fetch.LoadAround) -> Unit,
-) {
-    LaunchedEffect(Unit) {
-        actions(
-            Action.Fetch.LoadAround(
-                files.queryAtOrNull(0)
-                    ?: ArchiveFileQuery(archiveId = archiveId)
-            )
-        )
-    }
-    LaunchedEffect(lazyGridState, files) {
-        snapshotFlow { lazyGridState.layoutInfo.visibleItemsInfo.firstOrNull()?.index }
-            .filterNotNull()
-            .map(files::queryAt)
-            .collectLatest { actions(Action.Fetch.LoadAround(it)) }
     }
 }
 

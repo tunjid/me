@@ -46,12 +46,9 @@ import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
-import com.tunjid.tiler.TiledList
-import com.tunjid.tiler.queryAtOrNull
+import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.tiler.tiledListOf
 import com.tunjid.treenav.push
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.scan
 import kotlinx.serialization.Serializable
@@ -116,11 +113,16 @@ private fun ArchiveScreen(
         }
     }
 
-    ArchiveTiling(
-        currentQuery = state.queryState.currentQuery,
-        items = state.items,
+    FilterCollapseEffect(
         gridState = gridState,
         onAction = actions
+    )
+
+    gridState.PivotedTilingEffect(
+        items = state.items,
+        onQueryChanged = {
+            actions(Action.Fetch.LoadAround(it ?: state.queryState.currentQuery))
+        }
     )
 }
 
@@ -206,34 +208,10 @@ private fun GridCell(
 }
 
 @Composable
-private fun ArchiveTiling(
-    currentQuery: ArchiveQuery,
-    items: TiledList<ArchiveQuery, ArchiveItem>,
+private fun FilterCollapseEffect(
     gridState: LazyGridState,
     onAction: (Action) -> Unit,
 ) {
-    // Initial load
-    LaunchedEffect(Unit) {
-        onAction(
-            Action.Fetch.LoadAround(
-                query = currentQuery,
-            )
-        )
-    }
-    
-    // Endless scrolling
-    LaunchedEffect(items, gridState) {
-        snapshotFlow {
-            val visibleItems = gridState.layoutInfo.visibleItemsInfo
-            val firstItemInfo = visibleItems.firstOrNull()
-            firstItemInfo?.index?.let(items::queryAtOrNull)
-        }
-            .filterNotNull()
-            .distinctUntilChanged()
-            .collectLatest { query ->
-                onAction(Action.Fetch.LoadAround(query = query))
-            }
-    }
     // Close filters when scrolling
     LaunchedEffect(gridState) {
         snapshotFlow {
@@ -258,17 +236,17 @@ private fun ArchiveTiling(
 }
 
 //@Preview
-@Composable
-private fun PreviewLoadingState() {
-    ArchiveScreen(
-        stateHolder = State(
-            queryState = QueryState(
-                currentQuery = ArchiveQuery(kind = ArchiveKind.Articles),
-            ),
-            items = tiledListOf(
-                ArchiveQuery(kind = ArchiveKind.Articles) to
-                    ArchiveItem.Loading(isCircular = true)
-            )
-        ).asNoOpStateFlowMutator()
-    )
-}
+//@Composable
+//private fun PreviewLoadingState() {
+//    ArchiveScreen(
+//        stateHolder = State(
+//            queryState = QueryState(
+//                currentQuery = ArchiveQuery(kind = ArchiveKind.Articles),
+//            ),
+//            items = tiledListOf(
+//                ArchiveQuery(kind = ArchiveKind.Articles) to
+//                    ArchiveItem.Loading(isCircular = true)
+//            )
+//        ).asNoOpStateFlowMutator()
+//    )
+//}
