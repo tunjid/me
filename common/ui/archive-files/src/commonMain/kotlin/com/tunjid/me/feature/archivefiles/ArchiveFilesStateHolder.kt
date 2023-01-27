@@ -78,9 +78,8 @@ class ActualArchiveFilesStateHolder(
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
         authRepository.authMutations(),
-        route.isInMainNavMutations(
-            navStateFlow = navStateFlow,
-            uiStateFlow = uiStateFlow,
+        navStateFlow.isInMainNavMutations(
+            route = route,
             mutation = { copy(isInMainNav = it) }
         ),
         permissionsFlow.storagePermissionMutations(),

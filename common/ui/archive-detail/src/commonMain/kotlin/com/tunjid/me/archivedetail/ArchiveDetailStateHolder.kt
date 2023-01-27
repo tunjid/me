@@ -74,9 +74,8 @@ class ActualArchiveDetailStateHolder(
         archiveRepository.archiveLoadMutations(
             id = route.archiveId
         ),
-        route.isInMainNavMutations(
-            navStateFlow = navStateFlow,
-            uiStateFlow = uiStateFlow,
+        navStateFlow.isInMainNavMutations(
+            route = route,
             mutation = { copy(isInMainNav = it) }
         ),
     ),
