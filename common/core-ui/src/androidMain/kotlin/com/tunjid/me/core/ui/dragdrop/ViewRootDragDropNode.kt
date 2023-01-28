@@ -16,20 +16,37 @@
 
 package com.tunjid.me.core.ui.dragdrop
 
-import android.content.ClipData
-import android.view.*
+import android.view.DragEvent
+import android.view.GestureDetector
+import android.view.HapticFeedbackConstants
+import android.view.MotionEvent
+import android.view.View
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.modifier.ModifierLocalMap
 import androidx.compose.ui.modifier.ModifierLocalNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
+import androidx.compose.ui.node.modifierElementOf
 import androidx.compose.ui.unit.Density
 import androidx.core.view.GestureDetectorCompat
 import com.tunjid.me.core.utilities.ContentUri
 import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.core.utilities.Uri
-import android.net.Uri as AndroidUri
+
+fun Modifier.rootDragDropModifier(
+    dragTriggers: Set<DragTrigger> = setOf(),
+    rootDragDropNode: RootDragDropNode,
+): Modifier = this then modifierElementOf(
+    params = dragTriggers,
+    create = {
+        rootDragDropNode.dragTriggers = dragTriggers
+        rootDragDropNode
+    },
+    update = { it.dragTriggers = dragTriggers },
+    definitions = {}
+)
 
 actual class RootDragDropNode : DelegatingNode(),
     ModifierLocalNode,
@@ -37,6 +54,12 @@ actual class RootDragDropNode : DelegatingNode(),
     View.OnAttachStateChangeListener {
 
     private val dragDropNode: DragDropNode = delegated { rootDragDropNode() }
+    private lateinit var dragGestureDetector: DragGestureDetector
+    internal var dragTriggers = setOf<DragTrigger>()
+        set(value) {
+            field = value
+            if (::dragGestureDetector.isInitialized) dragGestureDetector.dragTriggers = value
+        }
 
     override val providedValues: ModifierLocalMap = dragDropNode.providedValues
 
@@ -49,47 +72,15 @@ actual class RootDragDropNode : DelegatingNode(),
             dragListener = dragListener(
                 dragDroppable = dragDropNode
             ),
-            touchListener = longPressDragGestureListener(
+            touchListener = DragGestureDetector(
                 view = view,
+                dragTriggers = dragTriggers,
                 dragDroppable = dragDropNode
-            )
+            ).also(::dragGestureDetector::set)
         )
     }
 
     override fun onViewDetachedFromWindow(view: View) = Unit
-}
-
-private fun longPressDragGestureListener(
-    view: View,
-    dragDroppable: DragDroppable,
-): View.OnTouchListener {
-    val gestureDetector = GestureDetectorCompat(
-        view.context,
-        object : GestureDetector.SimpleOnGestureListener() {
-            override fun onLongPress(event: MotionEvent) {
-                val dragInfo = dragDroppable.dragInfo(Offset(event.x, event.y)) ?: return
-                val clipData = dragInfo.clipData() ?: return
-                val density = with(view.context.resources) {
-                    Density(
-                        density = displayMetrics.density,
-                        fontScale = configuration.fontScale
-                    )
-                }
-
-                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                view.startDrag(
-                    clipData,
-                    PainterDragShadowBuilder(
-                        density = density,
-                        dragInfo = dragInfo,
-                    ),
-                    null,
-                    0
-                )
-            }
-        }
-    )
-    return View.OnTouchListener { _, motionEvent -> gestureDetector.onTouchEvent(motionEvent) }
 }
 
 private fun dragListener(
@@ -133,22 +124,6 @@ private fun dragListener(
 
         else -> error("Invalid action: ${event.action}")
     }
-}
-
-private fun DragInfo.clipData(): ClipData? {
-    if (uris.isEmpty()) return null
-
-    val mimeTypes = uris.map(Uri::mimetype).distinct().toTypedArray()
-    val dragData = ClipData(
-        "Drag drop",
-        mimeTypes,
-        ClipData.Item(AndroidUri.parse(uris.first().path))
-    )
-    uris.drop(1).forEach { uri ->
-        dragData.addItem(ClipData.Item(AndroidUri.parse(uri.path)))
-    }
-    println("mimeTypes: $mimeTypes; uris: $uris")
-    return dragData
 }
 
 private fun DragEvent.startDropMimetypes() = with(clipDescription) {

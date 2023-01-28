@@ -16,6 +16,7 @@
 
 package com.tunjid.me.core.ui.dragdrop
 
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.toAwtImage
@@ -24,6 +25,7 @@ import androidx.compose.ui.modifier.ModifierLocalMap
 import androidx.compose.ui.modifier.ModifierLocalNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
+import androidx.compose.ui.node.modifierElementOf
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import com.tunjid.me.core.utilities.FileUri
@@ -37,6 +39,13 @@ import java.io.File
 import java.io.Serializable
 import java.awt.dnd.DragSource as AwtDragSource
 import java.awt.dnd.DropTarget as AwtDropTarget
+
+fun Modifier.rootDragDropModifier(
+    rootDragDropNode: RootDragDropNode,
+): Modifier = this then modifierElementOf(
+    create = { rootDragDropNode },
+    definitions = {}
+)
 
 actual class RootDragDropNode(
     density: Float,

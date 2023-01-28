@@ -32,6 +32,7 @@ import androidx.window.layout.WindowMetricsCalculator
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.me.core.ui.dragdrop.RootDragDropNode
 import com.tunjid.me.core.ui.dragdrop.ContentView
+import com.tunjid.me.core.ui.dragdrop.DragTrigger
 import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
@@ -68,7 +69,13 @@ class MainActivity : AppCompatActivity() {
                     LocalLifecycleStateHolder provides meApp.lifecycleStateHolder,
                 ) {
                     Scaffold(
-                        modifier = Modifier.rootDragDropModifier(rootDragDropNode),
+                        modifier = Modifier.rootDragDropModifier(
+                            dragTriggers = setOf(
+                                DragTrigger.LongPress,
+                                DragTrigger.DoubleTap
+                            ),
+                            rootDragDropNode = rootDragDropNode
+                        ),
                         navStateHolder = meApp.navStateHolder,
                         globalUiStateHolder = meApp.globalUiStateHolder,
                     )

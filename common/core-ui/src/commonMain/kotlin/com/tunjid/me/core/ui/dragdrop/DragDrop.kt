@@ -24,13 +24,6 @@ import androidx.compose.ui.node.modifierElementOf
 
 expect class RootDragDropNode : DelegatingNode
 
-fun Modifier.rootDragDropModifier(
-    rootDragDropNode: RootDragDropNode
-): Modifier = this then modifierElementOf(
-    create = { rootDragDropNode },
-    definitions = {}
-)
-
 internal interface DragDroppable : DragSource, DropTarget
 
 /**
