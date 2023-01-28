@@ -32,7 +32,7 @@ sealed class DragTrigger {
     object DoubleTap : DragTrigger()
 }
 
-internal class DragGestureDetector(
+internal class DragTriggerDetector(
     private val view: View,
     internal var dragTriggers: Set<DragTrigger>,
     private val dragDroppable: DragDroppable,

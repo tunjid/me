@@ -17,9 +17,6 @@
 package com.tunjid.me.core.ui.dragdrop
 
 import android.view.DragEvent
-import android.view.GestureDetector
-import android.view.HapticFeedbackConstants
-import android.view.MotionEvent
 import android.view.View
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -29,8 +26,6 @@ import androidx.compose.ui.modifier.ModifierLocalNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.modifierElementOf
-import androidx.compose.ui.unit.Density
-import androidx.core.view.GestureDetectorCompat
 import com.tunjid.me.core.utilities.ContentUri
 import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.core.utilities.Uri
@@ -54,7 +49,7 @@ actual class RootDragDropNode : DelegatingNode(),
     View.OnAttachStateChangeListener {
 
     private val dragDropNode: DragDropNode = delegated { rootDragDropNode() }
-    private lateinit var dragGestureDetector: DragGestureDetector
+    private lateinit var dragGestureDetector: DragTriggerDetector
     internal var dragTriggers = setOf<DragTrigger>()
         set(value) {
             field = value
@@ -72,7 +67,7 @@ actual class RootDragDropNode : DelegatingNode(),
             dragListener = dragListener(
                 dragDroppable = dragDropNode
             ),
-            touchListener = DragGestureDetector(
+            touchListener = DragTriggerDetector(
                 view = view,
                 dragTriggers = dragTriggers,
                 dragDroppable = dragDropNode
