@@ -49,11 +49,11 @@ actual class RootDragDropNode : DelegatingNode(),
     View.OnAttachStateChangeListener {
 
     private val dragDropNode: DragDropNode = delegated { rootDragDropNode() }
-    private lateinit var dragGestureDetector: DragTriggerDetector
+    private lateinit var dragTriggerDetector: DragTriggerDetector
     internal var dragTriggers = setOf<DragTrigger>()
         set(value) {
             field = value
-            if (::dragGestureDetector.isInitialized) dragGestureDetector.dragTriggers = value
+            if (::dragTriggerDetector.isInitialized) dragTriggerDetector.dragTriggers = value
         }
 
     override val providedValues: ModifierLocalMap = dragDropNode.providedValues
@@ -71,7 +71,7 @@ actual class RootDragDropNode : DelegatingNode(),
                 view = view,
                 dragTriggers = dragTriggers,
                 dragDroppable = dragDropNode
-            ).also(::dragGestureDetector::set)
+            ).also(::dragTriggerDetector::set)
         )
     }
 
