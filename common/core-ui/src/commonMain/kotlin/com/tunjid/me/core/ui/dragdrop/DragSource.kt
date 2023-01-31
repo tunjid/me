@@ -62,7 +62,7 @@ fun Modifier.dragSource(
     dragShadowPainter: Painter? = null,
     dragStatus: () -> DragStatus,
 ): Modifier = this then modifierElementOf(
-    params = listOf(dragShadowPainter, dragStatus),
+    params = dragShadowPainter to dragStatus,
     create = {
         DragSourceNode(
             dragShadowPainter = dragShadowPainter,
@@ -74,7 +74,7 @@ fun Modifier.dragSource(
         dragSource.dragStatus = dragStatus
     },
     definitions = {
-        this.name = "dragSource"
+        name = "dragSource"
         properties["dragShadowPainter"] = dragShadowPainter
         properties["dragStatus"] = dragStatus
     },
@@ -104,13 +104,7 @@ private class DragSourceNode(
 
     override val providedValues: ModifierLocalMap = dragDropNode.providedValues
 
-    private var coordinates: LayoutCoordinates? = null
-
-    override val size: IntSize
-        get() = when (val coordinates = coordinates) {
-            null -> IntSize.Zero
-            else -> coordinates.size
-        }
+    override val size: IntSize get() = dragDropNode.size
 
     override fun dragInfo(offset: Offset): DragInfo? =
         when (val dragStatus = dragStatus()) {
@@ -122,8 +116,6 @@ private class DragSourceNode(
             )
         }
 
-    override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) =
         dragDropNode.onGloballyPositioned(coordinates)
-        this.coordinates = coordinates
-    }
 }

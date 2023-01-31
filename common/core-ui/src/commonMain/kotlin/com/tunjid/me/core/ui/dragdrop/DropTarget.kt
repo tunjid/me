@@ -63,7 +63,7 @@ fun Modifier.dropTarget(
         dropTarget.onEnded = onEnded
     },
     definitions = {
-        this.name = "dropTarget"
+        name = "dropTarget"
         properties["onDragStarted"] = onStarted
         properties["onEntered"] = onEntered
         properties["onMoved"] = onMoved
@@ -89,13 +89,11 @@ private class DropTargetNode(
         DragDropNode { start ->
             when (start) {
                 is DragDrop.Drag -> DragDropAction.Reject
-                is DragDrop.Drop -> when (
-                    onStarted(start.mimeTypes, start.offset)
-                ) {
-                    false -> DragDropAction.Reject
-                    true -> DragDropAction.Drop(
+                is DragDrop.Drop -> when {
+                    onStarted(start.mimeTypes, start.offset) -> DragDropAction.Drop(
                         dropTarget = this@DropTargetNode
                     )
+                    else -> DragDropAction.Reject
                 }
             }
         }
@@ -103,32 +101,27 @@ private class DropTargetNode(
 
     override val providedValues: ModifierLocalMap = dragDropNode.providedValues
 
-
-    private var coordinates: LayoutCoordinates? = null
-
     override fun onStarted(mimeTypes: Set<String>, position: Offset): Boolean = onStarted.invoke(
         mimeTypes,
-        coordinates?.windowToLocal(position) ?: position
+        dragDropNode.coordinates?.windowToLocal(position) ?: position
     )
 
     override fun onEntered() = onEntered.invoke()
 
     override fun onMoved(position: Offset) = onMoved.invoke(
-        coordinates?.windowToLocal(position) ?: position
+        dragDropNode.coordinates?.windowToLocal(position) ?: position
     )
 
     override fun onExited() = onExited.invoke()
 
     override fun onDropped(uris: List<Uri>, position: Offset): Boolean = onDropped.invoke(
         uris,
-        coordinates?.windowToLocal(position) ?: position
+        dragDropNode.coordinates?.windowToLocal(position) ?: position
     )
 
     override fun onEnded() = onEnded.invoke()
 
-    override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) =
         dragDropNode.onGloballyPositioned(coordinates)
-        this.coordinates = coordinates
-    }
 }
 
