@@ -46,8 +46,7 @@ internal interface DragDropChild : DragDroppable, DragDropParent {
 }
 
 internal val DragDropChild.area
-    get() =
-        size.width * size.height
+    get() = size.width * size.height
 
 internal sealed class DragDropAction {
     object Reject : DragDropAction()
