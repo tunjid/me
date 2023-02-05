@@ -13,7 +13,10 @@ photos:
 SELECT *
 FROM archiveFileEntity
 WHERE archive_id = :archiveId
-AND mimetype IN ("image/jpeg", "image/png", "image/gif")
+AND CASE WHEN :hasMimeTypeFilters
+         THEN mimetype IN :mimeTypeFilters
+         ELSE 1
+    END
 ORDER BY CASE WHEN :desc
               THEN created
               ELSE (-1 * created)

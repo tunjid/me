@@ -85,6 +85,8 @@ internal class OfflineFirstArchiveFileRepository(
         desc = query.desc,
         limit = query.limit.toLong(),
         offset = query.offset.toLong(),
+        mimeTypeFilters = query.mimeTypes ?: emptySet(),
+        hasMimeTypeFilters = query.mimeTypes != null,
     )
         .asFlow()
         .mapToList(context = dispatcher)

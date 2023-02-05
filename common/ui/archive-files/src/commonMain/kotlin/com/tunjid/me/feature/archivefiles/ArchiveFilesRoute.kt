@@ -100,7 +100,14 @@ private fun ArchiveFilesScreen(
             onQueryChanged = { query ->
                 actions(
                     Action.Fetch.LoadAround(
-                        query ?: ArchiveFileQuery(archiveId = state.archiveId)
+                        query ?: ArchiveFileQuery(
+                            archiveId = state.archiveId,
+                            mimeTypes = setOf(
+                                "image/png",
+                                "image/jpeg",
+                                "image/gif",
+                            )
+                        )
                     )
                 )
             }

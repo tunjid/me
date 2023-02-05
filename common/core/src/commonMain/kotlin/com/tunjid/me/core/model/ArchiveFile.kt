@@ -31,6 +31,7 @@ ArchiveFileQuery(
     val desc: Boolean = true,
     val offset: Int = 0,
     val limit: Int = DEFAULT_QUERY_LIMIT,
+    val mimeTypes: Set<String>? = null,
 )
 
 @Serializable
