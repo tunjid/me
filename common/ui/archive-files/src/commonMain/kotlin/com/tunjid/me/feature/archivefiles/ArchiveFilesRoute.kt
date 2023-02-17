@@ -34,9 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,7 +45,6 @@ import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
-import com.tunjid.me.core.ui.dragdrop.DragStatus
 import com.tunjid.me.core.ui.dragdrop.dragSource
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.maxSize
@@ -56,12 +53,7 @@ import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
-import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.compose.PivotedTilingEffect
-import com.tunjid.tiler.queryAtOrNull
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -207,16 +199,12 @@ private fun GalleryItem(
             contentScale = ContentScale.Crop,
             modifier = Modifier.dragSource(
                 dragShadowPainter = imagePainter,
-                dragStatus = {
-                    DragStatus.draggable(
-                        uris = listOf(
-                            RemoteUri(
-                                path = archiveFile.url,
-                                mimetype = archiveFile.mimeType,
-                            )
-                        ),
+                uris = listOf(
+                    RemoteUri(
+                        path = archiveFile.url,
+                        mimetype = archiveFile.mimeType,
                     )
-                }
+                )
             )
         )
     }

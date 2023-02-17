@@ -39,19 +39,6 @@ internal interface DragSource {
     fun dragInfo(offset: Offset): DragInfo?
 }
 
-sealed class DragStatus {
-
-    internal object Static : DragStatus()
-
-    internal data class Draggable(val uris: List<Uri>) : DragStatus()
-
-
-    companion object {
-        fun static(): DragStatus = Static
-        fun draggable(uris: List<Uri>): DragStatus = Draggable(uris)
-    }
-}
-
 internal data class DragInfo(
     val size: Size,
     val uris: List<Uri>,
@@ -60,29 +47,29 @@ internal data class DragInfo(
 
 fun Modifier.dragSource(
     dragShadowPainter: Painter? = null,
-    dragStatus: () -> DragStatus,
+    uris: List<Uri>,
 ): Modifier = this then modifierElementOf(
-    params = dragShadowPainter to dragStatus,
+    params = dragShadowPainter to uris,
     create = {
         DragSourceNode(
             dragShadowPainter = dragShadowPainter,
-            dragStatus = dragStatus
+            uris = uris
         )
     },
     update = { dragSource ->
         dragSource.dragShadowPainter = dragShadowPainter
-        dragSource.dragStatus = dragStatus
+        dragSource.uris = uris
     },
     definitions = {
         name = "dragSource"
         properties["dragShadowPainter"] = dragShadowPainter
-        properties["dragStatus"] = dragStatus
+        properties["dragStatus"] = uris
     },
 )
 
 private class DragSourceNode(
     override var dragShadowPainter: Painter?,
-    var dragStatus: () -> DragStatus,
+    var uris: List<Uri>,
 ) : DelegatingNode(),
     ModifierLocalNode,
     GlobalPositionAwareModifierNode,
@@ -92,9 +79,9 @@ private class DragSourceNode(
         DragDropNode { start ->
             when (start) {
                 is DragDrop.Drop -> DragDropAction.Reject
-                is DragDrop.Drag -> when (dragStatus()) {
-                    DragStatus.Static -> DragDropAction.Reject
-                    is DragStatus.Draggable -> DragDropAction.Drag(
+                is DragDrop.Drag -> when (uris) {
+                    emptyList<Uri>() -> DragDropAction.Reject
+                    else -> DragDropAction.Drag(
                         dragSource = this@DragSourceNode
                     )
                 }
@@ -107,10 +94,10 @@ private class DragSourceNode(
     override val size: IntSize get() = dragDropNode.size
 
     override fun dragInfo(offset: Offset): DragInfo? =
-        when (val dragStatus = dragStatus()) {
-            DragStatus.Static -> null
-            is DragStatus.Draggable -> DragInfo(
-                uris = dragStatus.uris,
+        when (uris) {
+            emptyList<Uri>() -> null
+            else -> DragInfo(
+                uris = uris,
                 size = size.toSize(),
                 dragShadowPainter = dragShadowPainter
             )
