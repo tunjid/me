@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toSize
 import com.tunjid.me.core.utilities.Uri
 
-internal interface DragSource {
+internal interface DragSource: DragOrDrop {
 
     val size: IntSize
 
@@ -78,12 +78,10 @@ private class DragSourceNode(
     private val dragDropNode = delegated {
         DragDropNode { start ->
             when (start) {
-                is DragDrop.Drop -> DragDropAction.Reject
-                is DragDrop.Drag -> when (uris) {
-                    emptyList<Uri>() -> DragDropAction.Reject
-                    else -> DragDropAction.Drag(
-                        dragSource = this@DragSourceNode
-                    )
+                is DragOrDropStart.Drop -> null
+                is DragOrDropStart.Drag -> when (uris) {
+                    emptyList<Uri>() -> null
+                    else -> this@DragSourceNode
                 }
             }
         }

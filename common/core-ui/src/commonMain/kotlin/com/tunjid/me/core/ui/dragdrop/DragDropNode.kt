@@ -35,7 +35,7 @@ import com.tunjid.me.core.utilities.Uri
 private val ModifierLocalDragDropParent = modifierLocalOf<DragDropParent?> { null }
 
 internal class DragDropNode(
-    private val onDragDropStarted: DragSource.(DragDrop) -> DragDropAction,
+    private val onDragOrDropStarted: (DragOrDropStart) -> DragOrDrop?,
 ) : Modifier.Node(),
     GlobalPositionAwareModifierNode,
     ModifierLocalNode,
@@ -101,7 +101,11 @@ internal class DragDropNode(
         if (childDragStatus != null) return childDragStatus
 
         // No draggable child, attempt to drag self
-        return onDragDropStarted(DragDrop.Drag(offset)).source?.dragInfo(offset)
+        return when(val dragSource = onDragOrDropStarted(DragOrDropStart.Drag(offset))) {
+            is DragSource -> dragSource.dragInfo(offset)
+            is DropTarget -> throw IllegalArgumentException("Attempted to start drag in a drop target")
+            null -> null
+        }
     }
     // end DragSource
 
@@ -110,7 +114,11 @@ internal class DragDropNode(
         coordinates ?: return false
 
         check(currentTarget == null)
-        currentTarget = onDragDropStarted(DragDrop.Drop(mimeTypes, position)).target
+        currentTarget = when(val dropTarget = onDragOrDropStarted(DragOrDropStart.Drop(mimeTypes, position))) {
+            is DragSource -> throw IllegalArgumentException("Attempted to start drop in a drag source")
+            is DropTarget -> dropTarget
+            null -> null
+        }
 
         var handledByChild = false
 

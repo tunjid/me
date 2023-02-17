@@ -26,7 +26,7 @@ import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.modifierElementOf
 import com.tunjid.me.core.utilities.Uri
 
-interface DropTarget {
+internal interface DropTarget: DragOrDrop {
     fun onStarted(mimeTypes: Set<String>, position: Offset): Boolean
     fun onEntered()
     fun onMoved(position: Offset) {}
@@ -88,12 +88,10 @@ private class DropTargetNode(
     private val dragDropNode = delegated {
         DragDropNode { start ->
             when (start) {
-                is DragDrop.Drag -> DragDropAction.Reject
-                is DragDrop.Drop -> when {
-                    onStarted(start.mimeTypes, start.offset) -> DragDropAction.Drop(
-                        dropTarget = this@DropTargetNode
-                    )
-                    else -> DragDropAction.Reject
+                is DragOrDropStart.Drag -> null
+                is DragOrDropStart.Drop -> when {
+                    onStarted(start.mimeTypes, start.offset) -> this@DropTargetNode
+                    else -> null
                 }
             }
         }

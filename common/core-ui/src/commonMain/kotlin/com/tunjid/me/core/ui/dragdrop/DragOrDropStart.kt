@@ -20,9 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.node.DelegatingNode
-import androidx.compose.ui.node.modifierElementOf
 
 expect class RootDragDropNode : DelegatingNode
+
+internal sealed interface DragOrDrop
 
 internal interface DragDroppable : DragSource, DropTarget
 
@@ -30,7 +31,7 @@ internal interface DragDroppable : DragSource, DropTarget
  * Root level [Modifier.Node], it always rejects leaving acceptance to its children
  */
 internal fun rootDragDropNode() = DragDropNode(
-    onDragDropStarted = { _ -> DragDropAction.Reject }
+    onDragOrDropStarted = { _ -> null }
 )
 
 internal interface DragDropParent {
@@ -48,36 +49,13 @@ internal interface DragDropChild : DragDroppable, DragDropParent {
 internal val DragDropChild.area
     get() = size.width * size.height
 
-internal sealed class DragDropAction {
-    object Reject : DragDropAction()
-
-    data class Drag(val dragSource: DragSource) : DragDropAction()
-
-    data class Drop(val dropTarget: DropTarget) : DragDropAction()
-
-
-    internal val target: DropTarget?
-        get() = when (this) {
-            Reject -> null
-            is Drag -> null
-            is Drop -> dropTarget
-        }
-
-    internal val source: DragSource?
-        get() = when (this) {
-            Reject -> null
-            is Drop -> null
-            is Drag -> dragSource
-        }
-}
-
-internal sealed class DragDrop {
+internal sealed class DragOrDropStart {
     data class Drag(
         val offset: Offset,
-    ) : DragDrop()
+    ) : DragOrDropStart()
 
     data class Drop(
         val mimeTypes: Set<String>,
         val offset: Offset,
-    ) : DragDrop()
+    ) : DragOrDropStart()
 }
