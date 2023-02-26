@@ -25,13 +25,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toComposeRect
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.me.core.ui.dragdrop.RootDragDropNode
-import com.tunjid.me.core.ui.dragdrop.ContentView
 import com.tunjid.me.core.ui.dragdrop.DragTrigger
 import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
 import com.tunjid.me.feature.LocalScreenStateHolderCache
@@ -59,10 +59,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         val rootDragDropNode = RootDragDropNode()
-        val contentView = ContentView(context = this)
-        contentView.addOnAttachStateChangeListener(rootDragDropNode)
+        val root = ComposeView(context = this)
 
-        contentView.setContent {
+        root.setContent {
             AppTheme {
                 CompositionLocalProvider(
                     LocalScreenStateHolderCache provides meApp.screenStateHolderCache,
@@ -74,7 +73,7 @@ class MainActivity : AppCompatActivity() {
                                 DragTrigger.LongPress,
                                 DragTrigger.DoubleTap
                             ),
-                            rootDragDropNode = rootDragDropNode
+                            view = root
                         ),
                         navStateHolder = meApp.navStateHolder,
                         globalUiStateHolder = meApp.globalUiStateHolder,
@@ -84,7 +83,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        setContentView(contentView)
+        setContentView(root)
 
         lifecycleScope.launch {
             insetMutations().collect(meApp.globalUiStateHolder.accept)

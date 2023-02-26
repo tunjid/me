@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toSize
 import com.tunjid.me.core.utilities.Uri
 
-internal interface DragSource: DragOrDrop {
+internal sealed interface DragSource: DragOrDrop {
 
     val size: IntSize
 

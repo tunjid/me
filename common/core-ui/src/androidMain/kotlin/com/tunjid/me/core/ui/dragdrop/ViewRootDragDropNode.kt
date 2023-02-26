@@ -18,64 +18,68 @@ package com.tunjid.me.core.ui.dragdrop
 
 import android.view.DragEvent
 import android.view.View
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.modifier.ModifierLocalMap
 import androidx.compose.ui.modifier.ModifierLocalNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.modifierElementOf
+import androidx.compose.ui.platform.debugInspectorInfo
 import com.tunjid.me.core.utilities.ContentUri
 import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.core.utilities.Uri
 
 fun Modifier.rootDragDropModifier(
     dragTriggers: Set<DragTrigger> = setOf(),
-    rootDragDropNode: RootDragDropNode,
-): Modifier = this then modifierElementOf(
-    params = dragTriggers,
-    create = {
-        rootDragDropNode.dragTriggers = dragTriggers
-        rootDragDropNode
-    },
-    update = { it.dragTriggers = dragTriggers },
-    definitions = {}
-)
+    view: View,
+): Modifier {
+    val rootDragDropNode = RootDragDropNode()
+    return this then modifierElementOf(
+        create = { rootDragDropNode },
+        definitions = {}
+    ) then composed(
+        inspectorInfo = debugInspectorInfo {
+            name = "ViewDragDetector"
+        },
+        factory = {
+            val spy = remember(keys = dragTriggers.toTypedArray()) {
+                val detector = DragTriggerDetector(
+                    view = view,
+                    dragTriggers = dragTriggers,
+                    dragDroppable = rootDragDropNode.dragDropNode
+                )
+                motionEventSpy {
+                    detector.onTouch(view, it)
+                }
+            }
+
+            LaunchedEffect(true) {
+                view.setOnDragListener(
+                    dragListener(
+                        dragDroppable = rootDragDropNode.dragDropNode
+                    )
+                )
+            }
+
+            this.then(spy)
+        })
+}
 
 actual class RootDragDropNode : DelegatingNode(),
     ModifierLocalNode,
-    GlobalPositionAwareModifierNode,
-    View.OnAttachStateChangeListener {
+    GlobalPositionAwareModifierNode {
 
-    private val dragDropNode: DragDropNode = delegated { rootDragDropNode() }
-    private lateinit var dragTriggerDetector: DragTriggerDetector
-    internal var dragTriggers = setOf<DragTrigger>()
-        set(value) {
-            field = value
-            if (::dragTriggerDetector.isInitialized) dragTriggerDetector.dragTriggers = value
-        }
-
+    internal val dragDropNode: DragDropNode = delegated { rootDragDropNode() }
     override val providedValues: ModifierLocalMap = dragDropNode.providedValues
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) =
         dragDropNode.onGloballyPositioned(coordinates)
-
-    override fun onViewAttachedToWindow(view: View) {
-        check(view is ContentView)
-        view.onAttached(
-            dragListener = dragListener(
-                dragDroppable = dragDropNode
-            ),
-            touchListener = DragTriggerDetector(
-                view = view,
-                dragTriggers = dragTriggers,
-                dragDroppable = dragDropNode
-            ).also(::dragTriggerDetector::set)
-        )
-    }
-
-    override fun onViewDetachedFromWindow(view: View) = Unit
 }
 
 private fun dragListener(

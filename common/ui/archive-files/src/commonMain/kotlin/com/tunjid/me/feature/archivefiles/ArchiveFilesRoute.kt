@@ -38,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveFile
@@ -160,6 +161,9 @@ private fun FilesDrop(
     Spacer(
         modifier = Modifier
             .fillMaxSize()
+            .pointerInput(0) {
+
+            }
             .border(
                 width = 2.dp,
                 color = borderColor,

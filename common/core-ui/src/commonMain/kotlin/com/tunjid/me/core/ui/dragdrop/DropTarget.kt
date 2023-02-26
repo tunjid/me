@@ -26,7 +26,7 @@ import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.modifierElementOf
 import com.tunjid.me.core.utilities.Uri
 
-internal interface DropTarget: DragOrDrop {
+internal sealed interface DropTarget: DragOrDrop {
     fun onStarted(mimeTypes: Set<String>, position: Offset): Boolean
     fun onEntered()
     fun onMoved(position: Offset) {}
