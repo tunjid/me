@@ -71,7 +71,7 @@ fun Modifier.rootDragDropModifier(
         })
 }
 
-actual class RootDragDropNode : DelegatingNode(),
+internal actual class RootDragDropNode : DelegatingNode(),
     ModifierLocalNode,
     GlobalPositionAwareModifierNode {
 

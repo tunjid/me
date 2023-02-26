@@ -21,7 +21,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.node.DelegatingNode
 
-expect class RootDragDropNode : DelegatingNode
+internal expect class RootDragDropNode : DelegatingNode
 
 internal sealed interface DragOrDrop
 

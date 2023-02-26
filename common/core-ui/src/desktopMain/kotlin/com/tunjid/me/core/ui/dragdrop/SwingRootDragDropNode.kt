@@ -57,7 +57,7 @@ fun Modifier.rootDragDropModifier(
     definitions = {}
 )
 
-actual class RootDragDropNode(
+internal actual class RootDragDropNode(
     density: Float,
     window: ComposeWindow,
 ) : DelegatingNode(),
