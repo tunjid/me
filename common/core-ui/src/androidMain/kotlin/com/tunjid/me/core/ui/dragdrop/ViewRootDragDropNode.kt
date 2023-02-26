@@ -55,7 +55,7 @@ fun Modifier.rootDragDropModifier(
                     dragDroppable = rootDragDropNode.dragDropNode
                 )
                 motionEventSpy {
-                    detector.onTouch(view, it)
+                    detector.onMotionEvent(it)
                 }
             }
 

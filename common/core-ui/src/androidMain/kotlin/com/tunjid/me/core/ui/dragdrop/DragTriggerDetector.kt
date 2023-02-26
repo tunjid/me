@@ -36,13 +36,12 @@ internal class DragTriggerDetector(
     private val view: View,
     internal var dragTriggers: Set<DragTrigger>,
     private val dragDroppable: DragDroppable,
-) : View.OnTouchListener {
+) {
 
     private val gestureDetector = GestureDetectorCompat(
         view.context,
         object : GestureDetector.SimpleOnGestureListener() {
             override fun onLongPress(event: MotionEvent) {
-                println("Drag triggers: $dragTriggers")
                 if (dragTriggers.contains(DragTrigger.LongPress)) processDrag(event)
             }
 
@@ -76,7 +75,7 @@ internal class DragTriggerDetector(
         return true
     }
 
-    override fun onTouch(view: View, event: MotionEvent): Boolean =
+    fun onMotionEvent(event: MotionEvent): Boolean =
         gestureDetector.onTouchEvent(event)
 }
 
