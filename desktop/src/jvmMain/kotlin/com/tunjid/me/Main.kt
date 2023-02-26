@@ -49,19 +49,16 @@ fun main() {
             title = "Me as a composition"
         ) {
             val density = LocalDensity.current.density
-            val dropParent = remember(density) {
-                RootDragDropNode(
-                    density = density,
-                    window = window,
-                )
-            }
             AppTheme {
                 CompositionLocalProvider(
                     LocalScreenStateHolderCache provides app.screenStateHolderCache,
                     LocalLifecycleStateHolder provides app.lifecycleStateHolder,
                 ) {
                     Scaffold(
-                        modifier = Modifier.rootDragDropModifier(dropParent),
+                        modifier = Modifier.rootDragDropModifier(
+                            density = density,
+                            window = window,
+                        ),
                         navStateHolder = app.navStateHolder,
                         globalUiStateHolder = app.globalUiStateHolder,
                     )

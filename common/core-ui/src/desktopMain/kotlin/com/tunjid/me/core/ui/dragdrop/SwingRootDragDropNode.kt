@@ -41,9 +41,19 @@ import java.awt.dnd.DragSource as AwtDragSource
 import java.awt.dnd.DropTarget as AwtDropTarget
 
 fun Modifier.rootDragDropModifier(
-    rootDragDropNode: RootDragDropNode,
+    density: Float,
+    window: ComposeWindow,
 ): Modifier = this then modifierElementOf(
-    create = { rootDragDropNode },
+    params = density,
+    create = {
+        RootDragDropNode(
+            density = density,
+            window = window,
+        )
+    },
+    update = {
+        it.updateDensity(density)
+    },
     definitions = {}
 )
 
@@ -56,23 +66,24 @@ actual class RootDragDropNode(
 
     private val dragDropNode: DragDropNode = delegated { rootDragDropNode() }
 
+    private val dropTargetListener = DensityAwareDropTargetListener(
+        dragDropNode = dragDropNode,
+        density = density
+    )
+
+    private val dragGestureListener = DensityAwareDragGestureListener(
+        dragDroppable = dragDropNode,
+        density = density
+    )
+
     init {
         window.contentPane.dropTarget = AwtDropTarget().apply {
-            addDropTargetListener(
-                dropTargetListener(
-                    dragDropNode = dragDropNode,
-                    density = density
-                )
-            )
+            addDropTargetListener(dropTargetListener)
         }
-
         AwtDragSource.getDefaultDragSource().createDefaultDragGestureRecognizer(
             window,
             DnDConstants.ACTION_COPY,
-            dragGestureListener(
-                dragDroppable = dragDropNode,
-                density = density
-            )
+            dragGestureListener
         )
     }
 
@@ -80,12 +91,17 @@ actual class RootDragDropNode(
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) =
         dragDropNode.onGloballyPositioned(coordinates)
+
+    fun updateDensity(density: Float) {
+        dropTargetListener.density = density
+        dragGestureListener.density = density
+    }
 }
 
-private fun dropTargetListener(
-    dragDropNode: DragDroppable,
-    density: Float,
-) = object : DropTargetListener {
+private class DensityAwareDropTargetListener(
+    private val dragDropNode: DragDroppable,
+    var density: Float,
+) : DropTargetListener {
     override fun dragEnter(dtde: DropTargetDragEvent?) {
         if (dtde == null) return
         dragDropNode.onStarted(
@@ -132,37 +148,37 @@ private fun dropTargetListener(
     }
 }
 
-private fun dragGestureListener(
-    dragDroppable: DragDroppable,
-    density: Float,
-) = DragGestureListener { event: DragGestureEvent ->
-    val offset = Offset(
-        x = event.dragOrigin.x * density,
-        y = event.dragOrigin.y * density
-    )
-
-    println("Dragging")
-    val dragInfo = dragDroppable.dragInfo(offset) ?: return@DragGestureListener
-
-    if (dragInfo.uris.isNotEmpty()) when (val shadowPainter = dragInfo.dragShadowPainter) {
-        null -> event.startDrag(
-            /* dragCursor = */ Cursor.getDefaultCursor(),
-            /* transferable = */ dragInfo.transferable()
+private class DensityAwareDragGestureListener(
+    private val dragDroppable: DragDroppable,
+    var density: Float,
+) : DragGestureListener {
+    override fun dragGestureRecognized(event: DragGestureEvent) {
+        val offset = Offset(
+            x = event.dragOrigin.x * density,
+            y = event.dragOrigin.y * density
         )
 
-        else -> event.startDrag(
-            /* dragCursor = */ Cursor.getDefaultCursor(),
-            /* dragImage = */ shadowPainter.toAwtImage(
-                density = Density(density),
-                layoutDirection = LayoutDirection.Ltr,
-                size = dragInfo.size
-            ),
-            /* imageOffset = */ Point(-dragInfo.size.width.toInt() / 2, -dragInfo.size.height.toInt() / 2),
-            /* transferable = */ dragInfo.transferable(),
-            /* dsl = */ object : DragSourceAdapter() {
+        val dragInfo = dragDroppable.dragInfo(offset) ?: return
 
-            }
-        )
+        if (dragInfo.uris.isNotEmpty()) when (val shadowPainter = dragInfo.dragShadowPainter) {
+            null -> event.startDrag(
+                /* dragCursor = */ Cursor.getDefaultCursor(),
+                /* transferable = */ dragInfo.transferable()
+            )
+
+            else -> event.startDrag(
+                /* dragCursor = */ Cursor.getDefaultCursor(),
+                /* dragImage = */ shadowPainter.toAwtImage(
+                    density = Density(density),
+                    layoutDirection = LayoutDirection.Ltr,
+                    size = dragInfo.size
+                ),
+                /* imageOffset = */ Point(-dragInfo.size.width.toInt() / 2, -dragInfo.size.height.toInt() / 2),
+                /* transferable = */ dragInfo.transferable(),
+                /* dsl = */ object : DragSourceAdapter() {
+                }
+            )
+        }
     }
 }
 
