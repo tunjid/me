@@ -54,9 +54,7 @@ fun Modifier.rootDragDropModifier(
                     dragTriggers = dragTriggers,
                     dragDroppable = rootDragDropNode.dragDropNode
                 )
-                motionEventSpy {
-                    detector.onMotionEvent(it)
-                }
+                motionEventSpy(detector::onMotionEvent)
             }
 
             LaunchedEffect(true) {

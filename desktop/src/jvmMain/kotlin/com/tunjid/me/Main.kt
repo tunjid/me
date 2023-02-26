@@ -26,7 +26,6 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.me.core.ui.dragdrop.RootDragDropNode
 import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.feature.MeApp
