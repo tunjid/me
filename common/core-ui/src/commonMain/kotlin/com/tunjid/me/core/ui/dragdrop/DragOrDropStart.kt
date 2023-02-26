@@ -42,7 +42,7 @@ internal interface DragDropParent {
     fun unregisterChild(child: DragDropChild)
 }
 
-internal interface DragDropChild : DragDroppable, DragDropParent {
+internal sealed interface DragDropChild : DragDroppable, DragDropParent {
     val coordinates: LayoutCoordinates?
 }
 

@@ -31,7 +31,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
 import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.me.core.ui.dragdrop.RootDragDropNode
 import com.tunjid.me.core.ui.dragdrop.DragTrigger
 import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
 import com.tunjid.me.feature.LocalScreenStateHolderCache
@@ -58,7 +57,6 @@ class MainActivity : AppCompatActivity() {
             meApp.navStateHolder.accept { mainNav.pop() }
         }
 
-        val rootDragDropNode = RootDragDropNode()
         val root = ComposeView(context = this)
 
         root.setContent {
