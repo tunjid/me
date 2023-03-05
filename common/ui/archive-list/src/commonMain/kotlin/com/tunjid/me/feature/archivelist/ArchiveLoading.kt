@@ -36,7 +36,16 @@ internal fun ArchiveRepository.archiveTiler(
         ),
         fetcher = { query ->
             flow {
-                emit(listOf(ArchiveItem.Loading(isCircular = false)))
+                emit(
+                    (0 until query.limit)
+                        .map {
+                            ArchiveItem.Loading(
+                                index = query.offset + it,
+                                queryId = query.hashCode(),
+                                isCircular = false
+                            )
+                        }
+                )
                 emitAll(
                     archivesStream(query).map { archives ->
                         archives.map(ArchiveItem::Result)

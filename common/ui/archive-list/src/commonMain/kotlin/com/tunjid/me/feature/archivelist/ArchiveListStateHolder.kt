@@ -37,6 +37,7 @@ import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
+import com.tunjid.tiler.emptyTiledList
 import com.tunjid.tiler.tiledListOf
 import com.tunjid.tiler.toTiledList
 import com.tunjid.tiler.utilities.toPivotedTileInputs
@@ -48,7 +49,7 @@ typealias ArchiveListStateHolder = ActionStateProducer<Action, StateFlow<State>>
 
 @Inject
 class ArchiveListStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveListRoute) -> ArchiveListStateHolder
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveListRoute) -> ArchiveListStateHolder,
 ) : ScreenStateHolderCreator by creator.downcast()
 
 /**
@@ -68,7 +69,11 @@ class ActualArchiveListStateHolder(
 ) : ArchiveListStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         items = tiledListOf(
-            ArchiveQuery(kind = route.kind) to ArchiveItem.Loading(isCircular = true)
+            ArchiveQuery(kind = route.kind) to ArchiveItem.Loading(
+                index = -1,
+                queryId = -1,
+                isCircular = true
+            )
         ),
         queryState = QueryState(
             currentQuery = ArchiveQuery(kind = route.kind),
@@ -241,8 +246,6 @@ private fun Flow<Action.Fetch>.fetchMutations(
                 limiter = Tile.Limiter { items -> items.size > 100 }
             )
         )
-        // Allow database queries to settle
-        .debounce(timeoutMillis = 250)
 
     return combine(
         flow = queries,

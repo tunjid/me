@@ -102,7 +102,7 @@ fun ProgressBar(
 fun ArchiveCard(
     modifier: Modifier = Modifier,
     query: ArchiveQuery,
-    archiveItem: ArchiveItem.Result,
+    archive: Archive,
     onArchiveSelected: (Archive) -> Unit,
     onCategoryClicked: (Descriptor.Category) -> Unit,
 ) {
@@ -121,29 +121,29 @@ fun ArchiveCard(
         modifier = modifier
             .padding(16.dp),
         onClick = {
-            onArchiveSelected(archiveItem.archive)
+            onArchiveSelected(archive)
         },
         content = {
             Column {
                 AsyncRasterImage(
-                    imageUrl = archiveItem.archive.thumbnail,
+                    imageUrl = archive.thumbnail,
                     modifier = thumbnailModifier.aspectRatio(16f/9f)
                 )
                 Spacer(Modifier.height(8.dp))
-                ArchiveDate(archiveItem.prettyDate)
+                ArchiveDate(archive.prettyDate)
                 Spacer(Modifier.height(8.dp))
                 ArchiveDetails(
-                    title = archiveItem.archive.title,
-                    description = archiveItem.archive.description,
-                    chipInfoList = archiveItem.descriptorChips<Descriptor.Category>(query = query),
+                    title = archive.title,
+                    description = archive.description,
+                    chipInfoList = archive.descriptorChips<Descriptor.Category>(query = query),
                     onCategoryClicked = onCategoryClicked
                 )
                 Spacer(Modifier.height(24.dp))
                 ArchiveCardFooter(
-                    authorImageUrl = archiveItem.archive.author.imageUrl,
-                    authorName = archiveItem.archive.author.fullName,
-                    timeToRead = archiveItem.readTime,
-                    likeCount = archiveItem.archive.likes
+                    authorImageUrl = archive.author.imageUrl,
+                    authorName = archive.author.fullName,
+                    timeToRead = archive.readTime,
+                    likeCount = archive.likes
                 )
                 Spacer(Modifier.height(8.dp))
             }

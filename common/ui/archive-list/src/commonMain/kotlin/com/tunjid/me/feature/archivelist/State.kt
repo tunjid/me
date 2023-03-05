@@ -19,14 +19,19 @@ package com.tunjid.me.feature.archivelist
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.User
+import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.emptyTiledList
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
@@ -47,7 +52,7 @@ data class State(
     val queryState: QueryState,
 //    @ProtoNumber(6) Deprecated key
     @Transient
-    val items: TiledList<ArchiveQuery, ArchiveItem> = emptyTiledList()
+    val items: TiledList<ArchiveQuery, ArchiveItem> = emptyTiledList(),
 ) : ByteSerializable
 
 val ArchiveItem.stickyHeader: ArchiveItem.Header?
@@ -72,7 +77,7 @@ sealed class Action(val key: String) {
     }
 
     data class FilterChanged(
-        val descriptor: Descriptor
+        val descriptor: Descriptor,
     ) : Action(key = "FilterChanged")
 
     data class ToggleFilter(val isExpanded: Boolean? = null) : Action(key = "ToggleFilter")
@@ -91,6 +96,8 @@ sealed class ArchiveItem {
     ) : ArchiveItem()
 
     data class Loading(
+        val index: Int,
+        val queryId: Int,
         val isCircular: Boolean,
     ) : ArchiveItem()
 }
@@ -98,29 +105,51 @@ sealed class ArchiveItem {
 val ArchiveItem.key: String
     get() = when (this) {
         is ArchiveItem.Header -> "header-$text"
-        is ArchiveItem.Loading -> "loading"
+        is ArchiveItem.Loading -> "loading-$index-$queryId"
         is ArchiveItem.Result -> "result-${archive.id}"
     }
 
 val Any.isHeaderKey: Boolean
     get() = this is String && this.startsWith("header")
 
-val ArchiveItem.Result.prettyDate: String
+val Archive.prettyDate: String
     get() {
-        val dateTime = archive.created.toLocalDateTime(TimeZone.currentSystemDefault())
+        val dateTime = created.toLocalDateTime(TimeZone.currentSystemDefault())
         return "${dateTime.month.name} ${dateTime.dayOfMonth} ${dateTime.year}"
     }
 
-val ArchiveItem.Result.readTime get() = "${archive.body.trim().split("/\\s+/").size / 250} min read"
+val Archive.readTime get() = "${body.trim().split("/\\s+/").size / 250} min read"
 
-val ArchiveItem.Result.dateTime
-    get() = archive.created.toLocalDateTime(
+val Archive.dateTime
+    get() = created.toLocalDateTime(
         TimeZone.currentSystemDefault()
     )
 val ArchiveItem.Result.headerText
-    get(): String = with(dateTime) {
+    get(): String = with(archive.dateTime) {
         "${month.name.lowercase().replaceFirstChar(Char::uppercase)}, $year"
     }
+
+val emptyArchive = Archive(
+    id = ArchiveId(""),
+    link = "",
+    title = "",
+    body = "",
+    description = "",
+    thumbnail = null,
+    videoUrl = null,
+    author = User(
+        id = UserId(""),
+        firstName = "",
+        lastName = "",
+        fullName = "",
+        imageUrl = "",
+    ),
+    likes = 0L,
+    created = Instant.DISTANT_PAST,
+    tags = emptyList(),
+    categories = emptyList(),
+    kind = ArchiveKind.Articles
+)
 
 @Serializable
 data class QueryState(
@@ -144,12 +173,12 @@ data class QueryState(
 )
 
 @Composable
-inline fun <reified T : Descriptor> ArchiveItem.Result.descriptorChips(
-    query: ArchiveQuery
+inline fun <reified T : Descriptor> Archive.descriptorChips(
+    query: ArchiveQuery,
 ) =
     when (T::class) {
-        Descriptor.Tag::class -> archive.tags.map { it to query.contentFilter.tags.contains(it) }
-        Descriptor.Category::class -> archive.categories.map { it to query.contentFilter.categories.contains(it) }
+        Descriptor.Tag::class -> tags.map { it to query.contentFilter.tags.contains(it) }
+        Descriptor.Category::class -> categories.map { it to query.contentFilter.categories.contains(it) }
         else -> throw IllegalArgumentException("Invalid descriptor class: ${T::class.qualifiedName}")
     }.map { (descriptor, selected) ->
         ChipInfo(

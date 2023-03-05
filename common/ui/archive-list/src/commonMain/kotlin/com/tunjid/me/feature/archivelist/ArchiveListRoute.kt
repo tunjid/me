@@ -194,15 +194,18 @@ private fun GridCell(
             item = item
         )
 
-        is ArchiveItem.Loading -> ProgressBar(
+        is ArchiveItem.Loading -> ArchiveCard(
             modifier = modifier,
-            isCircular = item.isCircular
+            query = query,
+            archive = emptyArchive,
+            onArchiveSelected = {},
+            onCategoryClicked = { }
         )
 
         is ArchiveItem.Result -> ArchiveCard(
             modifier = modifier,
             query = query,
-            archiveItem = item,
+            archive = item.archive,
             onArchiveSelected = { archive ->
                 navigate("archives/${archive.kind.type}/${archive.id.value}")
             },
