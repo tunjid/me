@@ -26,7 +26,6 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
-import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.isInMainNavMutations
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.NavState
@@ -37,7 +36,6 @@ import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
-import com.tunjid.tiler.emptyTiledList
 import com.tunjid.tiler.tiledListOf
 import com.tunjid.tiler.toTiledList
 import com.tunjid.tiler.utilities.toPivotedTileInputs
@@ -61,7 +59,6 @@ class ActualArchiveListStateHolder(
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
     navStateFlow: StateFlow<NavState>,
-    uiStateFlow: StateFlow<UiState>,
     navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
@@ -246,6 +243,8 @@ private fun Flow<Action.Fetch>.fetchMutations(
                 limiter = Tile.Limiter { items -> items.size > 100 }
             )
         )
+        // Allow database queries to settle
+        .debounce(timeoutMillis = 50)
 
     return combine(
         flow = queries,

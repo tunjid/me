@@ -32,7 +32,7 @@ val FetchResult.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
         var month = -1
         var year = -1
         queriedArchives.forEachIndexed { index, item ->
-            if (item is ArchiveItem.Result) {
+            if (item is ArchiveItem.Loaded) {
                 val query = queriedArchives.queryAt(index)
                 val dateTime = item.archive.dateTime
                 if (month != dateTime.monthNumber || year != dateTime.year) {
@@ -40,7 +40,10 @@ val FetchResult.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
                     year = dateTime.year
                     add(
                         query = query,
-                        item = ArchiveItem.Header(text = item.headerText)
+                        item = ArchiveItem.Header(
+                            index = item.index,
+                            text = item.headerText
+                        )
                     )
                 }
                 add(

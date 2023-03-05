@@ -58,7 +58,10 @@ data class State(
 val ArchiveItem.stickyHeader: ArchiveItem.Header?
     get() = when (this) {
         is ArchiveItem.Header -> this
-        is ArchiveItem.Result -> ArchiveItem.Header(text = headerText)
+        is ArchiveItem.Loaded -> ArchiveItem.Header(
+            index = index,
+            text = headerText
+        )
         else -> null
     }
 
@@ -87,16 +90,21 @@ sealed class Action(val key: String) {
 
 sealed class ArchiveItem {
 
+    abstract val index: Int
+
     data class Header(
+        override val index: Int,
         val text: String,
     ) : ArchiveItem()
 
-    data class Result(
-        val archive: Archive,
+    data class Loaded(
+       override val index: Int,
+       val queryId: Int,
+       val archive: Archive,
     ) : ArchiveItem()
 
     data class Loading(
-        val index: Int,
+        override val index: Int,
         val queryId: Int,
         val isCircular: Boolean,
     ) : ArchiveItem()
@@ -105,8 +113,9 @@ sealed class ArchiveItem {
 val ArchiveItem.key: String
     get() = when (this) {
         is ArchiveItem.Header -> "header-$text"
-        is ArchiveItem.Loading -> "loading-$index-$queryId"
-        is ArchiveItem.Result -> "result-${archive.id}"
+        // The ids have to match across these for fast scrolling to work
+        is ArchiveItem.Loading -> "archive-$index-$queryId"
+        is ArchiveItem.Loaded -> "archive-$index-$queryId"
     }
 
 val Any.isHeaderKey: Boolean
@@ -124,7 +133,7 @@ val Archive.dateTime
     get() = created.toLocalDateTime(
         TimeZone.currentSystemDefault()
     )
-val ArchiveItem.Result.headerText
+val ArchiveItem.Loaded.headerText
     get(): String = with(archive.dateTime) {
         "${month.name.lowercase().replaceFirstChar(Char::uppercase)}, $year"
     }

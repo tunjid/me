@@ -16,9 +16,13 @@
 
 package com.tunjid.me.feature.archivelist
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
@@ -26,12 +30,11 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -41,6 +44,8 @@ import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
+import com.tunjid.me.core.ui.scrollbar.Scrollbar
+import com.tunjid.me.core.ui.scrollbar.ScrollbarState
 import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
@@ -49,6 +54,7 @@ import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.scan
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
@@ -79,6 +85,7 @@ private fun ArchiveScreen(
     )
 
     val gridState = rememberLazyGridState()
+
     val cardWidth = 350.dp
     val stickyHeaderItem by remember(state.items) {
         derivedStateOf {
@@ -103,14 +110,40 @@ private fun ArchiveScreen(
                 stickyHeaderItem?.let { StickyHeader(item = it) }
             }
         ) {
-            ArchiveList(
-                gridState = gridState,
-                cardWidth = cardWidth,
-                items = state.items,
-                isInMainNav = state.isInMainNav,
-                currentQuery = state.queryState.currentQuery,
-                actions = actions
-            )
+            Box {
+                ArchiveList(
+                    gridState = gridState,
+                    cardWidth = cardWidth,
+                    items = state.items,
+                    isInMainNav = state.isInMainNav,
+                    currentQuery = state.queryState.currentQuery,
+                    actions = actions
+                )
+
+                var scrollPercentage by remember { mutableStateOf<Float?>(null) }
+
+                Scrollbar(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .width(12.dp),
+                    state = gridState.ScrollbarState(
+                        keys = arrayOf(state.queryState),
+                        size = state.queryState.count.toInt(),
+                        indexForItem = { itemInfo ->
+                            state.items.getOrNull(itemInfo.index)?.index
+                        }
+                    ),
+                    onThumbMoved = { percentage: Float ->
+                        scrollPercentage = percentage
+                    },
+                    thumb = { ScrollbarThumb() }
+                )
+                gridState.ScrollbarThumbPositionEffect(
+                    percentage = scrollPercentage,
+                    state = state,
+                    actions = actions
+                )
+            }
         }
     }
 
@@ -146,7 +179,7 @@ private fun ArchiveList(
                 span = { item ->
                     actions(Action.Fetch.NoColumnsChanged(maxLineSpan))
                     when (item) {
-                        is ArchiveItem.Result -> GridItemSpan(1)
+                        is ArchiveItem.Loaded -> GridItemSpan(1)
                         is ArchiveItem.Header,
                         is ArchiveItem.Loading,
                         -> GridItemSpan(maxLineSpan)
@@ -194,15 +227,20 @@ private fun GridCell(
             item = item
         )
 
-        is ArchiveItem.Loading -> ArchiveCard(
-            modifier = modifier,
-            query = query,
-            archive = emptyArchive,
-            onArchiveSelected = {},
-            onCategoryClicked = { }
-        )
+        is ArchiveItem.Loading ->
+            if (item.isCircular) ProgressBar(
+                modifier = modifier,
+                isCircular = true
+            )
+            else ArchiveCard(
+                modifier = modifier,
+                query = query,
+                archive = emptyArchive,
+                onArchiveSelected = {},
+                onCategoryClicked = { }
+            )
 
-        is ArchiveItem.Result -> ArchiveCard(
+        is ArchiveItem.Loaded -> ArchiveCard(
             modifier = modifier,
             query = query,
             archive = item.archive,
@@ -239,6 +277,54 @@ private fun FilterCollapseEffect(
                 }
                 if (dy != null && dy > 6) onAction(Action.ToggleFilter(isExpanded = false))
             }
+    }
+}
+
+@Composable
+private fun ScrollbarThumb() {
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(12.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                shape = RoundedCornerShape(16.dp)
+            )
+    )
+}
+
+@Composable
+private fun LazyGridState.ScrollbarThumbPositionEffect(
+    percentage: Float?,
+    state: State,
+    actions: (Action) -> Unit,
+) {
+    if (percentage == null) return
+    val currentState by rememberUpdatedState(state)
+
+    // Trigger the load to fetch the data required
+    LaunchedEffect(percentage) {
+        val count = currentState.queryState.count
+        actions(
+            Action.Fetch.LoadAround(
+                currentState.queryState.currentQuery.copy(
+                    offset = (count * percentage).toInt()
+                )
+            )
+        )
+
+        val indexToFind = (currentState.queryState.count * percentage).toInt()
+
+        // Fast path
+        val fastIndex = currentState.items.indexOfFirst { it.index == indexToFind }
+            .takeIf { it > -1 }
+        if (fastIndex != null) return@LaunchedEffect scrollToItem(fastIndex)
+
+        // Slow path
+        scrollToItem(
+            snapshotFlow { currentState.items.indexOfFirst { it.index == indexToFind } }
+                .first { it > -1 }
+        )
     }
 }
 

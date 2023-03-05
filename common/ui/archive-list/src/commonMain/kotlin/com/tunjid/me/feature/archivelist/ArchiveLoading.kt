@@ -48,7 +48,13 @@ internal fun ArchiveRepository.archiveTiler(
                 )
                 emitAll(
                     archivesStream(query).map { archives ->
-                        archives.map(ArchiveItem::Result)
+                        archives.mapIndexed { index, archive ->
+                            ArchiveItem.Loaded(
+                                index = query.offset + index,
+                                queryId = query.hashCode(),
+                                archive = archive
+                            )
+                        }
                     }
                 )
             }

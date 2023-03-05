@@ -256,7 +256,9 @@ private fun ArchiveCardFooter(
     }
 }
 
-private val sampleArchiveItem = ArchiveItem.Result(
+private val sampleArchiveItem = ArchiveItem.Loaded(
+    index = 0,
+    queryId = -1,
     archive = Archive(
         id = ArchiveId(""),
         link = "https://storage.googleapis.com/tunji-web-public/article-media/1P372On2TSH-rAuBsbWLGSQ.jpeg",
