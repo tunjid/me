@@ -76,10 +76,11 @@ private val ScrollbarTrack.height
 fun Scrollbar(
     modifier: Modifier = Modifier,
     state: ScrollbarState,
-    thumb: @Composable () -> Unit,
+    thumb: @Composable (isActive: Boolean) -> Unit,
     onThumbMoved: (Float) -> Unit,
 ) {
     val localDensity = LocalDensity.current
+    var isActive by remember { mutableStateOf(false) }
     var track by remember { mutableStateOf(ScrollbarTrack(0)) }
 
     val thumbHeightPercent = state.thumbHeightPercent
@@ -104,18 +105,33 @@ fun Scrollbar(
                 )
             }
             .pointerInput(track) {
-                detectTapGestures { offset ->
-                    onThumbMoved(
-                        track.thumbPosition(y = offset.y)
-                    )
-                }
+                detectTapGestures(
+                    onPress = {
+                        isActive = true
+                        tryAwaitRelease()
+                        isActive = false
+                    },
+                    onDoubleTap = {
+                        isActive = false
+                    },
+                    onTap = { offset ->
+                        isActive = false
+                        onThumbMoved(
+                            track.thumbPosition(y = offset.y)
+                        )
+                    })
             }
             .pointerInput(track) {
-                detectDragGestures { change, _ ->
-                    onThumbMoved(
-                        track.thumbPosition(y = change.position.y)
-                    )
-                }
+                detectDragGestures(
+                    onDragStart = { isActive = true },
+                    onDragEnd = { isActive = false },
+                    onDrag = { change, _ ->
+                        isActive = true
+                        onThumbMoved(
+                            track.thumbPosition(y = change.position.y)
+                        )
+                    }
+                )
             }
     ) {
         Box(
@@ -130,7 +146,7 @@ fun Scrollbar(
                 )
                 .fillMaxWidth()
         ) {
-            thumb()
+            thumb(isActive)
         }
     }
 }

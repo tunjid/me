@@ -16,6 +16,7 @@
 
 package com.tunjid.me.feature.archivelist
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -136,7 +137,7 @@ private fun ArchiveScreen(
                     onThumbMoved = { percentage: Float ->
                         scrollPercentage = percentage
                     },
-                    thumb = { ScrollbarThumb() }
+                    thumb = { isActive ->  ScrollbarThumb(isActive) }
                 )
                 gridState.ScrollbarThumbPositionEffect(
                     percentage = scrollPercentage,
@@ -281,13 +282,17 @@ private fun FilterCollapseEffect(
 }
 
 @Composable
-private fun ScrollbarThumb() {
+private fun ScrollbarThumb(isActive: Boolean) {
+    val color by animateColorAsState(
+        if (isActive) MaterialTheme.colorScheme.tertiaryContainer
+        else MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
+    )
     Box(
         modifier = Modifier
             .fillMaxHeight()
             .width(12.dp)
             .background(
-                color = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                color = color,
                 shape = RoundedCornerShape(16.dp)
             )
     )
