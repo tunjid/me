@@ -45,7 +45,7 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.scrollbar.Scrollbar
-import com.tunjid.me.core.ui.scrollbar.ScrollbarState
+import com.tunjid.me.core.ui.scrollbar.scrollbarState
 import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
@@ -126,7 +126,7 @@ private fun ArchiveScreen(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .width(12.dp),
-                    state = gridState.ScrollbarState(
+                    state = gridState.scrollbarState(
                         keys = arrayOf(state.queryState),
                         size = state.queryState.count.toInt(),
                         indexForItem = { itemInfo ->

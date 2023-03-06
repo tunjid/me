@@ -33,82 +33,64 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
-fun LazyListState.ScrollbarState(
+fun LazyListState.scrollbarState(
     vararg keys: Any? = emptyArray(),
     size: Int,
     indexForItem: (LazyListItemInfo) -> Int?,
-): ScrollbarState {
-    var scrollbarState by remember { mutableStateOf(ScrollbarState.FULL) }
-    LaunchedEffect(
-        keys = *(arrayOf(this, size) + keys)
-    ) {
-        snapshotFlow {
-            val visibleItemsInfo = layoutInfo.visibleItemsInfo
-            val visible = visibleItemsInfo.size
-            val info = visibleItemsInfo.lastOrNull()
-            val index = info?.let(indexForItem)?.takeIf { it >= 0 } ?: return@snapshotFlow null
-
-            ScrollbarState(
-                available = size,
-                visible = visible,
-                index = index
-            )
-        }
-            .filterNotNull()
-            .distinctUntilChanged()
-            .collect { scrollbarState = it }
-    }
-
-    return scrollbarState
-}
+): ScrollbarState =
+    scrollbarState(
+        size = size,
+        keys = keys,
+        items = { layoutInfo.visibleItemsInfo },
+        indexForItem = indexForItem
+    )
 
 @Composable
-fun LazyGridState.ScrollbarState(
+fun LazyGridState.scrollbarState(
     vararg keys: Any? = emptyArray(),
     size: Int,
     indexForItem: (LazyGridItemInfo) -> Int?,
-): ScrollbarState {
-    var scrollbarState by remember { mutableStateOf(ScrollbarState.FULL) }
-    LaunchedEffect(
-        keys = *(arrayOf(this, size) + keys)
-    ) {
-        snapshotFlow {
-            val visibleItemsInfo = layoutInfo.visibleItemsInfo
-            val visible = visibleItemsInfo.size
-            val info = visibleItemsInfo.lastOrNull()
-            val index = info?.let(indexForItem)?.takeIf { it >= 0 } ?: return@snapshotFlow null
-
-            ScrollbarState(
-                available = size,
-                visible = visible,
-                index = index
-            )
-        }
-            .filterNotNull()
-            .distinctUntilChanged()
-            .collect { scrollbarState = it }
-    }
-
-    return scrollbarState
-}
+): ScrollbarState =
+    scrollbarState(
+        size = size,
+        keys = keys,
+        items = { layoutInfo.visibleItemsInfo },
+        indexForItem = indexForItem
+    )
 
 @Composable
-fun LazyStaggeredGridState.ScrollbarState(
+fun LazyStaggeredGridState.scrollbarState(
     vararg keys: Any? = emptyArray(),
     size: Int,
     indexForItem: (LazyStaggeredGridItemInfo) -> Int?,
+): ScrollbarState =
+    scrollbarState(
+        size = size,
+        keys = keys,
+        items = { layoutInfo.visibleItemsInfo },
+        indexForItem = indexForItem
+    )
+
+@Composable
+private fun <LazyState : Any, LazyStateItem> LazyState.scrollbarState(
+    size: Int,
+    keys: Array<out Any?>,
+    items: LazyState.() -> List<LazyStateItem>,
+    indexForItem: (LazyStateItem) -> Int?,
 ): ScrollbarState {
     var scrollbarState by remember { mutableStateOf(ScrollbarState.FULL) }
     LaunchedEffect(
-        keys = *(arrayOf(this, size) + keys)
+        keys = (arrayOf(this, size) + keys)
     ) {
         snapshotFlow {
-            val visibleItemsInfo = layoutInfo.visibleItemsInfo
+            val visibleItemsInfo = items(this@scrollbarState)
             val visible = visibleItemsInfo.size
             val info = visibleItemsInfo.lastOrNull()
-            val index = info?.let(indexForItem)?.takeIf { it >= 0 } ?: return@snapshotFlow null
+            val index = info?.let(indexForItem)
+                ?.takeIf { it >= 0 }
+                ?: return@snapshotFlow null
 
-            ScrollbarState(
+            scrollbarState(
                 available = size,
                 visible = visible,
                 index = index

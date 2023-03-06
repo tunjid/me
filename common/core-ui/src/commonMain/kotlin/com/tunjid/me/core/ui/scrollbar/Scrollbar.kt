@@ -16,10 +16,7 @@
 
 package com.tunjid.me.core.ui.scrollbar
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -39,6 +36,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.util.packFloats
 import androidx.compose.ui.util.unpackFloat1
 import androidx.compose.ui.util.unpackFloat2
@@ -49,7 +48,7 @@ import kotlin.math.min
 @JvmInline
 value class ScrollbarState internal constructor(internal val packedValue: Long) {
     companion object {
-        val FULL = ScrollbarState(
+        val FULL = scrollbarState(
             thumbHeightPercent = 1f,
             thumbTravelPercent = 0f,
         )
@@ -60,7 +59,19 @@ val ScrollbarState.thumbHeightPercent get() = unpackFloat1(packedValue)
 
 val ScrollbarState.thumbTravelPercent get() = unpackFloat2(packedValue)
 
-var recr = 0
+@Immutable
+@JvmInline
+private value class ScrollbarTrack(val packedValue: Long) {
+    constructor(
+        top: Float,
+        bottom: Float,
+    ) : this(packFloats(top, bottom))
+}
+
+private val ScrollbarTrack.height
+    get() =
+        unpackFloat2(packedValue) - unpackFloat1(packedValue)
+
 @Composable
 fun Scrollbar(
     modifier: Modifier = Modifier,
@@ -69,50 +80,40 @@ fun Scrollbar(
     onThumbMoved: (Float) -> Unit,
 ) {
     val localDensity = LocalDensity.current
-    var minY by remember { mutableStateOf(0f) }
-    var maxY by remember { mutableStateOf(0f) }
+    var track by remember { mutableStateOf(ScrollbarTrack(0)) }
 
     val thumbHeightPercent = state.thumbHeightPercent
     val thumbTravelPercent = state.thumbTravelPercent
-    val thumbHeightPx = thumbHeightPx(thumbHeightPercent, maxY, minY)
+    val thumbHeightPx = thumbHeightPx(thumbHeightPercent, track.height)
 
     val thumbHeightDp by animateDpAsState(
         with(localDensity) { thumbHeightPx.toDp() }
     )
-    val thumbTravelPx by animateIntAsState(
-        targetValue = min(
-            a = ((maxY - minY) * thumbTravelPercent).toInt(),
-            b = ((maxY - minY) - thumbHeightPx).toInt()
-        ),
-        animationSpec = SpringSpec(
-            stiffness = Spring.StiffnessHigh
-        )
-    )
 
+    val thumbTravelPx = min(
+        a = (track.height * thumbTravelPercent).toInt(),
+        b = (track.height - thumbHeightPx).toInt()
+    )
     Box(
         modifier = modifier
             .fillMaxHeight()
             .onGloballyPositioned {
-                minY = it.positionInRoot().y
-                maxY = minY + it.size.height
+                track = ScrollbarTrack(
+                    top = it.positionInRoot().y,
+                    bottom = it.positionInRoot().y + it.size.height
+                )
             }
-            .pointerInput(minY, maxY) {
-                detectTapGestures {
+            .pointerInput(track) {
+                detectTapGestures { offset ->
                     onThumbMoved(
-                        it.y.calculateThumbMove(
-                            maxY = maxY,
-                            minY = minY
-                        )
+                        track.thumbPosition(y = offset.y)
                     )
                 }
             }
-            .pointerInput(minY, maxY) {
+            .pointerInput(track) {
                 detectDragGestures { change, _ ->
                     onThumbMoved(
-                        change.position.y.calculateThumbMove(
-                            maxY = maxY,
-                            minY = minY
-                        )
+                        track.thumbPosition(y = change.position.y)
                     )
                 }
             }
@@ -121,7 +122,12 @@ fun Scrollbar(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .height(thumbHeightDp)
-                .offset(y = with(localDensity) { thumbTravelPx.toDp() })
+                .offset(
+                    y = max(
+                        a = with(localDensity) { thumbTravelPx.toDp() },
+                        b = 0.dp
+                    )
+                )
                 .fillMaxWidth()
         ) {
             thumb()
@@ -131,25 +137,23 @@ fun Scrollbar(
 
 private fun thumbHeightPx(
     thumbHeightPercent: Float,
-    maxY: Float,
-    minY: Float,
+    trackHeight: Float,
 ): Float = max(
     a = thumbHeightPercent,
     b = 0.1f
-) * (maxY - minY)
+) * (trackHeight)
 
-private fun Float.calculateThumbMove(
-    maxY: Float,
-    minY: Float,
+private fun ScrollbarTrack.thumbPosition(
+    y: Float,
 ): Float = max(
     a = min(
-        a = this / (maxY - minY),
+        a = y / height,
         b = 1f
     ),
     b = 0f
 )
 
-fun ScrollbarState(
+fun scrollbarState(
     thumbHeightPercent: Float,
     thumbTravelPercent: Float,
 ) = ScrollbarState(
@@ -159,18 +163,18 @@ fun ScrollbarState(
     )
 )
 
-fun ScrollbarState(
+fun scrollbarState(
     available: Int,
     visible: Int,
     index: Int,
 ): ScrollbarState =
     when {
-        available != 0 -> ScrollbarState(
+        available != 0 -> scrollbarState(
             thumbHeightPercent = visible.toFloat() / available,
             thumbTravelPercent = index.toFloat() / available
         )
 
-        else -> ScrollbarState(
+        else -> scrollbarState(
             thumbHeightPercent = 1f,
             thumbTravelPercent = 0f,
         )
