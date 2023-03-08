@@ -25,7 +25,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-const val DefaultQueryLimit = 6
+const val DefaultQueryLimit = 10
 
 @Serializable
 data class

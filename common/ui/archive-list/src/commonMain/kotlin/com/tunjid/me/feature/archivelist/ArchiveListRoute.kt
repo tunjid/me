@@ -228,18 +228,10 @@ private fun GridCell(
             item = item
         )
 
-        is ArchiveItem.Loading ->
-            if (item.isCircular) ProgressBar(
-                modifier = modifier,
-                isCircular = true
-            )
-            else ArchiveCard(
-                modifier = modifier,
-                query = query,
-                archive = emptyArchive,
-                onArchiveSelected = {},
-                onCategoryClicked = { }
-            )
+        is ArchiveItem.Loading -> ProgressBar(
+            modifier = modifier,
+            isCircular = item.isCircular
+        )
 
         is ArchiveItem.Loaded -> ArchiveCard(
             modifier = modifier,
@@ -285,7 +277,7 @@ private fun FilterCollapseEffect(
 private fun ScrollbarThumb(isActive: Boolean) {
     val color by animateColorAsState(
         if (isActive) MaterialTheme.colorScheme.tertiaryContainer
-        else MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
+        else MaterialTheme.colorScheme.surfaceColorAtElevation(16.dp)
     )
     Box(
         modifier = Modifier

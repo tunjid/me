@@ -138,28 +138,6 @@ val ArchiveItem.Loaded.headerText
         "${month.name.lowercase().replaceFirstChar(Char::uppercase)}, $year"
     }
 
-val emptyArchive = Archive(
-    id = ArchiveId(""),
-    link = "",
-    title = "",
-    body = "",
-    description = "",
-    thumbnail = null,
-    videoUrl = null,
-    author = User(
-        id = UserId(""),
-        firstName = "",
-        lastName = "",
-        fullName = "",
-        imageUrl = "",
-    ),
-    likes = 0L,
-    created = Instant.DISTANT_PAST,
-    tags = emptyList(),
-    categories = emptyList(),
-    kind = ArchiveKind.Articles
-)
-
 @Serializable
 data class QueryState(
     // Deleted field

@@ -244,7 +244,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
             )
         )
         // Allow database queries to settle
-        .debounce(timeoutMillis = 50)
+        .debounce(timeoutMillis = 10)
 
     return combine(
         flow = queries,

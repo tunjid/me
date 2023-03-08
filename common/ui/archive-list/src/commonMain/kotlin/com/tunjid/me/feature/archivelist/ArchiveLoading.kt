@@ -16,7 +16,12 @@
 
 package com.tunjid.me.feature.archivelist
 
+import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.core.model.User
+import com.tunjid.me.core.model.UserId
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.tiler.ListTiler
 import com.tunjid.tiler.Tile
@@ -25,6 +30,7 @@ import com.tunjid.tiler.utilities.PivotRequest
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.datetime.Instant
 
 internal fun ArchiveRepository.archiveTiler(
     limiter: Tile.Limiter<ArchiveQuery, ArchiveItem>
@@ -39,10 +45,10 @@ internal fun ArchiveRepository.archiveTiler(
                 emit(
                     (0 until query.limit)
                         .map {
-                            ArchiveItem.Loading(
+                            ArchiveItem.Loaded(
                                 index = query.offset + it,
                                 queryId = query.hashCode(),
-                                isCircular = false
+                                archive = emptyArchive()
                             )
                         }
                 )
@@ -84,3 +90,25 @@ private val previousArchiveQuery: ArchiveQuery.() -> ArchiveQuery? = {
         )
     )
 }
+
+private fun emptyArchive() = Archive(
+    id = ArchiveId(""),
+    link = "",
+    title = "\n",
+    body = "",
+    description = "\n",
+    thumbnail = null,
+    videoUrl = null,
+    author = User(
+        id = UserId(""),
+        firstName = "",
+        lastName = "",
+        fullName = "",
+        imageUrl = "",
+    ),
+    likes = 0L,
+    created = Instant.DISTANT_PAST,
+    tags = emptyList(),
+    categories = emptyList(),
+    kind = ArchiveKind.Articles
+)
