@@ -101,8 +101,10 @@ private fun <LazyState : Any, LazyStateItem> LazyState.scrollbarState(
             val visibleItemsInfo = items(this@scrollbarState)
             val minItem = visibleItemsInfo.maxByOrNull(areaForItem)
                 ?: return@snapshotFlow null
-
             val minArea = areaForItem(minItem)
+                .takeIf { it > 0 }
+                ?: return@snapshotFlow null
+
             val visible = viewportArea(this@scrollbarState) / minArea
             val info = visibleItemsInfo.firstOrNull()
             val index = info?.let(indexForItem)

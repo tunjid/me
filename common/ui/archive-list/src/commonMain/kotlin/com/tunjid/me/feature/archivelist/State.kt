@@ -20,18 +20,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.model.User
-import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.tiler.TiledList
+import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.emptyTiledList
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
@@ -62,6 +59,7 @@ val ArchiveItem.stickyHeader: ArchiveItem.Header?
             index = index,
             text = headerText
         )
+
         else -> null
     }
 
@@ -98,9 +96,16 @@ sealed class ArchiveItem {
     ) : ArchiveItem()
 
     data class Loaded(
-       override val index: Int,
-       val queryId: Int,
-       val archive: Archive,
+        override val index: Int,
+        val key: String,
+        val archive: Archive,
+    ) : ArchiveItem()
+
+    data class PlaceHolder(
+        override val index: Int,
+        val key: String,
+        val lastId: ArchiveId? = null,
+        val archive: Archive,
     ) : ArchiveItem()
 
     data class Loading(
@@ -115,7 +120,8 @@ val ArchiveItem.key: String
         is ArchiveItem.Header -> "header-$text"
         // The ids have to match across these for fast scrolling to work
         is ArchiveItem.Loading -> "archive-$index-$queryId"
-        is ArchiveItem.Loaded -> "archive-$index-$queryId"
+        is ArchiveItem.PlaceHolder -> key
+        is ArchiveItem.Loaded -> key
     }
 
 val Any.isHeaderKey: Boolean
@@ -194,7 +200,7 @@ inline fun <reified T : Descriptor> ArchiveQuery.descriptorChips() =
     }
 
 @Composable
-inline fun QueryState.suggestedDescriptorChips() =
+fun QueryState.suggestedDescriptorChips() =
     suggestedDescriptors.map {
         ChipInfo(
             key = it,
@@ -209,4 +215,64 @@ inline fun QueryState.suggestedDescriptorChips() =
 fun Descriptor.tint() = when (this) {
     is Descriptor.Category -> MaterialTheme.colorScheme.secondaryContainer
     is Descriptor.Tag -> MaterialTheme.colorScheme.tertiaryContainer
+}
+
+fun TiledList<ArchiveQuery, ArchiveItem>.preserveIds(
+    old: TiledList<ArchiveQuery, ArchiveItem>
+): TiledList<ArchiveQuery, ArchiveItem> =
+    with(old.fold(KeyPreserver(), KeyPreserver::reduce)) {
+        buildTiledList {
+            this@preserveIds.forEachIndexed { index, item ->
+                add(
+                    this@preserveIds.queryAt(index),
+                    preserveId(item)
+                )
+            }
+        }
+    }
+
+/**
+ * Tracks keys between successive loads to maintain scroll position.
+ * Implementation is cheap as only <<100 items are sent to the UI at any one time.
+ *
+ * TODO: Improve this a lot, try to get space complexity down
+ */
+private class KeyPreserver {
+    private val keysToLoaded: MutableMap<String, ArchiveItem.Loaded> = mutableMapOf()
+    private val archiveIdsToLoaded: MutableMap<ArchiveId, ArchiveItem.Loaded> = mutableMapOf()
+    private val archiveIdsToPlaceholders: MutableMap<ArchiveId?, ArchiveItem.PlaceHolder> = mutableMapOf()
+
+    fun reduce(item: ArchiveItem): KeyPreserver = when (item) {
+        is ArchiveItem.Header,
+        is ArchiveItem.Loading -> Unit
+        is ArchiveItem.Loaded -> {
+            keysToLoaded[item.key] = item
+            archiveIdsToLoaded[item.archive.id] = item
+        }
+        is ArchiveItem.PlaceHolder -> archiveIdsToPlaceholders[item.lastId] = item
+    }.let { this }
+
+    fun preserveId(item: ArchiveItem) = when (item) {
+        is ArchiveItem.Header,
+        is ArchiveItem.Loading -> item
+        is ArchiveItem.Loaded -> when (val placeholder = archiveIdsToPlaceholders.remove(item.archive.id)) {
+            null -> when (val loadedItem = archiveIdsToLoaded.remove(item.archive.id)) {
+                null -> item
+                else -> item.copy(
+                    key = loadedItem.key
+                )
+            }
+
+            else -> item.copy(
+                key = placeholder.key
+            )
+        }
+
+        is ArchiveItem.PlaceHolder -> when (val loadedItem = keysToLoaded.remove(keysToLoaded.keys.firstOrNull())) {
+            null -> item
+            else -> item.copy(
+                lastId = loadedItem.archive.id
+            )
+        }
+    }
 }

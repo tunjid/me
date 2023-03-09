@@ -244,7 +244,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
             )
         )
         // Allow database queries to settle
-        .debounce(timeoutMillis = 10)
+        .debounce(timeoutMillis = 50)
 
     return combine(
         flow = queries,
@@ -255,7 +255,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
         .map { fetchResult: FetchResult ->
             mutation {
                 copy(
-                    items = fetchResult.itemsWithHeaders,
+                    items = fetchResult.itemsWithHeaders.preserveIds(items),
                     queryState = queryState.copy(
                         currentQuery = fetchResult.query,
                         count = fetchResult.archivesAvailable,
@@ -287,7 +287,7 @@ private fun ArchiveQuery?.amendQuery(
 
 private fun ArchiveQuery.hasTheSameFilter(other: ArchiveQuery) =
     kind == other.kind &&
-        desc == other.desc &&
-        temporalFilter == other.temporalFilter &&
-        contentFilter.tags.toSet() == other.contentFilter.tags.toSet() &&
-        contentFilter.categories.toSet() == other.contentFilter.categories.toSet()
+            desc == other.desc &&
+            temporalFilter == other.temporalFilter &&
+            contentFilter.tags.toSet() == other.contentFilter.tags.toSet() &&
+            contentFilter.categories.toSet() == other.contentFilter.categories.toSet()

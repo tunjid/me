@@ -32,24 +32,32 @@ val FetchResult.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
         var month = -1
         var year = -1
         queriedArchives.forEachIndexed { index, item ->
-            if (item is ArchiveItem.Loaded) {
-                val query = queriedArchives.queryAt(index)
-                val dateTime = item.archive.dateTime
-                if (month != dateTime.monthNumber || year != dateTime.year) {
-                    month = dateTime.monthNumber
-                    year = dateTime.year
+            when (item) {
+                is ArchiveItem.Loaded -> {
+                    val query = queriedArchives.queryAt(index)
+                    val dateTime = item.archive.dateTime
+                    if (month != dateTime.monthNumber || year != dateTime.year) {
+                        month = dateTime.monthNumber
+                        year = dateTime.year
+                        add(
+                            query = query,
+                            item = ArchiveItem.Header(
+                                index = item.index,
+                                text = item.headerText
+                            )
+                        )
+                    }
                     add(
                         query = query,
-                        item = ArchiveItem.Header(
-                            index = item.index,
-                            text = item.headerText
-                        )
+                        item = item
                     )
                 }
-                add(
+
+                is ArchiveItem.PlaceHolder -> add(
                     query = query,
                     item = item
                 )
+                else -> Unit
             }
         }
-    }.filterTransform { distinctBy(ArchiveItem::key) }
+    }

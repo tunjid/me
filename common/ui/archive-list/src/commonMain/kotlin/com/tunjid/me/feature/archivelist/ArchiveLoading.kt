@@ -43,21 +43,20 @@ internal fun ArchiveRepository.archiveTiler(
         fetcher = { query ->
             flow {
                 emit(
-                    (0 until query.limit)
-                        .map {
-                            ArchiveItem.Loaded(
-                                index = query.offset + it,
-                                queryId = query.hashCode(),
-                                archive = emptyArchive()
-                            )
-                        }
+                    (0 until query.limit).map { index ->
+                        ArchiveItem.PlaceHolder(
+                            index = query.offset + index,
+                            key = "${query.offset + index}-${query.hashCode()}",
+                            archive = emptyArchive()
+                        )
+                    }
                 )
                 emitAll(
                     archivesStream(query).map { archives ->
                         archives.mapIndexed { index, archive ->
                             ArchiveItem.Loaded(
                                 index = query.offset + index,
-                                queryId = query.hashCode(),
+                                key = "${query.offset + index}-${query.hashCode()}",
                                 archive = archive
                             )
                         }

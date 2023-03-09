@@ -180,7 +180,9 @@ private fun ArchiveList(
                 span = { item ->
                     actions(Action.Fetch.NoColumnsChanged(maxLineSpan))
                     when (item) {
-                        is ArchiveItem.Loaded -> GridItemSpan(1)
+                        is ArchiveItem.Loaded,
+                        is ArchiveItem.PlaceHolder
+                        -> GridItemSpan(1)
                         is ArchiveItem.Header,
                         is ArchiveItem.Loading,
                         -> GridItemSpan(maxLineSpan)
@@ -241,6 +243,14 @@ private fun GridCell(
                 navigate("archives/${archive.kind.type}/${archive.id.value}")
             },
             onCategoryClicked = onCategoryClicked
+        )
+
+        is ArchiveItem.PlaceHolder -> ArchiveCard(
+            modifier = modifier,
+            query = query,
+            archive = item.archive,
+            onArchiveSelected = { },
+            onCategoryClicked = { },
         )
     }
 }
