@@ -316,8 +316,13 @@ private fun LazyGridState.ScrollbarThumbPositionEffect(
         // Make offset a multiple of limit for query stability
         val count = currentState.queryState.count
         val limit = currentState.queryState.currentQuery.limit
-        val offsetFloat = count * percentage
-        val offset = limit * round(offsetFloat / limit).toInt()
+        val rounded = (count * percentage).toInt()
+        val modulo = rounded % limit
+        val offset = when {
+            modulo == 0 -> rounded
+            (limit - modulo <= limit / 2) -> rounded - modulo
+            else -> rounded + (limit - modulo)
+        }
         actions(
             Action.Fetch.LoadAround(
                 currentState.queryState.currentQuery.copy(
