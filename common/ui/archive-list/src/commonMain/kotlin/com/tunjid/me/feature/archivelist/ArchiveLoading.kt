@@ -22,6 +22,7 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.User
 import com.tunjid.me.core.model.UserId
+import com.tunjid.me.core.utilities.uuid
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.tiler.ListTiler
 import com.tunjid.tiler.Tile
@@ -42,21 +43,21 @@ internal fun ArchiveRepository.archiveTiler(
         ),
         fetcher = { query ->
             flow {
-                emit(
-                    (0 until query.limit).map { index ->
-                        ArchiveItem.PlaceHolder(
-                            index = query.offset + index,
-                            key = "${query.offset + index}-${query.hashCode()}",
-                            archive = emptyArchive()
-                        )
-                    }
-                )
+                val placeholders = (0 until query.limit).map { index ->
+                    ArchiveItem.PlaceHolder(
+                        index = query.offset + index,
+                        key = uuid(),
+                        archive = emptyArchive()
+                    )
+                }
+                emit(placeholders)
                 emitAll(
                     archivesStream(query).map { archives ->
                         archives.mapIndexed { index, archive ->
                             ArchiveItem.Loaded(
                                 index = query.offset + index,
-                                key = "${query.offset + index}-${query.hashCode()}",
+                                // Maintain keys between placeholders and loaded items
+                                key = placeholders[index].key,
                                 archive = archive
                             )
                         }

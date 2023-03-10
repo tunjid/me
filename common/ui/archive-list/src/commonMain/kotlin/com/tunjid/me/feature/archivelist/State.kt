@@ -217,15 +217,15 @@ fun Descriptor.tint() = when (this) {
     is Descriptor.Tag -> MaterialTheme.colorScheme.tertiaryContainer
 }
 
-fun TiledList<ArchiveQuery, ArchiveItem>.preserveIds(
-    old: TiledList<ArchiveQuery, ArchiveItem>
+fun TiledList<ArchiveQuery, ArchiveItem>.preserveKeys(
+    oldList: TiledList<ArchiveQuery, ArchiveItem>
 ): TiledList<ArchiveQuery, ArchiveItem> =
-    with(old.fold(KeyPreserver(), KeyPreserver::reduce)) {
+    with(oldList.fold(KeyPreserver(), KeyPreserver::reduce)) {
         buildTiledList {
-            this@preserveIds.forEachIndexed { index, item ->
+            this@preserveKeys.forEachIndexed { index, item ->
                 add(
-                    this@preserveIds.queryAt(index),
-                    preserveId(item)
+                    this@preserveKeys.queryAt(index),
+                    preserveKey(item)
                 )
             }
         }
@@ -234,45 +234,26 @@ fun TiledList<ArchiveQuery, ArchiveItem>.preserveIds(
 /**
  * Tracks keys between successive loads to maintain scroll position.
  * Implementation is cheap as only <<100 items are sent to the UI at any one time.
- *
- * TODO: Improve this a lot, try to get space complexity down
  */
 private class KeyPreserver {
-    private val keysToLoaded: MutableMap<String, ArchiveItem.Loaded> = mutableMapOf()
-    private val archiveIdsToLoaded: MutableMap<ArchiveId, ArchiveItem.Loaded> = mutableMapOf()
-    private val archiveIdsToPlaceholders: MutableMap<ArchiveId?, ArchiveItem.PlaceHolder> = mutableMapOf()
+    private val archiveIdsToKeys: MutableMap<ArchiveId, String> = mutableMapOf()
 
     fun reduce(item: ArchiveItem): KeyPreserver = when (item) {
         is ArchiveItem.Header,
-        is ArchiveItem.Loading -> Unit
-        is ArchiveItem.Loaded -> {
-            keysToLoaded[item.key] = item
-            archiveIdsToLoaded[item.archive.id] = item
-        }
-        is ArchiveItem.PlaceHolder -> archiveIdsToPlaceholders[item.lastId] = item
+        is ArchiveItem.Loading,
+        is ArchiveItem.PlaceHolder -> Unit
+
+        is ArchiveItem.Loaded -> archiveIdsToKeys[item.archive.id] = item.key
     }.let { this }
 
-    fun preserveId(item: ArchiveItem) = when (item) {
+    fun preserveKey(item: ArchiveItem) = when (item) {
         is ArchiveItem.Header,
-        is ArchiveItem.Loading -> item
-        is ArchiveItem.Loaded -> when (val placeholder = archiveIdsToPlaceholders.remove(item.archive.id)) {
-            null -> when (val loadedItem = archiveIdsToLoaded.remove(item.archive.id)) {
-                null -> item
-                else -> item.copy(
-                    key = loadedItem.key
-                )
-            }
+        is ArchiveItem.Loading,
+        is ArchiveItem.PlaceHolder -> item
 
-            else -> item.copy(
-                key = placeholder.key
-            )
-        }
-
-        is ArchiveItem.PlaceHolder -> when (val loadedItem = keysToLoaded.remove(keysToLoaded.keys.firstOrNull())) {
+        is ArchiveItem.Loaded -> when (val key = archiveIdsToKeys.remove(item.archive.id)) {
             null -> item
-            else -> item.copy(
-                lastId = loadedItem.archive.id
-            )
+            else -> item.copy(key = key)
         }
     }
 }
