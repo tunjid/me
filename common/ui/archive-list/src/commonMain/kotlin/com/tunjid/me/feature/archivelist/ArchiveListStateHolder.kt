@@ -204,6 +204,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
         .scan(null, ArchiveQuery?::amendQuery)
         .filterNotNull()
         .distinctUntilChanged()
+        .onEach { println("out ${it.offset}") }
         .shareIn(
             scope = scope,
             started = SharingStarted.WhileSubscribed()

@@ -59,6 +59,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.scan
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
+import kotlin.math.round
 
 @Serializable
 data class ArchiveListRoute(
@@ -137,7 +138,7 @@ private fun ArchiveScreen(
                     onThumbMoved = { percentage: Float ->
                         scrollPercentage = percentage
                     },
-                    thumb = { isActive ->  ScrollbarThumb(isActive) }
+                    thumb = { isActive -> ScrollbarThumb(isActive) }
                 )
                 gridState.ScrollbarThumbPositionEffect(
                     percentage = scrollPercentage,
@@ -183,6 +184,7 @@ private fun ArchiveList(
                         is ArchiveItem.Loaded,
                         is ArchiveItem.PlaceHolder
                         -> GridItemSpan(1)
+
                         is ArchiveItem.Header,
                         is ArchiveItem.Loading,
                         -> GridItemSpan(maxLineSpan)
@@ -311,11 +313,15 @@ private fun LazyGridState.ScrollbarThumbPositionEffect(
 
     // Trigger the load to fetch the data required
     LaunchedEffect(percentage) {
+        // Make offset a multiple of limit for query stability
         val count = currentState.queryState.count
+        val limit = currentState.queryState.currentQuery.limit
+        val offsetFloat = count * percentage
+        val offset = limit * round(offsetFloat / limit).toInt()
         actions(
             Action.Fetch.LoadAround(
                 currentState.queryState.currentQuery.copy(
-                    offset = (count * percentage).toInt()
+                    offset = offset
                 )
             )
         )

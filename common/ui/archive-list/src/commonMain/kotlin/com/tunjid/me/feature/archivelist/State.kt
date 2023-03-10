@@ -220,12 +220,12 @@ fun Descriptor.tint() = when (this) {
 fun TiledList<ArchiveQuery, ArchiveItem>.preserveKeys(
     oldList: TiledList<ArchiveQuery, ArchiveItem>
 ): TiledList<ArchiveQuery, ArchiveItem> =
-    with(oldList.fold(KeyPreserver(), KeyPreserver::reduce)) {
+    with(oldList.fold(KeyPreserver(), KeyPreserver::cacheKey)) {
         buildTiledList {
             this@preserveKeys.forEachIndexed { index, item ->
                 add(
                     this@preserveKeys.queryAt(index),
-                    preserveKey(item)
+                    restoreKey(item)
                 )
             }
         }
@@ -238,7 +238,7 @@ fun TiledList<ArchiveQuery, ArchiveItem>.preserveKeys(
 private class KeyPreserver {
     private val archiveIdsToKeys: MutableMap<ArchiveId, String> = mutableMapOf()
 
-    fun reduce(item: ArchiveItem): KeyPreserver = when (item) {
+    fun cacheKey(item: ArchiveItem): KeyPreserver = when (item) {
         is ArchiveItem.Header,
         is ArchiveItem.Loading,
         is ArchiveItem.PlaceHolder -> Unit
@@ -246,7 +246,7 @@ private class KeyPreserver {
         is ArchiveItem.Loaded -> archiveIdsToKeys[item.archive.id] = item.key
     }.let { this }
 
-    fun preserveKey(item: ArchiveItem) = when (item) {
+    fun restoreKey(item: ArchiveItem) = when (item) {
         is ArchiveItem.Header,
         is ArchiveItem.Loading,
         is ArchiveItem.PlaceHolder -> item

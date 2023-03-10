@@ -28,9 +28,12 @@ import com.tunjid.tiler.ListTiler
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.listTiler
 import com.tunjid.tiler.utilities.PivotRequest
+import java.util.concurrent.CancellationException
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.datetime.Instant
 
 internal fun ArchiveRepository.archiveTiler(
@@ -46,7 +49,7 @@ internal fun ArchiveRepository.archiveTiler(
                 val placeholders = (0 until query.limit).map { index ->
                     ArchiveItem.PlaceHolder(
                         index = query.offset + index,
-                        key = uuid(),
+                        key = "${query.offset + index}-${query.hashCode()}",
                         archive = emptyArchive()
                     )
                 }
