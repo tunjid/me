@@ -90,10 +90,10 @@ private fun ArchiveQuery.amend(
     )
 )
 
-fun ArchiveQuery.includes(archive: Archive) =
-    archive.categories.toSet().all(contentFilter.categories::contains) &&
-        archive.tags.toSet().all(contentFilter.tags::contains) &&
-        archive.kind == kind
+fun ArchiveQuery.includes(archive: Archive): Boolean =
+    contentFilter.categories.toSet().all(archive.categories::contains) &&
+        contentFilter.tags.toSet().all(archive.tags::contains) &&
+        kind == archive.kind
 // TODO temporal filter
 
 fun ArchiveQuery.hasTheSameFilter(other: ArchiveQuery) =
