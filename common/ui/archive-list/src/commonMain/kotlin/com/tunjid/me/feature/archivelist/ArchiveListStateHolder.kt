@@ -19,6 +19,7 @@ package com.tunjid.me.feature.archivelist
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.hasTheSameFilter
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
@@ -198,13 +199,12 @@ internal fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<St
  */
 private fun Flow<Action.Fetch>.fetchMutations(
     scope: CoroutineScope,
-    repo: ArchiveRepository
+    repo: ArchiveRepository,
 ): Flow<Mutation<State>> {
     val queries = filterIsInstance<Action.Fetch.QueriedFetch>()
         .scan(null, ArchiveQuery?::amendQuery)
         .filterNotNull()
         .distinctUntilChanged()
-        .onEach { println("out ${it.offset}") }
         .shareIn(
             scope = scope,
             started = SharingStarted.WhileSubscribed()
@@ -256,7 +256,11 @@ private fun Flow<Action.Fetch>.fetchMutations(
         .map { fetchResult: FetchResult ->
             mutation {
                 copy(
-                    items = fetchResult.queriedArchives.preserveKeys(items).itemsWithHeaders,
+                    items = preserveKeys(
+                        newQuery = fetchResult.query,
+                        newList = fetchResult.queriedArchives
+                    )
+                        .itemsWithHeaders,
                     queryState = queryState.copy(
                         currentQuery = fetchResult.query,
                         count = fetchResult.archivesAvailable,
@@ -274,7 +278,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
 }
 
 private fun ArchiveQuery?.amendQuery(
-    queriedFetch: Action.Fetch.QueriedFetch
+    queriedFetch: Action.Fetch.QueriedFetch,
 ) = when (this) {
     null -> queriedFetch.query
     else -> when (queriedFetch) {
@@ -285,10 +289,3 @@ private fun ArchiveQuery?.amendQuery(
         }
     }
 }
-
-private fun ArchiveQuery.hasTheSameFilter(other: ArchiveQuery) =
-    kind == other.kind &&
-            desc == other.desc &&
-            temporalFilter == other.temporalFilter &&
-            contentFilter.tags.toSet() == other.contentFilter.tags.toSet() &&
-            contentFilter.categories.toSet() == other.contentFilter.categories.toSet()

@@ -22,6 +22,8 @@ import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.hasTheSameFilter
+import com.tunjid.me.core.model.includes
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
@@ -95,17 +97,19 @@ sealed class ArchiveItem {
         val text: String,
     ) : ArchiveItem()
 
-    sealed class Card: ArchiveItem() {
+    sealed class Card : ArchiveItem() {
+        abstract val archive: Archive
+
         data class Loaded(
             override val index: Int,
             val key: String,
-            val archive: Archive,
+            override val archive: Archive,
         ) : Card()
 
         data class PlaceHolder(
             override val index: Int,
             val key: String,
-            val archive: Archive,
+            override val archive: Archive,
         ) : Card()
     }
 
@@ -218,45 +222,51 @@ fun Descriptor.tint() = when (this) {
     is Descriptor.Tag -> MaterialTheme.colorScheme.tertiaryContainer
 }
 
-fun TiledList<ArchiveQuery, ArchiveItem.Card>.preserveKeys(
-    oldList: TiledList<ArchiveQuery, ArchiveItem>
-): TiledList<ArchiveQuery, ArchiveItem> =
-    with(oldList.fold(KeyPreserver(), KeyPreserver::cacheKey)) {
-        buildTiledList {
-            this@preserveKeys.forEachIndexed { index, item ->
-                add(
-                    this@preserveKeys.queryAt(index),
-                    restoreKey(item)
-                )
-            }
-        }
-    }
-
 /**
  * Tracks keys between successive loads to maintain scroll position.
  * Implementation is cheap as only <<100 items are sent to the UI at any one time.
  */
-private class KeyPreserver {
-    private val archiveIdsToKeys: MutableMap<ArchiveId, String> = mutableMapOf()
+fun State.preserveKeys(
+    newQuery: ArchiveQuery,
+    newList: TiledList<ArchiveQuery, ArchiveItem.Card>,
+): TiledList<ArchiveQuery, ArchiveItem> = buildTiledList {
+    val oldArchiveIdsToKeys = mutableMapOf<ArchiveId, String>()
+    val oldLoadedItems = mutableListOf<ArchiveItem.Card.Loaded>()
+    val hasSameFilter = newQuery.hasTheSameFilter(queryState.currentQuery)
 
-    fun cacheKey(item: ArchiveItem): KeyPreserver = when (item) {
-        is ArchiveItem.Header,
-        is ArchiveItem.Loading,
-        is ArchiveItem.Card.PlaceHolder
-        -> Unit
+    items.forEach {
+        if (it !is ArchiveItem.Card.Loaded) return@forEach
+        if (!hasSameFilter && !newQuery.includes(it.archive)) return@forEach
+        oldLoadedItems.add(it)
+        oldArchiveIdsToKeys[it.archive.id] = it.key
+    }
 
-        is ArchiveItem.Card.Loaded -> archiveIdsToKeys[item.archive.id] = item.key
-    }.let { this }
+    val sortedLoadedItems = when {
+        // No need to sort, old items are not being fed back into the results
+        hasSameFilter -> mutableListOf()
+        // Items will be read from the end to improve performance
+        else -> when (newQuery.desc) {
+            queryState.currentQuery.desc -> oldLoadedItems.asReversed()
+            else -> oldLoadedItems
+        }.toMutableList()
+    }
 
-    fun restoreKey(item: ArchiveItem) = when (item) {
-        is ArchiveItem.Header,
-        is ArchiveItem.Loading,
-        is ArchiveItem.Card.PlaceHolder
-        -> item
+    newList.forEachIndexed { index, card ->
+        add(
+            query = newList.queryAt(index),
+            item = when (card) {
+                is ArchiveItem.Card.Loaded -> when (val existingKey =
+                    oldArchiveIdsToKeys.remove(card.archive.id)) {
+                    null -> card
+                    else -> card.copy(key = existingKey)
+                }
 
-        is ArchiveItem.Card.Loaded -> when (val key = archiveIdsToKeys.remove(item.archive.id)) {
-            null -> item
-            else -> item.copy(key = key)
-        }
+                is ArchiveItem.Card.PlaceHolder ->
+                    // Replace placeholders with existing data that matches
+                    sortedLoadedItems.removeLastOrNull()
+                        ?.also { oldArchiveIdsToKeys.remove(it.archive.id) }
+                        ?: card
+            }
+        )
     }
 }
