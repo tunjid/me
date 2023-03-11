@@ -59,7 +59,8 @@ val ArchiveItem.stickyHeader: ArchiveItem.Header?
         is ArchiveItem.Header -> this
         is ArchiveItem.Card.Loaded -> ArchiveItem.Header(
             index = index,
-            text = headerText
+            text = headerText,
+            key = "header-$headerText",
         )
 
         else -> null
@@ -91,43 +92,38 @@ sealed class Action(val key: String) {
 sealed class ArchiveItem {
 
     abstract val index: Int
+    abstract val key: String
 
     data class Header(
         override val index: Int,
+        override val key: String,
         val text: String,
     ) : ArchiveItem()
 
+    data class Loading(
+        override val index: Int,
+        override val key: String,
+        val isCircular: Boolean,
+    ) : ArchiveItem()
+
     sealed class Card : ArchiveItem() {
+
         abstract val archive: Archive
 
         data class Loaded(
             override val index: Int,
-            val key: String,
+            override val key: String,
             override val archive: Archive,
         ) : Card()
 
         data class PlaceHolder(
             override val index: Int,
-            val key: String,
+            override val key: String,
             override val archive: Archive,
         ) : Card()
     }
-
-    data class Loading(
-        override val index: Int,
-        val queryId: Int,
-        val isCircular: Boolean,
-    ) : ArchiveItem()
 }
 
-val ArchiveItem.key: String
-    get() = when (this) {
-        is ArchiveItem.Header -> "header-$text"
-        // The ids have to match across these for fast scrolling to work
-        is ArchiveItem.Loading -> "archive-$index-$queryId"
-        is ArchiveItem.Card.PlaceHolder -> key
-        is ArchiveItem.Card.Loaded -> key
-    }
 
 val Any.isHeaderKey: Boolean
     get() = this is String && this.startsWith("header")

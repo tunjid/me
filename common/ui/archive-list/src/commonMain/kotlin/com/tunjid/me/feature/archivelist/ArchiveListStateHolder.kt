@@ -69,7 +69,7 @@ class ActualArchiveListStateHolder(
         items = tiledListOf(
             ArchiveQuery(kind = route.kind) to ArchiveItem.Loading(
                 index = -1,
-                queryId = -1,
+                key = "-1",
                 isCircular = true
             )
         ),
