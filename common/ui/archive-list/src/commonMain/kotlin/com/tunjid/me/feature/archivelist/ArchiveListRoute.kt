@@ -59,7 +59,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.scan
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
-import kotlin.math.round
 
 @Serializable
 data class ArchiveListRoute(
@@ -181,8 +180,8 @@ private fun ArchiveList(
                 span = { item ->
                     actions(Action.Fetch.NoColumnsChanged(maxLineSpan))
                     when (item) {
-                        is ArchiveItem.Loaded,
-                        is ArchiveItem.PlaceHolder
+                        is ArchiveItem.Card.Loaded,
+                        is ArchiveItem.Card.PlaceHolder
                         -> GridItemSpan(1)
 
                         is ArchiveItem.Header,
@@ -237,7 +236,7 @@ private fun GridCell(
             isCircular = item.isCircular
         )
 
-        is ArchiveItem.Loaded -> ArchiveCard(
+        is ArchiveItem.Card.Loaded -> ArchiveCard(
             modifier = modifier,
             query = query,
             archive = item.archive,
@@ -247,7 +246,7 @@ private fun GridCell(
             onCategoryClicked = onCategoryClicked
         )
 
-        is ArchiveItem.PlaceHolder -> ArchiveCard(
+        is ArchiveItem.Card.PlaceHolder -> ArchiveCard(
             modifier = modifier,
             query = query,
             archive = item.archive,

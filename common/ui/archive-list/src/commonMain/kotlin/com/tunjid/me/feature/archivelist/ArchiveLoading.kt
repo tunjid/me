@@ -22,23 +22,19 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.User
 import com.tunjid.me.core.model.UserId
-import com.tunjid.me.core.utilities.uuid
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.tiler.ListTiler
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.listTiler
 import com.tunjid.tiler.utilities.PivotRequest
-import java.util.concurrent.CancellationException
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.datetime.Instant
 
 internal fun ArchiveRepository.archiveTiler(
-    limiter: Tile.Limiter<ArchiveQuery, ArchiveItem>
-): ListTiler<ArchiveQuery, ArchiveItem> =
+    limiter: Tile.Limiter<ArchiveQuery, ArchiveItem.Card>
+): ListTiler<ArchiveQuery, ArchiveItem.Card> =
     listTiler(
         limiter = limiter,
         order = Tile.Order.Sorted(
@@ -47,7 +43,7 @@ internal fun ArchiveRepository.archiveTiler(
         fetcher = { query ->
             flow {
                 val placeholders = (0 until query.limit).map { index ->
-                    ArchiveItem.PlaceHolder(
+                    ArchiveItem.Card.PlaceHolder(
                         index = query.offset + index,
                         key = "${query.offset + index}-${query.hashCode()}",
                         archive = emptyArchive()
@@ -57,7 +53,7 @@ internal fun ArchiveRepository.archiveTiler(
                 emitAll(
                     archivesStream(query).map { archives ->
                         archives.mapIndexed { index, archive ->
-                            ArchiveItem.Loaded(
+                            ArchiveItem.Card.Loaded(
                                 index = query.offset + index,
                                 // Maintain keys between placeholders and loaded items
                                 key = placeholders[index].key,

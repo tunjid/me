@@ -19,22 +19,22 @@ package com.tunjid.me.feature.archivelist
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.buildTiledList
-import com.tunjid.tiler.filterTransform
 
 data class FetchResult(
     val query: ArchiveQuery,
     val archivesAvailable: Long,
-    val queriedArchives: TiledList<ArchiveQuery, ArchiveItem>
+    val queriedArchives: TiledList<ArchiveQuery, ArchiveItem.Card>
 )
 
-val FetchResult.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
+val TiledList<ArchiveQuery, ArchiveItem>.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
     get() = buildTiledList {
+        val queriedArchives = this@itemsWithHeaders
         var month = -1
         var year = -1
         queriedArchives.forEachIndexed { index, item ->
+            val query = queriedArchives.queryAt(index)
             when (item) {
-                is ArchiveItem.Loaded -> {
-                    val query = queriedArchives.queryAt(index)
+                is ArchiveItem.Card.Loaded -> {
                     val dateTime = item.archive.dateTime
                     if (month != dateTime.monthNumber || year != dateTime.year) {
                         month = dateTime.monthNumber
@@ -53,7 +53,7 @@ val FetchResult.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
                     )
                 }
 
-                is ArchiveItem.PlaceHolder -> add(
+                is ArchiveItem.Card.PlaceHolder -> add(
                     query = query,
                     item = item
                 )

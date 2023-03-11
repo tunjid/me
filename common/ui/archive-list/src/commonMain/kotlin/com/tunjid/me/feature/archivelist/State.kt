@@ -55,7 +55,7 @@ data class State(
 val ArchiveItem.stickyHeader: ArchiveItem.Header?
     get() = when (this) {
         is ArchiveItem.Header -> this
-        is ArchiveItem.Loaded -> ArchiveItem.Header(
+        is ArchiveItem.Card.Loaded -> ArchiveItem.Header(
             index = index,
             text = headerText
         )
@@ -95,18 +95,19 @@ sealed class ArchiveItem {
         val text: String,
     ) : ArchiveItem()
 
-    data class Loaded(
-        override val index: Int,
-        val key: String,
-        val archive: Archive,
-    ) : ArchiveItem()
+    sealed class Card: ArchiveItem() {
+        data class Loaded(
+            override val index: Int,
+            val key: String,
+            val archive: Archive,
+        ) : Card()
 
-    data class PlaceHolder(
-        override val index: Int,
-        val key: String,
-        val lastId: ArchiveId? = null,
-        val archive: Archive,
-    ) : ArchiveItem()
+        data class PlaceHolder(
+            override val index: Int,
+            val key: String,
+            val archive: Archive,
+        ) : Card()
+    }
 
     data class Loading(
         override val index: Int,
@@ -120,8 +121,8 @@ val ArchiveItem.key: String
         is ArchiveItem.Header -> "header-$text"
         // The ids have to match across these for fast scrolling to work
         is ArchiveItem.Loading -> "archive-$index-$queryId"
-        is ArchiveItem.PlaceHolder -> key
-        is ArchiveItem.Loaded -> key
+        is ArchiveItem.Card.PlaceHolder -> key
+        is ArchiveItem.Card.Loaded -> key
     }
 
 val Any.isHeaderKey: Boolean
@@ -139,7 +140,7 @@ val Archive.dateTime
     get() = created.toLocalDateTime(
         TimeZone.currentSystemDefault()
     )
-val ArchiveItem.Loaded.headerText
+val ArchiveItem.Card.Loaded.headerText
     get(): String = with(archive.dateTime) {
         "${month.name.lowercase().replaceFirstChar(Char::uppercase)}, $year"
     }
@@ -217,7 +218,7 @@ fun Descriptor.tint() = when (this) {
     is Descriptor.Tag -> MaterialTheme.colorScheme.tertiaryContainer
 }
 
-fun TiledList<ArchiveQuery, ArchiveItem>.preserveKeys(
+fun TiledList<ArchiveQuery, ArchiveItem.Card>.preserveKeys(
     oldList: TiledList<ArchiveQuery, ArchiveItem>
 ): TiledList<ArchiveQuery, ArchiveItem> =
     with(oldList.fold(KeyPreserver(), KeyPreserver::cacheKey)) {
@@ -241,17 +242,19 @@ private class KeyPreserver {
     fun cacheKey(item: ArchiveItem): KeyPreserver = when (item) {
         is ArchiveItem.Header,
         is ArchiveItem.Loading,
-        is ArchiveItem.PlaceHolder -> Unit
+        is ArchiveItem.Card.PlaceHolder
+        -> Unit
 
-        is ArchiveItem.Loaded -> archiveIdsToKeys[item.archive.id] = item.key
+        is ArchiveItem.Card.Loaded -> archiveIdsToKeys[item.archive.id] = item.key
     }.let { this }
 
     fun restoreKey(item: ArchiveItem) = when (item) {
         is ArchiveItem.Header,
         is ArchiveItem.Loading,
-        is ArchiveItem.PlaceHolder -> item
+        is ArchiveItem.Card.PlaceHolder
+        -> item
 
-        is ArchiveItem.Loaded -> when (val key = archiveIdsToKeys.remove(item.archive.id)) {
+        is ArchiveItem.Card.Loaded -> when (val key = archiveIdsToKeys.remove(item.archive.id)) {
             null -> item
             else -> item.copy(key = key)
         }

@@ -220,7 +220,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
     val archivesAvailable = queries
         .flatMapLatest(repo::count)
 
-    val pivotInputs = queries.toPivotedTileInputs<ArchiveQuery, ArchiveItem>(
+    val pivotInputs = queries.toPivotedTileInputs<ArchiveQuery, ArchiveItem.Card>(
         columnChanges
             .map { it.noColumns }
             .map(::pivotRequest)
@@ -230,7 +230,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
     val limitInputs = queries
         .combine(columnChanges, ::Pair)
         .map { (query, columnChange) ->
-            Tile.Limiter<ArchiveQuery, ArchiveItem> { items ->
+            Tile.Limiter<ArchiveQuery, ArchiveItem.Card> { items ->
                 items.size > 4 * columnChange.noColumns * query.limit
             }
         }
@@ -256,7 +256,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
         .map { fetchResult: FetchResult ->
             mutation {
                 copy(
-                    items = fetchResult.itemsWithHeaders.preserveKeys(items),
+                    items = fetchResult.queriedArchives.preserveKeys(items).itemsWithHeaders,
                     queryState = queryState.copy(
                         currentQuery = fetchResult.query,
                         count = fetchResult.archivesAvailable,

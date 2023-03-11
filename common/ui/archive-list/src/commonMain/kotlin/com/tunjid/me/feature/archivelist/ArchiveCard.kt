@@ -256,7 +256,7 @@ private fun ArchiveCardFooter(
     }
 }
 
-private val sampleArchiveItem = ArchiveItem.Loaded(
+private val sampleArchiveItem = ArchiveItem.Card.Loaded(
     index = 0,
     key = "",
     archive = Archive(
