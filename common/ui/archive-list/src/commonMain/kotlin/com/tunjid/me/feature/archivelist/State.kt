@@ -251,21 +251,22 @@ fun State.preserveKeys(
         }.toMutableList()
     }
 
-    newList.forEachIndexed { index, card ->
+    for (index in 0 until newList.size) {
         add(
             query = newList.queryAt(index),
-            item = when (card) {
+            item = when (val card = newList[index]) {
                 is ArchiveItem.Card.Loaded -> when (val existingKey =
                     oldArchiveIdsToKeys.remove(card.archive.id)) {
                     null -> card
                     else -> card.copy(key = existingKey)
                 }
 
-                is ArchiveItem.Card.PlaceHolder ->
+                is ArchiveItem.Card.PlaceHolder -> {
                     // Replace placeholders with existing data that matches
                     sortedLoadedItems.removeLastOrNull()
                         ?.also { oldArchiveIdsToKeys.remove(it.archive.id) }
                         ?: card
+                }
             }
         )
     }

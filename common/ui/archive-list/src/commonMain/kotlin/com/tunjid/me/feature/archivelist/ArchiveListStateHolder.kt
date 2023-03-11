@@ -202,7 +202,8 @@ private fun Flow<Action.Fetch>.fetchMutations(
     repo: ArchiveRepository,
 ): Flow<Mutation<State>> {
     val queries = filterIsInstance<Action.Fetch.QueriedFetch>()
-        .scan(null, ArchiveQuery?::amendQuery)
+        .distinctUntilChanged()
+        .scan(null, ArchiveQuery?::stabilizeQuery)
         .filterNotNull()
         .distinctUntilChanged()
         .shareIn(
@@ -277,15 +278,32 @@ private fun Flow<Action.Fetch>.fetchMutations(
         }
 }
 
-private fun ArchiveQuery?.amendQuery(
+/**
+ * Make sure [ArchiveQuery.offset] is in multiples of [ArchiveQuery.limit] and that load more queries match the
+ * current query
+ */
+private fun ArchiveQuery?.stabilizeQuery(
     queriedFetch: Action.Fetch.QueriedFetch,
-) = when (this) {
-    null -> queriedFetch.query
-    else -> when (queriedFetch) {
-        is Action.Fetch.QueryChange -> queriedFetch.query
-        is Action.Fetch.LoadAround -> when {
-            queriedFetch.query.hasTheSameFilter(this) -> queriedFetch.query
-            else -> this
+): ArchiveQuery? {
+    val query = when (this) {
+        null -> queriedFetch.query
+        else -> when (queriedFetch) {
+            is Action.Fetch.QueryChange -> queriedFetch.query
+            is Action.Fetch.LoadAround -> when {
+                queriedFetch.query.hasTheSameFilter(this) -> queriedFetch.query
+                else -> return null
+            }
         }
     }
+
+    val limit = query.limit
+    val offset = query.offset
+    val modulo = offset % limit
+    return query.copy(
+        offset = when {
+            modulo == 0 -> offset
+            (limit - modulo <= limit / 2) -> offset - modulo
+            else -> offset + (limit - modulo)
+        }
+    )
 }

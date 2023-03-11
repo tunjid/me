@@ -312,25 +312,14 @@ private fun LazyGridState.ScrollbarThumbPositionEffect(
 
     // Trigger the load to fetch the data required
     LaunchedEffect(percentage) {
-        // Make offset a multiple of limit for query stability
-        val count = currentState.queryState.count
-        val limit = currentState.queryState.currentQuery.limit
-        val rounded = (count * percentage).toInt()
-        val modulo = rounded % limit
-        val offset = when {
-            modulo == 0 -> rounded
-            (limit - modulo <= limit / 2) -> rounded - modulo
-            else -> rounded + (limit - modulo)
-        }
+        val indexToFind = (currentState.queryState.count * percentage).toInt()
         actions(
             Action.Fetch.LoadAround(
                 currentState.queryState.currentQuery.copy(
-                    offset = offset
+                    offset = indexToFind
                 )
             )
         )
-
-        val indexToFind = (currentState.queryState.count * percentage).toInt()
 
         // Fast path
         val fastIndex = currentState.items.indexOfFirst { it.index == indexToFind }
