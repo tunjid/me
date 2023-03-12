@@ -35,7 +35,7 @@ ArchiveQuery(
     val contentFilter: ArchiveContentFilter = ArchiveContentFilter(),
     val desc: Boolean = true,
     val offset: Int = 0,
-    val limit: Int = DefaultQueryLimit
+    val limit: Int = DefaultQueryLimit,
 )
 
 val ArchiveQuery.hasContentFilter
@@ -44,7 +44,7 @@ val ArchiveQuery.hasContentFilter
 @Serializable
 data class ArchiveTemporalFilter(
     val year: Int?,
-    val month: Int?
+    val month: Int?,
 )
 
 @Serializable
@@ -70,7 +70,7 @@ operator fun ArchiveQuery.minus(descriptor: Descriptor) = amend(descriptor, List
 
 private fun ArchiveQuery.amend(
     descriptor: Descriptor,
-    operator: (List<Descriptor>, Descriptor) -> List<Descriptor>
+    operator: (List<Descriptor>, Descriptor) -> List<Descriptor>,
 ) = copy(
     contentFilter = contentFilter.copy(
         categories = when (descriptor) {
@@ -91,9 +91,9 @@ private fun ArchiveQuery.amend(
 )
 
 fun ArchiveQuery.includes(archive: Archive): Boolean =
-    contentFilter.categories.toSet().all(archive.categories::contains) &&
-        contentFilter.tags.toSet().all(archive.tags::contains) &&
-        kind == archive.kind
+    kind == archive.kind &&
+        contentFilter.categories.toSet().all(archive.categories::contains) &&
+        contentFilter.tags.toSet().all(archive.tags::contains)
 // TODO temporal filter
 
 fun ArchiveQuery.hasTheSameFilter(other: ArchiveQuery) =
@@ -104,11 +104,11 @@ fun ArchiveQuery.hasTheSameFilter(other: ArchiveQuery) =
         contentFilter.categories.toSet() == other.contentFilter.categories.toSet()
 
 private class CategorySerializer(
-    backing: KSerializer<Category> = descriptorSerializer(Descriptor::Category)
+    backing: KSerializer<Category> = descriptorSerializer(Descriptor::Category),
 ) : KSerializer<Category> by backing
 
 private class TagSerializer(
-    backing: KSerializer<Tag> = descriptorSerializer(Descriptor::Tag)
+    backing: KSerializer<Tag> = descriptorSerializer(Descriptor::Tag),
 ) : KSerializer<Tag> by backing
 
 private fun <T : Descriptor> descriptorSerializer(creator: (String) -> T) =

@@ -230,9 +230,9 @@ fun State.preserveKeys(
     val oldLoadedItems = mutableListOf<ArchiveItem.Card.Loaded>()
     val hasSameFilter = newQuery.hasTheSameFilter(queryState.currentQuery)
 
-    items.forEach {
-        if (it !is ArchiveItem.Card.Loaded) return@forEach
-        if (!hasSameFilter && !newQuery.includes(it.archive)) return@forEach
+    for (it in items) {
+        if (it !is ArchiveItem.Card.Loaded) continue
+        if (!hasSameFilter && !newQuery.includes(it.archive)) continue
         oldLoadedItems.add(it)
         oldArchiveIdsToKeys[it.archive.id] = it.key
     }
@@ -249,20 +249,21 @@ fun State.preserveKeys(
     var sortedSize = sortedLoadedItems.size
 
     for (index in 0 until newList.size) {
+        val item = newList[index]
+        if (item is ArchiveItem.Card.Loaded && !newQuery.includes(item.archive)) continue
         add(
             query = newList.queryAt(index),
-            item = when (val card = newList[index]) {
-                is ArchiveItem.Card.Loaded -> when (val existingKey =
-                    oldArchiveIdsToKeys.remove(card.archive.id)) {
-                    null -> card
-                    else -> card.copy(key = existingKey)
+            item = when (item) {
+                is ArchiveItem.Card.Loaded -> when (val existingKey = oldArchiveIdsToKeys.remove(item.archive.id)) {
+                    null -> item
+                    else -> item.copy(key = existingKey)
                 }
 
                 is ArchiveItem.Card.PlaceHolder -> {
                     // Replace placeholders with existing data that matches
                     sortedLoadedItems.getOrNull(--sortedSize)
                         ?.also { oldArchiveIdsToKeys.remove(it.archive.id) }
-                        ?: card
+                        ?: item
                 }
             }
         )
