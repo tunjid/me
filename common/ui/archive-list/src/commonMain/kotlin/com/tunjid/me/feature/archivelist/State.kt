@@ -244,8 +244,9 @@ fun State.preserveKeys(
         else -> when (newQuery.desc) {
             queryState.currentQuery.desc -> oldLoadedItems.asReversed()
             else -> oldLoadedItems
-        }.toMutableList()
+        }
     }
+    var sortedSize = sortedLoadedItems.size
 
     for (index in 0 until newList.size) {
         add(
@@ -259,7 +260,7 @@ fun State.preserveKeys(
 
                 is ArchiveItem.Card.PlaceHolder -> {
                     // Replace placeholders with existing data that matches
-                    sortedLoadedItems.removeLastOrNull()
+                    sortedLoadedItems.getOrNull(--sortedSize)
                         ?.also { oldArchiveIdsToKeys.remove(it.archive.id) }
                         ?: card
                 }
