@@ -87,9 +87,11 @@ class ScaffoldModule(
 
 inline fun <reified T : ByteSerializable> ByteSerializer.restoreState(savedState: ByteArray?): T? {
     return try {
-        // TODO: Figure out why this throws
-        if (savedState != null) fromBytes(savedState) else null
+        // Polymorphic serialization requires that the compile time type used to serialize, must also be used to
+        // deserialize. See https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md
+        if (savedState != null) fromBytes<ByteSerializable>(savedState) as? T else null
     } catch (e: Exception) {
+        e.printStackTrace()
         null
     }
 }
