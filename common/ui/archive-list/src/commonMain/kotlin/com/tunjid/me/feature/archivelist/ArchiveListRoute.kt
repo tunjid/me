@@ -45,9 +45,9 @@ import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
+import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.core.ui.scrollbar.Scrollbar
 import com.tunjid.me.core.ui.scrollbar.scrollbarState
-import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
@@ -85,7 +85,14 @@ private fun ArchiveScreen(
         onAction = actions
     )
 
-    val gridState = rememberLazyGridState()
+    rememberLazyGridState()
+    val isLoading by remember {
+        derivedStateOf { screenUiState.state.items.size == 1 && screenUiState.state.items.first() is ArchiveItem.Loading }
+    }
+    val gridState = remember(isLoading) {
+        if (isLoading) LazyGridState()
+        else state.savedListState.initialListState()
+    }
 
     val cardWidth = 350.dp
     val stickyHeaderItem by remember(state.items) {
@@ -159,6 +166,11 @@ private fun ArchiveScreen(
             actions(Action.Fetch.LoadAround(it ?: state.queryState.currentQuery))
         }
     )
+
+    if (!isLoading) SaveScrollPositionEffect(
+        gridState = gridState,
+        onAction = actions
+    )
 }
 
 @Composable
@@ -181,7 +193,7 @@ private fun ArchiveList(
                     actions(Action.Fetch.NoColumnsChanged(maxLineSpan))
                     when (item) {
                         is ArchiveItem.Card.Loaded,
-                        is ArchiveItem.Card.PlaceHolder
+                        is ArchiveItem.Card.PlaceHolder,
                         -> GridItemSpan(1)
 
                         is ArchiveItem.Header,
@@ -281,6 +293,26 @@ private fun FilterCollapseEffect(
                 }
                 if (dy != null && dy > 6) onAction(Action.ToggleFilter(isExpanded = false))
             }
+    }
+}
+
+
+@Composable
+private fun SaveScrollPositionEffect(
+    gridState: LazyGridState,
+    onAction: (Action) -> Unit,
+) {
+    // Close filters when scrolling
+    LaunchedEffect(gridState) {
+        snapshotFlow {
+            val info = gridState.layoutInfo.visibleItemsInfo.firstOrNull() ?: return@snapshotFlow null
+            Action.ListStateChanged(
+                firstVisibleItemScrollOffset = info.offset.y,
+                firstVisibleItemIndex = info.index
+            )
+        }
+            .filterNotNull()
+            .collect(onAction)
     }
 }
 

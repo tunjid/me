@@ -37,7 +37,6 @@ import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
-import com.tunjid.tiler.tiledListOf
 import com.tunjid.tiler.toTiledList
 import com.tunjid.tiler.utilities.toPivotedTileInputs
 import kotlinx.coroutines.CoroutineScope
@@ -66,13 +65,6 @@ class ActualArchiveListStateHolder(
     route: ArchiveListRoute,
 ) : ArchiveListStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
-        items = tiledListOf(
-            ArchiveQuery(kind = route.kind) to ArchiveItem.Loading(
-                index = -1,
-                key = "-1",
-                isCircular = true
-            )
-        ),
         queryState = QueryState(
             currentQuery = ArchiveQuery(kind = route.kind),
         )
@@ -98,6 +90,7 @@ class ActualArchiveListStateHolder(
                     kind = route.kind
                 )
 
+                is Action.ListStateChanged -> action.flow.listStateChangeMutations()
                 is Action.ToggleFilter -> action.flow.filterToggleMutations()
                 is Action.Navigate -> action.flow.consumeNavActions(
                     mutationMapper = Action.Navigate::navMutation,
@@ -195,6 +188,22 @@ internal fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<St
         }
 
 /**
+ * Saves scroll state across app restarts
+ */
+private fun Flow<Action.ListStateChanged>.listStateChangeMutations(): Flow<Mutation<State>> =
+    distinctUntilChanged()
+        .map {
+            mutation {
+                copy(
+                    savedListState = SavedListState(
+                        firstVisibleItemIndex = it.firstVisibleItemIndex,
+                        firstVisibleItemScrollOffset = it.firstVisibleItemScrollOffset
+                    )
+                )
+            }
+        }
+
+/**
  * Converts requests to fetch archives into a list of archives to render
  */
 private fun Flow<Action.Fetch>.fetchMutations(
@@ -208,14 +217,16 @@ private fun Flow<Action.Fetch>.fetchMutations(
         .distinctUntilChanged()
         .shareIn(
             scope = scope,
-            started = SharingStarted.WhileSubscribed()
+            started = SharingStarted.WhileSubscribed(),
+            replay = 1
         )
 
     val columnChanges = filterIsInstance<Action.Fetch.NoColumnsChanged>()
+        .onStart { emit(Action.Fetch.NoColumnsChanged(1)) }
         .distinctUntilChanged()
         .shareIn(
             scope = scope,
-            started = SharingStarted.WhileSubscribed()
+            started = SharingStarted.WhileSubscribed(),
         )
 
     val archivesAvailable = queries

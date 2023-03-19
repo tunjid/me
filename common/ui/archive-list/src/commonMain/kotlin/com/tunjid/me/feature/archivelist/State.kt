@@ -16,6 +16,7 @@
 
 package com.tunjid.me.feature.archivelist
 
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.tunjid.me.core.model.Archive
@@ -30,7 +31,7 @@ import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.buildTiledList
-import com.tunjid.tiler.emptyTiledList
+import com.tunjid.tiler.tiledListOf
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
@@ -39,8 +40,6 @@ import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
 data class State(
-    @ProtoNumber(1)
-    val shouldScrollToTop: Boolean = true,
     @ProtoNumber(2)
     val isInMainNav: Boolean = false,
     @ProtoNumber(3)
@@ -49,10 +48,35 @@ data class State(
     val isSignedIn: Boolean = false,
     @ProtoNumber(5)
     val queryState: QueryState,
+    @ProtoNumber(7)
+    val savedListState: SavedListState = SavedListState(),
 //    @ProtoNumber(6) Deprecated key
+//    @ProtoNumber(1) Deprecated key
     @Transient
-    val items: TiledList<ArchiveQuery, ArchiveItem> = emptyTiledList(),
+    val items: TiledList<ArchiveQuery, ArchiveItem> = tiledListOf(
+        ArchiveQuery(kind = queryState.currentQuery.kind) to ArchiveItem.Loading(
+            index = -1,
+            key = "-1",
+            isCircular = true
+        )
+    ),
 ) : ByteSerializable
+
+@Serializable
+@JvmInline
+value class SavedListState(
+    private val packedValue: Long = 0,
+) {
+    constructor(
+        firstVisibleItemIndex: Int = 0,
+        firstVisibleItemScrollOffset: Int = 0,
+    ) : this(firstVisibleItemIndex.toLong().shl(32) or (firstVisibleItemScrollOffset.toLong() and 0xFFFFFFFF))
+
+    fun initialListState() = LazyGridState(
+        firstVisibleItemIndex = packedValue.shr(32).toInt(),
+        firstVisibleItemScrollOffset = packedValue.and(0xFFFFFFFF).toInt(),
+    )
+}
 
 val ArchiveItem.stickyHeader: ArchiveItem.Header?
     get() = when (this) {
@@ -83,6 +107,11 @@ sealed class Action(val key: String) {
     data class FilterChanged(
         val descriptor: Descriptor,
     ) : Action(key = "FilterChanged")
+
+    data class ListStateChanged(
+        val firstVisibleItemIndex: Int ,
+        val firstVisibleItemScrollOffset: Int,
+    ) : Action(key = "ListStateChanged")
 
     data class ToggleFilter(val isExpanded: Boolean? = null) : Action(key = "ToggleFilter")
 
