@@ -36,6 +36,10 @@ import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.mutator.mutation
 import kotlinx.coroutines.flow.distinctUntilChanged
 import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
+import java.awt.event.FocusEvent
+import java.awt.event.FocusListener
+import java.awt.event.WindowEvent
+import java.awt.event.WindowFocusListener
 
 fun main() {
 
@@ -62,6 +66,18 @@ fun main() {
                         globalUiStateHolder = app.globalUiStateHolder,
                     )
                 }
+            }
+
+            LaunchedEffect(true) {
+                window.addWindowFocusListener(object : WindowFocusListener {
+                    override fun windowGainedFocus(e: WindowEvent?) {
+                        app.lifecycleStateHolder.accept { copy(isInForeground = true) }
+                    }
+
+                    override fun windowLostFocus(e: WindowEvent?) {
+                        app.lifecycleStateHolder.accept { copy(isInForeground = false) }
+                    }
+                })
             }
 
             val currentWidth = windowState.size.width

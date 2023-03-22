@@ -70,9 +70,15 @@ class PersistedMeApp(
             }
             .launchIn(appScope)
 
-        navStateStream
-            .mapLatest { navState ->
-                navState.mainNav.toSavedState(byteSerializer)
+        lifecycleStateHolder.state
+            .map { it.isInForeground }
+            .distinctUntilChanged()
+            .onStart { emit(false) }
+            .flatMapLatest {
+                navStateStream
+                    .mapLatest { navState ->
+                        navState.mainNav.toSavedState(byteSerializer)
+                    }
             }
             .onEach(savedStateRepository::saveState)
             .launchIn(appScope)

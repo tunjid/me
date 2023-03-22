@@ -20,7 +20,11 @@ with novel/experimental implementations of fundamental app architecture units in
 * Persistent animation
 * Large screen experiences
 
-All while targeting multiple platforms.
+All while targeting multiple platforms and meeting stringent product requirement constraints like:
+
+* No pull to refresh in the app. The app is always up to date.
+* Navigation is persisted between app restarts and device reboots.
+* Scroll position is preserved between app restarts and device reboots.
 
 The app is a WYSIWYG editor for my personal website. The source for the backend can be
 found [here](https://github.com/tunjid/tunji-web-deux).
