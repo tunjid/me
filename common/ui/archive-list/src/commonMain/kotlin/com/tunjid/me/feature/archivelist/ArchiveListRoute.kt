@@ -30,11 +30,18 @@ import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -54,11 +61,11 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
+import kotlin.math.abs
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.scan
 import kotlinx.serialization.Serializable
-import kotlin.math.abs
 
 @Serializable
 data class ArchiveListRoute(
@@ -85,9 +92,8 @@ private fun ArchiveScreen(
         onAction = actions
     )
 
-    rememberLazyGridState()
     val isLoading by remember {
-        derivedStateOf { screenUiState.state.items.size == 1 && screenUiState.state.items.first() is ArchiveItem.Loading }
+        derivedStateOf { screenUiState.state.isLoading }
     }
     val gridState = remember(isLoading) {
         if (isLoading) LazyGridState()

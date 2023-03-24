@@ -31,6 +31,7 @@ import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.buildTiledList
+import com.tunjid.tiler.emptyTiledList
 import com.tunjid.tiler.tiledListOf
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -53,13 +54,9 @@ data class State(
 //    @ProtoNumber(6) Deprecated key
 //    @ProtoNumber(1) Deprecated key
     @Transient
-    val items: TiledList<ArchiveQuery, ArchiveItem> = tiledListOf(
-        ArchiveQuery(kind = queryState.currentQuery.kind) to ArchiveItem.Loading(
-            index = -1,
-            key = "-1",
-            isCircular = true
-        )
-    ),
+    val isLoading: Boolean = true,
+    @Transient
+    val items: TiledList<ArchiveQuery, ArchiveItem> = emptyTiledList(),
 ) : ByteSerializable
 
 @Serializable
@@ -109,7 +106,7 @@ sealed class Action(val key: String) {
     ) : Action(key = "FilterChanged")
 
     data class ListStateChanged(
-        val firstVisibleItemIndex: Int ,
+        val firstVisibleItemIndex: Int,
         val firstVisibleItemScrollOffset: Int,
     ) : Action(key = "ListStateChanged")
 
