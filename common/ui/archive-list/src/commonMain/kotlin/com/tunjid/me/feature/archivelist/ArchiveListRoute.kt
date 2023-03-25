@@ -33,15 +33,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -61,10 +53,8 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
+import kotlinx.coroutines.flow.*
 import kotlin.math.abs
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.scan
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -99,14 +89,31 @@ private fun ArchiveScreen(
         if (isLoading) LazyGridState()
         else state.savedListState.initialListState()
     }
+    val scope = rememberCoroutineScope()
+    val visibleItemsFlow = remember(isLoading) {
+        if (isLoading) emptyFlow()
+        else snapshotFlow {
+            gridState.layoutInfo.visibleItemsInfo
+        }
+            .stateIn(
+                scope = scope,
+                initialValue = emptyList(),
+                started = SharingStarted.WhileSubscribed()
+            )
+    }
 
     val cardWidth = 350.dp
-    val stickyHeaderItem by remember(state.items) {
-        derivedStateOf {
-            val firstIndex = gridState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
-            val item = firstIndex?.let(state.items::getOrNull)
-            item?.stickyHeader
-        }
+    val stickyHeaderItem by produceState<ArchiveItem.Header?>(
+        initialValue = null,
+        key1 = screenUiState.state.items
+    ) {
+        visibleItemsFlow
+            .map { itemInfoList -> itemInfoList.firstOrNull()?.index }
+            .distinctUntilChanged()
+            .collect { firstIndex ->
+                val item = firstIndex?.let(state.items::getOrNull)
+                value = item?.stickyHeader
+            }
     }
 
     Column {
@@ -162,7 +169,7 @@ private fun ArchiveScreen(
     }
 
     FilterCollapseEffect(
-        gridState = gridState,
+        infoFlow = visibleItemsFlow,
         onAction = actions
     )
 
@@ -174,7 +181,7 @@ private fun ArchiveScreen(
     )
 
     if (!isLoading) SaveScrollPositionEffect(
-        gridState = gridState,
+        infoFlow = visibleItemsFlow,
         onAction = actions
     )
 }
@@ -276,14 +283,13 @@ private fun GridCell(
 
 @Composable
 private fun FilterCollapseEffect(
-    gridState: LazyGridState,
+    infoFlow: Flow<List<LazyGridItemInfo>>,
     onAction: (Action) -> Unit,
 ) {
     // Close filters when scrolling
-    LaunchedEffect(gridState) {
-        snapshotFlow {
-            gridState.layoutInfo.visibleItemsInfo.firstOrNull()
-        }
+    LaunchedEffect(infoFlow) {
+        infoFlow
+            .map { it.firstOrNull() }
             .scan<LazyGridItemInfo?, Pair<LazyGridItemInfo, LazyGridItemInfo>?>(null) { oldAndNewInfo, newInfo ->
                 when {
                     newInfo == null -> null
@@ -305,19 +311,20 @@ private fun FilterCollapseEffect(
 
 @Composable
 private fun SaveScrollPositionEffect(
-    gridState: LazyGridState,
+    infoFlow: Flow<List<LazyGridItemInfo>>,
     onAction: (Action) -> Unit,
 ) {
     // Close filters when scrolling
-    LaunchedEffect(gridState) {
-        snapshotFlow {
-            val info = gridState.layoutInfo.visibleItemsInfo.firstOrNull() ?: return@snapshotFlow null
-            Action.ListStateChanged(
-                firstVisibleItemScrollOffset = info.offset.y,
-                firstVisibleItemIndex = info.index
-            )
-        }
+    LaunchedEffect(infoFlow) {
+        infoFlow
+            .map { it.firstOrNull() }
             .filterNotNull()
+            .map { info ->
+                Action.ListStateChanged(
+                    firstVisibleItemScrollOffset = info.offset.y,
+                    firstVisibleItemIndex = info.index
+                )
+            }
             .collect(onAction)
     }
 }
