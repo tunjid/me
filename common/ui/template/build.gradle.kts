@@ -19,6 +19,9 @@ plugins {
     `kotlin-library-convention`
     kotlin("plugin.serialization")
 }
+android {
+    namespace = "com.tunjid.me.feature.template"
+}
 
 kotlin {
     sourceSets {

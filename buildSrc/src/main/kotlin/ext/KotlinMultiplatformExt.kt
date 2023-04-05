@@ -49,6 +49,7 @@ fun org.gradle.api.Project.configureKotlinMultiplatform(
 //                kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
                 dependencies {
                     api(libs.findLibrary("tartaka-kotlin-inject-runtime").get())
+                    implementation(libs.findLibrary("jetbrains-compose-runtime").get())
                 }
             }
         }

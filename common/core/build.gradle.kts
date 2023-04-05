@@ -20,6 +20,9 @@ plugins {
     id("org.jetbrains.compose")
     kotlin("plugin.serialization")
 }
+android {
+    namespace = "com.tunjid.me.core"
+}
 
 kotlin {
     sourceSets {

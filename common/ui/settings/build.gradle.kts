@@ -19,6 +19,9 @@ plugins {
     `kotlin-library-convention`
     `ui-module-convention`
 }
+android {
+    namespace = "com.tunjid.me.feature.settings"
+}
 
 kotlin {
     sourceSets {

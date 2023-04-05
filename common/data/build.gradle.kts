@@ -20,6 +20,9 @@ plugins {
     kotlin("plugin.serialization")
     id("app.cash.sqldelight")
 }
+android {
+    namespace = "com.tunjid.me.data"
+}
 
 kotlin {
     sourceSets {

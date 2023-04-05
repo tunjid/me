@@ -2,7 +2,7 @@
 accompanist = "0.25.1"
 apacheCommonsImaging = "1.0-alpha3"
 androidDesugarJdkLibs = "1.1.5"
-androidGradlePlugin = "7.2.2"
+androidGradlePlugin = "7.4.2"
 androidxActivity = "1.5.1"
 androidxAppCompat = "1.5.1"
 androidxCore = "1.9.0"

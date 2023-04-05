@@ -57,6 +57,7 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    namespace = "com.tunjid.me"
 }
 
 dependencies {
