@@ -15,9 +15,9 @@
  */
 
 plugins {
-    `android-library-convention`
-    `kotlin-library-convention`
-    `ui-module-convention`
+    id("android-library-convention")
+    id("kotlin-library-convention")
+    id("ui-module-convention")
 }
 android {
     namespace = "com.tunjid.me.archivefiles"

@@ -18,7 +18,7 @@ import java.io.FileInputStream
 import java.util.*
 
 plugins {
-    `android-application-convention`
+    id("android-application-convention")
     id("kotlin-android")
     kotlin("plugin.serialization")
     id("kotlin-parcelize")

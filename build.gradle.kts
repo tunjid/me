@@ -1,3 +1,5 @@
+import org.gradle.accessors.dm.LibrariesForLibs
+
 /*
  * Copyright 2021 Google LLC
  *
@@ -19,39 +21,22 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-    }
-    dependencies {
-        classpath(libs.android.gradlePlugin)
-        classpath(libs.kotlin.gradlePlugin)
-        classpath(libs.cashapp.sqldelight.gradlePlugin)
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven {
-            url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev/")
-        }
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven("https://plugins.gradle.org/m2/")
-    }
-}
-
-subprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven("https://plugins.gradle.org/m2/")
-        maven {
-            url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev/")
-        }
     }
 }
 
 tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)
+}
+
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.jetbrains.compose) apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.mpp) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.sqldelight) apply false
 }

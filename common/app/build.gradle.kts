@@ -15,8 +15,8 @@
  */
 
 plugins {
-    `android-library-convention`
-    `kotlin-library-convention`
+    id("android-library-convention")
+    id("kotlin-library-convention")
     id("org.jetbrains.compose")
     kotlin("plugin.serialization")
     id("app.cash.sqldelight")

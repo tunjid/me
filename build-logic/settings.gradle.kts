@@ -14,25 +14,20 @@
  * limitations under the License.
  */
 
-repositories {
-    google()
-    mavenCentral()
-    gradlePluginPortal()
-    maven {
-        url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev/")
+dependencyResolutionManagement {
+    repositories {
+        gradlePluginPortal()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        maven("https://plugins.gradle.org/m2/")
+        mavenCentral()
+        google()
+    }
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
     }
 }
 
-plugins {
-    `kotlin-dsl`
-//    kotlin("plugin.serialization").version("1.7.10")
-}
-
-dependencies {
-    implementation(libs.jetbrains.compose.gradlePlugin)
-    implementation(libs.android.gradlePlugin)
-    implementation(libs.kotlin.gradlePlugin)
-    implementation(libs.kotlin.serializationPlugin)
-    implementation(libs.google.devtools.kspPlugin)
-    implementation(libs.gradle.kotlinDslPlugin)
-}
+rootProject.name = "build-logic"
+include(":convention")
