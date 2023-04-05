@@ -276,7 +276,6 @@ fun State.preserveKeys(
 
     try {
         for (index in 0 until newList.size) {
-            println("Size: ${newList.size}; index accessed: $index")
             val item = newList[index]
             if (item is ArchiveItem.Card.Loaded && !newQuery.includes(item.archive)) continue
             add(
