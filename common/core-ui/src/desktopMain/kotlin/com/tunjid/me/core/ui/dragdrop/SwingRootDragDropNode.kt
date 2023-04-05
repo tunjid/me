@@ -25,7 +25,8 @@ import androidx.compose.ui.modifier.ModifierLocalMap
 import androidx.compose.ui.modifier.ModifierLocalNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
-import androidx.compose.ui.node.modifierElementOf
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import com.tunjid.me.core.utilities.FileUri
@@ -50,23 +51,38 @@ import java.awt.dnd.DropTarget as AwtDropTarget
 fun Modifier.rootDragDropModifier(
     density: Float,
     window: ComposeWindow,
-): Modifier = this then modifierElementOf(
-    params = density,
-    create = {
-        RootDragDropNode(
-            density = density,
-            window = window,
-        )
-    },
-    update = {
-        it.updateDensity(density)
-    },
-    definitions = {}
+): Modifier = this then RootDragDropElement(
+    density = density,
+    window = window,
 )
 
+private data class RootDragDropElement(
+    val density: Float,
+    val window: ComposeWindow,
+) : ModifierNodeElement<RootDragDropNode>() {
+
+    override fun create() = RootDragDropNode(
+        density = density,
+        window = window,
+    )
+
+    override fun update(node: RootDragDropNode) = node.apply {
+        density = this@RootDragDropElement.density
+        window = this@RootDragDropElement.window
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "RootDragDropNode"
+    }
+
+    override fun hashCode(): Int = 0
+
+    override fun equals(other: Any?): Boolean = this === other
+}
+
 internal actual class RootDragDropNode(
-    density: Float,
-    window: ComposeWindow,
+    var density: Float,
+    var window: ComposeWindow,
 ) : DelegatingNode(),
     ModifierLocalNode,
     GlobalPositionAwareModifierNode {
@@ -175,14 +191,18 @@ private class DensityAwareDragGestureListener(
 
             else -> event.startDrag(
                 /* dragCursor = */ Cursor.getDefaultCursor(),
-                /* dragImage = */ shadowPainter.toAwtImage(
+                /* dragImage = */
+                shadowPainter.toAwtImage(
                     density = Density(density),
                     layoutDirection = LayoutDirection.Ltr,
                     size = dragInfo.size
                 ),
-                /* imageOffset = */ Point(-dragInfo.size.width.toInt() / 2, -dragInfo.size.height.toInt() / 2),
-                /* transferable = */ dragInfo.transferable(),
-                /* dsl = */ object : DragSourceAdapter() {
+                /* imageOffset = */
+                Point(-dragInfo.size.width.toInt() / 2, -dragInfo.size.height.toInt() / 2),
+                /* transferable = */
+                dragInfo.transferable(),
+                /* dsl = */
+                object : DragSourceAdapter() {
                 }
             )
         }

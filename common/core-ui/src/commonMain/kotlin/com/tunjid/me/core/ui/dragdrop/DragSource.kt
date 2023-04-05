@@ -25,12 +25,13 @@ import androidx.compose.ui.modifier.ModifierLocalMap
 import androidx.compose.ui.modifier.ModifierLocalNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
-import androidx.compose.ui.node.modifierElementOf
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toSize
 import com.tunjid.me.core.utilities.Uri
 
-internal sealed interface DragSource: DragOrDrop {
+internal sealed interface DragSource : DragOrDrop {
 
     val size: IntSize
 
@@ -48,24 +49,38 @@ internal data class DragInfo(
 fun Modifier.dragSource(
     dragShadowPainter: Painter? = null,
     uris: List<Uri>,
-): Modifier = this then modifierElementOf(
-    params = dragShadowPainter to uris,
-    create = {
-        DragSourceNode(
-            dragShadowPainter = dragShadowPainter,
-            uris = uris
-        )
-    },
-    update = { dragSource ->
-        dragSource.dragShadowPainter = dragShadowPainter
-        dragSource.uris = uris
-    },
-    definitions = {
+): Modifier = this then DragSourceElement(
+    dragShadowPainter = dragShadowPainter,
+    uris = uris
+)
+
+private data class DragSourceElement(
+    /**
+     * Optional painter to draw the drag shadow for the UI.
+     * If not provided, the system default will be used.
+     */
+    val dragShadowPainter: Painter? = null,
+    /**
+     * A items to be transferred. If empty, a drag gesture will not be started.
+     */
+    val uris: List<Uri>,
+) : ModifierNodeElement<DragSourceNode>() {
+    override fun create() = DragSourceNode(
+        dragShadowPainter = dragShadowPainter,
+        uris = uris
+    )
+
+    override fun update(node: DragSourceNode) = node.apply {
+        dragShadowPainter = this@DragSourceElement.dragShadowPainter
+        uris = this@DragSourceElement.uris
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
         name = "dragSource"
         properties["dragShadowPainter"] = dragShadowPainter
         properties["dragStatus"] = uris
-    },
-)
+    }
+}
 
 private class DragSourceNode(
     override var dragShadowPainter: Painter?,

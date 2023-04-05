@@ -29,7 +29,8 @@ import androidx.compose.ui.modifier.ModifierLocalMap
 import androidx.compose.ui.modifier.ModifierLocalNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
-import androidx.compose.ui.node.modifierElementOf
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.debugInspectorInfo
 import com.tunjid.me.core.utilities.ContentUri
 import com.tunjid.me.core.utilities.RemoteUri
@@ -40,10 +41,7 @@ fun Modifier.rootDragDropModifier(
     view: View,
 ): Modifier {
     val rootDragDropNode = RootDragDropNode()
-    return this then modifierElementOf(
-        create = { rootDragDropNode },
-        definitions = {}
-    ) then composed(
+    return this then RootDragDropElement then composed(
         inspectorInfo = debugInspectorInfo {
             name = "ViewDragDetector"
         },
@@ -67,6 +65,23 @@ fun Modifier.rootDragDropModifier(
 
             this.then(spy)
         })
+}
+
+private object RootDragDropElement : ModifierNodeElement<RootDragDropNode>() {
+
+    private val rootDragDropNode = RootDragDropNode()
+
+    override fun create() = rootDragDropNode
+
+    override fun update(node: RootDragDropNode) = node
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "RootDragDropNode"
+    }
+
+    override fun hashCode(): Int = 0
+
+    override fun equals(other: Any?): Boolean = this === other
 }
 
 internal actual class RootDragDropNode : DelegatingNode(),

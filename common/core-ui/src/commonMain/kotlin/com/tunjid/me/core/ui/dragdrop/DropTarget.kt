@@ -23,10 +23,11 @@ import androidx.compose.ui.modifier.ModifierLocalMap
 import androidx.compose.ui.modifier.ModifierLocalNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
-import androidx.compose.ui.node.modifierElementOf
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.platform.InspectorInfo
 import com.tunjid.me.core.utilities.Uri
 
-internal sealed interface DropTarget: DragOrDrop {
+internal sealed interface DropTarget : DragOrDrop {
     fun onStarted(mimeTypes: Set<String>, position: Offset): Boolean
     fun onEntered()
     fun onMoved(position: Offset) {}
@@ -42,27 +43,42 @@ fun Modifier.dropTarget(
     onExited: () -> Unit = { },
     onDropped: (uris: List<Uri>, position: Offset) -> Boolean,
     onEnded: () -> Unit = {},
-): Modifier = this then modifierElementOf(
-    params = listOf(onStarted, onEntered, onMoved, onExited, onDropped, onEnded),
-    create = {
-        DropTargetNode(
-            onStarted = onStarted,
-            onEntered = onEntered,
-            onMoved = onMoved,
-            onExited = onExited,
-            onDropped = onDropped,
-            onEnded = onEnded
-        )
-    },
-    update = { dropTarget ->
-        dropTarget.onStarted = onStarted
-        dropTarget.onEntered = onEntered
-        dropTarget.onMoved = onMoved
-        dropTarget.onExited = onExited
-        dropTarget.onDropped = onDropped
-        dropTarget.onEnded = onEnded
-    },
-    definitions = {
+): Modifier = this then DropTargetElement(
+    onStarted = onStarted,
+    onEntered = onEntered,
+    onMoved = onMoved,
+    onExited = onExited,
+    onDropped = onDropped,
+    onEnded = onEnded
+)
+
+private data class DropTargetElement(
+    val onStarted: (mimeTypes: Set<String>, Offset) -> Boolean,
+    val onEntered: () -> Unit = { },
+    val onMoved: (position: Offset) -> Unit = {},
+    val onExited: () -> Unit = { },
+    val onDropped: (uris: List<Uri>, position: Offset) -> Boolean,
+    val onEnded: () -> Unit = {},
+) : ModifierNodeElement<DropTargetNode>() {
+    override fun create() = DropTargetNode(
+        onStarted = onStarted,
+        onEntered = onEntered,
+        onMoved = onMoved,
+        onExited = onExited,
+        onDropped = onDropped,
+        onEnded = onEnded,
+    )
+
+    override fun update(node: DropTargetNode) = node.apply {
+        onStarted = this@DropTargetElement.onStarted
+        onEntered = this@DropTargetElement.onEntered
+        onMoved = this@DropTargetElement.onMoved
+        onExited = this@DropTargetElement.onExited
+        onDropped = this@DropTargetElement.onDropped
+        onEnded = this@DropTargetElement.onEnded
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
         name = "dropTarget"
         properties["onDragStarted"] = onStarted
         properties["onEntered"] = onEntered
@@ -70,8 +86,8 @@ fun Modifier.dropTarget(
         properties["onExited"] = onExited
         properties["onDropped"] = onDropped
         properties["onEnded"] = onEnded
-    },
-)
+    }
+}
 
 private class DropTargetNode(
     var onStarted: (mimeTypes: Set<String>, Offset) -> Boolean,
