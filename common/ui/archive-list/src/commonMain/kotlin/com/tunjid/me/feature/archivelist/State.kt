@@ -274,24 +274,30 @@ fun State.preserveKeys(
     }
     var sortedSize = sortedLoadedItems.size
 
-    for (index in 0 until newList.size) {
-        val item = newList[index]
-        if (item is ArchiveItem.Card.Loaded && !newQuery.includes(item.archive)) continue
-        add(
-            query = newList.queryAt(index),
-            item = when (item) {
-                is ArchiveItem.Card.Loaded -> when (val existingKey = oldArchiveIdsToKeys.remove(item.archive.id)) {
-                    null -> item
-                    else -> item.copy(key = existingKey)
-                }
+    try {
+        for (index in 0 until newList.size) {
+            println("Size: ${newList.size}; index accessed: $index")
+            val item = newList[index]
+            if (item is ArchiveItem.Card.Loaded && !newQuery.includes(item.archive)) continue
+            add(
+                query = newList.queryAt(index),
+                item = when (item) {
+                    is ArchiveItem.Card.Loaded -> when (val existingKey = oldArchiveIdsToKeys.remove(item.archive.id)) {
+                        null -> item
+                        else -> item.copy(key = existingKey)
+                    }
 
-                is ArchiveItem.Card.PlaceHolder -> {
-                    // Replace placeholders with existing data that matches
-                    sortedLoadedItems.getOrNull(--sortedSize)
-                        ?.also { oldArchiveIdsToKeys.remove(it.archive.id) }
-                        ?: item
+                    is ArchiveItem.Card.PlaceHolder -> {
+                        // Replace placeholders with existing data that matches
+                        sortedLoadedItems.getOrNull(--sortedSize)
+                            ?.also { oldArchiveIdsToKeys.remove(it.archive.id) }
+                            ?: item
+                    }
                 }
-            }
-        )
+            )
+        }
+    }
+    catch (e: Exception) {
+        e.printStackTrace()
     }
 }

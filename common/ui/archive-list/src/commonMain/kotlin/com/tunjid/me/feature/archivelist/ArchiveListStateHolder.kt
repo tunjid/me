@@ -16,8 +16,10 @@
 
 package com.tunjid.me.feature.archivelist
 
+import com.tunjid.me.core.model.ARCHIVE_QUERY_LIMIT
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.core.model.FILE_QUERY_LIMIT
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.hasTheSameFilter
 import com.tunjid.me.core.utilities.ByteSerializer
@@ -150,8 +152,13 @@ private fun Flow<Action.FilterChanged>.filterChangedMutations(
                                     .filterNot { descriptor ->
                                         val contentFilter = queryState.currentQuery.contentFilter
                                         when (descriptor) {
-                                            is Descriptor.Category -> contentFilter.categories.contains(descriptor)
-                                            is Descriptor.Tag -> contentFilter.tags.contains(descriptor)
+                                            is Descriptor.Category -> contentFilter.categories.contains(
+                                                descriptor
+                                            )
+
+                                            is Descriptor.Tag -> contentFilter.tags.contains(
+                                                descriptor
+                                            )
                                         }
                                     }
                                     .take(10),
@@ -239,12 +246,12 @@ private fun Flow<Action.Fetch>.fetchMutations(
             .distinctUntilChanged()
     )
 
-    val limitInputs = queries
-        .combine(columnChanges, ::Pair)
-        .map { (query, columnChange) ->
-            Tile.Limiter<ArchiveQuery, ArchiveItem.Card> { items ->
-                items.size > 4 * columnChange.noColumns * query.limit
-            }
+    val limitInputs = columnChanges
+        .map { columnChange ->
+            Tile.Limiter<ArchiveQuery, ArchiveItem.Card>(
+                maxQueries = 4 * columnChange.noColumns,
+                queryItemsSize = null,
+            )
         }
 
     val archiveItems = merge(
@@ -253,7 +260,10 @@ private fun Flow<Action.Fetch>.fetchMutations(
     )
         .toTiledList(
             repo.archiveTiler(
-                limiter = Tile.Limiter { items -> items.size > 100 }
+                limiter = Tile.Limiter(
+                    maxQueries = 4,
+                    queryItemsSize = null,
+                )
             )
         )
         // Allow database queries to settle
@@ -280,7 +290,10 @@ private fun Flow<Action.Fetch>.fetchMutations(
                         suggestedDescriptors = queryState.suggestedDescriptors.filterNot { descriptor ->
                             val contentFilter = queryState.currentQuery.contentFilter
                             when (descriptor) {
-                                is Descriptor.Category -> contentFilter.categories.contains(descriptor)
+                                is Descriptor.Category -> contentFilter.categories.contains(
+                                    descriptor
+                                )
+
                                 is Descriptor.Tag -> contentFilter.tags.contains(descriptor)
                             }
                         },

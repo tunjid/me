@@ -19,6 +19,7 @@ package com.tunjid.me.feature.archivefiles
 import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.FILE_QUERY_LIMIT
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
@@ -139,7 +140,10 @@ private fun Flow<Action.Fetch>.loadMutations(
 
     val limitInputs: Flow<Tile.Limiter<ArchiveFileQuery, ArchiveFile>> = columnSizes
         .map { columnSize ->
-            Tile.Limiter { it.size > columnSize * 10 }
+            Tile.Limiter(
+                maxQueries = columnSize * 3,
+                queryItemsSize = null,
+            )
         }
 
     return merge(
@@ -147,7 +151,10 @@ private fun Flow<Action.Fetch>.loadMutations(
         limitInputs
     ).toTiledList(
         archiveFileRepository.archiveFilesTiler(
-            limiter = Tile.Limiter { it.size > 100 }
+            limiter = Tile.Limiter(
+                maxQueries = 3,
+                queryItemsSize = FILE_QUERY_LIMIT,
+            )
         )
     )
         .map {
