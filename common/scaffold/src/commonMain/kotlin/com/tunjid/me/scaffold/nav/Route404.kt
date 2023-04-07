@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.serialization.Serializable
 
 @Serializable
-object Route404 : AppRoute {
+object Route404 : AppRoute, StatelessRoute {
     override val id: String
         get() = "404"
 
@@ -48,7 +48,7 @@ object Route404 : AppRoute {
 }
 
 @Serializable
-object Route403 : AppRoute {
+object Route403 : AppRoute, StatelessRoute {
     override val id: String
         get() = "403"
 

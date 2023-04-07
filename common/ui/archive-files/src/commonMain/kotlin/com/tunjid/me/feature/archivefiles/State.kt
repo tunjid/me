@@ -34,16 +34,16 @@ enum class DragLocation {
 }
 
 sealed class UploadInfo {
-    object None: UploadInfo()
+    object None : UploadInfo()
 
     data class Message(
         val message: String
-    ): UploadInfo()
+    ) : UploadInfo()
 
     data class Progress(
         val message: String,
         val progress: Float
-    ): UploadInfo()
+    ) : UploadInfo()
 }
 
 @Serializable
@@ -59,6 +59,10 @@ data class State(
     @ProtoNumber(3)
     val hasStoragePermissions: Boolean = false,
     @Transient
+    val dndEnabled: Boolean = false,
+    @Transient
+    val fileType: FileType = FileType.Image,
+    @Transient
     val uploadInfo: UploadInfo = UploadInfo.None,
     @Transient
     val dragLocation: DragLocation = DragLocation.Inactive,
@@ -66,6 +70,10 @@ data class State(
     val files: TiledList<ArchiveFileQuery, ArchiveFile> = emptyTiledList(),
 ) : ByteSerializable
 
+fun State.startQuery() = ArchiveFileQuery(
+    archiveId = archiveId,
+    mimeTypes = fileType.mimeTypes
+)
 
 sealed class Action(val key: String) {
     data class Drag(val location: DragLocation) : Action("Drag")

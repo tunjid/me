@@ -24,6 +24,9 @@ import kotlinx.serialization.Serializable
 
 const val FILE_QUERY_LIMIT = 30
 
+val imageMimetypes = setOf("image/jpeg", "image/jpg", "image/png", "image/gif")
+val miscMimeTypes = setOf("text/css", "text/javascript")
+
 @Serializable
 data class
 ArchiveFileQuery(

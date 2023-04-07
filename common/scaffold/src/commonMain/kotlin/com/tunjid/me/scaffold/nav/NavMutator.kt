@@ -49,6 +49,11 @@ interface AppRoute : Route {
         get() = null
 }
 
+/**
+ * [AppRoute] instances with no state holder
+ */
+interface StatelessRoute: AppRoute
+
 data class NavItem(
     val name: String,
     val icon: ImageVector,

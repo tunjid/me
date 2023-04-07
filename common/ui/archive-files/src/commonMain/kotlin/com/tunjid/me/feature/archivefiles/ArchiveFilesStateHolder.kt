@@ -67,14 +67,15 @@ class ActualArchiveFilesStateHolder(
     byteSerializer: ByteSerializer,
     permissionsFlow: StateFlow<Permissions>,
     navStateFlow: StateFlow<NavState>,
-    uiStateFlow: StateFlow<UiState>,
     onPermissionRequested: (Permission) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveFilesRoute,
 ) : ArchiveFilesStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
-        archiveId = route.archiveId
+        archiveId = route.archiveId,
+        dndEnabled = route.dndEnabled,
+        fileType = route.fileType,
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(

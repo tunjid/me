@@ -75,7 +75,7 @@ data class ArchiveEditRoute(
     override val supportingRoute
         get() = when (archiveId) {
             null -> null
-            else -> "archives/${kind.type}/${archiveId.value}/files"
+            else -> "archives/${kind.type}/${archiveId.value}/files?type=image&dndEnabled=true"
         }
 }
 

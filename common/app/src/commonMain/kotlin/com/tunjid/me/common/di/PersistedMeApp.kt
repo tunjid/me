@@ -104,10 +104,11 @@ class PersistedMeApp(
                 ScopeHolder(
                     scope = routeScope,
                     stateHolder = when (route) {
-                        is Route404 -> Route404
-                        else -> allScreenStateHolders
+                        !is StatelessRoute -> allScreenStateHolders
                             .getValue(route::class.simpleName!!)
                             .invoke(routeScope, savedStateCache(route), route)
+
+                        else -> route
                     }
                 )
 

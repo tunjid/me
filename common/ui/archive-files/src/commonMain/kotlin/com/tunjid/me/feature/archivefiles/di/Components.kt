@@ -20,9 +20,11 @@ import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivefiles.ActualArchiveFilesStateHolder
+import com.tunjid.me.feature.archivefiles.ArchiveFilesParentRoute
+import com.tunjid.me.feature.archivefiles.ArchiveFilesRoute
 import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolder
 import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolderCreator
-import com.tunjid.me.feature.archivefiles.ArchiveFilesRoute
+import com.tunjid.me.feature.archivefiles.FileType
 import com.tunjid.me.feature.archivefiles.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
@@ -52,12 +54,31 @@ abstract class ArchiveFilesNavigationComponent {
             routePattern = "archives/{kind}/{id}/files",
             routeMapper = { (route: String, pathKeys: Map<String, String>) ->
                 val archiveId = ArchiveId(pathKeys["id"] ?: "")
-                val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
-                ArchiveFilesRoute(
-                    id = route,
-                    kind = kind,
-                    archiveId = archiveId,
-                )
+                val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] }
+                    ?: ArchiveKind.Articles
+                when (pathKeys["type"]) {
+                    null -> ArchiveFilesParentRoute(
+                        id = route,
+                        kind = kind,
+                        archiveId = archiveId,
+                    )
+
+                    "image" -> ArchiveFilesRoute(
+                        id = route,
+                        kind = kind,
+                        archiveId = archiveId,
+                        dndEnabled = true == pathKeys["dndEnabled"]?.toBooleanStrictOrNull(),
+                        fileType = FileType.Image
+                    )
+
+                    else -> ArchiveFilesRoute(
+                        id = route,
+                        kind = kind,
+                        archiveId = archiveId,
+                        dndEnabled = true == pathKeys["dndEnabled"]?.toBooleanStrictOrNull(),
+                        fileType = FileType.Misc
+                    )
+                }
             }
         )
 }
@@ -73,7 +94,7 @@ abstract class ArchiveFilesScreenHolderComponent(
 
     @IntoMap
     @Provides
-    fun archiveListStateHolderCreator(
+    fun archiveFilesStateHolderCreator(
         assist: ArchiveFilesStateHolderCreator
     ): Pair<String, ScreenStateHolderCreator> = Pair(
         first = ArchiveFilesRoute::class.simpleName!!,

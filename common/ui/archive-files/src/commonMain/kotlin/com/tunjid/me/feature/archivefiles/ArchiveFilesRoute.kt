@@ -21,7 +21,16 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -41,9 +50,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveFile
-import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.imageMimetypes
+import com.tunjid.me.core.model.miscMimeTypes
 import com.tunjid.me.core.ui.dragdrop.dragSource
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.maxSize
@@ -56,11 +66,18 @@ import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import kotlinx.serialization.Serializable
 
+enum class FileType(val mimeTypes: Set<String>) {
+    Image(imageMimetypes),
+    Misc(miscMimeTypes)
+}
+
 @Serializable
 data class ArchiveFilesRoute(
     override val id: String,
     val kind: ArchiveKind,
     val archiveId: ArchiveId,
+    val dndEnabled: Boolean = false,
+    val fileType: FileType = FileType.Image
 ) : AppRoute {
     @Composable
     override fun Render() {
@@ -71,7 +88,7 @@ data class ArchiveFilesRoute(
 }
 
 @Composable
-private fun ArchiveFilesScreen(
+internal fun ArchiveFilesScreen(
     stateHolder: ArchiveFilesStateHolder,
 ) {
     val screenUiState by stateHolder.toActionableState()
@@ -84,11 +101,14 @@ private fun ArchiveFilesScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         FilesGrid(
+            dndEnabled = state.dndEnabled,
+            fileType = state.fileType,
             files = state.files,
             lazyGridState = gridState,
             actions = actions
         )
         FilesDrop(
+            dndEnabled = state.dndEnabled,
             dragLocation = state.dragLocation,
             hasStoragePermissions = state.hasStoragePermissions,
             actions = actions
@@ -100,14 +120,7 @@ private fun ArchiveFilesScreen(
             onQueryChanged = { query ->
                 actions(
                     Action.Fetch.LoadAround(
-                        query ?: ArchiveFileQuery(
-                            archiveId = state.archiveId,
-                            mimeTypes = setOf(
-                                "image/png",
-                                "image/jpeg",
-                                "image/gif",
-                            )
-                        )
+                        query = query ?: state.startQuery()
                     )
                 )
             }
@@ -117,13 +130,18 @@ private fun ArchiveFilesScreen(
 
 @Composable
 private fun FilesGrid(
+    dndEnabled: Boolean,
     lazyGridState: LazyGridState,
+    fileType: FileType,
     files: List<ArchiveFile>,
     actions: (Action.Fetch.ColumnSizeChanged) -> Unit,
 ) {
     LazyVerticalGrid(
         state = lazyGridState,
-        columns = GridCells.Adaptive(100.dp),
+        columns = when (fileType) {
+            FileType.Image -> GridCells.Adaptive(100.dp)
+            FileType.Misc -> GridCells.Fixed(count = 1)
+        },
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
@@ -135,10 +153,18 @@ private fun FilesGrid(
                 GridItemSpan(1)
             },
             itemContent = { archiveFile ->
-                GalleryItem(
-                    modifier = Modifier.animateItemPlacement(),
-                    archiveFile = archiveFile
-                )
+                when (fileType) {
+                    FileType.Image -> ImageFile(
+                        modifier = Modifier.animateItemPlacement(),
+                        dndEnabled = dndEnabled,
+                        archiveFile = archiveFile
+                    )
+
+                    FileType.Misc -> TextFile(
+                        modifier = Modifier.animateItemPlacement(),
+                        archiveFile = archiveFile
+                    )
+                }
             }
         )
     }
@@ -146,6 +172,7 @@ private fun FilesGrid(
 
 @Composable
 private fun FilesDrop(
+    dndEnabled: Boolean,
     dragLocation: DragLocation,
     hasStoragePermissions: Boolean,
     actions: (Action) -> Unit,
@@ -165,30 +192,34 @@ private fun FilesDrop(
                 color = borderColor,
                 shape = MaterialTheme.shapes.medium,
             )
-            .dropTarget(
-                onStarted = { _, _ ->
-                    val (action, acceptedDrag) = when (hasStoragePermissions) {
-                        true -> Action.Drag(location = DragLocation.Outside) to true
-                        false -> Action.RequestPermission(Permission.ReadExternalStorage) to false
+            .run {
+                if (!dndEnabled) this
+                else dropTarget(
+                    onStarted = { _, _ ->
+                        val (action, acceptedDrag) = when (hasStoragePermissions) {
+                            true -> Action.Drag(location = DragLocation.Outside) to true
+                            false -> Action.RequestPermission(Permission.ReadExternalStorage) to false
+                        }
+                        actions(action)
+                        acceptedDrag
+                    },
+                    onEntered = { actions(Action.Drag(location = DragLocation.Inside)) },
+                    onExited = { actions(Action.Drag(location = DragLocation.Outside)) },
+                    onEnded = { actions(Action.Drag(location = DragLocation.Inactive)) },
+                    onDropped = { uris, _ ->
+                        actions(Action.Drag(location = DragLocation.Inactive))
+                        actions(Action.Drop(uris = uris))
+                        true
                     }
-                    actions(action)
-                    acceptedDrag
-                },
-                onEntered = { actions(Action.Drag(location = DragLocation.Inside)) },
-                onExited = { actions(Action.Drag(location = DragLocation.Outside)) },
-                onEnded = { actions(Action.Drag(location = DragLocation.Inactive)) },
-                onDropped = { uris, _ ->
-                    actions(Action.Drag(location = DragLocation.Inactive))
-                    actions(Action.Drop(uris = uris))
-                    true
-                }
-            )
+                )
+            }
     )
 }
 
 @Composable
-private fun GalleryItem(
+private fun ImageFile(
     modifier: Modifier = Modifier,
+    dndEnabled: Boolean,
     archiveFile: ArchiveFile,
 ) {
     BoxWithConstraints(
@@ -204,7 +235,8 @@ private fun GalleryItem(
             painter = imagePainter,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.dragSource(
+            modifier = if (!dndEnabled) Modifier
+            else Modifier.dragSource(
                 dragShadowPainter = imagePainter,
                 uris = listOf(
                     RemoteUri(
@@ -215,6 +247,17 @@ private fun GalleryItem(
             )
         )
     }
+}
+
+@Composable
+private fun TextFile(
+    modifier: Modifier = Modifier,
+    archiveFile: ArchiveFile,
+) {
+    Text(
+        modifier = modifier,
+        text = archiveFile.url
+    )
 }
 
 @Composable
