@@ -19,6 +19,7 @@ plugins {
     id("kotlin-library-convention")
     id("org.jetbrains.compose")
     kotlin("plugin.serialization")
+    id("ksp-convention")
 }
 android {
     namespace = "com.tunjid.me.scaffold"
