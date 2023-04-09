@@ -250,7 +250,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
         .map { columnChange ->
             Tile.Limiter<ArchiveQuery, ArchiveItem.Card>(
                 maxQueries = 4 * columnChange.noColumns,
-                queryItemsSize = null,
+                itemSizeHint = ARCHIVE_QUERY_LIMIT,
             )
         }
 
@@ -262,7 +262,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
             repo.archiveTiler(
                 limiter = Tile.Limiter(
                     maxQueries = 4,
-                    queryItemsSize = null,
+                    itemSizeHint = ARCHIVE_QUERY_LIMIT,
                 )
             )
         )

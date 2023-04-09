@@ -143,7 +143,7 @@ private fun Flow<Action.Fetch>.loadMutations(
         .map { columnSize ->
             Tile.Limiter(
                 maxQueries = columnSize * 3,
-                queryItemsSize = null,
+                itemSizeHint = FILE_QUERY_LIMIT,
             )
         }
 
@@ -154,7 +154,7 @@ private fun Flow<Action.Fetch>.loadMutations(
         archiveFileRepository.archiveFilesTiler(
             limiter = Tile.Limiter(
                 maxQueries = 3,
-                queryItemsSize = FILE_QUERY_LIMIT,
+                itemSizeHint = FILE_QUERY_LIMIT,
             )
         )
     )
