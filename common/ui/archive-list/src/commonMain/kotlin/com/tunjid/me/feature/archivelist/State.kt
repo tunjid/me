@@ -56,6 +56,8 @@ data class State(
     @Transient
     val isLoading: Boolean = true,
     @Transient
+    val listState: LazyGridState? = null,
+    @Transient
     val items: TiledList<ArchiveQuery, ArchiveItem> = emptyTiledList(),
 ) : ByteSerializable
 

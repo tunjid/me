@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
@@ -83,12 +84,9 @@ private fun ArchiveScreen(
     )
 
     val isLoading by remember {
-        derivedStateOf { screenUiState.state.isLoading }
+        derivedStateOf { screenUiState.state.listState == null }
     }
-    val gridState = remember(isLoading) {
-        if (isLoading) LazyGridState()
-        else state.savedListState.initialListState()
-    }
+    val gridState = state.listState ?: LazyGridState()
     val scope = rememberCoroutineScope()
     val visibleItemsFlow = remember(isLoading) {
         if (isLoading) emptyFlow()

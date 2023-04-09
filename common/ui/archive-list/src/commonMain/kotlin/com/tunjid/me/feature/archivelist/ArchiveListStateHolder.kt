@@ -279,6 +279,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
             mutation {
                 copy(
                     isLoading = false,
+                    listState = listState ?: savedListState.initialListState(),
                     items = preserveKeys(
                         newQuery = fetchResult.query,
                         newList = fetchResult.queriedArchives
