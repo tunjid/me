@@ -90,18 +90,22 @@ private fun ArchiveQuery.amend(
     )
 )
 
+fun ArchiveQuery.compare(a: Archive, b: Archive) =
+    if (desc) b.created.compareTo(a.created)
+    else a.created.compareTo(b.created)
+
 fun ArchiveQuery.includes(archive: Archive): Boolean =
     kind == archive.kind &&
-        contentFilter.categories.toSet().all(archive.categories::contains) &&
-        contentFilter.tags.toSet().all(archive.tags::contains)
+            contentFilter.categories.toSet().all(archive.categories::contains) &&
+            contentFilter.tags.toSet().all(archive.tags::contains)
 // TODO temporal filter
 
 fun ArchiveQuery.hasTheSameFilter(other: ArchiveQuery) =
     kind == other.kind &&
-        desc == other.desc &&
-        temporalFilter == other.temporalFilter &&
-        contentFilter.tags.toSet() == other.contentFilter.tags.toSet() &&
-        contentFilter.categories.toSet() == other.contentFilter.categories.toSet()
+            desc == other.desc &&
+            temporalFilter == other.temporalFilter &&
+            contentFilter.tags.toSet() == other.contentFilter.tags.toSet() &&
+            contentFilter.categories.toSet() == other.contentFilter.categories.toSet()
 
 private class CategorySerializer(
     backing: KSerializer<Category> = descriptorSerializer(Descriptor::Category),

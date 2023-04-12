@@ -20,13 +20,7 @@ import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.buildTiledList
 
-data class FetchResult(
-    val query: ArchiveQuery,
-    val archivesAvailable: Long,
-    val queriedArchives: TiledList<ArchiveQuery, ArchiveItem.Card>
-)
-
-val TiledList<ArchiveQuery, ArchiveItem>.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
+val TiledList<ArchiveQuery, ArchiveItem.Card>.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
     get() = buildTiledList {
         val queriedArchives = this@itemsWithHeaders
         var month = -1
@@ -60,7 +54,6 @@ val TiledList<ArchiveQuery, ArchiveItem>.itemsWithHeaders: TiledList<ArchiveQuer
                     query = query,
                     item = item
                 )
-                else -> Unit
             }
         }
     }

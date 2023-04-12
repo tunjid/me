@@ -19,7 +19,6 @@ package com.tunjid.me.feature.archivelist
 import com.tunjid.me.core.model.ARCHIVE_QUERY_LIMIT
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
-import com.tunjid.me.core.model.FILE_QUERY_LIMIT
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.hasTheSameFilter
 import com.tunjid.me.core.utilities.ByteSerializer
@@ -269,27 +268,28 @@ private fun Flow<Action.Fetch>.fetchMutations(
         // Allow database queries to settle
         .debounce(timeoutMillis = 50)
 
-    return combine(
-        flow = queries,
-        flow2 = archivesAvailable,
-        flow3 = archiveItems,
-        transform = ::FetchResult
-    )
-        .map { fetchResult: FetchResult ->
+    return merge(
+        archiveItems.map { newItems ->
             mutation {
                 copy(
                     isLoading = false,
                     listState = listState ?: savedListState.initialListState(),
-                    items = preserveKeys(
-                        newQuery = fetchResult.query,
-                        newList = fetchResult.queriedArchives
-                    )
-                        .itemsWithHeaders,
+                    items = preserveKeys(newItems = newItems).itemsWithHeaders,
+                )
+            }
+        },
+        archivesAvailable.map { count ->
+            mutation {
+                copy(queryState = queryState.copy(count = count))
+            }
+        },
+        queries.map { query ->
+            mutation {
+                copy(
                     queryState = queryState.copy(
-                        currentQuery = fetchResult.query,
-                        count = fetchResult.archivesAvailable,
+                        currentQuery = query,
                         suggestedDescriptors = queryState.suggestedDescriptors.filterNot { descriptor ->
-                            val contentFilter = queryState.currentQuery.contentFilter
+                            val contentFilter = query.contentFilter
                             when (descriptor) {
                                 is Descriptor.Category -> contentFilter.categories.contains(
                                     descriptor
@@ -302,6 +302,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
                 )
             }
         }
+    )
 }
 
 /**
