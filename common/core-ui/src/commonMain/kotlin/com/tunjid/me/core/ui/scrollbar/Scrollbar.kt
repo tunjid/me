@@ -18,7 +18,6 @@ package com.tunjid.me.core.ui.scrollbar
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -184,18 +183,12 @@ fun scrollbarState(
 )
 
 fun scrollbarState(
-    available: Int,
-    visible: Int,
-    index: Int,
+    itemsAvailable: Int,
+    itemsVisible: Int,
+    firstVisibleIndex: Int,
 ): ScrollbarState =
-    when {
-        available != 0 -> scrollbarState(
-            thumbHeightPercent = visible.toFloat() / available,
-            thumbTravelPercent = index.toFloat() / available
-        )
-
-        else -> scrollbarState(
-            thumbHeightPercent = 1f,
-            thumbTravelPercent = 0f,
-        )
-    }
+    if (itemsAvailable != 0) scrollbarState(
+        thumbHeightPercent = itemsVisible.toFloat() / itemsAvailable,
+        thumbTravelPercent = firstVisibleIndex.toFloat() / itemsAvailable
+    )
+    else ScrollbarState.FULL

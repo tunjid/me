@@ -99,22 +99,20 @@ private fun <LazyState : Any, LazyStateItem> LazyState.scrollbarState(
     ) {
         snapshotFlow {
             val visibleItemsInfo = items(this@scrollbarState)
-            val minItem = visibleItemsInfo.maxByOrNull(areaForItem)
-                ?: return@snapshotFlow null
-            val minArea = areaForItem(minItem)
-                .takeIf { it > 0 }
+            val maxArea = visibleItemsInfo.maxOfOrNull(areaForItem)
+                ?.takeIf { it > 0 }
                 ?: return@snapshotFlow null
 
-            val visible = viewportArea(this@scrollbarState) / minArea
-            val info = visibleItemsInfo.firstOrNull()
-            val index = info?.let(indexForItem)
+            val itemsVisible = viewportArea(this@scrollbarState) / maxArea
+            val firstVisibleItem = visibleItemsInfo.firstOrNull()
+            val firstVisibleIndex = firstVisibleItem?.let(indexForItem)
                 ?.takeIf { it >= 0 }
                 ?: return@snapshotFlow null
 
             scrollbarState(
-                available = size,
-                visible = visible,
-                index = index
+                itemsAvailable = size,
+                itemsVisible = itemsVisible,
+                firstVisibleIndex = firstVisibleIndex
             )
         }
             .filterNotNull()
