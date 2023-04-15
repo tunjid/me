@@ -17,6 +17,8 @@
 package com.tunjid.me.core.ui.scrollbar
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -83,9 +85,11 @@ fun ScrollbarState(
     )
 )
 
-private val ScrollbarState.thumbSizePercent get() = unpackFloat1(packedValue)
+private val ScrollbarState.thumbSizePercent
+    get() = unpackFloat1(packedValue)
 
-private val ScrollbarState.thumbTravelPercent get() = unpackFloat2(packedValue)
+private val ScrollbarState.thumbTravelPercent
+    get() = unpackFloat2(packedValue)
 
 private val ScrollbarTrack.size
     get() = unpackFloat2(packedValue) - unpackFloat1(packedValue)
@@ -152,9 +156,11 @@ private fun Scrollbar(
         with(localDensity) { thumbSizePx.toDp() }
     )
 
-    val thumbTravelPx = min(
-        a = (track.size * thumbTravelPercent).toInt(),
-        b = (track.size - thumbSizePx).toInt()
+    val thumbTravelPx by animateFloatAsState(
+        min(
+            a = track.size * thumbTravelPercent,
+            b = track.size - thumbSizePx
+        )
     )
 
     Box(
