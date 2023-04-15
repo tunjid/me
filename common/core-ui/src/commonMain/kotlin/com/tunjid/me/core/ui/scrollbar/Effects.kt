@@ -16,6 +16,7 @@
 
 package com.tunjid.me.core.ui.scrollbar
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
@@ -35,77 +36,88 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
-fun LazyListState.scrollbarState(
+inline fun LazyListState.scrollbarState(
     vararg keys: Any? = emptyArray(),
     size: Int,
-    indexForItem: (LazyListItemInfo) -> Int?,
+    crossinline itemIndex: (LazyListItemInfo) -> Int?,
 ): ScrollbarState =
     scrollbarState(
         size = size,
         keys = keys,
         items = { layoutInfo.visibleItemsInfo },
-        viewportArea = {
+        viewportSize = {
             when (layoutInfo.orientation) {
                 Orientation.Vertical -> layoutInfo.viewportSize.height
                 Orientation.Horizontal -> layoutInfo.viewportSize.width
             }
         },
-        areaForItem = { it.size },
-        indexForItem = indexForItem
+        itemSize = { it.size },
+        itemIndex = itemIndex
     )
 
 @Composable
-fun LazyGridState.scrollbarState(
+inline fun LazyGridState.scrollbarState(
     vararg keys: Any? = emptyArray(),
     size: Int,
-    indexForItem: (LazyGridItemInfo) -> Int?,
+    crossinline itemIndex: (LazyGridItemInfo) -> Int?,
 ): ScrollbarState =
     scrollbarState(
         size = size,
         keys = keys,
         items = { layoutInfo.visibleItemsInfo },
-        viewportArea = { layoutInfo.viewportSize.area },
-        areaForItem = { it.size.area },
-        indexForItem = indexForItem
+        viewportSize = {
+            when (layoutInfo.orientation) {
+                Orientation.Vertical -> layoutInfo.viewportSize.height
+                Orientation.Horizontal -> layoutInfo.viewportSize.width
+            }
+        },
+        itemSize = { it.size.area },
+        itemIndex = itemIndex
     )
 
 @Composable
-fun LazyStaggeredGridState.scrollbarState(
+@OptIn(ExperimentalFoundationApi::class)
+inline fun LazyStaggeredGridState.scrollbarState(
     vararg keys: Any? = emptyArray(),
     size: Int,
-    indexForItem: (LazyStaggeredGridItemInfo) -> Int?,
+    crossinline itemIndex: (LazyStaggeredGridItemInfo) -> Int?,
 ): ScrollbarState =
     scrollbarState(
         size = size,
         keys = keys,
         items = { layoutInfo.visibleItemsInfo },
-        viewportArea = { layoutInfo.viewportSize.area },
-        areaForItem = { it.size.area },
-        indexForItem = indexForItem
+        viewportSize = {
+            when (layoutInfo.orientation) {
+                Orientation.Vertical -> layoutInfo.viewportSize.height
+                Orientation.Horizontal -> layoutInfo.viewportSize.width
+            }
+        },
+        itemSize = { it.size.area },
+        itemIndex = itemIndex
     )
 
 @Composable
-private fun <LazyState : Any, LazyStateItem> LazyState.scrollbarState(
+inline fun <LazyState : Any, LazyStateItem> LazyState.scrollbarState(
     size: Int,
     keys: Array<out Any?>,
-    items: LazyState.() -> List<LazyStateItem>,
-    viewportArea: LazyState.() -> Int,
-    areaForItem: (LazyStateItem) -> Int,
-    indexForItem: (LazyStateItem) -> Int?,
+    crossinline items: LazyState.() -> List<LazyStateItem>,
+    crossinline viewportSize: LazyState.() -> Int,
+    crossinline itemSize: (LazyStateItem) -> Int,
+    crossinline itemIndex: (LazyStateItem) -> Int?,
 ): ScrollbarState {
-    var scrollbarState by remember { mutableStateOf(ScrollbarState.FULL) }
-    LaunchedEffect(
-        keys = (arrayOf(this, size) + keys)
-    ) {
+    var state by remember { mutableStateOf(ScrollbarState.FULL) }
+    LaunchedEffect(keys = (arrayOf(this, size) + keys)) {
         snapshotFlow {
             val visibleItemsInfo = items(this@scrollbarState)
-            val maxArea = visibleItemsInfo.maxOfOrNull(areaForItem)
-                ?.takeIf { it > 0 }
+            if (visibleItemsInfo.isEmpty()) return@snapshotFlow null
+
+            val avgSize = (visibleItemsInfo.sumOf(itemSize) / visibleItemsInfo.size)
+                .takeIf { it > 0 }
                 ?: return@snapshotFlow null
 
-            val itemsVisible = viewportArea(this@scrollbarState) / maxArea
+            val itemsVisible = viewportSize(this@scrollbarState) / avgSize
             val firstVisibleItem = visibleItemsInfo.firstOrNull()
-            val firstVisibleIndex = firstVisibleItem?.let(indexForItem)
+            val firstVisibleIndex = firstVisibleItem?.let(itemIndex)
                 ?.takeIf { it >= 0 }
                 ?: return@snapshotFlow null
 
@@ -117,10 +129,9 @@ private fun <LazyState : Any, LazyStateItem> LazyState.scrollbarState(
         }
             .filterNotNull()
             .distinctUntilChanged()
-            .collect { scrollbarState = it }
+            .collect { state = it }
     }
-
-    return scrollbarState
+    return state
 }
 
-private val IntSize.area get() = height * width
+val IntSize.area get() = height * width

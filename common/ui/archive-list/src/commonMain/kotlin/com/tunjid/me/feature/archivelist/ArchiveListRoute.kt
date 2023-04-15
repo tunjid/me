@@ -147,7 +147,7 @@ private fun ArchiveScreen(
                     state = gridState.scrollbarState(
                         keys = arrayOf(state.queryState),
                         size = state.queryState.count.toInt(),
-                        indexForItem = { itemInfo ->
+                        itemIndex = { itemInfo ->
                             state.items.getOrNull(itemInfo.index)?.index
                         }
                     ),
