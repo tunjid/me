@@ -36,12 +36,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
-inline fun LazyListState.scrollbarState(
+inline fun LazyListState.rememberScrollbarState(
     vararg keys: Any? = emptyArray(),
     size: Int,
     crossinline itemIndex: (LazyListItemInfo) -> Int?,
 ): ScrollbarState =
-    scrollbarState(
+    rememberScrollbarState(
         size = size,
         keys = keys,
         items = { layoutInfo.visibleItemsInfo },
@@ -56,12 +56,12 @@ inline fun LazyListState.scrollbarState(
     )
 
 @Composable
-inline fun LazyGridState.scrollbarState(
+inline fun LazyGridState.rememberScrollbarState(
     vararg keys: Any? = emptyArray(),
     size: Int,
     crossinline itemIndex: (LazyGridItemInfo) -> Int?,
 ): ScrollbarState =
-    scrollbarState(
+    rememberScrollbarState(
         size = size,
         keys = keys,
         items = { layoutInfo.visibleItemsInfo },
@@ -77,12 +77,12 @@ inline fun LazyGridState.scrollbarState(
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
-inline fun LazyStaggeredGridState.scrollbarState(
+inline fun LazyStaggeredGridState.rememberScrollbarState(
     vararg keys: Any? = emptyArray(),
     size: Int,
     crossinline itemIndex: (LazyStaggeredGridItemInfo) -> Int?,
 ): ScrollbarState =
-    scrollbarState(
+    rememberScrollbarState(
         size = size,
         keys = keys,
         items = { layoutInfo.visibleItemsInfo },
@@ -97,7 +97,7 @@ inline fun LazyStaggeredGridState.scrollbarState(
     )
 
 @Composable
-inline fun <LazyState : Any, LazyStateItem> LazyState.scrollbarState(
+inline fun <LazyState : Any, LazyStateItem> LazyState.rememberScrollbarState(
     size: Int,
     keys: Array<out Any?>,
     crossinline items: LazyState.() -> List<LazyStateItem>,
@@ -108,14 +108,14 @@ inline fun <LazyState : Any, LazyStateItem> LazyState.scrollbarState(
     var state by remember { mutableStateOf(ScrollbarState.FULL) }
     LaunchedEffect(keys = (arrayOf(this, size) + keys)) {
         snapshotFlow {
-            val visibleItemsInfo = items(this@scrollbarState)
+            val visibleItemsInfo = items(this@rememberScrollbarState)
             if (visibleItemsInfo.isEmpty()) return@snapshotFlow null
 
             val avgSize = (visibleItemsInfo.sumOf(itemSize) / visibleItemsInfo.size)
                 .takeIf { it > 0 }
                 ?: return@snapshotFlow null
 
-            val itemsVisible = viewportSize(this@scrollbarState) / avgSize
+            val itemsVisible = viewportSize(this@rememberScrollbarState) / avgSize
             val firstVisibleItem = visibleItemsInfo.firstOrNull()
             val firstVisibleIndex = firstVisibleItem?.let(itemIndex)
                 ?.takeIf { it >= 0 }

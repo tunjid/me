@@ -46,7 +46,7 @@ import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.core.ui.scrollbar.Scrollbar
-import com.tunjid.me.core.ui.scrollbar.scrollbarState
+import com.tunjid.me.core.ui.scrollbar.rememberScrollbarState
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.toActionableState
 import com.tunjid.me.scaffold.nav.AppRoute
@@ -140,17 +140,19 @@ private fun ArchiveScreen(
 
                 var scrollPercentage by remember { mutableStateOf<Float?>(null) }
 
+                val scrollbarState = gridState.rememberScrollbarState(
+                    keys = arrayOf(state.queryState),
+                    size = state.queryState.count.toInt(),
+                    itemIndex = { itemInfo ->
+                        state.items.getOrNull(itemInfo.index)?.index
+                    }
+                )
+
                 Scrollbar(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .width(12.dp),
-                    state = gridState.scrollbarState(
-                        keys = arrayOf(state.queryState),
-                        size = state.queryState.count.toInt(),
-                        itemIndex = { itemInfo ->
-                            state.items.getOrNull(itemInfo.index)?.index
-                        }
-                    ),
+                    state = scrollbarState,
                     onThumbMoved = { percentage: Float ->
                         scrollPercentage = percentage
                     },
