@@ -52,22 +52,30 @@ abstract class ArchiveFilesNavigationComponent {
     fun archiveFilesRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "archives/{kind}/{id}/files",
-            routeMapper = { (route: String, pathKeys: Map<String, String>) ->
+            routeMapper = { (
+                                route: String,
+                                pathKeys: Map<String, String>,
+                                queryKeys: Map<String, List<String>>
+                            ) ->
                 val archiveId = ArchiveId(pathKeys["id"] ?: "")
                 val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] }
                     ?: ArchiveKind.Articles
-                when (pathKeys["type"]) {
-                    null -> ArchiveFilesParentRoute(
+                val types = queryKeys["type"] ?: emptyList()
+                when {
+                    types.isEmpty() -> ArchiveFilesParentRoute(
                         id = route,
                         kind = kind,
                         archiveId = archiveId,
                     )
 
-                    "image" -> ArchiveFilesRoute(
+                    "image" in types -> ArchiveFilesRoute(
                         id = route,
                         kind = kind,
                         archiveId = archiveId,
-                        dndEnabled = true == pathKeys["dndEnabled"]?.toBooleanStrictOrNull(),
+                        dndEnabled = queryKeys["dndEnabled"]
+                            ?.map(String::toBooleanStrictOrNull)
+                            ?.any(true::equals)
+                            ?: false,
                         fileType = FileType.Image
                     )
 
@@ -75,7 +83,10 @@ abstract class ArchiveFilesNavigationComponent {
                         id = route,
                         kind = kind,
                         archiveId = archiveId,
-                        dndEnabled = true == pathKeys["dndEnabled"]?.toBooleanStrictOrNull(),
+                        dndEnabled = queryKeys["dndEnabled"]
+                            ?.map(String::toBooleanStrictOrNull)
+                            ?.any(true::equals)
+                            ?: false,
                         fileType = FileType.Misc
                     )
                 }
