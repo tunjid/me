@@ -25,7 +25,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -35,7 +34,8 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.lifecycle.toActionableState
+import com.tunjid.me.scaffold.lifecycle.component1
+import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
@@ -54,8 +54,7 @@ data class SettingsRoute(
 
 @Composable
 private fun SettingsScreen(stateHolder: SettingsStateHolder) {
-    val screenUiState by stateHolder.toActionableState()
-    val (state, actions) = screenUiState
+    val (state, actions) = stateHolder
     val scrollState = rememberScrollState()
 
     ScreenUiState(

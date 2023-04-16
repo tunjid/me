@@ -22,13 +22,31 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
@@ -49,7 +67,8 @@ import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.scaffold.lifecycle.toActionableState
+import com.tunjid.me.scaffold.lifecycle.component1
+import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -81,8 +100,7 @@ data class ArchiveEditRoute(
 
 @Composable
 private fun ArchiveEditScreen(stateHolder: ArchiveEditStateHolder) {
-    val screenUiState by stateHolder.toActionableState()
-    val (state, actions) = screenUiState
+    val (state, actions) = stateHolder
     val upsert = state.upsert
     val scrollState = rememberLazyListState()
 

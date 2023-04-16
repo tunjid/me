@@ -48,7 +48,8 @@ import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.core.ui.scrollbar.VerticalScrollbar
 import com.tunjid.me.core.ui.scrollbar.rememberScrollbarState
 import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.scaffold.lifecycle.toActionableState
+import com.tunjid.me.scaffold.lifecycle.component1
+import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.push
@@ -74,8 +75,7 @@ data class ArchiveListRoute(
 private fun ArchiveScreen(
     stateHolder: ArchiveListStateHolder,
 ) {
-    val screenUiState by stateHolder.toActionableState()
-    val (state, actions) = screenUiState
+    val (state, actions) = stateHolder
 
     if (state.isInMainNav) GlobalUi(
         state = state,
@@ -83,7 +83,7 @@ private fun ArchiveScreen(
     )
 
     val isLoading by remember {
-        derivedStateOf { screenUiState.state.listState == null }
+        derivedStateOf { state.listState == null }
     }
     val gridState = state.listState ?: LazyGridState()
     val scope = rememberCoroutineScope()
@@ -102,7 +102,7 @@ private fun ArchiveScreen(
     val cardWidth = 350.dp
     val stickyHeaderItem by produceState<ArchiveItem.Header?>(
         initialValue = null,
-        key1 = screenUiState.state.items
+        key1 = state.items
     ) {
         visibleItemsFlow
             .map { itemInfoList -> itemInfoList.firstOrNull()?.index }

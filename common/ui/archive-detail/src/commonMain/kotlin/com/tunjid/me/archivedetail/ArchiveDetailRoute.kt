@@ -16,13 +16,17 @@
 
 package com.tunjid.me.archivedetail
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,10 +37,11 @@ import com.halilibo.richtext.ui.material3.Material3RichText
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.AsyncRasterImage
+import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.scaffold.lifecycle.toActionableState
+import com.tunjid.me.scaffold.lifecycle.component1
+import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.treenav.pop
 import kotlinx.serialization.Serializable
@@ -59,8 +64,7 @@ data class ArchiveDetailRoute(
 
 @Composable
 private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
-    val screenUiState by stateHolder.toActionableState()
-    val (state, actions) = screenUiState
+    val (state, actions) = stateHolder
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
 
@@ -84,7 +88,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
             imageUrl = state.archive?.thumbnail,
             modifier = Modifier
                 .heightIn(max = 300.dp)
-                .aspectRatio(ratio = 16f/9f)
+                .aspectRatio(ratio = 16f / 9f)
                 .padding(horizontal = 16.dp)
                 .clip(MaterialTheme.shapes.medium)
         )

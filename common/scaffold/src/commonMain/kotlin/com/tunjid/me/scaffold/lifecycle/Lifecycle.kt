@@ -73,7 +73,7 @@ inline fun <T, R> StateFlow<T>.mappedCollectAsStateWithLifecycle(
 }
 
 @Composable
-inline fun <T> StateFlow<T>.collectAsStateWithLifecycle(
+fun <T> StateFlow<T>.collectAsStateWithLifecycle(
     context: CoroutineContext = Dispatchers.Main.immediate,
 ): State<T> {
     val lifecycle = LocalLifecycleStateHolder.current.state
@@ -94,32 +94,11 @@ class ActualLifecycleStateHolder(
     actionTransform = { it }
 )
 
-/**
- * [State] that can be mutated by [Action]
- */
-data class ActionableState<Action : Any, State : Any>(
-    val state: State,
-    val actions: (Action) -> Unit
-)
+@Composable
+operator fun <Action : Any, State : Any> ActionStateProducer<Action, StateFlow<State>>.component1()
+: State = state.collectAsStateWithLifecycle().value
 
 @Composable
-inline fun <Action : Any, State : Any> ActionStateProducer<Action, StateFlow<State>>.toActionableState(
+operator fun <Action : Any, State : Any> ActionStateProducer<Action, StateFlow<State>>.component2()
+: (Action) -> Unit = remember { accept }
 
-): androidx.compose.runtime.State<ActionableState<Action, State>> {
-    val stateFlow = remember {
-        state
-    }
-    val actions = remember {
-        accept
-    }
-    val state by stateFlow.collectAsStateWithLifecycle()
-    val actionableState = remember(state) {
-        derivedStateOf {
-            ActionableState(
-                state = state,
-                actions = actions
-            )
-        }
-    }
-    return actionableState
-}

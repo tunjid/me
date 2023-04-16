@@ -60,7 +60,8 @@ import com.tunjid.me.core.ui.maxSize
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.scaffold.lifecycle.toActionableState
+import com.tunjid.me.scaffold.lifecycle.component1
+import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.tiler.compose.PivotedTilingEffect
@@ -91,8 +92,7 @@ data class ArchiveFilesRoute(
 internal fun ArchiveFilesScreen(
     stateHolder: ArchiveFilesStateHolder,
 ) {
-    val screenUiState by stateHolder.toActionableState()
-    val (state, actions) = screenUiState
+    val (state, actions) = stateHolder
     val gridState = rememberLazyGridState()
 
     if (state.isInMainNav) GlobalUi()
