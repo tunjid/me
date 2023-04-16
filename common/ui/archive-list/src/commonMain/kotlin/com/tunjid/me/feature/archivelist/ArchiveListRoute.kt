@@ -76,6 +76,7 @@ private fun ArchiveScreen(
     stateHolder: ArchiveListStateHolder,
 ) {
     val (state, actions) = stateHolder
+    val updatedItems by rememberUpdatedState(state.items)
 
     if (state.isInMainNav) GlobalUi(
         state = state,
@@ -99,13 +100,13 @@ private fun ArchiveScreen(
     val cardWidth = 350.dp
     val stickyHeaderItem by produceState<ArchiveItem.Header?>(
         initialValue = null,
-        key1 = state.items
+        key1 = state.isLoading
     ) {
         visibleItemsFlow
             .map { itemInfoList -> itemInfoList.firstOrNull()?.index }
             .distinctUntilChanged()
             .collect { firstIndex ->
-                val item = firstIndex?.let(state.items::getOrNull)
+                val item = firstIndex?.let(updatedItems::getOrNull)
                 value = item?.stickyHeader
             }
     }
