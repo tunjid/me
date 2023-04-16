@@ -82,13 +82,10 @@ private fun ArchiveScreen(
         onAction = actions
     )
 
-    val isLoading by remember {
-        derivedStateOf { state.listState == null }
-    }
     val gridState = state.listState ?: LazyGridState()
     val scope = rememberCoroutineScope()
-    val visibleItemsFlow = remember(isLoading) {
-        if (isLoading) emptyFlow()
+    val visibleItemsFlow = remember(state.isLoading) {
+        if (state.isLoading) emptyFlow()
         else snapshotFlow {
             gridState.layoutInfo.visibleItemsInfo
         }
@@ -179,7 +176,7 @@ private fun ArchiveScreen(
         }
     )
 
-    if (!isLoading) SaveScrollPositionEffect(
+    SaveScrollPositionEffect(
         infoFlow = visibleItemsFlow,
         onAction = actions
     )
