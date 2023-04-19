@@ -18,6 +18,9 @@ package com.tunjid.me.feature.archivelist
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -146,15 +149,20 @@ private fun ArchiveScreen(
                     }
                 )
 
+                val interactionSource = remember { MutableInteractionSource() }
+                val isPressed by interactionSource.collectIsPressedAsState()
+                val isDragged by interactionSource.collectIsDraggedAsState()
+
                 VerticalScrollbar(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .width(12.dp),
                     state = scrollbarState,
+                    interactionSource = interactionSource,
                     onThumbMoved = { percentage: Float ->
                         scrollPercentage = percentage
                     },
-                    thumb = { isActive -> ScrollbarThumb(isActive) }
+                    thumb = { ScrollbarThumb(isDragged || isPressed) }
                 )
                 gridState.ScrollbarThumbPositionEffect(
                     percentage = scrollPercentage,
