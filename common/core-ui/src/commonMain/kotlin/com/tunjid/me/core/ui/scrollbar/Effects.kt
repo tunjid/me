@@ -16,7 +16,9 @@
 
 package com.tunjid.me.core.ui.scrollbar
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
@@ -28,84 +30,106 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 
+///**
+// * Remembers a [ScrollbarState] driven by the changes in a [ScrollbarState].
+// */
+//@Composable
+//fun ScrollState.scrollbarState(): ScrollbarState = ScrollbarState(
+//    thumbSizePercent = viewportSize.toFloat() / maxValue,
+//    thumbTravelPercent = value.toFloat() / maxValue,
+//)
+
+/**
+ * Remembers a [ScrollbarState] driven by the changes in a [LazyListState].
+ *
+ * @param itemsAvailable the total amount of items available to scroll in the lazy list.
+ * @param itemIndex a lookup function for index of an item in the list relative to [itemsAvailable].
+ */
 @Composable
-inline fun LazyListState.rememberScrollbarState(
-    vararg keys: Any? = emptyArray(),
+fun LazyListState.rememberScrollbarState(
     itemsAvailable: Int,
-    crossinline itemIndex: (LazyListItemInfo) -> Int?,
+    itemIndex: (LazyListItemInfo) -> Int? = LazyListItemInfo::index,
 ): ScrollbarState =
     rememberScrollbarState(
         itemsAvailable = itemsAvailable,
-        keys = keys,
-        items = { layoutInfo.visibleItemsInfo },
-        viewportSize = {
-            when (layoutInfo.orientation) {
-                Orientation.Vertical -> layoutInfo.viewportSize.height
-                Orientation.Horizontal -> layoutInfo.viewportSize.width
-            }
-        },
-        itemSize = { it.size },
+        visibleItems = { layoutInfo.visibleItemsInfo },
+        viewportSize = { layoutInfo.orientation.dimension(layoutInfo.viewportSize) },
+        maxItemSize = { it.size },
         itemIndex = itemIndex
     )
 
+/**
+ * Remembers a [ScrollbarState] driven by the changes in a [LazyGridState]
+ *
+ * @param itemsAvailable the total amount of items available to scroll in the grid.
+ * @param itemIndex a lookup function for index of an item in the grid relative to [itemsAvailable].
+ */
 @Composable
-inline fun LazyGridState.rememberScrollbarState(
-    vararg keys: Any? = emptyArray(),
+fun LazyGridState.rememberScrollbarState(
     itemsAvailable: Int,
-    crossinline itemIndex: (LazyGridItemInfo) -> Int?,
+    itemIndex: (LazyGridItemInfo) -> Int? = LazyGridItemInfo::index,
 ): ScrollbarState =
     rememberScrollbarState(
         itemsAvailable = itemsAvailable,
-        keys = keys,
-        items = { layoutInfo.visibleItemsInfo },
-        viewportSize = {
-            when (layoutInfo.orientation) {
-                Orientation.Vertical -> layoutInfo.viewportSize.height
-                Orientation.Horizontal -> layoutInfo.viewportSize.width
-            }
-        },
-        itemSize = { it.size.dimension(orientation = layoutInfo.orientation) },
+        visibleItems = { layoutInfo.visibleItemsInfo },
+        viewportSize = { layoutInfo.orientation.dimension(layoutInfo.viewportSize) },
+        maxItemSize = { layoutInfo.orientation.dimension(it.size) },
         itemIndex = itemIndex
     )
 
+/**
+ * Remembers a [ScrollbarState] driven by the changes in a [LazyStaggeredGridState]
+ *
+ * @param itemsAvailable the total amount of items available to scroll in the staggered grid.
+ * @param itemIndex a lookup function for index of an item in the staggered grid relative
+ * to [itemsAvailable].
+ */
 @Composable
-inline fun LazyStaggeredGridState.rememberScrollbarState(
-    vararg keys: Any? = emptyArray(),
+fun LazyStaggeredGridState.rememberScrollbarState(
     itemsAvailable: Int,
-    crossinline itemIndex: (LazyStaggeredGridItemInfo) -> Int?,
+    itemIndex: (LazyStaggeredGridItemInfo) -> Int? = LazyStaggeredGridItemInfo::index,
 ): ScrollbarState =
     rememberScrollbarState(
         itemsAvailable = itemsAvailable,
-        keys = keys,
-        items = { layoutInfo.visibleItemsInfo },
-        viewportSize = {
-            when (layoutInfo.orientation) {
-                Orientation.Vertical -> layoutInfo.viewportSize.height
-                Orientation.Horizontal -> layoutInfo.viewportSize.width
-            }
-        },
-        itemSize = { it.size.dimension(orientation = layoutInfo.orientation) },
+        visibleItems = { layoutInfo.visibleItemsInfo },
+        viewportSize = { layoutInfo.orientation.dimension(layoutInfo.viewportSize) },
+        maxItemSize = { layoutInfo.orientation.dimension(it.size) },
         itemIndex = itemIndex
     )
 
+/**
+ * A generic function for remembering [ScrollbarState] for lazy layouts.
+ * @param itemsAvailable the total amount of items available to scroll in the layout.
+ * @param visibleItems a list of items currently visible in the layout.
+ * @param viewportSize a lookup function for the size of the view port in the [Orientation] axis
+ * of the layout.
+ * @param maxItemSize a lookup function for the visible item with the maximum size in the
+ * [Orientation] axis of the layout.
+ * @param itemIndex a lookup function for index of an item in the layout relative to [itemsAvailable].
+ */
 @Composable
-inline fun <LazyState : Any, LazyStateItem> LazyState.rememberScrollbarState(
+// TODO: This utility function should be internal, but if it was, it would not be inline.
+//  is this abstraction worthwhile? The code can be copy pasted for the lazy states that use it.
+private fun <LazyState : ScrollableState, LazyStateItem> LazyState.rememberScrollbarState(
     itemsAvailable: Int,
-    keys: Array<out Any?>,
-    crossinline items: LazyState.() -> List<LazyStateItem>,
-    crossinline viewportSize: LazyState.() -> Int,
-    crossinline itemSize: LazyState.(LazyStateItem) -> Int,
-    crossinline itemIndex: (LazyStateItem) -> Int?,
+    visibleItems: LazyState.() -> List<LazyStateItem>,
+    viewportSize: LazyState.() -> Int,
+    maxItemSize: LazyState.(LazyStateItem) -> Int,
+    itemIndex: (LazyStateItem) -> Int?,
 ): ScrollbarState {
     var state by remember { mutableStateOf(ScrollbarState.FULL) }
-    LaunchedEffect(keys = (arrayOf(this, itemsAvailable) + keys)) {
+    LaunchedEffect(
+        key1 = this,
+        key2 = itemsAvailable
+    ) {
         snapshotFlow {
-            val visibleItemsInfo = items(this@rememberScrollbarState)
+            val visibleItemsInfo = visibleItems(this@rememberScrollbarState)
             if (visibleItemsInfo.isEmpty()) return@snapshotFlow null
 
             val firstVisibleItem = visibleItemsInfo.firstOrNull()
@@ -116,22 +140,97 @@ inline fun <LazyState : Any, LazyStateItem> LazyState.rememberScrollbarState(
                 ?: return@snapshotFlow null
 
             val maxSize = visibleItemsInfo.maxOfOrNull { item ->
-                itemSize(this@rememberScrollbarState, item)
+                maxItemSize(this@rememberScrollbarState, item)
             }
                 ?.takeIf { it > 0 }
                 ?: return@snapshotFlow null
 
-            val itemsVisible = viewportSize(this@rememberScrollbarState) / maxSize
+            val itemsVisible = viewportSize(this@rememberScrollbarState).toFloat() / maxSize
 
             if (itemsAvailable != 0) ScrollbarState(
-                thumbSizePercent = itemsVisible.toFloat() / itemsAvailable,
+                thumbSizePercent = itemsVisible / itemsAvailable,
                 thumbTravelPercent = firstVisibleIndex.toFloat() / itemsAvailable
             )
-            else ScrollbarState.FULL
+            else null
         }
             .filterNotNull()
             .distinctUntilChanged()
             .collect { state = it }
     }
     return state
+}
+
+/**
+ * Remembers a function to react to [Scrollbar] thumb position movements for a [ScrollbarState]
+ */
+@Composable
+fun ScrollState.thumbInteractions(): (Float) -> Unit {
+    var percentage by remember { mutableStateOf(Float.NaN) }
+
+    LaunchedEffect(percentage) {
+        if (percentage.isNaN()) return@LaunchedEffect
+        scrollTo((percentage * maxValue).toInt())
+    }
+    return remember {
+        { percentage = it }
+    }
+}
+
+/**
+ * Remembers a function to react to [Scrollbar] thumb position movements for a [LazyListState]
+ * @param itemsAvailable the amount of items in the list.
+ */
+@Composable
+fun LazyListState.thumbInteractions(
+    itemsAvailable: Int,
+): (Float) -> Unit = thumbInteractions(
+    itemsAvailable = itemsAvailable,
+    scroll = ::scrollToItem
+)
+
+/**
+ * Remembers a function to react to [Scrollbar] thumb position movements for a [LazyGridState]
+ * @param itemsAvailable the amount of items in the grid.
+ */
+@Composable
+fun LazyGridState.thumbInteractions(
+    itemsAvailable: Int,
+): (Float) -> Unit = thumbInteractions(
+    itemsAvailable = itemsAvailable,
+    scroll = ::scrollToItem
+)
+
+/**
+ * Remembers a function to react to [Scrollbar] thumb position movements for a [LazyStaggeredGridState]
+ * @param itemsAvailable the amount of items in the grid.
+ */
+@Composable
+fun LazyStaggeredGridState.thumbInteractions(
+    itemsAvailable: Int,
+): (Float) -> Unit = thumbInteractions(
+    itemsAvailable = itemsAvailable,
+    scroll = ::scrollToItem
+)
+
+/**
+ * Generic function to react to [Scrollbar] thumb interactions in a lazy layout.
+ * @param itemsAvailable the total amount of items available to scroll in the layout.
+ * @param scroll a function to be invoked when an index has been identified to scroll to.
+ */
+@Composable
+private fun thumbInteractions(
+    itemsAvailable: Int,
+    scroll: suspend (index: Int) -> Unit
+): (Float) -> Unit {
+    var percentage by remember { mutableStateOf(Float.NaN) }
+    val itemCount by rememberUpdatedState(itemsAvailable)
+
+    LaunchedEffect(percentage) {
+        if (percentage.isNaN()) return@LaunchedEffect
+        val indexToFind = (itemCount * percentage).toInt()
+        scroll(indexToFind)
+    }
+    return remember {
+        { percentage = it }
+    }
 }

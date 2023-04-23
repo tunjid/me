@@ -90,23 +90,23 @@ fun ScrollbarState(
     )
 )
 
-private val ScrollbarState.thumbSizePercent
+val ScrollbarState.thumbSizePercent
     get() = unpackFloat1(packedValue)
 
-private val ScrollbarState.thumbTravelPercent
+val ScrollbarState.thumbTravelPercent
     get() = unpackFloat2(packedValue)
 
 private val ScrollbarTrack.size
     get() = unpackFloat2(packedValue) - unpackFloat1(packedValue)
 
-fun Offset.dimension(orientation: Orientation) = when (orientation) {
-    Orientation.Horizontal -> x
-    Orientation.Vertical -> y
+fun Orientation.coordinateValue(offset: Offset) = when (this) {
+    Orientation.Horizontal -> offset.x
+    Orientation.Vertical -> offset.y
 }
 
-fun IntSize.dimension(orientation: Orientation) = when (orientation) {
-    Orientation.Horizontal -> width
-    Orientation.Vertical -> height
+fun Orientation.dimension(intSize: IntSize) = when (this) {
+    Orientation.Horizontal -> intSize.width
+    Orientation.Vertical -> intSize.height
 }
 
 @Composable
@@ -152,8 +152,8 @@ private fun Scrollbar(
     onThumbMoved: (Float) -> Unit,
 ) {
     val localDensity = LocalDensity.current
-    var pressedOffset by remember { mutableStateOf<Offset?>(null) }
-    var draggedOffset by remember { mutableStateOf<Offset?>(null) }
+    var pressedOffset by remember { mutableStateOf(Offset.Unspecified) }
+    var draggedOffset by remember { mutableStateOf(Offset.Unspecified) }
 
     var track by remember { mutableStateOf(ScrollbarTrack(0)) }
     val updatedState by rememberUpdatedState(state)
@@ -174,21 +174,27 @@ private fun Scrollbar(
         targetValue = (track.size - thumbSizePx) * thumbTravelPercent
     )
 
-    val draggableState = rememberDraggableState { change ->
-        val currentDraggedOffset = draggedOffset ?: return@rememberDraggableState
+    val draggableState = rememberDraggableState { delta ->
+        if (draggedOffset == Offset.Unspecified) return@rememberDraggableState
+
         draggedOffset = when (orientation) {
-            Orientation.Vertical -> currentDraggedOffset.copy(y = currentDraggedOffset.y + change)
-            Orientation.Horizontal -> currentDraggedOffset.copy(x = currentDraggedOffset.x + change)
+            Orientation.Vertical -> draggedOffset.copy(
+                y = draggedOffset.y + delta
+            )
+
+            Orientation.Horizontal -> draggedOffset.copy(
+                x = draggedOffset.x + delta
+            )
         }
     }
     Box(
         modifier = modifier
             .fillMaxHeight()
             .onGloballyPositioned { coordinates ->
-                val position = coordinates.positionInRoot().dimension(orientation)
+                val position = orientation.coordinateValue(coordinates.positionInRoot())
                 track = ScrollbarTrack(
                     max = position,
-                    min = position + coordinates.size.dimension(orientation)
+                    min = position + orientation.dimension(coordinates.size)
                 )
             }
             // Process scrollbar presses
@@ -204,7 +210,7 @@ private fun Scrollbar(
                             if (tryAwaitRelease()) PressInteraction.Release(initialPress)
                             else PressInteraction.Cancel(initialPress)
                         )
-                        pressedOffset = null
+                        pressedOffset = Offset.Unspecified
                     },
                 )
             }
@@ -217,7 +223,7 @@ private fun Scrollbar(
                     draggedOffset = startedPosition
                 },
                 onDragStopped = {
-                    draggedOffset = null
+                    draggedOffset = Offset.Unspecified
                 }
             )
     ) {
@@ -257,10 +263,11 @@ private fun Scrollbar(
 
     // Process presses
     LaunchedEffect(pressedOffset) {
-        val offset = pressedOffset ?: return@LaunchedEffect
+        if (pressedOffset == Offset.Unspecified) return@LaunchedEffect
+
         var currentTravel = updatedState.thumbTravelPercent
         val destinationTravel = updatedTrack.thumbPosition(
-            dimension = offset.dimension(orientation)
+            dimension = orientation.coordinateValue(pressedOffset)
         )
         val isPositive = currentTravel < destinationTravel
         // TODO: Come up with a better heuristic for jumps
@@ -278,10 +285,11 @@ private fun Scrollbar(
 
     // Process drags
     LaunchedEffect(draggedOffset) {
-        val offset = draggedOffset ?: return@LaunchedEffect
+        if (draggedOffset == Offset.Unspecified) return@LaunchedEffect
+
         onThumbMoved(
             updatedTrack.thumbPosition(
-                dimension = offset.dimension(orientation)
+                dimension = orientation.coordinateValue(draggedOffset)
             )
         )
     }

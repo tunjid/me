@@ -36,7 +36,16 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -57,8 +66,16 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
-import kotlinx.coroutines.flow.*
 import kotlin.math.abs
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -139,13 +156,10 @@ private fun ArchiveScreen(
                     actions = actions
                 )
 
-                var scrollPercentage by remember { mutableStateOf<Float?>(null) }
-
                 val scrollbarState = gridState.rememberScrollbarState(
-                    keys = arrayOf(state.queryState),
                     itemsAvailable = state.queryState.count.toInt(),
                     itemIndex = { itemInfo ->
-                        state.items.getOrNull(itemInfo.index)?.index
+                        updatedItems.getOrNull(itemInfo.index)?.index
                     }
                 )
 
@@ -159,15 +173,11 @@ private fun ArchiveScreen(
                         .width(12.dp),
                     state = scrollbarState,
                     interactionSource = interactionSource,
-                    onThumbMoved = { percentage: Float ->
-                        scrollPercentage = percentage
-                    },
+                    onThumbMoved = gridState.scrollbarThumbPositionFunction(
+                        state = state,
+                        actions = actions
+                    ),
                     thumb = { ScrollbarThumb(isDragged || isPressed) }
-                )
-                gridState.ScrollbarThumbPositionEffect(
-                    percentage = scrollPercentage,
-                    state = state,
-                    actions = actions
                 )
             }
         }
@@ -352,35 +362,40 @@ private fun ScrollbarThumb(isActive: Boolean) {
 }
 
 @Composable
-private fun LazyGridState.ScrollbarThumbPositionEffect(
-    percentage: Float?,
+private fun LazyGridState.scrollbarThumbPositionFunction(
     state: State,
     actions: (Action) -> Unit,
-) {
-    if (percentage == null) return
-    val currentState by rememberUpdatedState(state)
+): (Float) -> Unit {
+
+    var percentage by remember { mutableStateOf<Float?>(null) }
+    val updatedState by rememberUpdatedState(state)
 
     // Trigger the load to fetch the data required
     LaunchedEffect(percentage) {
-        val indexToFind = (currentState.queryState.count * percentage).toInt()
+        val currentPercentage = percentage ?: return@LaunchedEffect
+        val indexToFind = (state.queryState.count * currentPercentage).toInt()
         actions(
             Action.Fetch.LoadAround(
-                currentState.queryState.currentQuery.copy(
+                state.queryState.currentQuery.copy(
                     offset = indexToFind
                 )
             )
         )
 
         // Fast path
-        val fastIndex = currentState.items.indexOfFirst { it.index == indexToFind }
+        val fastIndex = updatedState.items.indexOfFirst { it.index == indexToFind }
             .takeIf { it > -1 }
         if (fastIndex != null) return@LaunchedEffect scrollToItem(fastIndex)
 
         // Slow path
         scrollToItem(
-            snapshotFlow { currentState.items.indexOfFirst { it.index == indexToFind } }
+            snapshotFlow { updatedState.items.indexOfFirst { it.index == indexToFind } }
                 .first { it > -1 }
         )
+
+    }
+    return remember {
+        { percentage = it }
     }
 }
 
