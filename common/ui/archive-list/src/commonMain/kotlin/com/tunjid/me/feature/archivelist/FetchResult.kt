@@ -40,7 +40,7 @@ val TiledList<ArchiveQuery, ArchiveItem.Card>.itemsWithHeaders: TiledList<Archiv
                                 text = item.headerText,
                                 // Keep the header key inconsistent between queries
                                 // This is so scroll is anchored to the cards and not the header
-                                key = "${item.headerText}-${query.hashCode()}"
+                                key = "header-${item.headerText}-${query.hashCode()}"
                             )
                         )
                     }
