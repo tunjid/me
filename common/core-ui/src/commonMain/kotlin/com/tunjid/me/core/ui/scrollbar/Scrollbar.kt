@@ -17,7 +17,6 @@
 package com.tunjid.me.core.ui.scrollbar
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
@@ -46,6 +45,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
@@ -99,14 +99,19 @@ val ScrollbarState.thumbTravelPercent
 private val ScrollbarTrack.size
     get() = unpackFloat2(packedValue) - unpackFloat1(packedValue)
 
-fun Orientation.coordinateValue(offset: Offset) = when (this) {
+internal fun Orientation.coordinateValue(offset: Offset) = when (this) {
     Orientation.Horizontal -> offset.x
     Orientation.Vertical -> offset.y
 }
 
-fun Orientation.dimension(intSize: IntSize) = when (this) {
+internal fun Orientation.dimension(intSize: IntSize) = when (this) {
     Orientation.Horizontal -> intSize.width
     Orientation.Vertical -> intSize.height
+}
+
+internal fun Orientation.dimension(intOffset: IntOffset) = when (this) {
+    Orientation.Horizontal -> intOffset.x
+    Orientation.Vertical -> intOffset.y
 }
 
 @Composable
@@ -170,9 +175,7 @@ private fun Scrollbar(
         targetValue = with(localDensity) { thumbSizePx.toDp() }
     )
 
-    val thumbTravelPx by animateFloatAsState(
-        targetValue = (track.size - thumbSizePx) * thumbTravelPercent
-    )
+    val thumbTravelPx = (track.size - thumbSizePx) * thumbTravelPercent
 
     val draggableState = rememberDraggableState { delta ->
         if (draggedOffset == Offset.Unspecified) return@rememberDraggableState

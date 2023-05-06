@@ -58,7 +58,7 @@ import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.core.ui.scrollbar.VerticalScrollbar
-import com.tunjid.me.core.ui.scrollbar.rememberScrollbarState
+import com.tunjid.me.core.ui.scrollbar.scrollbarState
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
@@ -156,10 +156,10 @@ private fun ArchiveScreen(
                     actions = actions
                 )
 
-                val scrollbarState = gridState.rememberScrollbarState(
+                val scrollbarState = gridState.scrollbarState(
                     itemsAvailable = state.queryState.count.toInt(),
                     itemIndex = { itemInfo ->
-                        updatedItems.getOrNull(itemInfo.index)?.index
+                        updatedItems.getOrNull(itemInfo.index)?.index ?: -1
                     }
                 )
 
