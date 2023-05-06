@@ -147,10 +147,12 @@ private fun ArchiveScreen(
             lazyState = gridState,
             headerMatcher = { it.key.isHeaderKey },
             stickyHeader = {
-                Surface {
+                Surface(
+                    modifier = Modifier.padding(end = 16.dp)
+                ) {
                     stickyHeaderItem?.let {
                         StickyHeader(
-                            modifier = Modifier.padding(horizontal = 16.dp),
+                            modifier = Modifier.padding(start = 16.dp),
                             item = it
                         )
                     }
