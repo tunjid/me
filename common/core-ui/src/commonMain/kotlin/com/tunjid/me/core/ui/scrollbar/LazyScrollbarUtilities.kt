@@ -32,7 +32,8 @@ internal inline fun <LazyState : ScrollableState, LazyStateItem> LazyState.scrol
     crossinline maxItemArea: LazyState.(LazyStateItem) -> Int,
     crossinline itemOffset: LazyState.(List<LazyStateItem>) -> Float,
     crossinline itemIndex: (LazyStateItem) -> Int,
-): ScrollbarState {
+    crossinline reverseLayout: LazyState.() -> Boolean,
+    ): ScrollbarState {
     var state by remember { mutableStateOf(ScrollbarState.FULL) }
     LaunchedEffect(
         key1 = this,
@@ -58,7 +59,10 @@ internal inline fun <LazyState : ScrollableState, LazyStateItem> LazyState.scrol
 
             ScrollbarState(
                 thumbSizePercent = itemsVisible / itemsAvailable,
-                thumbTravelPercent = scrollIndex / itemsAvailable
+                thumbTravelPercent = when {
+                    reverseLayout() -> 1f - (scrollIndex / itemsAvailable)
+                    else -> scrollIndex / itemsAvailable
+                }
             )
         }
             .filterNotNull()

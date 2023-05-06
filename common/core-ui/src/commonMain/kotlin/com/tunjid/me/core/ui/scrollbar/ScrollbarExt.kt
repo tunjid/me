@@ -59,7 +59,8 @@ fun LazyListState.scrollbarState(
                 itemIndex = itemIndex
             )
         },
-        itemIndex = itemIndex
+        itemIndex = itemIndex,
+        reverseLayout = { layoutInfo.reverseLayout },
     )
 
 /**
@@ -80,17 +81,20 @@ fun LazyGridState.scrollbarState(
         maxItemArea = {
             when (layoutInfo.orientation) {
                 Orientation.Vertical -> {
-                    (it.size.height + layoutInfo.mainAxisItemSpacing) * it.size.width
+                    (it.size.height + (layoutInfo.mainAxisItemSpacing / 2)) * it.size.width
                 }
+
                 Orientation.Horizontal -> {
-                    it.size.height * (it.size.width + layoutInfo.mainAxisItemSpacing)
+                    it.size.height * (it.size.width + (layoutInfo.mainAxisItemSpacing / 2))
                 }
             }
         },
         itemOffset = { visibleItems ->
             offsetCalculator(
                 visibleItems = visibleItems,
-                maxItemSize = { layoutInfo.orientation.dimension(it.size) },
+                maxItemSize = {
+                    layoutInfo.orientation.dimension(it.size) + (layoutInfo.mainAxisItemSpacing / 2)
+                },
                 offset = { layoutInfo.orientation.dimension(it.offset) },
                 next = { first ->
                     when (layoutInfo.orientation) {
@@ -106,7 +110,8 @@ fun LazyGridState.scrollbarState(
                 itemIndex = itemIndex
             )
         },
-        itemIndex = itemIndex
+        itemIndex = itemIndex,
+        reverseLayout = { layoutInfo.reverseLayout },
     )
 
 /**
@@ -137,5 +142,6 @@ fun LazyStaggeredGridState.scrollbarState(
             )
         },
         maxItemArea = { layoutInfo.orientation.dimension(it.size) },
-        itemIndex = itemIndex
+        itemIndex = itemIndex,
+        reverseLayout = { false },
     )
