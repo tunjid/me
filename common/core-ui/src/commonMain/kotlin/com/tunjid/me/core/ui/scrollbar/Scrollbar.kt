@@ -157,6 +157,7 @@ private fun Scrollbar(
     onThumbMoved: (Float) -> Unit,
 ) {
     val localDensity = LocalDensity.current
+    var interactionThumbTravelPercent by remember { mutableStateOf(Float.NaN) }
     var pressedOffset by remember { mutableStateOf(Offset.Unspecified) }
     var draggedOffset by remember { mutableStateOf(Offset.Unspecified) }
 
@@ -165,7 +166,10 @@ private fun Scrollbar(
     val updatedTrack by rememberUpdatedState(track)
 
     val thumbSizePercent = state.thumbSizePercent
-    val thumbTravelPercent = state.thumbTravelPercent
+    val thumbTravelPercent = when {
+        interactionThumbTravelPercent.isNaN() -> state.thumbTravelPercent
+        else -> interactionThumbTravelPercent
+    }
     val thumbSizePx = max(
         a = thumbSizePercent * track.size,
         b = with(localDensity) { minThumbSize.toPx() }
@@ -266,7 +270,10 @@ private fun Scrollbar(
 
     // Process presses
     LaunchedEffect(pressedOffset) {
-        if (pressedOffset == Offset.Unspecified) return@LaunchedEffect
+        if (pressedOffset == Offset.Unspecified) {
+            interactionThumbTravelPercent = Float.NaN
+            return@LaunchedEffect
+        }
 
         var currentTravel = updatedState.thumbTravelPercent
         val destinationTravel = updatedTrack.thumbPosition(
@@ -281,6 +288,7 @@ private fun Scrollbar(
                 if (isPositive) min(currentTravel + delta, destinationTravel)
                 else max(currentTravel + delta, destinationTravel)
             onThumbMoved(currentTravel)
+            interactionThumbTravelPercent = currentTravel
             // TODO: Define this more thoroughly
             delay(100)
         }
@@ -288,13 +296,15 @@ private fun Scrollbar(
 
     // Process drags
     LaunchedEffect(draggedOffset) {
-        if (draggedOffset == Offset.Unspecified) return@LaunchedEffect
-
-        onThumbMoved(
-            updatedTrack.thumbPosition(
-                dimension = orientation.coordinateValue(draggedOffset)
-            )
+        if (draggedOffset == Offset.Unspecified) {
+            interactionThumbTravelPercent = Float.NaN
+            return@LaunchedEffect
+        }
+        val currentTravel = updatedTrack.thumbPosition(
+            dimension = orientation.coordinateValue(draggedOffset)
         )
+        onThumbMoved(currentTravel)
+        interactionThumbTravelPercent = currentTravel
     }
 }
 
