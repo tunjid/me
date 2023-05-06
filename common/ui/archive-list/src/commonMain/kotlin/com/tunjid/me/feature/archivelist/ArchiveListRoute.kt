@@ -21,11 +21,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -35,6 +38,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -117,7 +121,7 @@ private fun ArchiveScreen(
             )
     }
 
-    val cardWidth = 350.dp
+    val cardWidth = 340.dp
     val stickyHeaderItem by produceState<ArchiveItem.Header?>(
         initialValue = null,
         key1 = state.isLoading
@@ -143,7 +147,14 @@ private fun ArchiveScreen(
             lazyState = gridState,
             headerMatcher = { it.key.isHeaderKey },
             stickyHeader = {
-                stickyHeaderItem?.let { StickyHeader(item = it) }
+                Surface {
+                    stickyHeaderItem?.let {
+                        StickyHeader(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            item = it
+                        )
+                    }
+                }
             }
         ) {
             Box {
@@ -213,6 +224,9 @@ private fun ArchiveList(
     LazyVerticalGrid(
         state = gridState,
         columns = GridCells.Adaptive(cardWidth),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp),
         content = {
             items(
                 items = items,

@@ -118,8 +118,7 @@ fun ArchiveCard(
     }
 
     ElevatedCard(
-        modifier = modifier
-            .padding(16.dp),
+        modifier = modifier,
         onClick = {
             onArchiveSelected(archive)
         },
