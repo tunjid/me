@@ -48,19 +48,25 @@ fun LazyListState.scrollbarState(
     scrollbarState(
         itemsAvailable = itemsAvailable,
         visibleItems = { layoutInfo.visibleItemsInfo },
-        viewportArea = { layoutInfo.orientation.dimension(layoutInfo.viewportSize) },
-        maxItemArea = { it.size },
         itemOffset = { visibleItems ->
             offsetCalculator(
                 visibleItems = visibleItems,
                 maxItemSize = { it.size },
                 offset = { it.offset },
                 next = { first -> visibleItems.find { it != first } },
-                itemIndex = itemIndex
+                itemIndex = itemIndex,
             )
         },
-        itemIndex = itemIndex,
+        itemPercentVisible = itemPercentVisible@{ itemInfo ->
+            itemVisibilityPercentage(
+                itemSize = itemInfo.size,
+                itemStart = itemInfo.offset,
+                viewportStartOffset = layoutInfo.viewportStartOffset,
+                viewportEndOffset = layoutInfo.viewportEndOffset,
+            )
+        },
         reverseLayout = { layoutInfo.reverseLayout },
+        itemIndex = itemIndex,
     )
 
 /**
@@ -77,18 +83,6 @@ fun LazyGridState.scrollbarState(
     scrollbarState(
         itemsAvailable = itemsAvailable,
         visibleItems = { layoutInfo.visibleItemsInfo },
-        viewportArea = { layoutInfo.viewportSize.height * layoutInfo.viewportSize.width },
-        maxItemArea = {
-            when (layoutInfo.orientation) {
-                Orientation.Vertical -> {
-                    (it.size.height + (layoutInfo.mainAxisItemSpacing / 2)) * it.size.width
-                }
-
-                Orientation.Horizontal -> {
-                    it.size.height * (it.size.width + (layoutInfo.mainAxisItemSpacing / 2))
-                }
-            }
-        },
         itemOffset = { visibleItems ->
             offsetCalculator(
                 visibleItems = visibleItems,
@@ -107,7 +101,15 @@ fun LazyGridState.scrollbarState(
                         }
                     }
                 },
-                itemIndex = itemIndex
+                itemIndex = itemIndex,
+            )
+        },
+        itemPercentVisible = itemPercentVisible@{ itemInfo ->
+            itemVisibilityPercentage(
+                itemSize = layoutInfo.orientation.dimension(itemInfo.size),
+                itemStart = layoutInfo.orientation.dimension(itemInfo.offset),
+                viewportStartOffset = layoutInfo.viewportStartOffset,
+                viewportEndOffset = layoutInfo.viewportEndOffset,
             )
         },
         itemIndex = itemIndex,
@@ -129,7 +131,6 @@ fun LazyStaggeredGridState.scrollbarState(
     scrollbarState(
         itemsAvailable = itemsAvailable,
         visibleItems = { layoutInfo.visibleItemsInfo },
-        viewportArea = { layoutInfo.orientation.dimension(layoutInfo.viewportSize) },
         itemOffset = { visibleItems ->
             offsetCalculator(
                 visibleItems = visibleItems,
@@ -141,7 +142,15 @@ fun LazyStaggeredGridState.scrollbarState(
                 itemIndex = itemIndex
             )
         },
-        maxItemArea = { layoutInfo.orientation.dimension(it.size) },
+        itemPercentVisible = itemPercentVisible@{ itemInfo ->
+            itemVisibilityPercentage(
+                itemSize = layoutInfo.orientation.dimension(itemInfo.size),
+                itemStart = layoutInfo.orientation.dimension(itemInfo.offset),
+                viewportStartOffset = layoutInfo.viewportStartOffset,
+                viewportEndOffset = layoutInfo.viewportEndOffset,
+            )
+        },
         itemIndex = itemIndex,
         reverseLayout = { false },
     )
+
