@@ -39,37 +39,35 @@ import com.tunjid.me.core.utilities.Uri
 fun Modifier.rootDragDropModifier(
     dragTriggers: Set<DragTrigger> = setOf(),
     view: View,
-): Modifier {
-    val rootDragDropNode = RootDragDropNode()
-    return this then RootDragDropElement then composed(
-        inspectorInfo = debugInspectorInfo {
-            name = "ViewDragDetector"
-        },
-        factory = {
-            val spy = remember(keys = dragTriggers.toTypedArray()) {
-                val detector = DragTriggerDetector(
-                    view = view,
-                    dragTriggers = dragTriggers,
-                    dragDroppable = rootDragDropNode.dragDropNode
-                )
-                motionEventSpy(detector::onMotionEvent)
-            }
+): Modifier = this then RootDragDropElement then composed(
+    inspectorInfo = debugInspectorInfo {
+        name = "ViewDragDetector"
+    },
+    factory = {
+        val spy = remember(keys = dragTriggers.toTypedArray()) {
+            val detector = DragTriggerDetector(
+                view = view,
+                dragTriggers = dragTriggers,
+                dragDroppable = RootDragDropElement.dragDropNode
+            )
+            motionEventSpy(detector::onMotionEvent)
+        }
 
-            LaunchedEffect(true) {
-                view.setOnDragListener(
-                    dragListener(
-                        dragDroppable = rootDragDropNode.dragDropNode
-                    )
+        LaunchedEffect(true) {
+            view.setOnDragListener(
+                dragListener(
+                    dragDroppable = RootDragDropElement.dragDropNode
                 )
-            }
+            )
+        }
 
-            this.then(spy)
-        })
-}
+        this.then(spy)
+    })
 
 private object RootDragDropElement : ModifierNodeElement<RootDragDropNode>() {
 
     private val rootDragDropNode = RootDragDropNode()
+    val dragDropNode = rootDragDropNode.dragDropNode
 
     override fun create() = rootDragDropNode
 
