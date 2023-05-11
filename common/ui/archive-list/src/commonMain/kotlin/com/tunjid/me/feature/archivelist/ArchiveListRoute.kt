@@ -16,30 +16,24 @@
 
 package com.tunjid.me.feature.archivelist
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsDraggedAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,7 +55,7 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.StickyHeaderGrid
-import com.tunjid.me.core.ui.scrollbar.VerticalScrollbar
+import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.me.core.ui.scrollbar.scrollbarState
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.component1
@@ -70,7 +64,6 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
-import kotlin.math.abs
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -81,6 +74,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.Serializable
+import kotlin.math.abs
 
 @Serializable
 data class ArchiveListRoute(
@@ -176,21 +170,17 @@ private fun ArchiveScreen(
                     }
                 )
 
-                val interactionSource = remember { MutableInteractionSource() }
-                val isPressed by interactionSource.collectIsPressedAsState()
-                val isDragged by interactionSource.collectIsDraggedAsState()
-
-                VerticalScrollbar(
+                FastScrollbar(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .width(12.dp),
                     state = scrollbarState,
-                    interactionSource = interactionSource,
+                    scrollInProgress = gridState.isScrollInProgress,
+                    orientation = Orientation.Vertical,
                     onThumbMoved = gridState.scrollbarThumbPositionFunction(
                         state = state,
                         actions = actions
                     ),
-                    thumb = { ScrollbarThumb(isDragged || isPressed) }
                 )
             }
         }
@@ -358,23 +348,6 @@ private fun SaveScrollPositionEffect(
             }
             .collect(onAction)
     }
-}
-
-@Composable
-private fun ScrollbarThumb(isActive: Boolean) {
-    val color by animateColorAsState(
-        if (isActive) MaterialTheme.colorScheme.tertiaryContainer
-        else MaterialTheme.colorScheme.surfaceColorAtElevation(16.dp)
-    )
-    Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(12.dp)
-            .background(
-                color = color,
-                shape = RoundedCornerShape(16.dp)
-            )
-    )
 }
 
 @Composable

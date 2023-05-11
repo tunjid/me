@@ -48,25 +48,24 @@ fun LazyListState.scrollbarState(
     scrollbarState(
         itemsAvailable = itemsAvailable,
         visibleItems = { layoutInfo.visibleItemsInfo },
-        itemOffset = { visibleItems ->
-            offsetCalculator(
+        firstItemIndex = { visibleItems ->
+            interpolateFirstItemIndex(
                 visibleItems = visibleItems,
-                maxItemSize = { it.size },
+                itemSize = { it.size },
                 offset = { it.offset },
-                next = { first -> visibleItems.find { it != first } },
+                nextItemOnMainAxis = { first -> visibleItems.find { it != first } },
                 itemIndex = itemIndex,
             )
         },
         itemPercentVisible = itemPercentVisible@{ itemInfo ->
             itemVisibilityPercentage(
                 itemSize = itemInfo.size,
-                itemStart = itemInfo.offset,
+                itemStartOffset = itemInfo.offset,
                 viewportStartOffset = layoutInfo.viewportStartOffset,
                 viewportEndOffset = layoutInfo.viewportEndOffset,
             )
         },
         reverseLayout = { layoutInfo.reverseLayout },
-        itemIndex = itemIndex,
     )
 
 /**
@@ -83,14 +82,14 @@ fun LazyGridState.scrollbarState(
     scrollbarState(
         itemsAvailable = itemsAvailable,
         visibleItems = { layoutInfo.visibleItemsInfo },
-        itemOffset = { visibleItems ->
-            offsetCalculator(
+        firstItemIndex = { visibleItems ->
+            interpolateFirstItemIndex(
                 visibleItems = visibleItems,
-                maxItemSize = {
-                    layoutInfo.orientation.dimension(it.size) + (layoutInfo.mainAxisItemSpacing / 2)
+                itemSize = {
+                    layoutInfo.orientation.valueOf(it.size)
                 },
-                offset = { layoutInfo.orientation.dimension(it.offset) },
-                next = { first ->
+                offset = { layoutInfo.orientation.valueOf(it.offset) },
+                nextItemOnMainAxis = { first ->
                     when (layoutInfo.orientation) {
                         Orientation.Vertical -> visibleItems.find {
                             it != first && it.row != first.row
@@ -106,13 +105,12 @@ fun LazyGridState.scrollbarState(
         },
         itemPercentVisible = itemPercentVisible@{ itemInfo ->
             itemVisibilityPercentage(
-                itemSize = layoutInfo.orientation.dimension(itemInfo.size),
-                itemStart = layoutInfo.orientation.dimension(itemInfo.offset),
+                itemSize = layoutInfo.orientation.valueOf(itemInfo.size),
+                itemStartOffset = layoutInfo.orientation.valueOf(itemInfo.offset),
                 viewportStartOffset = layoutInfo.viewportStartOffset,
                 viewportEndOffset = layoutInfo.viewportEndOffset,
             )
         },
-        itemIndex = itemIndex,
         reverseLayout = { layoutInfo.reverseLayout },
     )
 
@@ -131,12 +129,12 @@ fun LazyStaggeredGridState.scrollbarState(
     scrollbarState(
         itemsAvailable = itemsAvailable,
         visibleItems = { layoutInfo.visibleItemsInfo },
-        itemOffset = { visibleItems ->
-            offsetCalculator(
+        firstItemIndex = { visibleItems ->
+            interpolateFirstItemIndex(
                 visibleItems = visibleItems,
-                maxItemSize = { layoutInfo.orientation.dimension(it.size) },
-                offset = { layoutInfo.orientation.dimension(it.offset) },
-                next = { first ->
+                itemSize = { layoutInfo.orientation.valueOf(it.size) },
+                offset = { layoutInfo.orientation.valueOf(it.offset) },
+                nextItemOnMainAxis = { first ->
                     visibleItems.find { it != first && it.lane == first.lane }
                 },
                 itemIndex = itemIndex
@@ -144,13 +142,12 @@ fun LazyStaggeredGridState.scrollbarState(
         },
         itemPercentVisible = itemPercentVisible@{ itemInfo ->
             itemVisibilityPercentage(
-                itemSize = layoutInfo.orientation.dimension(itemInfo.size),
-                itemStart = layoutInfo.orientation.dimension(itemInfo.offset),
+                itemSize = layoutInfo.orientation.valueOf(itemInfo.size),
+                itemStartOffset = layoutInfo.orientation.valueOf(itemInfo.offset),
                 viewportStartOffset = layoutInfo.viewportStartOffset,
                 viewportEndOffset = layoutInfo.viewportEndOffset,
             )
         },
-        itemIndex = itemIndex,
         reverseLayout = { false },
     )
 

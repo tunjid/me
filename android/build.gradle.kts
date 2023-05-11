@@ -44,6 +44,16 @@ android {
                 keyPassword = props["keyPassword"] as String
             }
         }
+        create("release") {
+            if (file("debugKeystore.properties").exists()) {
+                val props = Properties()
+                props.load(FileInputStream(file("debugKeystore.properties")))
+                storeFile = file(props["keystore"] as String)
+                storePassword = props["keystore.password"] as String
+                keyAlias = props["keyAlias"] as String
+                keyPassword = props["keyPassword"] as String
+            }
+        }
     }
     buildTypes {
         release {
@@ -52,6 +62,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     kotlinOptions {
