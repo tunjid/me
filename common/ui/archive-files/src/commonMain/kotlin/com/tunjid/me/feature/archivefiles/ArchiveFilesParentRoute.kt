@@ -56,6 +56,7 @@ data class ArchiveFilesParentRoute(
     override val id: String,
     val kind: ArchiveKind,
     val archiveId: ArchiveId,
+    val dndEnabled: Boolean,
 ) : AppRoute, StatelessRoute {
 
     override val children: List<Node> = FileType.values()
@@ -64,7 +65,7 @@ data class ArchiveFilesParentRoute(
                 id = "$id?type=${fileType.name.lowercase()}",
                 kind = kind,
                 archiveId = archiveId,
-                dndEnabled = false,
+                dndEnabled = dndEnabled,
                 fileType = fileType
             )
         }

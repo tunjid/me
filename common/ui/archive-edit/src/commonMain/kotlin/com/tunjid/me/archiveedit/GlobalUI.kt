@@ -62,7 +62,7 @@ internal fun GlobalUi(
                     "preview", "edit" -> onAction(Action.ToggleEditView)
                     "gallery" -> onAction(Action.Navigate {
                         mainNav.push(
-                            "archives/${state.kind.type}/${state.upsert.id?.value}/files".toRoute
+                            "archives/${state.kind.type}/${state.upsert.id?.value}/files?dndEnabled=true".toRoute
                         )
                     })
                 }

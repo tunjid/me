@@ -66,16 +66,14 @@ abstract class ArchiveFilesNavigationComponent {
                         id = route,
                         kind = kind,
                         archiveId = archiveId,
-                    )
+                        dndEnabled = queryKeys.dndEnabled(),
+                        )
 
                     "image" in types -> ArchiveFilesRoute(
                         id = route,
                         kind = kind,
                         archiveId = archiveId,
-                        dndEnabled = queryKeys["dndEnabled"]
-                            ?.map(String::toBooleanStrictOrNull)
-                            ?.any(true::equals)
-                            ?: false,
+                        dndEnabled = queryKeys.dndEnabled(),
                         fileType = FileType.Image
                     )
 
@@ -83,15 +81,18 @@ abstract class ArchiveFilesNavigationComponent {
                         id = route,
                         kind = kind,
                         archiveId = archiveId,
-                        dndEnabled = queryKeys["dndEnabled"]
-                            ?.map(String::toBooleanStrictOrNull)
-                            ?.any(true::equals)
-                            ?: false,
+                        dndEnabled = queryKeys.dndEnabled(),
                         fileType = FileType.Misc
                     )
                 }
             }
         )
+
+    private fun Map<String, List<String>>.dndEnabled() =
+        (this["dndEnabled"]
+            ?.map(String::toBooleanStrictOrNull)
+            ?.any(true::equals)
+            ?: false)
 }
 
 @Component
