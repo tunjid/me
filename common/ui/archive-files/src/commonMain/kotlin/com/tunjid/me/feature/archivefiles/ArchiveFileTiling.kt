@@ -20,9 +20,9 @@ import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.data.repository.ArchiveFileRepository
 import com.tunjid.tiler.ListTiler
+import com.tunjid.tiler.PivotRequest
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.listTiler
-import com.tunjid.tiler.utilities.PivotRequest
 
 internal fun ArchiveFileRepository.archiveFilesTiler(
     limiter: Tile.Limiter<ArchiveFileQuery, ArchiveFile>
@@ -35,7 +35,7 @@ internal fun ArchiveFileRepository.archiveFilesTiler(
         fetcher = ::files
     )
 
-internal fun pivotRequest(gridSize: Int) = PivotRequest(
+internal fun pivotRequest(gridSize: Int) = PivotRequest<ArchiveFileQuery, ArchiveFile>(
     onCount = 3 * gridSize,
     offCount = 1 * gridSize,
     nextQuery = nextArchiveFileQuery,

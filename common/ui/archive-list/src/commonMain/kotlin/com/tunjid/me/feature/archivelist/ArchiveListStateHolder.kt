@@ -38,10 +38,25 @@ import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
+import com.tunjid.tiler.toPivotedTileInputs
 import com.tunjid.tiler.toTiledList
-import com.tunjid.tiler.utilities.toPivotedTileInputs
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.transformWhile
 import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveListStateHolder = ActionStateProducer<Action, StateFlow<State>>
@@ -238,8 +253,8 @@ private fun Flow<Action.Fetch>.fetchMutations(
     val archivesAvailable = queries
         .flatMapLatest(repo::count)
 
-    val pivotInputs = queries.toPivotedTileInputs<ArchiveQuery, ArchiveItem.Card>(
-        columnChanges
+    val pivotInputs = queries.toPivotedTileInputs(
+        pivotRequests = columnChanges
             .map { it.noColumns }
             .map(::pivotRequest)
             .distinctUntilChanged()

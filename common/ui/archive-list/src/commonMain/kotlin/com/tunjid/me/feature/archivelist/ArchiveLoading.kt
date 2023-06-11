@@ -24,9 +24,9 @@ import com.tunjid.me.core.model.User
 import com.tunjid.me.core.model.UserId
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.tiler.ListTiler
+import com.tunjid.tiler.PivotRequest
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.listTiler
-import com.tunjid.tiler.utilities.PivotRequest
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -72,7 +72,7 @@ internal fun ArchiveRepository.archiveTiler(
         }
     )
 
-internal fun pivotRequest(gridSize: Int) = PivotRequest(
+internal fun pivotRequest(gridSize: Int) = PivotRequest<ArchiveQuery, ArchiveItem.Card>(
     onCount = 3 * gridSize,
     offCount = 1 * gridSize,
     nextQuery = nextArchiveQuery,
