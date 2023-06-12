@@ -292,7 +292,7 @@ private fun GridCell(
             onCategoryClicked = onCategoryClicked
         )
 
-        is ArchiveItem.Card.PlaceHolder -> if (item.isVisible) ArchiveCard(
+        is ArchiveItem.Card.PlaceHolder -> ArchiveCard(
             modifier = modifier,
             query = query,
             archive = item.archive,

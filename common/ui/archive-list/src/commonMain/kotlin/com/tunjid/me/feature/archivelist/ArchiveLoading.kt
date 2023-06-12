@@ -47,24 +47,18 @@ internal fun ArchiveRepository.archiveTiler(
                         index = query.offset + index,
                         key = "${query.offset + index}-${query.hashCode()}",
                         archive = emptyArchive(),
-                        isVisible = true
                     )
                 }
                 emit(placeholders)
                 emitAll(
                     archivesStream(query).map { archives ->
-                        if (archives.isEmpty()) emptyList()
-                        // Ensure a fixed amount of items are returned
-                        else placeholders.mapIndexed { index, placeHolder ->
-                            when (val archive = archives.getOrNull(index)) {
-                                null -> placeHolder.copy(isVisible = false)
-                                else -> ArchiveItem.Card.Loaded(
-                                    index = query.offset + index,
-                                    // Maintain keys between placeholders and loaded items
-                                    key = placeholders[index].key,
-                                    archive = archive
-                                )
-                            }
+                        archives.mapIndexed { index, archive ->
+                            ArchiveItem.Card.Loaded(
+                                index = query.offset + index,
+                                // Maintain keys between placeholders and loaded items
+                                key = placeholders[index].key,
+                                archive = archive
+                            )
                         }
                     }
                 )

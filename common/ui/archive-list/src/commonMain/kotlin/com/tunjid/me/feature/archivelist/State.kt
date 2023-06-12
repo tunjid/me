@@ -152,7 +152,6 @@ sealed class ArchiveItem {
             override val index: Int,
             override val key: String,
             override val archive: Archive,
-            val isVisible: Boolean,
         ) : Card()
     }
 }
