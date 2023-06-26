@@ -68,7 +68,7 @@ internal fun ArchiveRepository.archiveTiler(
 
 internal fun pivotRequest(gridSize: Int) = PivotRequest<ArchiveQuery, ArchiveItem.Card>(
     onCount = 3 * gridSize,
-    offCount = 1 * gridSize,
+    offCount = 2 * gridSize,
     nextQuery = nextArchiveQuery,
     previousQuery = previousArchiveQuery,
     comparator = archiveQueryComparator,

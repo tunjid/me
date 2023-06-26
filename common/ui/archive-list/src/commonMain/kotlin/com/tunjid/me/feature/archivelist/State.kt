@@ -23,16 +23,15 @@ import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.model.compare
 import com.tunjid.me.core.model.hasTheSameFilter
-import com.tunjid.me.core.model.includes
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.tiler.TiledList
-import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.emptyTiledList
+import com.tunjid.tiler.filter
+import com.tunjid.tiler.map
 import com.tunjid.tiler.queryAtOrNull
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -261,81 +260,38 @@ fun Descriptor.tint() = when (this) {
  */
 fun State.preserveKeys(
     newItems: TiledList<ArchiveQuery, ArchiveItem.Card>,
-): TiledList<ArchiveQuery, ArchiveItem.Card> = buildTiledList {
+): TiledList<ArchiveQuery, ArchiveItem.Card> {
     val oldQuery = items.queryAtOrNull(0)
-    val newQuery = newItems.queryAtOrNull(0) ?: return@buildTiledList
+    val newQuery = newItems.queryAtOrNull(0) ?: return emptyTiledList()
     val hasSameFilter = oldQuery != null && newQuery.hasTheSameFilter(oldQuery)
 
+    // Simple pagination, accept all new items
+    if (hasSameFilter) return newItems
+
+    // A filter change, placeholders are unnecessary as content already exists. Wait till
+    // actual content is loaded
+    for (i in 0 until newItems.tileCount) {
+        @Suppress("UNCHECKED_CAST")
+        if (newItems[newItems.tileAt(i).start] is ArchiveItem.Card.PlaceHolder) return items.filter {
+            it is ArchiveItem.Card
+        } as TiledList<ArchiveQuery, ArchiveItem.Card>
+    }
+
+    // Actual content has been loaded, preserve the ids of items that existed before.
     val oldArchiveIdsToKeys = mutableMapOf<ArchiveId, String>().apply {
         for (it in items) if (it is ArchiveItem.Card.Loaded) set(it.archive.id, it.key)
     }
 
-    if (hasSameFilter) {
-        // Preserves keys in between loads
-        newItems.forEachIndexed { index, item ->
-            add(
-                query = newItems.queryAt(index),
-                item = oldArchiveIdsToKeys.preserveKey(item)
-            )
-        }
-    } else {
-        var oldIndex = 0
-        var newIndex = 0
-
-        val oldItems = when (oldQuery?.desc) {
-            newQuery.desc -> items
-            else -> items.asReversed()
-        }
-
-        // Merge the old list and the new list filtering out old items that do not match the
-        // query
-        while (oldIndex < oldItems.size && newIndex < newItems.size) {
-            when (val oldItem = oldItems[oldIndex]) {
-                is ArchiveItem.Header,
-                is ArchiveItem.Loading,
-                is ArchiveItem.Card.PlaceHolder -> oldIndex++
-
-                is ArchiveItem.Card.Loaded -> when (
-                    val comparison = newQuery.compare(
-                        a = oldItem.archive,
-                        b = newItems[newIndex].archive
-                    )
-                ) {
-                    in Int.MIN_VALUE..-1 -> {
-                        if (newQuery.includes(oldItem.archive)) add(
-                            query = newItems.queryAt(newIndex),
-                            item = oldArchiveIdsToKeys.preserveKey(oldItem)
-                        )
-                        oldIndex++
-                    }
-
-                    else -> {
-                        add(
-                            query = newItems.queryAt(newIndex),
-                            item = oldArchiveIdsToKeys.preserveKey(newItems[newIndex++])
-                        )
-                        if (comparison == 0) oldIndex++
-                    }
-                }
+    return newItems.map { item ->
+        when (item) {
+            is ArchiveItem.Card.Loaded -> when (
+                val existingKey = oldArchiveIdsToKeys.remove(item.archive.id)
+            ) {
+                null -> item
+                else -> item.copy(key = existingKey)
             }
+
+            is ArchiveItem.Card.PlaceHolder -> item
         }
-
-        while (newIndex < newItems.size) add(
-            query = newItems.queryAt(newIndex),
-            item = newItems[newIndex++]
-        )
     }
-}
-
-private fun MutableMap<ArchiveId, String>.preserveKey(
-    item: ArchiveItem.Card
-) = when (item) {
-    is ArchiveItem.Card.Loaded -> when (
-        val existingKey = remove(item.archive.id)
-    ) {
-        null -> item
-        else -> item.copy(key = existingKey)
-    }
-
-    is ArchiveItem.Card.PlaceHolder -> item
 }
