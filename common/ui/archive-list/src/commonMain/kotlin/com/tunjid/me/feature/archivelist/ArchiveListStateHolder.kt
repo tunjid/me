@@ -280,7 +280,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
             )
         )
         // Allow database queries to settle
-        .debounce(timeoutMillis = 50)
+        .debounce(timeoutMillis = 100)
 
     return merge(
         archiveItems.map { newItems ->
