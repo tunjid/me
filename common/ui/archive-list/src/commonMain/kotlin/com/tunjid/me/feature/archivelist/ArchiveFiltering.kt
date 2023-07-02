@@ -19,13 +19,11 @@ package com.tunjid.me.feature.archivelist
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AssistChip
@@ -54,10 +52,10 @@ import com.tunjid.me.scaffold.nav.icon
 
 @Composable
 fun ArchiveFilters(
-    item: QueryState,
+    queryState: QueryState,
     onChanged: (Action) -> Unit,
 ) {
-    val isExpanded = item.expanded
+    val isExpanded = queryState.expanded
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -77,12 +75,12 @@ fun ArchiveFilters(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Spacer(modifier = Modifier.width(8.dp))
-                SortButton(onChanged, item)
+                SortButton(onChanged, queryState)
                 Spacer(modifier = Modifier.width(12.dp))
-                ArchiveCountButton(count = item.count, kind = item.currentQuery.kind)
+                ArchiveCountButton(count = queryState.count, kind = queryState.currentQuery.kind)
                 Spacer(modifier = Modifier.width(8.dp))
                 DescriptorDetailButton(
-                    descriptors = item.currentQuery.contentFilter.categories + item.currentQuery.contentFilter.tags,
+                    descriptors = queryState.currentQuery.contentFilter.categories + queryState.currentQuery.contentFilter.tags,
                     onExpandClicked = {
                         onChanged(
                             Action.ToggleFilter(isExpanded = true)
@@ -91,7 +89,7 @@ fun ArchiveFilters(
                     onClearClicked = {
                         onChanged(
                             Action.Fetch.QueryChange(
-                                item.currentQuery.copy(
+                                queryState.currentQuery.copy(
                                     offset = 0,
                                     contentFilter = ArchiveContentFilter()
                                 )
@@ -107,7 +105,7 @@ fun ArchiveFilters(
                     modifier = Modifier
                         .padding(8.dp)
                         .weight(1F),
-                    state = item,
+                    state = queryState,
                     onChanged = onChanged
                 )
             }

@@ -22,11 +22,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
@@ -132,7 +130,7 @@ private fun ArchiveScreen(
     Column {
         Spacer(modifier = Modifier.height(16.dp))
         ArchiveFilters(
-            item = state.queryState,
+            queryState = state.queryState,
             onChanged = actions
         )
         Spacer(modifier = Modifier.height(16.dp))
