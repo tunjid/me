@@ -19,6 +19,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("multiplatform") // kotlin("jvm") doesn't work well in IDEA/AndroidStudio (https://github.com/JetBrains/compose-jb/issues/22)
     id("org.jetbrains.compose")
+    id("kotlin-jvm-convention")
 }
 
 kotlin {
@@ -43,9 +44,6 @@ kotlin {
                 implementation(libs.tunjid.mutator.coroutines.jvm)
             }
         }
-    }
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "11"
     }
 }
 

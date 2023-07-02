@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import ext.configureKotlinJvm
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.dependencies
@@ -53,10 +54,7 @@ fun org.gradle.api.Project.configureKotlinMultiplatform(
                 }
             }
         }
-
-        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-            kotlinOptions.jvmTarget = "11"
-        }
+        configureKotlinJvm()
 //        tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
 //            if (name != "kspCommonMainKotlinMetadata") {
 //                dependsOn("kspCommonMainKotlinMetadata")

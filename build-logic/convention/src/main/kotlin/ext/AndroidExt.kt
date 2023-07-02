@@ -15,6 +15,7 @@
  */
 
 import com.android.build.api.dsl.CommonExtension
+import ext.configureKotlinJvm
 import org.gradle.api.Action
 import org.gradle.api.JavaVersion
 import org.gradle.api.artifacts.Configuration
@@ -51,15 +52,7 @@ fun org.gradle.api.Project.commonConfiguration(
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
-    (this as org.gradle.api.plugins.ExtensionAware).apply {
-        val kotlinOptions = "kotlinOptions"
-        if (extensions.findByName(kotlinOptions) != null) {
-            extensions.configure(kotlinOptions, Action<KotlinJvmOptions> {
-                jvmTarget = "11"
-            })
-        }
-    }
+    configureKotlinJvm()
 }
 
 fun org.gradle.api.Project.coerceComposeVersion(configuration: Configuration) {
