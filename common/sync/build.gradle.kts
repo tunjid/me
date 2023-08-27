@@ -79,11 +79,13 @@ kotlin {
 }
 
 sqldelight {
-    database("AppDatabase") {
-        dialect(libs.cashapp.sqldelight.dialect.get().toString())
-        packageName = "com.tunjid.me.common.sync"
-        schemaOutputDirectory = file("build/dbs")
-        deriveSchemaFromMigrations = false
-        verifyMigrations = true
+    databases {
+        create("AppDatabase") {
+            dialect(libs.cashapp.sqldelight.dialect)
+            packageName.set("com.tunjid.me.common.sync")
+            schemaOutputDirectory.set(file("build/dbs"))
+            deriveSchemaFromMigrations.set(false)
+            verifyMigrations.set(true)
+        }
     }
 }

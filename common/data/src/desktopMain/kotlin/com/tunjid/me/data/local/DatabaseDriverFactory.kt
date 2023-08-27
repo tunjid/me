@@ -16,6 +16,7 @@
 
 package com.tunjid.me.data.local
 
+import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
@@ -26,7 +27,7 @@ import java.io.File
 actual fun databaseDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
 actual class DatabaseDriverFactory(
-    private val schema: SqlSchema
+    private val schema: SqlSchema<QueryResult.Value<Unit>>
 ) {
     actual fun createDriver(): SqlDriver {
         val databasePath = File(System.getProperty("java.io.tmpdir"), "me.db")

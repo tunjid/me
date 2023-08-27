@@ -17,6 +17,7 @@
 package com.tunjid.me.data.local
 
 import android.content.Context
+import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
@@ -27,7 +28,7 @@ actual fun databaseDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
 actual class DatabaseDriverFactory(
     private val context: Context,
-    private val schema: SqlSchema
+    private val schema: SqlSchema<QueryResult.Value<Unit>>
 ) {
     actual fun createDriver(): SqlDriver = AndroidSqliteDriver(
         schema = schema,
