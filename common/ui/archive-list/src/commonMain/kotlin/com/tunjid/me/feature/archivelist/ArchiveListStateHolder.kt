@@ -33,6 +33,7 @@ import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.coroutines.SuspendingStateHolder
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
@@ -92,11 +93,12 @@ class ActualArchiveListStateHolder(
             mutation = { copy(isInMainNav = it) }
         ),
     ),
-    actionTransform = { actions ->
+    actionTransform = stateHolder@{ actions ->
         actions.toMutationStream(keySelector = Action::key) {
             when (val action = type()) {
                 is Action.Fetch -> action.flow.fetchMutations(
                     scope = scope,
+                    state = this@stateHolder,
                     repo = archiveRepository
                 )
 
@@ -228,6 +230,7 @@ private fun Flow<Action.ListStateChanged>.listStateChangeMutations(): Flow<Mutat
  */
 private fun Flow<Action.Fetch>.fetchMutations(
     scope: CoroutineScope,
+    state: SuspendingStateHolder<State>,
     repo: ArchiveRepository,
 ): Flow<Mutation<State>> {
     val queries = filterIsInstance<Action.Fetch.QueriedFetch>()
@@ -279,19 +282,35 @@ private fun Flow<Action.Fetch>.fetchMutations(
                 )
             )
         )
-        // Allow database queries to settle
-        .debounce(timeoutMillis = 100)
 
     return merge(
-        archiveItems.map { newItems ->
-            mutation {
-                copy(
-                    isLoading = false,
-                    listState = listState ?: savedListState.initialListState(),
-                    items = preserveKeys(newItems = newItems).itemsWithHeaders,
-                )
+        archiveItems
+            .map { state.state().items to it }
+            .debounce { (oldItems, newItems) ->
+                val oldQueries = (0 until oldItems.tileCount).map(oldItems::queryAtTile)
+                val newQueries = (0 until newItems.tileCount).map(newItems::queryAtTile)
+                val itemsAtStartIndices = (0 until newItems.tileCount).map { newItems[newItems.tileAt(it).start] }
+
+                val newItemsEmpty = newItems.isEmpty()
+                val isDiffFilter = !newItemsEmpty
+                        && oldQueries.isNotEmpty()
+                        && !newQueries.first().hasTheSameFilter(oldQueries.first())
+                val hasPlaceHolder = itemsAtStartIndices.any { it is ArchiveItem.Card.PlaceHolder }
+
+                when {
+                    newItemsEmpty || isDiffFilter && hasPlaceHolder -> 500L
+                    else -> 0L
+                }
             }
-        },
+            .map { (_, newItems) ->
+                mutation {
+                    copy(
+                        isLoading = false,
+                        listState = listState ?: savedListState.initialListState(),
+                        items = preserveKeys(newItems = newItems).itemsWithHeaders,
+                    )
+                }
+            },
         archivesAvailable.map { count ->
             mutation {
                 copy(queryState = queryState.copy(count = count))
