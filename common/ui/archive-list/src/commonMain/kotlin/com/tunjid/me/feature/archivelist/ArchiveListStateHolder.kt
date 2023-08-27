@@ -98,7 +98,7 @@ class ActualArchiveListStateHolder(
             when (val action = type()) {
                 is Action.Fetch -> action.flow.fetchMutations(
                     scope = scope,
-                    state = this@stateHolder,
+                    stateHolder = this@stateHolder,
                     repo = archiveRepository
                 )
 
@@ -230,7 +230,7 @@ private fun Flow<Action.ListStateChanged>.listStateChangeMutations(): Flow<Mutat
  */
 private fun Flow<Action.Fetch>.fetchMutations(
     scope: CoroutineScope,
-    state: SuspendingStateHolder<State>,
+    stateHolder: SuspendingStateHolder<State>,
     repo: ArchiveRepository,
 ): Flow<Mutation<State>> {
     val queries = filterIsInstance<Action.Fetch.QueriedFetch>()
@@ -285,7 +285,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
 
     return merge(
         archiveItems
-            .map { state.state().items to it }
+            .map { stateHolder.state().items to it }
             .debounce { (oldItems, newItems) ->
                 val oldQueries = (0 until oldItems.tileCount).map(oldItems::queryAtTile)
                 val newQueries = (0 until newItems.tileCount).map(newItems::queryAtTile)
