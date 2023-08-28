@@ -16,10 +16,7 @@
 
 package com.tunjid.me.feature.archivelist
 
-import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.model.ArchiveQuery
-import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.model.hasTheSameFilter
+import com.tunjid.me.core.model.*
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
@@ -41,22 +38,7 @@ import com.tunjid.tiler.Tile
 import com.tunjid.tiler.toPivotedTileInputs
 import com.tunjid.tiler.toTiledList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.scan
-import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.flow.transformWhile
+import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveListStateHolder = ActionStateProducer<Action, StateFlow<State>>
@@ -233,7 +215,14 @@ private fun Flow<Action.Fetch>.fetchMutations(
     stateHolder: SuspendingStateHolder<State>,
     repo: ArchiveRepository,
 ): Flow<Mutation<State>> {
-    val queries = filterIsInstance<Action.Fetch.QueriedFetch>()
+    val queries = merge(
+        filterIsInstance<Action.Fetch.LoadAround>().map {
+            LoadReason.LoadMore(it.query)
+        },
+        filterIsInstance<Action.Fetch.QueryChange>().map { action ->
+            action.loadReason(stateHolder.state(), repo)
+        }
+    )
         .distinctUntilChanged()
         .scan(null, ArchiveQuery?::stabilizeQuery)
         .filterNotNull()
@@ -243,13 +232,11 @@ private fun Flow<Action.Fetch>.fetchMutations(
             started = SharingStarted.WhileSubscribed(),
             replay = 1
         )
-
     val columnChanges = filterIsInstance<Action.Fetch.NoColumnsChanged>()
-        .onStart { emit(Action.Fetch.NoColumnsChanged(1)) }
-        .distinctUntilChanged()
-        .shareIn(
+        .stateIn(
             scope = scope,
             started = SharingStarted.WhileSubscribed(),
+            initialValue = Action.Fetch.NoColumnsChanged(noColumns = 2)
         )
 
     val archivesAvailable = queries
@@ -298,6 +285,7 @@ private fun Flow<Action.Fetch>.fetchMutations(
                 val hasPlaceHolder = itemsAtStartIndices.any { it is ArchiveItem.Card.PlaceHolder }
 
                 when {
+                    // To preserve keys, when the query changes, debounce emissions
                     newItemsEmpty || isDiffFilter && hasPlaceHolder -> 500L
                     else -> 0L
                 }
@@ -338,19 +326,59 @@ private fun Flow<Action.Fetch>.fetchMutations(
     )
 }
 
+private suspend fun Action.Fetch.QueryChange.loadReason(
+    state: State,
+    repo: ArchiveRepository
+): LoadReason.QueryChange {
+    val currentQuery = state.queryState.currentQuery
+    val newQuery = when (this) {
+        is Action.Fetch.QueryChange.AddDescriptor -> currentQuery + descriptor
+        is Action.Fetch.QueryChange.RemoveDescriptor -> currentQuery - descriptor
+        Action.Fetch.QueryChange.ClearDescriptors -> currentQuery.copy(
+            contentFilter = ArchiveContentFilter()
+        )
+
+        Action.Fetch.QueryChange.ToggleOrder -> currentQuery.copy(
+            desc = !currentQuery.desc
+        )
+
+        is Action.Fetch.QueryChange.ToggleCategory -> when {
+            currentQuery.contentFilter.categories.contains(category) -> currentQuery - category
+            else -> currentQuery + category
+        }
+    }
+    val firstVisibleItemIndex = state.savedListState.firstVisibleItemIndex
+    val visibleOffset = when {
+        firstVisibleItemIndex > state.items.lastIndex -> currentQuery.offset
+        else -> when (val visibleItem = state.items.subList(
+            fromIndex = firstVisibleItemIndex,
+            toIndex = state.items.size
+        )
+            .filterIsInstance<ArchiveItem.Card.Loaded>()
+            .firstOrNull()) {
+            null -> currentQuery.offset
+            else -> (repo.offsetForId(
+                id = visibleItem.archive.id,
+                query = newQuery
+            ).first()).toInt()
+        }
+    }
+    return LoadReason.QueryChange(newQuery.copy(offset = visibleOffset))
+}
+
 /**
  * Make sure [ArchiveQuery.offset] is in multiples of [ArchiveQuery.limit] and that load more queries match the
  * current query
  */
 private fun ArchiveQuery?.stabilizeQuery(
-    queriedFetch: Action.Fetch.QueriedFetch,
+    reason: LoadReason,
 ): ArchiveQuery? {
     val query = when (this) {
-        null -> queriedFetch.query
-        else -> when (queriedFetch) {
-            is Action.Fetch.QueryChange -> queriedFetch.query
-            is Action.Fetch.LoadAround -> when {
-                queriedFetch.query.hasTheSameFilter(this) -> queriedFetch.query
+        null -> reason.query
+        else -> when (reason) {
+            is LoadReason.QueryChange -> reason.query
+            is LoadReason.LoadMore -> when {
+                reason.query.hasTheSameFilter(this) -> reason.query
                 else -> return null
             }
         }
@@ -366,4 +394,11 @@ private fun ArchiveQuery?.stabilizeQuery(
             else -> offset + (limit - modulo)
         }
     )
+}
+
+private sealed class LoadReason {
+    abstract val query: ArchiveQuery
+
+    data class LoadMore(override val query: ArchiveQuery) : LoadReason()
+    data class QueryChange(override val query: ArchiveQuery) : LoadReason()
 }

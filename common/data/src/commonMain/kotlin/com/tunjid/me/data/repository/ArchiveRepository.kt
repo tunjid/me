@@ -65,6 +65,11 @@ interface ArchiveRepository : Syncable {
     fun archiveStream(
         id: ArchiveId,
     ): Flow<Archive?>
+
+    fun offsetForId(
+        id: ArchiveId,
+        query: ArchiveQuery,
+    ): Flow<Long>
 }
 
 /**
@@ -158,7 +163,7 @@ internal class OfflineFirstArchiveRepository(
         )
 
     override fun archiveStream(
-     id: ArchiveId,
+        id: ArchiveId,
     ): Flow<Archive?> = archiveEntityQueries.get(
         id = id.value,
     )
@@ -166,6 +171,22 @@ internal class OfflineFirstArchiveRepository(
         .mapToOneOrNull(context = dispatcher)
         .flatMapLatest { it?.let(::archiveEntityToArchive) ?: flowOf(null) }
         .distinctUntilChanged()
+
+    override fun offsetForId(
+        id: ArchiveId,
+        query: ArchiveQuery,
+    ): Flow<Long> =
+        archiveEntityQueries.offsetForId(
+            id = id.value,
+            kind = query.kind.type,
+            useFilters = query.hasContentFilter,
+            desc = query.desc,
+            tagsOrCategories = query.contentFilter.tags.map(Descriptor.Tag::value)
+                .plus(query.contentFilter.categories.map(Descriptor.Category::value))
+                .distinct()
+        )
+            .asFlow()
+            .mapToOne(context = dispatcher)
 
     override suspend fun syncWith(
         request: SyncRequest,

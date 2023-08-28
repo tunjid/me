@@ -74,9 +74,13 @@ value class SavedListState(
             .shl(32) or (firstVisibleItemScrollOffset.toLong() and 0xFFFFFFFF)
     )
 
+    internal val firstVisibleItemIndex get() = packedValue.shr(32).toInt()
+
+    internal val firstVisibleItemScrollOffset get() = packedValue.and(0xFFFFFFFF).toInt()
+
     fun initialListState() = LazyGridState(
-        firstVisibleItemIndex = packedValue.shr(32).toInt(),
-        firstVisibleItemScrollOffset = packedValue.and(0xFFFFFFFF).toInt(),
+        firstVisibleItemIndex = firstVisibleItemIndex,
+        firstVisibleItemScrollOffset = firstVisibleItemScrollOffset,
     )
 }
 
@@ -94,16 +98,20 @@ val ArchiveItem.stickyHeader: ArchiveItem.Header?
 
 sealed class Action(val key: String) {
     sealed class Fetch : Action(key = "Fetch") {
-
-        sealed interface QueriedFetch {
-            val query: ArchiveQuery
-        }
-
-        data class QueryChange(override val query: ArchiveQuery) : Fetch(), QueriedFetch
-
-        data class LoadAround(override val query: ArchiveQuery) : Fetch(), QueriedFetch
+        data class LoadAround(val query: ArchiveQuery) : Fetch()
 
         data class NoColumnsChanged(val noColumns: Int) : Fetch()
+
+        sealed class QueryChange : Fetch() {
+            data class AddDescriptor(val descriptor: Descriptor) : QueryChange()
+            data class RemoveDescriptor(val descriptor: Descriptor) : QueryChange()
+
+            data class ToggleCategory(val category: Descriptor.Category) : QueryChange()
+
+            object ClearDescriptors : QueryChange()
+
+            object ToggleOrder : QueryChange()
+        }
     }
 
     data class FilterChanged(
@@ -295,3 +303,4 @@ fun State.preserveKeys(
         }
     }
 }
+

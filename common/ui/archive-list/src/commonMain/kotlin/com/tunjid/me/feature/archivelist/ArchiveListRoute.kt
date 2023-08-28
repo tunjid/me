@@ -17,20 +17,8 @@
 package com.tunjid.me.feature.archivelist
 
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
-import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,8 +38,6 @@ import androidx.compose.ui.zIndex
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.model.minus
-import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.me.core.ui.scrollbar.scrollbarState
@@ -62,15 +48,7 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.scan
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
 
@@ -240,12 +218,7 @@ private fun ArchiveList(
                         query = currentQuery,
                         onCategoryClicked = { category ->
                             actions(
-                                Action.Fetch.QueryChange(
-                                    query = currentQuery.copy(offset = 0).let { query ->
-                                        if (query.contentFilter.categories.contains(category)) query - category
-                                        else query + category
-                                    },
-                                )
+                                Action.Fetch.QueryChange.ToggleCategory(category)
                             )
                         },
                         navigate = { path ->

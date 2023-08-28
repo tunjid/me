@@ -40,11 +40,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.core.model.ArchiveContentFilter
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.model.minus
-import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.ui.ChipEditInfo
 import com.tunjid.me.core.ui.Chips
@@ -88,12 +85,7 @@ fun ArchiveFilters(
                     },
                     onClearClicked = {
                         onChanged(
-                            Action.Fetch.QueryChange(
-                                queryState.currentQuery.copy(
-                                    offset = 0,
-                                    contentFilter = ArchiveContentFilter()
-                                )
-                            )
+                            Action.Fetch.QueryChange.ClearDescriptors
                         )
                     }
                 )
@@ -129,12 +121,7 @@ private fun SortButton(
         selected = true,
         onClick = {
             onChanged(
-                Action.Fetch.QueryChange(
-                    query = item.currentQuery.copy(
-                        desc = !item.currentQuery.desc,
-                        offset = (item.count - item.currentQuery.offset).toInt()
-                    )
-                )
+                Action.Fetch.QueryChange.ToggleOrder
             )
         },
         shape = MaterialTheme.shapes.small,
@@ -274,9 +261,7 @@ private fun FilterChips(
             onClick = onClick@{
                 val descriptor = it.key as? Descriptor ?: return@onClick
                 onChanged(
-                    Action.Fetch.QueryChange(
-                        query = state.currentQuery.copy(offset = 0) + descriptor,
-                    )
+                    Action.Fetch.QueryChange.AddDescriptor(descriptor)
                 )
             }
         )
@@ -309,9 +294,7 @@ private fun onChipFilterChanged(
 ): (ChipAction) -> Unit = {
     when (it) {
         ChipAction.Added -> onChanged(
-            Action.Fetch.QueryChange(
-                query = state.currentQuery.copy(offset = 0) + reader(state),
-            )
+            Action.Fetch.QueryChange.AddDescriptor(reader(state))
         )
 
         is ChipAction.Changed -> onChanged(
@@ -321,9 +304,7 @@ private fun onChipFilterChanged(
         )
 
         is ChipAction.Removed -> onChanged(
-            Action.Fetch.QueryChange(
-                query = state.currentQuery.copy(offset = 0) - writer(it.text),
-            )
+            Action.Fetch.QueryChange.RemoveDescriptor(writer(it.text))
         )
     }
 }
