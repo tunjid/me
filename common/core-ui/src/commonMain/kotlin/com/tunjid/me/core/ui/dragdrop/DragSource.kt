@@ -22,7 +22,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.modifier.ModifierLocalMap
-import androidx.compose.ui.modifier.ModifierLocalNode
+import androidx.compose.ui.modifier.ModifierLocalModifierNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
@@ -70,7 +70,7 @@ private data class DragSourceElement(
         uris = uris
     )
 
-    override fun update(node: DragSourceNode) = node.apply {
+    override fun update(node: DragSourceNode) = with(node) {
         dragShadowPainter = this@DragSourceElement.dragShadowPainter
         uris = this@DragSourceElement.uris
     }
@@ -86,11 +86,11 @@ private class DragSourceNode(
     override var dragShadowPainter: Painter?,
     var uris: List<Uri>,
 ) : DelegatingNode(),
-    ModifierLocalNode,
+    ModifierLocalModifierNode,
     GlobalPositionAwareModifierNode,
     DragSource {
 
-    private val dragDropNode = delegated {
+    private val dragDropNode = delegate(
         DragDropNode { start ->
             when (start) {
                 is DragOrDropStart.Drop -> null
@@ -100,7 +100,7 @@ private class DragSourceNode(
                 }
             }
         }
-    }
+    )
 
     override val providedValues: ModifierLocalMap = dragDropNode.providedValues
 

@@ -59,7 +59,7 @@ data class ArchiveFilesParentRoute(
     val dndEnabled: Boolean,
 ) : AppRoute, StatelessRoute {
 
-    override val children: List<Node> = FileType.values()
+    override val children: List<Node> = FileType.entries
         .map { fileType ->
             ArchiveFilesRoute(
                 id = "$id?type=${fileType.name.lowercase()}",
@@ -92,7 +92,7 @@ data class ArchiveFilesParentRoute(
 private fun ArchiveFilesParentScreen(
     children: List<ArchiveFilesRoute>
 ) {
-    val pagerState = rememberPagerState()
+    val pagerState = rememberPagerState { children.size }
     var lastTabClicked by remember { mutableStateOf<Int?>(pagerState.currentPage) }
     Column(
         modifier = Modifier.fillMaxSize()
@@ -103,7 +103,6 @@ private fun ArchiveFilesParentScreen(
             onTabClicked = { lastTabClicked = it }
         )
         HorizontalPager(
-            pageCount = children.size,
             state = pagerState,
         ) { index ->
             ArchiveFilesScreen(

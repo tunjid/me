@@ -22,7 +22,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.modifier.ModifierLocalMap
-import androidx.compose.ui.modifier.ModifierLocalNode
+import androidx.compose.ui.modifier.ModifierLocalModifierNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
@@ -35,14 +35,7 @@ import java.awt.Cursor
 import java.awt.Point
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
-import java.awt.dnd.DnDConstants
-import java.awt.dnd.DragGestureEvent
-import java.awt.dnd.DragGestureListener
-import java.awt.dnd.DragSourceAdapter
-import java.awt.dnd.DropTargetDragEvent
-import java.awt.dnd.DropTargetDropEvent
-import java.awt.dnd.DropTargetEvent
-import java.awt.dnd.DropTargetListener
+import java.awt.dnd.*
 import java.io.File
 import java.io.Serializable
 import java.awt.dnd.DragSource as AwtDragSource
@@ -66,7 +59,7 @@ private data class RootDragDropElement(
         window = window,
     )
 
-    override fun update(node: RootDragDropNode) = node.apply {
+    override fun update(node: RootDragDropNode) = with(node) {
         density = this@RootDragDropElement.density
         window = this@RootDragDropElement.window
     }
@@ -84,10 +77,10 @@ internal actual class RootDragDropNode(
     var density: Float,
     var window: ComposeWindow,
 ) : DelegatingNode(),
-    ModifierLocalNode,
+    ModifierLocalModifierNode,
     GlobalPositionAwareModifierNode {
 
-    private val dragDropNode: DragDropNode = delegated { rootDragDropNode() }
+    private val dragDropNode: DragDropNode = delegate(rootDragDropNode())
 
     private val dropTargetListener = DensityAwareDropTargetListener(
         dragDropNode = dragDropNode,

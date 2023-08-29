@@ -26,7 +26,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.modifier.ModifierLocalMap
-import androidx.compose.ui.modifier.ModifierLocalNode
+import androidx.compose.ui.modifier.ModifierLocalModifierNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
@@ -83,7 +83,7 @@ private object RootDragDropElement : ModifierNodeElement<RootDragDropNode>() {
 }
 
 internal actual class RootDragDropNode : DelegatingNode(),
-    ModifierLocalNode,
+    ModifierLocalModifierNode,
     GlobalPositionAwareModifierNode {
 
     internal val dragDropNode: DragDropNode = delegated { rootDragDropNode() }

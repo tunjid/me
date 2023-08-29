@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.modifier.ModifierLocalMap
-import androidx.compose.ui.modifier.ModifierLocalNode
+import androidx.compose.ui.modifier.ModifierLocalModifierNode
 import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
@@ -38,7 +38,7 @@ internal class DragDropNode(
     private val onDragOrDropStarted: (DragOrDropStart) -> DragOrDrop?,
 ) : Modifier.Node(),
     GlobalPositionAwareModifierNode,
-    ModifierLocalNode,
+    ModifierLocalModifierNode,
     DragDropParent,
     DragDropChild,
     DragDroppable {
