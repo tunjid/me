@@ -71,7 +71,7 @@ private object RootDragDropElement : ModifierNodeElement<RootDragDropNode>() {
 
     override fun create() = rootDragDropNode
 
-    override fun update(node: RootDragDropNode) = node
+    override fun update(node: RootDragDropNode) = Unit
 
     override fun InspectorInfo.inspectableProperties() {
         name = "RootDragDropNode"
@@ -86,7 +86,7 @@ internal actual class RootDragDropNode : DelegatingNode(),
     ModifierLocalModifierNode,
     GlobalPositionAwareModifierNode {
 
-    internal val dragDropNode: DragDropNode = delegated { rootDragDropNode() }
+    internal val dragDropNode: DragDropNode = delegate(rootDragDropNode())
     override val providedValues: ModifierLocalMap = dragDropNode.providedValues
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) =
