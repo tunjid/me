@@ -39,6 +39,8 @@ import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.mapLatestToManyMutations
+import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
@@ -142,20 +144,19 @@ private fun Flow<Action>.withInitialLoad(
 private fun Flow<Permissions>.storagePermissionMutations(): Flow<Mutation<State>> =
     map { it.isGranted(Permission.ReadExternalStorage) }
         .distinctUntilChanged()
-        .map { mutation { copy(hasStoragePermissions = it) } }
+        .mapToMutation { copy(hasStoragePermissions = it) }
 
 /**
  * Mutations that have to do with the user's signed in status
  */
 private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
-    isSignedIn.map {
-        mutation {
+    isSignedIn
+        .mapToMutation {
             copy(
                 isSignedIn = it,
                 hasFetchedAuthStatus = true
             )
         }
-    }
 
 /**
  * Mutations from use text inputs
@@ -167,7 +168,7 @@ private fun Flow<Action.TextEdit>.textEditMutations(): Flow<Mutation<State>> =
  * Mutations from use text inputs
  */
 private fun Flow<Action.ToggleEditView>.viewToggleMutations(): Flow<Mutation<State>> =
-    map { mutation { copy(isEditing = !isEditing) } }
+    mapToMutation { copy(isEditing = !isEditing) }
 
 /**
  * Mutations from use drag events
@@ -180,16 +181,14 @@ private fun Flow<Action.Drag>.dragStatusMutations(): Flow<Mutation<State>> =
                 is Action.Drag.Thumbnail -> inWindowToInThumbnail.copy(second = action.inside)
             }
         }
-        .map { (inWindow, inThumbnail) ->
-            mutation {
-                copy(
-                    dragLocation = when {
-                        inThumbnail -> DragLocation.InThumbnail
-                        inWindow -> DragLocation.InWindow
-                        else -> DragLocation.None
-                    }
-                )
-            }
+        .mapToMutation { (inWindow, inThumbnail) ->
+            copy(
+                dragLocation = when {
+                    inThumbnail -> DragLocation.InThumbnail
+                    inWindow -> DragLocation.InWindow
+                    else -> DragLocation.None
+                }
+            )
         }
 
 /**
@@ -227,68 +226,66 @@ private fun Flow<Action.Drop>.dropMutations(
  * Mutations from editing the chips
  */
 private fun Flow<Action.ChipEdit>.chipEditMutations(): Flow<Mutation<State>> =
-    map { (chipAction, descriptor) ->
-        mutation {
-            if (descriptor.value.isBlank()) return@mutation this
-            val (updatedUpsert, updatedChipsState) = when (chipAction) {
-                ChipAction.Added -> Pair(
-                    upsert.copy(
-                        categories = when (descriptor) {
-                            is Descriptor.Category -> (upsert.categories + descriptor).distinct()
-                            else -> upsert.categories
-                        },
-                        tags = when (descriptor) {
-                            is Descriptor.Tag -> (upsert.tags + descriptor).distinct()
-                            else -> upsert.tags
-                        },
-                    ),
-                    chipsState.copy(
-                        categoryText = when (descriptor) {
-                            is Descriptor.Category -> Descriptor.Category(value = "")
-                            else -> chipsState.categoryText
-                        },
-                        tagText = when (descriptor) {
-                            is Descriptor.Tag -> Descriptor.Tag(value = "")
-                            else -> chipsState.tagText
-                        },
-                    )
+    mapToMutation { (chipAction, descriptor) ->
+        if (descriptor.value.isBlank()) return@mapToMutation this
+        val (updatedUpsert, updatedChipsState) = when (chipAction) {
+            ChipAction.Added -> Pair(
+                upsert.copy(
+                    categories = when (descriptor) {
+                        is Descriptor.Category -> (upsert.categories + descriptor).distinct()
+                        else -> upsert.categories
+                    },
+                    tags = when (descriptor) {
+                        is Descriptor.Tag -> (upsert.tags + descriptor).distinct()
+                        else -> upsert.tags
+                    },
+                ),
+                chipsState.copy(
+                    categoryText = when (descriptor) {
+                        is Descriptor.Category -> Descriptor.Category(value = "")
+                        else -> chipsState.categoryText
+                    },
+                    tagText = when (descriptor) {
+                        is Descriptor.Tag -> Descriptor.Tag(value = "")
+                        else -> chipsState.tagText
+                    },
                 )
+            )
 
-                is ChipAction.Changed -> Pair(
-                    upsert,
-                    chipsState.copy(
-                        categoryText = when (descriptor) {
-                            is Descriptor.Category -> descriptor
-                            else -> chipsState.categoryText
-                        },
-                        tagText = when (descriptor) {
-                            is Descriptor.Tag -> descriptor
-                            else -> chipsState.tagText
-                        }
-                    )
+            is ChipAction.Changed -> Pair(
+                upsert,
+                chipsState.copy(
+                    categoryText = when (descriptor) {
+                        is Descriptor.Category -> descriptor
+                        else -> chipsState.categoryText
+                    },
+                    tagText = when (descriptor) {
+                        is Descriptor.Tag -> descriptor
+                        else -> chipsState.tagText
+                    }
                 )
+            )
 
-                is ChipAction.Removed -> Pair(
-                    upsert.copy(
-                        categories = upsert.categories.filter { it != descriptor },
-                        tags = upsert.tags.filter { it != descriptor },
-                    ),
-                    chipsState
-                )
-            }
-            copy(
-                upsert = updatedUpsert,
-                chipsState = updatedChipsState
+            is ChipAction.Removed -> Pair(
+                upsert.copy(
+                    categories = upsert.categories.filter { it != descriptor },
+                    tags = upsert.tags.filter { it != descriptor },
+                ),
+                chipsState
             )
         }
+        copy(
+            upsert = updatedUpsert,
+            chipsState = updatedChipsState
+        )
     }
 
 /**
  * Mutations from consuming messages from the message queue
  */
 private fun Flow<Action.MessageConsumed>.messageConsumptionMutations(): Flow<Mutation<State>> =
-    map { (message) ->
-        mutation { copy(messages = messages - message) }
+    mapToMutation { (message) ->
+        copy(messages = messages - message)
     }
 
 /**
@@ -310,7 +307,7 @@ private fun Flow<Action.Load>.loadMutations(
     archiveRepository: ArchiveRepository,
 ): Flow<Mutation<State>> =
     debounce(200)
-        .flatMapLatest { monitor ->
+        .mapLatestToManyMutations { monitor ->
             when (monitor) {
                 is Action.Load.InitialLoad -> archiveRepository.textBodyMutations(
                     archiveId = monitor.id
@@ -318,7 +315,7 @@ private fun Flow<Action.Load>.loadMutations(
 
                 is Action.Load.Submit -> flow {
                     val (kind, upsert, headerPhoto) = monitor
-                    emit(mutation { copy(isSubmitting = true) })
+                    emit { copy(isSubmitting = true) }
 
                     val result = archiveRepository.upsert(kind = kind, upsert = upsert)
 
@@ -331,7 +328,7 @@ private fun Flow<Action.Load>.loadMutations(
                         is Result.Error -> result.message ?: "unknown error"
                     }
 
-                    emit(mutation { copy(isSubmitting = false, messages = messages + message) })
+                    emit { copy(isSubmitting = false, messages = messages + message) }
 
                     // Start monitoring the created archive
                     val id = upsert.id ?: (result as? Result.Success)?.item ?: return@flow
@@ -363,25 +360,23 @@ private fun ArchiveRepository.textBodyMutations(
     id = archiveId
 )
     .filterNotNull()
-    .map { archive ->
-        mutation {
-            copy(
+    .mapToMutation { archive ->
+        copy(
+            thumbnail = archive.thumbnail,
+            body = TextFieldValue(
+                text = archive.body
+            ),
+            upsert = upsert.copy(
+                id = archive.id,
+                title = archive.title,
+                description = archive.description,
+                videoUrl = archive.videoUrl,
                 thumbnail = archive.thumbnail,
-                body = TextFieldValue(
-                    text = archive.body
-                ),
-                upsert = upsert.copy(
-                    id = archive.id,
-                    title = archive.title,
-                    description = archive.description,
-                    videoUrl = archive.videoUrl,
-                    thumbnail = archive.thumbnail,
-                    body = archive.body,
-                    categories = archive.categories,
-                    tags = archive.tags,
-                )
+                body = archive.body,
+                categories = archive.categories,
+                tags = archive.tags,
             )
-        }
+        )
     }
 
 /**
@@ -400,8 +395,8 @@ private fun ArchiveRepository.headerUploadMutations(
         )) {
             // Do nothing on success
             is Result.Success -> Unit
-            is Result.Error -> emit(mutation {
+            is Result.Error -> emit {
                 copy(messages = messages + "Error uploading header: ${result.message ?: "Unknown error"}")
-            })
+            }
         }
     }

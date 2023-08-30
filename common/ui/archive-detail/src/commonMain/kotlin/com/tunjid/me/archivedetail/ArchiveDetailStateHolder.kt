@@ -35,6 +35,7 @@ import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
@@ -92,25 +93,21 @@ class ActualArchiveDetailStateHolder(
 )
 
 private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
-    signedInUserStream.map {
-        mutation {
+    signedInUserStream
+        .mapToMutation {
             copy(
                 signedInUserId = it?.id,
                 hasFetchedAuthStatus = true,
             )
         }
-    }
 
 private fun ArchiveRepository.archiveLoadMutations(
     id: ArchiveId,
-): Flow<Mutation<State>> = archiveStream(
-    id = id
-)
-    .map { fetchedArchive ->
-        mutation {
+): Flow<Mutation<State>> =
+    archiveStream(id = id)
+        .mapToMutation { fetchedArchive ->
             copy(
                 wasDeleted = archive != null && fetchedArchive == null,
                 archive = fetchedArchive
             )
         }
-    }

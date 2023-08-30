@@ -38,6 +38,7 @@ import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
@@ -124,13 +125,11 @@ class ActualArchiveFilesStateHolder(
 private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     isSignedIn
         .distinctUntilChanged()
-        .map {
-            mutation {
-                copy(
-                    isSignedIn = it,
-                    hasFetchedAuthStatus = true,
-                )
-            }
+        .mapToMutation {
+            copy(
+                isSignedIn = it,
+                hasFetchedAuthStatus = true,
+            )
         }
 
 private fun Flow<Action.Fetch>.loadMutations(
@@ -192,15 +191,15 @@ private fun Flow<Action.RequestPermission>.permissionRequestMutations(
 private fun Flow<Permissions>.storagePermissionMutations(): Flow<Mutation<State>> =
     map { it.isGranted(Permission.ReadExternalStorage) }
         .distinctUntilChanged()
-        .map { mutation { copy(hasStoragePermissions = it) } }
+        .mapToMutation { copy(hasStoragePermissions = it) }
 
 /**
  * Mutations from use drag events
  */
 private fun Flow<Action.Drag>.dragStatusMutations(): Flow<Mutation<State>> =
     distinctUntilChanged()
-        .map { (dragLocation) ->
-            mutation { copy(dragLocation = dragLocation) }
+        .mapToMutation { (dragLocation) ->
+            copy(dragLocation = dragLocation)
         }
 
 /**

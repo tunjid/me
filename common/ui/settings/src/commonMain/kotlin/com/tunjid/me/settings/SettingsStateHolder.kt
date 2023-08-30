@@ -27,12 +27,11 @@ import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
 typealias SettingsStateHolder = ActionStateProducer<Action, StateFlow<State>>
@@ -55,21 +54,19 @@ class ActualSettingsStateHolder(
     initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
-        authRepository.isSignedIn.map { isSignedIn ->
-            mutation {
-                copy(
-                    routes = listOfNotNull(
-                        "profile".takeIf { isSignedIn },
-                        "sign-in".takeIf { !isSignedIn }
-                    )
+        authRepository.isSignedIn.mapToMutation { isSignedIn ->
+            copy(
+                routes = listOfNotNull(
+                    "profile".takeIf { isSignedIn },
+                    "sign-in".takeIf { !isSignedIn }
                 )
-            }
+            )
         }
     ),
     actionTransform = { actions ->
         actions.toMutationStream {
             when (val type = type()) {
-                is Action.Navigate -> type.flow.consumeNavActions<Action.Navigate, State>(
+                is Action.Navigate -> type.flow.consumeNavActions(
                     mutationMapper = Action.Navigate::navMutation,
                     action = navActions
                 )

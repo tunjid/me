@@ -38,6 +38,8 @@ import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.SuspendingStateHolder
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.mapLatestToManyMutations
+import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
@@ -55,7 +57,6 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.scan
@@ -126,13 +127,11 @@ class ActualArchiveListStateHolder(
 internal fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     isSignedIn
         .distinctUntilChanged()
-        .map {
-            mutation {
-                copy(
-                    isSignedIn = it,
-                    hasFetchedAuthStatus = true,
-                )
-            }
+        .mapToMutation {
+            copy(
+                isSignedIn = it,
+                hasFetchedAuthStatus = true,
+            )
         }
 
 /**
@@ -141,54 +140,50 @@ internal fun AuthRepository.authMutations(): Flow<Mutation<State>> =
 private fun Flow<Action.FilterChanged>.filterChangedMutations(
     repo: ArchiveRepository,
     kind: ArchiveKind,
-): Flow<Mutation<State>> =
-    flatMapLatest { (descriptor) ->
-        flow {
-            // First update the text in the UI
-            emit {
-                copy(
-                    queryState = queryState.copy(
-                        categoryText = when (descriptor) {
-                            is Descriptor.Category -> descriptor
-                            else -> queryState.categoryText
-                        },
-                        tagText = when (descriptor) {
-                            is Descriptor.Tag -> descriptor
-                            else -> queryState.tagText
-                        },
-                    )
-                )
-            }
-            // Then asynchronously fetch suggestions
-            emitAll(
-                repo.descriptorsMatching(
-                    descriptor = descriptor,
-                    kind = kind
-                ).map { descriptors ->
-                    mutation {
-                        copy(
-                            queryState = queryState.copy(
-                                suggestedDescriptors = descriptors
-                                    .filterNot { descriptor ->
-                                        val contentFilter = queryState.currentQuery.contentFilter
-                                        when (descriptor) {
-                                            is Descriptor.Category -> contentFilter.categories.contains(
-                                                descriptor
-                                            )
-
-                                            is Descriptor.Tag -> contentFilter.tags.contains(
-                                                descriptor
-                                            )
-                                        }
-                                    }
-                                    .take(10),
-                            )
-                        )
-                    }
-                }
+): Flow<Mutation<State>> = mapLatestToManyMutations { (descriptor) ->
+    // First update the text in the UI
+    emit {
+        copy(
+            queryState = queryState.copy(
+                categoryText = when (descriptor) {
+                    is Descriptor.Category -> descriptor
+                    else -> queryState.categoryText
+                },
+                tagText = when (descriptor) {
+                    is Descriptor.Tag -> descriptor
+                    else -> queryState.tagText
+                },
             )
-        }
+        )
     }
+    // Then asynchronously fetch suggestions
+    emitAll(
+        repo.descriptorsMatching(
+            descriptor = descriptor,
+            kind = kind
+        ).mapToMutation { descriptors ->
+            copy(
+                queryState = queryState.copy(
+                    suggestedDescriptors = descriptors
+                        .filterNot { descriptor ->
+                            val contentFilter = queryState.currentQuery.contentFilter
+                            when (descriptor) {
+                                is Descriptor.Category -> contentFilter.categories.contains(
+                                    descriptor
+                                )
+
+                                is Descriptor.Tag -> contentFilter.tags.contains(
+                                    descriptor
+                                )
+                            }
+                        }
+                        .take(10),
+                )
+            )
+
+        }
+    )
+}
 
 /**
  * Every toggle isExpanded == null should be processed, however every specific request to
@@ -208,10 +203,8 @@ internal fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<St
             }
             true
         }
-        .map { isExpanded ->
-            mutation {
-                copy(queryState = queryState.copy(expanded = isExpanded ?: !queryState.expanded))
-            }
+        .mapToMutation { isExpanded ->
+            copy(queryState = queryState.copy(expanded = isExpanded ?: !queryState.expanded))
         }
 
 /**
@@ -219,15 +212,13 @@ internal fun Flow<Action.ToggleFilter>.filterToggleMutations(): Flow<Mutation<St
  */
 private fun Flow<Action.ListStateChanged>.listStateChangeMutations(): Flow<Mutation<State>> =
     distinctUntilChanged()
-        .map {
-            mutation {
-                copy(
-                    savedListState = SavedListState(
-                        firstVisibleItemIndex = it.firstVisibleItemIndex,
-                        firstVisibleItemScrollOffset = it.firstVisibleItemScrollOffset
-                    )
+        .mapToMutation {
+            copy(
+                savedListState = SavedListState(
+                    firstVisibleItemIndex = it.firstVisibleItemIndex,
+                    firstVisibleItemScrollOffset = it.firstVisibleItemScrollOffset
                 )
-            }
+            )
         }
 
 /**
@@ -310,40 +301,34 @@ private fun Flow<Action.Fetch>.fetchMutations(
                 if (isDiffFilter && newItems.hasPlaceholders()) QUERY_CHANGE_DEBOUNCE
                 else 0L
             }
-            .map { (_, newItems) ->
-                mutation {
-                    copy(
-                        isLoading = false,
-                        listState = listState ?: savedListState.initialListState(),
-                        items = preserveKeys(newItems = newItems).itemsWithHeaders,
-                    )
-                }
+            .mapToMutation { (_, newItems) ->
+                copy(
+                    isLoading = false,
+                    listState = listState ?: savedListState.initialListState(),
+                    items = preserveKeys(newItems = newItems).itemsWithHeaders,
+                )
             },
         // item available mutations
-        archivesAvailable.map { count ->
-            mutation {
-                copy(queryState = queryState.copy(count = count))
-            }
+        archivesAvailable.mapToMutation { count ->
+            copy(queryState = queryState.copy(count = count))
         },
         // query state mutations
-        queries.map { query ->
-            mutation {
-                copy(
-                    queryState = queryState.copy(
-                        currentQuery = query,
-                        suggestedDescriptors = queryState.suggestedDescriptors.filterNot { descriptor ->
-                            val contentFilter = query.contentFilter
-                            when (descriptor) {
-                                is Descriptor.Category -> contentFilter.categories.contains(
-                                    descriptor
-                                )
+        queries.mapToMutation { query ->
+            copy(
+                queryState = queryState.copy(
+                    currentQuery = query,
+                    suggestedDescriptors = queryState.suggestedDescriptors.filterNot { descriptor ->
+                        val contentFilter = query.contentFilter
+                        when (descriptor) {
+                            is Descriptor.Category -> contentFilter.categories.contains(
+                                descriptor
+                            )
 
-                                is Descriptor.Tag -> contentFilter.tags.contains(descriptor)
-                            }
-                        },
-                    )
+                            is Descriptor.Tag -> contentFilter.tags.contains(descriptor)
+                        }
+                    },
                 )
-            }
+            )
         }
     )
 }

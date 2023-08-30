@@ -33,6 +33,8 @@ import com.tunjid.me.scaffold.nav.canGoUp
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.mapLatestToManyMutations
+import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import com.tunjid.treenav.MultiStackNav
@@ -79,18 +81,16 @@ class ActualSignInStateHolder(
 )
 
 private fun Flow<Action.FieldChanged>.formEditMutations(): Flow<Mutation<State>> =
-    map { (updatedField) ->
-        mutation {
-            copy(fields = fields.update(updatedField))
-        }
+    mapToMutation { (updatedField) ->
+        copy(fields = fields.update(updatedField))
     }
 
 /**
  * Mutations from consuming messages from the message queue
  */
 private fun Flow<Action.MessageConsumed>.messageConsumptionMutations(): Flow<Mutation<State>> =
-    map { (message) ->
-        mutation { copy(messages = messages - message) }
+    mapToMutation { (message) ->
+        copy(messages = messages - message)
     }
 
 private fun Flow<Action.Submit>.submissionMutations(
@@ -98,18 +98,16 @@ private fun Flow<Action.Submit>.submissionMutations(
     navActions: (NavMutation) -> Unit
 ): Flow<Mutation<State>> =
     debounce(200)
-        .flatMapLatest { (request) ->
-            flow {
-                emit { copy(isSubmitting = true) }
-                when (val result = authRepository.createSession(request = request)) {
-                    is Result.Error -> emit {
-                        copy(messages = messages + "Error signing in: ${result.message}")
-                    }
-
-                    else -> navActions(NavContext::resetNav)
+        .mapLatestToManyMutations { (request) ->
+            emit { copy(isSubmitting = true) }
+            when (val result = authRepository.createSession(request = request)) {
+                is Result.Error -> emit {
+                    copy(messages = messages + "Error signing in: ${result.message}")
                 }
-                emit { copy(isSubmitting = false) }
+
+                else -> navActions(NavContext::resetNav)
             }
+            emit { copy(isSubmitting = false) }
         }
 
 private fun NavContext.resetNav(): MultiStackNav {
