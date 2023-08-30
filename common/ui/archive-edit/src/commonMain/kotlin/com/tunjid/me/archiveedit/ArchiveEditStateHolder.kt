@@ -309,11 +309,13 @@ private fun Flow<Action.Load>.loadMutations(
     debounce(200)
         .mapLatestToManyMutations { monitor ->
             when (monitor) {
-                is Action.Load.InitialLoad -> archiveRepository.textBodyMutations(
-                    archiveId = monitor.id
+                is Action.Load.InitialLoad -> emitAll(
+                    archiveRepository.textBodyMutations(
+                        archiveId = monitor.id
+                    )
                 )
 
-                is Action.Load.Submit -> flow {
+                is Action.Load.Submit -> {
                     val (kind, upsert, headerPhoto) = monitor
                     emit { copy(isSubmitting = true) }
 
@@ -331,7 +333,7 @@ private fun Flow<Action.Load>.loadMutations(
                     emit { copy(isSubmitting = false, messages = messages + message) }
 
                     // Start monitoring the created archive
-                    val id = upsert.id ?: (result as? Result.Success)?.item ?: return@flow
+                    val id = upsert.id ?: (result as? Result.Success)?.item ?: return@mapLatestToManyMutations
 
                     emitAll(
                         listOfNotNull(
