@@ -30,9 +30,10 @@ import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.emptyTiledList
-import com.tunjid.tiler.filter
+import com.tunjid.tiler.filterIsInstance
 import com.tunjid.tiler.map
 import com.tunjid.tiler.queryAtOrNull
+import com.tunjid.tiler.tiles
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
@@ -278,12 +279,7 @@ fun State.preserveKeys(
 
     // A filter change, placeholders are unnecessary as content already exists. Wait till
     // actual content is loaded
-    for (i in 0 until newItems.tileCount) {
-        @Suppress("UNCHECKED_CAST")
-        if (newItems[newItems.tileAt(i).start] is ArchiveItem.Card.PlaceHolder) return items.filter {
-            it is ArchiveItem.Card
-        } as TiledList<ArchiveQuery, ArchiveItem.Card>
-    }
+    if (newItems.hasPlaceholders()) return items.filterIsInstance<ArchiveQuery, ArchiveItem.Card>()
 
     // Actual content has been loaded, preserve the ids of items that existed before.
     val oldArchiveIdsToKeys = mutableMapOf<ArchiveId, String>().apply {
@@ -304,3 +300,6 @@ fun State.preserveKeys(
     }
 }
 
+fun TiledList<ArchiveQuery, *>.hasPlaceholders() = tiles().any { tile ->
+    get(tile.start) is ArchiveItem.Card.PlaceHolder
+}

@@ -16,7 +16,13 @@
 
 package com.tunjid.me.feature.archivelist
 
-import com.tunjid.me.core.model.*
+import com.tunjid.me.core.model.ArchiveContentFilter
+import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveQuery
+import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.hasTheSameFilter
+import com.tunjid.me.core.model.minus
+import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
@@ -35,10 +41,27 @@ import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
+import com.tunjid.tiler.queries
 import com.tunjid.tiler.toPivotedTileInputs
 import com.tunjid.tiler.toTiledList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformWhile
 import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveListStateHolder = ActionStateProducer<Action, StateFlow<State>>
@@ -271,24 +294,21 @@ private fun Flow<Action.Fetch>.fetchMutations(
         )
 
     return merge(
+        // list item mutations
         archiveItems
             .map { stateHolder.state().items to it }
+            // To preserve keys, when items are fetched for changes in the query, debounce emissions
             .debounce { (oldItems, newItems) ->
-                val oldQueries = (0 until oldItems.tileCount).map(oldItems::queryAtTile)
-                val newQueries = (0 until newItems.tileCount).map(newItems::queryAtTile)
-                val itemsAtStartIndices = (0 until newItems.tileCount).map { newItems[newItems.tileAt(it).start] }
+                // new items are still loading, debounce
+                if (newItems.isEmpty()) return@debounce QUERY_CHANGE_DEBOUNCE
 
-                val newItemsEmpty = newItems.isEmpty()
-                val isDiffFilter = !newItemsEmpty
-                        && oldQueries.isNotEmpty()
-                        && !newQueries.first().hasTheSameFilter(oldQueries.first())
-                val hasPlaceHolder = itemsAtStartIndices.any { it is ArchiveItem.Card.PlaceHolder }
+                val oldQueries = oldItems.queries()
+                val newQueries = newItems.queries()
+                val isDiffFilter = oldQueries.isNotEmpty() && !newQueries.first().hasTheSameFilter(oldQueries.first())
 
-                when {
-                    // To preserve keys, when the query changes, debounce emissions
-                    newItemsEmpty || isDiffFilter && hasPlaceHolder -> 500L
-                    else -> 0L
-                }
+                // new items were fetched for a different query and placeholders are present, debounce
+                if (isDiffFilter && newItems.hasPlaceholders()) QUERY_CHANGE_DEBOUNCE
+                else 0L
             }
             .map { (_, newItems) ->
                 mutation {
@@ -299,11 +319,13 @@ private fun Flow<Action.Fetch>.fetchMutations(
                     )
                 }
             },
+        // item available mutations
         archivesAvailable.map { count ->
             mutation {
                 copy(queryState = queryState.copy(count = count))
             }
         },
+        // query state mutations
         queries.map { query ->
             mutation {
                 copy(
@@ -402,3 +424,5 @@ private sealed class LoadReason {
     data class LoadMore(override val query: ArchiveQuery) : LoadReason()
     data class QueryChange(override val query: ArchiveQuery) : LoadReason()
 }
+
+private const val QUERY_CHANGE_DEBOUNCE = 300L
