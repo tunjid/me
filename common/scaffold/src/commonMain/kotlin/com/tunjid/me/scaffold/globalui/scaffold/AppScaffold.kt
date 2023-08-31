@@ -25,7 +25,10 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
+import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.*
+import kotlinx.coroutines.flow.map
 
 /**
  * Root scaffold for the app
@@ -111,6 +114,11 @@ fun Scaffold(
                 )
             }
         }
+
+        SavedStateCleanupEffect(
+            saveableStateHolder = saveableStateHolder,
+            navStateHolder = navStateHolder
+        )
     }
 }
 
@@ -135,6 +143,28 @@ private fun rememberMoveableContainerContent(
         movableContentOf {
             saveableStateHolder.SaveableStateProvider(route.id) {
                 route.Render()
+            }
+        }
+    }
+}
+
+/**
+ * Clean up after navigation routes that have been discarded
+ */
+@Composable
+private fun SavedStateCleanupEffect(
+    saveableStateHolder: SaveableStateHolder,
+    navStateHolder: NavStateHolder,
+) {
+    val removedRoutesFlow = remember {
+        navStateHolder.state
+            .map { it.mainNav }
+            .removedRoutes()
+    }
+    LaunchedEffect(Unit) {
+        removedRoutesFlow.collect { routes ->
+            routes.forEach { route ->
+                saveableStateHolder.removeState(route.id)
             }
         }
     }
