@@ -88,7 +88,7 @@ internal fun AppRouteContainer(
                 bottom = bottomClearance
             ),
         content = {
-            ResizableRouteContent(
+            Box(
                 modifier = Modifier
                     .width(
                         animateWidthChange(
@@ -97,9 +97,9 @@ internal fun AppRouteContainer(
                         ).value
                     )
                     .background(color = MaterialTheme.colorScheme.surface),
-                content = supportingContent
+                content = { supportingContent() }
             )
-            ResizableRouteContent(
+            Box(
                 modifier = Modifier
                     .width(
                         mainContentWidth(
@@ -117,7 +117,7 @@ internal fun AppRouteContainer(
                         }
                     )
                     .background(color = MaterialTheme.colorScheme.surface),
-                content = mainContent
+                content = { mainContent() }
             )
         }
     )
@@ -166,19 +166,6 @@ private fun animateWidthChange(targetSideWidth: Dp) = animateDpAsState(
     targetValue = targetSideWidth,
     animationSpec = navContentSizeSpring()
 )
-
-@Composable
-private fun ResizableRouteContent(
-    modifier: Modifier,
-    content: @Composable () -> Unit
-) {
-    Box(
-        modifier = modifier,
-        content = {
-            content()
-        }
-    )
-}
 
 private fun navContentSizeSpring() = spring<Dp>(
     stiffness = Spring.StiffnessMediumLow
