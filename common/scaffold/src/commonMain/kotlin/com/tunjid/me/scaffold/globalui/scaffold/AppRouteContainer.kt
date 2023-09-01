@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
+import androidx.compose.ui.zIndex
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
@@ -79,16 +80,21 @@ internal fun AppRouteContainer(
                     bottom = bottomClearance
                 ),
             content = {
-                val mainContentWidth by mainContentWidth(
-                    windowSizeClass = windowSizeClass,
-                    moveKind = moveKind
-                )
                 ResizableRouteContent(
                     modifier = Modifier
-                        .width(mainContentWidth)
+                        .zIndex(if (windowSizeClass.isNotExpanded) 2f else 1f)
+                        .width(
+                            mainContentWidth(
+                                windowSizeClass = windowSizeClass,
+                                moveKind = moveKind
+                            ).value
+                        )
                         .padding(
                             start = when {
-                                hasNavContent -> windowSizeClass.supportingPanelWidth()
+                                hasNavContent -> supportingContentWidth(
+                                    targetSideWidth = windowSizeClass.supportingPanelWidth()
+                                ).value
+
                                 else -> 0.dp
                             }
                         )
@@ -97,7 +103,7 @@ internal fun AppRouteContainer(
                 )
 
                 val targetSupportingContentWidth = when {
-                    hasNavContent -> windowSizeClass.supportingPanelWidth()
+                    hasNavContent -> WindowSizeClass.EXPANDED.supportingPanelWidth()
                     else -> maxWidth
                 }
                 val supportingContentWidth by supportingContentWidth(
@@ -105,6 +111,7 @@ internal fun AppRouteContainer(
                 )
                 if (supportingContentWidth != 0.dp) ResizableRouteContent(
                     modifier = Modifier
+                        .zIndex(1f)
                         .width(supportingContentWidth)
                         .background(color = MaterialTheme.colorScheme.surface),
                     content = supportingContent
