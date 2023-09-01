@@ -80,9 +80,21 @@ internal fun AppRouteContainer(
                     bottom = bottomClearance
                 ),
             content = {
+                val targetSupportingContentWidth = when {
+                    hasNavContent -> WindowSizeClass.EXPANDED.supportingPanelWidth()
+                    else -> maxWidth
+                }
+                val supportingContentWidth by supportingContentWidth(
+                    targetSupportingContentWidth
+                )
                 ResizableRouteContent(
                     modifier = Modifier
-                        .zIndex(if (windowSizeClass.isNotExpanded) 2f else 1f)
+                        .width(supportingContentWidth)
+                        .background(color = MaterialTheme.colorScheme.surface),
+                    content = supportingContent
+                )
+                ResizableRouteContent(
+                    modifier = Modifier
                         .width(
                             mainContentWidth(
                                 windowSizeClass = windowSizeClass,
@@ -101,22 +113,6 @@ internal fun AppRouteContainer(
                         .background(color = MaterialTheme.colorScheme.surface),
                     content = mainContent
                 )
-
-                val targetSupportingContentWidth = when {
-                    hasNavContent -> WindowSizeClass.EXPANDED.supportingPanelWidth()
-                    else -> maxWidth
-                }
-                val supportingContentWidth by supportingContentWidth(
-                    targetSupportingContentWidth
-                )
-                if (supportingContentWidth != 0.dp) ResizableRouteContent(
-                    modifier = Modifier
-                        .zIndex(1f)
-                        .width(supportingContentWidth)
-                        .background(color = MaterialTheme.colorScheme.surface),
-                    content = supportingContent
-                )
-
                 LaunchedEffect(supportingContentWidth, hasNavContent) {
                     val difference = (supportingContentWidth - targetSupportingContentWidth).let {
                         if (it < 0.dp) it * -1 else it
