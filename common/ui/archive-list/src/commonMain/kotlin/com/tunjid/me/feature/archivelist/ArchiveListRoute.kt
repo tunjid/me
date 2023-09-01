@@ -18,7 +18,7 @@ package com.tunjid.me.feature.archivelist
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.lazy.staggeredgrid.*
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +39,7 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.StickyHeaderGrid
+import com.tunjid.me.core.ui.StickyHeaderStaggeredGrid
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.me.core.ui.scrollbar.scrollbarState
 import com.tunjid.me.feature.LocalScreenStateHolderCache
@@ -77,7 +78,7 @@ private fun ArchiveScreen(
         onAction = actions
     )
 
-    val gridState = state.listState ?: LazyGridState()
+    val gridState = state.listState ?: LazyStaggeredGridState()
     val scope = rememberCoroutineScope()
     val visibleItemsFlow = remember(state.isLoading) {
         if (state.isLoading) emptyFlow()
@@ -112,9 +113,9 @@ private fun ArchiveScreen(
             onChanged = actions
         )
         Spacer(modifier = Modifier.height(16.dp))
-        StickyHeaderGrid(
+        StickyHeaderStaggeredGrid(
             modifier = Modifier.zIndex(-1f),
-            lazyState = gridState,
+            state = gridState,
             headerMatcher = { it.key.isHeaderKey },
             stickyHeader = {
                 Surface(
@@ -182,17 +183,17 @@ private fun ArchiveScreen(
 
 @Composable
 private fun ArchiveList(
-    gridState: LazyGridState,
+    gridState: LazyStaggeredGridState,
     items: List<ArchiveItem>,
     currentQuery: ArchiveQuery,
     isInMainNav: Boolean,
     cardWidth: Dp,
     actions: (Action) -> Unit,
 ) {
-    LazyVerticalGrid(
+    LazyVerticalStaggeredGrid(
         state = gridState,
-        columns = GridCells.Adaptive(cardWidth),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        columns = StaggeredGridCells.Adaptive(cardWidth),
+        verticalItemSpacing = 16.dp,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(horizontal = 16.dp),
         content = {
@@ -200,15 +201,15 @@ private fun ArchiveList(
                 items = items,
                 key = { it.key },
                 span = { item ->
-                    actions(Action.Fetch.NoColumnsChanged(maxLineSpan))
+//                    actions(Action.Fetch.NoColumnsChanged(maxLineSpan))
                     when (item) {
                         is ArchiveItem.Card.Loaded,
                         is ArchiveItem.Card.PlaceHolder,
-                        -> GridItemSpan(1)
+                        -> StaggeredGridItemSpan.SingleLane
 
                         is ArchiveItem.Header,
                         is ArchiveItem.Loading,
-                        -> GridItemSpan(maxLineSpan)
+                        -> StaggeredGridItemSpan.FullLine
                     }
                 },
                 itemContent = { item ->
@@ -275,14 +276,14 @@ private fun GridCell(
 
 @Composable
 private fun FilterCollapseEffect(
-    infoFlow: Flow<List<LazyGridItemInfo>>,
+    infoFlow: Flow<List<LazyStaggeredGridItemInfo>>,
     onAction: (Action) -> Unit,
 ) {
     // Close filters when scrolling
     LaunchedEffect(infoFlow) {
         infoFlow
             .map { it.firstOrNull() }
-            .scan<LazyGridItemInfo?, Pair<LazyGridItemInfo, LazyGridItemInfo>?>(null) { oldAndNewInfo, newInfo ->
+            .scan<LazyStaggeredGridItemInfo?, Pair<LazyStaggeredGridItemInfo, LazyStaggeredGridItemInfo>?>(null) { oldAndNewInfo, newInfo ->
                 when {
                     newInfo == null -> null
                     oldAndNewInfo == null -> newInfo to newInfo
@@ -303,7 +304,7 @@ private fun FilterCollapseEffect(
 
 @Composable
 private fun SaveScrollPositionEffect(
-    infoFlow: Flow<List<LazyGridItemInfo>>,
+    infoFlow: Flow<List<LazyStaggeredGridItemInfo>>,
     onAction: (Action) -> Unit,
 ) {
     // Close filters when scrolling
@@ -322,7 +323,7 @@ private fun SaveScrollPositionEffect(
 }
 
 @Composable
-private fun LazyGridState.scrollbarThumbPositionFunction(
+private fun LazyStaggeredGridState.scrollbarThumbPositionFunction(
     state: State,
     actions: (Action) -> Unit,
 ): (Float) -> Unit {

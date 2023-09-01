@@ -17,6 +17,7 @@
 package com.tunjid.me.feature.archivelist
 
 import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.tunjid.me.core.model.Archive
@@ -57,7 +58,7 @@ data class State(
     @Transient
     val isLoading: Boolean = true,
     @Transient
-    val listState: LazyGridState? = null,
+    val listState: LazyStaggeredGridState? = null,
     @Transient
     val items: TiledList<ArchiveQuery, ArchiveItem> = emptyTiledList(),
 ) : ByteSerializable
@@ -79,9 +80,9 @@ value class SavedListState(
 
     internal val firstVisibleItemScrollOffset get() = packedValue.and(0xFFFFFFFF).toInt()
 
-    fun initialListState() = LazyGridState(
-        firstVisibleItemIndex = firstVisibleItemIndex,
-        firstVisibleItemScrollOffset = firstVisibleItemScrollOffset,
+    fun initialListState() = LazyStaggeredGridState(
+        initialFirstVisibleItemIndex = firstVisibleItemIndex,
+        initialFirstVisibleItemOffset = firstVisibleItemScrollOffset,
     )
 }
 
