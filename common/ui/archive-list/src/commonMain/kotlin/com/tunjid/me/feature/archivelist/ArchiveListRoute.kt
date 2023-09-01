@@ -179,6 +179,11 @@ private fun ArchiveScreen(
         infoFlow = visibleItemsFlow,
         onAction = actions
     )
+
+    GridSizeUpdateEffect(
+        infoFlow = visibleItemsFlow,
+        onAction = actions
+    )
 }
 
 @Composable
@@ -200,8 +205,8 @@ private fun ArchiveList(
             items(
                 items = items,
                 key = { it.key },
+                contentType = { it.contentType },
                 span = { item ->
-//                    actions(Action.Fetch.NoColumnsChanged(maxLineSpan))
                     when (item) {
                         is ArchiveItem.Card.Loaded,
                         is ArchiveItem.Card.PlaceHolder,
@@ -310,14 +315,30 @@ private fun SaveScrollPositionEffect(
     // Close filters when scrolling
     LaunchedEffect(infoFlow) {
         infoFlow
-            .map { it.firstOrNull() }
-            .filterNotNull()
-            .map { info ->
+            .filter(List<LazyStaggeredGridItemInfo>::isNotEmpty)
+            .map { items ->
                 Action.ListStateChanged(
-                    firstVisibleItemScrollOffset = info.offset.y,
-                    firstVisibleItemIndex = info.index
+                    firstVisibleItemScrollOffset = items.first().offset.y,
+                    firstVisibleItemIndex = items.first().index
                 )
             }
+            .collect(onAction)
+    }
+}
+
+@Composable
+private fun GridSizeUpdateEffect(
+    infoFlow: Flow<List<LazyStaggeredGridItemInfo>>,
+    onAction: (Action) -> Unit,
+) {
+    LaunchedEffect(infoFlow) {
+        infoFlow
+            .filter(List<LazyStaggeredGridItemInfo>::isNotEmpty)
+            .map { items ->
+                val maxLane = items.maxOf(LazyStaggeredGridItemInfo::lane)
+                Action.Fetch.NoColumnsChanged(noColumns = maxLane + 1)
+            }
+            .distinctUntilChanged()
             .collect(onAction)
     }
 }

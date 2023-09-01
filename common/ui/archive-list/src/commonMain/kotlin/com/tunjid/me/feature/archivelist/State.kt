@@ -130,7 +130,7 @@ sealed class Action(val key: String) {
     data class Navigate(val navMutation: NavMutation) : Action(key = "Navigate")
 }
 
-sealed class ArchiveItem {
+sealed class ArchiveItem(val contentType: String) {
 
     abstract val index: Int
     abstract val key: String
@@ -139,15 +139,15 @@ sealed class ArchiveItem {
         override val index: Int,
         override val key: String,
         val text: String,
-    ) : ArchiveItem()
+    ) : ArchiveItem("Header")
 
     data class Loading(
         override val index: Int,
         override val key: String,
         val isCircular: Boolean,
-    ) : ArchiveItem()
+    ) : ArchiveItem("Loading")
 
-    sealed class Card : ArchiveItem() {
+    sealed class Card(contentType: String) : ArchiveItem(contentType) {
 
         abstract val archive: Archive
 
@@ -155,13 +155,13 @@ sealed class ArchiveItem {
             override val index: Int,
             override val key: String,
             override val archive: Archive,
-        ) : Card()
+        ) : Card("Loaded")
 
         data class PlaceHolder(
             override val index: Int,
             override val key: String,
             override val archive: Archive,
-        ) : Card()
+        ) : Card("Placeholder")
     }
 }
 
