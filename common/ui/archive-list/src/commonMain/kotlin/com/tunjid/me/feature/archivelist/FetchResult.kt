@@ -24,7 +24,6 @@ import com.tunjid.tiler.transform
 val TiledList<ArchiveQuery, ArchiveItem.Card>.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>
     get() {
         val queriedArchives = this@itemsWithHeaders
-        var month = -1
         var year = -1
         return queriedArchives.transform { index ->
             val item = queriedArchives[index]
@@ -32,8 +31,7 @@ val TiledList<ArchiveQuery, ArchiveItem.Card>.itemsWithHeaders: TiledList<Archiv
             when (item) {
                 is ArchiveItem.Card.Loaded -> {
                     val dateTime = item.archive.dateTime
-                    if (month != dateTime.monthNumber || year != dateTime.year) {
-                        month = dateTime.monthNumber
+                    if (year != dateTime.year) {
                         year = dateTime.year
                         add(
                             query = query,
