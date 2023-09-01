@@ -17,21 +17,32 @@
 package com.tunjid.me.feature.archivelist
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.core.model.Archive
@@ -41,11 +52,10 @@ import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.User
 import com.tunjid.me.core.model.UserId
+import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
-import com.tunjid.me.core.ui.AsyncRasterImage
-import com.tunjid.me.scaffold.globalui.scaffold.LocalNavigationAnimator
 import kotlinx.datetime.Clock.System
 
 @Composable
@@ -106,17 +116,6 @@ fun ArchiveCard(
     onArchiveSelected: (Archive) -> Unit,
     onCategoryClicked: (Descriptor.Category) -> Unit,
 ) {
-    var thumbnailWidth by remember { mutableStateOf(0) }
-    val isAnimatingSupportingContent by LocalNavigationAnimator.current.isAnimatingSupportingContent
-    val localDensity = LocalDensity.current
-    val thumbnailModifier = remember(isAnimatingSupportingContent) {
-        if (isAnimatingSupportingContent) Modifier
-            .width(with(localDensity) { thumbnailWidth.toDp() })
-        else modifier
-            .fillMaxWidth()
-            .onGloballyPositioned { thumbnailWidth = it.size.width }
-    }
-
     ElevatedCard(
         modifier = modifier,
         onClick = {
@@ -126,7 +125,9 @@ fun ArchiveCard(
             Column {
                 AsyncRasterImage(
                     imageUrl = archive.thumbnail,
-                    modifier = thumbnailModifier.aspectRatio(16f/9f)
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
                 )
                 Spacer(Modifier.height(8.dp))
                 ArchiveDate(archive.prettyDate)

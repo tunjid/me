@@ -29,17 +29,32 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
-import androidx.compose.ui.zIndex
 import com.tunjid.me.core.utilities.countIf
-import com.tunjid.me.scaffold.globalui.*
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.WindowSizeClass
+import com.tunjid.me.scaffold.globalui.bottomNavSize
+import com.tunjid.me.scaffold.globalui.isNotExpanded
+import com.tunjid.me.scaffold.globalui.keyboardSize
+import com.tunjid.me.scaffold.globalui.navRailWidth
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
+import com.tunjid.me.scaffold.globalui.supportingPanelWidth
+import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.MoveKind
 import com.tunjid.me.scaffold.nav.NavStateHolder
@@ -64,65 +79,48 @@ internal fun AppRouteContainer(
     val hasNavContent by navStateHolder.state.mappedCollectAsStateWithLifecycle {
         it.supportingRoute != null
     }
-    val navAnimations = remember {
-        MutableNavAnimations()
-    }
-
-    CompositionLocalProvider(
-        LocalNavigationAnimator provides navAnimations,
-    ) {
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = startClearance,
-                    top = topClearance,
-                    bottom = bottomClearance
-                ),
-            content = {
-                val targetSupportingContentWidth = when {
-                    hasNavContent -> WindowSizeClass.EXPANDED.supportingPanelWidth()
-                    else -> maxWidth
-                }
-                val supportingContentWidth by supportingContentWidth(
-                    targetSupportingContentWidth
-                )
-                ResizableRouteContent(
-                    modifier = Modifier
-                        .width(supportingContentWidth)
-                        .background(color = MaterialTheme.colorScheme.surface),
-                    content = supportingContent
-                )
-                ResizableRouteContent(
-                    modifier = Modifier
-                        .width(
-                            mainContentWidth(
-                                windowSizeClass = windowSizeClass,
-                                moveKind = moveKind
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = startClearance,
+                top = topClearance,
+                bottom = bottomClearance
+            ),
+        content = {
+            ResizableRouteContent(
+                modifier = Modifier
+                    .width(
+                        animateWidthChange(
+                            if (hasNavContent) WindowSizeClass.EXPANDED.supportingPanelWidth()
+                            else maxWidth
+                        ).value
+                    )
+                    .background(color = MaterialTheme.colorScheme.surface),
+                content = supportingContent
+            )
+            ResizableRouteContent(
+                modifier = Modifier
+                    .width(
+                        mainContentWidth(
+                            windowSizeClass = windowSizeClass,
+                            moveKind = moveKind
+                        ).value
+                    )
+                    .padding(
+                        start = when {
+                            hasNavContent -> animateWidthChange(
+                                targetSideWidth = windowSizeClass.supportingPanelWidth()
                             ).value
-                        )
-                        .padding(
-                            start = when {
-                                hasNavContent -> supportingContentWidth(
-                                    targetSideWidth = windowSizeClass.supportingPanelWidth()
-                                ).value
 
-                                else -> 0.dp
-                            }
-                        )
-                        .background(color = MaterialTheme.colorScheme.surface),
-                    content = mainContent
-                )
-                LaunchedEffect(supportingContentWidth, hasNavContent) {
-                    val difference = (supportingContentWidth - targetSupportingContentWidth).let {
-                        if (it < 0.dp) it * -1 else it
-                    }
-                    val percentage = difference / targetSupportingContentWidth
-                    navAnimations.isAnimatingSupportingContent.value = percentage >= 0.01f
-                }
-            }
-        )
-    }
+                            else -> 0.dp
+                        }
+                    )
+                    .background(color = MaterialTheme.colorScheme.surface),
+                content = mainContent
+            )
+        }
+    )
 }
 
 @Composable
@@ -164,7 +162,7 @@ private fun BoxWithConstraintsScope.mainContentWidth(
 }
 
 @Composable
-private fun supportingContentWidth(targetSideWidth: Dp) = animateDpAsState(
+private fun animateWidthChange(targetSideWidth: Dp) = animateDpAsState(
     targetValue = targetSideWidth,
     animationSpec = navContentSizeSpring()
 )
@@ -225,18 +223,4 @@ private fun routeContainerPadding(
     paddingValues[3] = bottomClearance
 
     return paddingValues
-}
-
-val LocalNavigationAnimator = staticCompositionLocalOf<NavAnimations> {
-    MutableNavAnimations().apply {
-        isAnimatingSupportingContent.value = false
-    }
-}
-
-interface NavAnimations {
-    val isAnimatingSupportingContent: State<Boolean>
-}
-
-private class MutableNavAnimations : NavAnimations {
-    override var isAnimatingSupportingContent = mutableStateOf(false)
 }
