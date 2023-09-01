@@ -84,11 +84,15 @@ internal fun AppRouteContainer(
                     moveKind = moveKind
                 )
                 ResizableRouteContent(
-                    width = mainContentWidth,
-                    startPadding = when {
-                        hasNavContent -> windowSizeClass.supportingPanelWidth()
-                        else -> 0.dp
-                    },
+                    modifier = Modifier
+                        .width(mainContentWidth)
+                        .padding(
+                            start = when {
+                                hasNavContent -> windowSizeClass.supportingPanelWidth()
+                                else -> 0.dp
+                            }
+                        )
+                        .background(color = MaterialTheme.colorScheme.surface),
                     content = mainContent
                 )
 
@@ -100,7 +104,9 @@ internal fun AppRouteContainer(
                     targetSupportingContentWidth
                 )
                 if (supportingContentWidth != 0.dp) ResizableRouteContent(
-                    width = supportingContentWidth,
+                    modifier = Modifier
+                        .width(supportingContentWidth)
+                        .background(color = MaterialTheme.colorScheme.surface),
                     content = supportingContent
                 )
 
@@ -162,15 +168,11 @@ private fun supportingContentWidth(targetSideWidth: Dp) = animateDpAsState(
 
 @Composable
 private fun ResizableRouteContent(
-    width: Dp,
-    startPadding: Dp? = null,
+    modifier: Modifier,
     content: @Composable () -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .width(width)
-            .padding(start = startPadding ?: 0.dp)
-            .background(color = MaterialTheme.colorScheme.surface),
+        modifier = modifier,
         content = {
             content()
         }
