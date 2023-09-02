@@ -38,6 +38,13 @@ const val NavName = "App"
 typealias NavStateHolder = ActionStateProducer<NavMutation, StateFlow<NavState>>
 typealias NavMutation = NavContext.() -> MultiStackNav
 
+/**
+ * A route that has a id for a [Route] defined in another module
+ */
+data class ExternalRoute(
+    override val id: String,
+) : Route
+
 interface AppRoute : Route {
     @Composable
     fun Render()
@@ -52,7 +59,7 @@ interface AppRoute : Route {
 /**
  * [AppRoute] instances with no state holder
  */
-interface StatelessRoute: AppRoute
+interface StatelessRoute : AppRoute
 
 data class NavItem(
     val name: String,
@@ -141,7 +148,8 @@ fun RouteParser<AppRoute>.parseMultiStackNav(savedState: SavedState) =
                             ),
                             operation = innerFold@{ stackNav, route ->
                                 stackNav.copy(
-                                    routes = stackNav.routes + (parse(routeString = route) ?: Route404)
+                                    routes = stackNav.routes + (parse(routeString = route)
+                                        ?: Route404)
                                 )
                             }
                         )

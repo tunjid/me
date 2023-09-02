@@ -43,6 +43,8 @@ import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.ExternalRoute
+import com.tunjid.treenav.Node
 import com.tunjid.treenav.pop
 import kotlinx.serialization.Serializable
 
@@ -59,7 +61,9 @@ data class ArchiveDetailRoute(
         )
     }
 
-    override val supportingRoute get() = "archives/${kind.type}"
+    override val children: List<Node> = listOf(ExternalRoute("archives/${kind.type}"))
+
+    override val supportingRoute get() = children.first().id
 }
 
 @Composable

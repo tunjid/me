@@ -70,7 +70,9 @@ import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.ExternalRoute
 import com.tunjid.me.scaffold.permissions.Permission
+import com.tunjid.treenav.Node
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -91,11 +93,18 @@ data class ArchiveEditRoute(
         )
     }
 
+    override val children: List<Node> = when (archiveId) {
+        null -> emptyList()
+        else -> listOf(
+            ExternalRoute(
+                id = "archives/${kind.type}/${archiveId.value}/files?type=image&dndEnabled=true"
+            )
+        )
+    }
+
+
     override val supportingRoute
-        get() = when (archiveId) {
-            null -> null
-            else -> "archives/${kind.type}/${archiveId.value}/files?type=image&dndEnabled=true"
-        }
+        get() = children.firstOrNull()?.id
 }
 
 @Composable
