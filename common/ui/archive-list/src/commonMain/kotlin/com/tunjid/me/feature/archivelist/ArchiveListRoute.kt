@@ -16,6 +16,10 @@
 
 package com.tunjid.me.feature.archivelist
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.*
@@ -33,6 +37,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.tunjid.me.core.model.ArchiveKind
@@ -219,7 +224,13 @@ private fun ArchiveList(
                 },
                 itemContent = { item ->
                     GridCell(
-                        modifier = Modifier.animateItemPlacement(),
+                        modifier = Modifier
+                            .animateItemPlacement(
+                                animationSpec = spring(
+                                    stiffness = Spring.StiffnessLow,
+                                    visibilityThreshold = IntOffset.VisibilityThreshold
+                                )
+                            ),
                         item = item,
                         query = currentQuery,
                         onCategoryClicked = { category ->
@@ -288,7 +299,9 @@ private fun FilterCollapseEffect(
     LaunchedEffect(infoFlow) {
         infoFlow
             .map { it.firstOrNull() }
-            .scan<LazyStaggeredGridItemInfo?, Pair<LazyStaggeredGridItemInfo, LazyStaggeredGridItemInfo>?>(null) { oldAndNewInfo, newInfo ->
+            .scan<LazyStaggeredGridItemInfo?, Pair<LazyStaggeredGridItemInfo, LazyStaggeredGridItemInfo>?>(
+                null
+            ) { oldAndNewInfo, newInfo ->
                 when {
                     newInfo == null -> null
                     oldAndNewInfo == null -> newInfo to newInfo
