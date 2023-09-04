@@ -16,7 +16,6 @@
 
 package com.tunjid.me.feature.archivelist
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
@@ -39,11 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
-import com.tunjid.me.core.ui.StickyHeaderGrid
 import com.tunjid.me.core.ui.StickyHeaderStaggeredGrid
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.me.core.ui.scrollbar.scrollbarState
@@ -119,20 +116,16 @@ private fun ArchiveScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
         StickyHeaderStaggeredGrid(
-            modifier = Modifier.zIndex(-1f),
+            modifier = Modifier,
             state = gridState,
             headerMatcher = { it.key.isHeaderKey },
             stickyHeader = {
-                Surface(
-                    modifier = Modifier.padding(end = 16.dp)
-                ) {
                     stickyHeaderItem?.let {
                         StickyHeader(
                             modifier = Modifier.padding(start = 16.dp),
                             item = it
                         )
                     }
-                }
             }
         ) {
             Box {

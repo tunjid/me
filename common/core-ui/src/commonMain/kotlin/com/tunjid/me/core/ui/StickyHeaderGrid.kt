@@ -27,10 +27,13 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridItemInfo
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisallowComposableCalls
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.IntOffset
 
 @Composable
@@ -124,8 +127,7 @@ inline fun <LazyState : ScrollableState, LazyItem> StickyHeaderLayout(
             }
         }
     }
-
-    Box(modifier = modifier) {
+    Box(modifier = modifier.clipToBounds()) {
         content()
         Box(
             modifier = Modifier.offset { IntOffset(x = 0, y = headerOffset) }

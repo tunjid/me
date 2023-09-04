@@ -183,7 +183,8 @@ val Archive.dateTime
     )
 val ArchiveItem.Card.Loaded.headerText
     get(): String = with(archive.dateTime) {
-        "${month.name.lowercase().replaceFirstChar(Char::uppercase)}, $year"
+//        "${month.name.lowercase().replaceFirstChar(Char::uppercase)}, $year"
+        "$year"
     }
 
 @Serializable
