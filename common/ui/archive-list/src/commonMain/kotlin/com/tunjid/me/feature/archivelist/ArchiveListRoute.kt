@@ -120,10 +120,10 @@ private fun ArchiveScreen(
             state = gridState,
             headerMatcher = { it.key.isHeaderKey },
             stickyHeader = {
-                    stickyHeaderItem?.let {
+                    stickyHeaderItem?.let { item ->
                         StickyHeader(
-                            modifier = Modifier.padding(start = 16.dp),
-                            item = it
+                            modifier = Modifier.fillMaxWidth(),
+                            item = item
                         )
                     }
             }

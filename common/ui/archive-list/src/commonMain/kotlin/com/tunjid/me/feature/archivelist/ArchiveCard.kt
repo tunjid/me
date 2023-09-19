@@ -65,18 +65,18 @@ fun StickyHeader(
     modifier: Modifier = Modifier,
     item: ArchiveItem.Header
 ) {
-    Box(modifier = modifier.height(32.dp)) {
+    Box(modifier = modifier.height(24.dp)) {
         FilledTonalButton(
+            modifier = Modifier.align(Alignment.Center),
             onClick = {},
             contentPadding = PaddingValues(
-                horizontal = 4.dp,
-                vertical = 4.dp
+                vertical = 2.dp
             ),
             content = {
                 Text(
                     text = item.text,
                     fontSize = TextUnit(
-                        value = 12f,
+                        value = 10f,
                         type = TextUnitType.Sp
                     )
                 )
