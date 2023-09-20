@@ -32,11 +32,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -65,15 +67,17 @@ fun StickyHeader(
     modifier: Modifier = Modifier,
     item: ArchiveItem.Header
 ) {
-    Box(modifier = modifier.height(24.dp)) {
-        FilledTonalButton(
+    Box(modifier = modifier) {
+        Surface(
             modifier = Modifier.align(Alignment.Center),
-            onClick = {},
-            contentPadding = PaddingValues(
-                vertical = 2.dp
-            ),
+            shape = RoundedCornerShape(8.dp),
+            tonalElevation = 32.dp,
             content = {
                 Text(
+                    modifier = Modifier.padding(
+                        horizontal = 8.dp,
+                        vertical = 4.dp,
+                    ),
                     text = item.text,
                     fontSize = TextUnit(
                         value = 10f,

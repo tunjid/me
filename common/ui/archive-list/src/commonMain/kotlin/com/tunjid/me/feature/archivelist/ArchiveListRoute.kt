@@ -16,13 +16,13 @@
 
 package com.tunjid.me.feature.archivelist
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.*
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
@@ -218,9 +219,15 @@ private fun ArchiveList(
                 itemContent = { item ->
                     GridCell(
                         modifier = Modifier
+                            .animateContentSize(
+                                animationSpec = spring(
+                                    stiffness = Spring.StiffnessMediumLow,
+                                    visibilityThreshold = IntSize.VisibilityThreshold
+                                )
+                            )
                             .animateItemPlacement(
                                 animationSpec = spring(
-                                    stiffness = Spring.StiffnessLow,
+                                    stiffness = Spring.StiffnessMediumLow,
                                     visibilityThreshold = IntOffset.VisibilityThreshold
                                 )
                             ),
