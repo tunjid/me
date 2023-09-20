@@ -53,7 +53,7 @@ import com.tunjid.me.scaffold.globalui.isNotExpanded
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.navRailWidth
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
-import com.tunjid.me.scaffold.globalui.supportingPanelWidth
+import com.tunjid.me.scaffold.globalui.secondaryContentWidth
 import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.MoveKind
@@ -67,8 +67,8 @@ internal fun AppRouteContainer(
     globalUiStateHolder: GlobalUiStateHolder,
     navStateHolder: NavStateHolder,
     moveKind: MoveKind,
-    mainContent: @Composable () -> Unit,
-    supportingContent: @Composable () -> Unit,
+    primaryContent: @Composable () -> Unit,
+    secondaryContent: @Composable () -> Unit,
 ) {
     val paddingValues = routeContainerPadding(globalUiStateHolder)
     val (startClearance, topClearance, _, bottomClearance) = paddingValues
@@ -77,7 +77,7 @@ internal fun AppRouteContainer(
         it.windowSizeClass
     }
     val hasNavContent by navStateHolder.state.mappedCollectAsStateWithLifecycle {
-        it.supportingRoute != null
+        it.secondaryRoute != null
     }
     BoxWithConstraints(
         modifier = Modifier
@@ -92,17 +92,17 @@ internal fun AppRouteContainer(
                 modifier = Modifier
                     .width(
                         animateWidthChange(
-                            if (hasNavContent) WindowSizeClass.EXPANDED.supportingPanelWidth()
+                            if (hasNavContent) WindowSizeClass.EXPANDED.secondaryContentWidth()
                             else maxWidth
                         ).value
                     )
                     .background(color = MaterialTheme.colorScheme.surface),
-                content = { supportingContent() }
+                content = { secondaryContent() }
             )
             Box(
                 modifier = Modifier
                     .width(
-                        mainContentWidth(
+                        primaryContentWidth(
                             windowSizeClass = windowSizeClass,
                             moveKind = moveKind
                         ).value
@@ -110,21 +110,21 @@ internal fun AppRouteContainer(
                     .padding(
                         start = when {
                             hasNavContent -> animateWidthChange(
-                                targetSideWidth = windowSizeClass.supportingPanelWidth()
+                                targetSideWidth = windowSizeClass.secondaryContentWidth()
                             ).value
 
                             else -> 0.dp
                         }
                     )
                     .background(color = MaterialTheme.colorScheme.surface),
-                content = { mainContent() }
+                content = { primaryContent() }
             )
         }
     )
 }
 
 @Composable
-private fun BoxWithConstraintsScope.mainContentWidth(
+private fun BoxWithConstraintsScope.primaryContentWidth(
     windowSizeClass: WindowSizeClass,
     moveKind: MoveKind
 ): State<Dp> {
@@ -139,11 +139,11 @@ private fun BoxWithConstraintsScope.mainContentWidth(
         key2 = moveKind,
         key3 = moveComplete,
     ) {
-        if (moveKind == MoveKind.SupportingToMain && !moveComplete) {
-            value = windowSizeClass.supportingPanelWidth()
+        if (moveKind == MoveKind.SecondaryToPrimary && !moveComplete) {
+            value = windowSizeClass.secondaryContentWidth()
 
             val anim = TargetBasedAnimation(
-                animationSpec = navContentSizeSpring(),
+                animationSpec = secondaryContentSizeSpring(),
                 typeConverter = Dp.VectorConverter,
                 initialValue = value,
                 targetValue = maxWidth
@@ -164,10 +164,10 @@ private fun BoxWithConstraintsScope.mainContentWidth(
 @Composable
 private fun animateWidthChange(targetSideWidth: Dp) = animateDpAsState(
     targetValue = targetSideWidth,
-    animationSpec = navContentSizeSpring()
+    animationSpec = secondaryContentSizeSpring()
 )
 
-private fun navContentSizeSpring() = spring<Dp>(
+private fun secondaryContentSizeSpring() = spring<Dp>(
     stiffness = Spring.StiffnessMediumLow
 )
 

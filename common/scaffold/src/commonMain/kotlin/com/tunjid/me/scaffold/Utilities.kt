@@ -18,7 +18,7 @@ package com.tunjid.me.scaffold
 
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.NavState
-import com.tunjid.me.scaffold.nav.mainRoute
+import com.tunjid.me.scaffold.nav.primaryRoute
 import com.tunjid.mutator.Mutation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,11 +28,11 @@ import kotlinx.coroutines.flow.map
 /**
  * Updates [State] with whether it is the main navigation content
  */
-fun <State> StateFlow<NavState>.isInMainNavMutations(
+fun <State> StateFlow<NavState>.IsInPrimaryNavMutations(
     route: AppRoute,
     mutation: State.(Boolean) -> State,
-): Flow<Mutation<State>> = map { route.id == it.mainRoute.id }
+): Flow<Mutation<State>> = map { route.id == it.primaryRoute.id }
     .distinctUntilChanged()
-    .map { isInMainNav ->
-        com.tunjid.mutator.mutation { mutation(isInMainNav) }
+    .map { IsInPrimaryNav ->
+        com.tunjid.mutator.mutation { mutation(IsInPrimaryNav) }
     }

@@ -25,8 +25,6 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.*
 import kotlinx.coroutines.flow.map
 
@@ -56,11 +54,11 @@ fun Scaffold(
         val containerTwoRoute: AppRoute by remember {
             derivedStateOf { moveableNav.containerTwoAndRoute.route }
         }
-        val mainContainer: ContentContainer? by remember {
-            derivedStateOf { moveableNav.mainContainer }
+        val primaryContainer: ContentContainer? by remember {
+            derivedStateOf { moveableNav.primaryContainer }
         }
-        val supportingContainer: ContentContainer? by remember {
-            derivedStateOf { moveableNav.supportingContainer }
+        val secondaryContainer: ContentContainer? by remember {
+            derivedStateOf { moveableNav.secondaryContainer }
         }
 
         val saveableStateHolder: SaveableStateHolder = rememberSaveableStateHolder()
@@ -89,14 +87,14 @@ fun Scaffold(
                     globalUiStateHolder = globalUiStateHolder,
                     navStateHolder = navStateHolder,
                     moveKind = moveKind,
-                    mainContent = {
-                        mainContainer.content(
+                    primaryContent = {
+                        primaryContainer.content(
                             containerOneContent = containerOneContent,
                             containerTwoContent = containerTwoContent
                         )
                     },
-                    supportingContent = {
-                        supportingContainer.content(
+                    secondaryContent = {
+                        secondaryContainer.content(
                             containerOneContent = containerOneContent,
                             containerTwoContent = containerTwoContent
                         )

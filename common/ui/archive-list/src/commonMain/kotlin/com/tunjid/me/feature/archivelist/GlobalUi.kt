@@ -68,7 +68,7 @@ fun GlobalUi(
 
                     SIGN_IN -> onAction(
                         Action.Navigate {
-                            mainNav.push("sign-in".toRoute)
+                            navState.push("sign-in".toRoute)
                         }
                     )
                 }
@@ -81,7 +81,7 @@ fun GlobalUi(
                 onAction(Action.Navigate {
                     val kind = state.queryState.currentQuery.kind
                     val route = "archives/${kind.type}/create".toRoute
-                    mainNav.push(route)
+                    navState.push(route)
                 })
             },
             navVisibility = NavVisibility.Visible,

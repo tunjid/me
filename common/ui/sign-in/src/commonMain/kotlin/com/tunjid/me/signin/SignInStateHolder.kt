@@ -111,8 +111,8 @@ private fun Flow<Action.Submit>.submissionMutations(
         }
 
 private fun NavContext.resetNav(): MultiStackNav {
-    var newNav = mainNav
-    for (i in 0.until(mainNav.stacks.size)) {
+    var newNav = navState
+    for (i in 0.until(navState.stacks.size)) {
         newNav = newNav.switch(i)
         while (newNav.canGoUp) newNav = newNav.pop()
     }

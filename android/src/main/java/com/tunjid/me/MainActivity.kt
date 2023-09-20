@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         val meApp = app.meApp
 
         onBackPressedDispatcher.addCallback(this) {
-            meApp.navStateHolder.accept { mainNav.pop() }
+            meApp.navStateHolder.accept { navState.pop() }
         }
 
         val root = ComposeView(context = this)

@@ -30,7 +30,7 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
-import com.tunjid.me.scaffold.isInMainNavMutations
+import com.tunjid.me.scaffold.IsInPrimaryNavMutations
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.consumeNavActions
@@ -41,7 +41,6 @@ import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.mapLatestToManyMutations
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.queries
 import com.tunjid.tiler.toPivotedTileInputs
@@ -94,9 +93,9 @@ class ActualArchiveListStateHolder(
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
         authRepository.authMutations(),
-        navStateFlow.isInMainNavMutations(
+        navStateFlow.IsInPrimaryNavMutations(
             route = route,
-            mutation = { copy(isInMainNav = it) }
+            mutation = { copy(isInPrimaryNav = it) }
         ),
     ),
     actionTransform = stateHolder@{ actions ->

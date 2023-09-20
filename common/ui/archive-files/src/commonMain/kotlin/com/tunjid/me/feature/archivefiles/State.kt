@@ -55,7 +55,7 @@ data class State(
     @ProtoNumber(1)
     val hasFetchedAuthStatus: Boolean = false,
     @ProtoNumber(2)
-    val isInMainNav: Boolean = true,
+    val isInPrimaryNav: Boolean = true,
     @ProtoNumber(3)
     val hasStoragePermissions: Boolean = false,
     @Transient

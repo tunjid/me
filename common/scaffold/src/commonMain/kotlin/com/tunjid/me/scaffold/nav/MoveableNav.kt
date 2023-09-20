@@ -27,22 +27,22 @@ import kotlinx.coroutines.flow.scan
  * Class that allows moving navigation content between composables
  */
 internal data class MoveableNav(
-    val mainRouteId: String = Route404.id,
-    val supportingRouteId: String? = null,
+    val primaryRouteId: String = Route404.id,
+    val secondaryRouteId: String? = null,
     val moveKind: MoveKind = MoveKind.None,
     val containerOneAndRoute: ContainerAndRoute = ContainerAndRoute(container = ContentContainer.One),
     val containerTwoAndRoute: ContainerAndRoute = ContainerAndRoute(container = ContentContainer.Two, route = Route403)
 )
 
-internal val MoveableNav.mainContainer: ContentContainer
-    get() = when (mainRouteId) {
+internal val MoveableNav.primaryContainer: ContentContainer
+    get() = when (primaryRouteId) {
         containerOneAndRoute.route.id -> containerOneAndRoute.container
         containerTwoAndRoute.route.id -> containerTwoAndRoute.container
         else -> throw IllegalArgumentException()
     }
 
-internal val MoveableNav.supportingContainer: ContentContainer?
-    get() = when (supportingRouteId) {
+internal val MoveableNav.secondaryContainer: ContentContainer?
+    get() = when (secondaryRouteId) {
         containerOneAndRoute.route.id -> containerOneAndRoute.container
         containerTwoAndRoute.route.id -> containerTwoAndRoute.container
         else -> null
@@ -58,40 +58,40 @@ internal enum class ContentContainer {
 }
 
 internal enum class MoveKind {
-    MainToSupporting, SupportingToMain, None
+    PrimaryToSecondary, SecondaryToPrimary, None
 }
 
 internal fun StateFlow<NavState>.moveableNav(): Flow<MoveableNav> =
     this
-        .map { it.mainRoute to it.supportingRoute }
+        .map { it.primaryRoute to it.secondaryRoute }
         .distinctUntilChanged()
         .scan(
             MoveableNav(
-                mainRouteId = value.mainRoute.id,
+                primaryRouteId = value.primaryRoute.id,
                 containerOneAndRoute = ContainerAndRoute(
-                    route = value.mainRoute,
+                    route = value.primaryRoute,
                     container = ContentContainer.One
                 ),
             )
-        ) { previousMoveableNav, (mainRoute, supportingRoute) ->
+        ) { previousMoveableNav, (primaryRoute, secondaryRoute) ->
             val moveableNavContext = MoveableNavContext(
                 slotOneAndRoute = previousMoveableNav.containerOneAndRoute,
                 slotTwoAndRoute = previousMoveableNav.containerTwoAndRoute
             )
             moveableNavContext.moveToFreeContainer(
-                incoming = supportingRoute,
-                outgoing = mainRoute,
+                incoming = secondaryRoute,
+                outgoing = primaryRoute,
             )
             moveableNavContext.moveToFreeContainer(
-                incoming = mainRoute,
-                outgoing = supportingRoute,
+                incoming = primaryRoute,
+                outgoing = secondaryRoute,
             )
             MoveableNav(
-                mainRouteId = mainRoute.id,
-                supportingRouteId = supportingRoute?.id,
+                primaryRouteId = primaryRoute.id,
+                secondaryRouteId = secondaryRoute?.id,
                 moveKind = when {
-                    previousMoveableNav.mainRouteId == supportingRoute?.id -> MoveKind.MainToSupporting
-                    mainRoute.id == previousMoveableNav.supportingRouteId -> MoveKind.SupportingToMain
+                    previousMoveableNav.primaryRouteId == secondaryRoute?.id -> MoveKind.PrimaryToSecondary
+                    primaryRoute.id == previousMoveableNav.secondaryRouteId -> MoveKind.SecondaryToPrimary
                     else -> MoveKind.None
                 },
                 containerOneAndRoute = moveableNavContext.slotOneAndRoute,

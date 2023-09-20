@@ -75,7 +75,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
     val canEdit = state.canEdit
 
 //    val navigator = LocalNavigator.current
-    if (state.isInMainNav) GlobalUi(
+    if (state.IsInPrimaryNav) GlobalUi(
         state = state,
         actions = actions
     )
@@ -132,6 +132,6 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
     // Pop nav if this archive does not exist anymore
     val wasDeleted = state.wasDeleted
     LaunchedEffect(wasDeleted) {
-        if (wasDeleted) actions(Action.Navigate { mainNav.pop() })
+        if (wasDeleted) actions(Action.Navigate { navState.pop() })
     }
 }

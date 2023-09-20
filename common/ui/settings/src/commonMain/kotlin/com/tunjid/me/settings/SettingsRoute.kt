@@ -78,7 +78,7 @@ private fun SettingsScreen(stateHolder: SettingsStateHolder) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        actions(Action.Navigate { mainNav.push(path.toRoute) })
+                        actions(Action.Navigate { navState.push(path.toRoute) })
                     },
                 content = {
                     Text(

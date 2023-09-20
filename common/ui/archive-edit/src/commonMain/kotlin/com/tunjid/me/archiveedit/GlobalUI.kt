@@ -18,12 +18,9 @@ package com.tunjid.me.archiveedit
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
 import com.tunjid.me.core.ui.icons.Preview
@@ -61,7 +58,7 @@ internal fun GlobalUi(
                 when (it.id) {
                     "preview", "edit" -> onAction(Action.ToggleEditView)
                     "gallery" -> onAction(Action.Navigate {
-                        mainNav.push(
+                        navState.push(
                             "archives/${state.kind.type}/${state.upsert.id?.value}/files?dndEnabled=true".toRoute
                         )
                     })

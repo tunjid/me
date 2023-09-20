@@ -76,7 +76,7 @@ private fun ArchiveScreen(
     val (state, actions) = stateHolder
     val updatedItems by rememberUpdatedState(state.items)
 
-    if (state.isInMainNav) GlobalUi(
+    if (state.isInPrimaryNav) GlobalUi(
         state = state,
         onAction = actions
     )
@@ -134,7 +134,7 @@ private fun ArchiveScreen(
                     gridState = gridState,
                     cardWidth = cardWidth,
                     items = state.items,
-                    isInMainNav = state.isInMainNav,
+                    IsInPrimaryNav = state.isInPrimaryNav,
                     currentQuery = state.queryState.currentQuery,
                     actions = actions
                 )
@@ -190,7 +190,7 @@ private fun ArchiveList(
     gridState: LazyStaggeredGridState,
     items: List<ArchiveItem>,
     currentQuery: ArchiveQuery,
-    isInMainNav: Boolean,
+    IsInPrimaryNav: Boolean,
     cardWidth: Dp,
     actions: (Action) -> Unit,
 ) {
@@ -240,8 +240,8 @@ private fun ArchiveList(
                         },
                         navigate = { path ->
                             actions(Action.Navigate {
-                                if (isInMainNav) mainNav.push(route = path.toRoute)
-                                else mainNav.swap(route = path.toRoute)
+                                if (IsInPrimaryNav) navState.push(route = path.toRoute)
+                                else navState.swap(route = path.toRoute)
                             })
                         }
                     )

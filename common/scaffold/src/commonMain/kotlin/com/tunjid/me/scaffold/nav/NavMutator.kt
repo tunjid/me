@@ -70,7 +70,7 @@ data class NavItem(
 
 data class NavState(
     val mainNav: MultiStackNav,
-    val supportingRoute: AppRoute?
+    val secondaryRoute: AppRoute?
 )
 
 val EmptyNavState = NavState(
@@ -83,10 +83,10 @@ val EmptyNavState = NavState(
             )
         )
     ),
-    supportingRoute = null
+    secondaryRoute = null
 )
 
-val NavState.mainRoute: AppRoute get() = mainNav.current as? AppRoute ?: Route404
+val NavState.primaryRoute: AppRoute get() = mainNav.current as? AppRoute ?: Route404
 
 @Inject
 class PersistedNavStateHolder(
@@ -133,7 +133,7 @@ private fun RouteParser<AppRoute>.parseNavState(
     newMultiStackNav: MultiStackNav
 ) = NavState(
     mainNav = newMultiStackNav,
-    supportingRoute = newMultiStackNav.navRailRoute?.let(this::parse)
+    secondaryRoute = newMultiStackNav.secondaryRoute?.let(this::parse)
 )
 
 fun RouteParser<AppRoute>.parseMultiStackNav(savedState: SavedState) =

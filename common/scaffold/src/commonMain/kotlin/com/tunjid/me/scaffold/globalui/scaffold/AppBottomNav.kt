@@ -17,7 +17,6 @@
 package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -83,7 +82,7 @@ internal fun BoxScope.AppBottomNav(
                         label = { Text(navItem.name) },
                         selected = navItem.selected,
                         onClick = {
-                            navStateHolder.accept { mainNav.navItemSelected(item = navItem) }
+                            navStateHolder.accept { navState.navItemSelected(item = navItem) }
                         }
                     )
                 }

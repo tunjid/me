@@ -16,7 +16,6 @@
 
 package com.tunjid.me.feature.archivelist
 
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -44,7 +43,7 @@ import kotlinx.serialization.protobuf.ProtoNumber
 @Serializable
 data class State(
     @ProtoNumber(2)
-    val isInMainNav: Boolean = false,
+    val isInPrimaryNav: Boolean = false,
     @ProtoNumber(3)
     val hasFetchedAuthStatus: Boolean = false,
     @ProtoNumber(4)
