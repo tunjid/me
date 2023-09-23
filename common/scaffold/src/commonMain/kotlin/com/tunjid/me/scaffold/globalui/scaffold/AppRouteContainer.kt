@@ -23,8 +23,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -32,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -40,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -52,8 +52,8 @@ import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.isNotExpanded
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.navRailWidth
-import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.globalui.secondaryContentWidth
+import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.MoveKind
@@ -79,9 +79,19 @@ internal fun AppRouteContainer(
     val hasNavContent by navStateHolder.state.mappedCollectAsStateWithLifecycle {
         it.secondaryRoute != null
     }
-    BoxWithConstraints(
+    val density = LocalDensity.current
+    var maxIntWidth by remember { mutableIntStateOf(0) }
+    val maxDpWidth = with(density) { maxIntWidth.toDp() }
+    Box(
         modifier = Modifier
             .fillMaxWidth()
+            .layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                maxIntWidth = placeable.width
+                layout(placeable.width, placeable.height) {
+                    placeable.placeRelative(x = 0, y = 0)
+                }
+            }
             .padding(
                 start = startClearance,
                 top = topClearance,
@@ -93,7 +103,7 @@ internal fun AppRouteContainer(
                     .width(
                         animateWidthChange(
                             if (hasNavContent) WindowSizeClass.EXPANDED.secondaryContentWidth()
-                            else maxWidth
+                            else maxDpWidth
                         ).value
                     )
                     .background(color = MaterialTheme.colorScheme.surface),
@@ -104,7 +114,8 @@ internal fun AppRouteContainer(
                     .width(
                         primaryContentWidth(
                             windowSizeClass = windowSizeClass,
-                            moveKind = moveKind
+                            moveKind = moveKind,
+                            maxWidth = maxDpWidth,
                         ).value
                     )
                     .padding(
@@ -124,9 +135,10 @@ internal fun AppRouteContainer(
 }
 
 @Composable
-private fun BoxWithConstraintsScope.primaryContentWidth(
+private fun primaryContentWidth(
     windowSizeClass: WindowSizeClass,
-    moveKind: MoveKind
+    moveKind: MoveKind,
+    maxWidth: Dp,
 ): State<Dp> {
     if (windowSizeClass.isNotExpanded) return mutableStateOf(maxWidth)
 
