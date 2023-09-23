@@ -45,15 +45,19 @@ data class SettingsRoute(
     override val id: String,
 ) : AppRoute {
     @Composable
-    override fun Render() {
+    override fun Render(modifier: Modifier) {
         SettingsScreen(
+            modifier = modifier,
             stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }
 
 @Composable
-private fun SettingsScreen(stateHolder: SettingsStateHolder) {
+private fun SettingsScreen(
+    modifier: Modifier,
+    stateHolder: SettingsStateHolder
+) {
     val (state, actions) = stateHolder
     val scrollState = rememberScrollState()
 
@@ -68,7 +72,7 @@ private fun SettingsScreen(stateHolder: SettingsStateHolder) {
     )
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.Start,

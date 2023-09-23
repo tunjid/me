@@ -53,15 +53,19 @@ data class ProfileRoute(
     override val id: String,
 ) : AppRoute {
     @Composable
-    override fun Render() {
+    override fun Render(modifier: Modifier) {
         ProfileScreen(
+            modifier = modifier,
             stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }
 
 @Composable
-private fun ProfileScreen(stateHolder: ProfileStateHolder) {
+private fun ProfileScreen(
+    modifier: Modifier,
+    stateHolder: ProfileStateHolder
+) {
     val (state, actions) = stateHolder
     val scrollState = rememberScrollState()
 
@@ -76,7 +80,7 @@ private fun ProfileScreen(stateHolder: ProfileStateHolder) {
     )
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -85,7 +89,7 @@ private fun ProfileScreen(stateHolder: ProfileStateHolder) {
         val painter = if (user != null) rememberAsyncRasterPainter(user.imageUrl) else null
 
         Spacer(modifier = Modifier.height(32.dp))
-        val modifier = Modifier
+        val imageModifier = Modifier
             .padding(horizontal = 16.dp)
             .size(96.dp)
 
@@ -93,12 +97,12 @@ private fun ProfileScreen(stateHolder: ProfileStateHolder) {
             painter = painter,
             contentScale = ContentScale.Crop,
             contentDescription = null,
-            modifier = modifier.clip(CircleShape)
+            modifier = imageModifier.clip(CircleShape)
         ) else Image(
             imageVector = Icons.Default.Person,
             contentScale = ContentScale.Crop,
             contentDescription = null,
-            modifier = modifier.clip(CircleShape)
+            modifier = imageModifier.clip(CircleShape)
         )
 
         state.fields.forEach { field ->

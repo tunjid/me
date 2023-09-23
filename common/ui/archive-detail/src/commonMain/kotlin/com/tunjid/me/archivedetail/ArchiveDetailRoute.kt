@@ -55,8 +55,9 @@ data class ArchiveDetailRoute(
     val archiveId: ArchiveId
 ) : AppRoute {
     @Composable
-    override fun Render() {
+    override fun Render(modifier: Modifier) {
         ArchiveDetailScreen(
+            modifier = modifier,
             stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
@@ -67,14 +68,14 @@ data class ArchiveDetailRoute(
 }
 
 @Composable
-private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
+private fun ArchiveDetailScreen(
+    modifier: Modifier,
+    stateHolder: ArchiveDetailStateHolder
+) {
     val (state, actions) = stateHolder
     val scrollState = rememberScrollState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
 
-    val canEdit = state.canEdit
-
-//    val navigator = LocalNavigator.current
     if (state.IsInPrimaryNav) GlobalUi(
         state = state,
         actions = actions
@@ -83,7 +84,7 @@ private fun ArchiveDetailScreen(stateHolder: ArchiveDetailStateHolder) {
     val archive = state.archive
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

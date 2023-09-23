@@ -62,8 +62,9 @@ data class ArchiveListRoute(
     val kind: ArchiveKind,
 ) : AppRoute {
     @Composable
-    override fun Render() {
+    override fun Render(modifier: Modifier) {
         ArchiveScreen(
+            modifier = modifier,
             stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
@@ -71,6 +72,7 @@ data class ArchiveListRoute(
 
 @Composable
 private fun ArchiveScreen(
+    modifier: Modifier,
     stateHolder: ArchiveListStateHolder,
 ) {
     val (state, actions) = stateHolder
@@ -109,7 +111,9 @@ private fun ArchiveScreen(
             }
     }
 
-    Column {
+    Column(
+        modifier = modifier
+    ) {
         Spacer(modifier = Modifier.height(16.dp))
         ArchiveFilters(
             queryState = state.queryState,
@@ -121,12 +125,12 @@ private fun ArchiveScreen(
             state = gridState,
             headerMatcher = { it.key.isHeaderKey },
             stickyHeader = {
-                    stickyHeaderItem?.let { item ->
-                        StickyHeader(
-                            modifier = Modifier.fillMaxWidth(),
-                            item = item
-                        )
-                    }
+                stickyHeaderItem?.let { item ->
+                    StickyHeader(
+                        modifier = Modifier.fillMaxWidth(),
+                        item = item
+                    )
+                }
             }
         ) {
             Box {

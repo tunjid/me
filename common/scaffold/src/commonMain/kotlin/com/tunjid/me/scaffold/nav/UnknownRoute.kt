@@ -30,9 +30,9 @@ import kotlinx.serialization.Serializable
 data class UnknownRoute(override val id: String = "404") : AppRoute, StatelessRoute {
 
     @Composable
-    override fun Render() {
+    override fun Render(modifier: Modifier) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = modifier.fillMaxSize()
         ) {
             Text(
                 modifier = Modifier
@@ -51,7 +51,7 @@ object Route403 : AppRoute, StatelessRoute {
         get() = "403"
 
     @Composable
-    override fun Render() {
+    override fun Render(modifier: Modifier) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {

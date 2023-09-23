@@ -38,15 +38,19 @@ data class SignInRoute(
     override val id: String,
 ) : AppRoute {
     @Composable
-    override fun Render() {
+    override fun Render(modifier: Modifier) {
         SignInScreen(
+            modifier = modifier,
             stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
 }
 
 @Composable
-private fun SignInScreen(stateHolder: SignInStateHolder) {
+private fun SignInScreen(
+    modifier: Modifier,
+    stateHolder: SignInStateHolder
+) {
     val (state, actions) = stateHolder
     val scrollState = rememberScrollState()
 
@@ -56,7 +60,7 @@ private fun SignInScreen(stateHolder: SignInStateHolder) {
     )
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,

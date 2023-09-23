@@ -140,7 +140,7 @@ private fun rememberMoveableContainerContent(
     return remember(route) {
         movableContentOf {
             saveableStateHolder.SaveableStateProvider(route.id) {
-                route.Render()
+                route.Render(Modifier)
             }
         }
     }
