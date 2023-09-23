@@ -49,10 +49,10 @@ fun Scaffold(
             derivedStateOf { moveableNav.moveKind }
         }
         val containerOneRoute by remember {
-            derivedStateOf { moveableNav.containerOneAndRoute.route }
+            derivedStateOf { moveableNav[ContentContainer.One] }
         }
         val containerTwoRoute: AppRoute by remember {
-            derivedStateOf { moveableNav.containerTwoAndRoute.route }
+            derivedStateOf { moveableNav[ContentContainer.Two] }
         }
         val primaryContainer: ContentContainer? by remember {
             derivedStateOf { moveableNav.primaryContainer }

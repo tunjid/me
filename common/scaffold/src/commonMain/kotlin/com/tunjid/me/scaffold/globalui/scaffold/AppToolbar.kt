@@ -49,7 +49,7 @@ import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.NavStateHolder
-import com.tunjid.me.scaffold.nav.Route404
+import com.tunjid.me.scaffold.nav.UnknownRoute
 import com.tunjid.me.scaffold.nav.canGoUp
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import com.tunjid.treenav.MultiStackNav
@@ -239,8 +239,8 @@ fun Test() {
                         StackNav(
                             name = "Preview",
                             routes = listOf(
-                                Route404,
-                                Route404
+                                UnknownRoute(id = "-"),
+                                UnknownRoute(id = "--")
                             )
                         )
                     )

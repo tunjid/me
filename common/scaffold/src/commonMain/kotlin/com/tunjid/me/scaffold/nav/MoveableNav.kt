@@ -27,35 +27,31 @@ import kotlinx.coroutines.flow.scan
  * Class that allows moving navigation content between composables
  */
 internal data class MoveableNav(
-    val primaryRouteId: String = Route404.id,
-    val secondaryRouteId: String? = null,
+    val primaryRoute: AppRoute = UnknownRoute(ContentContainer.One.name),
+    val secondaryRoute: AppRoute? = null,
+    val predictiveBackRoute: AppRoute? = null,
     val moveKind: MoveKind = MoveKind.None,
-    val containerOneAndRoute: ContainerAndRoute = ContainerAndRoute(container = ContentContainer.One),
-    val containerTwoAndRoute: ContainerAndRoute = ContainerAndRoute(container = ContentContainer.Two, route = Route403)
+    val routeIdsToContainers: Map<String, ContentContainer> = ContentContainer.entries
+        .associateBy(ContentContainer::name),
 )
 
 internal val MoveableNav.primaryContainer: ContentContainer
-    get() = when (primaryRouteId) {
-        containerOneAndRoute.route.id -> containerOneAndRoute.container
-        containerTwoAndRoute.route.id -> containerTwoAndRoute.container
-        else -> throw IllegalArgumentException()
-    }
+    get() = routeIdsToContainers.getValue(primaryRoute.id)
 
 internal val MoveableNav.secondaryContainer: ContentContainer?
-    get() = when (secondaryRouteId) {
-        containerOneAndRoute.route.id -> containerOneAndRoute.container
-        containerTwoAndRoute.route.id -> containerTwoAndRoute.container
-        else -> null
-    }
-
-internal data class ContainerAndRoute(
-    val route: AppRoute = Route404,
-    val container: ContentContainer,
-)
+    get() = routeIdsToContainers[secondaryRoute?.id]
 
 internal enum class ContentContainer {
     One, Two
 }
+
+internal operator fun MoveableNav.get(container: ContentContainer): AppRoute =
+    when (container) {
+        routeIdsToContainers[primaryRoute.id] -> primaryRoute
+        routeIdsToContainers[secondaryRoute?.id] -> secondaryRoute
+        routeIdsToContainers[predictiveBackRoute?.id] -> predictiveBackRoute
+        else -> Route403
+    } ?: Route403
 
 internal enum class MoveKind {
     PrimaryToSecondary, SecondaryToPrimary, None
@@ -63,55 +59,54 @@ internal enum class MoveKind {
 
 internal fun StateFlow<NavState>.moveableNav(): Flow<MoveableNav> =
     this
-        .map { it.primaryRoute to it.secondaryRoute }
+        .map { navState ->
+            Triple(
+                navState.primaryRoute,
+                navState.secondaryRoute,
+                navState.predictiveBackRoute,
+            )
+        }
         .distinctUntilChanged()
         .scan(
+            with(MoveableNav()) {
+                copy(
+                    primaryRoute = value.primaryRoute,
+                    secondaryRoute = value.secondaryRoute,
+                    routeIdsToContainers = routeIdsToContainers.include(
+                        listOfNotNull(
+                            value.primaryRoute,
+                            value.secondaryRoute
+                        )
+                    )
+                )
+            }
+        ) { previousMoveableNav, (primaryRoute, secondaryRoute, predictiveBackRoute) ->
+            val routesToContainers = previousMoveableNav.routeIdsToContainers
+                .include(listOfNotNull(primaryRoute, secondaryRoute))
+
             MoveableNav(
-                primaryRouteId = value.primaryRoute.id,
-                containerOneAndRoute = ContainerAndRoute(
-                    route = value.primaryRoute,
-                    container = ContentContainer.One
-                ),
-            )
-        ) { previousMoveableNav, (primaryRoute, secondaryRoute) ->
-            val moveableNavContext = MoveableNavContext(
-                slotOneAndRoute = previousMoveableNav.containerOneAndRoute,
-                slotTwoAndRoute = previousMoveableNav.containerTwoAndRoute
-            )
-            moveableNavContext.moveToFreeContainer(
-                incoming = secondaryRoute,
-                outgoing = primaryRoute,
-            )
-            moveableNavContext.moveToFreeContainer(
-                incoming = primaryRoute,
-                outgoing = secondaryRoute,
-            )
-            MoveableNav(
-                primaryRouteId = primaryRoute.id,
-                secondaryRouteId = secondaryRoute?.id,
+                primaryRoute = primaryRoute,
+                secondaryRoute = secondaryRoute,
+                predictiveBackRoute = predictiveBackRoute,
                 moveKind = when {
-                    previousMoveableNav.primaryRouteId == secondaryRoute?.id -> MoveKind.PrimaryToSecondary
-                    primaryRoute.id == previousMoveableNav.secondaryRouteId -> MoveKind.SecondaryToPrimary
+                    previousMoveableNav.primaryRoute.id == secondaryRoute?.id -> MoveKind.PrimaryToSecondary
+                    primaryRoute.id == previousMoveableNav.secondaryRoute?.id -> MoveKind.SecondaryToPrimary
                     else -> MoveKind.None
                 },
-                containerOneAndRoute = moveableNavContext.slotOneAndRoute,
-                containerTwoAndRoute = moveableNavContext.slotTwoAndRoute,
+                routeIdsToContainers = routesToContainers,
             )
         }
 
-private class MoveableNavContext(
-    var slotOneAndRoute: ContainerAndRoute,
-    var slotTwoAndRoute: ContainerAndRoute
-)
+private fun Map<String, ContentContainer>.include(
+    incoming: List<AppRoute>,
+): Map<String, ContentContainer> {
+    val routesToAdd = incoming.filterNot { contains(it.id) }
+    val relevantRouteIds = incoming.map { it.id }.toSet()
+    val sortedByIrrelevance = entries.sortedBy { relevantRouteIds.contains(it.key) }
 
-private fun MoveableNavContext.moveToFreeContainer(incoming: AppRoute?, outgoing: AppRoute?) =
-    when (incoming) {
-        null,
-        slotOneAndRoute.route,
-        slotTwoAndRoute.route -> Unit
-        else -> when (outgoing) {
-            slotOneAndRoute.route -> slotTwoAndRoute = slotTwoAndRoute.copy(route = incoming)
-            slotTwoAndRoute.route -> slotOneAndRoute = slotOneAndRoute.copy(route = incoming)
-            else -> slotOneAndRoute = slotOneAndRoute.copy(route = incoming)
-        }
+    val replacedKeyValuePairs = List(sortedByIrrelevance.size) { index ->
+        val sortedEntry = sortedByIrrelevance[index]
+        (routesToAdd.getOrNull(index)?.id ?: sortedEntry.key) to sortedEntry.value
     }
+    return replacedKeyValuePairs.toMap()
+}

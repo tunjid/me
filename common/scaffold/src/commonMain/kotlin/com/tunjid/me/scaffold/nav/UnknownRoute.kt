@@ -27,9 +27,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.serialization.Serializable
 
 @Serializable
-object Route404 : AppRoute, StatelessRoute {
-    override val id: String
-        get() = "404"
+data class UnknownRoute(override val id: String = "404") : AppRoute, StatelessRoute {
 
     @Composable
     override fun Render() {

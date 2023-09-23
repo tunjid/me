@@ -28,6 +28,7 @@ import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Route
 import com.tunjid.treenav.StackNav
 import com.tunjid.treenav.current
+import com.tunjid.treenav.pop
 import com.tunjid.treenav.strings.RouteParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
@@ -79,14 +80,16 @@ val EmptyNavState = NavState(
         stacks = listOf(
             StackNav(
                 name = "emptyStack",
-                routes = listOf(Route404)
+                routes = listOf(UnknownRoute())
             )
         )
     ),
     secondaryRoute = null
 )
 
-val NavState.primaryRoute: AppRoute get() = mainNav.current as? AppRoute ?: Route404
+val NavState.primaryRoute: AppRoute get() = mainNav.current as? AppRoute ?: UnknownRoute()
+
+val NavState.predictiveBackRoute: AppRoute? get() = mainNav.pop().current as? AppRoute
 
 @Inject
 class PersistedNavStateHolder(
@@ -148,8 +151,9 @@ fun RouteParser<AppRoute>.parseMultiStackNav(savedState: SavedState) =
                             ),
                             operation = innerFold@{ stackNav, route ->
                                 stackNav.copy(
-                                    routes = stackNav.routes + (parse(routeString = route)
-                                        ?: Route404)
+                                    routes = stackNav.routes + (
+                                            parse(routeString = route) ?: UnknownRoute()
+                                            )
                                 )
                             }
                         )
