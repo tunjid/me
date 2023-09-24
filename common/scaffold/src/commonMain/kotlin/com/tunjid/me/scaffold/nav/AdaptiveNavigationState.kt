@@ -23,29 +23,29 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 
 /**
- *
- * Class that allows moving navigation content between composables
+ * Data structure for managing navigation as it adapts to various layout configurations
  */
-internal data class MoveableNav(
-    val primaryRoute: AppRoute = UnknownRoute(ContentContainer.One.name),
+internal data class AdaptiveNavigationState(
+    val primaryRoute: AppRoute = UnknownRoute(AdaptiveContainer.entries.first().name),
     val secondaryRoute: AppRoute? = null,
     val predictiveBackRoute: AppRoute? = null,
     val moveKind: MoveKind = MoveKind.None,
-    val routeIdsToContainers: Map<String, ContentContainer> = ContentContainer.entries
-        .associateBy(ContentContainer::name),
+    val routeIdsToContainers: Map<String, AdaptiveContainer> = AdaptiveContainer.entries
+        .associateBy(AdaptiveContainer::name),
 )
 
-internal val MoveableNav.primaryContainer: ContentContainer
+internal val AdaptiveNavigationState.primaryContainer: AdaptiveContainer
     get() = routeIdsToContainers.getValue(primaryRoute.id)
 
-internal val MoveableNav.secondaryContainer: ContentContainer?
+internal val AdaptiveNavigationState.secondaryContainer: AdaptiveContainer?
     get() = routeIdsToContainers[secondaryRoute?.id]
 
-internal enum class ContentContainer {
+@Suppress("unused")
+internal enum class AdaptiveContainer {
     One, Two
 }
 
-internal operator fun MoveableNav.get(container: ContentContainer): AppRoute =
+internal operator fun AdaptiveNavigationState.get(container: AdaptiveContainer): AppRoute =
     when (container) {
         routeIdsToContainers[primaryRoute.id] -> primaryRoute
         routeIdsToContainers[secondaryRoute?.id] -> secondaryRoute
@@ -57,7 +57,7 @@ internal enum class MoveKind {
     PrimaryToSecondary, SecondaryToPrimary, None
 }
 
-internal fun StateFlow<NavState>.moveableNav(): Flow<MoveableNav> =
+internal fun StateFlow<NavState>.adaptiveNavigationState(): Flow<AdaptiveNavigationState> =
     this
         .map { navState ->
             Triple(
@@ -68,7 +68,7 @@ internal fun StateFlow<NavState>.moveableNav(): Flow<MoveableNav> =
         }
         .distinctUntilChanged()
         .scan(
-            with(MoveableNav()) {
+            with(AdaptiveNavigationState()) {
                 copy(
                     primaryRoute = value.primaryRoute,
                     secondaryRoute = value.secondaryRoute,
@@ -84,7 +84,7 @@ internal fun StateFlow<NavState>.moveableNav(): Flow<MoveableNav> =
             val routesToContainers = previousMoveableNav.routeIdsToContainers
                 .include(listOfNotNull(primaryRoute, secondaryRoute))
 
-            MoveableNav(
+            AdaptiveNavigationState(
                 primaryRoute = primaryRoute,
                 secondaryRoute = secondaryRoute,
                 predictiveBackRoute = predictiveBackRoute,
@@ -97,9 +97,9 @@ internal fun StateFlow<NavState>.moveableNav(): Flow<MoveableNav> =
             )
         }
 
-private fun Map<String, ContentContainer>.include(
+private fun Map<String, AdaptiveContainer>.include(
     incoming: List<AppRoute>,
-): Map<String, ContentContainer> {
+): Map<String, AdaptiveContainer> {
     val routesToAdd = incoming.filterNot { contains(it.id) }
     val relevantRouteIds = incoming.map { it.id }.toSet()
     val sortedByIrrelevance = entries.sortedBy { relevantRouteIds.contains(it.key) }

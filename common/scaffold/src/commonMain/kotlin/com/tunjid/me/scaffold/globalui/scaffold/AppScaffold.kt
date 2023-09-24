@@ -22,6 +22,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
@@ -40,37 +41,30 @@ fun Scaffold(
     CompositionLocalProvider(
         LocalGlobalUiStateHolder provides globalUiStateHolder,
     ) {
-        val moveableNavFlow = remember {
-            navStateHolder.state.moveableNav()
+        val adaptiveNavigationStateFlow = remember {
+            navStateHolder.state.adaptiveNavigationState()
         }
-        val moveableNav by moveableNavFlow.collectAsState(MoveableNav())
+        val adaptiveNavigationState by adaptiveNavigationStateFlow.collectAsState(
+            AdaptiveNavigationState()
+        )
 
         val moveKind by remember {
-            derivedStateOf { moveableNav.moveKind }
+            derivedStateOf { adaptiveNavigationState.moveKind }
         }
-        val containerOneRoute by remember {
-            derivedStateOf { moveableNav[ContentContainer.One] }
+        val primaryContainer: AdaptiveContainer? by remember {
+            derivedStateOf { adaptiveNavigationState.primaryContainer }
         }
-        val containerTwoRoute: AppRoute by remember {
-            derivedStateOf { moveableNav[ContentContainer.Two] }
-        }
-        val primaryContainer: ContentContainer? by remember {
-            derivedStateOf { moveableNav.primaryContainer }
-        }
-        val secondaryContainer: ContentContainer? by remember {
-            derivedStateOf { moveableNav.secondaryContainer }
+        val secondaryContainer: AdaptiveContainer? by remember {
+            derivedStateOf { adaptiveNavigationState.secondaryContainer }
         }
 
         val saveableStateHolder: SaveableStateHolder = rememberSaveableStateHolder()
 
-        val containerOneContent = rememberMoveableContainerContent(
+        val containerContents = rememberAdaptiveContainersToRoutes(
+            adaptiveNavigationState = adaptiveNavigationState,
             saveableStateHolder = saveableStateHolder,
-            route = containerOneRoute
         )
-        val containerTwoContent = rememberMoveableContainerContent(
-            saveableStateHolder = saveableStateHolder,
-            route = containerTwoRoute
-        )
+
         Surface {
             Box(
                 modifier = modifier.fillMaxSize()
@@ -88,15 +82,13 @@ fun Scaffold(
                     navStateHolder = navStateHolder,
                     moveKind = moveKind,
                     primaryContent = {
-                        primaryContainer.content(
-                            containerOneContent = containerOneContent,
-                            containerTwoContent = containerTwoContent
+                        primaryContainer.adaptiveContent(
+                            adaptiveContainersToRoutes = containerContents,
                         )
                     },
                     secondaryContent = {
-                        secondaryContainer.content(
-                            containerOneContent = containerOneContent,
-                            containerTwoContent = containerTwoContent
+                        secondaryContainer.adaptiveContent(
+                            adaptiveContainersToRoutes = containerContents,
                         )
                     }
                 )
@@ -121,29 +113,34 @@ fun Scaffold(
 }
 
 @Composable
-private fun ContentContainer?.content(
-    containerOneContent: @Composable () -> Unit,
-    containerTwoContent: @Composable () -> Unit
+private fun AdaptiveContainer?.adaptiveContent(
+    adaptiveContainersToRoutes: SnapshotStateMap<AdaptiveContainer, @Composable () -> Unit>
 ) {
-    when (this) {
-        ContentContainer.One -> containerOneContent()
-        ContentContainer.Two -> containerTwoContent()
-        null -> Unit
-    }
+    adaptiveContainersToRoutes[this]?.invoke() ?: Unit
 }
 
 @Composable
-private fun rememberMoveableContainerContent(
+private fun rememberAdaptiveContainersToRoutes(
+    adaptiveNavigationState: AdaptiveNavigationState,
     saveableStateHolder: SaveableStateHolder,
-    route: AppRoute
-): @Composable () -> Unit {
-    return remember(route) {
-        movableContentOf {
-            saveableStateHolder.SaveableStateProvider(route.id) {
-                route.Render(Modifier)
+): SnapshotStateMap<AdaptiveContainer, @Composable () -> Unit> {
+    val updatedAdaptiveNavigationState by rememberUpdatedState(adaptiveNavigationState)
+    val adaptiveContainersToRoutes = remember {
+        mutableStateMapOf<AdaptiveContainer, @Composable () -> Unit>()
+    }
+    AdaptiveContainer.entries.forEach { adaptiveContainer ->
+        val route by remember {
+            derivedStateOf { updatedAdaptiveNavigationState[adaptiveContainer] }
+        }
+        adaptiveContainersToRoutes[adaptiveContainer] = remember(route) {
+            movableContentOf {
+                saveableStateHolder.SaveableStateProvider(route.id) {
+                    route.Render(Modifier)
+                }
             }
         }
     }
+    return adaptiveContainersToRoutes
 }
 
 /**
