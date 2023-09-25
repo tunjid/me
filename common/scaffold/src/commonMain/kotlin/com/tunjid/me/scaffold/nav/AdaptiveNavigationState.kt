@@ -26,10 +26,27 @@ import kotlinx.coroutines.flow.scan
  * Data structure for managing navigation as it adapts to various layout configurations
  */
 internal data class AdaptiveNavigationState(
+    /**
+     * The route in the primary navigation container
+     */
     val primaryRoute: AppRoute = UnknownRoute(AdaptiveContainer.entries.first().name),
+    /**
+     * The route in the secondary navigation container
+     */
     val secondaryRoute: AppRoute? = null,
-    val predictiveBackRoute: AppRoute? = null,
+    /**
+     * The route that will show up in the primary navigation container after back is pressed.
+     * This is used to preview the incoming route in the primary navigation container after a
+     * back press. If a back destination does not need to be previewed, it will be null.
+     */
+    val transientPrimaryBackRoute: AppRoute? = null,
+    /**
+     * Describes moves between the primary and secondary navigation containers.
+     */
     val moveKind: MoveKind = MoveKind.None,
+    /**
+     * A mapping of route ids to the containers they are currently in.
+     */
     val routeIdsToContainers: Map<String, AdaptiveContainer> = AdaptiveContainer.entries
         .associateBy(AdaptiveContainer::name),
 )
@@ -49,9 +66,9 @@ internal operator fun AdaptiveNavigationState.get(container: AdaptiveContainer):
     when (container) {
         routeIdsToContainers[primaryRoute.id] -> primaryRoute
         routeIdsToContainers[secondaryRoute?.id] -> secondaryRoute
-        routeIdsToContainers[predictiveBackRoute?.id] -> predictiveBackRoute
-        else -> Route403
-    } ?: Route403
+        routeIdsToContainers[transientPrimaryBackRoute?.id] -> transientPrimaryBackRoute
+        else -> null
+    } ?: UnknownRoute("--")
 
 internal enum class MoveKind {
     PrimaryToSecondary, SecondaryToPrimary, None
@@ -80,17 +97,17 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(): Flow<AdaptiveNavigat
                     )
                 )
             }
-        ) { previousMoveableNav, (primaryRoute, secondaryRoute, predictiveBackRoute) ->
-            val routesToContainers = previousMoveableNav.routeIdsToContainers
+        ) { previous, (primaryRoute, secondaryRoute, predictiveBackRoute) ->
+            val routesToContainers = previous.routeIdsToContainers
                 .include(listOfNotNull(primaryRoute, secondaryRoute))
 
             AdaptiveNavigationState(
                 primaryRoute = primaryRoute,
                 secondaryRoute = secondaryRoute,
-                predictiveBackRoute = predictiveBackRoute,
+                transientPrimaryBackRoute = predictiveBackRoute,
                 moveKind = when {
-                    previousMoveableNav.primaryRoute.id == secondaryRoute?.id -> MoveKind.PrimaryToSecondary
-                    primaryRoute.id == previousMoveableNav.secondaryRoute?.id -> MoveKind.SecondaryToPrimary
+                    previous.primaryRoute.id == secondaryRoute?.id -> MoveKind.PrimaryToSecondary
+                    primaryRoute.id == previous.secondaryRoute?.id -> MoveKind.SecondaryToPrimary
                     else -> MoveKind.None
                 },
                 routeIdsToContainers = routesToContainers,

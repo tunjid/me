@@ -44,24 +44,3 @@ data class UnknownRoute(override val id: String = "404") : AppRoute, StatelessRo
         }
     }
 }
-
-@Serializable
-object Route403 : AppRoute, StatelessRoute {
-    override val id: String
-        get() = "403"
-
-    @Composable
-    override fun Render(modifier: Modifier) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(),
-                text = "404",
-                fontSize = 40.sp
-            )
-        }
-    }
-}
