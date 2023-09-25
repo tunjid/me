@@ -80,7 +80,7 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(): Flow<AdaptiveNavigat
             Triple(
                 navState.primaryRoute,
                 navState.secondaryRoute,
-                navState.predictiveBackRoute,
+                navState.primaryRouteOnBackPress,
             )
         }
         .distinctUntilChanged()
