@@ -152,17 +152,14 @@ private fun rememberAdaptiveContainersToRoutes(
     adaptiveNavigationState: AdaptiveNavigationState,
     saveableStateHolder: SaveableStateHolder,
 ): SnapshotStateMap<AdaptiveContainer, @Composable () -> Unit> {
-    val adaptiveContainersToRoutes = remember {
-        mutableStateMapOf<AdaptiveContainer, @Composable () -> Unit>()
-    }
     val updatedAdaptiveNavigationState by rememberUpdatedState(adaptiveNavigationState)
-
-    AdaptiveContainer.entries.forEach { adaptiveContainer ->
-        val route by remember {
-            derivedStateOf { updatedAdaptiveNavigationState[adaptiveContainer] }
-        }
-        adaptiveContainersToRoutes[adaptiveContainer] = remember(route) {
-            movableContentOf {
+    return remember {
+        val adaptiveContainersToRoutes = mutableStateMapOf<AdaptiveContainer, @Composable () -> Unit>()
+        AdaptiveContainer.entries.forEach { adaptiveContainer ->
+            adaptiveContainersToRoutes[adaptiveContainer] = movableContentOf {
+                val route by remember {
+                    derivedStateOf { updatedAdaptiveNavigationState[adaptiveContainer] }
+                }
                 saveableStateHolder.SaveableStateProvider(route.id) {
                     route.Render(
                         when (updatedAdaptiveNavigationState.transientPrimaryBackRoute?.id) {
@@ -173,8 +170,8 @@ private fun rememberAdaptiveContainersToRoutes(
                 }
             }
         }
+        adaptiveContainersToRoutes
     }
-    return adaptiveContainersToRoutes
 }
 
 /**
