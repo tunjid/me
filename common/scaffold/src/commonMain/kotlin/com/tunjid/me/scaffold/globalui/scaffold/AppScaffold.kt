@@ -156,10 +156,10 @@ private fun rememberAdaptiveContainersToRoutes(
     val updatedAdaptiveNavigationState by rememberUpdatedState(adaptiveNavigationState)
     return remember {
         val slotsToRoutes = mutableStateMapOf<AdaptiveContainerSlot, @Composable () -> Unit>()
-        AdaptiveContainerSlot.entries.forEach { container ->
-            slotsToRoutes[container] = movableContentOf {
+        AdaptiveContainerSlot.entries.forEach { slot ->
+            slotsToRoutes[slot] = movableContentOf {
                 val route by remember {
-                    derivedStateOf { updatedAdaptiveNavigationState[container] }
+                    derivedStateOf { updatedAdaptiveNavigationState[slot] }
                 }
                 AnimatedContent(
                     targetState = route
