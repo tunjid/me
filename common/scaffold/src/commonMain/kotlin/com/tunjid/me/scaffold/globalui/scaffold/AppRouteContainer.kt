@@ -69,6 +69,7 @@ internal fun AppRouteContainer(
     moveKind: MoveKind,
     primaryContent: @Composable () -> Unit,
     secondaryContent: @Composable () -> Unit,
+    transientPrimaryContent: @Composable () -> Unit,
 ) {
     val paddingValues = routeContainerPadding(globalUiStateHolder)
     val (startClearance, topClearance, _, bottomClearance) = paddingValues
@@ -98,39 +99,75 @@ internal fun AppRouteContainer(
                 bottom = bottomClearance
             ),
         content = {
-            Box(
-                modifier = Modifier
-                    .width(
-                        animateWidthChange(
-                            if (hasNavContent) WindowSizeClass.EXPANDED.secondaryContentWidth()
-                            else maxDpWidth
-                        ).value
-                    )
-                    .background(color = MaterialTheme.colorScheme.surface),
-                content = { secondaryContent() }
+            secondaryContainer(
+                hasNavContent = hasNavContent,
+                maxDpWidth = maxDpWidth,
+                secondaryContent = secondaryContent
             )
-            Box(
-                modifier = Modifier
-                    .width(
-                        primaryContentWidth(
-                            windowSizeClass = windowSizeClass,
-                            moveKind = moveKind,
-                            maxWidth = maxDpWidth,
-                        ).value
-                    )
-                    .padding(
-                        start = when {
-                            hasNavContent -> animateWidthChange(
-                                targetSideWidth = windowSizeClass.secondaryContentWidth()
-                            ).value
-
-                            else -> 0.dp
-                        }
-                    )
-                    .background(color = MaterialTheme.colorScheme.surface),
-                content = { primaryContent() }
+            primaryContainer(
+                windowSizeClass = windowSizeClass,
+                moveKind = moveKind,
+                maxDpWidth = maxDpWidth,
+                hasNavContent = hasNavContent,
+                primaryContent = primaryContent,
+                transientPrimaryContent = transientPrimaryContent,
             )
         }
+    )
+}
+
+@Composable
+private fun primaryContainer(
+    windowSizeClass: WindowSizeClass,
+    moveKind: MoveKind,
+    maxDpWidth: Dp,
+    hasNavContent: Boolean,
+    primaryContent: @Composable () -> Unit,
+    transientPrimaryContent: @Composable () -> Unit
+) {
+    val animatedWidth by primaryContentWidth(
+        windowSizeClass = windowSizeClass,
+        moveKind = moveKind,
+        maxWidth = maxDpWidth,
+    )
+    val startPadding = when {
+        hasNavContent -> animateWidthChange(
+            targetSideWidth = windowSizeClass.secondaryContentWidth()
+        ).value
+
+        else -> 0.dp
+    }
+    Box(
+        modifier = Modifier
+            .width(animatedWidth)
+            .padding(start = startPadding)
+            .background(color = MaterialTheme.colorScheme.surface),
+        content = { primaryContent() }
+    )
+    Box(
+        modifier = Modifier
+            .width(animatedWidth)
+            .padding(start = startPadding),
+        content = { transientPrimaryContent() }
+    )
+}
+
+@Composable
+private fun secondaryContainer(
+    hasNavContent: Boolean,
+    maxDpWidth: Dp,
+    secondaryContent: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .width(
+                animateWidthChange(
+                    if (hasNavContent) WindowSizeClass.EXPANDED.secondaryContentWidth()
+                    else maxDpWidth
+                ).value
+            )
+            .background(color = MaterialTheme.colorScheme.surface),
+        content = { secondaryContent() }
     )
 }
 

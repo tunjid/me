@@ -50,6 +50,8 @@ data class State(
     // Read this from the DB
     @Transient
     val archive: Archive? = null,
+    @Transient
+    val hasSecondaryPanel: Boolean = false,
 ) : ByteSerializable
 
 val State.canEdit: Boolean get() = signedInUserId != null && signedInUserId == archive?.author?.id

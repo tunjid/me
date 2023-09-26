@@ -38,6 +38,7 @@ import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.AsyncRasterImage
+import com.tunjid.me.core.ui.BackHandler
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.component1
@@ -82,6 +83,14 @@ private fun ArchiveDetailScreen(
     )
 
     val archive = state.archive
+
+    // Override back presses here to simply pop navigation, with no back preview on large screens.
+    // Instead the secondary navigation container should expand, since the back preview is already
+    // being shown in the secondary navigation
+    // TODO: Expand the secondary navigation container
+    BackHandler(enabled = state.IsInPrimaryNav && state.hasSecondaryPanel) {
+        stateHolder.accept(Action.Navigate { navState.pop() })
+    }
 
     Column(
         modifier = modifier

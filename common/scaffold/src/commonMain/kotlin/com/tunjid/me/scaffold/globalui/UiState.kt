@@ -18,6 +18,7 @@ package com.tunjid.me.scaffold.globalui
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,6 +36,19 @@ sealed class NavVisibility {
     object Gone : NavVisibility()
     object GoneIfBottomNav : NavVisibility()
 }
+
+interface BackStatus {
+    data object None: BackStatus
+}
+
+internal expect class PreviewBackStatus: BackStatus
+
+expect val BackStatus.touchX: Float
+expect val BackStatus.touchY: Float
+expect val BackStatus.progress: Float
+expect val BackStatus.isFromLeft: Boolean
+expect val BackStatus.isPreviewing: Boolean
+
 
 data class UiState(
     val toolbarItems: List<ToolbarItem> = listOf(),
@@ -58,6 +72,7 @@ data class UiState(
     val windowSizeClass: WindowSizeClass = WindowSizeClass.COMPACT,
     val isImmersive: Boolean = false,
     val systemUI: SystemUI = NoOpSystemUI,
+    val backStatus: BackStatus = BackStatus.None,
     val fabClickListener: (Unit) -> Unit = emptyCallback(),
     val toolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),
     val altToolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),

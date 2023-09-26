@@ -29,6 +29,7 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.IsInPrimaryNavMutations
+import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.consumeNavActions
@@ -42,6 +43,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
@@ -71,6 +73,7 @@ class ActualArchiveDetailStateHolder(
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
         uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
+        uiStateFlow.hasSecondaryPanelMutations(),
         authRepository.authMutations(),
         archiveRepository.archiveLoadMutations(
             id = route.archiveId
@@ -91,6 +94,11 @@ class ActualArchiveDetailStateHolder(
         }
     }
 )
+
+private fun StateFlow<UiState>.hasSecondaryPanelMutations(): Flow<Mutation<State>> =
+    map { it.windowSizeClass > WindowSizeClass.COMPACT }
+        .distinctUntilChanged()
+        .mapToMutation { copy(hasSecondaryPanel = it) }
 
 private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     signedInUserStream

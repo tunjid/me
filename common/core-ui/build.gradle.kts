@@ -44,6 +44,7 @@ kotlin {
             dependencies {
                 implementation(libs.androidx.core.ktx)
                 implementation(libs.accompanist.flowlayout)
+                implementation(libs.androidx.activity.compose)
                 implementation(libs.androidx.compose.foundation.layout)
 
                 implementation(libs.coil.compose)

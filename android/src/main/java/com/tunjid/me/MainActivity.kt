@@ -17,7 +17,6 @@
 package com.tunjid.me
 
 import android.os.Bundle
-import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -38,11 +37,11 @@ import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.insetMutations
+import com.tunjid.me.scaffold.globalui.integrateBackActions
 import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
 import com.tunjid.mutator.mutation
-import com.tunjid.treenav.pop
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -53,9 +52,10 @@ class MainActivity : AppCompatActivity() {
         val app = applicationContext as App
         val meApp = app.meApp
 
-        onBackPressedDispatcher.addCallback(this) {
-            meApp.navStateHolder.accept { navState.pop() }
-        }
+        integrateBackActions(
+            globalUiStateHolder = meApp.globalUiStateHolder,
+            navStateHolder = meApp.navStateHolder,
+        )
 
         val root = ComposeView(context = this)
 

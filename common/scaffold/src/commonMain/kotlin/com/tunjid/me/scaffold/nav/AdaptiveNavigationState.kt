@@ -16,8 +16,13 @@
 
 package com.tunjid.me.scaffold.nav
 
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.WindowSizeClass
+import com.tunjid.me.scaffold.globalui.isNotExpanded
+import com.tunjid.me.scaffold.globalui.isPreviewing
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
@@ -57,9 +62,12 @@ internal val AdaptiveNavigationState.primaryContainer: AdaptiveContainer
 internal val AdaptiveNavigationState.secondaryContainer: AdaptiveContainer?
     get() = routeIdsToContainers[secondaryRoute?.id]
 
+internal val AdaptiveNavigationState.transientPrimaryContainer: AdaptiveContainer?
+    get() = routeIdsToContainers[transientPrimaryBackRoute?.id]
+
 @Suppress("unused")
 internal enum class AdaptiveContainer {
-    One, Two
+    One, Two, Three
 }
 
 internal operator fun AdaptiveNavigationState.get(container: AdaptiveContainer): AppRoute =
@@ -74,13 +82,28 @@ internal enum class MoveKind {
     PrimaryToSecondary, SecondaryToPrimary, None
 }
 
-internal fun StateFlow<NavState>.adaptiveNavigationState(): Flow<AdaptiveNavigationState> =
-    this
-        .map { navState ->
-            Triple(
-                navState.primaryRoute,
-                navState.secondaryRoute,
-                navState.primaryRouteOnBackPress,
+internal fun StateFlow<NavState>.adaptiveNavigationState(
+    uiState: StateFlow<UiState>
+): Flow<AdaptiveNavigationState> =
+    combine(uiState, ::Pair)
+        .map { (navState, uiState) ->
+            // If there is a back preview in progress, show the back primary route in the
+            // primary container
+            val visiblePrimaryRoute = navState.primaryRouteOnBackPress.takeIf {
+                uiState.backStatus.isPreviewing
+            } ?: navState.primaryRoute
+
+            AdaptiveNavigationState(
+                primaryRoute = visiblePrimaryRoute,
+                secondaryRoute = navState.secondaryRoute.takeIf { route ->
+                    route?.id != visiblePrimaryRoute.id
+                            && uiState.windowSizeClass > WindowSizeClass.COMPACT
+                },
+                transientPrimaryBackRoute = navState.primaryRoute.takeIf { route ->
+                    uiState.backStatus.isPreviewing
+                            && route.id != visiblePrimaryRoute.id
+                            && route.id != navState.secondaryRoute?.id
+                },
             )
         }
         .distinctUntilChanged()
@@ -92,25 +115,29 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(): Flow<AdaptiveNavigat
                     routeIdsToContainers = routeIdsToContainers.include(
                         listOfNotNull(
                             value.primaryRoute,
-                            value.secondaryRoute
+                            value.secondaryRoute,
+                            value.primaryRouteOnBackPress.takeIf { route ->
+                                route?.id != value.secondaryRoute?.id
+                                        && route?.id != value.primaryRoute.id
+                            },
                         )
                     )
                 )
             }
-        ) { previous, (primaryRoute, secondaryRoute, predictiveBackRoute) ->
-            val routesToContainers = previous.routeIdsToContainers
-                .include(listOfNotNull(primaryRoute, secondaryRoute))
-
-            AdaptiveNavigationState(
-                primaryRoute = primaryRoute,
-                secondaryRoute = secondaryRoute,
-                transientPrimaryBackRoute = predictiveBackRoute,
+        ) { previous, current ->
+            current.copy(
                 moveKind = when {
-                    previous.primaryRoute.id == secondaryRoute?.id -> MoveKind.PrimaryToSecondary
-                    primaryRoute.id == previous.secondaryRoute?.id -> MoveKind.SecondaryToPrimary
+                    previous.primaryRoute.id == current.secondaryRoute?.id -> MoveKind.PrimaryToSecondary
+                    current.primaryRoute.id == previous.secondaryRoute?.id -> MoveKind.SecondaryToPrimary
                     else -> MoveKind.None
                 },
-                routeIdsToContainers = routesToContainers,
+                routeIdsToContainers = previous.routeIdsToContainers.include(
+                    listOfNotNull(
+                        current.transientPrimaryBackRoute,
+                        current.primaryRoute,
+                        current.secondaryRoute
+                    )
+                ),
             )
         }
 

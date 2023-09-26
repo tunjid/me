@@ -19,14 +19,31 @@ package com.tunjid.me.scaffold.globalui.scaffold
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
-import com.tunjid.me.scaffold.nav.*
+import com.tunjid.me.scaffold.nav.AdaptiveContainer
+import com.tunjid.me.scaffold.nav.AdaptiveNavigationState
+import com.tunjid.me.scaffold.nav.NavStateHolder
+import com.tunjid.me.scaffold.nav.adaptiveNavigationState
+import com.tunjid.me.scaffold.nav.get
+import com.tunjid.me.scaffold.nav.primaryContainer
+import com.tunjid.me.scaffold.nav.removedRoutes
+import com.tunjid.me.scaffold.nav.secondaryContainer
+import com.tunjid.me.scaffold.nav.transientPrimaryContainer
 import kotlinx.coroutines.flow.map
 
 /**
@@ -41,8 +58,11 @@ fun Scaffold(
     CompositionLocalProvider(
         LocalGlobalUiStateHolder provides globalUiStateHolder,
     ) {
+        val uiStateFlow = remember {
+            globalUiStateHolder.state
+        }
         val adaptiveNavigationStateFlow = remember {
-            navStateHolder.state.adaptiveNavigationState()
+            navStateHolder.state.adaptiveNavigationState(uiStateFlow)
         }
         val adaptiveNavigationState by adaptiveNavigationStateFlow.collectAsState(
             AdaptiveNavigationState()
@@ -56,6 +76,9 @@ fun Scaffold(
         }
         val secondaryContainer: AdaptiveContainer? by remember {
             derivedStateOf { adaptiveNavigationState.secondaryContainer }
+        }
+        val transientPrimaryContainer: AdaptiveContainer? by remember {
+            derivedStateOf { adaptiveNavigationState.transientPrimaryContainer }
         }
 
         val saveableStateHolder: SaveableStateHolder = rememberSaveableStateHolder()
@@ -90,7 +113,12 @@ fun Scaffold(
                         secondaryContainer.adaptiveContent(
                             adaptiveContainersToRoutes = containerContents,
                         )
-                    }
+                    },
+                    transientPrimaryContent = {
+                        transientPrimaryContainer.adaptiveContent(
+                            adaptiveContainersToRoutes = containerContents,
+                        )
+                    },
                 )
                 AppFab(
                     globalUiStateHolder = globalUiStateHolder,
@@ -124,10 +152,11 @@ private fun rememberAdaptiveContainersToRoutes(
     adaptiveNavigationState: AdaptiveNavigationState,
     saveableStateHolder: SaveableStateHolder,
 ): SnapshotStateMap<AdaptiveContainer, @Composable () -> Unit> {
-    val updatedAdaptiveNavigationState by rememberUpdatedState(adaptiveNavigationState)
     val adaptiveContainersToRoutes = remember {
         mutableStateMapOf<AdaptiveContainer, @Composable () -> Unit>()
     }
+    val updatedAdaptiveNavigationState by rememberUpdatedState(adaptiveNavigationState)
+
     AdaptiveContainer.entries.forEach { adaptiveContainer ->
         val route by remember {
             derivedStateOf { updatedAdaptiveNavigationState[adaptiveContainer] }
@@ -135,13 +164,23 @@ private fun rememberAdaptiveContainersToRoutes(
         adaptiveContainersToRoutes[adaptiveContainer] = remember(route) {
             movableContentOf {
                 saveableStateHolder.SaveableStateProvider(route.id) {
-                    route.Render(Modifier)
+                    route.Render(
+                        when (updatedAdaptiveNavigationState.transientPrimaryBackRoute?.id) {
+                            route.id -> Modifier.backPreviewModifier()
+                            else -> Modifier
+                        }
+                    )
                 }
             }
         }
     }
     return adaptiveContainersToRoutes
 }
+
+/**
+ * Modifier that offers a way to preview content behind the primary content
+ */
+internal expect fun Modifier.backPreviewModifier(): Modifier
 
 /**
  * Clean up after navigation routes that have been discarded
