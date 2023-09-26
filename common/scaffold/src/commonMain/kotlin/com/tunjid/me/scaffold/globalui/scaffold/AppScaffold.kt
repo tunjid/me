@@ -36,14 +36,13 @@ import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.nav.AdaptiveContainer
+import com.tunjid.me.scaffold.nav.AdaptiveContainerSlot
 import com.tunjid.me.scaffold.nav.AdaptiveNavigationState
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.adaptiveNavigationState
 import com.tunjid.me.scaffold.nav.get
-import com.tunjid.me.scaffold.nav.primaryContainer
+import com.tunjid.me.scaffold.nav.primaryContainerSlot
 import com.tunjid.me.scaffold.nav.removedRoutes
-import com.tunjid.me.scaffold.nav.secondaryContainer
-import com.tunjid.me.scaffold.nav.transientPrimaryContainer
 import kotlinx.coroutines.flow.map
 
 /**
@@ -71,14 +70,14 @@ fun Scaffold(
         val moveKind by remember {
             derivedStateOf { adaptiveNavigationState.moveKind }
         }
-        val primaryContainer: AdaptiveContainer? by remember {
-            derivedStateOf { adaptiveNavigationState.primaryContainer }
+        val primaryContainer: AdaptiveContainerSlot? by remember {
+            derivedStateOf { adaptiveNavigationState.primaryContainerSlot }
         }
-        val secondaryContainer: AdaptiveContainer? by remember {
-            derivedStateOf { adaptiveNavigationState.secondaryContainer }
+        val secondaryContainer: AdaptiveContainerSlot? by remember {
+            derivedStateOf { adaptiveNavigationState[AdaptiveContainer.Secondary] }
         }
-        val transientPrimaryContainer: AdaptiveContainer? by remember {
-            derivedStateOf { adaptiveNavigationState.transientPrimaryContainer }
+        val transientPrimaryContainer: AdaptiveContainerSlot? by remember {
+            derivedStateOf { adaptiveNavigationState[AdaptiveContainer.TransientPrimary] }
         }
 
         val saveableStateHolder: SaveableStateHolder = rememberSaveableStateHolder()
@@ -106,17 +105,17 @@ fun Scaffold(
                     moveKind = moveKind,
                     primaryContent = {
                         primaryContainer.adaptiveContent(
-                            adaptiveContainersToRoutes = containerContents,
+                            adaptiveContainerSlotsToRoutes = containerContents,
                         )
                     },
                     secondaryContent = {
                         secondaryContainer.adaptiveContent(
-                            adaptiveContainersToRoutes = containerContents,
+                            adaptiveContainerSlotsToRoutes = containerContents,
                         )
                     },
                     transientPrimaryContent = {
                         transientPrimaryContainer.adaptiveContent(
-                            adaptiveContainersToRoutes = containerContents,
+                            adaptiveContainerSlotsToRoutes = containerContents,
                         )
                     },
                 )
@@ -141,24 +140,24 @@ fun Scaffold(
 }
 
 @Composable
-private fun AdaptiveContainer?.adaptiveContent(
-    adaptiveContainersToRoutes: SnapshotStateMap<AdaptiveContainer, @Composable () -> Unit>
+private fun AdaptiveContainerSlot?.adaptiveContent(
+    adaptiveContainerSlotsToRoutes: SnapshotStateMap<AdaptiveContainerSlot, @Composable () -> Unit>
 ) {
-    adaptiveContainersToRoutes[this]?.invoke() ?: Unit
+    adaptiveContainerSlotsToRoutes[this]?.invoke() ?: Unit
 }
 
 @Composable
 private fun rememberAdaptiveContainersToRoutes(
     adaptiveNavigationState: AdaptiveNavigationState,
     saveableStateHolder: SaveableStateHolder,
-): SnapshotStateMap<AdaptiveContainer, @Composable () -> Unit> {
+): SnapshotStateMap<AdaptiveContainerSlot, @Composable () -> Unit> {
     val updatedAdaptiveNavigationState by rememberUpdatedState(adaptiveNavigationState)
     return remember {
-        val adaptiveContainersToRoutes = mutableStateMapOf<AdaptiveContainer, @Composable () -> Unit>()
-        AdaptiveContainer.entries.forEach { adaptiveContainer ->
-            adaptiveContainersToRoutes[adaptiveContainer] = movableContentOf {
+        val slotsToRoutes = mutableStateMapOf<AdaptiveContainerSlot, @Composable () -> Unit>()
+        AdaptiveContainerSlot.entries.forEach { container ->
+            slotsToRoutes[container] = movableContentOf {
                 val route by remember {
-                    derivedStateOf { updatedAdaptiveNavigationState[adaptiveContainer] }
+                    derivedStateOf { updatedAdaptiveNavigationState[container] }
                 }
                 saveableStateHolder.SaveableStateProvider(route.id) {
                     route.Render(
@@ -170,7 +169,7 @@ private fun rememberAdaptiveContainersToRoutes(
                 }
             }
         }
-        adaptiveContainersToRoutes
+        slotsToRoutes
     }
 }
 
