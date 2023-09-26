@@ -16,6 +16,8 @@
 
 package com.tunjid.me.scaffold.globalui.scaffold
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
@@ -159,13 +161,17 @@ private fun rememberAdaptiveContainersToRoutes(
                 val route by remember {
                     derivedStateOf { updatedAdaptiveNavigationState[container] }
                 }
-                saveableStateHolder.SaveableStateProvider(route.id) {
-                    route.Render(
-                        when (updatedAdaptiveNavigationState.transientPrimaryBackRoute?.id) {
-                            route.id -> Modifier.backPreviewModifier()
-                            else -> Modifier
-                        }
-                    )
+                AnimatedContent(
+                    targetState = route
+                ) { targetRoute ->
+                    saveableStateHolder.SaveableStateProvider(targetRoute.id) {
+                        targetRoute.Render(
+                            when (updatedAdaptiveNavigationState.transientPrimaryBackRoute?.id) {
+                                targetRoute.id -> Modifier.backPreviewModifier()
+                                else -> Modifier.animateContentSize()
+                            }
+                        )
+                    }
                 }
             }
         }
