@@ -18,6 +18,7 @@ package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
@@ -40,6 +41,7 @@ import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.nav.AdaptiveContainer
 import com.tunjid.me.scaffold.nav.AdaptiveContainerSlot
 import com.tunjid.me.scaffold.nav.AdaptiveNavigationState
+import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.adaptiveNavigationState
 import com.tunjid.me.scaffold.nav.get
@@ -161,14 +163,20 @@ private fun rememberAdaptiveContainersToRoutes(
                 val route by remember {
                     derivedStateOf { updatedAdaptiveNavigationState[slot] }
                 }
-                AnimatedContent(
-                    targetState = route
+                val transition = updateTransition(route)
+                transition.AnimatedContent(
+                    contentKey = AppRoute::id
                 ) { targetRoute ->
                     saveableStateHolder.SaveableStateProvider(targetRoute.id) {
                         targetRoute.Render(
-                            when (updatedAdaptiveNavigationState.transientPrimaryBackRoute?.id) {
-                                targetRoute.id -> Modifier.backPreviewModifier()
-                                else -> Modifier.animateContentSize()
+                            when (targetRoute.id) {
+                                updatedAdaptiveNavigationState.primaryRoute.id ->
+                                    Modifier.animateContentSize()
+
+                                updatedAdaptiveNavigationState.transientPrimaryBackRoute?.id ->
+                                    Modifier.backPreviewModifier()
+
+                                else -> Modifier
                             }
                         )
                     }
