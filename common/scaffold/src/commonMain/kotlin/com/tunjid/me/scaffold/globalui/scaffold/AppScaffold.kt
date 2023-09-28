@@ -19,6 +19,8 @@ package com.tunjid.me.scaffold.globalui.scaffold
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -174,18 +176,18 @@ private fun rememberAdaptiveContainersToRoutes(
                         targetRoute.Render(
                             when (targetRoute.id) {
                                 updatedState.primaryRoute.id -> FillSizeModifier.animateEnterExit(
-                                    enter = fadeIn(),
-                                    exit = fadeOut()
+                                    enter = fadeIn(animationSpec = RouteTransitionAnimationSpec),
+                                    exit = fadeOut(animationSpec = RouteTransitionAnimationSpec)
                                 )
 
                                 updatedState.secondaryRoute?.id -> FillSizeModifier.animateEnterExit(
-                                    enter = fadeIn(),
+                                    enter = fadeIn(animationSpec = RouteTransitionAnimationSpec),
                                     exit = ExitTransition.None
                                 )
 
                                 updatedState.transientPrimaryBackRoute?.id -> FillSizeModifier.animateEnterExit(
                                     enter = EnterTransition.None,
-                                    exit = fadeOut()
+                                    exit = fadeOut(animationSpec = RouteTransitionAnimationSpec)
                                 )
                                     .backPreviewModifier()
 
@@ -202,13 +204,6 @@ private fun rememberAdaptiveContainersToRoutes(
         slotsToRoutes
     }
 }
-
-/**
- * Modifier that offers a way to preview content behind the primary content
- */
-internal expect fun Modifier.backPreviewModifier(): Modifier
-
-private val FillSizeModifier = Modifier.fillMaxSize()
 
 /**
  * Clean up after navigation routes that have been discarded
@@ -231,3 +226,12 @@ private fun SavedStateCleanupEffect(
         }
     }
 }
+
+/**
+ * Modifier that offers a way to preview content behind the primary content
+ */
+internal expect fun Modifier.backPreviewModifier(): Modifier
+
+private val FillSizeModifier = Modifier.fillMaxSize()
+
+private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(700)
