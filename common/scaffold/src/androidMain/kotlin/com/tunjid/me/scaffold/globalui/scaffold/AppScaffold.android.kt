@@ -2,7 +2,6 @@ package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -13,7 +12,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
@@ -28,7 +26,6 @@ import kotlin.math.roundToInt
 // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
 internal actual fun Modifier.backPreviewModifier(): Modifier =
     this then Modifier.composed {
-        val density = LocalDensity.current
         val configuration = LocalConfiguration.current
         val globalUiStateHolder = LocalGlobalUiStateHolder.current
 
@@ -51,37 +48,32 @@ internal actual fun Modifier.backPreviewModifier(): Modifier =
                 val containerWidth = placeable.width
                 val containerHeight = placeable.height
 
-                val maxXShift = ((containerWidth / 20) - BACK_PREVIEW_PADDING)
+                val scaledWidth = containerWidth * scale
+                val spaceOnEachSide = (containerWidth - scaledWidth) / 2
+                val margin = (BACK_PREVIEW_PADDING * backStatus.progress).dp.roundToPx()
+
+                val xOffset = ((spaceOnEachSide - margin) * when {
+                    backStatus.isFromLeft -> 1
+                    else -> -1
+                }).toInt()
+
                 val maxYShift = ((containerHeight / 20) - BACK_PREVIEW_PADDING)
-                val isOrientedHorizontally = maxXShift > maxYShift
-
-                val xOffset =
-                    (backStatus.progress * maxXShift).roundToInt() * (if (backStatus.isFromLeft) 1 else -1)
-
-                val touchPoint =
-                    if (isOrientedHorizontally) backStatus.touchX
-                    else backStatus.touchY
-
-                val screenSize = with(density) {
-                    (if (isOrientedHorizontally) configuration.screenWidthDp
-                    else configuration.screenHeightDp).dp.toPx()
+                val isOrientedHorizontally = containerWidth > containerHeight
+                val screenSize = when {
+                    isOrientedHorizontally -> configuration.screenWidthDp
+                    else -> configuration.screenHeightDp
+                }.dp.roundToPx()
+                val touchPoint = when {
+                    isOrientedHorizontally -> backStatus.touchX
+                    else -> backStatus.touchY
                 }
                 val verticalProgress = (touchPoint / screenSize) - 0.5f
-
                 val yOffset = (verticalProgress * maxYShift).roundToInt()
 
                 layout(placeable.width, placeable.height) {
                     placeable.placeRelative(x = xOffset, y = yOffset)
                 }
             }
-            .padding(
-                start =
-                if (backStatus.isFromLeft) 0.dp
-                else (BACK_PREVIEW_PADDING * backStatus.progress).dp,
-                end =
-                if (backStatus.isFromLeft) (BACK_PREVIEW_PADDING * backStatus.progress).dp
-                else 0.dp
-            )
             .scale(scale)
             .background(
                 color = color,

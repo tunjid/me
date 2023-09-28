@@ -17,8 +17,11 @@
 package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
@@ -155,13 +158,13 @@ private fun rememberAdaptiveContainersToRoutes(
     adaptiveNavigationState: AdaptiveNavigationState,
     saveableStateHolder: SaveableStateHolder,
 ): SnapshotStateMap<AdaptiveContainerSlot, @Composable () -> Unit> {
-    val updatedAdaptiveNavigationState by rememberUpdatedState(adaptiveNavigationState)
+    val updatedState by rememberUpdatedState(adaptiveNavigationState)
     return remember {
         val slotsToRoutes = mutableStateMapOf<AdaptiveContainerSlot, @Composable () -> Unit>()
         AdaptiveContainerSlot.entries.forEach { slot ->
             slotsToRoutes[slot] = movableContentOf {
                 val route by remember {
-                    derivedStateOf { updatedAdaptiveNavigationState[slot] }
+                    derivedStateOf { updatedState[slot] }
                 }
                 val transition = updateTransition(route)
                 transition.AnimatedContent(
@@ -170,13 +173,26 @@ private fun rememberAdaptiveContainersToRoutes(
                     saveableStateHolder.SaveableStateProvider(targetRoute.id) {
                         targetRoute.Render(
                             when (targetRoute.id) {
-                                updatedAdaptiveNavigationState.primaryRoute.id ->
-                                    Modifier.animateContentSize()
+                                updatedState.primaryRoute.id -> FillSizeModifier.animateEnterExit(
+                                    enter = fadeIn(),
+                                    exit = fadeOut()
+                                )
 
-                                updatedAdaptiveNavigationState.transientPrimaryBackRoute?.id ->
-                                    Modifier.backPreviewModifier()
+                                updatedState.secondaryRoute?.id -> FillSizeModifier.animateEnterExit(
+                                    enter = fadeIn(),
+                                    exit = ExitTransition.None
+                                )
 
-                                else -> Modifier
+                                updatedState.transientPrimaryBackRoute?.id -> FillSizeModifier.animateEnterExit(
+                                    enter = EnterTransition.None,
+                                    exit = fadeOut()
+                                )
+                                    .backPreviewModifier()
+
+                                else -> FillSizeModifier.animateEnterExit(
+                                    enter = EnterTransition.None,
+                                    exit = ExitTransition.None
+                                )
                             }
                         )
                     }
@@ -191,6 +207,8 @@ private fun rememberAdaptiveContainersToRoutes(
  * Modifier that offers a way to preview content behind the primary content
  */
 internal expect fun Modifier.backPreviewModifier(): Modifier
+
+private val FillSizeModifier = Modifier.fillMaxSize()
 
 /**
  * Clean up after navigation routes that have been discarded
