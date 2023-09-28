@@ -175,20 +175,23 @@ private fun rememberAdaptiveContainersToRoutes(
                     saveableStateHolder.SaveableStateProvider(targetRoute.id) {
                         targetRoute.Render(
                             when (targetRoute.id) {
-                                updatedState.primaryRoute.id -> FillSizeModifier.animateEnterExit(
-                                    enter = fadeIn(animationSpec = RouteTransitionAnimationSpec),
-                                    exit = fadeOut(animationSpec = RouteTransitionAnimationSpec)
-                                )
+                                updatedState.primaryRoute.id -> FillSizeModifier
+                                    .animateEnterExit(
+                                        enter = fadeIn(RouteTransitionAnimationSpec),
+                                        exit = fadeOut(RouteTransitionAnimationSpec)
+                                    )
 
-                                updatedState.secondaryRoute?.id -> FillSizeModifier.animateEnterExit(
-                                    enter = fadeIn(animationSpec = RouteTransitionAnimationSpec),
-                                    exit = ExitTransition.None
-                                )
+                                updatedState.secondaryRoute?.id -> FillSizeModifier
+                                    .animateEnterExit(
+                                        enter = fadeIn(RouteTransitionAnimationSpec),
+                                        exit = ExitTransition.None
+                                    )
 
-                                updatedState.transientPrimaryBackRoute?.id -> FillSizeModifier.animateEnterExit(
-                                    enter = EnterTransition.None,
-                                    exit = fadeOut(animationSpec = RouteTransitionAnimationSpec)
-                                )
+                                updatedState.transientPrimaryBackRoute?.id -> FillSizeModifier
+                                    .animateEnterExit(
+                                        enter = EnterTransition.None,
+                                        exit = fadeOut(RouteTransitionAnimationSpec)
+                                    )
                                     .backPreviewModifier()
 
                                 else -> FillSizeModifier.animateEnterExit(
