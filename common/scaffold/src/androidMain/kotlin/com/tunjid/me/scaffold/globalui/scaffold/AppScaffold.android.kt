@@ -8,7 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
@@ -71,10 +70,12 @@ internal actual fun Modifier.backPreviewModifier(): Modifier =
                 val yOffset = (verticalProgress * maxYShift).roundToInt()
 
                 layout(placeable.width, placeable.height) {
-                    placeable.placeRelative(x = xOffset, y = yOffset)
+                    placeable.placeRelativeWithLayer(x = xOffset, y = yOffset) {
+                        scaleX = scale
+                        scaleY = scale
+                    }
                 }
             }
-            .scale(scale)
             .background(
                 color = color,
                 shape = RoundedCornerShape(16.dp)
