@@ -26,6 +26,15 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 
+internal enum class AdaptiveContainer {
+    Primary, Secondary, TransientPrimary
+}
+
+@Suppress("unused")
+internal enum class AdaptiveContainerSlot {
+    One, Two, Three
+}
+
 /**
  * Data structure for managing navigation as it adapts to various layout configurations
  */
@@ -53,6 +62,10 @@ internal data class AdaptiveNavigationState(
      */
     val routeIdsToAdaptiveSlots: Map<String, AdaptiveContainerSlot> = AdaptiveContainerSlot.entries
         .associateBy(AdaptiveContainerSlot::name),
+    /**
+     * The window size class of the current screen configuration
+     */
+    val windowSizeClass: WindowSizeClass = WindowSizeClass.COMPACT,
 )
 
 internal val AdaptiveNavigationState.primaryContainerSlot: AdaptiveContainerSlot
@@ -66,13 +79,13 @@ internal operator fun AdaptiveNavigationState.get(
     AdaptiveContainer.TransientPrimary -> routeIdsToAdaptiveSlots[transientPrimaryBackRoute?.id]
 }
 
-internal enum class AdaptiveContainer {
-    Primary, Secondary, TransientPrimary
-}
-
-@Suppress("unused")
-internal enum class AdaptiveContainerSlot {
-    One, Two, Three
+internal operator fun AdaptiveNavigationState.get(
+    route: AppRoute
+): AdaptiveContainer? = when (route.id) {
+    primaryRoute.id -> AdaptiveContainer.Primary
+    secondaryRoute?.id -> AdaptiveContainer.Secondary
+    transientPrimaryBackRoute?.id -> AdaptiveContainer.TransientPrimary
+    else -> null
 }
 
 internal operator fun AdaptiveNavigationState.get(container: AdaptiveContainerSlot): AppRoute =
@@ -109,6 +122,7 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
                             && route.id != visiblePrimaryRoute.id
                             && route.id != navState.secondaryRoute?.id
                 },
+                windowSizeClass = uiState.windowSizeClass,
             )
         }
         .distinctUntilChanged()
@@ -117,15 +131,18 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
                 copy(
                     primaryRoute = value.primaryRoute,
                     secondaryRoute = value.secondaryRoute,
-                    routeIdsToAdaptiveSlots = routeIdsToAdaptiveSlots.include(
-                        listOfNotNull(
-                            value.primaryRoute,
-                            value.secondaryRoute,
-                            value.primaryRouteOnBackPress.takeIf { route ->
-                                route?.id != value.secondaryRoute?.id
-                                        && route?.id != value.primaryRoute.id
-                            },
-                        )
+                    routeIdsToAdaptiveSlots = placeRoutesInSlots(
+                        existingRoutesToSlots = routeIdsToAdaptiveSlots,
+                        incomingContainersToRoutes = listOfNotNull(
+                            value.primaryRoute.placeIn(AdaptiveContainer.Primary),
+                            value.secondaryRoute.placeIn(AdaptiveContainer.Secondary),
+                            value.primaryRouteOnBackPress
+                                .takeIf { route ->
+                                    route?.id != value.secondaryRoute?.id
+                                            && route?.id != value.primaryRoute.id
+                                }
+                                .placeIn(AdaptiveContainer.TransientPrimary),
+                        ).toMap()
                     )
                 )
             }
@@ -136,26 +153,37 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
                     current.primaryRoute.id == previous.secondaryRoute?.id -> MoveKind.SecondaryToPrimary
                     else -> MoveKind.None
                 },
-                routeIdsToAdaptiveSlots = previous.routeIdsToAdaptiveSlots.include(
-                    listOfNotNull(
-                        current.transientPrimaryBackRoute,
-                        current.primaryRoute,
-                        current.secondaryRoute
-                    )
+                routeIdsToAdaptiveSlots = placeRoutesInSlots(
+                    existingRoutesToSlots = previous.routeIdsToAdaptiveSlots,
+                    incomingContainersToRoutes = listOfNotNull(
+                        current.primaryRoute.placeIn(AdaptiveContainer.Primary),
+                        current.secondaryRoute.placeIn(AdaptiveContainer.Secondary),
+                        current.transientPrimaryBackRoute.placeIn(AdaptiveContainer.TransientPrimary),
+                    ).toMap()
                 ),
             )
         }
 
-private fun Map<String, AdaptiveContainerSlot>.include(
-    incoming: List<AppRoute>,
+private fun AppRoute?.placeIn(container: AdaptiveContainer) =
+    if (this == null) null
+    else container to this
+
+private fun placeRoutesInSlots(
+    existingRoutesToSlots: Map<String, AdaptiveContainerSlot>,
+    incomingContainersToRoutes: Map<AdaptiveContainer, AppRoute>,
 ): Map<String, AdaptiveContainerSlot> {
-    val routesToAdd = incoming.filterNot { contains(it.id) }
-    val relevantRouteIds = incoming.map { it.id }.toSet()
-    val sortedByIrrelevance = entries.sortedBy { relevantRouteIds.contains(it.key) }
+    val routesToAdd = incomingContainersToRoutes.filterNot {
+        existingRoutesToSlots.contains(it.value.id)
+    }
+    val relevantRouteIds = incomingContainersToRoutes.map { it.value.id }.toSet()
+
+    val sortedByIrrelevance =
+        existingRoutesToSlots.entries.sortedBy { relevantRouteIds.contains(it.key) }
+    val routes = routesToAdd.entries.sortedBy { it.key }
 
     val replacedKeyValuePairs = List(sortedByIrrelevance.size) { index ->
         val sortedEntry = sortedByIrrelevance[index]
-        (routesToAdd.getOrNull(index)?.id ?: sortedEntry.key) to sortedEntry.value
+        (routes.getOrNull(index)?.value?.id ?: sortedEntry.key) to sortedEntry.value
     }
     return replacedKeyValuePairs.toMap()
 }

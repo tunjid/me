@@ -32,7 +32,7 @@ fun ComponentActivity.integrateBackActions(
                         touchX = backEvent.touchX,
                         touchY = backEvent.touchY,
                         progress = backEvent.progress,
-                        isPreviewing = true,
+                        isPreviewing = backEvent.progress > Float.MIN_VALUE,
                         isFromLeft = backEvent.swipeEdge == BackEventCompat.EDGE_LEFT
                     )
                 )
