@@ -90,7 +90,7 @@ val EmptyNavState = NavState(
 
 val NavState.primaryRoute: AppRoute get() = mainNav.current as? AppRoute ?: UnknownRoute()
 
-val NavState.predictiveBackRoute: AppRoute? get() = mainNav.pop().current as? AppRoute
+val NavState.primaryRouteOnBackPress: AppRoute? get() = mainNav.pop().current as? AppRoute
 
 @Inject
 class PersistedNavStateHolder(
