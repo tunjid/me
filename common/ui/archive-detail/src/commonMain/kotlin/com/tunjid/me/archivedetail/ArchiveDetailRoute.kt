@@ -38,9 +38,10 @@ import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.AsyncRasterImage
-import com.tunjid.me.core.ui.BackHandler
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.feature.LocalScreenStateHolderCache
+import com.tunjid.me.scaffold.globalui.PaneSplit
+import com.tunjid.me.scaffold.globalui.scaffold.SeconaryPaneCloseBackHandler
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
@@ -84,13 +85,10 @@ private fun ArchiveDetailScreen(
 
     val archive = state.archive
 
-    // Override back presses here to simply pop navigation, with no back preview on large screens.
-    // Instead the secondary navigation container should expand, since the back preview is already
-    // being shown in the secondary navigation
-    // TODO: Expand the secondary navigation container
-    BackHandler(enabled = state.IsInPrimaryNav && state.hasSecondaryPanel) {
-        stateHolder.accept(Action.Navigate { navState.pop() })
-    }
+    // Close the secondary pane when invoking back since it contains the list view
+    SeconaryPaneCloseBackHandler(
+        enabled = state.IsInPrimaryNav && state.hasSecondaryPanel
+    )
 
     Column(
         modifier = modifier
@@ -143,5 +141,12 @@ private fun ArchiveDetailScreen(
     val wasDeleted = state.wasDeleted
     LaunchedEffect(wasDeleted) {
         if (wasDeleted) actions(Action.Navigate { navState.pop() })
+    }
+
+    // If the user fully expands the secondary pane, pop this destination back to the list
+    LaunchedEffect(state.hasSecondaryPanel, state.paneSplit) {
+        if (state.hasSecondaryPanel && state.paneSplit == PaneSplit.Full) {
+            actions(Action.Navigate { navState.pop() })
+        }
     }
 }

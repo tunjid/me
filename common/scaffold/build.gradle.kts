@@ -39,6 +39,7 @@ kotlin {
 
                 implementation(libs.jetbrains.compose.runtime)
                 implementation(libs.jetbrains.compose.animation)
+                implementation(libs.jetbrains.compose.material)
                 implementation(libs.jetbrains.compose.material3)
                 implementation(libs.jetbrains.compose.foundation.foundation)
                 implementation(libs.jetbrains.compose.foundation.layout)
