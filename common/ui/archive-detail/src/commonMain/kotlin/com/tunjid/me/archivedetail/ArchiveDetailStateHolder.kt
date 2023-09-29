@@ -38,7 +38,6 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.mutator.mutation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -73,7 +72,7 @@ class ActualArchiveDetailStateHolder(
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
         uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
-        uiStateFlow.hasSecondaryPanelMutations(),
+        uiStateFlow.paneMutations(),
         authRepository.authMutations(),
         archiveRepository.archiveLoadMutations(
             id = route.archiveId
@@ -95,10 +94,15 @@ class ActualArchiveDetailStateHolder(
     }
 )
 
-private fun StateFlow<UiState>.hasSecondaryPanelMutations(): Flow<Mutation<State>> =
-    map { it.windowSizeClass > WindowSizeClass.COMPACT }
+private fun StateFlow<UiState>.paneMutations(): Flow<Mutation<State>> =
+    map { (it.windowSizeClass > WindowSizeClass.COMPACT) to it.paneSplit }
         .distinctUntilChanged()
-        .mapToMutation { copy(hasSecondaryPanel = it) }
+        .mapToMutation { (hasSecondaryPanel, paneSplit) ->
+            copy(
+                hasSecondaryPanel = hasSecondaryPanel,
+                paneSplit = paneSplit,
+            )
+        }
 
 private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     signedInUserStream

@@ -3,14 +3,19 @@ package com.tunjid.me.scaffold.globalui
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.PredictiveBackHandler
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.treenav.pop
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 internal actual data class PreviewBackStatus(
     val touchX: Float,
@@ -20,23 +25,43 @@ internal actual data class PreviewBackStatus(
     val isPreviewing: Boolean,
 ) : BackStatus
 
+@Composable
+actual fun BackHandler(
+    enabled: Boolean,
+    onStarted: () -> Unit,
+    onProgressed: (BackStatus) -> Unit,
+    onCancelled: () -> Unit,
+    onBack: () -> Unit
+) {
+    PredictiveBackHandler(enabled) { progress: Flow<BackEventCompat> ->
+        try {
+            progress.collectIndexed { index, backEvent ->
+                if (index == 0) onStarted()
+                val backStatus = backEvent.toBackStatus()
+                onProgressed(backStatus)
+            }
+            onBack()
+        } catch (e: CancellationException) {
+            onCancelled()
+        }
+    }
+}
+
+internal fun BackEventCompat.toBackStatus() = PreviewBackStatus(
+    touchX = touchX,
+    touchY = touchY,
+    progress = progress,
+    isPreviewing = progress > Float.MIN_VALUE,
+    isFromLeft = swipeEdge == BackEventCompat.EDGE_LEFT
+)
+
 fun ComponentActivity.integrateBackActions(
     globalUiStateHolder: GlobalUiStateHolder,
     navStateHolder: NavStateHolder,
 ) {
     val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackProgressed(backEvent: BackEventCompat) {
-            globalUiStateHolder.accept {
-                copy(
-                    backStatus = PreviewBackStatus(
-                        touchX = backEvent.touchX,
-                        touchY = backEvent.touchY,
-                        progress = backEvent.progress,
-                        isPreviewing = backEvent.progress > Float.MIN_VALUE,
-                        isFromLeft = backEvent.swipeEdge == BackEventCompat.EDGE_LEFT
-                    )
-                )
-            }
+            globalUiStateHolder.accept { copy(backStatus = backEvent.toBackStatus()) }
         }
 
         override fun handleOnBackPressed() {
