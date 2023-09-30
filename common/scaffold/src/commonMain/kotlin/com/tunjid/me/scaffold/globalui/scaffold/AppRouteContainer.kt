@@ -16,6 +16,7 @@
 
 package com.tunjid.me.scaffold.globalui.scaffold
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.TargetBasedAnimation
 import androidx.compose.animation.core.VectorConverter
@@ -56,6 +57,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -90,6 +92,7 @@ import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.ExpandAll
 import com.tunjid.me.scaffold.nav.MoveKind
 import com.tunjid.me.scaffold.nav.NavStateHolder
+import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -202,9 +205,14 @@ internal fun AppRouteContainer(
                     primaryContent = primaryContent,
                     transientPrimaryContent = transientPrimaryContent,
                 )
-                if (hasNavContent && windowSizeClass > WindowSizeClass.COMPACT) DraggableThumb(
-                    paneSplitState = paneSplitState
-                )
+                AnimatedVisibility(
+                    modifier = Modifier.align(Alignment.CenterStart),
+                    visible = hasNavContent && windowSizeClass > WindowSizeClass.COMPACT
+                ) {
+                    DraggableThumb(
+                        paneSplitState = paneSplitState
+                    )
+                }
             }
         )
     }
@@ -293,6 +301,7 @@ private fun SecondaryContainer(
 private fun BoxScope.DraggableThumb(
     paneSplitState: PaneSplitState
 ) {
+    val scope = rememberCoroutineScope()
     val isPressed by paneSplitState.interactionSource.collectIsPressedAsState()
     val isDragged by paneSplitState.interactionSource.collectIsDraggedAsState()
     val thumbWidth by animateDpAsState(
@@ -322,7 +331,10 @@ private fun BoxScope.DraggableThumb(
                 .align(Alignment.Center)
                 .width(thumbWidth)
                 .height(DraggableDividerSizeDp),
-            shape = RoundedCornerShape(DraggableDividerSizeDp)
+            shape = RoundedCornerShape(DraggableDividerSizeDp),
+            onClick = {
+                scope.launch { paneSplitState.moveTo(PaneSplit.OneThirds) }
+            },
         ) {
             Image(
                 modifier = Modifier
