@@ -26,14 +26,14 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 
 sealed class NavMode {
-    object BottomNav : NavMode()
-    object NavRail : NavMode()
+    data object BottomNav : NavMode()
+    data object NavRail : NavMode()
 }
 
 sealed class NavVisibility {
-    object Visible : NavVisibility()
-    object Gone : NavVisibility()
-    object GoneIfBottomNav : NavVisibility()
+    data object Visible : NavVisibility()
+    data object Gone : NavVisibility()
+    data object GoneIfBottomNav : NavVisibility()
 }
 
 enum class PaneSplit {

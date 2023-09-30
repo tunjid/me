@@ -47,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
@@ -219,29 +220,33 @@ private fun LazyListScope.dragDropThumbnail(
             DragLocation.None -> Color.Transparent
         }
     )
-    AsyncRasterImage(
-        imageUrl = thumbnail,
-        modifier = Modifier
-            .heightIn(max = 300.dp)
-            .aspectRatio(ratio = 16f / 9f)
-            .padding(horizontal = 16.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .border(
-                width = 2.dp,
-                color = borderColor,
-                shape = MaterialTheme.shapes.medium,
-            )
-            .dropTarget(
-                onStarted = { _, _ -> hasStoragePermission },
-                onEntered = { onAction(Action.Drag.Thumbnail(inside = true)) },
-                onExited = { onAction(Action.Drag.Thumbnail(inside = false)) },
-                onDropped = { uris, _ ->
-                    onAction(Action.Drag.Thumbnail(inside = false))
-                    onAction(Action.Drop(uris = uris))
-                    true
-                },
-            ) { onAction(Action.Drag.Thumbnail(inside = false)) }
-    )
+    Box(
+        modifier = Modifier.fillParentMaxWidth()
+    ) {
+        AsyncRasterImage(
+            imageUrl = thumbnail,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .heightIn(max = 300.dp)
+                .aspectRatio(ratio = 16f / 9f)
+                .clip(MaterialTheme.shapes.medium)
+                .border(
+                    width = 2.dp,
+                    color = borderColor,
+                    shape = MaterialTheme.shapes.medium,
+                )
+                .dropTarget(
+                    onStarted = { _, _ -> hasStoragePermission },
+                    onEntered = { onAction(Action.Drag.Thumbnail(inside = true)) },
+                    onExited = { onAction(Action.Drag.Thumbnail(inside = false)) },
+                    onDropped = { uris, _ ->
+                        onAction(Action.Drag.Thumbnail(inside = false))
+                        onAction(Action.Drop(uris = uris))
+                        true
+                    },
+                ) { onAction(Action.Drag.Thumbnail(inside = false)) }
+        )
+    }
 }
 
 private fun LazyListScope.titleEditor(

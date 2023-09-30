@@ -16,7 +16,6 @@
 
 package com.tunjid.me.feature.archivelist
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
@@ -37,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
@@ -97,7 +95,7 @@ private fun ArchiveScreen(
             )
     }
 
-    val cardWidth = 340.dp
+    val cardWidth = 320.dp
     val stickyHeaderItem by produceState<ArchiveItem.Header?>(
         initialValue = null,
         key1 = state.isLoading
@@ -138,7 +136,7 @@ private fun ArchiveScreen(
                     gridState = gridState,
                     cardWidth = cardWidth,
                     items = state.items,
-                    IsInPrimaryNav = state.isInPrimaryNav,
+                    isInPrimaryNav = state.isInPrimaryNav,
                     currentQuery = state.queryState.currentQuery,
                     actions = actions
                 )
@@ -194,7 +192,7 @@ private fun ArchiveList(
     gridState: LazyStaggeredGridState,
     items: List<ArchiveItem>,
     currentQuery: ArchiveQuery,
-    IsInPrimaryNav: Boolean,
+    isInPrimaryNav: Boolean,
     cardWidth: Dp,
     actions: (Action) -> Unit,
 ) {
@@ -203,7 +201,11 @@ private fun ArchiveList(
         columns = StaggeredGridCells.Adaptive(cardWidth),
         verticalItemSpacing = 16.dp,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 36.dp
+        ),
         content = {
             items(
                 items = items,
@@ -223,12 +225,6 @@ private fun ArchiveList(
                 itemContent = { item ->
                     GridCell(
                         modifier = Modifier
-                            .animateContentSize(
-                                animationSpec = spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    visibilityThreshold = IntSize.VisibilityThreshold
-                                )
-                            )
                             .animateItemPlacement(
                                 animationSpec = spring(
                                     stiffness = Spring.StiffnessMediumLow,
@@ -244,7 +240,7 @@ private fun ArchiveList(
                         },
                         navigate = { path ->
                             actions(Action.Navigate {
-                                if (IsInPrimaryNav) navState.push(route = path.toRoute)
+                                if (isInPrimaryNav) navState.push(route = path.toRoute)
                                 else navState.swap(route = path.toRoute)
                             })
                         }

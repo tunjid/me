@@ -20,6 +20,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.materialPath
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.unit.dp
 
 val com.tunjid.me.core.model.ArchiveKind.icon: ImageVector
     get() = iconMap.getOrPut(this) {
@@ -203,3 +210,49 @@ public val Icons.Filled.FilterList: ImageVector
     }
 
 private var _filterList: ImageVector? = null
+
+
+public val Icons.Filled.ExpandAll: ImageVector
+    get() {
+        if (_expandAll != null) {
+            return _expandAll!!
+        }
+        _expandAll = ImageVector.Builder(
+            name = "vector",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                fill = SolidColor(Color.Black),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(18.17f, 12f)
+                lineTo(15f, 8.83f)
+                lineTo(16.41f, 7.41f)
+                lineTo(21f, 12f)
+                lineTo(16.41f, 16.58f)
+                lineTo(15f, 15.17f)
+                lineTo(18.17f, 12f)
+                moveTo(5.83f, 12f)
+                lineTo(9f, 15.17f)
+                lineTo(7.59f, 16.59f)
+                lineTo(3f, 12f)
+                lineTo(7.59f, 7.42f)
+                lineTo(9f, 8.83f)
+                lineTo(5.83f, 12f)
+                close()
+            }
+        }.build()
+        return _expandAll!!
+    }
+
+private var _expandAll: ImageVector? = null

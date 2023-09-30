@@ -84,6 +84,7 @@ fun GlobalUi(
                     navState.push(route)
                 })
             },
+            insetFlags = InsetFlags.NO_BOTTOM,
             navVisibility = NavVisibility.Visible,
             statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
         )

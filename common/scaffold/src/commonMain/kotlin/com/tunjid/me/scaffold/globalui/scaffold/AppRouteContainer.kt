@@ -23,8 +23,13 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,7 +38,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Surface
 import androidx.compose.material.SwipeableState
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.swipeable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -56,6 +63,9 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -77,6 +87,7 @@ import com.tunjid.me.scaffold.globalui.progress
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
+import com.tunjid.me.scaffold.nav.ExpandAll
 import com.tunjid.me.scaffold.nav.MoveKind
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import kotlin.math.max
@@ -101,9 +112,13 @@ private class PaneSplitState {
 
     val currentPaneSplit get() = swipeableState.currentValue
 
+    private val mutableInteractionSource = MutableInteractionSource()
+
+    val interactionSource: InteractionSource = mutableInteractionSource
+
     private val swipeableState = SwipeableState(
         initialValue = PaneSplit.OneThirds,
-        animationSpec = tween()
+        animationSpec = tween(),
     )
 
     val modifier by derivedStateOf {
@@ -116,7 +131,8 @@ private class PaneSplitState {
                 (maxWidth * (2f / 3)) to PaneSplit.TwoThirds,
                 maxWidth.toFloat() to PaneSplit.Full,
             ),
-            orientation = Orientation.Horizontal
+            orientation = Orientation.Horizontal,
+            interactionSource = mutableInteractionSource,
         )
     }
 
@@ -225,20 +241,31 @@ private fun PrimaryContainer(
         windowSizeClass = windowSizeClass,
         moveKind = moveKind,
         maxWidth = maxWidth,
-        secondaryContentWidth = secondaryContentWidth
+        secondaryContentWidth = max(
+            a = MinPaneWidth,
+            b = secondaryContentWidth
+        )
     )
     val startPadding = if (hasNavContent) secondaryContentWidth else 0.dp
+
+    val baseModifier = Modifier
+        .width(animatedWidth)
+        .padding(start = startPadding)
+        // Do not place items when they are too small, but keep them in the composition
+        .layout { measurable, constraints ->
+            val placeable = measurable.measure(constraints)
+            layout(placeable.width, placeable.height) innerLayout@{
+                if (placeable.width.toDp() < MinPaneWidth) return@innerLayout
+                placeable.place(x = 0, y = 0)
+            }
+        }
     Box(
-        modifier = Modifier
-            .width(animatedWidth)
-            .padding(start = startPadding)
+        modifier = baseModifier
             .background(color = MaterialTheme.colorScheme.surface),
         content = { primaryContent() }
     )
     Box(
-        modifier = Modifier
-            .width(animatedWidth)
-            .padding(start = startPadding),
+        modifier = baseModifier,
         content = { transientPrimaryContent() }
     )
 }
@@ -251,7 +278,7 @@ private fun SecondaryContainer(
     secondaryContent: @Composable () -> Unit
 ) {
     val actualWidth = max(
-        a = SecondaryPanelMinWidth,
+        a = MinPaneWidth,
         b = if (hasNavContent) width else maxWidth
     )
     Box(
@@ -266,13 +293,16 @@ private fun SecondaryContainer(
 private fun BoxScope.DraggableThumb(
     paneSplitState: PaneSplitState
 ) {
+    val isPressed by paneSplitState.interactionSource.collectIsPressedAsState()
+    val isDragged by paneSplitState.interactionSource.collectIsDraggedAsState()
     val thumbWidth by animateDpAsState(
-        when (paneSplitState.targetPaneSplit) {
+        if (isPressed || isDragged) DraggableDividerSizeDp
+        else when (paneSplitState.targetPaneSplit) {
             PaneSplit.Zero -> DraggableDividerSizeDp
-            PaneSplit.OneThirds -> 4.dp
-            PaneSplit.Half -> 4.dp
-            PaneSplit.TwoThirds -> 4.dp
-            PaneSplit.Full -> 4.dp
+            PaneSplit.OneThirds,
+            PaneSplit.Half,
+            PaneSplit.TwoThirds,
+            PaneSplit.Full -> 2.dp
         }
     )
     Box(
@@ -287,16 +317,24 @@ private fun BoxScope.DraggableThumb(
             .width(DraggableDividerSizeDp)
             .then(paneSplitState.modifier)
     ) {
-        Box(
+        Surface(
             modifier = Modifier
                 .align(Alignment.Center)
                 .width(thumbWidth)
-                .height(DraggableDividerSizeDp)
-                .background(
-                    color = MaterialTheme.colorScheme.onSurface,
-                    shape = RoundedCornerShape(DraggableDividerSizeDp)
+                .height(DraggableDividerSizeDp),
+            shape = RoundedCornerShape(DraggableDividerSizeDp)
+        ) {
+            Image(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .scale(0.6f),
+                imageVector = Icons.Filled.ExpandAll,
+                contentDescription = "Drag",
+                colorFilter = ColorFilter.tint(
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-        )
+            )
+        }
     }
 }
 
@@ -432,5 +470,5 @@ fun SeconaryPaneCloseBackHandler(enabled: Boolean) {
     }
 }
 
-private val DraggableDividerSizeDp = 64.dp
-private val SecondaryPanelMinWidth = 128.dp
+private val DraggableDividerSizeDp = 48.dp
+private val MinPaneWidth = 120.dp
