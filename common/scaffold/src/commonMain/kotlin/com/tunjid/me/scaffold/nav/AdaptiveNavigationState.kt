@@ -172,18 +172,24 @@ private fun placeRoutesInSlots(
     existingRoutesToSlots: Map<String, AdaptiveContainerSlot>,
     incomingContainersToRoutes: Map<AdaptiveContainer, AppRoute>,
 ): Map<String, AdaptiveContainerSlot> {
-    val routesToAdd = incomingContainersToRoutes.filterNot {
-        existingRoutesToSlots.contains(it.value.id)
-    }
-    val relevantRouteIds = incomingContainersToRoutes.map { it.value.id }.toSet()
+    // A set of ids that will be guaranteed a place in the slots
+    val relevantRouteIds = incomingContainersToRoutes
+        .map { it.value.id }
+        .toSet()
 
-    val sortedByIrrelevance =
-        existingRoutesToSlots.entries.sortedBy { relevantRouteIds.contains(it.key) }
-    val routes = routesToAdd.entries.sortedBy { it.key }
+    // Sort existing routes by irrelevance; routes to be ejected will be first
+    val sortedByIrrelevance = existingRoutesToSlots.entries
+        .sortedBy { relevantRouteIds.contains(it.key) }
 
+    // Find routes to display that are not already in slots
+    val routesToAdd = incomingContainersToRoutes.entries
+        .filterNot { existingRoutesToSlots.contains(it.value.id) }
+        .sortedBy { it.key }
+
+    // Replace irrelevant routes with incoming routes that were not previously cached
     val replacedKeyValuePairs = List(sortedByIrrelevance.size) { index ->
         val sortedEntry = sortedByIrrelevance[index]
-        (routes.getOrNull(index)?.value?.id ?: sortedEntry.key) to sortedEntry.value
+        (routesToAdd.getOrNull(index)?.value?.id ?: sortedEntry.key) to sortedEntry.value
     }
     return replacedKeyValuePairs.toMap()
 }
