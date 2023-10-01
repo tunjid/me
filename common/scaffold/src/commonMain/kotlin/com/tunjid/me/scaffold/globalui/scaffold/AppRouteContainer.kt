@@ -26,9 +26,11 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -114,9 +116,9 @@ private class PaneSplitState {
 
     val currentPaneSplit get() = swipeableState.currentValue
 
-    private val mutableInteractionSource = MutableInteractionSource()
+    private val thumbMutableInteractionSource = MutableInteractionSource()
 
-    val interactionSource: InteractionSource = mutableInteractionSource
+    val thumbInteractionSource: InteractionSource = thumbMutableInteractionSource
 
     private val swipeableState = SwipeableState(
         initialValue = PaneSplit.OneThirds,
@@ -124,18 +126,20 @@ private class PaneSplitState {
     )
 
     val modifier by derivedStateOf {
-        Modifier.swipeable(
-            state = swipeableState,
-            anchors = mapOf(
-                0f to PaneSplit.Zero,
-                (maxWidth * (1f / 3)) to PaneSplit.OneThirds,
-                (maxWidth * (1f / 2)) to PaneSplit.Half,
-                (maxWidth * (2f / 3)) to PaneSplit.TwoThirds,
-                maxWidth.toFloat() to PaneSplit.Full,
-            ),
-            orientation = Orientation.Horizontal,
-            interactionSource = mutableInteractionSource,
-        )
+        Modifier
+            .hoverable(thumbMutableInteractionSource)
+            .swipeable(
+                state = swipeableState,
+                anchors = mapOf(
+                    0f to PaneSplit.Zero,
+                    (maxWidth * (1f / 3)) to PaneSplit.OneThirds,
+                    (maxWidth * (1f / 2)) to PaneSplit.Half,
+                    (maxWidth * (2f / 3)) to PaneSplit.TwoThirds,
+                    maxWidth.toFloat() to PaneSplit.Full,
+                ),
+                orientation = Orientation.Horizontal,
+                interactionSource = thumbMutableInteractionSource,
+            )
     }
 
     fun updateMaxWidth(maxWidth: Int) {
@@ -299,10 +303,11 @@ private fun BoxScope.DraggableThumb(
     paneSplitState: PaneSplitState
 ) {
     val scope = rememberCoroutineScope()
-    val isPressed by paneSplitState.interactionSource.collectIsPressedAsState()
-    val isDragged by paneSplitState.interactionSource.collectIsDraggedAsState()
+    val isHovered by paneSplitState.thumbInteractionSource.collectIsHoveredAsState()
+    val isPressed by paneSplitState.thumbInteractionSource.collectIsPressedAsState()
+    val isDragged by paneSplitState.thumbInteractionSource.collectIsDraggedAsState()
     val thumbWidth by animateDpAsState(
-        if (isPressed || isDragged) DraggableDividerSizeDp
+        if (isHovered || isPressed || isDragged) DraggableDividerSizeDp
         else when (paneSplitState.targetPaneSplit) {
             PaneSplit.Zero -> DraggableDividerSizeDp
             PaneSplit.OneThirds,
