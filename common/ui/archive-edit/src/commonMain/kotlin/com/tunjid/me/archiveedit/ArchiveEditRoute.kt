@@ -221,7 +221,9 @@ private fun LazyListScope.dragDropThumbnail(
         }
     )
     Box(
-        modifier = Modifier.fillParentMaxWidth()
+        modifier = Modifier
+            .fillParentMaxWidth()
+            .padding(horizontal = 16.dp)
     ) {
         AsyncRasterImage(
             imageUrl = thumbnail,

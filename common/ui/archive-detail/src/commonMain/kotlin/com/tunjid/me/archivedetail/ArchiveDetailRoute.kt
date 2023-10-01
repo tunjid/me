@@ -95,7 +95,7 @@ private fun ArchiveDetailScreen(
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(modifier = Modifier.padding(16.dp))
+        Spacer(modifier = Modifier.padding(8.dp))
         AsyncRasterImage(
             imageUrl = state.archive?.thumbnail,
             modifier = Modifier
