@@ -24,7 +24,7 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
-import com.tunjid.me.scaffold.globalui.PaneSplit
+import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.nav.NavMutation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -54,7 +54,7 @@ data class State(
     @Transient
     val hasSecondaryPanel: Boolean = false,
     @Transient
-    val paneSplit: PaneSplit? = null,
+    val paneAnchor: PaneAnchor? = null,
 ) : ByteSerializable
 
 val State.canEdit: Boolean get() = signedInUserId != null && signedInUserId == archive?.author?.id

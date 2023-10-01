@@ -95,12 +95,12 @@ class ActualArchiveDetailStateHolder(
 )
 
 private fun StateFlow<UiState>.paneMutations(): Flow<Mutation<State>> =
-    map { (it.windowSizeClass > WindowSizeClass.COMPACT) to it.paneSplit }
+    map { (it.windowSizeClass > WindowSizeClass.COMPACT) to it.paneAnchor }
         .distinctUntilChanged()
         .mapToMutation { (hasSecondaryPanel, paneSplit) ->
             copy(
                 hasSecondaryPanel = hasSecondaryPanel,
-                paneSplit = paneSplit,
+                paneAnchor = paneSplit,
             )
         }
 

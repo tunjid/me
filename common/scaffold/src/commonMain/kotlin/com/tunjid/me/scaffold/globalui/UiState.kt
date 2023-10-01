@@ -36,7 +36,7 @@ sealed class NavVisibility {
     data object GoneIfBottomNav : NavVisibility()
 }
 
-enum class PaneSplit {
+enum class PaneAnchor {
     Zero, OneThirds, Half, TwoThirds, Full
 }
 
@@ -63,7 +63,7 @@ data class UiState(
     val isImmersive: Boolean = false,
     val systemUI: SystemUI = NoOpSystemUI,
     val backStatus: BackStatus = BackStatus.None,
-    val paneSplit: PaneSplit = PaneSplit.Zero,
+    val paneAnchor: PaneAnchor = PaneAnchor.Zero,
     val fabClickListener: (Unit) -> Unit = emptyCallback(),
     val toolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),
     val altToolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),

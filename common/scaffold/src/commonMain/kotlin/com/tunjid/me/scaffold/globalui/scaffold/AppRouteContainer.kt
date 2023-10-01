@@ -79,7 +79,7 @@ import androidx.compose.ui.zIndex
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.scaffold.globalui.BackHandler
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.PaneSplit
+import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.bottomNavSize
@@ -97,13 +97,13 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-private val LocalPaneSplitState = staticCompositionLocalOf {
-    PaneSplitState()
+private val LocalPaneAnchorState = staticCompositionLocalOf {
+    PaneAnchorState()
 }
 
 @Stable
 // TODO: Migrate to AnchoredDraggable when moving to Compose 1.6
-private class PaneSplitState {
+private class PaneAnchorState {
     var maxWidth by mutableIntStateOf(1000)
         private set
     val width
@@ -121,7 +121,7 @@ private class PaneSplitState {
     val thumbInteractionSource: InteractionSource = thumbMutableInteractionSource
 
     private val swipeableState = SwipeableState(
-        initialValue = PaneSplit.OneThirds,
+        initialValue = PaneAnchor.OneThirds,
         animationSpec = tween(),
     )
 
@@ -131,11 +131,11 @@ private class PaneSplitState {
             .swipeable(
                 state = swipeableState,
                 anchors = mapOf(
-                    0f to PaneSplit.Zero,
-                    (maxWidth * (1f / 3)) to PaneSplit.OneThirds,
-                    (maxWidth * (1f / 2)) to PaneSplit.Half,
-                    (maxWidth * (2f / 3)) to PaneSplit.TwoThirds,
-                    maxWidth.toFloat() to PaneSplit.Full,
+                    0f to PaneAnchor.Zero,
+                    (maxWidth * (1f / 3)) to PaneAnchor.OneThirds,
+                    (maxWidth * (1f / 2)) to PaneAnchor.Half,
+                    (maxWidth * (2f / 3)) to PaneAnchor.TwoThirds,
+                    maxWidth.toFloat() to PaneAnchor.Full,
                 ),
                 orientation = Orientation.Horizontal,
                 interactionSource = thumbMutableInteractionSource,
@@ -152,7 +152,7 @@ private class PaneSplitState {
 
     suspend fun completeDispatch() = swipeableState.performFling(0f)
 
-    suspend fun moveTo(anchor: PaneSplit) = swipeableState.animateTo(anchor)
+    suspend fun moveTo(anchor: PaneAnchor) = swipeableState.animateTo(anchor)
 }
 
 /**
@@ -177,10 +177,10 @@ internal fun AppRouteContainer(
         it.secondaryRoute != null
     }
     val density = LocalDensity.current
-    val paneSplitState = remember(::PaneSplitState)
+    val paneSplitState = remember(::PaneAnchorState)
 
     CompositionLocalProvider(
-        LocalPaneSplitState provides paneSplitState,
+        LocalPaneAnchorState provides paneSplitState,
     ) {
         Box(
             modifier = Modifier
@@ -213,7 +213,7 @@ internal fun AppRouteContainer(
                     visible = hasNavContent && windowSizeClass > WindowSizeClass.COMPACT
                 ) {
                     DraggableThumb(
-                        paneSplitState = paneSplitState
+                        paneAnchorState = paneSplitState
                     )
                 }
             }
@@ -223,17 +223,17 @@ internal fun AppRouteContainer(
     LaunchedEffect(windowSizeClass, hasNavContent) {
         paneSplitState.moveTo(
             if (hasNavContent) when (windowSizeClass) {
-                WindowSizeClass.COMPACT -> PaneSplit.Zero
-                WindowSizeClass.MEDIUM -> PaneSplit.OneThirds
-                WindowSizeClass.EXPANDED -> PaneSplit.Half
+                WindowSizeClass.COMPACT -> PaneAnchor.Zero
+                WindowSizeClass.MEDIUM -> PaneAnchor.OneThirds
+                WindowSizeClass.EXPANDED -> PaneAnchor.Half
             }
-            else PaneSplit.Zero
+            else PaneAnchor.Zero
         )
     }
 
     LaunchedEffect(paneSplitState.currentPaneSplit) {
         globalUiStateHolder.accept {
-            copy(paneSplit = paneSplitState.currentPaneSplit)
+            copy(paneAnchor = paneSplitState.currentPaneSplit)
         }
     }
 }
@@ -300,33 +300,33 @@ private fun SecondaryContainer(
 
 @Composable
 private fun BoxScope.DraggableThumb(
-    paneSplitState: PaneSplitState
+    paneAnchorState: PaneAnchorState
 ) {
     val scope = rememberCoroutineScope()
-    val isHovered by paneSplitState.thumbInteractionSource.collectIsHoveredAsState()
-    val isPressed by paneSplitState.thumbInteractionSource.collectIsPressedAsState()
-    val isDragged by paneSplitState.thumbInteractionSource.collectIsDraggedAsState()
+    val isHovered by paneAnchorState.thumbInteractionSource.collectIsHoveredAsState()
+    val isPressed by paneAnchorState.thumbInteractionSource.collectIsPressedAsState()
+    val isDragged by paneAnchorState.thumbInteractionSource.collectIsDraggedAsState()
     val thumbWidth by animateDpAsState(
         if (isHovered || isPressed || isDragged) DraggableDividerSizeDp
-        else when (paneSplitState.targetPaneSplit) {
-            PaneSplit.Zero -> DraggableDividerSizeDp
-            PaneSplit.OneThirds,
-            PaneSplit.Half,
-            PaneSplit.TwoThirds,
-            PaneSplit.Full -> 2.dp
+        else when (paneAnchorState.targetPaneSplit) {
+            PaneAnchor.Zero -> DraggableDividerSizeDp
+            PaneAnchor.OneThirds,
+            PaneAnchor.Half,
+            PaneAnchor.TwoThirds,
+            PaneAnchor.Full -> 2.dp
         }
     )
     Box(
         modifier = Modifier
             .offset {
                 IntOffset(
-                    x = paneSplitState.width - (DraggableDividerSizeDp / 2).roundToPx(),
+                    x = paneAnchorState.width - (DraggableDividerSizeDp / 2).roundToPx(),
                     y = 0
                 )
             }
             .align(Alignment.CenterStart)
             .width(DraggableDividerSizeDp)
-            .then(paneSplitState.modifier)
+            .then(paneAnchorState.modifier)
     ) {
         Surface(
             modifier = Modifier
@@ -335,7 +335,7 @@ private fun BoxScope.DraggableThumb(
                 .height(DraggableDividerSizeDp),
             shape = RoundedCornerShape(DraggableDividerSizeDp),
             onClick = {
-                scope.launch { paneSplitState.moveTo(PaneSplit.OneThirds) }
+                scope.launch { paneAnchorState.moveTo(PaneAnchor.OneThirds) }
             },
         ) {
             Image(
@@ -440,7 +440,7 @@ private fun routeContainerPadding(
 
 @Composable
 fun SeconaryPaneCloseBackHandler(enabled: Boolean) {
-    val paneSplitState = LocalPaneSplitState.current
+    val paneSplitState = LocalPaneAnchorState.current
     var started by remember { mutableStateOf(false) }
     var widthAtStart by remember { mutableIntStateOf(0) }
     var desiredPaneWidth by remember { mutableFloatStateOf(0f) }

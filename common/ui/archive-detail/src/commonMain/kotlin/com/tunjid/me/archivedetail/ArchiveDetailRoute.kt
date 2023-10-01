@@ -40,7 +40,7 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.scaffold.globalui.PaneSplit
+import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.scaffold.SeconaryPaneCloseBackHandler
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
@@ -144,8 +144,8 @@ private fun ArchiveDetailScreen(
     }
 
     // If the user fully expands the secondary pane, pop this destination back to the list
-    LaunchedEffect(state.hasSecondaryPanel, state.paneSplit) {
-        if (state.hasSecondaryPanel && state.paneSplit == PaneSplit.Full) {
+    LaunchedEffect(state.hasSecondaryPanel, state.paneAnchor) {
+        if (state.hasSecondaryPanel && state.paneAnchor == PaneAnchor.Full) {
             actions(Action.Navigate { navState.pop() })
         }
     }
