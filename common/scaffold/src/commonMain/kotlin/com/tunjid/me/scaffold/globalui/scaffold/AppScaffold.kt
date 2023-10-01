@@ -24,8 +24,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -176,23 +178,25 @@ private fun rememberAdaptiveContainersToRoutes(
                         targetRoute.Render(
                             when (targetRoute.id) {
                                 updatedState.primaryRoute.id -> FillSizeModifier
+                                    .background(color = MaterialTheme.colorScheme.surface)
                                     .animateEnterExit(
                                         enter = fadeIn(RouteTransitionAnimationSpec),
                                         exit = fadeOut(RouteTransitionAnimationSpec)
                                     )
 
                                 updatedState.secondaryRoute?.id -> FillSizeModifier
+                                    .background(color = MaterialTheme.colorScheme.surface)
                                     .animateEnterExit(
                                         enter = fadeIn(RouteTransitionAnimationSpec),
                                         exit = ExitTransition.None
                                     )
 
                                 updatedState.transientPrimaryBackRoute?.id -> FillSizeModifier
+                                    .backPreviewModifier()
                                     .animateEnterExit(
                                         enter = EnterTransition.None,
                                         exit = fadeOut(RouteTransitionAnimationSpec)
                                     )
-                                    .backPreviewModifier()
 
                                 else -> FillSizeModifier.animateEnterExit(
                                     enter = EnterTransition.None,

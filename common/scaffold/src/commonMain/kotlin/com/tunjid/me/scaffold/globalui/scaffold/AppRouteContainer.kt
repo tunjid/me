@@ -25,7 +25,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -268,8 +267,7 @@ private fun PrimaryContainer(
             }
         }
     Box(
-        modifier = baseModifier
-            .background(color = MaterialTheme.colorScheme.surface),
+        modifier = baseModifier,
         content = { primaryContent() }
     )
     Box(
@@ -291,8 +289,7 @@ private fun SecondaryContainer(
     )
     Box(
         modifier = Modifier
-            .width(actualWidth)
-            .background(color = MaterialTheme.colorScheme.surface),
+            .width(actualWidth),
         content = { secondaryContent() }
     )
 }
