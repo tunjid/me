@@ -158,7 +158,6 @@ private fun ArchiveEditScreen(
             ),
         state = scrollState,
     ) {
-        spacer(8.dp)
         dragDropThumbnail(
             thumbnail = state.thumbnail,
             hasStoragePermission = state.hasStoragePermissions,

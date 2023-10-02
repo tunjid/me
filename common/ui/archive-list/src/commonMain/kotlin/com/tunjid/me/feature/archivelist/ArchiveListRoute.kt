@@ -112,7 +112,6 @@ private fun ArchiveScreen(
     Column(
         modifier = modifier
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
         ArchiveFilters(
             queryState = state.queryState,
             onChanged = actions
