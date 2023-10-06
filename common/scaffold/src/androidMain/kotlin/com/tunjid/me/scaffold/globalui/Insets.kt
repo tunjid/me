@@ -16,12 +16,8 @@
 
 package com.tunjid.me.scaffold.globalui
 
-import android.graphics.Color
-import android.os.Build
 import android.view.ViewGroup
-import android.view.Window
-import android.view.WindowManager
-import androidx.core.view.WindowCompat
+import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentActivity
 import com.tunjid.me.scaffold.globalui.*
@@ -38,13 +34,13 @@ import kotlinx.coroutines.flow.callbackFlow
  */
 
 fun FragmentActivity.insetMutations(): Flow<Mutation<UiState>> {
-    window.assumeControl()
+    enableEdgeToEdge()
 
     val rootView = window.decorView
         .findViewById<ViewGroup>(android.R.id.content)
         .getChildAt(0)
 
-    return callbackFlow<Mutation<UiState>> {
+    return callbackFlow {
         rootView.setOnApplyWindowInsetsListener { _, insets ->
             channel.trySend {
                 reduceSystemInsets(
@@ -57,19 +53,6 @@ fun FragmentActivity.insetMutations(): Flow<Mutation<UiState>> {
         }
         awaitClose { }
     }
-}
-
-private fun Window.assumeControl() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        val windowAttributes = attributes
-        windowAttributes.layoutInDisplayCutoutMode =
-            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-        attributes = windowAttributes
-    }
-    WindowCompat.setDecorFitsSystemWindows(this, false)
-//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) isNavigationBarContrastEnforced = false
-    navigationBarColor = Color.TRANSPARENT
-    statusBarColor = Color.TRANSPARENT
 }
 
 private fun UiState.reduceSystemInsets(
