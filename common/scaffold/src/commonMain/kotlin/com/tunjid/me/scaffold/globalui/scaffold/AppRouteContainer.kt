@@ -275,13 +275,8 @@ private fun primaryContentModifier(
     var complete by remember(moveKind) { mutableStateOf(false) }
 
     LaunchedEffect(windowSizeClass, moveKind) {
-        if (windowSizeClass.isNotExpanded) {
-            // Maintain max width on smaller devices
-            widthAnimatable.snapTo(maxWidth)
-            complete = true
-            return@LaunchedEffect
-        }
-        if (moveKind != MoveKind.SecondaryToPrimary) {
+        // Maintain max width on smaller devices
+        if (windowSizeClass.isNotExpanded || moveKind != MoveKind.SecondaryToPrimary) {
             complete = true
             return@LaunchedEffect
         }
@@ -297,9 +292,7 @@ private fun primaryContentModifier(
 
     return Modifier
         .width(if (complete) maxWidth else widthAnimatable.value)
-        .padding(
-            start = if (hasNavContent && !windowSizeClass.isNotExpanded) secondaryContentWidth else 0.dp
-        )
+        .padding(start = secondaryContentWidth countIf (hasNavContent && !windowSizeClass.isNotExpanded))
         .restrictedSizePlacement()
 }
 
