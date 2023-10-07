@@ -20,15 +20,12 @@ import androidx.compose.ui.unit.dp
 
 enum class WindowSizeClass { COMPACT, MEDIUM, EXPANDED }
 
-val WindowSizeClass.isNotExpanded get() = this != WindowSizeClass.EXPANDED
-
 fun WindowSizeClass.navRailWidth() =
     when (this) {
         WindowSizeClass.COMPACT -> 0.dp
         WindowSizeClass.MEDIUM,
         WindowSizeClass.EXPANDED -> 72.dp
     }
-
 
 fun WindowSizeClass.toolbarSize() =
     when (this) {
@@ -42,11 +39,4 @@ fun WindowSizeClass.bottomNavSize() =
         WindowSizeClass.COMPACT,
         WindowSizeClass.MEDIUM,
         WindowSizeClass.EXPANDED -> 80.dp
-    }
-
-fun WindowSizeClass.secondaryContentWidth() =
-    when (this) {
-        WindowSizeClass.COMPACT,
-        WindowSizeClass.MEDIUM  -> 0.dp
-        WindowSizeClass.EXPANDED -> 400.dp
     }

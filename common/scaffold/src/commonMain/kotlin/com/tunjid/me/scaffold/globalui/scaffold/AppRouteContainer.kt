@@ -72,7 +72,6 @@ import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.bottomNavSize
-import com.tunjid.me.scaffold.globalui.isNotExpanded
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.navRailWidth
 import com.tunjid.me.scaffold.globalui.progress
@@ -276,7 +275,7 @@ private fun primaryContentModifier(
 
     LaunchedEffect(windowSizeClass, moveKind) {
         // Maintain max width on smaller devices
-        if (windowSizeClass.isNotExpanded || moveKind != MoveKind.SecondaryToPrimary) {
+        if (windowSizeClass == WindowSizeClass.COMPACT || moveKind != MoveKind.SecondaryToPrimary) {
             complete = true
             return@LaunchedEffect
         }
@@ -292,7 +291,11 @@ private fun primaryContentModifier(
 
     return Modifier
         .width(if (complete) maxWidth else widthAnimatable.value)
-        .padding(start = secondaryContentWidth countIf (hasNavContent && !windowSizeClass.isNotExpanded))
+        .padding(
+            start = secondaryContentWidth.countIf(
+                condition = hasNavContent && windowSizeClass > WindowSizeClass.COMPACT
+            )
+        )
         .restrictedSizePlacement()
 }
 
