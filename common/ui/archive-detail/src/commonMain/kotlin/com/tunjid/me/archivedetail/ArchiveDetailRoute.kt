@@ -41,7 +41,7 @@ import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.PaneAnchor
-import com.tunjid.me.scaffold.globalui.scaffold.SeconaryPaneCloseBackHandler
+import com.tunjid.me.scaffold.globalui.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
@@ -86,7 +86,7 @@ private fun ArchiveDetailScreen(
     val archive = state.archive
 
     // Close the secondary pane when invoking back since it contains the list view
-    SeconaryPaneCloseBackHandler(
+    SecondaryPaneCloseBackHandler(
         enabled = state.IsInPrimaryNav && state.hasSecondaryPanel
     )
 

@@ -414,7 +414,7 @@ private fun Modifier.restrictedSizePlacement() =
     }
 
 @Composable
-fun SeconaryPaneCloseBackHandler(enabled: Boolean) {
+fun SecondaryPaneCloseBackHandler(enabled: Boolean) {
     val paneSplitState = LocalPaneAnchorState.current
     var started by remember { mutableStateOf(false) }
     var widthAtStart by remember { mutableIntStateOf(0) }
