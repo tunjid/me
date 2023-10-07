@@ -19,7 +19,6 @@ package com.tunjid.me.scaffold.globalui.scaffold
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.TargetBasedAnimation
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDpAsState
@@ -48,14 +47,12 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -267,48 +264,42 @@ private fun primaryContentModifier(
     secondaryContentWidth: Dp,
     maxWidth: Dp,
 ): Modifier {
-    val startPadding = if (hasNavContent) secondaryContentWidth else 0.dp
-
-    if (windowSizeClass.isNotExpanded) return Modifier
-        .width(maxWidth)
-        .padding(start = startPadding)
-        .restrictedSizePlacement()
-
     val updatedSecondaryContentWidth by rememberUpdatedState(secondaryContentWidth)
-
-    var moveComplete by remember(moveKind) {
-        mutableStateOf(false)
+    val widthAnimatable = remember {
+        Animatable(
+            initialValue = maxWidth,
+            typeConverter = Dp.VectorConverter,
+            visibilityThreshold = Dp.VisibilityThreshold,
+        )
     }
-    val width = produceState(
-        initialValue = maxWidth,
-        key1 = maxWidth,
-        key2 = moveKind,
-        key3 = moveComplete,
-    ) {
-        if (moveKind == MoveKind.SecondaryToPrimary && !moveComplete) {
-            value = updatedSecondaryContentWidth
+    var complete by remember(moveKind) { mutableStateOf(false) }
 
-            val anim = TargetBasedAnimation(
-                animationSpec = contentSizeSpring(),
-                typeConverter = Dp.VectorConverter,
-                initialValue = value,
-                targetValue = maxWidth
-            )
-
-            var playTime: Long
-            val startTime = withFrameNanos { it }
-
-            while (value < maxWidth) {
-                playTime = withFrameNanos { it } - startTime
-                value = anim.getValueFromNanos(playTime)
-            }
-            moveComplete = true
-        } else value = maxWidth
+    LaunchedEffect(windowSizeClass, moveKind) {
+        if (windowSizeClass.isNotExpanded) {
+            // Maintain max width on smaller devices
+            widthAnimatable.snapTo(maxWidth)
+            complete = true
+            return@LaunchedEffect
+        }
+        if (moveKind != MoveKind.SecondaryToPrimary) {
+            complete = true
+            return@LaunchedEffect
+        }
+        complete = false
+        // Snap to this width to give the impression of the container sliding
+        widthAnimatable.snapTo(targetValue = updatedSecondaryContentWidth)
+        widthAnimatable.animateTo(
+            targetValue = maxWidth,
+            animationSpec = contentSizeSpring(),
+        )
+        complete = true
     }
 
     return Modifier
-        .width(width.value)
-        .padding(start = startPadding)
+        .width(if (complete) maxWidth else widthAnimatable.value)
+        .padding(
+            start = if (hasNavContent && !windowSizeClass.isNotExpanded) secondaryContentWidth else 0.dp
+        )
         .restrictedSizePlacement()
 }
 
@@ -344,9 +335,8 @@ private fun secondaryContentModifier(
     }
 
     return Modifier
-        .width(
-            if (complete) updatedWidth.value else widthAnimatable.value
-        )
+        .width(if (complete) updatedWidth.value else widthAnimatable.value)
+        // Display the secondary content over the primary content to maintain the sliding illusion
         .zIndex(if (complete) 0f else 1f)
         .restrictedSizePlacement()
 }
