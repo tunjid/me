@@ -66,7 +66,7 @@ fun ArchiveFilters(
         ) {
             Row(
                 modifier = Modifier
-                    .defaultMinSize(minHeight = 48.dp)
+                    .requiredHeight(48.dp)
                     .fillMaxWidth()
                     .clickable { onChanged(Action.ToggleFilter()) },
                 verticalAlignment = Alignment.CenterVertically,
