@@ -22,7 +22,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
@@ -43,8 +42,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,7 +49,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -66,7 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.zIndex
 import com.tunjid.me.core.utilities.countIf
-import com.tunjid.me.scaffold.globalui.BackHandler
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.UiState
@@ -74,7 +69,6 @@ import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.navRailWidth
-import com.tunjid.me.scaffold.globalui.progress
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
@@ -82,10 +76,6 @@ import com.tunjid.me.scaffold.nav.ExpandAll
 import com.tunjid.me.scaffold.nav.MoveKind
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import kotlinx.coroutines.launch
-
-private val LocalPaneAnchorState = staticCompositionLocalOf {
-    PaneAnchorState()
-}
 
 /**
  * Motionally intelligent container for the hosting the navigation routes
@@ -116,6 +106,7 @@ internal fun AppRouteContainer(
     ) {
         Box(
             modifier = Modifier
+                // Place under bottom navigation, app bars, fabs and the like
                 .zIndex(-1f)
                 .fillMaxWidth()
                 .onSizeChanged { paneSplitState.updateMaxWidth(it.width) }
@@ -284,7 +275,7 @@ private fun primaryContentModifier(
         widthAnimatable.snapTo(targetValue = updatedSecondaryContentWidth)
         widthAnimatable.animateTo(
             targetValue = maxWidth,
-            animationSpec = contentSizeSpring(),
+            animationSpec = ContentSizeSpring,
         )
         complete = true
     }
@@ -325,7 +316,7 @@ private fun secondaryContentModifier(
         widthAnimatable.snapTo(targetValue = maxWidth)
         widthAnimatable.animateTo(
             targetValue = width,
-            animationSpec = contentSizeSpring(),
+            animationSpec = ContentSizeSpring,
         )
         complete = true
     }
@@ -336,10 +327,6 @@ private fun secondaryContentModifier(
         .zIndex(if (complete) 0f else 1f)
         .restrictedSizePlacement()
 }
-
-private fun contentSizeSpring() = spring<Dp>(
-    stiffness = Spring.StiffnessMediumLow
-)
 
 @Composable
 private fun routeContainerPadding(
@@ -399,51 +386,9 @@ private fun Modifier.restrictedSizePlacement() =
         }
     }
 
-@Composable
-fun SecondaryPaneCloseBackHandler(enabled: Boolean) {
-    val paneSplitState = LocalPaneAnchorState.current
-    var started by remember { mutableStateOf(false) }
-    var widthAtStart by remember { mutableIntStateOf(0) }
-    var desiredPaneWidth by remember { mutableFloatStateOf(0f) }
-    val animatedDesiredPanelWidth by animateFloatAsState(desiredPaneWidth)
-
-    BackHandler(
-        enabled = enabled,
-        onStarted = {
-            widthAtStart = paneSplitState.width
-            started = true
-        },
-        onProgressed = { backStatus ->
-            val backProgress = backStatus.progress
-            val distanceToCover = paneSplitState.maxWidth - widthAtStart
-            desiredPaneWidth = (backProgress * distanceToCover) + widthAtStart
-        },
-        onCancelled = {
-            started = false
-        },
-        onBack = {
-            started = false
-        }
-    )
-
-    // Make sure desiredPaneWidth is synced with paneSplitState.width before the back gesture
-    LaunchedEffect(started, paneSplitState.width) {
-        if (started) return@LaunchedEffect
-        desiredPaneWidth = paneSplitState.width.toFloat()
-    }
-
-    // Dispatch changes as the user presses back
-    LaunchedEffect(started, animatedDesiredPanelWidth) {
-        if (!started) return@LaunchedEffect
-        paneSplitState.dispatch(delta = animatedDesiredPanelWidth - paneSplitState.width.toFloat())
-    }
-
-    // Fling to settle
-    LaunchedEffect(started) {
-        if (started) return@LaunchedEffect
-        paneSplitState.completeDispatch()
-    }
-}
-
 private val DraggableDividerSizeDp = 48.dp
 private val MinPaneWidth = 120.dp
+
+private val ContentSizeSpring = spring<Dp>(
+    stiffness = Spring.StiffnessLow
+)
