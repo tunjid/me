@@ -287,7 +287,7 @@ private fun primaryContentModifier(
                 condition = hasNavContent && windowSizeClass > WindowSizeClass.COMPACT
             )
         )
-        .restrictedSizePlacement()
+        .restrictedSizePlacement(atStart = false)
 }
 
 @Composable
@@ -325,7 +325,7 @@ private fun secondaryContentModifier(
         .width(if (complete) updatedWidth.value else widthAnimatable.value)
         // Display the secondary content over the primary content to maintain the sliding illusion
         .zIndex(if (complete) 0f else 1f)
-        .restrictedSizePlacement()
+        .restrictedSizePlacement(atStart = true)
 }
 
 @Composable
@@ -369,19 +369,29 @@ private fun routeContainerPadding(
     return paddingValues
 }
 
-private fun Modifier.restrictedSizePlacement() =
-    // When the content area is small, just shift items out of view
-    layout { measurable, constraints ->
-        val actualConstraints = when (val minPaneIntWidth = MinPaneWidth.roundToPx()) {
-            in constraints.maxWidth..Int.MAX_VALUE -> constraints.copy(
-                maxWidth = minPaneIntWidth
-            )
-
+/**
+ * Shifts layouts out of view when the content area is too small instead of resizing them
+ */
+private fun Modifier.restrictedSizePlacement(
+    atStart: Boolean
+) = layout { measurable, constraints ->
+        val minPanWidth = MinPaneWidth.roundToPx()
+        val actualConstraints = when {
+            constraints.maxWidth < minPanWidth -> constraints.copy(maxWidth = minPanWidth)
             else -> constraints
         }
         val placeable = measurable.measure(actualConstraints)
-        layout(placeable.width, placeable.height) {
-            placeable.place(x = 0, y = 0)
+        layout(width = placeable.width, height = placeable.height) {
+            placeable.placeRelative(
+                x = when {
+                    constraints.maxWidth < minPanWidth -> when {
+                        atStart -> constraints.maxWidth - minPanWidth
+                        else -> minPanWidth - constraints.maxWidth
+                    }
+                    else -> 0
+                },
+                y = 0
+            )
         }
     }
 
