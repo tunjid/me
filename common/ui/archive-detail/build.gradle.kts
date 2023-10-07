@@ -34,6 +34,7 @@ kotlin {
                 implementation(libs.kotlinx.serialization.cbor)
                 implementation(libs.kotlinx.serialization.json)
 
+                implementation(libs.richeditor)
                 implementation(libs.richtext.commonmark)
                 implementation(libs.richtext.material3)
 

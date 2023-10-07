@@ -16,14 +16,13 @@
 
 package com.tunjid.me.archivedetail
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,14 +30,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
-import com.halilibo.richtext.markdown.Markdown
-import com.halilibo.richtext.ui.material3.Material3RichText
+import com.mohamedrejeb.richeditor.model.rememberRichTextState
+import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.Chips
+import com.tunjid.me.core.ui.NestedScrollTextContainer
+import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.scaffold.SecondaryPaneCloseBackHandler
@@ -49,6 +51,8 @@ import com.tunjid.me.scaffold.nav.ExternalRoute
 import com.tunjid.treenav.Node
 import com.tunjid.treenav.pop
 import kotlinx.serialization.Serializable
+
+private const val BODY_KEY = 3
 
 @Serializable
 data class ArchiveDetailRoute(
@@ -75,7 +79,7 @@ private fun ArchiveDetailScreen(
     stateHolder: ArchiveDetailStateHolder
 ) {
     val (state, actions) = stateHolder
-    val scrollState = rememberScrollState()
+    val scrollState = rememberLazyListState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
 
     if (state.IsInPrimaryNav) GlobalUi(
@@ -90,50 +94,75 @@ private fun ArchiveDetailScreen(
         enabled = state.IsInPrimaryNav && state.hasSecondaryPanel
     )
 
-    Column(
-        modifier = modifier
-            .verticalScroll(state = scrollState),
+    LazyColumn(
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
+        state = scrollState
     ) {
-        AsyncRasterImage(
-            imageUrl = state.archive?.thumbnail,
-            modifier = Modifier
-                .heightIn(max = 300.dp)
-                .aspectRatio(ratio = 16f / 9f)
-                .padding(horizontal = 16.dp)
-                .clip(MaterialTheme.shapes.medium)
-        )
-        Chips(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            name = "Categories:",
-            chipInfoList = state.descriptorChips<Descriptor.Category>(),
-        )
-
-        Spacer(modifier = Modifier.padding(16.dp))
-
-        Material3RichText(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        ) {
-            if (archive != null) Markdown(
-                content = archive.body
+        item {
+            AsyncRasterImage(
+                imageUrl = state.archive?.thumbnail,
+                modifier = Modifier
+                    .heightIn(max = 300.dp)
+                    .aspectRatio(ratio = 16f / 9f)
+                    .padding(horizontal = 16.dp)
+                    .clip(MaterialTheme.shapes.medium)
+            )
+        }
+        item {
+            Chips(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                name = "Categories:",
+                chipInfoList = state.descriptorChips<Descriptor.Category>(),
             )
         }
 
-        Spacer(modifier = Modifier.padding(16.dp))
+        item {
+            Spacer(modifier = Modifier.padding(16.dp))
+        }
 
-        Chips(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            name = "Tags:",
-            chipInfoList = state.descriptorChips<Descriptor.Tag>(),
-        )
+        item(key = BODY_KEY) {
+            val richTextState = rememberRichTextState()
+            NestedScrollTextContainer(
+                modifier = Modifier
+                    .fillParentMaxSize()
+                    .padding(horizontal = 16.dp),
+                canConsumeScrollEvents = scrollState.isInViewport(BODY_KEY),
+                onScrolled = scrollState::dispatchRawDelta,
+            ) {
+                RichTextEditor(
+                    state = richTextState,
+                    readOnly = true,
+                )
+            }
 
-        Spacer(modifier = Modifier.padding(64.dp + navBarSizeDp))
+            LaunchedEffect(archive) {
+                archive?.let {
+                    richTextState.setMarkdown(it.body)
+                    richTextState.selection = TextRange.Zero
+                }
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.padding(16.dp))
+        }
+
+        item {
+            Chips(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                name = "Tags:",
+                chipInfoList = state.descriptorChips<Descriptor.Tag>(),
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.padding(64.dp + navBarSizeDp))
+        }
     }
 
     // Pop nav if this archive does not exist anymore

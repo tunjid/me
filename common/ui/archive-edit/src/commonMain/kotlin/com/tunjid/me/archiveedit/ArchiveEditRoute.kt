@@ -18,10 +18,7 @@ package com.tunjid.me.archiveedit
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -40,20 +37,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
@@ -66,7 +60,9 @@ import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.ui.AsyncRasterImage
+import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
+import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
@@ -74,8 +70,6 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.ExternalRoute
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.treenav.Node
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -117,21 +111,8 @@ private fun ArchiveEditScreen(
     val (state, actions) = stateHolder
     val upsert = state.upsert
     val scrollState = rememberLazyListState()
-
-    // Disable body text field from scrolling until all items are offscreen
-    var canConsumeScrollEventsInBody by remember {
-        mutableStateOf(false)
-    }
-
-    LaunchedEffect(scrollState) {
-        snapshotFlow { scrollState.layoutInfo }
-            .map { it.visibleItemsInfo.firstOrNull()?.key == BODY_INDEX }
-            .distinctUntilChanged()
-            .collect { canConsumeScrollEventsInBody = it }
-    }
-
     val scope = rememberCoroutineScope()
-
+    val isBodyInViewPort = scrollState.isInViewport(BODY_INDEX)
     GlobalUi(
         state = state,
         onAction = actions
@@ -193,7 +174,7 @@ private fun ArchiveEditScreen(
         spacer(16.dp)
         if (state.isEditing) bodyEditor(
             body = state.body,
-            canConsumeScrollEvents = canConsumeScrollEventsInBody,
+            canConsumeScrollEvents = isBodyInViewPort,
             onScrolled = scrollState::dispatchRawDelta,
             onInteractedWith = {
                 scope.launch { scrollState.animateScrollToItem(BODY_INDEX) }
@@ -308,10 +289,15 @@ private fun LazyListScope.bodyEditor(
     onInteractedWith: () -> Unit,
     onEdit: (Action.TextEdit) -> Unit,
 ) = item(key = BODY_INDEX) {
-    Box(
+    NestedScrollTextContainer(
         modifier = Modifier
             .fillParentMaxSize()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp),
+        canConsumeScrollEvents = canConsumeScrollEvents,
+        onScrolled = onScrolled,
+        onPointerInput = {
+            detectTapGestures { onInteractedWith() }
+        }
     ) {
         var layoutResult: TextLayoutResult? by remember { mutableStateOf(null) }
         // TODO: Revert to TextField when b/240975569 and b/235383908 are fixed
@@ -357,23 +343,6 @@ private fun LazyListScope.bodyEditor(
             ),
 //            label = { Text(text = "Body") },
             onValueChange = { onEdit(Action.TextEdit.Body.Edit(it)) }
-        )
-
-        // Overlay a box over the TextField to intercept scroll events
-        Spacer(
-            modifier = Modifier
-                .fillMaxSize(if (canConsumeScrollEvents) 0f else 1f)
-                .scrollable(
-                    orientation = Orientation.Vertical,
-                    reverseDirection = true,
-                    // Pass the scroll events up the tree to the parent lazy list state to consume
-                    state = rememberScrollableState(onScrolled)
-                )
-                .pointerInput(Unit) {
-                    detectTapGestures {
-                        onInteractedWith()
-                    }
-                }
         )
     }
 }
