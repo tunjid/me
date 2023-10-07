@@ -370,18 +370,17 @@ private fun routeContainerPadding(
 }
 
 private fun Modifier.restrictedSizePlacement() =
-    // Do not place items when they are too small, but keep them in the composition
+    // When the content area is small, just shift items out of view
     layout { measurable, constraints ->
-        if (constraints.maxWidth < MinPaneWidth.roundToPx()) return@layout layout(
-            constraints.maxWidth,
-            constraints.maxHeight
-        ) {
-            // TODO: create a frosted glass effect here instead of just disappearing
-        }
+        val actualConstraints = when (val minPaneIntWidth = MinPaneWidth.roundToPx()) {
+            in constraints.maxWidth..Int.MAX_VALUE -> constraints.copy(
+                maxWidth = minPaneIntWidth
+            )
 
-        val placeable = measurable.measure(constraints)
-        layout(placeable.width, placeable.height) innerLayout@{
-            if (placeable.width.toDp() < MinPaneWidth) return@innerLayout
+            else -> constraints
+        }
+        val placeable = measurable.measure(actualConstraints)
+        layout(placeable.width, placeable.height) {
             placeable.place(x = 0, y = 0)
         }
     }
