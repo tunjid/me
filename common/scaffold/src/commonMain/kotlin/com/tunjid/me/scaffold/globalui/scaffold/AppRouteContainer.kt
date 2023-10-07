@@ -25,12 +25,7 @@ import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.InteractionSource
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -43,15 +38,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
-import androidx.compose.material.SwipeableState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.swipeable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -95,65 +86,9 @@ import com.tunjid.me.scaffold.nav.ExpandAll
 import com.tunjid.me.scaffold.nav.MoveKind
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import kotlinx.coroutines.launch
-import kotlin.math.max
-import kotlin.math.roundToInt
 
 private val LocalPaneAnchorState = staticCompositionLocalOf {
     PaneAnchorState()
-}
-
-@Stable
-// TODO: Migrate to AnchoredDraggable when moving to Compose 1.6
-private class PaneAnchorState {
-    var maxWidth by mutableIntStateOf(1000)
-        private set
-    val width
-        get() = max(
-            a = 0,
-            b = swipeableState.offset.value.roundToInt()
-        )
-
-    val targetPaneSplit get() = swipeableState.targetValue
-
-    val currentPaneSplit get() = swipeableState.currentValue
-
-    private val thumbMutableInteractionSource = MutableInteractionSource()
-
-    val thumbInteractionSource: InteractionSource = thumbMutableInteractionSource
-
-    private val swipeableState = SwipeableState(
-        initialValue = PaneAnchor.OneThirds,
-        animationSpec = tween(),
-    )
-
-    val modifier by derivedStateOf {
-        Modifier
-            .hoverable(thumbMutableInteractionSource)
-            .swipeable(
-                state = swipeableState,
-                anchors = mapOf(
-                    0f to PaneAnchor.Zero,
-                    (maxWidth * (1f / 3)) to PaneAnchor.OneThirds,
-                    (maxWidth * (1f / 2)) to PaneAnchor.Half,
-                    (maxWidth * (2f / 3)) to PaneAnchor.TwoThirds,
-                    maxWidth.toFloat() to PaneAnchor.Full,
-                ),
-                orientation = Orientation.Horizontal,
-                interactionSource = thumbMutableInteractionSource,
-            )
-    }
-
-    fun updateMaxWidth(maxWidth: Int) {
-        this.maxWidth = maxWidth
-    }
-
-    fun dispatch(delta: Float) {
-        swipeableState.performDrag(delta)
-    }
-
-    suspend fun completeDispatch() = swipeableState.performFling(0f)
-
-    suspend fun moveTo(anchor: PaneAnchor) = swipeableState.animateTo(anchor)
 }
 
 /**
