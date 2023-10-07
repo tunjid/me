@@ -17,9 +17,11 @@
 package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.TargetBasedAnimation
 import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -49,7 +51,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -193,18 +194,22 @@ internal fun AppRouteContainer(
                     bottom = bottomClearance
                 ),
             content = {
-                SecondaryContainer(
-                    hasNavContent = hasNavContent,
-                    width = with(density) { paneSplitState.width.toDp() },
-                    maxWidth = with(density) { paneSplitState.maxWidth.toDp() },
+                SecondaryContentContainer(
+                    modifier = secondaryContentModifier(
+                        moveKind = moveKind,
+                        width = with(density) { paneSplitState.width.toDp() },
+                        maxWidth = with(density) { paneSplitState.maxWidth.toDp() },
+                    ),
                     secondaryContent = secondaryContent
                 )
-                PrimaryContainer(
-                    windowSizeClass = windowSizeClass,
-                    moveKind = moveKind,
-                    secondaryContentWidth = with(density) { paneSplitState.width.toDp() },
-                    maxWidth = with(density) { paneSplitState.maxWidth.toDp() },
-                    hasNavContent = hasNavContent,
+                PrimaryContentContainer(
+                    modifier = primaryContentModifier(
+                        windowSizeClass = windowSizeClass,
+                        moveKind = moveKind,
+                        hasNavContent = hasNavContent,
+                        maxWidth = with(density) { paneSplitState.maxWidth.toDp() },
+                        secondaryContentWidth = with(density) { paneSplitState.width.toDp() }
+                    ),
                     primaryContent = primaryContent,
                     transientPrimaryContent = transientPrimaryContent,
                 )
@@ -239,61 +244,28 @@ internal fun AppRouteContainer(
 }
 
 @Composable
-private fun PrimaryContainer(
-    windowSizeClass: WindowSizeClass,
-    moveKind: MoveKind,
-    maxWidth: Dp,
-    secondaryContentWidth: Dp,
-    hasNavContent: Boolean,
+private fun PrimaryContentContainer(
+    modifier: Modifier,
     primaryContent: @Composable () -> Unit,
     transientPrimaryContent: @Composable () -> Unit
 ) {
-    val animatedWidth by primaryContentWidth(
-        windowSizeClass = windowSizeClass,
-        moveKind = moveKind,
-        maxWidth = maxWidth,
-        secondaryContentWidth = max(
-            a = MinPaneWidth,
-            b = secondaryContentWidth
-        )
-    )
-    val startPadding = if (hasNavContent) secondaryContentWidth else 0.dp
-
-    val baseModifier = Modifier
-        .width(animatedWidth)
-        .padding(start = startPadding)
-        // Do not place items when they are too small, but keep them in the composition
-        .layout { measurable, constraints ->
-            val placeable = measurable.measure(constraints)
-            layout(placeable.width, placeable.height) innerLayout@{
-                if (placeable.width.toDp() < MinPaneWidth) return@innerLayout
-                placeable.place(x = 0, y = 0)
-            }
-        }
     Box(
-        modifier = baseModifier,
+        modifier = modifier,
         content = { primaryContent() }
     )
     Box(
-        modifier = baseModifier,
+        modifier = modifier,
         content = { transientPrimaryContent() }
     )
 }
 
 @Composable
-private fun SecondaryContainer(
-    hasNavContent: Boolean,
-    width: Dp,
-    maxWidth: Dp,
+private fun SecondaryContentContainer(
+    modifier: Modifier,
     secondaryContent: @Composable () -> Unit
 ) {
-    val actualWidth = max(
-        a = MinPaneWidth,
-        b = if (hasNavContent) width else maxWidth
-    )
     Box(
-        modifier = Modifier
-            .width(actualWidth),
+        modifier = modifier,
         content = { secondaryContent() }
     )
 }
@@ -353,19 +325,26 @@ private fun BoxScope.DraggableThumb(
 }
 
 @Composable
-private fun primaryContentWidth(
+private fun primaryContentModifier(
     windowSizeClass: WindowSizeClass,
+    hasNavContent: Boolean,
     moveKind: MoveKind,
     secondaryContentWidth: Dp,
     maxWidth: Dp,
-): State<Dp> {
-    if (windowSizeClass.isNotExpanded) return mutableStateOf(maxWidth)
+): Modifier {
+    val startPadding = if (hasNavContent) secondaryContentWidth else 0.dp
+
+    if (windowSizeClass.isNotExpanded) return Modifier
+        .width(maxWidth)
+        .padding(start = startPadding)
+        .restrictedSizePlacement()
+
     val updatedSecondaryContentWidth by rememberUpdatedState(secondaryContentWidth)
 
     var moveComplete by remember(moveKind) {
         mutableStateOf(false)
     }
-    return produceState(
+    val width = produceState(
         initialValue = maxWidth,
         key1 = maxWidth,
         key2 = moveKind,
@@ -375,7 +354,7 @@ private fun primaryContentWidth(
             value = updatedSecondaryContentWidth
 
             val anim = TargetBasedAnimation(
-                animationSpec = secondaryContentSizeSpring(),
+                animationSpec = contentSizeSpring(),
                 typeConverter = Dp.VectorConverter,
                 initialValue = value,
                 targetValue = maxWidth
@@ -391,9 +370,53 @@ private fun primaryContentWidth(
             moveComplete = true
         } else value = maxWidth
     }
+
+    return Modifier
+        .width(width.value)
+        .padding(start = startPadding)
+        .restrictedSizePlacement()
 }
 
-private fun secondaryContentSizeSpring() = spring<Dp>(
+@Composable
+private fun secondaryContentModifier(
+    moveKind: MoveKind,
+    width: Dp,
+    maxWidth: Dp,
+): Modifier {
+    val updatedWidth = rememberUpdatedState(width)
+    val widthAnimatable = remember {
+        Animatable(
+            initialValue = maxWidth,
+            typeConverter = Dp.VectorConverter,
+            visibilityThreshold = Dp.VisibilityThreshold,
+        )
+    }
+    var complete by remember { mutableStateOf(true) }
+
+    LaunchedEffect(moveKind) {
+        if (moveKind != MoveKind.PrimaryToSecondary) {
+            complete = true
+            return@LaunchedEffect
+        }
+        complete = false
+        // Snap to this width to give the impression of the container sliding
+        widthAnimatable.snapTo(targetValue = maxWidth)
+        widthAnimatable.animateTo(
+            targetValue = width,
+            animationSpec = contentSizeSpring(),
+        )
+        complete = true
+    }
+
+    return Modifier
+        .width(
+            if (complete) updatedWidth.value else widthAnimatable.value
+        )
+        .zIndex(if (complete) 0f else 1f)
+        .restrictedSizePlacement()
+}
+
+private fun contentSizeSpring() = spring<Dp>(
     stiffness = Spring.StiffnessMediumLow
 )
 
@@ -437,6 +460,23 @@ private fun routeContainerPadding(
 
     return paddingValues
 }
+
+private fun Modifier.restrictedSizePlacement() =
+    // Do not place items when they are too small, but keep them in the composition
+    layout { measurable, constraints ->
+        if (constraints.maxWidth < MinPaneWidth.roundToPx()) return@layout layout(
+            constraints.maxWidth,
+            constraints.maxHeight
+        ) {
+            // TODO: create a frosted glass effect here instead of just disappearing
+        }
+
+        val placeable = measurable.measure(constraints)
+        layout(placeable.width, placeable.height) innerLayout@{
+            if (placeable.width.toDp() < MinPaneWidth) return@innerLayout
+            placeable.place(x = 0, y = 0)
+        }
+    }
 
 @Composable
 fun SeconaryPaneCloseBackHandler(enabled: Boolean) {
