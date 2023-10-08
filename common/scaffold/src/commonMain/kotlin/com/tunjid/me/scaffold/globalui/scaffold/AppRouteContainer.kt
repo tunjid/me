@@ -262,7 +262,7 @@ private fun primaryContentModifier(
             visibilityThreshold = Dp.VisibilityThreshold,
         )
     }
-    var complete by remember(moveKind) { mutableStateOf(false) }
+    var complete by remember { mutableStateOf(false) }
 
     LaunchedEffect(windowSizeClass, moveKind) {
         // Maintain max width on smaller devices
