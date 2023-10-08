@@ -39,6 +39,7 @@ fun NestedScrollTextContainer(
                 .scrollable(
                     orientation = Orientation.Vertical,
                     reverseDirection = true,
+                    enabled = !canConsumeScrollEvents,
                     // Pass the scroll events up the tree to the parent to consume
                     state = rememberScrollableState(onScrolled)
                 )
@@ -52,17 +53,17 @@ fun NestedScrollTextContainer(
 
 @Composable
 fun LazyListState.isInViewport(key: Any): Boolean {
-    val isScrollingUp = isScrollingUp()
+    val isScrollingForward = isScrollingForward()
     return produceState(
         initialValue = false,
         key1 = key,
-        key2 = isScrollingUp,
+        key2 = isScrollingForward,
         key3 = this,
     ) {
         snapshotFlow {
             when {
-                isScrollingUp -> layoutInfo.visibleItemsInfo.lastOrNull()
-                else -> layoutInfo.visibleItemsInfo.firstOrNull()
+                isScrollingForward -> layoutInfo.visibleItemsInfo.firstOrNull()
+                else -> layoutInfo.visibleItemsInfo.lastOrNull()
             }?.key == key
         }
             .distinctUntilChanged()
@@ -72,7 +73,7 @@ fun LazyListState.isInViewport(key: Any): Boolean {
 
 
 @Composable
-private fun LazyListState.isScrollingUp(): Boolean {
+private fun LazyListState.isScrollingForward(): Boolean {
     var previousIndex by remember(this) { mutableStateOf(firstVisibleItemIndex) }
     var previousScrollOffset by remember(this) { mutableStateOf(firstVisibleItemScrollOffset) }
     return remember(this) {
@@ -81,10 +82,11 @@ private fun LazyListState.isScrollingUp(): Boolean {
                 !canScrollBackward -> true
                 !canScrollForward -> false
                 previousIndex != firstVisibleItemIndex -> {
-                    previousIndex > firstVisibleItemIndex
+                    previousIndex < firstVisibleItemIndex
                 }
+
                 else -> {
-                    previousScrollOffset >= firstVisibleItemScrollOffset
+                    previousScrollOffset <= firstVisibleItemScrollOffset
                 }
             }.also {
                 previousIndex = firstVisibleItemIndex

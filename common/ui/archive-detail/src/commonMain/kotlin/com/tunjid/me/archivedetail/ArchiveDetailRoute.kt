@@ -81,6 +81,7 @@ private fun ArchiveDetailScreen(
     val (state, actions) = stateHolder
     val scrollState = rememberLazyListState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
+    val bodyInViewport = scrollState.isInViewport(BODY_KEY)
 
     if (state.IsInPrimaryNav) GlobalUi(
         state = state,
@@ -124,24 +125,23 @@ private fun ArchiveDetailScreen(
         }
 
         item(key = BODY_KEY) {
-            val richTextState = rememberRichTextState()
             NestedScrollTextContainer(
                 modifier = Modifier
                     .fillParentMaxSize()
                     .padding(horizontal = 16.dp),
-                canConsumeScrollEvents = scrollState.isInViewport(BODY_KEY),
+                canConsumeScrollEvents = bodyInViewport,
                 onScrolled = scrollState::dispatchRawDelta,
             ) {
+                val richTextState = rememberRichTextState()
                 RichTextEditor(
                     state = richTextState,
                     readOnly = true,
                 )
-            }
-
-            LaunchedEffect(archive) {
-                archive?.let {
-                    richTextState.setMarkdown(it.body)
-                    richTextState.selection = TextRange.Zero
+                LaunchedEffect(archive) {
+                    archive?.let {
+                        richTextState.setMarkdown(it.body)
+                        richTextState.selection = TextRange.Zero
+                    }
                 }
             }
         }
