@@ -77,10 +77,15 @@ private fun LazyListState.isScrollingUp(): Boolean {
     var previousScrollOffset by remember(this) { mutableStateOf(firstVisibleItemScrollOffset) }
     return remember(this) {
         derivedStateOf {
-            if (previousIndex != firstVisibleItemIndex) {
-                previousIndex > firstVisibleItemIndex
-            } else {
-                previousScrollOffset >= firstVisibleItemScrollOffset
+            when {
+                !canScrollBackward -> true
+                !canScrollForward -> false
+                previousIndex != firstVisibleItemIndex -> {
+                    previousIndex > firstVisibleItemIndex
+                }
+                else -> {
+                    previousScrollOffset >= firstVisibleItemScrollOffset
+                }
             }.also {
                 previousIndex = firstVisibleItemIndex
                 previousScrollOffset = firstVisibleItemScrollOffset
