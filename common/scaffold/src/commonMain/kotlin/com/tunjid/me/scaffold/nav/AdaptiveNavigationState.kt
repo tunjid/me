@@ -52,7 +52,7 @@ internal data class AdaptiveNavigationState(
      * This is used to preview the incoming route in the primary navigation container after a
      * back press. If a back destination does not need to be previewed, it will be null.
      */
-    val transientPrimaryBackRoute: AppRoute? = null,
+    val transientPrimaryRoute: AppRoute? = null,
     /**
      * Describes moves between the primary and secondary navigation containers.
      */
@@ -76,7 +76,7 @@ internal operator fun AdaptiveNavigationState.get(
 ): AdaptiveContainerSlot? = when (container) {
     AdaptiveContainer.Primary -> primaryContainerSlot
     AdaptiveContainer.Secondary -> routeIdsToAdaptiveSlots[secondaryRoute?.id]
-    AdaptiveContainer.TransientPrimary -> routeIdsToAdaptiveSlots[transientPrimaryBackRoute?.id]
+    AdaptiveContainer.TransientPrimary -> routeIdsToAdaptiveSlots[transientPrimaryRoute?.id]
 }
 
 internal operator fun AdaptiveNavigationState.get(
@@ -84,7 +84,7 @@ internal operator fun AdaptiveNavigationState.get(
 ): AdaptiveContainer? = when (route.id) {
     primaryRoute.id -> AdaptiveContainer.Primary
     secondaryRoute?.id -> AdaptiveContainer.Secondary
-    transientPrimaryBackRoute?.id -> AdaptiveContainer.TransientPrimary
+    transientPrimaryRoute?.id -> AdaptiveContainer.TransientPrimary
     else -> null
 }
 
@@ -92,12 +92,39 @@ internal operator fun AdaptiveNavigationState.get(container: AdaptiveContainerSl
     when (container) {
         routeIdsToAdaptiveSlots[primaryRoute.id] -> primaryRoute
         routeIdsToAdaptiveSlots[secondaryRoute?.id] -> secondaryRoute
-        routeIdsToAdaptiveSlots[transientPrimaryBackRoute?.id] -> transientPrimaryBackRoute
+        routeIdsToAdaptiveSlots[transientPrimaryRoute?.id] -> transientPrimaryRoute
         else -> null
     } ?: UnknownRoute("--")
 
-internal enum class MoveKind {
-    PrimaryToSecondary, SecondaryToPrimary, PrimaryToTransient, TransientToPrimary, None
+internal sealed class MoveKind {
+    data class Swap(
+        val from: AdaptiveContainer,
+        val to: AdaptiveContainer,
+    ) : MoveKind()
+
+    data object None : MoveKind()
+
+    companion object {
+        val PrimaryToSecondary = Swap(
+            from = AdaptiveContainer.Primary,
+            to = AdaptiveContainer.Secondary
+        )
+
+        val SecondaryToPrimary = Swap(
+            from = AdaptiveContainer.Secondary,
+            to = AdaptiveContainer.Primary
+        )
+
+        val PrimaryToTransient = Swap(
+            from = AdaptiveContainer.Primary,
+            to = AdaptiveContainer.Secondary
+        )
+
+        val TransientToPrimary = Swap(
+            from = AdaptiveContainer.Primary,
+            to = AdaptiveContainer.Secondary
+        )
+    }
 }
 
 internal fun StateFlow<NavState>.adaptiveNavigationState(
@@ -117,14 +144,18 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
                     route?.id != visiblePrimaryRoute.id
                             && uiState.windowSizeClass > WindowSizeClass.COMPACT
                 },
-                transientPrimaryBackRoute = navState.primaryRoute.takeIf { route ->
+                transientPrimaryRoute = navState.primaryRoute.takeIf { route ->
                     uiState.backStatus.isPreviewing
                             && route.id != visiblePrimaryRoute.id
                             && route.id != navState.secondaryRoute?.id
                 },
                 windowSizeClass = uiState.windowSizeClass,
                 moveKind = when {
-                    uiState.backStatus.isPreviewing -> MoveKind.PrimaryToTransient
+                    uiState.backStatus.isPreviewing -> MoveKind.Swap(
+                        from = AdaptiveContainer.Primary,
+                        to = AdaptiveContainer.TransientPrimary,
+                    )
+
                     else -> MoveKind.None
                 }
             )
@@ -151,7 +182,8 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
                     else -> when {
                         previous.primaryRoute.id == current.secondaryRoute?.id -> MoveKind.PrimaryToSecondary
                         current.primaryRoute.id == previous.secondaryRoute?.id -> MoveKind.SecondaryToPrimary
-                        previous.moveKind == MoveKind.PrimaryToTransient && current.transientPrimaryBackRoute == null -> MoveKind.TransientToPrimary
+                        previous.moveKind == MoveKind.PrimaryToTransient
+                                && current.transientPrimaryRoute == null -> MoveKind.TransientToPrimary
                         else -> MoveKind.None
                     }
                 },
@@ -160,7 +192,7 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
                     incomingContainersToRoutes = listOfNotNull(
                         current.primaryRoute.placeIn(AdaptiveContainer.Primary),
                         current.secondaryRoute.placeIn(AdaptiveContainer.Secondary),
-                        current.transientPrimaryBackRoute.placeIn(AdaptiveContainer.TransientPrimary),
+                        current.transientPrimaryRoute.placeIn(AdaptiveContainer.TransientPrimary),
                     ).toMap()
                 ),
             )

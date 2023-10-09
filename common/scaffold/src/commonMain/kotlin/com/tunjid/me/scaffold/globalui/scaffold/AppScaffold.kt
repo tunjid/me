@@ -191,7 +191,7 @@ private fun rememberAdaptiveContainersToRoutes(
                                         exit = ExitTransition.None
                                     )
 
-                                updatedState.transientPrimaryBackRoute?.id -> FillSizeModifier
+                                updatedState.transientPrimaryRoute?.id -> FillSizeModifier
                                     .backPreviewModifier()
                                     .animateEnterExit(
                                         enter = EnterTransition.None,
