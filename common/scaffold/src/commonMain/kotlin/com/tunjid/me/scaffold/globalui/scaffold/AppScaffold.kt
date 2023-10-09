@@ -17,7 +17,7 @@
 package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
@@ -41,17 +41,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.nav.AdaptiveContainer
 import com.tunjid.me.scaffold.nav.AdaptiveContainerSlot
 import com.tunjid.me.scaffold.nav.AdaptiveNavigationState
-import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.NavStateHolder
+import com.tunjid.me.scaffold.nav.SlotMetadata
 import com.tunjid.me.scaffold.nav.adaptiveNavigationState
 import com.tunjid.me.scaffold.nav.get
+import com.tunjid.me.scaffold.nav.metadataFor
 import com.tunjid.me.scaffold.nav.primaryContainerSlot
 import com.tunjid.me.scaffold.nav.removedRoutes
 import kotlinx.coroutines.flow.map
@@ -81,13 +81,13 @@ fun Scaffold(
         val moveKind by remember {
             derivedStateOf { adaptiveNavigationState.moveKind }
         }
-        val primaryContainer: AdaptiveContainerSlot? by remember {
+        val primaryContainerSlot: AdaptiveContainerSlot? by remember {
             derivedStateOf { adaptiveNavigationState.primaryContainerSlot }
         }
-        val secondaryContainer: AdaptiveContainerSlot? by remember {
+        val secondaryContainerSlot: AdaptiveContainerSlot? by remember {
             derivedStateOf { adaptiveNavigationState[AdaptiveContainer.Secondary] }
         }
-        val transientPrimaryContainer: AdaptiveContainerSlot? by remember {
+        val transientPrimaryContainerSlot: AdaptiveContainerSlot? by remember {
             derivedStateOf { adaptiveNavigationState[AdaptiveContainer.TransientPrimary] }
         }
 
@@ -115,19 +115,13 @@ fun Scaffold(
                     navStateHolder = navStateHolder,
                     moveKind = moveKind,
                     primaryContent = {
-                        primaryContainer.adaptiveContent(
-                            adaptiveContainerSlotsToRoutes = containerContents,
-                        )
+                        containerContents(primaryContainerSlot).invoke()
                     },
                     secondaryContent = {
-                        secondaryContainer.adaptiveContent(
-                            adaptiveContainerSlotsToRoutes = containerContents,
-                        )
+                        containerContents(secondaryContainerSlot).invoke()
                     },
                     transientPrimaryContent = {
-                        transientPrimaryContainer.adaptiveContent(
-                            adaptiveContainerSlotsToRoutes = containerContents,
-                        )
+                        containerContents(transientPrimaryContainerSlot).invoke()
                     },
                 )
                 AppFab(
@@ -151,66 +145,64 @@ fun Scaffold(
 }
 
 @Composable
-private fun AdaptiveContainerSlot?.adaptiveContent(
-    adaptiveContainerSlotsToRoutes: SnapshotStateMap<AdaptiveContainerSlot, @Composable () -> Unit>
-) {
-    adaptiveContainerSlotsToRoutes[this]?.invoke() ?: Unit
-}
-
-@Composable
 private fun rememberAdaptiveContainersToRoutes(
     adaptiveNavigationState: AdaptiveNavigationState,
     saveableStateHolder: SaveableStateHolder,
-): SnapshotStateMap<AdaptiveContainerSlot, @Composable () -> Unit> {
+): (AdaptiveContainerSlot?) -> (@Composable () -> Unit) {
     val updatedState by rememberUpdatedState(adaptiveNavigationState)
     return remember {
-        val slotsToRoutes = mutableStateMapOf<AdaptiveContainerSlot, @Composable () -> Unit>()
+        val slotsToRoutes = mutableStateMapOf<AdaptiveContainerSlot?, @Composable () -> Unit>()
+        slotsToRoutes[null] = {}
         AdaptiveContainerSlot.entries.forEach { slot ->
             slotsToRoutes[slot] = movableContentOf {
-                val route by remember {
-                    derivedStateOf { updatedState[slot] }
-                }
-                val transition = updateTransition(route)
-                transition.AnimatedContent(
-                    contentKey = AppRoute::id
-                ) { targetRoute ->
-                    saveableStateHolder.SaveableStateProvider(targetRoute.id) {
-                        targetRoute.Render(
-                            when (targetRoute.id) {
-                                updatedState.primaryRoute.id -> FillSizeModifier
-                                    .background(color = MaterialTheme.colorScheme.surface)
-                                    .animateEnterExit(
-                                        enter = fadeIn(RouteTransitionAnimationSpec),
-                                        exit = fadeOut(RouteTransitionAnimationSpec)
-                                    )
-
-                                updatedState.secondaryRoute?.id -> FillSizeModifier
-                                    .background(color = MaterialTheme.colorScheme.surface)
-                                    .animateEnterExit(
-                                        enter = fadeIn(RouteTransitionAnimationSpec),
-                                        exit = ExitTransition.None
-                                    )
-
-                                updatedState.transientPrimaryRoute?.id -> FillSizeModifier
-                                    .backPreviewModifier()
-                                    .animateEnterExit(
-                                        enter = EnterTransition.None,
-                                        exit = fadeOut(RouteTransitionAnimationSpec)
-                                    )
-
-                                else -> FillSizeModifier.animateEnterExit(
-                                    enter = EnterTransition.None,
-                                    exit = ExitTransition.None
-                                )
-                            }
-                        )
+                slotsToRoutes[slot] = movableContentOf {
+                    val metadata by remember {
+                        derivedStateOf { updatedState.metadataFor(slot) }
                     }
+                    saveableStateHolder.Render(metadata)
                 }
             }
         }
-        slotsToRoutes
+        slotsToRoutes::getValue
     }
 }
+
+@Composable
+private fun SaveableStateHolder.Render(
+    metadata: SlotMetadata,
+) {
+    val transition = updateTransition(metadata)
+    transition.AnimatedContent(
+        contentKey = { it.route.id }
+    ) { targetMetadata ->
+        SaveableStateProvider(targetMetadata.route.id) {
+            targetMetadata.route.Render(modifierFor(targetMetadata.container))
+        }
+    }
+}
+
+@Composable
+private fun AnimatedContentScope.modifierFor(container: AdaptiveContainer?) =
+    when (container) {
+        AdaptiveContainer.Primary -> FillSizeModifier
+            .background(color = MaterialTheme.colorScheme.surface)
+            .animateEnterExit(
+                enter = fadeIn(RouteTransitionAnimationSpec),
+                exit = fadeOut(RouteTransitionAnimationSpec)
+            )
+
+        AdaptiveContainer.Secondary -> FillSizeModifier
+            .background(color = MaterialTheme.colorScheme.surface)
+            .animateEnterExit(
+                enter = fadeIn(RouteTransitionAnimationSpec),
+                exit = ExitTransition.None
+            )
+
+        AdaptiveContainer.TransientPrimary -> FillSizeModifier
+            .backPreviewModifier()
+
+        else -> FillSizeModifier
+    }
 
 /**
  * Clean up after navigation routes that have been discarded

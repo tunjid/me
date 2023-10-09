@@ -68,6 +68,27 @@ internal data class AdaptiveNavigationState(
     val windowSizeClass: WindowSizeClass = WindowSizeClass.COMPACT,
 )
 
+/**
+ * Information about content in an [AdaptiveContainerSlot]
+ */
+internal data class AdaptiveSlotMetadata(
+    val route: AppRoute,
+    val container: AdaptiveContainer?,
+    val moveKind: MoveKind,
+)
+
+internal fun AdaptiveNavigationState.metadataFor(
+    slot: AdaptiveContainerSlot
+): AdaptiveSlotMetadata {
+    val route = get(slot)
+    val container = get(route)
+    return AdaptiveSlotMetadata(
+        route = route,
+        container = container,
+        moveKind = moveKind
+    )
+}
+
 internal val AdaptiveNavigationState.primaryContainerSlot: AdaptiveContainerSlot
     get() = routeIdsToAdaptiveSlots.getValue(primaryRoute.id)
 
@@ -184,6 +205,7 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
                         current.primaryRoute.id == previous.secondaryRoute?.id -> MoveKind.SecondaryToPrimary
                         previous.moveKind == MoveKind.PrimaryToTransient
                                 && current.transientPrimaryRoute == null -> MoveKind.TransientToPrimary
+
                         else -> MoveKind.None
                     }
                 },
