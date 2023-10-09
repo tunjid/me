@@ -97,7 +97,7 @@ internal operator fun AdaptiveNavigationState.get(container: AdaptiveContainerSl
     } ?: UnknownRoute("--")
 
 internal enum class MoveKind {
-    PrimaryToSecondary, SecondaryToPrimary, None
+    PrimaryToSecondary, SecondaryToPrimary, PrimaryToTransient, TransientToPrimary, None
 }
 
 internal fun StateFlow<NavState>.adaptiveNavigationState(
@@ -123,6 +123,10 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
                             && route.id != navState.secondaryRoute?.id
                 },
                 windowSizeClass = uiState.windowSizeClass,
+                moveKind = when {
+                    uiState.backStatus.isPreviewing -> MoveKind.PrimaryToTransient
+                    else -> MoveKind.None
+                }
             )
         }
         .distinctUntilChanged()
@@ -136,22 +140,20 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
                         incomingContainersToRoutes = listOfNotNull(
                             value.primaryRoute.placeIn(AdaptiveContainer.Primary),
                             value.secondaryRoute.placeIn(AdaptiveContainer.Secondary),
-                            value.primaryRouteOnBackPress
-                                .takeIf { route ->
-                                    route?.id != value.secondaryRoute?.id
-                                            && route?.id != value.primaryRoute.id
-                                }
-                                .placeIn(AdaptiveContainer.TransientPrimary),
                         ).toMap()
                     )
                 )
             }
         ) { previous, current ->
             current.copy(
-                moveKind = when {
-                    previous.primaryRoute.id == current.secondaryRoute?.id -> MoveKind.PrimaryToSecondary
-                    current.primaryRoute.id == previous.secondaryRoute?.id -> MoveKind.SecondaryToPrimary
-                    else -> MoveKind.None
+                moveKind = when (current.moveKind) {
+                    MoveKind.PrimaryToTransient -> current.moveKind
+                    else -> when {
+                        previous.primaryRoute.id == current.secondaryRoute?.id -> MoveKind.PrimaryToSecondary
+                        current.primaryRoute.id == previous.secondaryRoute?.id -> MoveKind.SecondaryToPrimary
+                        previous.moveKind == MoveKind.PrimaryToTransient && current.transientPrimaryBackRoute == null -> MoveKind.TransientToPrimary
+                        else -> MoveKind.None
+                    }
                 },
                 routeIdsToAdaptiveSlots = placeRoutesInSlots(
                     existingRoutesToSlots = previous.routeIdsToAdaptiveSlots,
