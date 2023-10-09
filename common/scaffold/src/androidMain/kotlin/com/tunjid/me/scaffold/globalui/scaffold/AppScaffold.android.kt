@@ -1,16 +1,21 @@
 package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntOffsetAsState
+import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
@@ -37,6 +42,11 @@ internal actual fun Modifier.backPreviewModifier(): Modifier =
         val scale by animateFloatAsState(
             // Deviates from the spec here. The spec says 90% of the container, I'm doing 80%
             targetValue = 1f - (backStatus.progress * 0.2F),
+            label = "back preview modifier scale"
+        )
+        var offset by remember { mutableStateOf(IntOffset.Zero) }
+        val animatedOffset by animateIntOffsetAsState(
+            targetValue = offset,
             label = "back preview modifier scale"
         )
         val color = MaterialTheme.colorScheme.surface
@@ -69,8 +79,9 @@ internal actual fun Modifier.backPreviewModifier(): Modifier =
                 val verticalProgress = (touchPoint / screenSize) - 0.5f
                 val yOffset = (verticalProgress * maxYShift).roundToInt()
 
+                offset = IntOffset(xOffset, yOffset)
                 layout(placeable.width, placeable.height) {
-                    placeable.placeRelativeWithLayer(x = xOffset, y = yOffset) {
+                    placeable.placeRelativeWithLayer(x = animatedOffset.x, y = animatedOffset.y) {
                         scaleX = scale
                         scaleY = scale
                     }
