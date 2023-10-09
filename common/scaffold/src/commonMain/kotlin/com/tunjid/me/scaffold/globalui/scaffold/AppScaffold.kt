@@ -47,8 +47,8 @@ import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.nav.AdaptiveContainer
 import com.tunjid.me.scaffold.nav.AdaptiveContainerSlot
 import com.tunjid.me.scaffold.nav.AdaptiveNavigationState
+import com.tunjid.me.scaffold.nav.AdaptiveSlotMetadata
 import com.tunjid.me.scaffold.nav.NavStateHolder
-import com.tunjid.me.scaffold.nav.SlotMetadata
 import com.tunjid.me.scaffold.nav.adaptiveNavigationState
 import com.tunjid.me.scaffold.nav.get
 import com.tunjid.me.scaffold.nav.metadataFor
@@ -169,7 +169,7 @@ private fun rememberAdaptiveContainersToRoutes(
 
 @Composable
 private fun SaveableStateHolder.Render(
-    metadata: SlotMetadata,
+    metadata: AdaptiveSlotMetadata,
 ) {
     val transition = updateTransition(metadata)
     transition.AnimatedContent(
