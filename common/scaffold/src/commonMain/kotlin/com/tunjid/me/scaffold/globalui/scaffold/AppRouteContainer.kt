@@ -287,7 +287,7 @@ private fun primaryContentModifier(
                 condition = hasNavContent && windowSizeClass > WindowSizeClass.COMPACT
             )
         )
-        .restrictedSizePlacement(atStart = false)
+        .restrictedSizePlacement(atStart = moveKind == MoveKind.SecondaryToPrimary)
 }
 
 @Composable
@@ -325,7 +325,7 @@ private fun secondaryContentModifier(
         .width(if (complete) updatedWidth.value else widthAnimatable.value)
         // Display the secondary content over the primary content to maintain the sliding illusion
         .zIndex(if (complete) 0f else 1f)
-        .restrictedSizePlacement(atStart = true)
+        .restrictedSizePlacement(atStart = moveKind == MoveKind.PrimaryToSecondary)
 }
 
 @Composable
