@@ -155,12 +155,10 @@ private fun rememberAdaptiveContainersToRoutes(
         slotsToRoutes[null] = {}
         AdaptiveContainerSlot.entries.forEach { slot ->
             slotsToRoutes[slot] = movableContentOf {
-                slotsToRoutes[slot] = movableContentOf {
-                    val metadata by remember {
-                        derivedStateOf { updatedState.metadataFor(slot) }
-                    }
-                    saveableStateHolder.Render(metadata)
+                val metadata by remember {
+                    derivedStateOf { updatedState.metadataFor(slot) }
                 }
+                saveableStateHolder.Render(metadata)
             }
         }
         slotsToRoutes::getValue
