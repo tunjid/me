@@ -171,8 +171,9 @@ private fun SaveableStateHolder.Render(
 ) {
     val transition = updateTransition(metadata)
     transition.AnimatedContent(
-        contentKey = { it.route.id }
+        contentKey = { it.route?.id }
     ) { targetMetadata ->
+        if(targetMetadata.route == null) return@AnimatedContent
         SaveableStateProvider(targetMetadata.route.id) {
             targetMetadata.route.Render(modifierFor(targetMetadata.container))
         }
@@ -231,4 +232,6 @@ internal expect fun Modifier.backPreviewModifier(): Modifier
 
 private val FillSizeModifier = Modifier.fillMaxSize()
 
-private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(700)
+private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(
+    durationMillis = 700
+)
