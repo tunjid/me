@@ -129,6 +129,8 @@ internal sealed class MoveKind {
 
     fun Swap.unaffectedContainers() = AdaptiveContainer.entries - setOf(from, to)
 
+    fun Swap.affects(container: AdaptiveContainer?) = from == container || to == container
+
     companion object {
         val PrimaryToSecondary = Swap(
             from = AdaptiveContainer.Primary,

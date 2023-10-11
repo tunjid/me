@@ -48,6 +48,8 @@ import com.tunjid.me.scaffold.nav.AdaptiveContainer
 import com.tunjid.me.scaffold.nav.AdaptiveContainerSlot
 import com.tunjid.me.scaffold.nav.AdaptiveNavigationState
 import com.tunjid.me.scaffold.nav.AdaptiveSlotMetadata
+import com.tunjid.me.scaffold.nav.MoveKind
+import com.tunjid.me.scaffold.nav.MoveKind.None.affects
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.adaptiveNavigationState
 import com.tunjid.me.scaffold.nav.get
@@ -169,11 +171,15 @@ private fun rememberAdaptiveContainersToRoutes(
 private fun SaveableStateHolder.Render(
     metadata: AdaptiveSlotMetadata,
 ) {
-    val transition = updateTransition(metadata)
-    transition.AnimatedContent(
-        contentKey = { it.route?.id }
+    if (metadata.moveKind is MoveKind.Swap && metadata.moveKind.affects(metadata.container)) {
+        if (metadata.route == null) return
+        SaveableStateProvider(metadata.route.id) {
+            metadata.route.Render(modifierFor(metadata.container))
+        }
+    } else updateTransition(metadata).AnimatedContent(
+        contentKey = { it.route?.id },
     ) { targetMetadata ->
-        if(targetMetadata.route == null) return@AnimatedContent
+        if (targetMetadata.route == null) return@AnimatedContent
         SaveableStateProvider(targetMetadata.route.id) {
             targetMetadata.route.Render(modifierFor(targetMetadata.container))
         }
@@ -181,21 +187,28 @@ private fun SaveableStateHolder.Render(
 }
 
 @Composable
-private fun AnimatedContentScope.modifierFor(container: AdaptiveContainer?) =
+private fun <T> T.modifierFor(container: AdaptiveContainer?) =
     when (container) {
         AdaptiveContainer.Primary -> FillSizeModifier
             .background(color = MaterialTheme.colorScheme.surface)
-            .animateEnterExit(
-                enter = fadeIn(RouteTransitionAnimationSpec),
-                exit = fadeOut(RouteTransitionAnimationSpec)
-            )
+            .run {
+                if (this@modifierFor is AnimatedContentScope) animateEnterExit(
+                    enter = fadeIn(RouteTransitionAnimationSpec),
+                    exit = fadeOut(RouteTransitionAnimationSpec)
+                )
+                else this
+            }
+
 
         AdaptiveContainer.Secondary -> FillSizeModifier
             .background(color = MaterialTheme.colorScheme.surface)
-            .animateEnterExit(
-                enter = fadeIn(RouteTransitionAnimationSpec),
-                exit = ExitTransition.None
-            )
+            .run {
+                if (this@modifierFor is AnimatedContentScope) animateEnterExit(
+                    enter = fadeIn(RouteTransitionAnimationSpec),
+                    exit = ExitTransition.None
+                )
+                else this
+            }
 
         AdaptiveContainer.TransientPrimary -> FillSizeModifier
             .backPreviewModifier()
