@@ -237,16 +237,14 @@ private fun AdaptiveNavigationState.adaptTo(
         // In a change, each container should keep its slot from the previous state.
         // This allows the AnimatedContent transition run on the route id
         MoveKind.Change -> {
-            val updatedRouteIdsToAdaptiveSlots = mutableMapOf(
-                // Use the previous primary slot for the new primary route
-                primaryRoute.id to routeIdsToAdaptiveSlots.getValue(primaryRoute.id)
-            )
+            val updatedRouteIdsToAdaptiveSlots = mutableMapOf<String, AdaptiveContainerSlot>()
             // Going from the primary route downwards, look up its previous slot
             // If that slot is null, find the first slot that hasn't been taken up yet
             // otherwise reuse its existing slot
             val routeLookups = listOf(
                 AdaptiveNavigationState::primaryRoute,
-                AdaptiveNavigationState::secondaryRoute
+                AdaptiveNavigationState::secondaryRoute,
+                AdaptiveNavigationState::transientPrimaryRoute,
             )
             for (lookup in routeLookups) {
                 val currentRoute = lookup(current) ?: continue
