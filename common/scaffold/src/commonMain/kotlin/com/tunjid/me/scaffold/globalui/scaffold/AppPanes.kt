@@ -41,9 +41,9 @@ internal class PaneAnchorState {
             b = swipeableState.offset.value.roundToInt()
         )
 
-    val targetPaneSplit get() = swipeableState.targetValue
+    val targetPaneAnchor get() = swipeableState.targetValue
 
-    val currentPaneSplit get() = swipeableState.currentValue
+    val currentPaneAnchor get() = swipeableState.currentValue
 
     private val thumbMutableInteractionSource = MutableInteractionSource()
 
@@ -79,7 +79,7 @@ internal class PaneAnchorState {
         swipeableState.performDrag(delta)
     }
 
-    suspend fun completeDispatch() = swipeableState.performFling(0f)
+    suspend fun completeDispatch() = swipeableState.performFling(velocity = 0f)
 
     suspend fun moveTo(anchor: PaneAnchor) = swipeableState.animateTo(anchor)
 }

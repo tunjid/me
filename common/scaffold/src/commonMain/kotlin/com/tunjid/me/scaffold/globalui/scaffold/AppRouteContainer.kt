@@ -157,9 +157,9 @@ internal fun AppRouteContainer(
         )
     }
 
-    LaunchedEffect(paneSplitState.currentPaneSplit) {
+    LaunchedEffect(paneSplitState.currentPaneAnchor) {
         globalUiStateHolder.accept {
-            copy(paneAnchor = paneSplitState.currentPaneSplit)
+            copy(paneAnchor = paneSplitState.currentPaneAnchor)
         }
     }
 }
@@ -201,7 +201,7 @@ private fun BoxScope.DraggableThumb(
     val isDragged by paneAnchorState.thumbInteractionSource.collectIsDraggedAsState()
     val thumbWidth by animateDpAsState(
         if (isHovered || isPressed || isDragged) DraggableDividerSizeDp
-        else when (paneAnchorState.targetPaneSplit) {
+        else when (paneAnchorState.targetPaneAnchor) {
             PaneAnchor.Zero -> DraggableDividerSizeDp
             PaneAnchor.OneThirds,
             PaneAnchor.Half,
@@ -328,7 +328,7 @@ private fun secondaryContentModifier(
         // Display the secondary content over the primary content to maintain the sliding illusion
         .zIndex(if (complete) 0f else 1f)
         .restrictedSizePlacement(
-            atStart = paneAnchorState.currentPaneSplit > paneAnchorState.targetPaneSplit
+            atStart = paneAnchorState.currentPaneAnchor > paneAnchorState.targetPaneAnchor
         )
 }
 
