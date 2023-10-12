@@ -286,7 +286,9 @@ private fun primaryContentModifier(
                 condition = hasNavContent && windowSizeClass > WindowSizeClass.COMPACT
             )
         )
-        .restrictedSizePlacement(atStart = moveKind == MoveKind.SecondaryToPrimary)
+        .restrictedSizePlacement(
+            atStart = moveKind == MoveKind.SecondaryToPrimary
+        )
 }
 
 @Composable
@@ -320,11 +322,14 @@ private fun secondaryContentModifier(
         complete = true
     }
 
+    val paneAnchorState = LocalPaneAnchorState.current
     return Modifier
         .width(if (complete) updatedWidth.value else widthAnimatable.value)
         // Display the secondary content over the primary content to maintain the sliding illusion
         .zIndex(if (complete) 0f else 1f)
-        .restrictedSizePlacement(atStart = moveKind == MoveKind.PrimaryToSecondary)
+        .restrictedSizePlacement(
+            atStart = paneAnchorState.currentPaneSplit > paneAnchorState.targetPaneSplit
+        )
 }
 
 @Composable
