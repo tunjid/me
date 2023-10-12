@@ -18,7 +18,6 @@ package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDpAsState
@@ -375,25 +374,26 @@ private fun routeContainerPadding(
 private fun Modifier.restrictedSizePlacement(
     atStart: Boolean
 ) = layout { measurable, constraints ->
-        val minPanWidth = MinPaneWidth.roundToPx()
-        val actualConstraints = when {
-            constraints.maxWidth < minPanWidth -> constraints.copy(maxWidth = minPanWidth)
-            else -> constraints
-        }
-        val placeable = measurable.measure(actualConstraints)
-        layout(width = placeable.width, height = placeable.height) {
-            placeable.placeRelative(
-                x = when {
-                    constraints.maxWidth < minPanWidth -> when {
-                        atStart -> constraints.maxWidth - minPanWidth
-                        else -> minPanWidth - constraints.maxWidth
-                    }
-                    else -> 0
-                },
-                y = 0
-            )
-        }
+    val minPanWidth = MinPaneWidth.roundToPx()
+    val actualConstraints = when {
+        constraints.maxWidth < minPanWidth -> constraints.copy(maxWidth = minPanWidth)
+        else -> constraints
     }
+    val placeable = measurable.measure(actualConstraints)
+    layout(width = placeable.width, height = placeable.height) {
+        placeable.placeRelative(
+            x = when {
+                constraints.maxWidth < minPanWidth -> when {
+                    atStart -> constraints.maxWidth - minPanWidth
+                    else -> minPanWidth - constraints.maxWidth
+                }
+
+                else -> 0
+            },
+            y = 0
+        )
+    }
+}
 
 private val DraggableDividerSizeDp = 48.dp
 private val MinPaneWidth = 120.dp
