@@ -226,6 +226,8 @@ private fun AdaptiveNavigationState.adaptTo(
     }
 
     return when (moveKind) {
+        // In a change, each container should keep its slot from the previous state.
+        // This allows the AnimatedContent transition run on the route id
         MoveKind.Change -> {
             val updatedRouteIdsToAdaptiveSlots = mutableMapOf(
                 // Use the previous primary slot for the new primary route
@@ -256,7 +258,7 @@ private fun AdaptiveNavigationState.adaptTo(
             )
         }
 
-        // Replace irrelevant routes with incoming routes that were not previously cached
+        // In a swap, preserve the existing slot for a route, but change its associated container
         is MoveKind.Swap -> {
             val fromSlot = this.slotFor(moveKind.from) ?: throw IllegalArgumentException(
                 "No slot was previously assigned to the container being moved from in $moveKind"
