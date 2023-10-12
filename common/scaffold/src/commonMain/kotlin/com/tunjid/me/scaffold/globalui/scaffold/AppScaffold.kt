@@ -49,10 +49,10 @@ import com.tunjid.me.scaffold.nav.AdaptiveContainerSlot
 import com.tunjid.me.scaffold.nav.AdaptiveNavigationState
 import com.tunjid.me.scaffold.nav.AdaptiveSlotMetadata
 import com.tunjid.me.scaffold.nav.MoveKind
-import com.tunjid.me.scaffold.nav.MoveKind.None.affects
+import com.tunjid.me.scaffold.nav.MoveKind.Change.affects
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.adaptiveNavigationState
-import com.tunjid.me.scaffold.nav.get
+import com.tunjid.me.scaffold.nav.slotFor
 import com.tunjid.me.scaffold.nav.metadataFor
 import com.tunjid.me.scaffold.nav.primaryContainerSlot
 import com.tunjid.me.scaffold.nav.removedRoutes
@@ -77,7 +77,7 @@ fun Scaffold(
             navStateHolder.state.adaptiveNavigationState(uiStateFlow)
         }
         val adaptiveNavigationState by adaptiveNavigationStateFlow.collectAsState(
-            AdaptiveNavigationState()
+            AdaptiveNavigationState.Initial
         )
 
         val moveKind by remember {
@@ -87,10 +87,10 @@ fun Scaffold(
             derivedStateOf { adaptiveNavigationState.primaryContainerSlot }
         }
         val secondaryContainerSlot: AdaptiveContainerSlot? by remember {
-            derivedStateOf { adaptiveNavigationState[AdaptiveContainer.Secondary] }
+            derivedStateOf { adaptiveNavigationState.slotFor(AdaptiveContainer.Secondary) }
         }
         val transientPrimaryContainerSlot: AdaptiveContainerSlot? by remember {
-            derivedStateOf { adaptiveNavigationState[AdaptiveContainer.TransientPrimary] }
+            derivedStateOf { adaptiveNavigationState.slotFor(AdaptiveContainer.TransientPrimary) }
         }
 
         val saveableStateHolder: SaveableStateHolder = rememberSaveableStateHolder()
