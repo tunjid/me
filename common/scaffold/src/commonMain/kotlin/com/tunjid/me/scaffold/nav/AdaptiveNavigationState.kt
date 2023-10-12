@@ -80,6 +80,12 @@ internal data class AdaptiveNavigationState(
     }
 }
 
+private val AdaptiveRouteInContainerLookups = listOf(
+    AdaptiveNavigationState::primaryRoute,
+    AdaptiveNavigationState::secondaryRoute,
+    AdaptiveNavigationState::transientPrimaryRoute,
+)
+
 /**
  * Information about content in an [AdaptiveContainerSlot]
  */
@@ -153,8 +159,6 @@ internal sealed class MoveKind {
 
     fun Swap.unaffectedContainers() = AdaptiveContainer.entries - setOf(from, to)
 
-    fun Swap.affects(container: AdaptiveContainer?) = from == container || to == container
-
     companion object {
         val PrimaryToSecondary = Swap(
             from = AdaptiveContainer.Primary,
@@ -218,6 +222,10 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
             operation = AdaptiveNavigationState::adaptTo
         )
 
+/**
+ * A method that adapts changes in navigation to different containers while allowing for them
+ * to be animated easily.
+ */
 private fun AdaptiveNavigationState.adaptTo(
     current: AdaptiveNavigationState,
 ): AdaptiveNavigationState {
@@ -238,15 +246,10 @@ private fun AdaptiveNavigationState.adaptTo(
         // This allows the AnimatedContent transition run on the route id
         MoveKind.Change -> {
             val updatedRouteIdsToAdaptiveSlots = mutableMapOf<String, AdaptiveContainerSlot>()
-            // Going from the primary route downwards, look up its previous slot
+            // For routes in all containers, look up its previous slot
             // If that slot is null, find the first slot that hasn't been taken up yet
             // otherwise reuse its existing slot
-            val routeLookups = listOf(
-                AdaptiveNavigationState::primaryRoute,
-                AdaptiveNavigationState::secondaryRoute,
-                AdaptiveNavigationState::transientPrimaryRoute,
-            )
-            for (lookup in routeLookups) {
+            for (lookup in AdaptiveRouteInContainerLookups) {
                 val currentRoute = lookup(current) ?: continue
                 val previousRoute = lookup(this)
                 val slot = when (val previousSlot = routeIdsToAdaptiveSlots[previousRoute?.id]) {
@@ -258,6 +261,7 @@ private fun AdaptiveNavigationState.adaptTo(
                 }
                 updatedRouteIdsToAdaptiveSlots[currentRoute.id] = slot
             }
+            // TODO: Remove stale route ids after they complete their transition
             current.copy(
                 moveKind = moveKind,
                 routeIdsToAdaptiveSlots = routeIdsToAdaptiveSlots + updatedRouteIdsToAdaptiveSlots
