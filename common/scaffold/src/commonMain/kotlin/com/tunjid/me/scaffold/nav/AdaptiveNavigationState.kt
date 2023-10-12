@@ -279,7 +279,7 @@ private fun AdaptiveNavigationState.adaptTo(
             current.copy(
                 moveKind = moveKind,
                 routeIdsToAdaptiveSlots = when (val newRoute = current.routeFor(moveKind.from)) {
-                    null -> routeIdsToAdaptiveSlots - routeFor(vacatedSlot)?.id
+                    null -> routeIdsToAdaptiveSlots
                     else -> routeIdsToAdaptiveSlots - routeFor(vacatedSlot)?.id + Pair(
                         first = newRoute.id,
                         second = vacatedSlot
