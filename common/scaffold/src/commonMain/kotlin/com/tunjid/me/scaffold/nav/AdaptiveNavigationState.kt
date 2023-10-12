@@ -278,7 +278,7 @@ private fun AdaptiveNavigationState.adaptTo(
             }
 
             val excludedSlots = moveKind.unaffectedContainers()
-                .map(this::slotFor)
+                .map(::slotFor)
                 .plus(fromSlot)
                 .toSet()
 

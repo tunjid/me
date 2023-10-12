@@ -52,10 +52,9 @@ import com.tunjid.me.scaffold.nav.MoveKind
 import com.tunjid.me.scaffold.nav.MoveKind.Change.affects
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.adaptiveNavigationState
-import com.tunjid.me.scaffold.nav.slotFor
 import com.tunjid.me.scaffold.nav.metadataFor
-import com.tunjid.me.scaffold.nav.primaryContainerSlot
 import com.tunjid.me.scaffold.nav.removedRoutes
+import com.tunjid.me.scaffold.nav.slotFor
 import kotlinx.coroutines.flow.map
 
 /**
@@ -79,20 +78,9 @@ fun Scaffold(
         val adaptiveNavigationState by adaptiveNavigationStateFlow.collectAsState(
             AdaptiveNavigationState.Initial
         )
-
         val moveKind by remember {
             derivedStateOf { adaptiveNavigationState.moveKind }
         }
-        val primaryContainerSlot: AdaptiveContainerSlot? by remember {
-            derivedStateOf { adaptiveNavigationState.primaryContainerSlot }
-        }
-        val secondaryContainerSlot: AdaptiveContainerSlot? by remember {
-            derivedStateOf { adaptiveNavigationState.slotFor(AdaptiveContainer.Secondary) }
-        }
-        val transientPrimaryContainerSlot: AdaptiveContainerSlot? by remember {
-            derivedStateOf { adaptiveNavigationState.slotFor(AdaptiveContainer.TransientPrimary) }
-        }
-
         val saveableStateHolder: SaveableStateHolder = rememberSaveableStateHolder()
 
         val containerContents = rememberAdaptiveContainersToRoutes(
@@ -117,13 +105,19 @@ fun Scaffold(
                     navStateHolder = navStateHolder,
                     moveKind = moveKind,
                     primaryContent = {
-                        containerContents(primaryContainerSlot).invoke()
+                        containerContents(
+                            adaptiveNavigationState.slotFor(AdaptiveContainer.Primary)
+                        ).invoke()
                     },
                     secondaryContent = {
-                        containerContents(secondaryContainerSlot).invoke()
+                        containerContents(
+                            adaptiveNavigationState.slotFor(AdaptiveContainer.Secondary)
+                        ).invoke()
                     },
                     transientPrimaryContent = {
-                        containerContents(transientPrimaryContainerSlot).invoke()
+                        containerContents(
+                            adaptiveNavigationState.slotFor(AdaptiveContainer.TransientPrimary)
+                        ).invoke()
                     },
                 )
                 AppFab(
