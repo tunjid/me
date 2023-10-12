@@ -61,7 +61,7 @@ internal data class AdaptiveNavigationState(
     /**
      * A mapping of route ids to the adaptive slots they are currently in.
      */
-    val routeIdsToAdaptiveSlots: Map<String, AdaptiveContainerSlot>,
+    val routeIdsToAdaptiveSlots: Map<String?, AdaptiveContainerSlot>,
     /**
      * The window size class of the current screen configuration
      */
@@ -269,21 +269,22 @@ private fun AdaptiveNavigationState.adaptTo(
         // In a swap, preserve the existing slot for a route, however find new routes coming in
         // an assign unoccupied slots to them.
         is MoveKind.Swap -> {
-            val fromSlot = this.slotFor(moveKind.from) ?: throw IllegalArgumentException(
-                "No slot was previously assigned to the container being moved from in $moveKind"
-            )
+            val fromSlot = this.slotFor(moveKind.from)
             val excludedSlots = moveKind.unaffectedContainers()
                 .map(::slotFor)
                 .plus(fromSlot)
                 .toSet()
 
+            val vacatedSlot = AdaptiveContainerSlot.entries.first {
+                !excludedSlots.contains(it)
+            }
             current.copy(
                 moveKind = moveKind,
                 routeIdsToAdaptiveSlots = when (val newRoute = current.routeFor(moveKind.from)) {
-                    null -> routeIdsToAdaptiveSlots
-                    else -> routeIdsToAdaptiveSlots + Pair(
+                    null -> routeIdsToAdaptiveSlots - routeFor(vacatedSlot)?.id
+                    else -> routeIdsToAdaptiveSlots - routeFor(vacatedSlot)?.id + Pair(
                         first = newRoute.id,
-                        second = AdaptiveContainerSlot.entries.first { !excludedSlots.contains(it) }
+                        second = vacatedSlot
                     )
                 }
             )
