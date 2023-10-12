@@ -225,7 +225,7 @@ private fun AdaptiveNavigationState.adaptTo(
         }
     }
 
-    when (moveKind) {
+    return when (moveKind) {
         MoveKind.Change -> {
             val updatedRouteIdsToAdaptiveSlots = mutableMapOf(
                 // Use the previous primary slot for the new primary route
@@ -250,7 +250,7 @@ private fun AdaptiveNavigationState.adaptTo(
                 }
                 updatedRouteIdsToAdaptiveSlots[currentRoute.id] = slot
             }
-            return current.copy(
+            current.copy(
                 moveKind = moveKind,
                 routeIdsToAdaptiveSlots = routeIdsToAdaptiveSlots + updatedRouteIdsToAdaptiveSlots
             )
@@ -261,17 +261,9 @@ private fun AdaptiveNavigationState.adaptTo(
             val fromSlot = this.slotFor(moveKind.from) ?: throw IllegalArgumentException(
                 "No slot was previously assigned to the container being moved from in $moveKind"
             )
-            val movedRoute = this.routeFor(fromSlot) ?: throw IllegalArgumentException(
+            val fromRoute = this.routeFor(fromSlot) ?: throw IllegalArgumentException(
                 "No route was previously placed in slot $fromSlot when attempting $moveKind"
             )
-
-            val incomingRoute = when (moveKind) {
-                MoveKind.PrimaryToSecondary -> current.primaryRoute
-                MoveKind.SecondaryToPrimary -> null
-                MoveKind.PrimaryToTransient -> current.primaryRoute
-                MoveKind.TransientToPrimary -> null
-                else -> null
-            }
 
             val excludedSlots = moveKind.unaffectedContainers()
                 .map(::slotFor)
@@ -279,12 +271,18 @@ private fun AdaptiveNavigationState.adaptTo(
                 .toSet()
 
             val toSlot = AdaptiveContainerSlot.entries.first { !excludedSlots.contains(it) }
-
-            return current.copy(
+            val toRoute = when (moveKind) {
+                MoveKind.PrimaryToSecondary -> current.primaryRoute
+                MoveKind.SecondaryToPrimary -> null
+                MoveKind.PrimaryToTransient -> current.primaryRoute
+                MoveKind.TransientToPrimary -> null
+                else -> null
+            }
+            current.copy(
                 moveKind = moveKind,
                 routeIdsToAdaptiveSlots = routeIdsToAdaptiveSlots + listOfNotNull(
-                    movedRoute.id to fromSlot,
-                    incomingRoute?.id?.let { it to toSlot }
+                    fromRoute.id to fromSlot,
+                    toRoute?.id?.let { it to toSlot }
                 )
             )
         }
