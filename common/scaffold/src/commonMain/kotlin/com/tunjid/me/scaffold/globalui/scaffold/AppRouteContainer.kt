@@ -322,13 +322,12 @@ private fun secondaryContentModifier(
         complete = true
     }
 
-    val paneAnchorState = LocalPaneAnchorState.current
     return Modifier
         .width(if (complete) updatedWidth.value else widthAnimatable.value)
         // Display the secondary content over the primary content to maintain the sliding illusion
         .zIndex(if (complete) 0f else 1f)
         .restrictedSizePlacement(
-            atStart = paneAnchorState.currentPaneAnchor > paneAnchorState.targetPaneAnchor
+            atStart = moveKind == MoveKind.PrimaryToSecondary
         )
 }
 
