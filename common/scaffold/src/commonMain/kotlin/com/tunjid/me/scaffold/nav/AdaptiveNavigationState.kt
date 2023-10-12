@@ -102,13 +102,10 @@ internal fun AdaptiveNavigationState.metadataFor(
     )
 }
 
-internal val AdaptiveNavigationState.primaryContainerSlot: AdaptiveContainerSlot
-    get() = routeIdsToAdaptiveSlots.getValue(primaryRoute.id)
-
 internal fun AdaptiveNavigationState.slotFor(
     container: AdaptiveContainer
 ): AdaptiveContainerSlot? = when (container) {
-    AdaptiveContainer.Primary -> primaryContainerSlot
+    AdaptiveContainer.Primary -> routeIdsToAdaptiveSlots[primaryRoute.id]
     AdaptiveContainer.Secondary -> routeIdsToAdaptiveSlots[secondaryRoute?.id]
     AdaptiveContainer.TransientPrimary -> routeIdsToAdaptiveSlots[transientPrimaryRoute?.id]
 }
@@ -124,13 +121,12 @@ internal fun AdaptiveNavigationState.containerFor(
 
 internal fun AdaptiveNavigationState.routeFor(
     container: AdaptiveContainerSlot
-): AppRoute? =
-    when (container) {
-        routeIdsToAdaptiveSlots[primaryRoute.id] -> primaryRoute
-        routeIdsToAdaptiveSlots[secondaryRoute?.id] -> secondaryRoute
-        routeIdsToAdaptiveSlots[transientPrimaryRoute?.id] -> transientPrimaryRoute
-        else -> null
-    }
+): AppRoute? = when (container) {
+    routeIdsToAdaptiveSlots[primaryRoute.id] -> primaryRoute
+    routeIdsToAdaptiveSlots[secondaryRoute?.id] -> secondaryRoute
+    routeIdsToAdaptiveSlots[transientPrimaryRoute?.id] -> transientPrimaryRoute
+    else -> null
+}
 
 internal sealed class MoveKind {
 
