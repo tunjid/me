@@ -399,5 +399,5 @@ private val DraggableDividerSizeDp = 48.dp
 private val MinPaneWidth = 120.dp
 
 private val ContentSizeSpring = spring<Dp>(
-    stiffness = Spring.StiffnessLow
+    stiffness = 100f
 )
