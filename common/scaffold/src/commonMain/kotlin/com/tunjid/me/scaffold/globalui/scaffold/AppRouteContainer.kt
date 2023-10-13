@@ -262,19 +262,23 @@ private fun primaryContentModifier(
     var complete by remember { mutableStateOf(false) }
 
     LaunchedEffect(windowSizeClass, moveKind) {
-        // Maintain max width on smaller devices
-        if (windowSizeClass == WindowSizeClass.COMPACT || moveKind != MoveKind.SecondaryToPrimary) {
+        try {
+            // Maintain max width on smaller devices
+            if (windowSizeClass == WindowSizeClass.COMPACT
+                || moveKind != MoveKind.SecondaryToPrimary) {
+                complete = true
+                return@LaunchedEffect
+            }
+            complete = false
+            // Snap to this width to give the impression of the container sliding
+            widthAnimatable.snapTo(targetValue = updatedSecondaryContentWidth)
+            widthAnimatable.animateTo(
+                targetValue = maxWidth,
+                animationSpec = ContentSizeSpring,
+            )
+        } finally {
             complete = true
-            return@LaunchedEffect
         }
-        complete = false
-        // Snap to this width to give the impression of the container sliding
-        widthAnimatable.snapTo(targetValue = updatedSecondaryContentWidth)
-        widthAnimatable.animateTo(
-            targetValue = maxWidth,
-            animationSpec = ContentSizeSpring,
-        )
-        complete = true
     }
 
     return Modifier
@@ -307,24 +311,28 @@ private fun secondaryContentModifier(
     var complete by remember { mutableStateOf(true) }
 
     LaunchedEffect(moveKind) {
-        if (moveKind != MoveKind.PrimaryToSecondary) {
+        try {
+            if (moveKind != MoveKind.PrimaryToSecondary) {
+                complete = true
+                return@LaunchedEffect
+            }
+            complete = false
+
+            widthAnimatable.animateTo(
+                targetValue = width,
+                animationSpec = ContentSizeSpring,
+            )
+        } finally {
             complete = true
-            return@LaunchedEffect
+            // Keep the animatable width at the full width for seamless animations
+            widthAnimatable.snapTo(targetValue = maxWidth)
         }
-        complete = false
-        // Snap to this width to give the impression of the container sliding
-        widthAnimatable.snapTo(targetValue = maxWidth)
-        widthAnimatable.animateTo(
-            targetValue = width,
-            animationSpec = ContentSizeSpring,
-        )
-        complete = true
     }
 
     return Modifier
-        .width(if (complete) updatedWidth.value else widthAnimatable.value)
         // Display the secondary content over the primary content to maintain the sliding illusion
         .zIndex(if (complete) 0f else 1f)
+        .width(if (complete) updatedWidth.value else widthAnimatable.value)
         .restrictedSizePlacement(
             atStart = moveKind == MoveKind.PrimaryToSecondary
         )
