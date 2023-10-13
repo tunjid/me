@@ -747,7 +747,6 @@ private fun LazyStaggeredGridMeasureContext.measure(
             },
             filter = { itemIndex ->
                 val lane = laneInfo.getLane(itemIndex)
-                println("LANE: $lane")
                 when (lane) {
                     LazyStaggeredGridLaneInfo.Unset, LazyStaggeredGridLaneInfo.FullSpan -> {
                         firstItemIndices.all { it > itemIndex }
