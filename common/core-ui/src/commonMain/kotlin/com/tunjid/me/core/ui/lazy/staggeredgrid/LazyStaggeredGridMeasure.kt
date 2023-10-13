@@ -32,7 +32,6 @@ import androidx.compose.ui.util.packInts
 import androidx.compose.ui.util.unpackInt1
 import androidx.compose.ui.util.unpackInt2
 import com.tunjid.me.core.ui.lazy.layout.LazyLayoutKeyIndexMap
-import com.tunjid.me.core.ui.lazy.staggeredgrid.LazyStaggeredGridLaneInfo.Companion.FullSpan
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -236,7 +235,7 @@ internal class LazyStaggeredGridMeasureContext(
         get() = size != 1
 
     inline val SpanRange.laneInfo: Int
-        get() = if (isFullSpan) FullSpan else start
+        get() = if (isFullSpan) LazyStaggeredGridLaneInfo.FullSpan else start
 }
 
 @ExperimentalFoundationApi
@@ -386,7 +385,7 @@ private fun LazyStaggeredGridMeasureContext.measure(
             // Case 3: the first item is in the wrong lane (it should always be in
             // the first one)
             val firstItemLane = laneInfo.getLane(0)
-            return firstItemLane != 0 && firstItemLane != Unset && firstItemLane != FullSpan
+            return firstItemLane != 0 && firstItemLane != Unset && firstItemLane != LazyStaggeredGridLaneInfo.FullSpan
         }
 
         // define min offset (currently includes beforeContentPadding)
@@ -748,8 +747,9 @@ private fun LazyStaggeredGridMeasureContext.measure(
             },
             filter = { itemIndex ->
                 val lane = laneInfo.getLane(itemIndex)
+                println("LANE: $lane")
                 when (lane) {
-                    Unset, FullSpan -> {
+                    LazyStaggeredGridLaneInfo.Unset, LazyStaggeredGridLaneInfo.FullSpan -> {
                         firstItemIndices.all { it > itemIndex }
                     }
                     else -> {
@@ -782,7 +782,7 @@ private fun LazyStaggeredGridMeasureContext.measure(
                 }
                 val lane = laneInfo.getLane(itemIndex)
                 when (lane) {
-                    Unset, FullSpan -> {
+                    LazyStaggeredGridLaneInfo.Unset, LazyStaggeredGridLaneInfo.FullSpan -> {
                         currentItemIndices.all { it < itemIndex }
                     }
                     else -> {
