@@ -21,7 +21,7 @@ import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.staggeredgrid.*
+import com.tunjid.me.core.ui.lazy.staggeredgrid.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,13 +41,17 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.StickyHeaderStaggeredGrid
+import com.tunjid.me.core.ui.lazy.staggeredgrid.LazyStaggeredGridState
+import com.tunjid.me.core.ui.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import com.tunjid.me.core.ui.lazy.staggeredgrid.StaggeredGridCells
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.me.core.ui.scrollbar.scrollbarState
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.tiler.compose.PivotedTilingEffect
+import com.tunjid.tiler.TiledList
+import com.tunjid.tiler.queryAtOrNull
 import com.tunjid.treenav.push
 import com.tunjid.treenav.swap
 import kotlinx.coroutines.flow.*
@@ -170,6 +174,9 @@ private fun ArchiveScreen(
 
     gridState.PivotedTilingEffect(
         items = state.items,
+        indexSelector = kotlin.ranges.IntRange::first,
+        itemsList = { layoutInfo.visibleItemsInfo },
+        indexForItem = LazyStaggeredGridItemInfo::index,
         onQueryChanged = {
             actions(Action.Fetch.LoadAround(it ?: state.queryState.currentQuery))
         }
@@ -408,3 +415,25 @@ private fun LazyStaggeredGridState.scrollbarThumbPositionFunction(
 //        ).asNoOpStateFlowMutator()
 //    )
 //}
+
+@Composable
+private inline fun <Query, LazyState : Any, LazyStateItem> LazyState.PivotedTilingEffect(
+    items: TiledList<Query, *>,
+    noinline onQueryChanged: (Query?) -> Unit,
+    crossinline indexSelector: IntRange.() -> Int = kotlin.ranges.IntRange::first,
+    crossinline itemsList: LazyState.() -> List<LazyStateItem>,
+    crossinline indexForItem: (LazyStateItem) -> Int?,
+) {
+    val updatedItems by rememberUpdatedState(items)
+    LaunchedEffect(this) {
+        snapshotFlow {
+            val visibleItemsInfo = itemsList(this@PivotedTilingEffect)
+            val index = indexSelector(visibleItemsInfo.indices)
+            val lazyStateItem = visibleItemsInfo.getOrNull(index)
+            val itemIndex = lazyStateItem?.let(indexForItem)
+            itemIndex?.let(updatedItems::queryAtOrNull)
+        }
+            .distinctUntilChanged()
+            .collect(onQueryChanged)
+    }
+}

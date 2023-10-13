@@ -21,9 +21,9 @@ import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
 import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridItemInfo
-import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.runtime.Composable
+import com.tunjid.me.core.ui.lazy.staggeredgrid.LazyStaggeredGridItemInfo
+import com.tunjid.me.core.ui.lazy.staggeredgrid.LazyStaggeredGridState
 
 ///**
 // * Remembers a [ScrollbarState] driven by the changes in a [ScrollbarState].
