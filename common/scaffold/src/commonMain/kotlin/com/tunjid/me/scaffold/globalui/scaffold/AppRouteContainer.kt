@@ -127,9 +127,8 @@ internal fun AppRouteContainer(
                     modifier = primaryContentModifier(
                         windowSizeClass = windowSizeClass,
                         moveKind = moveKind,
-                        hasNavContent = hasNavContent,
-                        maxWidth = with(density) { paneSplitState.maxWidth.toDp() },
-                        secondaryContentWidth = with(density) { paneSplitState.width.toDp() }
+                        secondaryContentWidth = with(density) { paneSplitState.width.toDp() },
+                        maxWidth = with(density) { paneSplitState.maxWidth.toDp() }
                     ),
                     primaryContent = primaryContent,
                     transientPrimaryContent = transientPrimaryContent,
@@ -248,7 +247,6 @@ private fun BoxScope.DraggableThumb(
 @Composable
 private fun primaryContentModifier(
     windowSizeClass: WindowSizeClass,
-    hasNavContent: Boolean,
     moveKind: MoveKind,
     secondaryContentWidth: Dp,
     maxWidth: Dp,
@@ -282,8 +280,9 @@ private fun primaryContentModifier(
     return Modifier
         .width(if (complete) maxWidth else widthAnimatable.value)
         .padding(
-            start = secondaryContentWidth.countIf(
-                condition = hasNavContent && windowSizeClass > WindowSizeClass.COMPACT
+            start = updatedSecondaryContentWidth.countIf(
+                moveKind != MoveKind.SecondaryToPrimary
+                        && windowSizeClass != WindowSizeClass.COMPACT
             )
         )
         .restrictedSizePlacement(
