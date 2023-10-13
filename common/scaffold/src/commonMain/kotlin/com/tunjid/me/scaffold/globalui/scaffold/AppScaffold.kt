@@ -18,12 +18,14 @@ package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,6 +50,7 @@ import com.tunjid.me.scaffold.nav.AdaptiveContainer
 import com.tunjid.me.scaffold.nav.AdaptiveContainerSlot
 import com.tunjid.me.scaffold.nav.AdaptiveNavigationState
 import com.tunjid.me.scaffold.nav.AdaptiveSlotMetadata
+import com.tunjid.me.scaffold.nav.MoveKind
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.adaptiveNavigationState
 import com.tunjid.me.scaffold.nav.metadataFor
@@ -163,35 +166,41 @@ private fun SaveableStateHolder.Render(
 ) {
     updateTransition(metadata).AnimatedContent(
         contentKey = { it.route?.id },
+        transitionSpec = {
+            EnterTransition.None togetherWith ExitTransition.None
+        }
     ) { targetMetadata ->
         if (targetMetadata.route == null) return@AnimatedContent
         SaveableStateProvider(targetMetadata.route.id) {
-            targetMetadata.route.Render(modifierFor(targetMetadata.container))
+            targetMetadata.route.Render(modifierFor(targetMetadata))
         }
     }
 }
 
 @Composable
-private fun AnimatedContentScope.modifierFor(container: AdaptiveContainer?) =
-    when (container) {
-        AdaptiveContainer.Primary -> FillSizeModifier
-            .background(color = MaterialTheme.colorScheme.surface)
-            .animateEnterExit(
-                enter = fadeIn(RouteTransitionAnimationSpec),
-                exit = fadeOut(RouteTransitionAnimationSpec)
-            )
+private fun AnimatedContentScope.modifierFor(metadata: AdaptiveSlotMetadata) =
+    if (metadata.container == null || metadata.route == null) FillSizeModifier
+    else when (metadata.moveKind) {
+        is MoveKind.Swap -> when (metadata.container) {
+            AdaptiveContainer.Primary, AdaptiveContainer.Secondary -> FillSizeModifier
+                .background(color = MaterialTheme.colorScheme.surface)
 
-        AdaptiveContainer.Secondary -> FillSizeModifier
-            .background(color = MaterialTheme.colorScheme.surface)
-            .animateEnterExit(
-                enter = fadeIn(RouteTransitionAnimationSpec),
-                exit = ExitTransition.None
-            )
+            AdaptiveContainer.TransientPrimary -> FillSizeModifier
+                .backPreviewModifier()
 
-        AdaptiveContainer.TransientPrimary -> FillSizeModifier
-            .backPreviewModifier()
+        }
 
-        else -> FillSizeModifier
+        MoveKind.Change -> when (metadata.container) {
+            AdaptiveContainer.Primary, AdaptiveContainer.Secondary -> FillSizeModifier
+                .background(color = MaterialTheme.colorScheme.surface)
+                .animateEnterExit(
+                    enter = fadeIn(RouteTransitionAnimationSpec),
+                    exit = fadeOut(RouteTransitionAnimationSpec)
+                )
+
+            AdaptiveContainer.TransientPrimary -> FillSizeModifier
+                .backPreviewModifier()
+        }
     }
 
 /**
