@@ -438,6 +438,6 @@ private val ItemPlacementSpec = itemSpring(IntOffset.VisibilityThreshold)
 private fun <T> itemSpring(
     visibilityThreshold: T
 ) = spring(
-    stiffness = Spring.StiffnessMediumLow,
+    stiffness = Spring.StiffnessMedium,
     visibilityThreshold = visibilityThreshold
 )
