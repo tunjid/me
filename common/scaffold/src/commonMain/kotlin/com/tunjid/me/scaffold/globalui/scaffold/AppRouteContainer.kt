@@ -112,7 +112,7 @@ internal fun AppRouteContainer(
         Box(
             modifier = Modifier
                 // Place under bottom navigation, app bars, fabs and the like
-                .zIndex(-1f)
+                .zIndex(PaneDragHandleZIndex)
                 .fillMaxWidth()
                 .onSizeChanged { paneSplitState.updateMaxWidth(it.width) }
                 .padding(
@@ -289,6 +289,7 @@ private fun primaryContentModifier(
     }
 
     return Modifier
+        .zIndex(PrimaryContainerZIndex)
         .width(if (complete) maxWidth else widthAnimatable.value)
         .padding(
             start = updatedSecondaryContentWidth.countIf(
@@ -342,7 +343,7 @@ private fun secondaryContentModifier(
 
     return Modifier
         // Display the secondary content over the primary content to maintain the sliding illusion
-        .zIndex(if (complete) 0f else 1f)
+        .zIndex(if (complete) SecondaryContainerZIndex else PrimaryContainerZIndex)
         .width(if (complete) updatedWidth.value else widthAnimatable.value)
         .restrictedSizePlacement(
             atStart = moveKind == PrimaryToSecondary
@@ -423,3 +424,7 @@ private val MinPaneWidth = 120.dp
 private val ContentSizeSpring = adaptiveSpringSpec(
     visibilityThreshold = Dp.VisibilityThreshold
 )
+
+private const val PaneDragHandleZIndex = -1f
+private const val PrimaryContainerZIndex = -2f
+private const val SecondaryContainerZIndex = -3f
