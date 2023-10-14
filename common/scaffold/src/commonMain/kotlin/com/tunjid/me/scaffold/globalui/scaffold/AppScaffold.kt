@@ -171,8 +171,12 @@ private fun SaveableStateHolder.Render(
         }
     ) { targetMetadata ->
         if (targetMetadata.currentRoute == null) return@AnimatedContent
-        SaveableStateProvider(targetMetadata.currentRoute.id) {
-            targetMetadata.currentRoute.Render(modifierFor(targetMetadata))
+        Box(
+            modifier = modifierFor(targetMetadata)
+        ) {
+            SaveableStateProvider(targetMetadata.currentRoute.id) {
+                targetMetadata.currentRoute.Render()
+            }
         }
     }
 }

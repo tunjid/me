@@ -66,9 +66,8 @@ data class ArchiveListRoute(
     val kind: ArchiveKind,
 ) : AppRoute {
     @Composable
-    override fun Render(modifier: Modifier) {
+    override fun Render() {
         ArchiveScreen(
-            modifier = modifier,
             stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
@@ -76,7 +75,6 @@ data class ArchiveListRoute(
 
 @Composable
 private fun ArchiveScreen(
-    modifier: Modifier,
     stateHolder: ArchiveListStateHolder,
 ) {
     val (state, actions) = stateHolder
@@ -115,9 +113,7 @@ private fun ArchiveScreen(
             }
     }
 
-    Column(
-        modifier = modifier
-    ) {
+    Column {
         ArchiveFilters(
             queryState = state.queryState,
             onChanged = actions

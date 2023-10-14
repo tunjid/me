@@ -71,7 +71,7 @@ data class ArchiveFilesParentRoute(
         }
 
     @Composable
-    override fun Render(modifier: Modifier) {
+    override fun Render() {
         ScreenUiState(
             UiState(
                 toolbarShows = true,
@@ -83,7 +83,6 @@ data class ArchiveFilesParentRoute(
             )
         )
         ArchiveFilesParentScreen(
-            modifier = modifier,
             children = children.filterIsInstance<ArchiveFilesRoute>(),
         )
     }
@@ -91,13 +90,12 @@ data class ArchiveFilesParentRoute(
 
 @Composable
 private fun ArchiveFilesParentScreen(
-    modifier: Modifier,
     children: List<ArchiveFilesRoute>
 ) {
     val pagerState = rememberPagerState { children.size }
     var lastTabClicked by remember { mutableStateOf<Int?>(pagerState.currentPage) }
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         Tabs(
             currentTabIndex = pagerState.currentPage,
@@ -108,7 +106,6 @@ private fun ArchiveFilesParentScreen(
             state = pagerState,
         ) { index ->
             ArchiveFilesScreen(
-                modifier = Modifier,
                 stateHolder = LocalScreenStateHolderCache.current
                     .screenStateHolderFor(children[index])
             )

@@ -18,6 +18,7 @@ package com.tunjid.me.signin
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
@@ -38,9 +39,8 @@ data class SignInRoute(
     override val id: String,
 ) : AppRoute {
     @Composable
-    override fun Render(modifier: Modifier) {
+    override fun Render() {
         SignInScreen(
-            modifier = modifier,
             stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
@@ -48,7 +48,6 @@ data class SignInRoute(
 
 @Composable
 private fun SignInScreen(
-    modifier: Modifier,
     stateHolder: SignInStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -60,8 +59,8 @@ private fun SignInScreen(
     )
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
+        modifier = Modifier
+            .fillMaxSize()
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

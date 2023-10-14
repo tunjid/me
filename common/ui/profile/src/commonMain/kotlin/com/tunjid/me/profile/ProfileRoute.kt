@@ -19,6 +19,7 @@ package com.tunjid.me.profile
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -53,9 +54,8 @@ data class ProfileRoute(
     override val id: String,
 ) : AppRoute {
     @Composable
-    override fun Render(modifier: Modifier) {
+    override fun Render() {
         ProfileScreen(
-            modifier = modifier,
             stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
@@ -63,7 +63,6 @@ data class ProfileRoute(
 
 @Composable
 private fun ProfileScreen(
-    modifier: Modifier,
     stateHolder: ProfileStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -80,8 +79,8 @@ private fun ProfileScreen(
     )
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
+        modifier = Modifier
+            .fillMaxSize()
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

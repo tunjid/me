@@ -61,9 +61,8 @@ data class ArchiveDetailRoute(
     val archiveId: ArchiveId
 ) : AppRoute {
     @Composable
-    override fun Render(modifier: Modifier) {
+    override fun Render() {
         ArchiveDetailScreen(
-            modifier = modifier,
             stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
@@ -75,7 +74,6 @@ data class ArchiveDetailRoute(
 
 @Composable
 private fun ArchiveDetailScreen(
-    modifier: Modifier,
     stateHolder: ArchiveDetailStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -96,7 +94,7 @@ private fun ArchiveDetailScreen(
     )
 
     LazyColumn(
-        modifier = modifier,
+        modifier = Modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         state = scrollState
     ) {

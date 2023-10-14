@@ -81,9 +81,8 @@ data class ArchiveFilesRoute(
     val fileType: FileType = FileType.Image
 ) : AppRoute {
     @Composable
-    override fun Render(modifier: Modifier) {
+    override fun Render() {
         ArchiveFilesScreen(
-            modifier = modifier,
             stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
@@ -91,7 +90,6 @@ data class ArchiveFilesRoute(
 
 @Composable
 internal fun ArchiveFilesScreen(
-    modifier: Modifier,
     stateHolder: ArchiveFilesStateHolder,
 ) {
     val (state, actions) = stateHolder
@@ -100,7 +98,7 @@ internal fun ArchiveFilesScreen(
     if (state.isInPrimaryNav) GlobalUi()
 
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         FilesGrid(
             dndEnabled = state.dndEnabled,

@@ -17,7 +17,6 @@
 package com.tunjid.me.scaffold.nav
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
@@ -49,7 +48,7 @@ data class ExternalRoute(
 
 interface AppRoute : Route {
     @Composable
-    fun Render(modifier: Modifier)
+    fun Render()
 
     /**
      * Defines what route to show in the supporting panel alongside this route

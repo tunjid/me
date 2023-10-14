@@ -82,9 +82,8 @@ data class ArchiveEditRoute(
     val archiveId: ArchiveId?,
 ) : AppRoute {
     @Composable
-    override fun Render(modifier: Modifier) {
+    override fun Render() {
         ArchiveEditScreen(
-            modifier = modifier,
             stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
         )
     }
@@ -105,7 +104,6 @@ data class ArchiveEditRoute(
 
 @Composable
 private fun ArchiveEditScreen(
-    modifier: Modifier,
     stateHolder: ArchiveEditStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -119,7 +117,7 @@ private fun ArchiveEditScreen(
     )
 
     LazyColumn(
-        modifier = modifier
+        modifier = Modifier
             .dropTarget(
                 onStarted = { _, _ ->
                     val (action, acceptedDrag) = when (state.hasStoragePermissions) {
