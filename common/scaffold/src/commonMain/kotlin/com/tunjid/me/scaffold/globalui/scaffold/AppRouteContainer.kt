@@ -74,22 +74,22 @@ import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.ExpandAll
-import com.tunjid.me.scaffold.nav.MoveKind
-import com.tunjid.me.scaffold.nav.MoveKind.Companion.PrimaryToSecondary
-import com.tunjid.me.scaffold.nav.MoveKind.Companion.SecondaryToPrimary
+import com.tunjid.me.scaffold.nav.Adaptive
+import com.tunjid.me.scaffold.nav.Adaptive.Adaptation.Companion.PrimaryToSecondary
+import com.tunjid.me.scaffold.nav.Adaptive.Adaptation.Companion.SecondaryToPrimary
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
- * Motionally intelligent container for the hosting the navigation routes
+ * Motionally intelligent, adaptive container for the hosting the navigation routes
  */
 @Composable
 internal fun AppRouteContainer(
     globalUiStateHolder: GlobalUiStateHolder,
     navStateHolder: NavStateHolder,
-    moveKind: MoveKind,
+    moveKind: Adaptive.Adaptation,
     primaryContent: @Composable () -> Unit,
     secondaryContent: @Composable () -> Unit,
     transientPrimaryContent: @Composable () -> Unit,
@@ -123,7 +123,7 @@ internal fun AppRouteContainer(
             content = {
                 SecondaryContentContainer(
                     modifier = secondaryContentModifier(
-                        moveKind = moveKind,
+                        adaptation = moveKind,
                         width = with(density) { paneSplitState.width.toDp() },
                         maxWidth = with(density) { paneSplitState.maxWidth.toDp() },
                     ),
@@ -132,7 +132,7 @@ internal fun AppRouteContainer(
                 PrimaryContentContainer(
                     modifier = primaryContentModifier(
                         windowSizeClass = windowSizeClass,
-                        moveKind = moveKind,
+                        adaptation = moveKind,
                         secondaryContentWidth = with(density) { paneSplitState.width.toDp() },
                         maxWidth = with(density) { paneSplitState.maxWidth.toDp() }
                     ),
@@ -152,6 +152,7 @@ internal fun AppRouteContainer(
     }
 
     LaunchedEffect(windowSizeClass, hasNavContent) {
+        // Delay briefly so the animation runs
         delay(5)
         paneSplitState.moveTo(
             if (hasNavContent) when (windowSizeClass) {
@@ -254,7 +255,7 @@ private fun BoxScope.DraggableThumb(
 @Composable
 private fun primaryContentModifier(
     windowSizeClass: WindowSizeClass,
-    moveKind: MoveKind,
+    adaptation: Adaptive.Adaptation,
     secondaryContentWidth: Dp,
     maxWidth: Dp,
 ): Modifier {
@@ -268,10 +269,10 @@ private fun primaryContentModifier(
     }
     var complete by remember { mutableStateOf(false) }
 
-    LaunchedEffect(windowSizeClass, moveKind) {
+    LaunchedEffect(windowSizeClass, adaptation) {
         try {
             // Maintain max width on smaller devices
-            if (windowSizeClass == COMPACT || moveKind != SecondaryToPrimary
+            if (windowSizeClass == COMPACT || adaptation != SecondaryToPrimary
             ) {
                 complete = true
                 return@LaunchedEffect
@@ -293,17 +294,17 @@ private fun primaryContentModifier(
         .width(if (complete) maxWidth else widthAnimatable.value)
         .padding(
             start = updatedSecondaryContentWidth.countIf(
-                condition = moveKind != SecondaryToPrimary && windowSizeClass != COMPACT
+                condition = adaptation != SecondaryToPrimary && windowSizeClass != COMPACT
             )
         )
         .restrictedSizePlacement(
-            atStart = moveKind == SecondaryToPrimary
+            atStart = adaptation == SecondaryToPrimary
         )
 }
 
 @Composable
 private fun secondaryContentModifier(
-    moveKind: MoveKind,
+    adaptation: Adaptive.Adaptation,
     width: Dp,
     maxWidth: Dp,
 ): Modifier {
@@ -317,8 +318,8 @@ private fun secondaryContentModifier(
     }
     var complete by remember { mutableStateOf(true) }
 
-    LaunchedEffect(moveKind) {
-        complete = moveKind != PrimaryToSecondary
+    LaunchedEffect(adaptation) {
+        complete = adaptation != PrimaryToSecondary
     }
 
     LaunchedEffect(complete) {
@@ -346,7 +347,7 @@ private fun secondaryContentModifier(
         .zIndex(if (complete) SecondaryContainerZIndex else PrimaryContainerZIndex)
         .width(if (complete) updatedWidth.value else widthAnimatable.value)
         .restrictedSizePlacement(
-            atStart = moveKind == PrimaryToSecondary
+            atStart = adaptation == PrimaryToSecondary
         )
 }
 

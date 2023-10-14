@@ -46,14 +46,10 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
-import com.tunjid.me.scaffold.nav.AdaptiveContainer
-import com.tunjid.me.scaffold.nav.AdaptiveContainerSlot
-import com.tunjid.me.scaffold.nav.AdaptiveNavigationState
-import com.tunjid.me.scaffold.nav.AdaptiveSlotMetadata
-import com.tunjid.me.scaffold.nav.MoveKind
+import com.tunjid.me.scaffold.nav.Adaptive
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.adaptiveNavigationState
-import com.tunjid.me.scaffold.nav.metadataFor
+import com.tunjid.me.scaffold.nav.containerStateFor
 import com.tunjid.me.scaffold.nav.removedRoutes
 import com.tunjid.me.scaffold.nav.slotFor
 import kotlinx.coroutines.flow.map
@@ -77,7 +73,7 @@ fun Scaffold(
             navStateHolder.state.adaptiveNavigationState(uiStateFlow)
         }
         val adaptiveNavigationState by adaptiveNavigationStateFlow.collectAsState(
-            AdaptiveNavigationState.Initial
+            Adaptive.NavigationState.Initial
         )
         val moveKind by remember {
             derivedStateOf { adaptiveNavigationState.moveKind }
@@ -106,17 +102,17 @@ fun Scaffold(
                     moveKind = moveKind,
                     primaryContent = {
                         routeLookup(
-                            adaptiveNavigationState.slotFor(AdaptiveContainer.Primary)
+                            adaptiveNavigationState.slotFor(Adaptive.Container.Primary)
                         ).invoke()
                     },
                     secondaryContent = {
                         routeLookup(
-                            adaptiveNavigationState.slotFor(AdaptiveContainer.Secondary)
+                            adaptiveNavigationState.slotFor(Adaptive.Container.Secondary)
                         ).invoke()
                     },
                     transientPrimaryContent = {
                         routeLookup(
-                            adaptiveNavigationState.slotFor(AdaptiveContainer.TransientPrimary)
+                            adaptiveNavigationState.slotFor(Adaptive.Container.TransientPrimary)
                         ).invoke()
                     },
                 )
@@ -142,18 +138,18 @@ fun Scaffold(
 
 @Composable
 private fun SaveableStateHolder.rememberSlotToRouteComposableLookup(
-    adaptiveNavigationState: AdaptiveNavigationState,
-): (AdaptiveContainerSlot?) -> (@Composable () -> Unit) {
+    adaptiveNavigationState: Adaptive.NavigationState,
+): (Adaptive.Slot?) -> (@Composable () -> Unit) {
     val updatedState by rememberUpdatedState(adaptiveNavigationState)
     return remember {
-        val slotsToRoutes = mutableStateMapOf<AdaptiveContainerSlot?, @Composable () -> Unit>()
+        val slotsToRoutes = mutableStateMapOf<Adaptive.Slot?, @Composable () -> Unit>()
         slotsToRoutes[null] = {}
-        AdaptiveContainerSlot.entries.forEach { slot ->
+        Adaptive.Slot.entries.forEach { slot ->
             slotsToRoutes[slot] = movableContentOf {
-                val metadata by remember {
-                    derivedStateOf { updatedState.metadataFor(slot) }
+                val containerState by remember {
+                    derivedStateOf { updatedState.containerStateFor(slot) }
                 }
-                Render(metadata)
+                Render(containerState)
             }
         }
         slotsToRoutes::getValue
@@ -162,48 +158,55 @@ private fun SaveableStateHolder.rememberSlotToRouteComposableLookup(
 
 @Composable
 private fun SaveableStateHolder.Render(
-    metadata: AdaptiveSlotMetadata,
+    containerState: Adaptive.ContainerState,
 ) {
-    updateTransition(metadata).AnimatedContent(
+    updateTransition(containerState).AnimatedContent(
         contentKey = { it.currentRoute?.id },
         transitionSpec = {
             EnterTransition.None togetherWith ExitTransition.None
         }
     ) { targetMetadata ->
-        if (targetMetadata.currentRoute == null) return@AnimatedContent
-        Box(
-            modifier = modifierFor(targetMetadata)
-        ) {
-            SaveableStateProvider(targetMetadata.currentRoute.id) {
-                targetMetadata.currentRoute.Render()
+        when (val route = targetMetadata.currentRoute) {
+            // TODO: For the transient content container, gracefully animate out instead of
+            //  disappearing
+            null -> Unit
+            else -> Box(
+                modifier = modifierFor(targetMetadata)
+            ) {
+                SaveableStateProvider(route.id) {
+                    route.Render()
+                }
             }
         }
     }
 }
 
 @Composable
-private fun AnimatedContentScope.modifierFor(metadata: AdaptiveSlotMetadata) =
-    if (metadata.container == null || metadata.currentRoute == null) FillSizeModifier
-    else when (metadata.moveKind) {
-        is MoveKind.Swap -> when (metadata.container) {
-            AdaptiveContainer.Primary, AdaptiveContainer.Secondary -> FillSizeModifier
+private fun AnimatedContentScope.modifierFor(containerState: Adaptive.ContainerState) =
+    if (containerState.container == null || containerState.currentRoute == null) FillSizeModifier
+    else when (containerState.adaptation) {
+        is Adaptive.Adaptation.Swap -> when (containerState.container) {
+            Adaptive.Container.Primary, Adaptive.Container.Secondary -> FillSizeModifier
                 .background(color = MaterialTheme.colorScheme.surface)
 
-            AdaptiveContainer.TransientPrimary -> FillSizeModifier
+            Adaptive.Container.TransientPrimary -> FillSizeModifier
                 .backPreviewModifier()
 
+            null -> FillSizeModifier
         }
 
-        MoveKind.Change -> when (metadata.container) {
-            AdaptiveContainer.Primary, AdaptiveContainer.Secondary -> FillSizeModifier
+        Adaptive.Adaptation.Change -> when (containerState.container) {
+            Adaptive.Container.Primary, Adaptive.Container.Secondary -> FillSizeModifier
                 .background(color = MaterialTheme.colorScheme.surface)
                 .animateEnterExit(
                     enter = fadeIn(RouteTransitionAnimationSpec),
                     exit = fadeOut(RouteTransitionAnimationSpec)
                 )
 
-            AdaptiveContainer.TransientPrimary -> FillSizeModifier
+            Adaptive.Container.TransientPrimary -> FillSizeModifier
                 .backPreviewModifier()
+
+            null -> FillSizeModifier
         }
     }
 
