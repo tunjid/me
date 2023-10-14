@@ -27,6 +27,8 @@ import androidx.compose.foundation.lazy.layout.LazyLayout
 import androidx.compose.foundation.lazy.layout.LazyLayoutItemProvider
 import androidx.compose.foundation.overscroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -65,8 +67,9 @@ internal fun LazyStaggeredGrid(
     val overscrollEffect = ScrollableDefaults.overscrollEffect()
 
     val itemProviderState = rememberStaggeredGridItemProvider(state, content)
-    val itemProviderLambda = remember(itemProviderState) { itemProviderState::value }
-
+    val itemProviderLambda by remember {
+        derivedStateOf { itemProviderState::value }
+    }
 
     val coroutineScope = rememberCoroutineScope()
     val measurePolicy = rememberStaggeredGridMeasurePolicy(
