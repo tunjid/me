@@ -16,6 +16,7 @@
 
 package com.tunjid.me.scaffold
 
+import androidx.compose.animation.core.spring
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.primaryRoute
@@ -36,3 +37,9 @@ fun <State> StateFlow<NavState>.IsInPrimaryNavMutations(
     .map { IsInPrimaryNav ->
         com.tunjid.mutator.mutation { mutation(IsInPrimaryNav) }
     }
+
+internal fun <T> adaptiveSpringSpec(visibilityThreshold: T) = spring(
+    dampingRatio = 0.8f,
+    stiffness = 600f,
+    visibilityThreshold = visibilityThreshold
+)

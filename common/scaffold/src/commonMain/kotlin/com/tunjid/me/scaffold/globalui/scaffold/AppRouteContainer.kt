@@ -21,7 +21,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -47,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,10 +61,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.zIndex
 import com.tunjid.me.core.utilities.countIf
+import com.tunjid.me.scaffold.adaptiveSpringSpec
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
+import com.tunjid.me.scaffold.globalui.WindowSizeClass.COMPACT
 import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.navRailWidth
@@ -73,7 +75,11 @@ import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.ExpandAll
 import com.tunjid.me.scaffold.nav.MoveKind
+import com.tunjid.me.scaffold.nav.MoveKind.Companion.PrimaryToSecondary
+import com.tunjid.me.scaffold.nav.MoveKind.Companion.SecondaryToPrimary
 import com.tunjid.me.scaffold.nav.NavStateHolder
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -135,7 +141,7 @@ internal fun AppRouteContainer(
                 )
                 AnimatedVisibility(
                     modifier = Modifier.align(Alignment.CenterStart),
-                    visible = hasNavContent && windowSizeClass > WindowSizeClass.COMPACT
+                    visible = hasNavContent && windowSizeClass > COMPACT
                 ) {
                     DraggableThumb(
                         paneAnchorState = paneSplitState
@@ -146,9 +152,10 @@ internal fun AppRouteContainer(
     }
 
     LaunchedEffect(windowSizeClass, hasNavContent) {
+        delay(5)
         paneSplitState.moveTo(
             if (hasNavContent) when (windowSizeClass) {
-                WindowSizeClass.COMPACT -> PaneAnchor.Zero
+                COMPACT -> PaneAnchor.Zero
                 WindowSizeClass.MEDIUM -> PaneAnchor.OneThirds
                 WindowSizeClass.EXPANDED -> PaneAnchor.Half
             }
@@ -264,8 +271,8 @@ private fun primaryContentModifier(
     LaunchedEffect(windowSizeClass, moveKind) {
         try {
             // Maintain max width on smaller devices
-            if (windowSizeClass == WindowSizeClass.COMPACT
-                || moveKind != MoveKind.SecondaryToPrimary) {
+            if (windowSizeClass == COMPACT || moveKind != SecondaryToPrimary
+            ) {
                 complete = true
                 return@LaunchedEffect
             }
@@ -285,12 +292,11 @@ private fun primaryContentModifier(
         .width(if (complete) maxWidth else widthAnimatable.value)
         .padding(
             start = updatedSecondaryContentWidth.countIf(
-                moveKind != MoveKind.SecondaryToPrimary
-                        && windowSizeClass != WindowSizeClass.COMPACT
+                condition = moveKind != SecondaryToPrimary && windowSizeClass != COMPACT
             )
         )
         .restrictedSizePlacement(
-            atStart = moveKind == MoveKind.SecondaryToPrimary
+            atStart = moveKind == SecondaryToPrimary
         )
 }
 
@@ -311,22 +317,27 @@ private fun secondaryContentModifier(
     var complete by remember { mutableStateOf(true) }
 
     LaunchedEffect(moveKind) {
-        try {
-            if (moveKind != MoveKind.PrimaryToSecondary) {
-                complete = true
-                return@LaunchedEffect
-            }
-            complete = false
+        complete = moveKind != PrimaryToSecondary
+    }
 
-            widthAnimatable.animateTo(
-                targetValue = width,
-                animationSpec = ContentSizeSpring,
-            )
-        } finally {
-            complete = true
-            // Keep the animatable width at the full width for seamless animations
-            widthAnimatable.snapTo(targetValue = maxWidth)
-        }
+    LaunchedEffect(complete) {
+        if (complete) return@LaunchedEffect
+        snapshotFlow { updatedWidth.value }
+            .collectLatest { newestWidth ->
+                // Don't cancel the previous animation, instead launch a new one and let the
+                // animatable handle the retargeting required
+                launch {
+                    if (widthAnimatable.value != newestWidth) widthAnimatable.animateTo(
+                        targetValue = newestWidth,
+                        animationSpec = ContentSizeSpring,
+                    )
+                    else {
+                        complete = true
+                        // Keep the animatable width at the full width for seamless animations
+                        widthAnimatable.snapTo(targetValue = maxWidth)
+                    }
+                }
+            }
     }
 
     return Modifier
@@ -334,7 +345,7 @@ private fun secondaryContentModifier(
         .zIndex(if (complete) 0f else 1f)
         .width(if (complete) updatedWidth.value else widthAnimatable.value)
         .restrictedSizePlacement(
-            atStart = moveKind == MoveKind.PrimaryToSecondary
+            atStart = moveKind == PrimaryToSecondary
         )
 }
 
@@ -409,6 +420,6 @@ private fun Modifier.restrictedSizePlacement(
 private val DraggableDividerSizeDp = 48.dp
 private val MinPaneWidth = 120.dp
 
-private val ContentSizeSpring = spring<Dp>(
-    stiffness = 100f
+private val ContentSizeSpring = adaptiveSpringSpec(
+    visibilityThreshold = Dp.VisibilityThreshold
 )

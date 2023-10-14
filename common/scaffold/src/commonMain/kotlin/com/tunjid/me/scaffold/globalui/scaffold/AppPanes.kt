@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import com.tunjid.me.scaffold.adaptiveSpringSpec
 import com.tunjid.me.scaffold.globalui.BackHandler
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.progress
@@ -29,6 +30,10 @@ import kotlin.math.roundToInt
 internal val LocalPaneAnchorState = staticCompositionLocalOf {
     PaneAnchorState()
 }
+
+private val PaneSpring = adaptiveSpringSpec(
+    visibilityThreshold = 0.1f
+)
 
 @Stable
 // TODO: Migrate to AnchoredDraggable when moving to Compose 1.6
@@ -81,7 +86,10 @@ internal class PaneAnchorState {
 
     suspend fun completeDispatch() = swipeableState.performFling(velocity = 0f)
 
-    suspend fun moveTo(anchor: PaneAnchor) = swipeableState.animateTo(anchor)
+    suspend fun moveTo(anchor: PaneAnchor) = swipeableState.animateTo(
+        targetValue = anchor,
+        anim = PaneSpring
+    )
 }
 
 /**
