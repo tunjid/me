@@ -16,6 +16,7 @@
 
 package com.tunjid.me.feature.archivelist
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
@@ -231,12 +233,8 @@ private fun ArchiveList(
                 itemContent = { item ->
                     GridCell(
                         modifier = Modifier
-                            .animateItemPlacement(
-                                animationSpec = spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    visibilityThreshold = IntOffset.VisibilityThreshold
-                                )
-                            ),
+                            .animateContentSize(animationSpec = ItemSizeSpec)
+                            .animateItemPlacement(animationSpec = ItemPlacementSpec),
                         item = item,
                         query = currentQuery,
                         onCategoryClicked = { category ->
@@ -437,3 +435,13 @@ private inline fun <Query, LazyState : Any, LazyStateItem> LazyState.PivotedTili
             .collect(onQueryChanged)
     }
 }
+
+private val ItemSizeSpec = itemSpring(IntSize.VisibilityThreshold)
+private val ItemPlacementSpec = itemSpring(IntOffset.VisibilityThreshold)
+
+private fun <T> itemSpring(
+    visibilityThreshold: T
+) = spring(
+    stiffness = Spring.StiffnessMediumLow,
+    visibilityThreshold = visibilityThreshold
+)
