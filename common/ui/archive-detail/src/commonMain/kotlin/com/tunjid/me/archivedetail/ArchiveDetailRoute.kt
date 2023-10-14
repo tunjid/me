@@ -81,7 +81,7 @@ private fun ArchiveDetailScreen(
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
     val bodyInViewport = scrollState.isInViewport(BODY_KEY)
 
-    if (state.IsInPrimaryNav) GlobalUi(
+    if (state.isInPrimaryNav) GlobalUi(
         state = state,
         actions = actions
     )
@@ -90,7 +90,7 @@ private fun ArchiveDetailScreen(
 
     // Close the secondary pane when invoking back since it contains the list view
     SecondaryPaneCloseBackHandler(
-        enabled = state.IsInPrimaryNav && state.hasSecondaryPanel
+        enabled = state.isInPrimaryNav && state.hasSecondaryPanel
     )
 
     LazyColumn(

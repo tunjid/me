@@ -28,7 +28,7 @@ import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
-import com.tunjid.me.scaffold.IsInPrimaryNavMutations
+import com.tunjid.me.scaffold.isInPrimaryNavMutations
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.NavState
@@ -77,9 +77,9 @@ class ActualArchiveDetailStateHolder(
         archiveRepository.archiveLoadMutations(
             id = route.archiveId
         ),
-        navStateFlow.IsInPrimaryNavMutations(
+        navStateFlow.isInPrimaryNavMutations(
             route = route,
-            mutation = { copy(IsInPrimaryNav = it) }
+            mutation = { copy(isInPrimaryNav = it) }
         ),
     ),
     actionTransform = { actions ->

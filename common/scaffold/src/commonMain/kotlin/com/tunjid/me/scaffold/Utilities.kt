@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.map
 /**
  * Updates [State] with whether it is the main navigation content
  */
-fun <State> StateFlow<NavState>.IsInPrimaryNavMutations(
+fun <State> StateFlow<NavState>.isInPrimaryNavMutations(
     route: AppRoute,
     mutation: State.(Boolean) -> State,
 ): Flow<Mutation<State>> = map { route.id == it.primaryRoute.id }

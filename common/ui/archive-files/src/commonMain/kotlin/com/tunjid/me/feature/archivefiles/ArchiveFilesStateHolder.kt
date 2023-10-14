@@ -31,7 +31,7 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
-import com.tunjid.me.scaffold.IsInPrimaryNavMutations
+import com.tunjid.me.scaffold.isInPrimaryNavMutations
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
@@ -93,7 +93,7 @@ class ActualArchiveFilesStateHolder(
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
         authRepository.authMutations(),
-        navStateFlow.IsInPrimaryNavMutations(
+        navStateFlow.isInPrimaryNavMutations(
             route = route,
             mutation = { copy(isInPrimaryNav = it) }
         ),

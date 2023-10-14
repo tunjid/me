@@ -47,7 +47,7 @@ data class State(
     @ProtoNumber(5)
     val kind: ArchiveKind,
     @ProtoNumber(6)
-    val IsInPrimaryNav: Boolean = false,
+    val isInPrimaryNav: Boolean = false,
     // Read this from the DB
     @Transient
     val archive: Archive? = null,
