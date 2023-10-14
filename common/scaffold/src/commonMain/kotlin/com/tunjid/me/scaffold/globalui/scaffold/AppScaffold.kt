@@ -165,21 +165,21 @@ private fun SaveableStateHolder.Render(
     metadata: AdaptiveSlotMetadata,
 ) {
     updateTransition(metadata).AnimatedContent(
-        contentKey = { it.route?.id },
+        contentKey = { it.currentRoute?.id },
         transitionSpec = {
             EnterTransition.None togetherWith ExitTransition.None
         }
     ) { targetMetadata ->
-        if (targetMetadata.route == null) return@AnimatedContent
-        SaveableStateProvider(targetMetadata.route.id) {
-            targetMetadata.route.Render(modifierFor(targetMetadata))
+        if (targetMetadata.currentRoute == null) return@AnimatedContent
+        SaveableStateProvider(targetMetadata.currentRoute.id) {
+            targetMetadata.currentRoute.Render(modifierFor(targetMetadata))
         }
     }
 }
 
 @Composable
 private fun AnimatedContentScope.modifierFor(metadata: AdaptiveSlotMetadata) =
-    if (metadata.container == null || metadata.route == null) FillSizeModifier
+    if (metadata.container == null || metadata.currentRoute == null) FillSizeModifier
     else when (metadata.moveKind) {
         is MoveKind.Swap -> when (metadata.container) {
             AdaptiveContainer.Primary, AdaptiveContainer.Secondary -> FillSizeModifier

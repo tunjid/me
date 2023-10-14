@@ -63,6 +63,10 @@ internal data class AdaptiveNavigationState(
      */
     val routeIdsToAdaptiveSlots: Map<String?, AdaptiveContainerSlot>,
     /**
+     * A mapping of adaptive container to the routes that were last in them.
+     */
+    val previousContainersToRoutes: Map<AdaptiveContainer, AppRoute?>,
+    /**
      * The window size class of the current screen configuration
      */
     val windowSizeClass: WindowSizeClass,
@@ -76,6 +80,7 @@ internal data class AdaptiveNavigationState(
             windowSizeClass = WindowSizeClass.COMPACT,
             routeIdsToAdaptiveSlots = AdaptiveContainerSlot.entries
                 .associateBy(AdaptiveContainerSlot::name),
+            previousContainersToRoutes = emptyMap(),
         )
     }
 }
@@ -90,7 +95,8 @@ private val AdaptiveRouteInContainerLookups = listOf(
  * Information about content in an [AdaptiveContainerSlot]
  */
 internal data class AdaptiveSlotMetadata(
-    val route: AppRoute?,
+    val currentRoute: AppRoute?,
+    val previousRoute: AppRoute?,
     val slot: AdaptiveContainerSlot?,
     val container: AdaptiveContainer?,
     val moveKind: MoveKind,
@@ -100,11 +106,13 @@ internal fun AdaptiveNavigationState.metadataFor(
     slot: AdaptiveContainerSlot
 ): AdaptiveSlotMetadata {
     val route = routeFor(slot)
+    val container = route?.let(::containerFor)
     return AdaptiveSlotMetadata(
         slot = slot,
-        route = route,
-        container = route?.let(::containerFor),
-        moveKind = moveKind
+        currentRoute = route,
+        previousRoute = previousContainersToRoutes[container],
+        container = container,
+        moveKind = moveKind,
     )
 }
 
@@ -213,7 +221,8 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
 
                     else -> MoveKind.Change
                 },
-                routeIdsToAdaptiveSlots = emptyMap()
+                routeIdsToAdaptiveSlots = emptyMap(),
+                previousContainersToRoutes = emptyMap(),
             )
         }
         .distinctUntilChanged()
@@ -264,6 +273,7 @@ private fun AdaptiveNavigationState.adaptTo(
             // TODO: Remove stale route ids after they complete their transition
             current.copy(
                 moveKind = moveKind,
+                previousContainersToRoutes = AdaptiveContainer.entries.associateWith(::routeFor),
                 routeIdsToAdaptiveSlots = routeIdsToAdaptiveSlots + updatedRouteIdsToAdaptiveSlots
             )
         }
@@ -282,6 +292,7 @@ private fun AdaptiveNavigationState.adaptTo(
             }
             current.copy(
                 moveKind = moveKind,
+                previousContainersToRoutes = AdaptiveContainer.entries.associateWith(::routeFor),
                 routeIdsToAdaptiveSlots = when (val newRoute = current.routeFor(moveKind.from)) {
                     null -> routeIdsToAdaptiveSlots
                     else -> routeIdsToAdaptiveSlots - routeFor(vacatedSlot)?.id + Pair(
