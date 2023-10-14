@@ -385,7 +385,9 @@ private fun LazyStaggeredGridMeasureContext.measure(
             // Case 3: the first item is in the wrong lane (it should always be in
             // the first one)
             val firstItemLane = laneInfo.getLane(0)
-            return firstItemLane != 0 && firstItemLane != Unset && firstItemLane != LazyStaggeredGridLaneInfo.FullSpan
+            return firstItemLane != 0
+                    && firstItemLane != LazyStaggeredGridLaneInfo.Unset
+                    && firstItemLane != LazyStaggeredGridLaneInfo.FullSpan
         }
 
         // define min offset (currently includes beforeContentPadding)
