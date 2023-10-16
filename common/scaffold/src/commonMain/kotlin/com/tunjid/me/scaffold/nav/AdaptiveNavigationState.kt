@@ -16,6 +16,8 @@
 
 package com.tunjid.me.scaffold.nav
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.isPreviewing
@@ -54,6 +56,14 @@ object Adaptive {
         val container: Container?
         val adaptation: Adaptation
     }
+
+    /**
+     * Describes how a route transitions after an adaptive change
+     */
+    data class Transitions(
+        val enter: EnterTransition,
+        val exit: ExitTransition,
+    )
 
     /**
      * [Slot] based implementation of [ContainerState]

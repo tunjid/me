@@ -182,33 +182,25 @@ private fun SaveableStateHolder.Render(
 }
 
 @Composable
-private fun AnimatedContentScope.modifierFor(containerState: Adaptive.ContainerState) =
-    if (containerState.container == null || containerState.currentRoute == null) FillSizeModifier
-    else when (containerState.adaptation) {
-        is Adaptive.Adaptation.Swap -> when (containerState.container) {
-            Adaptive.Container.Primary, Adaptive.Container.Secondary -> FillSizeModifier
-                .background(color = MaterialTheme.colorScheme.surface)
+private fun AnimatedContentScope.modifierFor(
+    containerState: Adaptive.ContainerState
+) = when (containerState.container) {
+    Adaptive.Container.Primary, Adaptive.Container.Secondary -> FillSizeModifier
+        .background(color = MaterialTheme.colorScheme.surface)
 
-            Adaptive.Container.TransientPrimary -> FillSizeModifier
-                .backPreviewModifier()
+    Adaptive.Container.TransientPrimary -> FillSizeModifier
+        .backPreviewModifier()
 
-            null -> FillSizeModifier
-        }
-
-        Adaptive.Adaptation.Change -> when (containerState.container) {
-            Adaptive.Container.Primary, Adaptive.Container.Secondary -> FillSizeModifier
-                .background(color = MaterialTheme.colorScheme.surface)
-                .animateEnterExit(
-                    enter = fadeIn(RouteTransitionAnimationSpec),
-                    exit = fadeOut(RouteTransitionAnimationSpec)
-                )
-
-            Adaptive.Container.TransientPrimary -> FillSizeModifier
-                .backPreviewModifier()
-
-            null -> FillSizeModifier
-        }
+    null -> FillSizeModifier
+} then when (val currentRoute = containerState.currentRoute) {
+    null -> Modifier
+    else -> with(currentRoute.transitionsFor(containerState)) {
+        Modifier.animateEnterExit(
+            enter = enter,
+            exit = exit
+        )
     }
+}
 
 /**
  * Clean up after navigation routes that have been discarded
@@ -238,7 +230,3 @@ private fun SavedStateCleanupEffect(
 internal expect fun Modifier.backPreviewModifier(): Modifier
 
 private val FillSizeModifier = Modifier.fillMaxSize()
-
-private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(
-    durationMillis = 700
-)

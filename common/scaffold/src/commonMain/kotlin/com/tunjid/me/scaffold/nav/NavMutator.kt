@@ -16,6 +16,12 @@
 
 package com.tunjid.me.scaffold.nav
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.tunjid.me.scaffold.savedstate.SavedState
@@ -39,6 +45,10 @@ const val NavName = "App"
 typealias NavStateHolder = ActionStateProducer<NavMutation, StateFlow<NavState>>
 typealias NavMutation = NavContext.() -> MultiStackNav
 
+private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(
+    durationMillis = 700
+)
+
 /**
  * A route that has a id for a [Route] defined in another module
  */
@@ -55,6 +65,29 @@ interface AppRoute : Route {
      */
     val supportingRoute: String?
         get() = null
+
+    fun transitionsFor(
+        state: Adaptive.ContainerState
+    ): Adaptive.Transitions = when (state.container) {
+        Adaptive.Container.Primary,
+        Adaptive.Container.Secondary -> when (state.adaptation) {
+            Adaptive.Adaptation.Change -> Adaptive.Transitions(
+                enter = fadeIn(RouteTransitionAnimationSpec),
+                exit = fadeOut(RouteTransitionAnimationSpec)
+            )
+
+            is Adaptive.Adaptation.Swap -> Adaptive.Transitions(
+                enter = EnterTransition.None,
+                exit = ExitTransition.None,
+            )
+        }
+
+        Adaptive.Container.TransientPrimary,
+        null -> Adaptive.Transitions(
+            enter = EnterTransition.None,
+            exit = ExitTransition.None,
+        )
+    }
 }
 
 /**
