@@ -16,43 +16,23 @@
 
 package com.tunjid.me.scaffold.globalui.scaffold
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.SaveableStateHolder
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
+import com.tunjid.me.scaffold.globalui.shared.AdaptiveContainerScope
 import com.tunjid.me.scaffold.nav.Adaptive
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.adaptiveNavigationState
-import com.tunjid.me.scaffold.nav.containerStateFor
-import com.tunjid.me.scaffold.nav.removedRoutes
 import com.tunjid.me.scaffold.nav.slotFor
-import kotlinx.coroutines.flow.map
 
 /**
  * Root scaffold for the app
@@ -78,12 +58,6 @@ fun Scaffold(
         val moveKind by remember {
             derivedStateOf { adaptiveNavigationState.moveKind }
         }
-        val saveableStateHolder: SaveableStateHolder = rememberSaveableStateHolder()
-
-        val routeLookup = saveableStateHolder.rememberSlotToRouteComposableLookup(
-            adaptiveNavigationState = adaptiveNavigationState,
-        )
-
         Surface {
             Box(
                 modifier = modifier.fillMaxSize()
@@ -96,26 +70,31 @@ fun Scaffold(
                     globalUiStateHolder = globalUiStateHolder,
                     navStateHolder = navStateHolder,
                 )
-                AppRouteContainer(
-                    globalUiStateHolder = globalUiStateHolder,
+                AdaptiveContainerScope(
                     navStateHolder = navStateHolder,
-                    moveKind = moveKind,
-                    primaryContent = {
-                        routeLookup(
-                            adaptiveNavigationState.slotFor(Adaptive.Container.Primary)
-                        ).invoke()
-                    },
-                    secondaryContent = {
-                        routeLookup(
-                            adaptiveNavigationState.slotFor(Adaptive.Container.Secondary)
-                        ).invoke()
-                    },
-                    transientPrimaryContent = {
-                        routeLookup(
-                            adaptiveNavigationState.slotFor(Adaptive.Container.TransientPrimary)
-                        ).invoke()
-                    },
-                )
+                    adaptiveNavigationState = adaptiveNavigationState
+                ) adaptiveContainerScope@{ routeLookup ->
+                    AppRouteContainer(
+                        globalUiStateHolder = globalUiStateHolder,
+                        navStateHolder = navStateHolder,
+                        moveKind = moveKind,
+                        primaryContent = {
+                            routeLookup(
+                                adaptiveNavigationState.slotFor(Adaptive.Container.Primary)
+                            ).invoke(this@adaptiveContainerScope)
+                        },
+                        secondaryContent = {
+                            routeLookup(
+                                adaptiveNavigationState.slotFor(Adaptive.Container.Secondary)
+                            ).invoke(this@adaptiveContainerScope)
+                        },
+                        transientPrimaryContent = {
+                            routeLookup(
+                                adaptiveNavigationState.slotFor(Adaptive.Container.TransientPrimary)
+                            ).invoke(this@adaptiveContainerScope)
+                        },
+                    )
+                }
                 AppFab(
                     globalUiStateHolder = globalUiStateHolder,
                 )
@@ -128,99 +107,6 @@ fun Scaffold(
                 )
             }
         }
-
-        SavedStateCleanupEffect(
-            saveableStateHolder = saveableStateHolder,
-            navStateHolder = navStateHolder
-        )
-    }
-}
-
-@Composable
-private fun SaveableStateHolder.rememberSlotToRouteComposableLookup(
-    adaptiveNavigationState: Adaptive.NavigationState,
-): (Adaptive.Slot?) -> (@Composable () -> Unit) {
-    val updatedState by rememberUpdatedState(adaptiveNavigationState)
-    return remember {
-        val slotsToRoutes = mutableStateMapOf<Adaptive.Slot?, @Composable () -> Unit>()
-        slotsToRoutes[null] = {}
-        Adaptive.Slot.entries.forEach { slot ->
-            slotsToRoutes[slot] = movableContentOf {
-                val containerState by remember {
-                    derivedStateOf { updatedState.containerStateFor(slot) }
-                }
-                Render(containerState)
-            }
-        }
-        slotsToRoutes::getValue
-    }
-}
-
-@Composable
-private fun SaveableStateHolder.Render(
-    containerState: Adaptive.ContainerState,
-) {
-    updateTransition(containerState).AnimatedContent(
-        contentKey = { it.currentRoute?.id },
-        transitionSpec = {
-            EnterTransition.None togetherWith ExitTransition.None
-        }
-    ) { targetMetadata ->
-        when (val route = targetMetadata.currentRoute) {
-            // TODO: For the transient content container, gracefully animate out instead of
-            //  disappearing
-            null -> Unit
-            else -> Box(
-                modifier = modifierFor(targetMetadata)
-            ) {
-                SaveableStateProvider(route.id) {
-                    route.Render()
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun AnimatedContentScope.modifierFor(
-    containerState: Adaptive.ContainerState
-) = when (containerState.container) {
-    Adaptive.Container.Primary, Adaptive.Container.Secondary -> FillSizeModifier
-        .background(color = MaterialTheme.colorScheme.surface)
-
-    Adaptive.Container.TransientPrimary -> FillSizeModifier
-        .backPreviewModifier()
-
-    null -> FillSizeModifier
-} then when (val currentRoute = containerState.currentRoute) {
-    null -> Modifier
-    else -> with(currentRoute.transitionsFor(containerState)) {
-        Modifier.animateEnterExit(
-            enter = enter,
-            exit = exit
-        )
-    }
-}
-
-/**
- * Clean up after navigation routes that have been discarded
- */
-@Composable
-private fun SavedStateCleanupEffect(
-    saveableStateHolder: SaveableStateHolder,
-    navStateHolder: NavStateHolder,
-) {
-    val removedRoutesFlow = remember {
-        navStateHolder.state
-            .map { it.mainNav }
-            .removedRoutes()
-    }
-    LaunchedEffect(Unit) {
-        removedRoutesFlow.collect { routes ->
-            routes.forEach { route ->
-                saveableStateHolder.removeState(route.id)
-            }
-        }
     }
 }
 
@@ -228,5 +114,3 @@ private fun SavedStateCleanupEffect(
  * Modifier that offers a way to preview content behind the primary content
  */
 internal expect fun Modifier.backPreviewModifier(): Modifier
-
-private val FillSizeModifier = Modifier.fillMaxSize()

@@ -33,6 +33,12 @@ import kotlinx.coroutines.flow.scan
  * Namespace for adaptive layout changes in an app
  */
 object Adaptive {
+
+    /**
+     * Scope for adaptive content that can show up in an arbitrary [Container]
+     */
+    interface ContainerScope
+
     /**
      * A layout in the hierarchy that hosts an [AppRoute]
      */
