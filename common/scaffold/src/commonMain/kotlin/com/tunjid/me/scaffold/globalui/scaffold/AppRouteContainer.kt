@@ -74,9 +74,9 @@ import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.ExpandAll
-import com.tunjid.me.scaffold.nav.Adaptive
-import com.tunjid.me.scaffold.nav.Adaptive.Adaptation.Companion.PrimaryToSecondary
-import com.tunjid.me.scaffold.nav.Adaptive.Adaptation.Companion.SecondaryToPrimary
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive.Adaptation.Companion.PrimaryToSecondary
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive.Adaptation.Companion.SecondaryToPrimary
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest

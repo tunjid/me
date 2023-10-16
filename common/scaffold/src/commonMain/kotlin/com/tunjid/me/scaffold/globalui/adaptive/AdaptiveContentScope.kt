@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.scaffold.globalui.shared
+package com.tunjid.me.scaffold.globalui.adaptive
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
@@ -39,9 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import com.tunjid.me.scaffold.globalui.scaffold.backPreviewModifier
-import com.tunjid.me.scaffold.nav.Adaptive
 import com.tunjid.me.scaffold.nav.NavStateHolder
-import com.tunjid.me.scaffold.nav.containerStateFor
 import com.tunjid.me.scaffold.nav.removedRoutes
 import kotlinx.coroutines.flow.map
 

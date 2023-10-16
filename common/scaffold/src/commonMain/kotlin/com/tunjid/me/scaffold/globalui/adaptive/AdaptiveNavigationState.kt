@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.scaffold.nav
+package com.tunjid.me.scaffold.globalui.adaptive
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.isPreviewing
-import com.tunjid.me.scaffold.nav.Adaptive.Adaptation.Change.unaffectedContainers
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive.Adaptation.Change.unaffectedContainers
+import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.NavState
+import com.tunjid.me.scaffold.nav.UnknownRoute
+import com.tunjid.me.scaffold.nav.primaryRoute
+import com.tunjid.me.scaffold.nav.primaryRouteOnBackPress
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine

@@ -28,11 +28,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.shared.AdaptiveContainerScope
-import com.tunjid.me.scaffold.nav.Adaptive
+import com.tunjid.me.scaffold.globalui.adaptive.AdaptiveContainerScope
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.nav.NavStateHolder
-import com.tunjid.me.scaffold.nav.adaptiveNavigationState
-import com.tunjid.me.scaffold.nav.slotFor
+import com.tunjid.me.scaffold.globalui.adaptive.adaptiveNavigationState
+import com.tunjid.me.scaffold.globalui.adaptive.slotFor
 
 /**
  * Root scaffold for the app
