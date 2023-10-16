@@ -62,6 +62,7 @@ import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
+import com.tunjid.me.scaffold.nav.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.tiler.compose.PivotedTilingEffect
@@ -80,12 +81,14 @@ data class ArchiveFilesRoute(
     val dndEnabled: Boolean = false,
     val fileType: FileType = FileType.Image
 ) : AppRoute {
-    @Composable
-    override fun Render() {
-        ArchiveFilesScreen(
-            stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
-        )
-    }
+    override val content: @Composable Adaptive.ContainerScope.() -> Unit
+        get() = {
+            ArchiveFilesScreen(
+                stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
+                    route = this@ArchiveFilesRoute
+                ),
+            )
+        }
 }
 
 @Composable

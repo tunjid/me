@@ -46,6 +46,7 @@ import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
+import com.tunjid.me.scaffold.nav.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.ExternalRoute
 import com.tunjid.treenav.Node
@@ -60,12 +61,14 @@ data class ArchiveDetailRoute(
     val kind: ArchiveKind,
     val archiveId: ArchiveId
 ) : AppRoute {
-    @Composable
-    override fun Render() {
-        ArchiveDetailScreen(
-            stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
-        )
-    }
+    override val content: @Composable Adaptive.ContainerScope.() -> Unit
+        get() = {
+            ArchiveDetailScreen(
+                stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
+                    route = this@ArchiveDetailRoute
+                ),
+            )
+        }
 
     override val children: List<Node> = listOf(ExternalRoute("archives/${kind.type}"))
 

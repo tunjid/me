@@ -46,6 +46,7 @@ import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
+import com.tunjid.me.scaffold.nav.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import kotlinx.serialization.Serializable
 
@@ -53,12 +54,14 @@ import kotlinx.serialization.Serializable
 data class ProfileRoute(
     override val id: String,
 ) : AppRoute {
-    @Composable
-    override fun Render() {
-        ProfileScreen(
-            stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
-        )
-    }
+    override val content: @Composable Adaptive.ContainerScope.() -> Unit
+        get() = {
+            ProfileScreen(
+                stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
+                    route = this@ProfileRoute
+                ),
+            )
+        }
 }
 
 @Composable

@@ -29,18 +29,18 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UnknownRoute(override val id: String = "404") : AppRoute, StatelessRoute {
 
-    @Composable
-    override fun Render() {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(),
-                text = "404",
-                fontSize = 40.sp
-            )
+    override val content: @Composable Adaptive.ContainerScope.() -> Unit
+        get() = {
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(),
+                    text = "404",
+                    fontSize = 40.sp
+                )
+            }
         }
-    }
 }

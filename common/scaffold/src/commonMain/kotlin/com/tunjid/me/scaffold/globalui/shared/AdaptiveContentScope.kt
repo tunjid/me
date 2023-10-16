@@ -113,7 +113,7 @@ private fun AdaptiveContentScopeWithSavedState.Render(
                 modifier = modifierFor(targetMetadata)
             ) {
                 SaveableStateProvider(route.id) {
-                    route.Render()
+                    route.content(this@Render)
                 }
             }
         }

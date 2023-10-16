@@ -51,6 +51,7 @@ import com.tunjid.me.core.ui.scrollbar.scrollbarState
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
+import com.tunjid.me.scaffold.nav.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.queryAtOrNull
@@ -65,12 +66,14 @@ data class ArchiveListRoute(
     override val id: String,
     val kind: ArchiveKind,
 ) : AppRoute {
-    @Composable
-    override fun Render() {
-        ArchiveScreen(
-            stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
-        )
-    }
+    override val content: @Composable Adaptive.ContainerScope.() -> Unit
+        get() = {
+            ArchiveScreen(
+                stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
+                    route = this@ArchiveListRoute
+                ),
+            )
+        }
 }
 
 @Composable

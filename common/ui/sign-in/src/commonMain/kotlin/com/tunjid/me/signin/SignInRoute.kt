@@ -31,6 +31,7 @@ import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
+import com.tunjid.me.scaffold.nav.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import kotlinx.serialization.Serializable
 
@@ -38,12 +39,14 @@ import kotlinx.serialization.Serializable
 data class SignInRoute(
     override val id: String,
 ) : AppRoute {
-    @Composable
-    override fun Render() {
-        SignInScreen(
-            stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
-        )
-    }
+    override val content: @Composable Adaptive.ContainerScope.() -> Unit
+        get() = {
+            SignInScreen(
+                stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
+                    route = this@SignInRoute
+                ),
+            )
+        }
 }
 
 @Composable

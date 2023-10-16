@@ -46,6 +46,7 @@ import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.nav.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.StatelessRoute
 import com.tunjid.treenav.Node
@@ -70,22 +71,22 @@ data class ArchiveFilesParentRoute(
             )
         }
 
-    @Composable
-    override fun Render() {
-        ScreenUiState(
-            UiState(
-                toolbarShows = true,
-                toolbarTitle = "Files",
-                fabShows = false,
-                fabExtended = true,
-                navVisibility = NavVisibility.Visible,
-                statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+    override val content: @Composable Adaptive.ContainerScope.() -> Unit
+        get() = {
+            ScreenUiState(
+                UiState(
+                    toolbarShows = true,
+                    toolbarTitle = "Files",
+                    fabShows = false,
+                    fabExtended = true,
+                    navVisibility = NavVisibility.Visible,
+                    statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+                )
             )
-        )
-        ArchiveFilesParentScreen(
-            children = children.filterIsInstance<ArchiveFilesRoute>(),
-        )
-    }
+            ArchiveFilesParentScreen(
+                children = children.filterIsInstance<ArchiveFilesRoute>(),
+            )
+        }
 }
 
 @Composable

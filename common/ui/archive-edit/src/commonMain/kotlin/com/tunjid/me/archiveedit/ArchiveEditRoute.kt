@@ -66,6 +66,7 @@ import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
+import com.tunjid.me.scaffold.nav.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.ExternalRoute
 import com.tunjid.me.scaffold.permissions.Permission
@@ -81,12 +82,14 @@ data class ArchiveEditRoute(
     val kind: ArchiveKind,
     val archiveId: ArchiveId?,
 ) : AppRoute {
-    @Composable
-    override fun Render() {
-        ArchiveEditScreen(
-            stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(this),
-        )
-    }
+    override val content: @Composable Adaptive.ContainerScope.() -> Unit
+        get() = {
+            ArchiveEditScreen(
+                stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
+                    route = this@ArchiveEditRoute
+                ),
+            )
+        }
 
     override val children: List<Node> = when (archiveId) {
         null -> emptyList()

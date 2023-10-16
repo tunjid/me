@@ -57,8 +57,7 @@ data class ExternalRoute(
 ) : Route
 
 interface AppRoute : Route {
-    @Composable
-    fun Render()
+    val content: @Composable Adaptive.ContainerScope.() -> Unit
 
     /**
      * Defines what route to show in the supporting panel alongside this route
