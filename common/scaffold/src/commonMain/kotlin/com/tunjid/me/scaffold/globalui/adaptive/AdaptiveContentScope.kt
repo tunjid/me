@@ -30,7 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentWithReceiverOf
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -43,18 +43,20 @@ import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.removedRoutes
 import kotlinx.coroutines.flow.map
 
-private typealias RouteInSlotLookup = (Adaptive.Slot?) -> (@Composable Adaptive.ContainerScope.() -> Unit)
+internal fun interface AdaptiveRouteLookup {
+    fun routeIn(slot: Adaptive.Slot?): @Composable () -> Unit
+}
 
 @Composable
-internal fun AdaptiveContainerScope(
+internal fun AdaptiveContentHost(
     navStateHolder: NavStateHolder,
     adaptiveNavigationState: Adaptive.NavigationState,
-    content: @Composable Adaptive.ContainerScope.(RouteInSlotLookup) -> Unit
+    content: @Composable AdaptiveRouteLookup.() -> Unit
 ) {
     LookaheadScope {
         val saveableStateHolder = rememberSaveableStateHolder()
         val routeScope = remember(saveableStateHolder) {
-            AdaptiveContentScopeWithSavedState(
+            AdaptiveContentHost(
                 lookaheadLayoutScope = this,
                 saveableStateHolder = saveableStateHolder
             )
@@ -66,35 +68,34 @@ internal fun AdaptiveContainerScope(
     }
 }
 
-internal class AdaptiveContentScopeWithSavedState internal constructor(
+internal class AdaptiveContentHost internal constructor(
     lookaheadLayoutScope: LookaheadScope,
     saveableStateHolder: SaveableStateHolder,
-) : Adaptive.ContainerScope,
-    LookaheadScope by lookaheadLayoutScope,
+) : LookaheadScope by lookaheadLayoutScope,
     SaveableStateHolder by saveableStateHolder
 
 @Composable
-private fun AdaptiveContentScopeWithSavedState.rememberSlotToRouteComposableLookup(
+private fun AdaptiveContentHost.rememberSlotToRouteComposableLookup(
     adaptiveNavigationState: Adaptive.NavigationState,
-): (Adaptive.Slot?) -> (@Composable Adaptive.ContainerScope.() -> Unit) {
+): AdaptiveRouteLookup {
     val updatedState by rememberUpdatedState(adaptiveNavigationState)
     return remember {
-        val slotsToRoutes = mutableStateMapOf<Adaptive.Slot?, @Composable Adaptive.ContainerScope.() -> Unit>()
+        val slotsToRoutes = mutableStateMapOf<Adaptive.Slot?, @Composable () -> Unit>()
         slotsToRoutes[null] = {}
         Adaptive.Slot.entries.forEach { slot ->
-            slotsToRoutes[slot] = movableContentWithReceiverOf<Adaptive.ContainerScope> {
+            slotsToRoutes[slot] = movableContentOf {
                 val containerState by remember {
                     derivedStateOf { updatedState.containerStateFor(slot) }
                 }
                 Render(containerState)
             }
         }
-        slotsToRoutes::getValue
+        AdaptiveRouteLookup(slotsToRoutes::getValue)
     }
 }
 
 @Composable
-private fun AdaptiveContentScopeWithSavedState.Render(
+private fun AdaptiveContentHost.Render(
     containerState: Adaptive.ContainerState,
 ) {
     updateTransition(containerState).AnimatedContent(
@@ -103,15 +104,17 @@ private fun AdaptiveContentScopeWithSavedState.Render(
             EnterTransition.None togetherWith ExitTransition.None
         }
     ) { targetMetadata ->
-        when (val route = targetMetadata.currentRoute) {
-            // TODO: For the transient content container, gracefully animate out instead of
-            //  disappearing
-            null -> Unit
-            else -> Box(
-                modifier = modifierFor(targetMetadata)
-            ) {
-                SaveableStateProvider(route.id) {
-                    route.content(this@Render)
+        with(AnimatedAdaptiveContentScope(this)) adaptiveContentScope@{
+            when (val route = targetMetadata.currentRoute) {
+                // TODO: For the transient content container, gracefully animate out instead of
+                //  disappearing
+                null -> Unit
+                else -> Box(
+                    modifier = modifierFor(targetMetadata)
+                ) {
+                    SaveableStateProvider(route.id) {
+                        route.content(this@adaptiveContentScope)
+                    }
                 }
             }
         }
@@ -143,7 +146,7 @@ private fun AnimatedContentScope.modifierFor(
  * Clean up after navigation routes that have been discarded
  */
 @Composable
-private fun AdaptiveContentScopeWithSavedState.SavedStateCleanupEffect(
+private fun AdaptiveContentHost.SavedStateCleanupEffect(
     navStateHolder: NavStateHolder,
 ) {
     val removedRoutesFlow = remember {
@@ -161,3 +164,8 @@ private fun AdaptiveContentScopeWithSavedState.SavedStateCleanupEffect(
 }
 
 private val FillSizeModifier = Modifier.fillMaxSize()
+
+@JvmInline
+value class AnimatedAdaptiveContentScope(
+    val animatedContentScope: AnimatedContentScope
+) : Adaptive.ContainerScope

@@ -28,7 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.adaptive.AdaptiveContainerScope
+import com.tunjid.me.scaffold.globalui.adaptive.AdaptiveContentHost
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.globalui.adaptive.adaptiveNavigationState
@@ -70,28 +70,28 @@ fun Scaffold(
                     globalUiStateHolder = globalUiStateHolder,
                     navStateHolder = navStateHolder,
                 )
-                AdaptiveContainerScope(
+                AdaptiveContentHost(
                     navStateHolder = navStateHolder,
                     adaptiveNavigationState = adaptiveNavigationState
-                ) adaptiveContainerScope@{ routeLookup ->
+                ) {
                     AppRouteContainer(
                         globalUiStateHolder = globalUiStateHolder,
                         navStateHolder = navStateHolder,
                         moveKind = moveKind,
                         primaryContent = {
-                            routeLookup(
+                            routeIn(
                                 adaptiveNavigationState.slotFor(Adaptive.Container.Primary)
-                            ).invoke(this@adaptiveContainerScope)
+                            ).invoke()
                         },
                         secondaryContent = {
-                            routeLookup(
+                            routeIn(
                                 adaptiveNavigationState.slotFor(Adaptive.Container.Secondary)
-                            ).invoke(this@adaptiveContainerScope)
+                            ).invoke()
                         },
                         transientPrimaryContent = {
-                            routeLookup(
+                            routeIn(
                                 adaptiveNavigationState.slotFor(Adaptive.Container.TransientPrimary)
-                            ).invoke(this@adaptiveContainerScope)
+                            ).invoke()
                         },
                     )
                 }
