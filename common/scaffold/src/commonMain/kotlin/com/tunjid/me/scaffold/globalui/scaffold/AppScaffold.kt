@@ -55,8 +55,8 @@ fun Scaffold(
         val adaptiveNavigationState by adaptiveNavigationStateFlow.collectAsState(
             Adaptive.NavigationState.Initial
         )
-        val moveKind by remember {
-            derivedStateOf { adaptiveNavigationState.moveKind }
+        val adaptation by remember {
+            derivedStateOf { adaptiveNavigationState.adaptation }
         }
         Surface {
             Box(
@@ -77,7 +77,7 @@ fun Scaffold(
                     AppRouteContainer(
                         globalUiStateHolder = globalUiStateHolder,
                         navStateHolder = navStateHolder,
-                        moveKind = moveKind,
+                        adaptation = adaptation,
                         primaryContent = {
                             routeIn(
                                 adaptiveNavigationState.slotFor(Adaptive.Container.Primary)

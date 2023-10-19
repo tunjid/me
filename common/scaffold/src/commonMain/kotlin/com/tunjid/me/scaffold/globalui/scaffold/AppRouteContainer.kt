@@ -89,7 +89,7 @@ import kotlinx.coroutines.launch
 internal fun AppRouteContainer(
     globalUiStateHolder: GlobalUiStateHolder,
     navStateHolder: NavStateHolder,
-    moveKind: Adaptive.Adaptation,
+    adaptation: Adaptive.Adaptation,
     primaryContent: @Composable () -> Unit,
     secondaryContent: @Composable () -> Unit,
     transientPrimaryContent: @Composable () -> Unit,
@@ -123,7 +123,7 @@ internal fun AppRouteContainer(
             content = {
                 SecondaryContentContainer(
                     modifier = secondaryContentModifier(
-                        adaptation = moveKind,
+                        adaptation = adaptation,
                         width = with(density) { paneSplitState.width.toDp() },
                         maxWidth = with(density) { paneSplitState.maxWidth.toDp() },
                     ),
@@ -132,7 +132,7 @@ internal fun AppRouteContainer(
                 PrimaryContentContainer(
                     modifier = primaryContentModifier(
                         windowSizeClass = windowSizeClass,
-                        adaptation = moveKind,
+                        adaptation = adaptation,
                         secondaryContentWidth = with(density) { paneSplitState.width.toDp() },
                         maxWidth = with(density) { paneSplitState.maxWidth.toDp() }
                     ),
