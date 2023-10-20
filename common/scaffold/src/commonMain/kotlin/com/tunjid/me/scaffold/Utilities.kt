@@ -34,8 +34,8 @@ fun <State> StateFlow<NavState>.isInPrimaryNavMutations(
     mutation: State.(Boolean) -> State,
 ): Flow<Mutation<State>> = map { route.id == it.primaryRoute.id }
     .distinctUntilChanged()
-    .map { IsInPrimaryNav ->
-        com.tunjid.mutator.mutation { mutation(IsInPrimaryNav) }
+    .map { isInPrimaryNav ->
+        com.tunjid.mutator.mutation { mutation(isInPrimaryNav) }
     }
 
 internal fun <T> adaptiveSpringSpec(visibilityThreshold: T) = spring(
