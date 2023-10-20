@@ -90,8 +90,6 @@ private fun ArchiveDetailScreen(
     )
 
     val archive = state.archive
-    println("primary: ${state.isInPrimaryNav}")
-
 
     // Close the secondary pane when invoking back since it contains the list view
     SecondaryPaneCloseBackHandler(

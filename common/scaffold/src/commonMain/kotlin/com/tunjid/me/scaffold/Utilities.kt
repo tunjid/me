@@ -21,22 +21,27 @@ import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.primaryRoute
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.coroutines.mapToMutation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
 /**
- * Updates [State] with whether it is the main navigation content
+ * Updates [State] with whether it is the primary navigation container if it is currently
+ * in a navigation container
  */
 fun <State> StateFlow<NavState>.isInPrimaryNavMutations(
     route: AppRoute,
     mutation: State.(Boolean) -> State,
-): Flow<Mutation<State>> = map { route.id == it.primaryRoute.id }
-    .distinctUntilChanged()
-    .map { isInPrimaryNav ->
-        com.tunjid.mutator.mutation { mutation(isInPrimaryNav) }
-    }
+): Flow<Mutation<State>> =
+    filter { route.id == it.primaryRoute.id || route.id == it.secondaryRoute?.id }
+        .map { route.id == it.primaryRoute.id }
+        .distinctUntilChanged()
+        .mapToMutation { isInPrimaryNav ->
+            mutation(isInPrimaryNav)
+        }
 
 internal fun <T> adaptiveSpringSpec(visibilityThreshold: T) = spring(
     dampingRatio = 0.8f,
