@@ -309,6 +309,7 @@ private fun secondaryContentModifier(
     maxWidth: Dp,
 ): Modifier {
     val updatedWidth = rememberUpdatedState(width)
+    val updatedMaxWidth = rememberUpdatedState(maxWidth)
     val widthAnimatable = remember {
         Animatable(
             initialValue = maxWidth,
@@ -333,18 +334,16 @@ private fun secondaryContentModifier(
                         targetValue = newestWidth,
                         animationSpec = ContentSizeSpring,
                     )
-                    else {
-                        complete = true
-                        // Keep the animatable width at the full width for seamless animations
-                        widthAnimatable.snapTo(targetValue = maxWidth)
-                    }
+                    complete = true
+                    // Keep the animatable width at the full width for seamless animations
+                    widthAnimatable.snapTo(targetValue = updatedMaxWidth.value)
                 }
             }
     }
 
     return Modifier
         // Display the secondary content over the primary content to maintain the sliding illusion
-        .zIndex(if (complete) SecondaryContainerZIndex else PrimaryContainerZIndex)
+        .zIndex(if (complete) SecondaryContainerZIndex else SecondaryContainerAnimationZIndex)
         .width(if (complete) updatedWidth.value else widthAnimatable.value)
         .restrictedSizePlacement(
             atStart = adaptation == PrimaryToSecondary
@@ -429,3 +428,4 @@ private val ContentSizeSpring = adaptiveSpringSpec(
 private const val PaneDragHandleZIndex = -1f
 private const val PrimaryContainerZIndex = -2f
 private const val SecondaryContainerZIndex = -3f
+private const val SecondaryContainerAnimationZIndex = -1.5f
