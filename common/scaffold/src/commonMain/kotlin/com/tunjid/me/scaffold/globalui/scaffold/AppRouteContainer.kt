@@ -179,11 +179,10 @@ private fun PrimaryContentContainer(
 ) {
     Box(
         modifier = modifier,
-        content = { primaryContent() }
-    )
-    Box(
-        modifier = modifier,
-        content = { transientPrimaryContent() }
+        content = {
+            primaryContent()
+            transientPrimaryContent()
+        }
     )
 }
 
