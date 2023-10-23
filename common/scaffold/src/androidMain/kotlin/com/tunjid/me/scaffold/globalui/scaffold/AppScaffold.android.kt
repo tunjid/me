@@ -64,7 +64,14 @@ internal actual fun Modifier.backPreviewModifier(): Modifier =
 
         Modifier
             .layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
+                val placeable = measurable.measure(
+                    constraints.copy(
+                        maxWidth = (constraints.maxWidth * scale).roundToInt(),
+                        minWidth = (constraints.minWidth * scale).roundToInt(),
+                        maxHeight = (constraints.maxHeight * scale).roundToInt(),
+                        minHeight = (constraints.minHeight * scale).roundToInt(),
+                    )
+                )
                 val containerWidth = placeable.width
                 val containerHeight = placeable.height
 
@@ -92,10 +99,7 @@ internal actual fun Modifier.backPreviewModifier(): Modifier =
 
                 offset = IntOffset(xOffset, yOffset)
                 layout(placeable.width, placeable.height) {
-                    placeable.placeRelativeWithLayer(x = animatedOffset.x, y = animatedOffset.y) {
-                        scaleX = scale
-                        scaleY = scale
-                    }
+                    placeable.placeRelative(x = animatedOffset.x, y = animatedOffset.y)
                 }
             }
             .background(
