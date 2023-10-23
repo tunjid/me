@@ -85,7 +85,7 @@ object Adaptive {
      * Information about content in an [Adaptive.Container]
      */
     @Stable
-    interface ContainerState {
+    sealed interface ContainerState {
         val currentRoute: AppRoute?
         val previousRoute: AppRoute?
         val container: Container?
@@ -101,6 +101,8 @@ object Adaptive {
     )
 
     @Stable
+    // TODO: Why can't the state backed by delegates be seen?
+    @Suppress("CanSealedSubClassBeObject")
     internal class MutableContainerState : ContainerState {
         override var currentRoute: AppRoute? by mutableStateOf(null)
         override var previousRoute: AppRoute? by mutableStateOf(null)
