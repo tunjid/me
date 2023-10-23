@@ -54,7 +54,7 @@ object Adaptive {
 
         @Composable
         fun rememberSharedContent(
-            key: String,
+            key: Any,
             sharedElement: @Composable (Modifier) -> Unit
         ): @Composable (Modifier) -> Unit
 

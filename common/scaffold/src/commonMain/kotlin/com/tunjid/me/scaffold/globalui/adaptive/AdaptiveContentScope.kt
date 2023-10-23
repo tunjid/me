@@ -80,22 +80,22 @@ internal fun AdaptiveContentHost(
 }
 
 @Stable
-internal class AdaptiveContentHost internal constructor(
+private class AdaptiveContentHost(
     lookaheadLayoutScope: LookaheadScope,
     saveableStateHolder: SaveableStateHolder,
 ) : LookaheadScope by lookaheadLayoutScope,
     SaveableStateHolder by saveableStateHolder {
-    private val keysToSharedElements = mutableStateMapOf<String, @Composable (Modifier) -> Unit>()
+    private val keysToSharedElements = mutableStateMapOf<Any, @Composable (Modifier) -> Unit>()
 
     fun getOrCreateSharedElement(
-        key: String,
+        key: Any,
         sharedElement: @Composable (Modifier) -> Unit
     ): @Composable (Modifier) -> Unit = keysToSharedElements.getOrPut(key) {
         createSharedElement(key, sharedElement)
     }
 
     private fun createSharedElement(
-        key: String,
+        key: Any,
         sharedElement: @Composable (Modifier) -> Unit
     ): @Composable (Modifier) -> Unit {
         val sharedElementData = SharedElementData(lookaheadScope = this)
@@ -138,6 +138,10 @@ private fun AdaptiveContentHost.rememberSlotToRouteComposableLookup(
     }
 }
 
+/**
+ * Renders [containerState] into is [Adaptive.Container] with scopes that allow for animations
+ * and shared elements.
+ */
 @Composable
 private fun AdaptiveContentHost.Render(
     containerState: Adaptive.ContainerState,
@@ -171,17 +175,6 @@ private fun AdaptiveContentHost.Render(
     }
 }
 
-@Composable
-private fun Adaptive.ContainerState.rootModifier() = when (container) {
-    Adaptive.Container.Primary, Adaptive.Container.Secondary -> FillSizeModifier
-        .background(color = MaterialTheme.colorScheme.surface)
-
-    Adaptive.Container.TransientPrimary -> FillSizeModifier
-        .backPreviewModifier()
-
-    null -> FillSizeModifier
-}
-
 /**
  * Clean up after navigation routes that have been discarded
  */
@@ -203,15 +196,15 @@ private fun AdaptiveContentHost.SavedStateCleanupEffect(
     }
 }
 
-private val FillSizeModifier = Modifier.fillMaxSize()
-
+/**
+ * An implementation of [Adaptive.ContainerScope] that supports animations and shared elements
+ */
 @Stable
 private class AnimatedAdaptiveContentScope(
     val containerState: Adaptive.ContainerState,
     val adaptiveContentHost: AdaptiveContentHost,
     val animatedContentScope: AnimatedContentScope
 ) : Adaptive.ContainerScope, AnimatedVisibilityScope by animatedContentScope {
-
     override val adaptation: Adaptive.Adaptation
         get() = containerState.adaptation
 
@@ -228,7 +221,7 @@ private class AnimatedAdaptiveContentScope(
 
     @Composable
     override fun rememberSharedContent(
-        key: String,
+        key: Any,
         sharedElement: @Composable (Modifier) -> Unit
     ): @Composable (Modifier) -> Unit {
         val currentNavigationState = LocalAdaptiveNavigationState.current
@@ -247,12 +240,25 @@ private class AnimatedAdaptiveContentScope(
     }
 
     @Composable
-    override fun isInPreview(): Boolean {
-        return LocalAdaptiveNavigationState.current.primaryRoute.id == containerState.currentRoute?.id
+    override fun isInPreview(): Boolean =
+        LocalAdaptiveNavigationState.current.primaryRoute.id == containerState.currentRoute?.id
                 && containerState.adaptation == Adaptive.Adaptation.PrimaryToTransient
-    }
+
 }
 
 internal val LocalAdaptiveNavigationState = staticCompositionLocalOf {
     Adaptive.NavigationState.Initial
 }
+
+@Composable
+private fun Adaptive.ContainerState.rootModifier() = when (container) {
+    Adaptive.Container.Primary, Adaptive.Container.Secondary -> FillSizeModifier
+        .background(color = MaterialTheme.colorScheme.surface)
+
+    Adaptive.Container.TransientPrimary -> FillSizeModifier
+        .backPreviewModifier()
+
+    null -> FillSizeModifier
+}
+
+private val FillSizeModifier = Modifier.fillMaxSize()
