@@ -103,14 +103,14 @@ private fun AdaptiveContentHost.Render(
         transitionSpec = {
             EnterTransition.None togetherWith ExitTransition.None
         }
-    ) { targetMetadata ->
+    ) { targetContainerState ->
         with(AnimatedAdaptiveContentScope(this)) adaptiveContentScope@{
-            when (val route = targetMetadata.currentRoute) {
+            when (val route = targetContainerState.currentRoute) {
                 // TODO: For the transient content container, gracefully animate out instead of
                 //  disappearing
                 null -> Unit
                 else -> Box(
-                    modifier = modifierFor(targetMetadata)
+                    modifier = modifierFor(targetContainerState)
                 ) {
                     SaveableStateProvider(route.id) {
                         route.content(this@adaptiveContentScope)
