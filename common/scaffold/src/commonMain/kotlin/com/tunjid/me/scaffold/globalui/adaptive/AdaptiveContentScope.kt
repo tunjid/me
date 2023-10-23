@@ -32,7 +32,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -128,9 +127,7 @@ private fun AdaptiveContentHost.rememberSlotToRouteComposableLookup(
         slotsToRoutes[null] = {}
         Adaptive.Slot.entries.forEach { slot ->
             slotsToRoutes[slot] = movableContentOf {
-                val containerState by remember {
-                    derivedStateOf { updatedState.containerStateFor(slot) }
-                }
+                val containerState = updatedState.containerStateFor(slot)
                 Render(containerState)
             }
         }
