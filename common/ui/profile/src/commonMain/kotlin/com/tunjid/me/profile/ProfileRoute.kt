@@ -57,6 +57,7 @@ data class ProfileRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             ProfileScreen(
+                modifier = animatedModifier,
                 stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
                     route = this@ProfileRoute
                 ),
@@ -66,6 +67,7 @@ data class ProfileRoute(
 
 @Composable
 private fun ProfileScreen(
+    modifier: Modifier = Modifier,
     stateHolder: ProfileStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -82,7 +84,7 @@ private fun ProfileScreen(
     )
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,

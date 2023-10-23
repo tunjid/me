@@ -42,6 +42,7 @@ data class SignInRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             SignInScreen(
+                modifier = animatedModifier,
                 stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
                     route = this@SignInRoute
                 ),
@@ -51,6 +52,7 @@ data class SignInRoute(
 
 @Composable
 private fun SignInScreen(
+    modifier: Modifier = Modifier,
     stateHolder: SignInStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -62,7 +64,7 @@ private fun SignInScreen(
     )
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,

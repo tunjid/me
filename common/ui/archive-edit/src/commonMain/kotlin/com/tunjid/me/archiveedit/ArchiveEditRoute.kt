@@ -64,9 +64,9 @@ import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.LocalScreenStateHolderCache
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.ExternalRoute
 import com.tunjid.me.scaffold.permissions.Permission
@@ -100,13 +100,12 @@ data class ArchiveEditRoute(
         )
     }
 
-
     override val supportingRoute
         get() = children.firstOrNull()?.id
 }
 
 @Composable
-private fun ArchiveEditScreen(
+private fun Adaptive.ContainerScope.ArchiveEditScreen(
     stateHolder: ArchiveEditStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -118,6 +117,15 @@ private fun ArchiveEditScreen(
         state = state,
         onAction = actions
     )
+
+    val thumbnail = rememberSharedContent(
+        "thumb",
+    ) { modifier ->
+        AsyncRasterImage(
+            imageUrl = state.thumbnail,
+            modifier = modifier
+        )
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -141,39 +149,42 @@ private fun ArchiveEditScreen(
         state = scrollState,
     ) {
         dragDropThumbnail(
-            thumbnail = state.thumbnail,
+            thumbnail = thumbnail,
             hasStoragePermission = state.hasStoragePermissions,
             dragLocation = state.dragLocation,
             onAction = actions
         )
 
-        spacer(8.dp)
+        spacer(modifier = animatedModifier, 8.dp)
         titleEditor(
+            modifier = animatedModifier,
             title = upsert.title,
             onEdit = actions
         )
 
-        spacer(8.dp)
+        spacer(modifier = animatedModifier, 8.dp)
         descriptionEditor(
             description = upsert.description,
             onEdit = actions
         )
 
-        spacer(8.dp)
+        spacer(modifier = animatedModifier, 8.dp)
         videoUrlEditor(
             videoUrl = upsert.videoUrl,
             onEdit = actions
         )
 
-        spacer(8.dp)
+        spacer(modifier = animatedModifier, 8.dp)
         chipsEditor(
+            modifier = animatedModifier,
             upsert = upsert,
             chipsState = state.chipsState,
             onAction = actions
         )
 
-        spacer(16.dp)
+        spacer(modifier = animatedModifier, 16.dp)
         if (state.isEditing) bodyEditor(
+            modifier = animatedModifier,
             body = state.body,
             canConsumeScrollEvents = isBodyInViewPort,
             onScrolled = scrollState::dispatchRawDelta,
@@ -183,13 +194,14 @@ private fun ArchiveEditScreen(
             onEdit = actions
         )
         else bodyPreview(
+            modifier = animatedModifier,
             body = upsert.body
         )
     }
 }
 
 private fun LazyListScope.dragDropThumbnail(
-    thumbnail: String?,
+    thumbnail: @Composable (Modifier) -> Unit,
     hasStoragePermission: Boolean,
     dragLocation: DragLocation,
     onAction: (Action) -> Unit,
@@ -206,11 +218,12 @@ private fun LazyListScope.dragDropThumbnail(
             .fillParentMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        AsyncRasterImage(
-            imageUrl = thumbnail,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .heightIn(max = 300.dp)
+        thumbnail(
+            Modifier
+//                .fillParentMaxWidth()
+                .align(Alignment.Center)
+                .padding(horizontal = 16.dp)
+                .heightIn(max = 100.dp)
                 .aspectRatio(ratio = 16f / 9f)
                 .clip(MaterialTheme.shapes.medium)
                 .border(
@@ -233,10 +246,12 @@ private fun LazyListScope.dragDropThumbnail(
 }
 
 private fun LazyListScope.titleEditor(
+    modifier: Modifier,
     title: String,
     onEdit: (Action.TextEdit) -> Unit,
 ) = item {
     TextField(
+        modifier = modifier,
         value = title,
         maxLines = 2,
         colors = Unstyled(),
@@ -284,6 +299,7 @@ private fun LazyListScope.videoUrlEditor(
 }
 
 private fun LazyListScope.bodyEditor(
+    modifier: Modifier,
     body: TextFieldValue,
     canConsumeScrollEvents: Boolean,
     onScrolled: (Float) -> Float,
@@ -291,7 +307,7 @@ private fun LazyListScope.bodyEditor(
     onEdit: (Action.TextEdit) -> Unit,
 ) = item(key = BODY_INDEX) {
     NestedScrollTextContainer(
-        modifier = Modifier
+        modifier = modifier
             .fillParentMaxSize()
             .padding(horizontal = 16.dp),
         canConsumeScrollEvents = canConsumeScrollEvents,
@@ -348,11 +364,11 @@ private fun LazyListScope.bodyEditor(
     }
 }
 
-private fun LazyListScope.bodyPreview(body: String) = item(
+private fun LazyListScope.bodyPreview(modifier: Modifier, body: String) = item(
     key = BODY_INDEX
 ) {
     Material3RichText(
-        modifier = Modifier
+        modifier = modifier
             .defaultMinSize(minHeight = 500.dp)
             .padding(horizontal = 16.dp)
     ) {
@@ -363,12 +379,13 @@ private fun LazyListScope.bodyPreview(body: String) = item(
 }
 
 private fun LazyListScope.chipsEditor(
+    modifier: Modifier,
     upsert: ArchiveUpsert,
     chipsState: ChipsState,
     onAction: (Action) -> Unit,
 ) = item {
     EditChips(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
             .padding(horizontal = 16.dp),
         upsert = upsert,
         state = chipsState,
@@ -376,8 +393,8 @@ private fun LazyListScope.chipsEditor(
     )
 }
 
-private fun LazyListScope.spacer(size: Dp) = item {
-    Spacer(modifier = Modifier.padding(size))
+private fun LazyListScope.spacer(modifier: Modifier, size: Dp) = item {
+    Spacer(modifier = modifier.padding(size))
 }
 
 @Composable

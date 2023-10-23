@@ -49,6 +49,7 @@ data class SettingsRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             SettingsScreen(
+                modifier = animatedModifier,
                 stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
                     route = this@SettingsRoute
                 ),
@@ -58,6 +59,7 @@ data class SettingsRoute(
 
 @Composable
 private fun SettingsScreen(
+    modifier: Modifier = Modifier,
     stateHolder: SettingsStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -74,7 +76,7 @@ private fun SettingsScreen(
     )
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.Start,

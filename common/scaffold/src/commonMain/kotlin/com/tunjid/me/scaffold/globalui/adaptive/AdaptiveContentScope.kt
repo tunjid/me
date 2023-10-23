@@ -18,6 +18,7 @@ package com.tunjid.me.scaffold.globalui.adaptive
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.updateTransition
@@ -27,15 +28,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import com.tunjid.me.scaffold.globalui.scaffold.backPreviewModifier
@@ -61,18 +68,55 @@ internal fun AdaptiveContentHost(
                 saveableStateHolder = saveableStateHolder
             )
         }
-        with(routeScope) {
-            content(rememberSlotToRouteComposableLookup(adaptiveNavigationState))
-            SavedStateCleanupEffect(navStateHolder)
+        CompositionLocalProvider(
+            LocalAdaptiveNavigationState provides adaptiveNavigationState,
+        ) {
+            with(routeScope) {
+                content(rememberSlotToRouteComposableLookup(adaptiveNavigationState))
+                SavedStateCleanupEffect(navStateHolder)
+            }
         }
     }
 }
 
+@Stable
 internal class AdaptiveContentHost internal constructor(
     lookaheadLayoutScope: LookaheadScope,
     saveableStateHolder: SaveableStateHolder,
 ) : LookaheadScope by lookaheadLayoutScope,
-    SaveableStateHolder by saveableStateHolder
+    SaveableStateHolder by saveableStateHolder {
+    private val keysToSharedElements = mutableStateMapOf<String, @Composable (Modifier) -> Unit>()
+
+    fun getOrCreateSharedElement(
+        key: String,
+        sharedElement: @Composable (Modifier) -> Unit
+    ): @Composable (Modifier) -> Unit = keysToSharedElements.getOrPut(key) {
+        createSharedElement(key, sharedElement)
+    }
+
+    private fun createSharedElement(
+        key: String,
+        sharedElement: @Composable (Modifier) -> Unit
+    ): @Composable (Modifier) -> Unit {
+        val sharedElementData = SharedElementData(lookaheadScope = this)
+        var inCount by mutableIntStateOf(0)
+
+        return movableContentOf { modifier ->
+            val updatedElement by rememberUpdatedState(sharedElement)
+            updatedElement(
+                modifier.sharedElement(
+                    sharedElementData = sharedElementData,
+                )
+            )
+            DisposableEffect(Unit) {
+                ++inCount
+                onDispose {
+                    if (--inCount <= 0) keysToSharedElements.remove(key)
+                }
+            }
+        }
+    }
+}
 
 @Composable
 private fun AdaptiveContentHost.rememberSlotToRouteComposableLookup(
@@ -104,13 +148,19 @@ private fun AdaptiveContentHost.Render(
             EnterTransition.None togetherWith ExitTransition.None
         }
     ) { targetContainerState ->
-        with(AnimatedAdaptiveContentScope(this)) adaptiveContentScope@{
+        with(
+            AnimatedAdaptiveContentScope(
+                containerState = targetContainerState,
+                adaptiveContentHost = this@Render,
+                animatedContentScope = this
+            )
+        ) adaptiveContentScope@{
             when (val route = targetContainerState.currentRoute) {
                 // TODO: For the transient content container, gracefully animate out instead of
                 //  disappearing
                 null -> Unit
                 else -> Box(
-                    modifier = modifierFor(targetContainerState)
+                    modifier = targetContainerState.rootModifier()
                 ) {
                     SaveableStateProvider(route.id) {
                         route.content(this@adaptiveContentScope)
@@ -122,9 +172,7 @@ private fun AdaptiveContentHost.Render(
 }
 
 @Composable
-private fun AnimatedContentScope.modifierFor(
-    containerState: Adaptive.ContainerState
-) = when (containerState.container) {
+private fun Adaptive.ContainerState.rootModifier() = when (container) {
     Adaptive.Container.Primary, Adaptive.Container.Secondary -> FillSizeModifier
         .background(color = MaterialTheme.colorScheme.surface)
 
@@ -132,14 +180,6 @@ private fun AnimatedContentScope.modifierFor(
         .backPreviewModifier()
 
     null -> FillSizeModifier
-} then when (val currentRoute = containerState.currentRoute) {
-    null -> Modifier
-    else -> with(currentRoute.transitionsFor(containerState)) {
-        Modifier.animateEnterExit(
-            enter = enter,
-            exit = exit
-        )
-    }
 }
 
 /**
@@ -165,7 +205,54 @@ private fun AdaptiveContentHost.SavedStateCleanupEffect(
 
 private val FillSizeModifier = Modifier.fillMaxSize()
 
-@JvmInline
-value class AnimatedAdaptiveContentScope(
+@Stable
+private class AnimatedAdaptiveContentScope(
+    val containerState: Adaptive.ContainerState,
+    val adaptiveContentHost: AdaptiveContentHost,
     val animatedContentScope: AnimatedContentScope
-) : Adaptive.ContainerScope
+) : Adaptive.ContainerScope, AnimatedVisibilityScope by animatedContentScope {
+
+    override val adaptation: Adaptive.Adaptation
+        get() = containerState.adaptation
+
+    override val animatedModifier: Modifier =
+        when (val currentRoute = containerState.currentRoute) {
+            null -> Modifier
+            else -> with(currentRoute.transitionsFor(containerState)) {
+                Modifier.animateEnterExit(
+                    enter = enter,
+                    exit = exit
+                )
+            }
+        }
+
+    @Composable
+    override fun rememberSharedContent(
+        key: String,
+        sharedElement: @Composable (Modifier) -> Unit
+    ): @Composable (Modifier) -> Unit {
+        val currentNavigationState = LocalAdaptiveNavigationState.current
+        // This container state may be animating out. Look up the actual current route
+        val currentRouteInContainer = containerState.container?.let(
+            currentNavigationState::routeFor
+        )
+        val isCurrentlyAnimatingIn = currentRouteInContainer?.id == containerState.currentRoute?.id
+
+        // Do not use the shared element if this content is being animated out
+        if (!isCurrentlyAnimatingIn) return { modifier ->
+            sharedElement(modifier)
+        }
+
+        return adaptiveContentHost.getOrCreateSharedElement(key, sharedElement)
+    }
+
+    @Composable
+    override fun isInPreview(): Boolean {
+        return LocalAdaptiveNavigationState.current.primaryRoute.id == containerState.currentRoute?.id
+                && containerState.adaptation == Adaptive.Adaptation.PrimaryToTransient
+    }
+}
+
+internal val LocalAdaptiveNavigationState = staticCompositionLocalOf {
+    Adaptive.NavigationState.Initial
+}

@@ -16,12 +16,16 @@
 
 package com.tunjid.me.scaffold.globalui.adaptive
 
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
-import com.tunjid.me.scaffold.globalui.isPreviewing
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive.Adaptation.Change.unaffectedContainers
+import com.tunjid.me.scaffold.globalui.isPreviewing
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.UnknownRoute
@@ -42,7 +46,21 @@ object Adaptive {
     /**
      * Scope for adaptive content that can show up in an arbitrary [Container]
      */
-    interface ContainerScope
+    interface ContainerScope : AnimatedVisibilityScope {
+
+        val animatedModifier: Modifier
+
+        val adaptation: Adaptation
+
+        @Composable
+        fun rememberSharedContent(
+            key: String,
+            sharedElement: @Composable (Modifier) -> Unit
+        ): @Composable (Modifier) -> Unit
+
+        @Composable
+        fun isInPreview(): Boolean
+    }
 
     /**
      * A layout in the hierarchy that hosts an [AppRoute]
@@ -61,6 +79,7 @@ object Adaptive {
     /**
      * Information about content in an [Adaptive.Container]
      */
+    @Stable
     interface ContainerState {
         val currentRoute: AppRoute?
         val previousRoute: AppRoute?

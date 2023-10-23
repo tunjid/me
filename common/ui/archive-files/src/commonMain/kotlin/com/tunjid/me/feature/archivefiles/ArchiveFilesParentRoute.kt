@@ -84,6 +84,7 @@ data class ArchiveFilesParentRoute(
                 )
             )
             ArchiveFilesParentScreen(
+                modifier = animatedModifier,
                 children = children.filterIsInstance<ArchiveFilesRoute>(),
             )
         }
@@ -91,12 +92,13 @@ data class ArchiveFilesParentRoute(
 
 @Composable
 private fun ArchiveFilesParentScreen(
+    modifier: Modifier = Modifier,
     children: List<ArchiveFilesRoute>
 ) {
     val pagerState = rememberPagerState { children.size }
     var lastTabClicked by remember { mutableStateOf<Int?>(pagerState.currentPage) }
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         Tabs(
             currentTabIndex = pagerState.currentPage,

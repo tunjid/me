@@ -16,6 +16,7 @@
 
 package com.tunjid.me.archivedetail
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
@@ -76,7 +78,7 @@ data class ArchiveDetailRoute(
 }
 
 @Composable
-private fun ArchiveDetailScreen(
+private fun Adaptive.ContainerScope.ArchiveDetailScreen(
     stateHolder: ArchiveDetailStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -96,15 +98,28 @@ private fun ArchiveDetailScreen(
         enabled = state.isInPrimaryNav && state.hasSecondaryPanel
     )
 
+    val thumbnail = when {
+        isInPreview() -> { modifier ->
+            Box(modifier)
+        }
+        else -> rememberSharedContent(
+            "thumb",
+        ) { modifier ->
+            AsyncRasterImage(
+                imageUrl = state.archive?.thumbnail,
+                modifier = modifier
+            )
+        }
+    }
+
     LazyColumn(
-        modifier = Modifier,
+        modifier = Modifier.graphicsLayer { clip = false },
         horizontalAlignment = Alignment.CenterHorizontally,
         state = scrollState
     ) {
         item {
-            AsyncRasterImage(
-                imageUrl = state.archive?.thumbnail,
-                modifier = Modifier
+            thumbnail(
+                Modifier
                     .heightIn(max = 300.dp)
                     .aspectRatio(ratio = 16f / 9f)
                     .padding(horizontal = 16.dp)
@@ -113,7 +128,7 @@ private fun ArchiveDetailScreen(
         }
         item {
             Chips(
-                modifier = Modifier
+                modifier = animatedModifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 name = "Categories:",
@@ -122,12 +137,12 @@ private fun ArchiveDetailScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.padding(16.dp))
+            Spacer(modifier = animatedModifier.padding(16.dp))
         }
 
         item(key = BODY_KEY) {
             NestedScrollTextContainer(
-                modifier = Modifier
+                modifier = animatedModifier
                     .fillParentMaxSize()
                     .padding(horizontal = 16.dp),
                 canConsumeScrollEvents = bodyInViewport,
@@ -148,12 +163,12 @@ private fun ArchiveDetailScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.padding(16.dp))
+            Spacer(modifier = animatedModifier.padding(16.dp))
         }
 
         item {
             Chips(
-                modifier = Modifier
+                modifier = animatedModifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 name = "Tags:",
@@ -162,7 +177,7 @@ private fun ArchiveDetailScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.padding(64.dp + navBarSizeDp))
+            Spacer(modifier = animatedModifier.padding(64.dp + navBarSizeDp))
         }
     }
 
