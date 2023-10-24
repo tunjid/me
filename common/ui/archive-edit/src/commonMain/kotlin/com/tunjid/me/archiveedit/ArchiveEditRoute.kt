@@ -64,9 +64,9 @@ import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.ExternalRoute
 import com.tunjid.me.scaffold.permissions.Permission
@@ -99,6 +99,7 @@ data class ArchiveEditRoute(
             )
         )
     }
+
 
     override val supportingRoute
         get() = children.firstOrNull()?.id
@@ -155,36 +156,33 @@ private fun Adaptive.ContainerScope.ArchiveEditScreen(
             onAction = actions
         )
 
-        spacer(modifier = animatedModifier, 8.dp)
+        spacer(8.dp)
         titleEditor(
-            modifier = animatedModifier,
             title = upsert.title,
             onEdit = actions
         )
 
-        spacer(modifier = animatedModifier, 8.dp)
+        spacer(8.dp)
         descriptionEditor(
             description = upsert.description,
             onEdit = actions
         )
 
-        spacer(modifier = animatedModifier, 8.dp)
+        spacer(8.dp)
         videoUrlEditor(
             videoUrl = upsert.videoUrl,
             onEdit = actions
         )
 
-        spacer(modifier = animatedModifier, 8.dp)
+        spacer(8.dp)
         chipsEditor(
-            modifier = animatedModifier,
             upsert = upsert,
             chipsState = state.chipsState,
             onAction = actions
         )
 
-        spacer(modifier = animatedModifier, 16.dp)
+        spacer(16.dp)
         if (state.isEditing) bodyEditor(
-            modifier = animatedModifier,
             body = state.body,
             canConsumeScrollEvents = isBodyInViewPort,
             onScrolled = scrollState::dispatchRawDelta,
@@ -194,7 +192,6 @@ private fun Adaptive.ContainerScope.ArchiveEditScreen(
             onEdit = actions
         )
         else bodyPreview(
-            modifier = animatedModifier,
             body = upsert.body
         )
     }
@@ -246,12 +243,10 @@ private fun LazyListScope.dragDropThumbnail(
 }
 
 private fun LazyListScope.titleEditor(
-    modifier: Modifier,
     title: String,
     onEdit: (Action.TextEdit) -> Unit,
 ) = item {
     TextField(
-        modifier = modifier,
         value = title,
         maxLines = 2,
         colors = Unstyled(),
@@ -299,7 +294,6 @@ private fun LazyListScope.videoUrlEditor(
 }
 
 private fun LazyListScope.bodyEditor(
-    modifier: Modifier,
     body: TextFieldValue,
     canConsumeScrollEvents: Boolean,
     onScrolled: (Float) -> Float,
@@ -307,7 +301,7 @@ private fun LazyListScope.bodyEditor(
     onEdit: (Action.TextEdit) -> Unit,
 ) = item(key = BODY_INDEX) {
     NestedScrollTextContainer(
-        modifier = modifier
+        modifier = Modifier
             .fillParentMaxSize()
             .padding(horizontal = 16.dp),
         canConsumeScrollEvents = canConsumeScrollEvents,
@@ -364,11 +358,11 @@ private fun LazyListScope.bodyEditor(
     }
 }
 
-private fun LazyListScope.bodyPreview(modifier: Modifier, body: String) = item(
+private fun LazyListScope.bodyPreview(body: String) = item(
     key = BODY_INDEX
 ) {
     Material3RichText(
-        modifier = modifier
+        modifier = Modifier
             .defaultMinSize(minHeight = 500.dp)
             .padding(horizontal = 16.dp)
     ) {
@@ -379,13 +373,12 @@ private fun LazyListScope.bodyPreview(modifier: Modifier, body: String) = item(
 }
 
 private fun LazyListScope.chipsEditor(
-    modifier: Modifier,
     upsert: ArchiveUpsert,
     chipsState: ChipsState,
     onAction: (Action) -> Unit,
 ) = item {
     EditChips(
-        modifier = modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
             .padding(horizontal = 16.dp),
         upsert = upsert,
         state = chipsState,
@@ -393,8 +386,8 @@ private fun LazyListScope.chipsEditor(
     )
 }
 
-private fun LazyListScope.spacer(modifier: Modifier, size: Dp) = item {
-    Spacer(modifier = modifier.padding(size))
+private fun LazyListScope.spacer(size: Dp) = item {
+    Spacer(modifier = Modifier.padding(size))
 }
 
 @Composable

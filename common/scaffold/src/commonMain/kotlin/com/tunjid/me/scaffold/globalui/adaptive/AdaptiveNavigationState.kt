@@ -100,15 +100,16 @@ object Adaptive {
         val exit: ExitTransition,
     )
 
-    @Stable
-    // TODO: Why can't the state backed by delegates be seen?
-    @Suppress("CanSealedSubClassBeObject")
-    internal class MutableContainerState : ContainerState {
-        override var currentRoute: AppRoute? by mutableStateOf(null)
-        override var previousRoute: AppRoute? by mutableStateOf(null)
-        override var container: Container? by mutableStateOf(null)
-        override var adaptation: Adaptation by mutableStateOf(Adaptation.Change)
-    }
+    /**
+     * [Slot] based implementation of [ContainerState]
+     */
+    internal data class SlotContainerState(
+        val slot: Slot?,
+        override val currentRoute: AppRoute?,
+        override val previousRoute: AppRoute?,
+        override val container: Container?,
+        override val adaptation: Adaptation,
+    ) : ContainerState
 
     /**
      * A description of the process that the layout undertook to adapt to its new configuration
@@ -208,17 +209,18 @@ private val AdaptiveRouteInContainerLookups = listOf(
     Adaptive.NavigationState::transientPrimaryRoute,
 )
 
-@Composable
 internal fun Adaptive.NavigationState.containerStateFor(
     slot: Adaptive.Slot
 ): Adaptive.ContainerState {
-    val containerState = remember(slot) { Adaptive.MutableContainerState() }
-    Snapshot.withMutableSnapshot {
-        containerState.currentRoute = routeFor(slot)
-        containerState.container = containerState.currentRoute?.let(::containerFor)
-        containerState.adaptation = adaptation
-    }
-    return containerState
+    val route = routeFor(slot)
+    val container = route?.let(::containerFor)
+    return Adaptive.SlotContainerState(
+        slot = slot,
+        currentRoute = route,
+        previousRoute = previousContainersToRoutes[container],
+        container = container,
+        adaptation = adaptation,
+    )
 }
 
 internal fun Adaptive.NavigationState.slotFor(

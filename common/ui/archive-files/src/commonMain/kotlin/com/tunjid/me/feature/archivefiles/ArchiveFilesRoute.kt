@@ -84,7 +84,6 @@ data class ArchiveFilesRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             ArchiveFilesScreen(
-                modifier = animatedModifier,
                 stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
                     route = this@ArchiveFilesRoute
                 ),
@@ -94,7 +93,6 @@ data class ArchiveFilesRoute(
 
 @Composable
 internal fun ArchiveFilesScreen(
-    modifier: Modifier = Modifier,
     stateHolder: ArchiveFilesStateHolder,
 ) {
     val (state, actions) = stateHolder
@@ -103,7 +101,7 @@ internal fun ArchiveFilesScreen(
     if (state.isInPrimaryNav) GlobalUi()
 
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         FilesGrid(
             dndEnabled = state.dndEnabled,

@@ -33,7 +33,7 @@ data class UnknownRoute(override val id: String = "404") : AppRoute, StatelessRo
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             Box(
-                modifier = animatedModifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             ) {
                 Text(
                     modifier = Modifier

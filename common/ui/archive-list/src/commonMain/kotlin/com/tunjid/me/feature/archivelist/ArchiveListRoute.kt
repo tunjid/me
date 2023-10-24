@@ -69,7 +69,6 @@ data class ArchiveListRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             ArchiveScreen(
-                modifier = animatedModifier,
                 stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
                     route = this@ArchiveListRoute
                 ),
@@ -79,7 +78,6 @@ data class ArchiveListRoute(
 
 @Composable
 private fun ArchiveScreen(
-    modifier: Modifier = Modifier,
     stateHolder: ArchiveListStateHolder,
 ) {
     val (state, actions) = stateHolder
@@ -118,9 +116,7 @@ private fun ArchiveScreen(
             }
     }
 
-    Column(
-        modifier = modifier
-    ) {
+    Column {
         ArchiveFilters(
             queryState = state.queryState,
             onChanged = actions

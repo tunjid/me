@@ -30,7 +30,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
@@ -113,7 +112,7 @@ private fun Adaptive.ContainerScope.ArchiveDetailScreen(
     }
 
     LazyColumn(
-        modifier = Modifier.graphicsLayer { clip = false },
+        modifier = Modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         state = scrollState
     ) {
@@ -128,7 +127,7 @@ private fun Adaptive.ContainerScope.ArchiveDetailScreen(
         }
         item {
             Chips(
-                modifier = animatedModifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 name = "Categories:",
@@ -137,12 +136,12 @@ private fun Adaptive.ContainerScope.ArchiveDetailScreen(
         }
 
         item {
-            Spacer(modifier = animatedModifier.padding(16.dp))
+            Spacer(modifier = Modifier.padding(16.dp))
         }
 
         item(key = BODY_KEY) {
             NestedScrollTextContainer(
-                modifier = animatedModifier
+                modifier = Modifier
                     .fillParentMaxSize()
                     .padding(horizontal = 16.dp),
                 canConsumeScrollEvents = bodyInViewport,
@@ -163,12 +162,12 @@ private fun Adaptive.ContainerScope.ArchiveDetailScreen(
         }
 
         item {
-            Spacer(modifier = animatedModifier.padding(16.dp))
+            Spacer(modifier = Modifier.padding(16.dp))
         }
 
         item {
             Chips(
-                modifier = animatedModifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 name = "Tags:",
@@ -177,7 +176,7 @@ private fun Adaptive.ContainerScope.ArchiveDetailScreen(
         }
 
         item {
-            Spacer(modifier = animatedModifier.padding(64.dp + navBarSizeDp))
+            Spacer(modifier = Modifier.padding(64.dp + navBarSizeDp))
         }
     }
 

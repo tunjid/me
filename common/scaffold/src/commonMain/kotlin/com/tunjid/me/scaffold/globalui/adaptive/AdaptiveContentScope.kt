@@ -161,7 +161,7 @@ private fun AdaptiveContentHost.Render(
                 //  disappearing
                 null -> Unit
                 else -> Box(
-                    modifier = targetContainerState.rootModifier()
+                    modifier = modifierFor(containerState)
                 ) {
                     SaveableStateProvider(route.id) {
                         route.content(this@adaptiveContentScope)
@@ -248,9 +248,20 @@ internal val LocalAdaptiveNavigationState = staticCompositionLocalOf {
 }
 
 @Composable
-private fun Adaptive.ContainerState.rootModifier() = when (container) {
+private fun AnimatedVisibilityScope.modifierFor(
+    containerState: Adaptive.ContainerState
+) = when (containerState.container) {
     Adaptive.Container.Primary, Adaptive.Container.Secondary -> FillSizeModifier
         .background(color = MaterialTheme.colorScheme.surface)
+        .then(
+            when (val enterAndExit = containerState.currentRoute?.transitionsFor(containerState)) {
+                null -> Modifier
+                else -> Modifier.animateEnterExit(
+                    enter = enterAndExit.enter,
+                    exit = enterAndExit.exit
+                )
+            }
+        )
 
     Adaptive.Container.TransientPrimary -> FillSizeModifier
         .backPreviewModifier()
