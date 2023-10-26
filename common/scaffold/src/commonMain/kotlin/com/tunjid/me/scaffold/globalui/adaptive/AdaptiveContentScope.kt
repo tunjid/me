@@ -80,48 +80,50 @@ internal fun AdaptiveContentHost(
     }
 }
 
-private fun AdaptiveContentHost.getOrCreateSharedElement(
-    key: Any,
-    sharedElement: @Composable (Modifier) -> Unit,
-): @Composable (Modifier) -> Unit = getOrPut(key) {
-    createSharedElement(
-        key = key,
-        sharedElement = sharedElement,
-    )
-}
-
-private fun AdaptiveContentHost.createSharedElement(
-    key: Any,
-    sharedElement: @Composable (Modifier) -> Unit,
-): @Composable (Modifier) -> Unit {
-    val sharedElementData = SharedElementData(lookaheadScope = this)
-    var inCount by mutableIntStateOf(0)
-
-    return movableContentOf { modifier ->
-        val updatedElement by rememberUpdatedState(sharedElement)
-        updatedElement(
-            modifier.sharedElement(
-                enabled = LocalSharedElementAnimationStatus.current,
-                sharedElementData = sharedElementData,
-            )
-        )
-
-        DisposableEffect(Unit) {
-            ++inCount
-            onDispose {
-                if (--inCount <= 0) remove(key)
-            }
-        }
-    }
-}
-
 @Stable
 private class AdaptiveContentHost(
     lookaheadLayoutScope: LookaheadScope,
     saveableStateHolder: SaveableStateHolder,
 ) : LookaheadScope by lookaheadLayoutScope,
-    SaveableStateHolder by saveableStateHolder,
-    MutableMap<Any, @Composable (Modifier) -> Unit> by mutableStateMapOf()
+    SaveableStateHolder by saveableStateHolder {
+
+    private val sharedElementMap = mutableStateMapOf<Any, @Composable (Modifier) -> Unit>()
+
+    fun getOrCreateSharedElement(
+        key: Any,
+        sharedElement: @Composable (Modifier) -> Unit,
+    ): @Composable (Modifier) -> Unit = sharedElementMap.getOrPut(key) {
+        createSharedElement(
+            key = key,
+            sharedElement = sharedElement,
+        )
+    }
+
+    private fun createSharedElement(
+        key: Any,
+        sharedElement: @Composable (Modifier) -> Unit,
+    ): @Composable (Modifier) -> Unit {
+        val sharedElementData = SharedElementData(lookaheadScope = this)
+        var inCount by mutableIntStateOf(0)
+
+        return movableContentOf { modifier ->
+            val updatedElement by rememberUpdatedState(sharedElement)
+            updatedElement(
+                modifier.sharedElement(
+                    enabled = LocalSharedElementAnimationStatus.current,
+                    sharedElementData = sharedElementData,
+                )
+            )
+
+            DisposableEffect(Unit) {
+                ++inCount
+                onDispose {
+                    if (--inCount <= 0) sharedElementMap.remove(key)
+                }
+            }
+        }
+    }
+}
 
 @Composable
 private fun AdaptiveContentHost.rememberSlotToRouteComposableLookup(
