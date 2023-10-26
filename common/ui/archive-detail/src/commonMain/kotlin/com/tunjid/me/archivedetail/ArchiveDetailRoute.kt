@@ -25,8 +25,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -91,6 +93,9 @@ private fun Adaptive.ContainerScope.ArchiveDetailScreen(
     )
 
     val archive = state.archive
+    val thumbnailPlaceholder = remember<@Composable (Modifier) -> Unit> {
+        { modifier -> Box(modifier) }
+    }
 
     // Close the secondary pane when invoking back since it contains the list view
     SecondaryPaneCloseBackHandler(
@@ -98,9 +103,7 @@ private fun Adaptive.ContainerScope.ArchiveDetailScreen(
     )
 
     val thumbnail = when {
-        isInPreview() -> { modifier ->
-            Box(modifier)
-        }
+        isInPreview() -> thumbnailPlaceholder
         else -> rememberSharedContent(
             "thumb",
         ) { modifier ->
