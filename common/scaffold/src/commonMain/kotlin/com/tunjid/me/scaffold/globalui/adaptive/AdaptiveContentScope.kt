@@ -151,15 +151,10 @@ private fun AdaptiveContentHost.rememberSlotToRouteComposableLookup(
 private fun AdaptiveContentHost.Render(
     containerState: Adaptive.ContainerState,
 ) {
-    var canAnimate by remember { mutableStateOf(true) }
-    LaunchedEffect(containerState) {
-        canAnimate = true
-        // TODO: This is a heuristic, it assumes animations can run for a full second
-        //  after a scope change
-        delay(1000)
-        canAnimate = false
-    }
-    updateTransition(containerState).AnimatedContent(
+    val transition = updateTransition(containerState)
+    var canAnimateSharedElements by remember { mutableStateOf(true) }
+
+    transition.AnimatedContent(
         contentKey = { it.currentRoute?.id },
         transitionSpec = {
             EnterTransition.None togetherWith ExitTransition.None
@@ -180,7 +175,7 @@ private fun AdaptiveContentHost.Render(
                     modifier = modifierFor(containerState)
                 ) {
                     CompositionLocalProvider(
-                        LocalSharedElementAnimationStatus provides canAnimate
+                        LocalSharedElementAnimationStatus provides canAnimateSharedElements
                     ) {
                         SaveableStateProvider(route.id) {
                             route.content(this@adaptiveContentScope)
@@ -188,6 +183,24 @@ private fun AdaptiveContentHost.Render(
                     }
                 }
             }
+        }
+    }
+
+    LaunchedEffect(containerState) {
+        if (transition.targetState.adaptation is Adaptive.Adaptation.Swap) {
+            canAnimateSharedElements = true
+            // TODO: This is a heuristic, it assumes animations can run for a certain duration
+            //  after a swap change
+            delay(700)
+            canAnimateSharedElements = false
+        }
+    }
+
+    // Transitions only run for change adaptations
+    LaunchedEffect(transition.isRunning) {
+        // Change transitions can stop animating shared elements when the transition is complete
+        if (!transition.isRunning && transition.targetState.adaptation is Adaptive.Adaptation.Change) {
+            canAnimateSharedElements = false
         }
     }
 }
