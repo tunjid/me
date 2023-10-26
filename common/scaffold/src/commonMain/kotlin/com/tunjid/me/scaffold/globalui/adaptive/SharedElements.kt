@@ -45,6 +45,7 @@ internal class SharedElementData(
  * LookaheadLayout, whenever there's a change in the layout.
  */
 internal fun Modifier.sharedElement(
+    enabled: Boolean,
     sharedElementData: SharedElementData,
 ): Modifier = composed {
     val coroutineScope = rememberCoroutineScope()
@@ -70,7 +71,8 @@ internal fun Modifier.sharedElement(
                     relativeToSource = Offset.Zero
                 ).round()
             }
-            placeable.place(x = x, y = y)
+            if (enabled) placeable.place(x = x, y = y)
+            else placeable.place(0, 0)
         }
     }
 }

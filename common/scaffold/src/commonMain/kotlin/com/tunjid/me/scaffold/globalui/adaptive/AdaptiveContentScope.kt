@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.SaveableStateHolder
@@ -47,6 +48,7 @@ import androidx.compose.ui.layout.LookaheadScope
 import com.tunjid.me.scaffold.globalui.scaffold.backPreviewModifier
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.removedRoutes
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 
 internal fun interface AdaptiveRouteLookup {
@@ -78,44 +80,48 @@ internal fun AdaptiveContentHost(
     }
 }
 
+private fun AdaptiveContentHost.getOrCreateSharedElement(
+    key: Any,
+    sharedElement: @Composable (Modifier) -> Unit,
+): @Composable (Modifier) -> Unit = getOrPut(key) {
+    createSharedElement(
+        key = key,
+        sharedElement = sharedElement,
+    )
+}
+
+private fun AdaptiveContentHost.createSharedElement(
+    key: Any,
+    sharedElement: @Composable (Modifier) -> Unit,
+): @Composable (Modifier) -> Unit {
+    val sharedElementData = SharedElementData(lookaheadScope = this)
+    var inCount by mutableIntStateOf(0)
+
+    return movableContentOf { modifier ->
+        val updatedElement by rememberUpdatedState(sharedElement)
+        updatedElement(
+            modifier.sharedElement(
+                enabled = LocalSharedElementAnimationStatus.current,
+                sharedElementData = sharedElementData,
+            )
+        )
+
+        DisposableEffect(Unit) {
+            ++inCount
+            onDispose {
+                if (--inCount <= 0) remove(key)
+            }
+        }
+    }
+}
+
 @Stable
 private class AdaptiveContentHost(
     lookaheadLayoutScope: LookaheadScope,
     saveableStateHolder: SaveableStateHolder,
 ) : LookaheadScope by lookaheadLayoutScope,
-    SaveableStateHolder by saveableStateHolder {
-    private val keysToSharedElements = mutableStateMapOf<Any, @Composable (Modifier) -> Unit>()
-
-    fun getOrCreateSharedElement(
-        key: Any,
-        sharedElement: @Composable (Modifier) -> Unit
-    ): @Composable (Modifier) -> Unit = keysToSharedElements.getOrPut(key) {
-        createSharedElement(key, sharedElement)
-    }
-
-    private fun createSharedElement(
-        key: Any,
-        sharedElement: @Composable (Modifier) -> Unit
-    ): @Composable (Modifier) -> Unit {
-        val sharedElementData = SharedElementData(lookaheadScope = this)
-        var inCount by mutableIntStateOf(0)
-
-        return movableContentOf { modifier ->
-            val updatedElement by rememberUpdatedState(sharedElement)
-            updatedElement(
-                modifier.sharedElement(
-                    sharedElementData = sharedElementData,
-                )
-            )
-            DisposableEffect(Unit) {
-                ++inCount
-                onDispose {
-                    if (--inCount <= 0) keysToSharedElements.remove(key)
-                }
-            }
-        }
-    }
-}
+    SaveableStateHolder by saveableStateHolder,
+    MutableMap<Any, @Composable (Modifier) -> Unit> by mutableStateMapOf()
 
 @Composable
 private fun AdaptiveContentHost.rememberSlotToRouteComposableLookup(
@@ -143,6 +149,14 @@ private fun AdaptiveContentHost.rememberSlotToRouteComposableLookup(
 private fun AdaptiveContentHost.Render(
     containerState: Adaptive.ContainerState,
 ) {
+    var canAnimate by remember { mutableStateOf(true) }
+    LaunchedEffect(containerState) {
+        canAnimate = true
+        // TODO: This is a heuristic, it assumes animations can run for a full second
+        //  after a scope change
+        delay(1000)
+        canAnimate = false
+    }
     updateTransition(containerState).AnimatedContent(
         contentKey = { it.currentRoute?.id },
         transitionSpec = {
@@ -163,8 +177,12 @@ private fun AdaptiveContentHost.Render(
                 else -> Box(
                     modifier = modifierFor(containerState)
                 ) {
-                    SaveableStateProvider(route.id) {
-                        route.content(this@adaptiveContentScope)
+                    CompositionLocalProvider(
+                        LocalSharedElementAnimationStatus provides canAnimate
+                    ) {
+                        SaveableStateProvider(route.id) {
+                            route.content(this@adaptiveContentScope)
+                        }
                     }
                 }
             }
@@ -205,17 +223,6 @@ private class AnimatedAdaptiveContentScope(
     override val adaptation: Adaptive.Adaptation
         get() = containerState.adaptation
 
-    override val animatedModifier: Modifier =
-        when (val currentRoute = containerState.currentRoute) {
-            null -> Modifier
-            else -> with(currentRoute.transitionsFor(containerState)) {
-                Modifier.animateEnterExit(
-                    enter = enter,
-                    exit = exit
-                )
-            }
-        }
-
     @Composable
     override fun rememberSharedContent(
         key: Any,
@@ -243,8 +250,12 @@ private class AnimatedAdaptiveContentScope(
 
 }
 
-internal val LocalAdaptiveNavigationState = staticCompositionLocalOf {
+private val LocalAdaptiveNavigationState = staticCompositionLocalOf {
     Adaptive.NavigationState.Initial
+}
+
+private val LocalSharedElementAnimationStatus = staticCompositionLocalOf {
+    false
 }
 
 @Composable

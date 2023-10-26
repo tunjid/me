@@ -22,11 +22,6 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
@@ -52,8 +47,6 @@ object Adaptive {
      * Scope for adaptive content that can show up in an arbitrary [Container]
      */
     interface ContainerScope : AnimatedVisibilityScope {
-
-        val animatedModifier: Modifier
 
         val adaptation: Adaptation
 
