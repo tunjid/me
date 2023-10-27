@@ -16,7 +16,6 @@
 
 package com.tunjid.me.archivedetail
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,10 +24,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,10 +43,13 @@ import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.PaneAnchor
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
+import com.tunjid.me.scaffold.globalui.adaptive.emptyElement
+import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
+import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.globalui.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.ExternalRoute
 import com.tunjid.treenav.Node
@@ -79,7 +79,7 @@ data class ArchiveDetailRoute(
 }
 
 @Composable
-private fun Adaptive.ContainerScope.ArchiveDetailScreen(
+private fun ArchiveDetailScreen(
     stateHolder: ArchiveDetailStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -93,25 +93,22 @@ private fun Adaptive.ContainerScope.ArchiveDetailScreen(
     )
 
     val archive = state.archive
-    val thumbnailPlaceholder = remember<@Composable (Modifier) -> Unit> {
-        { modifier -> Box(modifier) }
-    }
 
     // Close the secondary pane when invoking back since it contains the list view
     SecondaryPaneCloseBackHandler(
         enabled = state.isInPrimaryNav && state.hasSecondaryPanel
     )
 
-    val thumbnail = when {
-        isInPreview() -> thumbnailPlaceholder
-        else -> rememberSharedContent(
-            "thumb",
-        ) { modifier ->
-            AsyncRasterImage(
-                imageUrl = state.archive?.thumbnail,
-                modifier = modifier
-            )
-        }
+    val thumbnail = rememberSharedContent(
+        key = thumbnailSharedElementKey(state.archiveId),
+        alt = {
+            if (isInPreview()) emptyElement else null
+        },
+    ) { modifier ->
+        AsyncRasterImage(
+            imageUrl = state.archive?.thumbnail,
+            modifier = modifier
+        )
     }
 
     LazyColumn(

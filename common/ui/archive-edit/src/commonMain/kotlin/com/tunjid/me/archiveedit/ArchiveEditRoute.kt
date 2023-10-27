@@ -67,6 +67,8 @@ import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
+import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
+import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.ExternalRoute
 import com.tunjid.me.scaffold.permissions.Permission
@@ -106,7 +108,7 @@ data class ArchiveEditRoute(
 }
 
 @Composable
-private fun Adaptive.ContainerScope.ArchiveEditScreen(
+private fun ArchiveEditScreen(
     stateHolder: ArchiveEditStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -120,7 +122,7 @@ private fun Adaptive.ContainerScope.ArchiveEditScreen(
     )
 
     val thumbnail = rememberSharedContent(
-        "thumb",
+        key = thumbnailSharedElementKey(state.upsert.id),
     ) { modifier ->
         AsyncRasterImage(
             imageUrl = state.thumbnail,

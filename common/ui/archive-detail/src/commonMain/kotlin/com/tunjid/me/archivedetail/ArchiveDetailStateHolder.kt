@@ -67,6 +67,7 @@ class ActualArchiveDetailStateHolder(
 ) : ArchiveDetailStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         kind = route.kind,
+        archiveId = route.archiveId,
         navBarSize = uiStateFlow.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),

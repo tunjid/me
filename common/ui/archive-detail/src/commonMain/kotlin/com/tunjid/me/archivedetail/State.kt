@@ -19,6 +19,7 @@ package com.tunjid.me.archivedetail
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.ChipInfo
@@ -48,6 +49,8 @@ data class State(
     val kind: ArchiveKind,
     @ProtoNumber(6)
     val isInPrimaryNav: Boolean = false,
+    @Transient
+    val archiveId: ArchiveId? = null,
     // Read this from the DB
     @Transient
     val archive: Archive? = null,

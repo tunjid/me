@@ -50,6 +50,8 @@ object Adaptive {
 
         val adaptation: Adaptation
 
+        val containerState: ContainerState
+
         @Composable
         fun rememberSharedContent(
             key: Any,

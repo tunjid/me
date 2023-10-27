@@ -26,6 +26,10 @@ import androidx.compose.ui.unit.round
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+fun thumbnailSharedElementKey(
+     property: Any?
+) = "thumbnail-$property"
+
 @Stable
 internal class SharedElementData(
     val lookaheadScope: LookaheadScope
