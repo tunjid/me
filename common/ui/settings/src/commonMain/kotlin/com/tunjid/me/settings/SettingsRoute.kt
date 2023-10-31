@@ -30,14 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.feature.LocalScreenStateHolderCache
+import com.tunjid.me.feature.screenStateHolderFor
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
@@ -49,7 +49,7 @@ data class SettingsRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             SettingsScreen(
-                stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
+                stateHolder = screenStateHolderFor(
                     route = this@SettingsRoute
                 ),
             )

@@ -41,7 +41,7 @@ import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.isInViewport
-import com.tunjid.me.feature.LocalScreenStateHolderCache
+import com.tunjid.me.feature.screenStateHolderFor
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.globalui.adaptive.emptyElement
@@ -67,7 +67,7 @@ data class ArchiveDetailRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             ArchiveDetailScreen(
-                stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
+                stateHolder = screenStateHolderFor(
                     route = this@ArchiveDetailRoute
                 ),
             )

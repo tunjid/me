@@ -200,8 +200,13 @@ private fun AdaptiveContentHost.Render(
     // Transitions only run for change adaptations
     LaunchedEffect(transition.isRunning) {
         // Change transitions can stop animating shared elements when the transition is complete
-        if (!transition.isRunning && transition.targetState.adaptation is Adaptive.Adaptation.Change) {
-            canAnimateSharedElements = false
+        when {
+            transition.isRunning -> canAnimateSharedElements = true
+            else -> when (transition.targetState.adaptation) {
+                is Adaptive.Adaptation.Change -> canAnimateSharedElements = false
+                // Controlled elsewhere
+                is Adaptive.Adaptation.Swap -> Unit
+            }
         }
     }
 }
@@ -283,7 +288,12 @@ val Adaptive.ContainerScope.emptyElement get() = EmptyElement
 @Composable
 fun rememberSharedContent(
     key: Any,
-    alt: @Composable Adaptive.ContainerScope.() -> (@Composable (Modifier) -> Unit)? = { null },
+    enabled: Adaptive.ContainerScope.() -> Boolean = {
+        containerState.container == Adaptive.Container.Primary
+    },
+    alt: @Composable Adaptive.ContainerScope.() -> (@Composable (Modifier) -> Unit)? = {
+        null
+    },
     sharedElement: @Composable (Modifier) -> Unit
 ): @Composable (Modifier) -> Unit =
     when (val scope = LocalAdaptiveContentScope.current) {
@@ -291,7 +301,10 @@ fun rememberSharedContent(
             "This may only be called from an adaptive content scope"
         )
 
-        else -> alt(scope) ?: scope.rememberSharedContent(key, sharedElement)
+        else -> when {
+            enabled(scope) -> alt(scope) ?: scope.rememberSharedContent(key, sharedElement)
+            else -> sharedElement
+        }
     }
 
 private val LocalAdaptiveNavigationState = staticCompositionLocalOf {
@@ -303,7 +316,7 @@ private val LocalAdaptiveContentScope = staticCompositionLocalOf<Adaptive.Contai
 }
 
 private val LocalSharedElementAnimationStatus = staticCompositionLocalOf {
-    false
+    true
 }
 
 @Composable
@@ -330,5 +343,5 @@ private fun AnimatedVisibilityScope.modifierFor(
 
 private val FillSizeModifier = Modifier.fillMaxSize()
 
-private val EmptyElement:  @Composable (Modifier) -> Unit = { modifier -> Box(modifier) }
+private val EmptyElement: @Composable (Modifier) -> Unit = { modifier -> Box(modifier) }
 
