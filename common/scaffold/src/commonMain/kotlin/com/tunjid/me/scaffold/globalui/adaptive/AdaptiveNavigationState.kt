@@ -48,8 +48,6 @@ object Adaptive {
      */
     interface ContainerScope : AnimatedVisibilityScope {
 
-        val adaptation: Adaptation
-
         val containerState: ContainerState
 
         @Composable
@@ -57,9 +55,6 @@ object Adaptive {
             key: Any,
             sharedElement: @Composable (Modifier) -> Unit
         ): @Composable (Modifier) -> Unit
-
-        @Composable
-        fun isInPreview(): Boolean
     }
 
     /**

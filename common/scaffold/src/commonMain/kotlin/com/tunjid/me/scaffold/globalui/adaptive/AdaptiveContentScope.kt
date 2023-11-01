@@ -241,8 +241,6 @@ private class AnimatedAdaptiveContentScope(
     val adaptiveContentHost: AdaptiveContentHost,
     val animatedContentScope: AnimatedContentScope
 ) : Adaptive.ContainerScope, AnimatedVisibilityScope by animatedContentScope {
-    override val adaptation: Adaptive.Adaptation
-        get() = containerState.adaptation
 
     @Composable
     override fun rememberSharedContent(
@@ -261,22 +259,16 @@ private class AnimatedAdaptiveContentScope(
         // Do not use the shared element if this content is being animated out
         if (!isCurrentlyAnimatingIn) return unsharedElement
 
-        // Do not use the shared element if there has been a swap and this is not the destination
-        val adaptation = containerState.adaptation
-        if (adaptation is Adaptive.Adaptation.Swap && adaptation.to != containerState.container)
-            return unsharedElement
-
         return adaptiveContentHost.getOrCreateSharedElement(key, sharedElement)
     }
-
-    @Composable
-    override fun isInPreview(): Boolean =
-        LocalAdaptiveNavigationState.current.primaryRoute.id == containerState.currentRoute?.id
-                && containerState.adaptation == Adaptive.Adaptation.PrimaryToTransient
 }
 
 @Suppress("UnusedReceiverParameter")
 val Adaptive.ContainerScope.emptyElement get() = EmptyElement
+
+val Adaptive.ContainerScope.isInPreview: Boolean
+    get() = containerState.container == Adaptive.Container.Primary
+            && containerState.adaptation == Adaptive.Adaptation.PrimaryToTransient
 
 /**
  * Creates a shared element between composables
@@ -291,7 +283,7 @@ fun rememberSharedContent(
     enabled: Adaptive.ContainerScope.() -> Boolean = {
         containerState.container == Adaptive.Container.Primary
     },
-    alt: @Composable Adaptive.ContainerScope.() -> (@Composable (Modifier) -> Unit)? = {
+    alt: Adaptive.ContainerScope.() -> (@Composable (Modifier) -> Unit)? = {
         null
     },
     sharedElement: @Composable (Modifier) -> Unit

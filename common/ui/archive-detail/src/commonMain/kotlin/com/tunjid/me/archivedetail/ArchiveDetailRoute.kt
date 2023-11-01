@@ -45,6 +45,7 @@ import com.tunjid.me.feature.screenStateHolderFor
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.globalui.adaptive.emptyElement
+import com.tunjid.me.scaffold.globalui.adaptive.isInPreview
 import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.globalui.scaffold.SecondaryPaneCloseBackHandler
@@ -102,7 +103,7 @@ private fun ArchiveDetailScreen(
     val thumbnail = rememberSharedContent(
         key = thumbnailSharedElementKey(state.archiveId),
         alt = {
-            if (isInPreview()) emptyElement else null
+            if (isInPreview) emptyElement else null
         },
     ) { modifier ->
         AsyncRasterImage(
