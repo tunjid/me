@@ -57,7 +57,7 @@ internal fun Modifier.sharedElement(
         val (width, height) = sharedElementData.sizeAnimation.updateTarget(
             coroutineScope = coroutineScope,
             targetValue = lookaheadSize,
-            animationSpec = spring(stiffness = Spring.StiffnessMedium)
+            animationSpec = sharedElementSpring()
         )
         val animatedConstraints = Constraints.fixed(width, height)
         val placeable = measurable.measure(animatedConstraints)
@@ -67,7 +67,7 @@ internal fun Modifier.sharedElement(
                 placementScope = this,
                 coroutineScope = coroutineScope,
                 lookaheadScope = sharedElementData.lookaheadScope,
-                animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                animationSpec = sharedElementSpring()
             )
             coordinates?.let {
                 sharedElementData.placementOffset = lookaheadScopeCoordinates.localPositionOf(
@@ -133,3 +133,5 @@ private fun DeferredAnimation<IntOffset, AnimationVector2D>.updateTargetBasedOnC
         }
     }
 }
+
+private fun <T> sharedElementSpring() = spring<T>(stiffness = Spring.StiffnessMedium)

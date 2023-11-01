@@ -188,12 +188,18 @@ private fun AdaptiveContentHost.Render(
     }
 
     LaunchedEffect(containerState) {
-        if (transition.targetState.adaptation is Adaptive.Adaptation.Swap) {
-            canAnimateSharedElements = true
-            // TODO: This is a heuristic, it assumes animations can run for a certain duration
-            //  after a swap change
-            delay(700)
-            canAnimateSharedElements = false
+        when (transition.targetState.adaptation) {
+            // When things move to the transient container, it's instantaneous. No shared elements
+            Adaptive.Adaptation.PrimaryToTransient -> canAnimateSharedElements = false
+            is Adaptive.Adaptation.Swap -> {
+                canAnimateSharedElements = true
+                // TODO: This is a heuristic, it assumes animations can run for a certain duration
+                //  after a swap change
+                delay(700)
+                canAnimateSharedElements = false
+            }
+
+            is Adaptive.Adaptation.Change -> Unit
         }
     }
 
@@ -280,10 +286,7 @@ val Adaptive.ContainerScope.isInPreview: Boolean
 @Composable
 fun rememberSharedContent(
     key: Any,
-    enabled: Adaptive.ContainerScope.() -> Boolean = {
-        containerState.container == Adaptive.Container.Primary
-    },
-    alt: Adaptive.ContainerScope.() -> (@Composable (Modifier) -> Unit)? = {
+    alt: Adaptive.ContainerScope.() -> @Composable ((Modifier) -> Unit)? = {
         null
     },
     sharedElement: @Composable (Modifier) -> Unit
@@ -293,9 +296,18 @@ fun rememberSharedContent(
             "This may only be called from an adaptive content scope"
         )
 
-        else -> when {
-            enabled(scope) -> alt(scope) ?: scope.rememberSharedContent(key, sharedElement)
-            else -> sharedElement
+        else -> when (scope.containerState.container) {
+            // Allow shared elements in the primary or transient primary content only
+            Adaptive.Container.Primary,
+            Adaptive.Container.TransientPrimary -> alt(scope) ?: scope.rememberSharedContent(
+                key = key,
+                sharedElement = sharedElement
+            )
+
+            Adaptive.Container.Secondary -> sharedElement
+            null -> throw IllegalArgumentException(
+                "Shared elements may only be used in non null containers"
+            )
         }
     }
 
