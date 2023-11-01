@@ -47,7 +47,6 @@ import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.globalui.adaptive.emptyElement
 import com.tunjid.me.scaffold.globalui.adaptive.isInPreview
 import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
-import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.globalui.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
@@ -101,7 +100,7 @@ private fun ArchiveDetailScreen(
     )
 
     val thumbnail = rememberSharedContent(
-        key = thumbnailSharedElementKey(state.archiveId),
+        key = state.sharedElementKey,
         alt = {
             if (isInPreview) emptyElement else null
         },

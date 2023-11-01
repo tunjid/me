@@ -122,7 +122,7 @@ private fun ArchiveEditScreen(
     )
 
     val thumbnail = rememberSharedContent(
-        key = thumbnailSharedElementKey(state.upsert.id),
+        key = state.sharedElementKey,
     ) { modifier ->
         AsyncRasterImage(
             imageUrl = state.thumbnail,

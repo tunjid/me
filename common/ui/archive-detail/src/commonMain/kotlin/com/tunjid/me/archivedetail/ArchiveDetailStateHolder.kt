@@ -30,6 +30,7 @@ import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
+import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.consumeNavActions
@@ -67,7 +68,7 @@ class ActualArchiveDetailStateHolder(
 ) : ArchiveDetailStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         kind = route.kind,
-        archiveId = route.archiveId,
+        sharedElementKey = thumbnailSharedElementKey(route.archiveId),
         navBarSize = uiStateFlow.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
