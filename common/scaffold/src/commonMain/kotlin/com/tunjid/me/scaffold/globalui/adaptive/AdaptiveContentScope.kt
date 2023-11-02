@@ -32,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
@@ -105,7 +104,7 @@ private class AdaptiveContentHost(
         key: Any,
         sharedElement: @Composable (Modifier) -> Unit,
     ): @Composable (Modifier) -> Unit {
-        val sharedElementData = SharedElementData(lookaheadScope = this)
+        val sharedElementData = SharedElementData()
         var inCount by mutableIntStateOf(0)
 
         return movableContentOf { modifier ->

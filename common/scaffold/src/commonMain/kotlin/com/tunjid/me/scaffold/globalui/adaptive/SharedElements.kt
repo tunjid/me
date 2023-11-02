@@ -2,7 +2,6 @@ package com.tunjid.me.scaffold.globalui.adaptive
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector
-import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.TwoWayConverter
@@ -16,8 +15,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.layout.LookaheadScope
-import androidx.compose.ui.layout.Placeable.PlacementScope
 import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
@@ -27,13 +24,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 fun thumbnailSharedElementKey(
-     property: Any?
+    property: Any?
 ) = "thumbnail-$property"
 
 @Stable
-internal class SharedElementData(
-    val lookaheadScope: LookaheadScope
-) {
+internal class SharedElementData {
     val offsetAnimation = DeferredAnimation(
         vectorConverter = IntOffset.VectorConverter,
         animationSpec = sharedElementSpring()
@@ -61,14 +56,24 @@ internal fun Modifier.sharedElement(
         val animatedConstraints = Constraints.fixed(width, height)
         val placeable = measurable.measure(animatedConstraints)
 
-        layout(placeable.width, placeable.height) {
-            val (x, y) = sharedElementData.offsetAnimation.updateTargetBasedOnCoordinates(
-                placementScope = this,
-                coroutineScope = coroutineScope,
-                lookaheadScope = sharedElementData.lookaheadScope,
+        layout(placeable.width, placeable.height) layout@{
+            val currentCoordinates = coordinates ?: return@layout placeable.place(x = 0, y = 0)
+            val targetOffset = lookaheadScopeCoordinates.localLookaheadPositionOf(
+                currentCoordinates
             )
+            val animatedOffset = sharedElementData.offsetAnimation.updateTarget(
+                coroutineScope,
+                targetOffset.round(),
+            )
+            val currentOffset = lookaheadScopeCoordinates.localPositionOf(
+                sourceCoordinates = currentCoordinates,
+                relativeToSource = Offset.Zero
+            ).round()
+
+            val (x, y) = animatedOffset - currentOffset
+
             if (enabled) placeable.place(x = x, y = y)
-            else placeable.place(0, 0)
+            else placeable.place(x = 0, y = 0)
         }
     }
 }
@@ -99,28 +104,6 @@ internal class DeferredAnimation<T, V : AnimationVector>(
             }
         }
         return animatable?.value ?: targetValue
-    }
-}
-
-private fun DeferredAnimation<IntOffset, AnimationVector2D>.updateTargetBasedOnCoordinates(
-    placementScope: PlacementScope,
-    lookaheadScope: LookaheadScope,
-    coroutineScope: CoroutineScope,
-): IntOffset = with(lookaheadScope) {
-    when (val coordinates = placementScope.coordinates) {
-        null -> IntOffset.Zero
-        else -> with(placementScope) {
-            val targetOffset = lookaheadScopeCoordinates.localLookaheadPositionOf(coordinates)
-            val animOffset = updateTarget(
-                coroutineScope,
-                targetOffset.round(),
-            )
-            val current = lookaheadScopeCoordinates.localPositionOf(
-                sourceCoordinates = coordinates,
-                relativeToSource = Offset.Zero
-            ).round()
-            (animOffset - current)
-        }
     }
 }
 
