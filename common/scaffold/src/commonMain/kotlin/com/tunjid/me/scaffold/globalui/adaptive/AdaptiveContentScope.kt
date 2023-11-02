@@ -19,6 +19,7 @@ package com.tunjid.me.scaffold.globalui.adaptive
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.updateTransition
@@ -31,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
@@ -151,15 +153,16 @@ private fun AdaptiveContentHost.rememberSlotToRouteComposableLookup(
 private fun AdaptiveContentHost.Render(
     containerState: Adaptive.ContainerState,
 ) {
-    val transition = updateTransition(containerState)
-    var canAnimateSharedElements by remember { mutableStateOf(true) }
+    val containerTransition = updateTransition(containerState)
+    val latestContainerState by rememberUpdatedState(containerState)
 
-    transition.AnimatedContent(
+    containerTransition.AnimatedContent(
         contentKey = { it.currentRoute?.id },
         transitionSpec = {
             EnterTransition.None togetherWith ExitTransition.None
         }
     ) { targetContainerState ->
+        var canAnimateSharedElements by remember { mutableStateOf(true) }
         with(
             AnimatedAdaptiveContentScope(
                 containerState = targetContainerState,
@@ -167,6 +170,9 @@ private fun AdaptiveContentHost.Render(
                 animatedContentScope = this
             )
         ) adaptiveContentScope@{
+            // Animate if not fully visible or by the effects to run later
+            val animationStatus = canAnimateSharedElements || transition.targetState != EnterExitState.Visible
+
             when (val route = targetContainerState.currentRoute) {
                 // TODO: For the transient content container, gracefully animate out instead of
                 //  disappearing
@@ -176,7 +182,7 @@ private fun AdaptiveContentHost.Render(
                 ) {
                     CompositionLocalProvider(
                         LocalAdaptiveContentScope provides this@adaptiveContentScope,
-                        LocalSharedElementAnimationStatus provides canAnimateSharedElements
+                        LocalSharedElementAnimationStatus provides animationStatus
                     ) {
                         SaveableStateProvider(route.id) {
                             route.content(this@adaptiveContentScope)
@@ -185,33 +191,37 @@ private fun AdaptiveContentHost.Render(
                 }
             }
         }
-    }
 
-    LaunchedEffect(containerState) {
-        when (transition.targetState.adaptation) {
-            // When things move to the transient container, it's instantaneous. No shared elements
-            Adaptive.Adaptation.PrimaryToTransient -> canAnimateSharedElements = false
-            is Adaptive.Adaptation.Swap -> {
-                canAnimateSharedElements = true
-                // TODO: This is a heuristic, it assumes animations can run for a certain duration
-                //  after a swap change
-                delay(700)
-                canAnimateSharedElements = false
+        LaunchedEffect(latestContainerState) {
+            when (latestContainerState.adaptation) {
+                // When things move to the primary container from transient, share elements
+                Adaptive.Adaptation.TransientToPrimary -> {
+                    canAnimateSharedElements = true
+                    // TODO: This is a heuristic, it assumes animations can run for a certain duration
+                    //  after a swap change
+                    delay(700)
+                    canAnimateSharedElements = false
+                }
+
+                // Don't do anything here, uses the other launched effect for if its running
+                else -> Unit
             }
-
-            is Adaptive.Adaptation.Change -> Unit
         }
-    }
 
-    // Transitions only run for change adaptations
-    LaunchedEffect(transition.isRunning) {
-        // Change transitions can stop animating shared elements when the transition is complete
-        when {
-            transition.isRunning -> canAnimateSharedElements = true
-            else -> when (transition.targetState.adaptation) {
-                is Adaptive.Adaptation.Change -> canAnimateSharedElements = false
-                // Controlled elsewhere
-                is Adaptive.Adaptation.Swap -> Unit
+        // Transitions only run for change adaptations
+        LaunchedEffect(transition.isRunning) {
+            // Change transitions can stop animating shared elements when the transition is complete
+            canAnimateSharedElements = when {
+                transition.isRunning -> true
+                else -> when (containerTransition.targetState.adaptation) {
+                    is Adaptive.Adaptation.Change -> when (transition.currentState) {
+                        EnterExitState.PreEnter,
+                        EnterExitState.PostExit -> true
+                        EnterExitState.Visible -> false
+                    }
+                    // Controlled elsewhere
+                    is Adaptive.Adaptation.Swap -> canAnimateSharedElements
+                }
             }
         }
     }
