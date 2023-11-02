@@ -42,8 +42,6 @@ internal class SharedElementData(
         vectorConverter = IntSize.VectorConverter,
         animationSpec = sharedElementSpring()
     )
-
-    var placementOffset: IntOffset by mutableStateOf(IntOffset.Zero)
 }
 
 /**
@@ -69,12 +67,6 @@ internal fun Modifier.sharedElement(
                 coroutineScope = coroutineScope,
                 lookaheadScope = sharedElementData.lookaheadScope,
             )
-            coordinates?.let {
-                sharedElementData.placementOffset = lookaheadScopeCoordinates.localPositionOf(
-                    sourceCoordinates = it,
-                    relativeToSource = Offset.Zero
-                ).round()
-            }
             if (enabled) placeable.place(x = x, y = y)
             else placeable.place(0, 0)
         }
