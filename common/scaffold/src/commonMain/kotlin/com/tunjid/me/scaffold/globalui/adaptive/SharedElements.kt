@@ -35,10 +35,12 @@ internal class SharedElementData(
     val lookaheadScope: LookaheadScope
 ) {
     val offsetAnimation = DeferredAnimation(
-        IntOffset.VectorConverter
+        vectorConverter = IntOffset.VectorConverter,
+        animationSpec = sharedElementSpring()
     )
     val sizeAnimation = DeferredAnimation(
-        IntSize.VectorConverter
+        vectorConverter = IntSize.VectorConverter,
+        animationSpec = sharedElementSpring()
     )
 
     var placementOffset: IntOffset by mutableStateOf(IntOffset.Zero)
@@ -57,7 +59,6 @@ internal fun Modifier.sharedElement(
         val (width, height) = sharedElementData.sizeAnimation.updateTarget(
             coroutineScope = coroutineScope,
             targetValue = lookaheadSize,
-            animationSpec = sharedElementSpring()
         )
         val animatedConstraints = Constraints.fixed(width, height)
         val placeable = measurable.measure(animatedConstraints)
@@ -67,7 +68,6 @@ internal fun Modifier.sharedElement(
                 placementScope = this,
                 coroutineScope = coroutineScope,
                 lookaheadScope = sharedElementData.lookaheadScope,
-                animationSpec = sharedElementSpring()
             )
             coordinates?.let {
                 sharedElementData.placementOffset = lookaheadScopeCoordinates.localPositionOf(
@@ -82,7 +82,8 @@ internal fun Modifier.sharedElement(
 }
 
 internal class DeferredAnimation<T, V : AnimationVector>(
-    private val vectorConverter: TwoWayConverter<T, V>
+    private val vectorConverter: TwoWayConverter<T, V>,
+    private val animationSpec: FiniteAnimationSpec<T>
 ) {
     val value: T? get() = animatable?.value ?: target
 
@@ -92,7 +93,6 @@ internal class DeferredAnimation<T, V : AnimationVector>(
     fun updateTarget(
         coroutineScope: CoroutineScope,
         targetValue: T,
-        animationSpec: FiniteAnimationSpec<T>
     ): T = with(coroutineScope) {
         target = targetValue
         if (target != null && target != animatable?.targetValue) {
@@ -114,7 +114,6 @@ private fun DeferredAnimation<IntOffset, AnimationVector2D>.updateTargetBasedOnC
     placementScope: PlacementScope,
     lookaheadScope: LookaheadScope,
     coroutineScope: CoroutineScope,
-    animationSpec: FiniteAnimationSpec<IntOffset>,
 ): IntOffset = with(lookaheadScope) {
     when (val coordinates = placementScope.coordinates) {
         null -> IntOffset.Zero
@@ -123,7 +122,6 @@ private fun DeferredAnimation<IntOffset, AnimationVector2D>.updateTargetBasedOnC
             val animOffset = updateTarget(
                 coroutineScope,
                 targetOffset.round(),
-                animationSpec,
             )
             val current = lookaheadScopeCoordinates.localPositionOf(
                 sourceCoordinates = coordinates,
