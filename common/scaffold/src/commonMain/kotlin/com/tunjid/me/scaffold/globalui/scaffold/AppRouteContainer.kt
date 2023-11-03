@@ -39,7 +39,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -93,17 +92,10 @@ internal fun AppRouteContainer(
     val paddingValues = routeContainerPadding(state.routeContainerPositionalState)
     val (startClearance, topClearance, _, bottomClearance) = paddingValues
 
-    val updatedState by rememberUpdatedState(state)
+    val hasNavContent = state.secondaryRoute != null
+    val windowSizeClass = state.windowSizeClass
+    val adaptation = state.adaptation
 
-    val hasNavContent by remember {
-        derivedStateOf { updatedState.secondaryRoute != null }
-    }
-    val windowSizeClass by remember {
-        derivedStateOf { updatedState.windowSizeClass }
-    }
-    val adaptation by remember {
-        derivedStateOf { updatedState.adaptation }
-    }
     val density = LocalDensity.current
     val paneSplitState = remember(::PaneAnchorState)
 
