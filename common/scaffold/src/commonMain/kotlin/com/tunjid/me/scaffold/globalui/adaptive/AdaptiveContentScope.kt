@@ -67,7 +67,6 @@ internal fun AdaptiveContentHost(
         val saveableStateHolder = rememberSaveableStateHolder()
         val routeScope = remember(saveableStateHolder) {
             AdaptiveContentHost(
-                lookaheadLayoutScope = this,
                 saveableStateHolder = saveableStateHolder
             )
         }
@@ -84,10 +83,8 @@ internal fun AdaptiveContentHost(
 
 @Stable
 private class AdaptiveContentHost(
-    lookaheadLayoutScope: LookaheadScope,
     saveableStateHolder: SaveableStateHolder,
-) : LookaheadScope by lookaheadLayoutScope,
-    SaveableStateHolder by saveableStateHolder {
+) : SaveableStateHolder by saveableStateHolder {
 
     private val sharedElementMap = mutableStateMapOf<Any, @Composable (Modifier) -> Unit>()
 
