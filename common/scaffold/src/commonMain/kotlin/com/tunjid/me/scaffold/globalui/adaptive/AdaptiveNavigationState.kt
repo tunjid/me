@@ -27,6 +27,8 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive.Adaptation.Change.unaffectedContainers
 import com.tunjid.me.scaffold.globalui.isPreviewing
+import com.tunjid.me.scaffold.globalui.slices.RouteContainerPositionalState
+import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.UnknownRoute
@@ -178,6 +180,10 @@ object Adaptive {
          * The window size class of the current screen configuration
          */
         val windowSizeClass: WindowSizeClass,
+        /**
+         * The positionalState of route containers
+         */
+        val routeContainerPositionalState: RouteContainerPositionalState,
     ) {
         companion object {
             internal val Initial = NavigationState(
@@ -188,6 +194,7 @@ object Adaptive {
                 windowSizeClass = WindowSizeClass.COMPACT,
                 routeIdsToAdaptiveSlots = Slot.entries.associateBy(Slot::name),
                 previousContainersToRoutes = emptyMap(),
+                routeContainerPositionalState = UiState().routeContainerState
             )
         }
     }
@@ -278,6 +285,7 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
         },
         routeIdsToAdaptiveSlots = emptyMap(),
         previousContainersToRoutes = emptyMap(),
+        routeContainerPositionalState = uiState.routeContainerState
     )
 }
     .distinctUntilChanged()

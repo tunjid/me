@@ -21,11 +21,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.adaptive.SavedStateAdaptiveContentHost
+import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
+import com.tunjid.me.scaffold.globalui.adaptive.SavedStateAdaptiveContentHost
 import com.tunjid.me.scaffold.nav.NavStateHolder
 
 /**
@@ -57,8 +59,14 @@ fun Scaffold(
                     uiState = globalUiStateHolder.state
                 ) {
                     AppRouteContainer(
-                        globalUiStateHolder = globalUiStateHolder,
                         state = state,
+                        onPaneAnchorChanged = remember {
+                            { paneAnchor: PaneAnchor ->
+                                globalUiStateHolder.accept {
+                                    copy(paneAnchor = paneAnchor)
+                                }
+                            }
+                        },
                         primaryContent = {
                             routeIn(Adaptive.Container.Primary).invoke()
                         },

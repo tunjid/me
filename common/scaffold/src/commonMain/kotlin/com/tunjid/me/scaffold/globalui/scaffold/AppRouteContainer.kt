@@ -63,21 +63,18 @@ import androidx.compose.ui.unit.max
 import androidx.compose.ui.zIndex
 import com.tunjid.me.core.utilities.countIf
 import com.tunjid.me.scaffold.adaptiveSpringSpec
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.PaneAnchor
-import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.WindowSizeClass.COMPACT
-import com.tunjid.me.scaffold.globalui.bottomNavSize
-import com.tunjid.me.scaffold.globalui.keyboardSize
-import com.tunjid.me.scaffold.globalui.navRailWidth
-import com.tunjid.me.scaffold.globalui.slices.routeContainerState
-import com.tunjid.me.scaffold.globalui.toolbarSize
-import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.nav.ExpandAll
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive.Adaptation.Companion.PrimaryToSecondary
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive.Adaptation.Companion.SecondaryToPrimary
+import com.tunjid.me.scaffold.globalui.bottomNavSize
+import com.tunjid.me.scaffold.globalui.keyboardSize
+import com.tunjid.me.scaffold.globalui.navRailWidth
+import com.tunjid.me.scaffold.globalui.slices.RouteContainerPositionalState
+import com.tunjid.me.scaffold.globalui.toolbarSize
+import com.tunjid.me.scaffold.nav.ExpandAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -87,13 +84,13 @@ import kotlinx.coroutines.launch
  */
 @Composable
 internal fun AppRouteContainer(
-    globalUiStateHolder: GlobalUiStateHolder,
     state: Adaptive.NavigationState,
+    onPaneAnchorChanged: (PaneAnchor) -> Unit,
     primaryContent: @Composable () -> Unit,
     secondaryContent: @Composable () -> Unit,
     transientPrimaryContent: @Composable () -> Unit,
 ) {
-    val paddingValues = routeContainerPadding(globalUiStateHolder)
+    val paddingValues = routeContainerPadding(state.routeContainerPositionalState)
     val (startClearance, topClearance, _, bottomClearance) = paddingValues
 
     val updatedState by rememberUpdatedState(state)
@@ -167,11 +164,8 @@ internal fun AppRouteContainer(
             else PaneAnchor.Zero
         )
     }
-
     LaunchedEffect(paneSplitState.currentPaneAnchor) {
-        globalUiStateHolder.accept {
-            copy(paneAnchor = paneSplitState.currentPaneAnchor)
-        }
+        onPaneAnchorChanged(paneSplitState.currentPaneAnchor)
     }
 }
 
@@ -355,14 +349,11 @@ private fun secondaryContentModifier(
 
 @Composable
 private fun routeContainerPadding(
-    globalUiStateHolder: GlobalUiStateHolder,
+    state: RouteContainerPositionalState,
 ): SnapshotStateList<Dp> {
     val paddingValues = remember {
         mutableStateListOf(0.dp, 0.dp, 0.dp, 0.dp)
     }
-    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
-        mapper = UiState::routeContainerState
-    )
 
     val bottomNavHeight = state.windowSizeClass.bottomNavSize() countIf state.bottomNavVisible
 
