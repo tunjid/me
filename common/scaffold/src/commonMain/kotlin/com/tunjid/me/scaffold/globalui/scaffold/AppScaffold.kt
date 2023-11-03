@@ -53,8 +53,8 @@ fun Scaffold(
                     navStateHolder = navStateHolder,
                 )
                 SavedStateAdaptiveContentHost(
-                    navStateHolder = navStateHolder,
-                    globalUiStateHolder = globalUiStateHolder
+                    navState = navStateHolder.state,
+                    uiState = globalUiStateHolder.state
                 ) {
                     AppRouteContainer(
                         globalUiStateHolder = globalUiStateHolder,
@@ -65,9 +65,10 @@ fun Scaffold(
                         secondaryContent = {
                             routeIn(Adaptive.Container.Secondary).invoke()
                         },
-                    ) {
-                        routeIn(Adaptive.Container.TransientPrimary).invoke()
-                    }
+                        transientPrimaryContent = {
+                            routeIn(Adaptive.Container.TransientPrimary).invoke()
+                        },
+                    )
                 }
                 AppFab(
                     globalUiStateHolder = globalUiStateHolder,

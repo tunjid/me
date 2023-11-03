@@ -47,11 +47,12 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.zIndex
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
+import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.scaffold.backPreviewModifier
-import com.tunjid.me.scaffold.nav.NavStateHolder
+import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.removedRoutes
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
 internal interface AdaptiveContentHost {
@@ -62,8 +63,8 @@ internal interface AdaptiveContentHost {
 
 @Composable
 internal fun SavedStateAdaptiveContentHost(
-    navStateHolder: NavStateHolder,
-    globalUiStateHolder: GlobalUiStateHolder,
+    navState: StateFlow<NavState>,
+    uiState: StateFlow<UiState>,
     content: @Composable AdaptiveContentHost.() -> Unit
 ) {
     LookaheadScope {
@@ -75,13 +76,13 @@ internal fun SavedStateAdaptiveContentHost(
         }
 
         LaunchedEffect(adaptiveContentHost) {
-            navStateHolder.state.adaptiveNavigationState(globalUiStateHolder.state).collect(
+            navState.adaptiveNavigationState(uiState).collect(
                 adaptiveContentHost::state::set
             )
         }
 
         adaptiveContentHost.content()
-        adaptiveContentHost.SavedStateCleanupEffect(navStateHolder)
+        adaptiveContentHost.SavedStateCleanupEffect(navState)
     }
 }
 
@@ -93,15 +94,16 @@ private class SavedStateAdaptiveContentHost(
 
     override var state by mutableStateOf(Adaptive.NavigationState.Initial)
     private val keysToSharedElements = mutableStateMapOf<Any, @Composable (Modifier) -> Unit>()
-    private val slotsToRoutes = mutableStateMapOf<Adaptive.Slot?, @Composable () -> Unit>().also { map ->
-        map[null] = {}
-        Adaptive.Slot.entries.forEach { slot ->
-            map[slot] = movableContentOf {
-                val containerState = state.containerStateFor(slot)
-                Render(containerState)
+    private val slotsToRoutes =
+        mutableStateMapOf<Adaptive.Slot?, @Composable () -> Unit>().also { map ->
+            map[null] = {}
+            Adaptive.Slot.entries.forEach { slot ->
+                map[slot] = movableContentOf {
+                    val containerState = state.containerStateFor(slot)
+                    Render(containerState)
+                }
             }
         }
-    }
 
     override fun routeIn(container: Adaptive.Container?): @Composable () -> Unit {
         val slot = container?.let(state::slotFor)
@@ -235,10 +237,10 @@ private fun SavedStateAdaptiveContentHost.Render(
  */
 @Composable
 private fun SavedStateAdaptiveContentHost.SavedStateCleanupEffect(
-    navStateHolder: NavStateHolder,
+    navState: StateFlow<NavState>,
 ) {
     val removedRoutesFlow = remember {
-        navStateHolder.state
+        navState
             .map { it.mainNav }
             .removedRoutes()
     }
