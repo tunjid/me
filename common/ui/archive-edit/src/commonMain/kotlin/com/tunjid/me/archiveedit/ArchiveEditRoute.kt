@@ -63,10 +63,11 @@ import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
-import com.tunjid.me.feature.LocalScreenStateHolderCache
+import com.tunjid.me.feature.screenStateHolderFor
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
+import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.ExternalRoute
 import com.tunjid.me.scaffold.permissions.Permission
@@ -85,9 +86,9 @@ data class ArchiveEditRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             ArchiveEditScreen(
-                stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
+                stateHolder = screenStateHolderFor(
                     route = this@ArchiveEditRoute
-                ),
+                )
             )
         }
 
@@ -119,6 +120,15 @@ private fun ArchiveEditScreen(
         onAction = actions
     )
 
+    val thumbnail = rememberSharedContent(
+        key = state.sharedElementKey,
+    ) { modifier ->
+        AsyncRasterImage(
+            imageUrl = state.thumbnail,
+            modifier = modifier
+        )
+    }
+
     LazyColumn(
         modifier = Modifier
             .dropTarget(
@@ -141,7 +151,7 @@ private fun ArchiveEditScreen(
         state = scrollState,
     ) {
         dragDropThumbnail(
-            thumbnail = state.thumbnail,
+            thumbnail = thumbnail,
             hasStoragePermission = state.hasStoragePermissions,
             dragLocation = state.dragLocation,
             onAction = actions
@@ -189,7 +199,7 @@ private fun ArchiveEditScreen(
 }
 
 private fun LazyListScope.dragDropThumbnail(
-    thumbnail: String?,
+    thumbnail: @Composable (Modifier) -> Unit,
     hasStoragePermission: Boolean,
     dragLocation: DragLocation,
     onAction: (Action) -> Unit,
@@ -206,11 +216,12 @@ private fun LazyListScope.dragDropThumbnail(
             .fillParentMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        AsyncRasterImage(
-            imageUrl = thumbnail,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .heightIn(max = 300.dp)
+        thumbnail(
+            Modifier
+//                .fillParentMaxWidth()
+                .align(Alignment.Center)
+                .padding(horizontal = 16.dp)
+                .heightIn(max = 100.dp)
                 .aspectRatio(ratio = 16f / 9f)
                 .clip(MaterialTheme.shapes.medium)
                 .border(

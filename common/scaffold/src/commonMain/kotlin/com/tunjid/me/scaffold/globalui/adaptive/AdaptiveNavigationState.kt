@@ -16,12 +16,17 @@
 
 package com.tunjid.me.scaffold.globalui.adaptive
 
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
-import com.tunjid.me.scaffold.globalui.isPreviewing
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive.Adaptation.Change.unaffectedContainers
+import com.tunjid.me.scaffold.globalui.isPreviewing
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.UnknownRoute
@@ -31,7 +36,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 
 /**
@@ -42,7 +46,16 @@ object Adaptive {
     /**
      * Scope for adaptive content that can show up in an arbitrary [Container]
      */
-    interface ContainerScope
+    interface ContainerScope : AnimatedVisibilityScope {
+
+        val containerState: ContainerState
+
+        @Composable
+        fun rememberSharedContent(
+            key: Any,
+            sharedElement: @Composable (Modifier) -> Unit
+        ): @Composable (Modifier) -> Unit
+    }
 
     /**
      * A layout in the hierarchy that hosts an [AppRoute]
@@ -61,7 +74,8 @@ object Adaptive {
     /**
      * Information about content in an [Adaptive.Container]
      */
-    interface ContainerState {
+    @Stable
+    sealed interface ContainerState {
         val currentRoute: AppRoute?
         val previousRoute: AppRoute?
         val container: Container?
@@ -132,6 +146,7 @@ object Adaptive {
     /**
      * Data structure for managing navigation as it adapts to various layout configurations
      */
+    @Immutable
     internal data class NavigationState(
         /**
          * The route in the primary navigation container
@@ -233,45 +248,43 @@ internal fun Adaptive.NavigationState.routeFor(
 }
 
 internal fun StateFlow<NavState>.adaptiveNavigationState(
-    uiState: StateFlow<UiState>
-): Flow<Adaptive.NavigationState> =
-    combine(uiState, ::Pair)
-        .map { (navState, uiState) ->
-            // If there is a back preview in progress, show the back primary route in the
-            // primary container
-            val visiblePrimaryRoute = navState.primaryRouteOnBackPress.takeIf {
-                uiState.backStatus.isPreviewing
-            } ?: navState.primaryRoute
+    uiStateFlow: StateFlow<UiState>
+): Flow<Adaptive.NavigationState> = combine(uiStateFlow) { navState, uiState ->
+    // If there is a back preview in progress, show the back primary route in the
+    // primary container
+    val visiblePrimaryRoute = navState.primaryRouteOnBackPress.takeIf {
+        uiState.backStatus.isPreviewing
+    } ?: navState.primaryRoute
 
-            Adaptive.NavigationState(
-                primaryRoute = visiblePrimaryRoute,
-                secondaryRoute = navState.secondaryRoute.takeIf { route ->
-                    route?.id != visiblePrimaryRoute.id
-                            && uiState.windowSizeClass > WindowSizeClass.COMPACT
-                },
-                transientPrimaryRoute = navState.primaryRoute.takeIf { route ->
-                    uiState.backStatus.isPreviewing
-                            && route.id != visiblePrimaryRoute.id
-                            && route.id != navState.secondaryRoute?.id
-                },
-                windowSizeClass = uiState.windowSizeClass,
-                adaptation = when {
-                    uiState.backStatus.isPreviewing -> Adaptive.Adaptation.Swap(
-                        from = Adaptive.Container.Primary,
-                        to = Adaptive.Container.TransientPrimary,
-                    )
-
-                    else -> Adaptive.Adaptation.Change
-                },
-                routeIdsToAdaptiveSlots = emptyMap(),
-                previousContainersToRoutes = emptyMap(),
+    Adaptive.NavigationState(
+        primaryRoute = visiblePrimaryRoute,
+        secondaryRoute = navState.secondaryRoute.takeIf { route ->
+            route?.id != visiblePrimaryRoute.id
+                    && uiState.windowSizeClass > WindowSizeClass.COMPACT
+        },
+        transientPrimaryRoute = navState.primaryRoute.takeIf { route ->
+            uiState.backStatus.isPreviewing
+                    && route.id != visiblePrimaryRoute.id
+                    && route.id != navState.secondaryRoute?.id
+        },
+        windowSizeClass = uiState.windowSizeClass,
+        adaptation = when {
+            uiState.backStatus.isPreviewing -> Adaptive.Adaptation.Swap(
+                from = Adaptive.Container.Primary,
+                to = Adaptive.Container.TransientPrimary,
             )
-        }
-        .distinctUntilChanged()
-        .scan(
-            initial = Adaptive.NavigationState.Initial,
-            operation = Adaptive.NavigationState::adaptTo
-        )
+
+            else -> Adaptive.Adaptation.Change
+        },
+        routeIdsToAdaptiveSlots = emptyMap(),
+        previousContainersToRoutes = emptyMap(),
+    )
+}
+    .distinctUntilChanged()
+    .scan(
+        initial = Adaptive.NavigationState.Initial,
+        operation = Adaptive.NavigationState::adaptTo
+    )
 
 /**
  * A method that adapts changes in navigation to different containers while allowing for them

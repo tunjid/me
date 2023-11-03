@@ -20,7 +20,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -35,7 +34,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -60,6 +58,8 @@ import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
+import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
+import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
 import kotlinx.datetime.Clock.System
 
 @Composable
@@ -123,6 +123,14 @@ fun ArchiveCard(
     onArchiveSelected: (Archive) -> Unit,
     onCategoryClicked: (Descriptor.Category) -> Unit,
 ) {
+    val thumb = rememberSharedContent(
+        key = thumbnailSharedElementKey(archive.id),
+    ) { innerModifier ->
+        AsyncRasterImage(
+            imageUrl = archive.thumbnail,
+            modifier = innerModifier
+        )
+    }
     ElevatedCard(
         modifier = modifier,
         onClick = {
@@ -130,9 +138,8 @@ fun ArchiveCard(
         },
         content = {
             Column {
-                AsyncRasterImage(
-                    imageUrl = archive.thumbnail,
-                    modifier = modifier
+                thumb(
+                    modifier
                         .fillMaxWidth()
                         .aspectRatio(16f / 9f)
                 )

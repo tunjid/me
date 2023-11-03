@@ -22,7 +22,6 @@ import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
-import com.tunjid.me.core.ui.lazy.staggeredgrid.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,15 +42,13 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.StickyHeaderStaggeredGrid
-import com.tunjid.me.core.ui.lazy.staggeredgrid.LazyStaggeredGridState
-import com.tunjid.me.core.ui.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import com.tunjid.me.core.ui.lazy.staggeredgrid.StaggeredGridCells
+import com.tunjid.me.core.ui.lazy.staggeredgrid.*
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.me.core.ui.scrollbar.scrollbarState
-import com.tunjid.me.feature.LocalScreenStateHolderCache
+import com.tunjid.me.feature.screenStateHolderFor
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.queryAtOrNull
@@ -69,7 +66,7 @@ data class ArchiveListRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             ArchiveScreen(
-                stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
+                stateHolder = screenStateHolderFor(
                     route = this@ArchiveListRoute
                 ),
             )

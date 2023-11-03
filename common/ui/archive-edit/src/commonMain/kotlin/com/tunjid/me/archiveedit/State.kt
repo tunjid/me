@@ -25,6 +25,7 @@ import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
+import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.mutator.Mutation
@@ -53,14 +54,16 @@ data class State(
     val navBarSize: Int,
     @ProtoNumber(7)
     val kind: ArchiveKind,
+    @ProtoNumber(10)
+    val chipsState: ChipsState = ChipsState(),
+    @ProtoNumber(11)
+    val sharedElementKey: String = thumbnailSharedElementKey(property = null),
     @Transient
     val thumbnail: String? = null,
     @Transient
     val body: TextFieldValue = TextFieldValue(),
     @Transient
     val upsert: ArchiveUpsert = ArchiveUpsert(),
-    @ProtoNumber(10)
-    val chipsState: ChipsState = ChipsState(),
     @Transient
     val toUpload: LocalUri? = null,
     @Transient
