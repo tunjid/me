@@ -39,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -77,7 +78,6 @@ import com.tunjid.me.scaffold.nav.ExpandAll
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive.Adaptation.Companion.PrimaryToSecondary
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive.Adaptation.Companion.SecondaryToPrimary
-import com.tunjid.me.scaffold.nav.NavStateHolder
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -88,8 +88,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun AppRouteContainer(
     globalUiStateHolder: GlobalUiStateHolder,
-    navStateHolder: NavStateHolder,
-    adaptation: Adaptive.Adaptation,
+    state: Adaptive.NavigationState,
     primaryContent: @Composable () -> Unit,
     secondaryContent: @Composable () -> Unit,
     transientPrimaryContent: @Composable () -> Unit,
@@ -97,11 +96,16 @@ internal fun AppRouteContainer(
     val paddingValues = routeContainerPadding(globalUiStateHolder)
     val (startClearance, topClearance, _, bottomClearance) = paddingValues
 
-    val windowSizeClass by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle {
-        it.windowSizeClass
+    val updatedState by rememberUpdatedState(state)
+
+    val hasNavContent by remember {
+        derivedStateOf { updatedState.secondaryRoute != null }
     }
-    val hasNavContent by navStateHolder.state.mappedCollectAsStateWithLifecycle {
-        it.secondaryRoute != null
+    val windowSizeClass by remember {
+        derivedStateOf { updatedState.windowSizeClass }
+    }
+    val adaptation by remember {
+        derivedStateOf { updatedState.adaptation }
     }
     val density = LocalDensity.current
     val paneSplitState = remember(::PaneAnchorState)

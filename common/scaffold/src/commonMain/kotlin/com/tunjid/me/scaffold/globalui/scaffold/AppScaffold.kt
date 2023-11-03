@@ -58,18 +58,16 @@ fun Scaffold(
                 ) {
                     AppRouteContainer(
                         globalUiStateHolder = globalUiStateHolder,
-                        navStateHolder = navStateHolder,
-                        adaptation = state.adaptation,
+                        state = state,
                         primaryContent = {
                             routeIn(Adaptive.Container.Primary).invoke()
                         },
                         secondaryContent = {
                             routeIn(Adaptive.Container.Secondary).invoke()
                         },
-                        transientPrimaryContent = {
-                            routeIn(Adaptive.Container.TransientPrimary).invoke()
-                        },
-                    )
+                    ) {
+                        routeIn(Adaptive.Container.TransientPrimary).invoke()
+                    }
                 }
                 AppFab(
                     globalUiStateHolder = globalUiStateHolder,
