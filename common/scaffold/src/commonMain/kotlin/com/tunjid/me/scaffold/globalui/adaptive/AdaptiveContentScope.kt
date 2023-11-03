@@ -283,26 +283,14 @@ private class AnimatedAdaptiveContentScope(
     }
 }
 
-@Suppress("UnusedReceiverParameter")
-val Adaptive.ContainerScope.emptyElement get() = EmptyElement
-
-val Adaptive.ContainerScope.isInPreview: Boolean
-    get() = containerState.container == Adaptive.Container.Primary
-            && containerState.adaptation == Adaptive.Adaptation.PrimaryToTransient
-
 /**
  * Creates a shared element between composables
  * @param key the key for the shared element
- * @param alt allows for rendering something else in place of the shared element in
- * certain scenarios
  * @param sharedElement the element to be shared
  */
 @Composable
 fun rememberSharedContent(
     key: Any,
-    alt: Adaptive.ContainerScope.() -> @Composable ((Modifier) -> Unit)? = {
-        null
-    },
     sharedElement: @Composable (Modifier) -> Unit
 ): @Composable (Modifier) -> Unit =
     when (val scope = LocalAdaptiveContentScope.current) {
@@ -311,17 +299,20 @@ fun rememberSharedContent(
         )
 
         else -> when (scope.containerState.container) {
-            // Allow shared elements in the primary or transient primary content only
-            Adaptive.Container.Primary,
-            Adaptive.Container.TransientPrimary -> alt(scope) ?: scope.rememberSharedContent(
-                key = key,
-                sharedElement = sharedElement
-            )
-
-            Adaptive.Container.Secondary -> sharedElement
             null -> throw IllegalArgumentException(
                 "Shared elements may only be used in non null containers"
             )
+            // Allow shared elements in the primary or transient primary content only
+            Adaptive.Container.Primary,
+            Adaptive.Container.TransientPrimary -> when {
+                scope.isInPreview -> EmptyElement
+                else -> scope.rememberSharedContent(
+                    key = key,
+                    sharedElement = sharedElement
+                )
+            }
+            // In the secondary container use the element as is
+            Adaptive.Container.Secondary -> sharedElement
         }
     }
 
@@ -363,3 +354,6 @@ private val FillSizeModifier = Modifier.fillMaxSize()
 
 private val EmptyElement: @Composable (Modifier) -> Unit = { modifier -> Box(modifier) }
 
+private val Adaptive.ContainerScope.isInPreview: Boolean
+    get() = containerState.container == Adaptive.Container.Primary
+            && containerState.adaptation == Adaptive.Adaptation.PrimaryToTransient
