@@ -21,18 +21,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.adaptive.AdaptiveContentHost
+import com.tunjid.me.scaffold.globalui.adaptive.SavedStateAdaptiveContentHost
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.nav.NavStateHolder
-import com.tunjid.me.scaffold.globalui.adaptive.adaptiveNavigationState
-import com.tunjid.me.scaffold.globalui.adaptive.slotFor
 
 /**
  * Root scaffold for the app
@@ -46,18 +40,6 @@ fun Scaffold(
     CompositionLocalProvider(
         LocalGlobalUiStateHolder provides globalUiStateHolder,
     ) {
-        val uiStateFlow = remember {
-            globalUiStateHolder.state
-        }
-        val adaptiveNavigationStateFlow = remember {
-            navStateHolder.state.adaptiveNavigationState(uiStateFlow)
-        }
-        val adaptiveNavigationState by adaptiveNavigationStateFlow.collectAsState(
-            Adaptive.NavigationState.Initial
-        )
-        val adaptation by remember {
-            derivedStateOf { adaptiveNavigationState.adaptation }
-        }
         Surface {
             Box(
                 modifier = modifier.fillMaxSize()
@@ -70,28 +52,22 @@ fun Scaffold(
                     globalUiStateHolder = globalUiStateHolder,
                     navStateHolder = navStateHolder,
                 )
-                AdaptiveContentHost(
+                SavedStateAdaptiveContentHost(
                     navStateHolder = navStateHolder,
-                    adaptiveNavigationState = adaptiveNavigationState
+                    globalUiStateHolder = globalUiStateHolder
                 ) {
                     AppRouteContainer(
                         globalUiStateHolder = globalUiStateHolder,
                         navStateHolder = navStateHolder,
-                        adaptation = adaptation,
+                        adaptation = state.adaptation,
                         primaryContent = {
-                            routeIn(
-                                adaptiveNavigationState.slotFor(Adaptive.Container.Primary)
-                            ).invoke()
+                            routeIn(Adaptive.Container.Primary).invoke()
                         },
                         secondaryContent = {
-                            routeIn(
-                                adaptiveNavigationState.slotFor(Adaptive.Container.Secondary)
-                            ).invoke()
+                            routeIn(Adaptive.Container.Secondary).invoke()
                         },
                         transientPrimaryContent = {
-                            routeIn(
-                                adaptiveNavigationState.slotFor(Adaptive.Container.TransientPrimary)
-                            ).invoke()
+                            routeIn(Adaptive.Container.TransientPrimary).invoke()
                         },
                     )
                 }

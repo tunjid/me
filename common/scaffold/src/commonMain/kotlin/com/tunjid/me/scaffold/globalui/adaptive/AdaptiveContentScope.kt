@@ -47,51 +47,71 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.zIndex
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.scaffold.backPreviewModifier
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.removedRoutes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 
-internal fun interface AdaptiveRouteLookup {
-    fun routeIn(slot: Adaptive.Slot?): @Composable () -> Unit
+internal interface AdaptiveContentHost {
+
+    val state: Adaptive.NavigationState
+    fun routeIn(container: Adaptive.Container?): @Composable () -> Unit
 }
 
 @Composable
-internal fun AdaptiveContentHost(
+internal fun SavedStateAdaptiveContentHost(
     navStateHolder: NavStateHolder,
-    adaptiveNavigationState: Adaptive.NavigationState,
-    content: @Composable AdaptiveRouteLookup.() -> Unit
+    globalUiStateHolder: GlobalUiStateHolder,
+    content: @Composable AdaptiveContentHost.() -> Unit
 ) {
     LookaheadScope {
         val saveableStateHolder = rememberSaveableStateHolder()
-        val routeScope = remember(saveableStateHolder) {
-            AdaptiveContentHost(
+        val adaptiveContentHost = remember(saveableStateHolder) {
+            SavedStateAdaptiveContentHost(
                 saveableStateHolder = saveableStateHolder
             )
         }
-        CompositionLocalProvider(
-            LocalAdaptiveNavigationState provides adaptiveNavigationState,
-        ) {
-            with(routeScope) {
-                content(rememberSlotToRouteComposableLookup(adaptiveNavigationState))
-                SavedStateCleanupEffect(navStateHolder)
-            }
+
+        LaunchedEffect(adaptiveContentHost) {
+            navStateHolder.state.adaptiveNavigationState(globalUiStateHolder.state).collect(
+                adaptiveContentHost::state::set
+            )
         }
+
+        adaptiveContentHost.content()
+        adaptiveContentHost.SavedStateCleanupEffect(navStateHolder)
     }
 }
 
 @Stable
-private class AdaptiveContentHost(
+private class SavedStateAdaptiveContentHost(
     saveableStateHolder: SaveableStateHolder,
-) : SaveableStateHolder by saveableStateHolder {
+) : AdaptiveContentHost,
+    SaveableStateHolder by saveableStateHolder {
 
-    private val sharedElementMap = mutableStateMapOf<Any, @Composable (Modifier) -> Unit>()
+    override var state by mutableStateOf(Adaptive.NavigationState.Initial)
+    private val keysToSharedElements = mutableStateMapOf<Any, @Composable (Modifier) -> Unit>()
+    private val slotsToRoutes = mutableStateMapOf<Adaptive.Slot?, @Composable () -> Unit>().also { map ->
+        map[null] = {}
+        Adaptive.Slot.entries.forEach { slot ->
+            map[slot] = movableContentOf {
+                val containerState = state.containerStateFor(slot)
+                Render(containerState)
+            }
+        }
+    }
+
+    override fun routeIn(container: Adaptive.Container?): @Composable () -> Unit {
+        val slot = container?.let(state::slotFor)
+        return slotsToRoutes.getValue(slot)
+    }
 
     fun getOrCreateSharedElement(
         key: Any,
         sharedElement: @Composable (Modifier) -> Unit,
-    ): @Composable (Modifier) -> Unit = sharedElementMap.getOrPut(key) {
+    ): @Composable (Modifier) -> Unit = keysToSharedElements.getOrPut(key) {
         createSharedElement(
             key = key,
             sharedElement = sharedElement,
@@ -119,28 +139,10 @@ private class AdaptiveContentHost(
             DisposableEffect(Unit) {
                 ++inCount
                 onDispose {
-                    if (--inCount <= 0) sharedElementMap.remove(key)
+                    if (--inCount <= 0) keysToSharedElements.remove(key)
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun AdaptiveContentHost.rememberSlotToRouteComposableLookup(
-    adaptiveNavigationState: Adaptive.NavigationState,
-): AdaptiveRouteLookup {
-    val updatedState by rememberUpdatedState(adaptiveNavigationState)
-    return remember {
-        val slotsToRoutes = mutableStateMapOf<Adaptive.Slot?, @Composable () -> Unit>()
-        slotsToRoutes[null] = {}
-        Adaptive.Slot.entries.forEach { slot ->
-            slotsToRoutes[slot] = movableContentOf {
-                val containerState = updatedState.containerStateFor(slot)
-                Render(containerState)
-            }
-        }
-        AdaptiveRouteLookup(slotsToRoutes::getValue)
     }
 }
 
@@ -149,7 +151,7 @@ private fun AdaptiveContentHost.rememberSlotToRouteComposableLookup(
  * and shared elements.
  */
 @Composable
-private fun AdaptiveContentHost.Render(
+private fun SavedStateAdaptiveContentHost.Render(
     containerState: Adaptive.ContainerState,
 ) {
     val containerTransition = updateTransition(containerState)
@@ -232,7 +234,7 @@ private fun AdaptiveContentHost.Render(
  * Clean up after navigation routes that have been discarded
  */
 @Composable
-private fun AdaptiveContentHost.SavedStateCleanupEffect(
+private fun SavedStateAdaptiveContentHost.SavedStateCleanupEffect(
     navStateHolder: NavStateHolder,
 ) {
     val removedRoutesFlow = remember {
@@ -255,7 +257,7 @@ private fun AdaptiveContentHost.SavedStateCleanupEffect(
 @Stable
 private class AnimatedAdaptiveContentScope(
     override val containerState: Adaptive.ContainerState,
-    val adaptiveContentHost: AdaptiveContentHost,
+    val adaptiveContentHost: SavedStateAdaptiveContentHost,
     val animatedContentScope: AnimatedContentScope
 ) : Adaptive.ContainerScope, AnimatedVisibilityScope by animatedContentScope {
 
@@ -266,7 +268,7 @@ private class AnimatedAdaptiveContentScope(
     ): @Composable (Modifier) -> Unit {
         val unsharedElement by rememberUpdatedState(sharedElement)
 
-        val currentNavigationState = LocalAdaptiveNavigationState.current
+        val currentNavigationState = adaptiveContentHost.state
         // This container state may be animating out. Look up the actual current route
         val currentRouteInContainer = containerState.container?.let(
             currentNavigationState::routeFor
@@ -312,10 +314,6 @@ fun rememberSharedContent(
             Adaptive.Container.Secondary -> sharedElement
         }
     }
-
-private val LocalAdaptiveNavigationState = staticCompositionLocalOf {
-    Adaptive.NavigationState.Initial
-}
 
 private val LocalAdaptiveContentScope = staticCompositionLocalOf<Adaptive.ContainerScope?> {
     null
