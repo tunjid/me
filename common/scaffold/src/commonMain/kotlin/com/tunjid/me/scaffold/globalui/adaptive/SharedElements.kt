@@ -107,4 +107,4 @@ internal class DeferredAnimation<T, V : AnimationVector>(
     }
 }
 
-private fun <T> sharedElementSpring() = spring<T>(stiffness = Spring.StiffnessMedium)
+private fun <T> sharedElementSpring() = spring<T>(stiffness = Spring.StiffnessLow)

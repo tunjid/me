@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
+import androidx.compose.ui.zIndex
 import com.tunjid.me.scaffold.globalui.scaffold.backPreviewModifier
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.removedRoutes
@@ -110,10 +111,12 @@ private class AdaptiveContentHost(
         return movableContentOf { modifier ->
             val updatedElement by rememberUpdatedState(sharedElement)
             updatedElement(
-                Modifier.sharedElement(
-                    enabled = LocalSharedElementAnimationStatus.current,
-                    sharedElementData = sharedElementData,
-                ) then modifier
+                Modifier
+                    .zIndex(20f)
+                    .sharedElement(
+                        enabled = LocalSharedElementAnimationStatus.current,
+                        sharedElementData = sharedElementData,
+                    ) then modifier
             )
 
             DisposableEffect(Unit) {
