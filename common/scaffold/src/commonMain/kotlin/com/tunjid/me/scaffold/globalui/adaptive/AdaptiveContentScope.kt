@@ -110,10 +110,10 @@ private class AdaptiveContentHost(
         return movableContentOf { modifier ->
             val updatedElement by rememberUpdatedState(sharedElement)
             updatedElement(
-                modifier.sharedElement(
+                Modifier.sharedElement(
                     enabled = LocalSharedElementAnimationStatus.current,
                     sharedElementData = sharedElementData,
-                )
+                ) then modifier
             )
 
             DisposableEffect(Unit) {
@@ -170,7 +170,8 @@ private fun AdaptiveContentHost.Render(
             )
         ) adaptiveContentScope@{
             // Animate if not fully visible or by the effects to run later
-            val animationStatus = canAnimateSharedElements || transition.targetState != EnterExitState.Visible
+            val animationStatus = canAnimateSharedElements
+                    || transition.targetState != EnterExitState.Visible
 
             when (val route = targetContainerState.currentRoute) {
                 // TODO: For the transient content container, gracefully animate out instead of
@@ -208,7 +209,7 @@ private fun AdaptiveContentHost.Render(
         }
 
         // Transitions only run for change adaptations
-        LaunchedEffect(transition.isRunning) {
+        LaunchedEffect(transition.isRunning, transition.currentState) {
             // Change transitions can stop animating shared elements when the transition is complete
             canAnimateSharedElements = when {
                 transition.isRunning -> true
@@ -216,6 +217,7 @@ private fun AdaptiveContentHost.Render(
                     is Adaptive.Adaptation.Change -> when (transition.currentState) {
                         EnterExitState.PreEnter,
                         EnterExitState.PostExit -> true
+
                         EnterExitState.Visible -> false
                     }
                     // Controlled elsewhere
