@@ -48,6 +48,7 @@ internal fun Modifier.sharedElement(
     sharedElementData: SharedElementData,
 ): Modifier = composed {
     val coroutineScope = rememberCoroutineScope()
+    // TODO: Optimize the not enabled path
     intermediateLayout { measurable, _ ->
         val (width, height) = sharedElementData.sizeAnimation.updateTarget(
             coroutineScope = coroutineScope,
