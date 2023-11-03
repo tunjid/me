@@ -44,8 +44,8 @@ internal actual fun Modifier.backPreviewModifier(): Modifier =
             mapper = UiState::backStatus
         )
         val scale by animateFloatAsState(
-            // Deviates from the spec here. The spec says 90% of the container, I'm doing 80%
-            targetValue = 1f - (backStatus.progress * 0.2F),
+            // Deviates from the spec here. The spec says 90% of the container, I'm doing 75%
+            targetValue = 1f - (backStatus.progress * 0.25F),
             label = "back preview modifier scale"
         )
         var offset by remember { mutableStateOf(IntOffset.Zero) }
