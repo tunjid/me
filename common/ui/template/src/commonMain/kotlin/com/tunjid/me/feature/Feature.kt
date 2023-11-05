@@ -42,7 +42,7 @@ val LocalScreenStateHolderCache: ProvidableCompositionLocal<ScreenStateHolderCac
     }
 
 @Composable
-fun <T> screenStateHolderFor(route: AppRoute): T {
+fun <T> rememberRetainedStateHolder(route: AppRoute): T {
     val cache = LocalScreenStateHolderCache.current
     return remember(cache) { cache.screenStateHolderFor(route) }
 }

@@ -39,14 +39,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
-import com.tunjid.me.feature.LocalScreenStateHolderCache
+import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.nav.AppRoute
 import kotlinx.serialization.Serializable
 
@@ -57,7 +57,7 @@ data class ProfileRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             ProfileScreen(
-                stateHolder = LocalScreenStateHolderCache.current.screenStateHolderFor(
+                stateHolder = rememberRetainedStateHolder(
                     route = this@ProfileRoute
                 ),
             )

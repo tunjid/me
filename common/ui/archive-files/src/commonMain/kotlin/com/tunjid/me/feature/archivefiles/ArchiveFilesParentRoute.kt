@@ -42,7 +42,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.feature.LocalScreenStateHolderCache
+import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
@@ -107,8 +107,7 @@ private fun ArchiveFilesParentScreen(
             state = pagerState,
         ) { index ->
             ArchiveFilesScreen(
-                stateHolder = LocalScreenStateHolderCache.current
-                    .screenStateHolderFor(children[index])
+                stateHolder = rememberRetainedStateHolder(children[index])
             )
         }
     }

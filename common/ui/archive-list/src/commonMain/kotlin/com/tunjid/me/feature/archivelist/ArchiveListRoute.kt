@@ -45,7 +45,7 @@ import com.tunjid.me.core.ui.StickyHeaderStaggeredGrid
 import com.tunjid.me.core.ui.lazy.staggeredgrid.*
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.me.core.ui.scrollbar.scrollbarState
-import com.tunjid.me.feature.screenStateHolderFor
+import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
@@ -66,7 +66,7 @@ data class ArchiveListRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             ArchiveScreen(
-                stateHolder = screenStateHolderFor(
+                stateHolder = rememberRetainedStateHolder(
                     route = this@ArchiveListRoute
                 ),
             )

@@ -33,11 +33,9 @@ import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
+import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
 import com.tunjid.mutator.mutation
 import kotlinx.coroutines.flow.distinctUntilChanged
-import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
-import java.awt.event.FocusEvent
-import java.awt.event.FocusListener
 import java.awt.event.WindowEvent
 import java.awt.event.WindowFocusListener
 

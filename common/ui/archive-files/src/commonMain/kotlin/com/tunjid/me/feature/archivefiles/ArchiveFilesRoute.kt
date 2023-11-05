@@ -59,7 +59,7 @@ import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.maxSize
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.core.utilities.RemoteUri
-import com.tunjid.me.feature.screenStateHolderFor
+import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
@@ -84,7 +84,7 @@ data class ArchiveFilesRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             ArchiveFilesScreen(
-                stateHolder = screenStateHolderFor(
+                stateHolder = rememberRetainedStateHolder(
                     route = this@ArchiveFilesRoute
                 ),
             )

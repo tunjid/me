@@ -63,7 +63,7 @@ import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
-import com.tunjid.me.feature.screenStateHolderFor
+import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.lifecycle.component1
@@ -86,7 +86,7 @@ data class ArchiveEditRoute(
     override val content: @Composable Adaptive.ContainerScope.() -> Unit
         get() = {
             ArchiveEditScreen(
-                stateHolder = screenStateHolderFor(
+                stateHolder = rememberRetainedStateHolder(
                     route = this@ArchiveEditRoute
                 )
             )
