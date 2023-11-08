@@ -3,7 +3,6 @@ package com.tunjid.me.scaffold.globalui.scaffold
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,7 +18,6 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
@@ -44,13 +42,8 @@ internal actual fun Modifier.backPreviewModifier(): Modifier =
             mapper = UiState::backStatus
         )
         val scale by animateFloatAsState(
-            // Deviates from the spec here. The spec says 90% of the container, I'm doing 75%
-            targetValue = 1f - (backStatus.progress * 0.25F),
-            label = "back preview modifier scale"
-        )
-        var offset by remember { mutableStateOf(IntOffset.Zero) }
-        val animatedOffset by animateIntOffsetAsState(
-            targetValue = offset,
+            // Deviates from the spec here. The spec says 90% of the container, I'm doing 85%
+            targetValue = 1f - (backStatus.progress * 0.15F),
             label = "back preview modifier scale"
         )
         var elevation by remember { mutableStateOf(0.dp) }
@@ -97,9 +90,8 @@ internal actual fun Modifier.backPreviewModifier(): Modifier =
                 val verticalProgress = (touchPoint / screenSize) - 0.5f
                 val yOffset = (verticalProgress * maxYShift).roundToInt()
 
-                offset = IntOffset(xOffset, yOffset)
                 layout(placeable.width, placeable.height) {
-                    placeable.placeRelative(x = animatedOffset.x, y = animatedOffset.y)
+                    placeable.placeRelative(x = xOffset, y = yOffset)
                 }
             }
             .background(
