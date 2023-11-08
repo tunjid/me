@@ -51,7 +51,6 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.scaffold.backPreviewModifier
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.removedRoutes
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
@@ -157,8 +156,6 @@ private fun SavedStateAdaptiveContentHost.Render(
     containerState: Adaptive.ContainerState,
 ) {
     val containerTransition = updateTransition(containerState)
-    val latestContainerState by rememberUpdatedState(containerState)
-
     containerTransition.AnimatedContent(
         contentKey = { it.currentRoute?.id },
         transitionSpec = {
@@ -196,22 +193,6 @@ private fun SavedStateAdaptiveContentHost.Render(
             }
         }
 
-        LaunchedEffect(latestContainerState) {
-            when (latestContainerState.adaptation) {
-                // When things move to the primary container from transient, share elements
-                Adaptive.Adaptation.TransientToPrimary -> {
-                    canAnimateSharedElements = true
-                    // TODO: This is a heuristic, it assumes animations can run for a certain duration
-                    //  after a swap change
-                    delay(700)
-                    canAnimateSharedElements = false
-                }
-
-                // Don't do anything here, uses the other launched effect for if its running
-                else -> Unit
-            }
-        }
-
         // Transitions only run for change adaptations
         LaunchedEffect(transition.isRunning, transition.currentState) {
             // Change transitions can stop animating shared elements when the transition is complete
@@ -224,7 +205,7 @@ private fun SavedStateAdaptiveContentHost.Render(
 
                         EnterExitState.Visible -> false
                     }
-                    // Controlled elsewhere
+                    // No-op on swaps
                     is Adaptive.Adaptation.Swap -> canAnimateSharedElements
                 }
             }
