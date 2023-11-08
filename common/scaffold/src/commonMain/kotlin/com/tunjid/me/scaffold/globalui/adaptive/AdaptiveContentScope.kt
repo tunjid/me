@@ -173,6 +173,7 @@ private fun SavedStateAdaptiveContentHost.Render(
             // Animate if not fully visible or by the effects to run later
             val animationStatus = canAnimateSharedElements
                     || transition.targetState != EnterExitState.Visible
+                    || isInPreview
 
             when (val route = targetContainerState.currentRoute) {
                 // TODO: For the transient content container, gracefully animate out instead of
