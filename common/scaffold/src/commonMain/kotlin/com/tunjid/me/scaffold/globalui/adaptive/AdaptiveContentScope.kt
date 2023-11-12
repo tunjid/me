@@ -51,8 +51,12 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.scaffold.backPreviewModifier
 import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.removedRoutes
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 
 internal interface AdaptiveContentHost {
 
@@ -76,7 +80,7 @@ internal fun SavedStateAdaptiveContentHost(
 
         LaunchedEffect(adaptiveContentHost) {
             navState.adaptiveNavigationState(uiState).collect(
-                adaptiveContentHost::state::set
+                adaptiveContentHost::updateState
             )
         }
 
@@ -92,7 +96,8 @@ private class SavedStateAdaptiveContentHost(
     SaveableStateHolder by saveableStateHolder {
 
     override var state by mutableStateOf(Adaptive.NavigationState.Initial)
-    private val keysToSharedElements = mutableStateMapOf<Any, @Composable (Modifier) -> Unit>()
+        private set
+
     private val slotsToRoutes =
         mutableStateMapOf<Adaptive.Slot?, @Composable () -> Unit>().also { map ->
             map[null] = {}
@@ -104,9 +109,28 @@ private class SavedStateAdaptiveContentHost(
             }
         }
 
+    val idsAnimatingOut = MutableStateFlow(setOf<String>())
+    private val keysToSharedElements = mutableStateMapOf<Any, @Composable (Modifier) -> Unit>()
+
     override fun routeIn(container: Adaptive.Container?): @Composable () -> Unit {
         val slot = container?.let(state::slotFor)
         return slotsToRoutes.getValue(slot)
+    }
+
+    /**
+     * Updates [state] with [newState] when there are no conflicting routes that are animating
+     * out that would cause conflicts with the [SaveableStateHolder] implementation.
+     */
+    suspend fun updateState(newState: Adaptive.NavigationState) {
+        state = when {
+            newState.hasConflictingRoutes(idsAnimatingOut.value) -> {
+                // Wait for animation to finish before updating state
+                idsAnimatingOut.filterNot(newState::hasConflictingRoutes).first()
+                newState
+            }
+
+            else -> newState
+        }
     }
 
     fun getOrCreateSharedElement(
@@ -209,6 +233,21 @@ private fun SavedStateAdaptiveContentHost.Render(
                     // No-op on swaps
                     is Adaptive.Adaptation.Swap -> canAnimateSharedElements
                 }
+            }
+        }
+
+        // Add routes ids that are animating out
+        LaunchedEffect(transition.isRunning) {
+            if (transition.targetState == EnterExitState.PostExit) {
+                val routeId = targetContainerState.currentRoute?.id ?: return@LaunchedEffect
+                idsAnimatingOut.update { it + routeId }
+            }
+        }
+        // Remove route ids that have animated out
+        DisposableEffect(Unit) {
+            onDispose {
+                val routeId = targetContainerState.currentRoute?.id ?: return@onDispose
+                idsAnimatingOut.update { it - routeId }
             }
         }
     }
@@ -336,3 +375,12 @@ private val EmptyElement: @Composable (Modifier) -> Unit = { modifier -> Box(mod
 private val Adaptive.ContainerScope.isInPreview: Boolean
     get() = containerState.container == Adaptive.Container.Primary
             && containerState.adaptation == Adaptive.Adaptation.PrimaryToTransient
+
+/**
+ * Checks if any of the new routes coming in has any conflicts with those animating out.
+ */
+private fun Adaptive.NavigationState.hasConflictingRoutes(
+    animatingOutIds: Set<String>
+) = animatingOutIds.contains(primaryRoute.id)
+        || secondaryRoute?.id?.let(animatingOutIds::contains) == true
+        || transientPrimaryRoute?.id?.let(animatingOutIds::contains) == true
