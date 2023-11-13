@@ -143,7 +143,7 @@ private class SavedStateAdaptiveContentHost(
                 Modifier
                     .zIndex(20f)
                     .sharedElement(
-                        enabled = LocalSharedElementAnimationStatus.current,
+                        enabled = LocalAdaptiveContentScope.current?.canAnimateSharedElements == true,
                         sharedElementData = sharedElementData,
                     ) then modifier
             )
@@ -173,33 +173,31 @@ private fun SavedStateAdaptiveContentHost.Render(
             EnterTransition.None togetherWith ExitTransition.None
         }
     ) { targetContainerState ->
-        var canAnimateSharedElements by remember { mutableStateOf(true) }
-        with(
+        val scope = remember {
             AnimatedAdaptiveContentScope(
                 containerState = targetContainerState,
                 adaptiveContentHost = this@Render,
                 animatedContentScope = this
             )
-        ) adaptiveContentScope@{
-            // Animate if not fully visible or by the effects to run later
-            val animationStatus = canAnimateSharedElements
-                    || transition.targetState != EnterExitState.Visible
-                    || isInPreview
+        }
+        scope.containerState = targetContainerState
+        // Animate if not fully visible or by the effects to run later
+        scope.canAnimateSharedElements = scope.canAnimateSharedElements
+                || scope.isInPreview
+                || transition.targetState != EnterExitState.Visible
 
-            when (val route = targetContainerState.currentRoute) {
-                // TODO: For the transient content container, gracefully animate out instead of
-                //  disappearing
-                null -> Unit
-                else -> Box(
-                    modifier = modifierFor(containerState)
+        when (val route = targetContainerState.currentRoute) {
+            // TODO: For the transient content container, gracefully animate out instead of
+            //  disappearing
+            null -> Unit
+            else -> Box(
+                modifier = modifierFor(containerState)
+            ) {
+                CompositionLocalProvider(
+                    LocalAdaptiveContentScope provides scope
                 ) {
-                    CompositionLocalProvider(
-                        LocalAdaptiveContentScope provides this@adaptiveContentScope,
-                        LocalSharedElementAnimationStatus provides animationStatus
-                    ) {
-                        SaveableStateProvider(route.id) {
-                            route.content(this@adaptiveContentScope)
-                        }
+                    SaveableStateProvider(route.id) {
+                        route.content(scope)
                     }
                 }
             }
@@ -208,7 +206,7 @@ private fun SavedStateAdaptiveContentHost.Render(
         // Transitions only run for change adaptations
         LaunchedEffect(transition.isRunning, transition.currentState) {
             // Change transitions can stop animating shared elements when the transition is complete
-            canAnimateSharedElements = when {
+            scope.canAnimateSharedElements = when {
                 transition.isRunning -> true
                 else -> when (containerTransition.targetState.adaptation) {
                     is Adaptive.Adaptation.Change -> when (transition.currentState) {
@@ -218,7 +216,7 @@ private fun SavedStateAdaptiveContentHost.Render(
                         EnterExitState.Visible -> false
                     }
                     // No-op on swaps
-                    is Adaptive.Adaptation.Swap -> canAnimateSharedElements
+                    is Adaptive.Adaptation.Swap -> scope.canAnimateSharedElements
                 }
             }
         }

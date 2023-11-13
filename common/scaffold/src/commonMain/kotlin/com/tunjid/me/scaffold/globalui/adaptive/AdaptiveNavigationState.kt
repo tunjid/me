@@ -52,6 +52,8 @@ object Adaptive {
 
         val containerState: ContainerState
 
+        val canAnimateSharedElements: Boolean
+
         @Composable
         fun rememberSharedContent(
             key: Any,

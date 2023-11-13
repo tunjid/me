@@ -22,7 +22,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 
@@ -31,10 +33,15 @@ import androidx.compose.ui.Modifier
  */
 @Stable
 internal class AnimatedAdaptiveContentScope(
-    override val containerState: Adaptive.ContainerState,
+    containerState: Adaptive.ContainerState,
     val adaptiveContentHost: AdaptiveContentHost,
     val animatedContentScope: AnimatedContentScope
 ) : Adaptive.ContainerScope, AnimatedVisibilityScope by animatedContentScope {
+
+    override var containerState by mutableStateOf(containerState)
+    override var canAnimateSharedElements: Boolean by mutableStateOf(
+        value = containerState.adaptation != Adaptive.Adaptation.PrimaryToTransient
+    )
 
     @Composable
     override fun rememberSharedContent(
@@ -92,10 +99,6 @@ fun rememberSharedContent(
 
 internal val LocalAdaptiveContentScope = staticCompositionLocalOf<Adaptive.ContainerScope?> {
     null
-}
-
-internal val LocalSharedElementAnimationStatus = staticCompositionLocalOf {
-    true
 }
 
 private val EmptyElement: @Composable (Modifier) -> Unit = { modifier -> Box(modifier) }
