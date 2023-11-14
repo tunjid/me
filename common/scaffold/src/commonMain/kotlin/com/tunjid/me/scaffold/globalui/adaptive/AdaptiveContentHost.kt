@@ -66,7 +66,7 @@ internal fun SavedStateAdaptiveContentHost(
         }
 
         LaunchedEffect(adaptiveContentHost) {
-            navState.adaptiveNavigationState(uiState).collect(
+            adaptiveNavigationState(navState, uiState).collect(
                 adaptiveContentHost::updateState
             )
         }

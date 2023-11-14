@@ -38,7 +38,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.withIndex
 
 /**
  * Namespace for adaptive layout changes in an app
@@ -119,7 +121,7 @@ object Adaptive {
          */
         data class Swap(
             val from: Container,
-            val to: Container,
+            val to: Container?,
         ) : Adaptation()
 
         fun Swap.unaffectedContainers() = Container.entries - setOf(from, to)
@@ -144,6 +146,11 @@ object Adaptive {
                 from = Container.TransientPrimary,
                 to = Container.Primary
             )
+
+            val TransientDismissal = Swap(
+                from = Container.TransientPrimary,
+                to = null
+            )
         }
     }
 
@@ -152,6 +159,10 @@ object Adaptive {
      */
     @Immutable
     internal data class NavigationState(
+        /**
+         * Monotonously increasing id for changes in navigation state
+         */
+        val navId: Int,
         /**
          * The route in the primary navigation container
          */
@@ -189,6 +200,7 @@ object Adaptive {
     ) {
         companion object {
             internal val Initial = NavigationState(
+                navId = -1,
                 primaryRoute = UnknownRoute(Slot.One.name),
                 secondaryRoute = null,
                 transientPrimaryRoute = null,
@@ -202,7 +214,7 @@ object Adaptive {
     }
 }
 
-private val AdaptiveRouteInContainerLookups = listOf(
+private val AdaptiveRouteInContainerLookups: List<(Adaptive.NavigationState) -> AppRoute?> = listOf(
     Adaptive.NavigationState::primaryRoute,
     Adaptive.NavigationState::secondaryRoute,
     Adaptive.NavigationState::transientPrimaryRoute,
@@ -223,8 +235,9 @@ internal fun Adaptive.NavigationState.containerStateFor(
 }
 
 internal fun Adaptive.NavigationState.slotFor(
-    container: Adaptive.Container
+    container: Adaptive.Container?
 ): Adaptive.Slot? = when (container) {
+    null -> null
     Adaptive.Container.Primary -> routeIdsToAdaptiveSlots[primaryRoute.id]
     Adaptive.Container.Secondary -> routeIdsToAdaptiveSlots[secondaryRoute?.id]
     Adaptive.Container.TransientPrimary -> routeIdsToAdaptiveSlots[transientPrimaryRoute?.id]
@@ -256,9 +269,16 @@ internal fun Adaptive.NavigationState.routeFor(
     Adaptive.Container.TransientPrimary -> transientPrimaryRoute
 }
 
-internal fun StateFlow<NavState>.adaptiveNavigationState(
+
+internal fun adaptiveNavigationState(
+    navStateFlow: StateFlow<NavState>,
     uiStateFlow: StateFlow<UiState>
-): Flow<Adaptive.NavigationState> = combine(uiStateFlow) { navState, uiState ->
+): Flow<Adaptive.NavigationState> = combine(
+    flow = navStateFlow.withIndex(),
+    flow2 = uiStateFlow.distinctUntilChangedBy {
+        listOf(it.backStatus, it.windowSizeClass, it.routeContainerState)
+    },
+) { (navId, navState), uiState ->
     // If there is a back preview in progress, show the back primary route in the
     // primary container
     val visiblePrimaryRoute = navState.primaryRouteOnBackPress.takeIf {
@@ -266,6 +286,7 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
     } ?: navState.primaryRoute
 
     Adaptive.NavigationState(
+        navId = navId,
         primaryRoute = visiblePrimaryRoute,
         secondaryRoute = navState.secondaryRoute.takeIf { route ->
             route?.id != visiblePrimaryRoute.id
@@ -283,11 +304,14 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
                 to = Adaptive.Container.TransientPrimary,
             )
 
+            // Tentative, decide downstream
             else -> Adaptive.Adaptation.Change
         },
+        // Tentative, decide downstream
         routeIdsToAdaptiveSlots = emptyMap(),
+        // Tentative, decide downstream
         previousContainersToRoutes = emptyMap(),
-        routeContainerPositionalState = uiState.routeContainerState
+        routeContainerPositionalState = uiState.routeContainerState,
     )
 }
     .distinctUntilChanged()
@@ -303,19 +327,32 @@ internal fun StateFlow<NavState>.adaptiveNavigationState(
 private fun Adaptive.NavigationState.adaptTo(
     current: Adaptive.NavigationState,
 ): Adaptive.NavigationState {
-    val adaptation = when (current.adaptation) {
+    val newAdaptation = when (current.adaptation) {
+        // Moved from primary container to transient, keep as is
         Adaptive.Adaptation.PrimaryToTransient -> current.adaptation
         else -> when {
             primaryRoute.id == current.secondaryRoute?.id -> Adaptive.Adaptation.PrimaryToSecondary
             current.primaryRoute.id == secondaryRoute?.id -> Adaptive.Adaptation.SecondaryToPrimary
             adaptation == Adaptive.Adaptation.PrimaryToTransient
-                    && current.transientPrimaryRoute == null -> Adaptive.Adaptation.TransientToPrimary
+                    && current.transientPrimaryRoute == null -> when (current.navId) {
+                // Wait for the actual navigation state to change
+                navId -> adaptation
+                // Navigation has changed, adapt
+                else -> when(transientPrimaryRoute?.id) {
+                    current.primaryRoute.id -> Adaptive.Adaptation.TransientToPrimary
+                    else -> Adaptive.Adaptation.TransientDismissal
+                }
+            }
 
-            else -> Adaptive.Adaptation.Change
+            else -> when (current.navId) {
+                // Wait for the actual navigation state to change
+                navId -> adaptation
+                else -> Adaptive.Adaptation.Change
+            }
         }
     }
 
-    return when (adaptation) {
+    return when (newAdaptation) {
         // In a change, each container should keep its slot from the previous state.
         // This allows the AnimatedContent transition run on the route id
         Adaptive.Adaptation.Change -> {
@@ -337,7 +374,7 @@ private fun Adaptive.NavigationState.adaptTo(
             }
             // TODO: Remove stale route ids after they complete their transition
             current.copy(
-                adaptation = adaptation,
+                adaptation = newAdaptation,
                 previousContainersToRoutes = Adaptive.Container.entries.associateWith(::routeFor),
                 routeIdsToAdaptiveSlots = routeIdsToAdaptiveSlots + updatedRouteIdsToAdaptiveSlots
             )
@@ -345,27 +382,39 @@ private fun Adaptive.NavigationState.adaptTo(
 
         // In a swap, preserve the existing slot for a route, however find new routes coming in
         // an assign unoccupied slots to them.
-        is Adaptive.Adaptation.Swap -> {
-            val fromSlot = this.slotFor(adaptation.from)
-            val excludedSlots = adaptation.unaffectedContainers()
-                .map(::slotFor)
-                .plus(fromSlot)
-                .toSet()
-
-            val vacatedSlot = Adaptive.Slot.entries.first {
-                !excludedSlots.contains(it)
-            }
-            current.copy(
-                adaptation = adaptation,
-                previousContainersToRoutes = Adaptive.Container.entries.associateWith(::routeFor),
-                routeIdsToAdaptiveSlots = when (val newRoute = current.routeFor(adaptation.from)) {
-                    null -> routeIdsToAdaptiveSlots
-                    else -> routeIdsToAdaptiveSlots - routeFor(vacatedSlot)?.id + Pair(
-                        first = newRoute.id,
-                        second = vacatedSlot
-                    )
-                }
+        is Adaptive.Adaptation.Swap -> when {
+            // No change appreciable change in routes, keep things as is
+            AdaptiveRouteInContainerLookups.map(current::run)
+                    == AdaptiveRouteInContainerLookups.map(this::run)
+                    && adaptation == newAdaptation -> current.copy(
+                adaptation = newAdaptation,
+                previousContainersToRoutes = previousContainersToRoutes,
+                routeIdsToAdaptiveSlots = routeIdsToAdaptiveSlots
             )
+
+            else -> {
+                val fromSlot = this.slotFor(newAdaptation.from)
+                val excludedSlots = newAdaptation.unaffectedContainers()
+                    .map(::slotFor)
+                    .plus(fromSlot)
+                    .toSet()
+
+                val vacatedSlot = Adaptive.Slot.entries.first {
+                    !excludedSlots.contains(it)
+                }
+                current.copy(
+                    adaptation = newAdaptation,
+                    previousContainersToRoutes = Adaptive.Container.entries.associateWith(::routeFor),
+                    routeIdsToAdaptiveSlots = when (val newRoute =
+                        current.routeFor(newAdaptation.from)) {
+                        null -> routeIdsToAdaptiveSlots
+                        else -> routeIdsToAdaptiveSlots - routeFor(vacatedSlot)?.id + Pair(
+                            first = newRoute.id,
+                            second = vacatedSlot
+                        )
+                    }
+                )
+            }
         }
     }
 }
