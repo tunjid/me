@@ -216,14 +216,14 @@ private fun SavedStateAdaptiveContentHost.Render(
         LaunchedEffect(transition.isRunning) {
             if (transition.targetState == EnterExitState.PostExit) {
                 val routeId = targetContainerState.currentRoute?.id ?: return@LaunchedEffect
-                accept(Action.OnAnimatedIn(routeId))
+                accept(Action.RouteExitStart(routeId))
             }
         }
         // Remove route ids that have animated out
         DisposableEffect(Unit) {
             onDispose {
                 val routeId = targetContainerState.currentRoute?.id ?: return@onDispose
-                accept(Action.OnAnimatedOut(routeId))
+                accept(Action.RouteExitEnd(routeId))
             }
         }
     }

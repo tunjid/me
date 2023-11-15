@@ -25,9 +25,9 @@ import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.withIndex
 
 internal sealed class Action {
-    data class OnAnimatedIn(val id: String) : Action()
+    data class RouteExitStart(val id: String) : Action()
 
-    data class OnAnimatedOut(val id: String) : Action()
+    data class RouteExitEnd(val id: String) : Action()
 
 }
 
@@ -46,11 +46,11 @@ internal fun CoroutineScope.adaptiveNavigationStateMutator(
     actionTransform = { actions ->
         actions.toMutationStream {
             when (val action = type()) {
-                is Action.OnAnimatedIn -> action.flow.mapToMutation { animatedInAction ->
-                    copy(routeIdsAnimatingOut = routeIdsAnimatingOut + animatedInAction.id)
+                is Action.RouteExitStart -> action.flow.mapToMutation { exitStart ->
+                    copy(routeIdsAnimatingOut = routeIdsAnimatingOut + exitStart.id)
                 }
-                is Action.OnAnimatedOut -> action.flow.mapToMutation { animatedOutAction ->
-                    copy(routeIdsAnimatingOut = routeIdsAnimatingOut - animatedOutAction.id)
+                is Action.RouteExitEnd -> action.flow.mapToMutation { exitEnd ->
+                    copy(routeIdsAnimatingOut = routeIdsAnimatingOut - exitEnd.id)
                 }
             }
         }
