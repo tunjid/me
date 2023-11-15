@@ -170,6 +170,10 @@ object Adaptive {
          */
         val adaptation: Adaptation,
         /**
+         * A set of route ids that may be returned to.
+         */
+        val backStackIds: Set<String>,
+        /**
          * A set of route ids that are animating out.
          */
         val routeIdsAnimatingOut: Set<String>,
@@ -199,6 +203,7 @@ object Adaptive {
                 adaptation = Adaptation.Change,
                 windowSizeClass = WindowSizeClass.COMPACT,
                 routeIdsToAdaptiveSlots = Slot.entries.associateBy(Slot::name),
+                backStackIds = emptySet(),
                 routeIdsAnimatingOut = emptySet(),
                 previousContainersToRoutes = emptyMap(),
                 routeContainerPositionalState = UiState().routeContainerState

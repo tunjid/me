@@ -13,6 +13,8 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
+import com.tunjid.treenav.Order
+import com.tunjid.treenav.flatten
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,6 +23,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.withIndex
 
@@ -46,12 +49,8 @@ internal fun CoroutineScope.adaptiveNavigationStateMutator(
     actionTransform = { actions ->
         actions.toMutationStream {
             when (val action = type()) {
-                is Action.RouteExitStart -> action.flow.mapToMutation { exitStart ->
-                    copy(routeIdsAnimatingOut = routeIdsAnimatingOut + exitStart.id)
-                }
-                is Action.RouteExitEnd -> action.flow.mapToMutation { exitEnd ->
-                    copy(routeIdsAnimatingOut = routeIdsAnimatingOut - exitEnd.id)
-                }
+                is Action.RouteExitStart -> action.flow.routeExitStartMutations()
+                is Action.RouteExitEnd -> action.flow.routeExitEndMutations()
             }
         }
     },
@@ -97,6 +96,7 @@ private fun adaptiveNavigationStateMutations(
             // Tentative, decide downstream
             else -> Adaptive.Adaptation.Change
         },
+        backStackIds = navState.mainNav.flatten(Order.DepthFirst).map { it.id }.toSet(),
         // Tentative, decide downstream
         routeIdsAnimatingOut = emptySet(),
         // Tentative, decide downstream
@@ -215,13 +215,42 @@ private fun Adaptive.NavigationState.adaptTo(
     }
 }
 
+private fun Flow<Action.RouteExitStart>.routeExitStartMutations(): Flow<Mutation<Adaptive.NavigationState>> =
+    mapToMutation { exitStart ->
+        copy(routeIdsAnimatingOut = routeIdsAnimatingOut + exitStart.id)
+    }
+
+private fun Flow<Action.RouteExitEnd>.routeExitEndMutations(): Flow<Mutation<Adaptive.NavigationState>> =
+    mapToMutation { exitEnd ->
+        copy(routeIdsAnimatingOut = routeIdsAnimatingOut - exitEnd.id).prune()
+    }
+
 /**
  * Checks if any of the new routes coming in has any conflicts with those animating out.
  */
 private fun Adaptive.NavigationState.hasConflictingRoutes() =
     routeIdsAnimatingOut.contains(primaryRoute.id)
-        || secondaryRoute?.id?.let(routeIdsAnimatingOut::contains) == true
-        || transientPrimaryRoute?.id?.let(routeIdsAnimatingOut::contains) == true
+            || secondaryRoute?.id?.let(routeIdsAnimatingOut::contains) == true
+            || transientPrimaryRoute?.id?.let(routeIdsAnimatingOut::contains) == true
+
+/**
+ * Trims unneeded metadata from the [Adaptive.NavigationState]
+ */
+private fun Adaptive.NavigationState.prune(): Adaptive.NavigationState = copy(
+    routeIdsToAdaptiveSlots = routeIdsToAdaptiveSlots.filter { (routeId) ->
+        if (routeId == null) return@filter false
+        backStackIds.contains(routeId)
+                || routeIdsAnimatingOut.contains(routeId)
+                || previousContainersToRoutes.values.map { it?.id }.toSet().contains(routeId)
+    },
+    previousContainersToRoutes = previousContainersToRoutes.filter { (_, route) ->
+        if (route == null) return@filter false
+        backStackIds.contains(route.id)
+                || routeIdsAnimatingOut.contains(route.id)
+                || previousContainersToRoutes.values.map { it?.id }.toSet().contains(route.id)
+    }
+)
+
 
 private val AdaptiveRouteInContainerLookups: List<(Adaptive.NavigationState) -> AppRoute?> = listOf(
     Adaptive.NavigationState::primaryRoute,
