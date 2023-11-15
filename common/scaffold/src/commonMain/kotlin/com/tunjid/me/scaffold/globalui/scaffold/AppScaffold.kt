@@ -59,7 +59,7 @@ fun Scaffold(
                     uiState = globalUiStateHolder.state
                 ) {
                     AppRouteContainer(
-                        state = state,
+                        state = adaptedState,
                         onPaneAnchorChanged = remember {
                             { paneAnchor: PaneAnchor ->
                                 globalUiStateHolder.accept {

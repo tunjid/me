@@ -50,7 +50,7 @@ internal class AnimatedAdaptiveContentScope(
     ): @Composable (Modifier) -> Unit {
         val unsharedElement by rememberUpdatedState(sharedElement)
 
-        val currentNavigationState = adaptiveContentHost.state
+        val currentNavigationState = adaptiveContentHost.adaptedState
         // This container state may be animating out. Look up the actual current route
         val currentRouteInContainer = containerState.container?.let(
             currentNavigationState::routeFor
