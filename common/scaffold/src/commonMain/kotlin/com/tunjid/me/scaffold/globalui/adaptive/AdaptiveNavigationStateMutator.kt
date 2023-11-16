@@ -13,7 +13,7 @@ import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.treenav.Order
-import com.tunjid.treenav.flatten
+import com.tunjid.treenav.traverse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -96,7 +96,9 @@ private fun adaptiveNavigationStateMutations(
                 previewState = uiState.backStatus.previewState
             )
         },
-        backStackIds = navState.mainNav.flatten(Order.DepthFirst).map { it.id }.toSet(),
+        backStackIds = mutableSetOf<String>().apply {
+            navState.mainNav.traverse(Order.DepthFirst) { add(it.id) }
+        },
         // Tentative, decide downstream
         routeIdsAnimatingOut = emptySet(),
         // Tentative, decide downstream
@@ -146,9 +148,7 @@ private fun Adaptive.NavigationState.adaptTo(
             else -> when (current.navId) {
                 // Wait for the actual navigation state to change
                 navId -> adaptation
-                else -> Adaptive.Adaptation.Change(
-                    previewState = BackStatus.PreviewState.NoPreview
-                )
+                else -> current.adaptation
             }
         }
     }
