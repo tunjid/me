@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
+import com.tunjid.me.scaffold.globalui.BackStatus
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.slices.RouteContainerPositionalState
@@ -102,7 +103,7 @@ object Adaptive {
         /**
          * Routes were changed in containers
          */
-        data object Change : Adaptation()
+        data class Change(val previewState: BackStatus.PreviewState) : Adaptation()
 
         /**
          * Routes were swapped in between containers
@@ -111,8 +112,6 @@ object Adaptive {
             val from: Container,
             val to: Container?,
         ) : Adaptation()
-
-        fun Swap.unaffectedContainers() = Container.entries - setOf(from, to)
 
         companion object {
             val PrimaryToSecondary = Swap(
@@ -200,7 +199,7 @@ object Adaptive {
                 primaryRoute = UnknownRoute(Slot.One.name),
                 secondaryRoute = null,
                 transientPrimaryRoute = null,
-                adaptation = Adaptation.Change,
+                adaptation = Adaptation.Change(previewState = BackStatus.PreviewState.NoPreview),
                 windowSizeClass = WindowSizeClass.COMPACT,
                 routeIdsToAdaptiveSlots = Slot.entries.associateBy(Slot::name),
                 backStackIds = emptySet(),
@@ -211,6 +210,8 @@ object Adaptive {
         }
     }
 }
+
+fun Adaptive.Adaptation.Swap.containersExcludingDestination() = Adaptive.Container.entries - setOf(to)
 
 internal fun Adaptive.NavigationState.containerStateFor(
     slot: Adaptive.Slot

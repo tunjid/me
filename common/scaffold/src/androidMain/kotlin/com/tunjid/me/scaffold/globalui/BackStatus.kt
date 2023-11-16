@@ -23,7 +23,13 @@ internal actual data class PreviewBackStatus(
     val progress: Float,
     val isFromLeft: Boolean,
     val isPreviewing: Boolean,
-) : BackStatus
+) : BackStatus {
+    override val previewState: BackStatus.PreviewState
+        get() = when {
+            isPreviewing -> BackStatus.PreviewState.Previewing
+            else -> BackStatus.PreviewState.CancelledAfterPreview
+        }
+}
 
 @Composable
 actual fun BackHandler(
@@ -66,13 +72,17 @@ fun ComponentActivity.integrateBackActions(
 
         override fun handleOnBackPressed() {
             // Dismiss back preview
-            globalUiStateHolder.accept { copy(backStatus = BackStatus.None) }
+            globalUiStateHolder.accept {
+                copy(backStatus = BackStatus.None(BackStatus.PreviewState.CommittedAfterPreview))
+            }
             // Pop navigation
             navStateHolder.accept { navState.pop() }
         }
 
         override fun handleOnBackCancelled() {
-            globalUiStateHolder.accept { copy(backStatus = BackStatus.None) }
+            globalUiStateHolder.accept {
+                copy(backStatus = BackStatus.None(BackStatus.PreviewState.CancelledAfterPreview))
+            }
         }
     }
     onBackPressedDispatcher.addCallback(backPressedCallback)
@@ -101,7 +111,3 @@ actual val BackStatus.progress: Float
 actual val BackStatus.isFromLeft: Boolean
     get() =
         if (this is PreviewBackStatus) isFromLeft else false
-
-actual val BackStatus.isPreviewing: Boolean
-    get() =
-        if (this is PreviewBackStatus) isPreviewing else false

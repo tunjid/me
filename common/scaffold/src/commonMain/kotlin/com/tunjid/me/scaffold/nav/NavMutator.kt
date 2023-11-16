@@ -71,7 +71,7 @@ interface AppRoute : Route {
     ): Adaptive.Transitions = when (state.container) {
         Adaptive.Container.Primary,
         Adaptive.Container.Secondary -> when (state.adaptation) {
-            Adaptive.Adaptation.Change -> Adaptive.Transitions(
+            is Adaptive.Adaptation.Change -> Adaptive.Transitions(
                 enter = fadeIn(
                     animationSpec = RouteTransitionAnimationSpec,
                     initialAlpha = 0.1f
