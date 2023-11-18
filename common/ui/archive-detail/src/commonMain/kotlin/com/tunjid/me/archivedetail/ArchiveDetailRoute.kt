@@ -85,7 +85,7 @@ private fun ArchiveDetailScreen(
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
     val bodyInViewport = scrollState.isInViewport(BODY_KEY)
 
-    if (state.isInPrimaryNav) GlobalUi(
+    GlobalUi(
         state = state,
         actions = actions
     )

@@ -17,6 +17,8 @@
 package com.tunjid.me.scaffold.globalui
 
 import androidx.compose.runtime.*
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
+import com.tunjid.me.scaffold.globalui.adaptive.LocalAdaptiveContentScope
 import com.tunjid.mutator.mutation
 
 val currentUiState
@@ -31,29 +33,28 @@ val currentUiState
 @Composable
 fun ScreenUiState(state: UiState) {
     val uiStateHolder = LocalGlobalUiStateHolder.current
-    var immutables by remember { mutableStateOf(state) }
+    val updatedState by rememberUpdatedState(state)
 
     val fabClickListener = MutableFunction(state.fabClickListener)
     val toolbarMenuClickListener = MutableFunction(state.toolbarMenuClickListener)
     val altToolbarMenuClickListener = MutableFunction(state.altToolbarMenuClickListener)
     val snackbarMessageConsumer = MutableFunction(state.snackbarMessageConsumer)
 
-    immutables = state.copy(
-        fabClickListener = fabClickListener,
-        toolbarMenuClickListener = toolbarMenuClickListener,
-        altToolbarMenuClickListener = altToolbarMenuClickListener,
-        snackbarMessageConsumer = snackbarMessageConsumer,
-    )
-
-    LaunchedEffect(immutables) {
-        uiStateHolder.accept(mutation {
-            // Preserve things that should not be overwritten
-            immutables.copy(
-                navMode = navMode,
-                windowSizeClass = windowSizeClass,
-                systemUI = systemUI,
-            )
-        })
+    val scope = LocalAdaptiveContentScope.current ?: return
+    LaunchedEffect(updatedState, scope.containerState) {
+        if (scope.containerState.container == Adaptive.Container.Primary) uiStateHolder.accept(
+            mutation {
+                // Preserve things that should not be overwritten
+                updatedState.copy(
+                    navMode = navMode,
+                    windowSizeClass = windowSizeClass,
+                    systemUI = systemUI,
+                    fabClickListener = fabClickListener,
+                    toolbarMenuClickListener = toolbarMenuClickListener,
+                    altToolbarMenuClickListener = altToolbarMenuClickListener,
+                    snackbarMessageConsumer = snackbarMessageConsumer,
+                )
+            })
     }
 
     DisposableEffect(true) {

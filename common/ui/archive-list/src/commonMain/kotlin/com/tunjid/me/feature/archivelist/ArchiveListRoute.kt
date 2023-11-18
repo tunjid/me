@@ -80,7 +80,7 @@ private fun ArchiveScreen(
     val (state, actions) = stateHolder
     val updatedItems by rememberUpdatedState(state.items)
 
-    if (state.isInPrimaryNav) GlobalUi(
+    GlobalUi(
         state = state,
         onAction = actions
     )

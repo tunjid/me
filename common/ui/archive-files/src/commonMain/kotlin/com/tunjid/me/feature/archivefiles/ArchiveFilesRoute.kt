@@ -98,7 +98,7 @@ internal fun ArchiveFilesScreen(
     val (state, actions) = stateHolder
     val gridState = rememberLazyGridState()
 
-    if (state.isInPrimaryNav) GlobalUi()
+    GlobalUi()
 
     Box(
         modifier = Modifier.fillMaxSize()
