@@ -60,7 +60,7 @@ internal class AnimatedAdaptiveContentScope(
         // Do not use the shared element if this content is being animated out
         if (!isCurrentlyAnimatingIn) return unsharedElement
 
-        return adaptiveContentHost.getOrCreateSharedElement(key, sharedElement)
+        return adaptiveContentHost.createOrUpdateSharedElement(key, sharedElement)
     }
 }
 

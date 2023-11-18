@@ -18,18 +18,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
-import androidx.compose.ui.zIndex
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.scaffold.backPreviewModifier
 import com.tunjid.me.scaffold.nav.NavState
@@ -44,7 +41,7 @@ internal interface AdaptiveContentHost {
     val adaptedState: Adaptive.NavigationState
     fun routeIn(container: Adaptive.Container?): @Composable () -> Unit
 
-    fun getOrCreateSharedElement(
+    fun createOrUpdateSharedElement(
         key: Any,
         sharedElement: @Composable (Modifier) -> Unit,
     ): @Composable (Modifier) -> Unit
@@ -106,46 +103,23 @@ private class SavedStateAdaptiveContentHost(
             }
         }
 
-    private val keysToSharedElements = mutableStateMapOf<Any, @Composable (Modifier) -> Unit>()
+    private val keysToSharedElements = mutableStateMapOf<Any, SharedElementData>()
 
     override fun routeIn(container: Adaptive.Container?): @Composable () -> Unit {
         val slot = container?.let(adaptedState::slotFor)
         return slotsToRoutes.getValue(slot)
     }
 
-    override fun getOrCreateSharedElement(
-        key: Any,
-        sharedElement: @Composable (Modifier) -> Unit,
-    ): @Composable (Modifier) -> Unit = keysToSharedElements.getOrPut(key) {
-        createSharedElement(
-            key = key,
-            sharedElement = sharedElement,
-        )
-    }
-
-    private fun createSharedElement(
+    override fun createOrUpdateSharedElement(
         key: Any,
         sharedElement: @Composable (Modifier) -> Unit,
     ): @Composable (Modifier) -> Unit {
-        val sharedElementData = SharedElementData()
-        var inCount by mutableIntStateOf(0)
-
-        return movableContentOf { modifier ->
-            val updatedElement by rememberUpdatedState(sharedElement)
-            updatedElement(
-                Modifier
-                    .zIndex(20f)
-                    .sharedElement(
-                        enabled = LocalAdaptiveContentScope.current?.canAnimateSharedElements == true,
-                        sharedElementData = sharedElementData,
-                    ) then modifier
-            )
-
-            DisposableEffect(Unit) {
-                ++inCount
-                onDispose {
-                    if (--inCount <= 0) keysToSharedElements.remove(key)
-                }
+        val sharedElementData = keysToSharedElements.getOrPut(key) {
+            SharedElementData(sharedElement) { keysToSharedElements.remove(key) }
+        }
+        return sharedElementData.moveableSharedElement.also {
+            if (sharedElementData.currentSharedElement != sharedElement) {
+                sharedElementData.currentSharedElement = sharedElement
             }
         }
     }

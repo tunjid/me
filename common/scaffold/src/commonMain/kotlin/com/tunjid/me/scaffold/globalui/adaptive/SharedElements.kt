@@ -7,8 +7,12 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -20,6 +24,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
+import androidx.compose.ui.zIndex
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -28,7 +33,13 @@ fun thumbnailSharedElementKey(
 ) = "thumbnail-$property"
 
 @Stable
-internal class SharedElementData {
+internal class SharedElementData(
+    sharedElement: @Composable (Modifier) -> Unit,
+    onRemoved: () -> Unit
+)  {
+    private var inCount by mutableIntStateOf(0)
+    var currentSharedElement by mutableStateOf(sharedElement)
+
     val offsetAnimation = DeferredAnimation(
         vectorConverter = IntOffset.VectorConverter,
         animationSpec = sharedElementSpring()
@@ -37,6 +48,24 @@ internal class SharedElementData {
         vectorConverter = IntSize.VectorConverter,
         animationSpec = sharedElementSpring()
     )
+
+    val moveableSharedElement = movableContentOf<Modifier> { modifier ->
+        sharedElement(
+            Modifier
+                .zIndex(20f)
+                .sharedElement(
+                    enabled = LocalAdaptiveContentScope.current?.canAnimateSharedElements == true,
+                    sharedElementData = this,
+                ) then modifier
+        )
+
+        DisposableEffect(Unit) {
+            ++inCount
+            onDispose {
+                if (--inCount <= 0) onRemoved()
+            }
+        }
+    }
 }
 
 /**
