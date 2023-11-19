@@ -108,6 +108,7 @@ internal fun Modifier.sharedElement(
     }
 }
 
+@Stable
 internal class DeferredAnimation<T, V : AnimationVector>(
     private val vectorConverter: TwoWayConverter<T, V>,
     private val animationSpec: FiniteAnimationSpec<T>

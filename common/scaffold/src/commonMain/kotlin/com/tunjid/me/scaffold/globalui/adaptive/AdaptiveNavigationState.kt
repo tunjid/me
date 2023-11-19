@@ -39,11 +39,14 @@ object Adaptive {
     /**
      * Scope for adaptive content that can show up in an arbitrary [Container]
      */
+    @Stable
     interface ContainerScope : AnimatedVisibilityScope {
 
         val containerState: ContainerState
 
         val canAnimateSharedElements: Boolean
+
+        fun isCurrentlyShared(key: Any) : Boolean
 
         @Composable
         fun rememberSharedContent(

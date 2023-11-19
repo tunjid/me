@@ -36,10 +36,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
+@Stable
 internal interface AdaptiveContentHost {
 
     val adaptedState: Adaptive.NavigationState
     fun routeIn(container: Adaptive.Container?): @Composable () -> Unit
+
+    fun isCurrentlyShared(key: Any): Boolean
 
     fun createOrUpdateSharedElement(
         key: Any,
@@ -109,6 +112,9 @@ private class SavedStateAdaptiveContentHost(
         val slot = container?.let(adaptedState::slotFor)
         return slotsToRoutes.getValue(slot)
     }
+
+    override fun isCurrentlyShared(key: Any): Boolean =
+        keysToSharedElements.contains(key)
 
     override fun createOrUpdateSharedElement(
         key: Any,

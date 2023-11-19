@@ -43,13 +43,14 @@ internal class AnimatedAdaptiveContentScope(
         value = containerState.adaptation != Adaptive.Adaptation.PrimaryToTransient
     )
 
+    override fun isCurrentlyShared(key: Any): Boolean =
+        adaptiveContentHost.isCurrentlyShared(key)
+
     @Composable
     override fun rememberSharedContent(
         key: Any,
         sharedElement: @Composable (Modifier) -> Unit
     ): @Composable (Modifier) -> Unit {
-        val unsharedElement by rememberUpdatedState(sharedElement)
-
         val currentNavigationState = adaptiveContentHost.adaptedState
         // This container state may be animating out. Look up the actual current route
         val currentRouteInContainer = containerState.container?.let(
@@ -58,7 +59,7 @@ internal class AnimatedAdaptiveContentScope(
         val isCurrentlyAnimatingIn = currentRouteInContainer?.id == containerState.currentRoute?.id
 
         // Do not use the shared element if this content is being animated out
-        if (!isCurrentlyAnimatingIn) return unsharedElement
+        if (!isCurrentlyAnimatingIn) return sharedElement
 
         return adaptiveContentHost.createOrUpdateSharedElement(key, sharedElement)
     }
@@ -84,14 +85,22 @@ fun rememberSharedContent(
                 "Shared elements may only be used in non null containers"
             )
             // Allow shared elements in the primary or transient primary content only
-            Adaptive.Container.Primary,
-            Adaptive.Container.TransientPrimary -> when {
-                scope.isInPreview -> EmptyElement
+            Adaptive.Container.Primary -> when {
+                // Show a blank space for shared elements between the destinations
+                scope.isInPreview && scope.isCurrentlyShared(key) -> EmptyElement
+                // If previewing and it won't be shared, show the item as is
+                scope.isInPreview -> sharedElement
+                // Share the element
                 else -> scope.rememberSharedContent(
                     key = key,
                     sharedElement = sharedElement
                 )
             }
+            // Share the element when in the transient container
+            Adaptive.Container.TransientPrimary -> scope.rememberSharedContent(
+                key = key,
+                sharedElement = sharedElement
+            )
             // In the secondary container use the element as is
             Adaptive.Container.Secondary -> sharedElement
         }
