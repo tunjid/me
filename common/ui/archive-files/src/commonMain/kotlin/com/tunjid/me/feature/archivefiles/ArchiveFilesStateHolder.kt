@@ -61,6 +61,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import me.tatarka.inject.annotations.Inject
+import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.consumeNavActions
 
 typealias ArchiveFilesStateHolder = ActionStateProducer<Action, StateFlow<State>>
 
@@ -80,6 +82,7 @@ class ActualArchiveFilesStateHolder(
     byteSerializer: ByteSerializer,
     permissionsFlow: StateFlow<Permissions>,
     navStateFlow: StateFlow<NavState>,
+    navActions: (NavMutation) -> Unit,
     onPermissionRequested: (Permission) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
@@ -116,6 +119,10 @@ class ActualArchiveFilesStateHolder(
                 is Action.Fetch -> action.flow.loadMutations(
                     scope = scope,
                     archiveFileRepository = archiveFileRepository
+                )
+                is Action.Navigate -> action.flow.consumeNavActions(
+                    mutationMapper = Action.Navigate::navMutation,
+                    action = navActions
                 )
             }
         }

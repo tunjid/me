@@ -21,6 +21,7 @@ import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.Uri
+import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.emptyTiledList
@@ -87,4 +88,6 @@ sealed class Action(val key: String) {
 
         data class ColumnSizeChanged(val size: Int) : Fetch()
     }
+
+    data class Navigate(val navMutation: NavMutation) : Action(key = "Navigate")
 }

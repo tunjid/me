@@ -21,6 +21,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -59,13 +60,17 @@ import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.maxSize
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.core.utilities.RemoteUri
+import com.tunjid.me.feature.archivegallery.ArchiveGalleryRoute
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
+import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
+import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.tiler.compose.PivotedTilingEffect
+import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
 
 enum class FileType(val mimeTypes: Set<String>) {
@@ -137,7 +142,7 @@ private fun FilesGrid(
     lazyGridState: LazyGridState,
     fileType: FileType,
     files: List<ArchiveFile>,
-    actions: (Action.Fetch.ColumnSizeChanged) -> Unit,
+    actions: (Action) -> Unit,
 ) {
     LazyVerticalGrid(
         state = lazyGridState,
@@ -160,7 +165,8 @@ private fun FilesGrid(
                     FileType.Image -> ImageFile(
                         modifier = Modifier.animateItemPlacement(),
                         dndEnabled = dndEnabled,
-                        archiveFile = archiveFile
+                        archiveFile = archiveFile,
+                        actions = actions
                     )
 
                     FileType.Misc -> TextFile(
@@ -224,31 +230,49 @@ private fun ImageFile(
     modifier: Modifier = Modifier,
     dndEnabled: Boolean,
     archiveFile: ArchiveFile,
+    actions: (Action) -> Unit,
 ) {
     BoxWithConstraints(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
             .aspectRatio(1f)
+            .clickable {
+                actions(Action.Navigate {
+                    navState.push(
+                        ArchiveGalleryRoute(
+                            id = "archive/${archiveFile.archiveId.value}/gallery",
+                            archiveId = archiveFile.archiveId,
+                            archiveFileIds = listOf(archiveFile.id),
+                            urls = listOf(archiveFile.url)
+                        )
+                    )
+                })
+            }
     ) {
-        val imagePainter = rememberAsyncRasterPainter(
-            imageUri = archiveFile.url,
-            size = maxSize()
-        )
-        if (imagePainter != null) Image(
-            painter = imagePainter,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = if (!dndEnabled) Modifier
-            else Modifier.dragSource(
-                dragShadowPainter = imagePainter,
-                uris = listOf(
-                    RemoteUri(
-                        path = archiveFile.url,
-                        mimetype = archiveFile.mimeType,
+        val sharedElement = rememberSharedContent(
+            key = thumbnailSharedElementKey(archiveFile.id)
+        ) { sharedElementModifier ->
+            val imagePainter = rememberAsyncRasterPainter(
+                imageUri = archiveFile.url,
+                size = maxSize()
+            )
+            if (imagePainter != null) Image(
+                painter = imagePainter,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = if (!dndEnabled) sharedElementModifier
+                else sharedElementModifier.dragSource(
+                    dragShadowPainter = imagePainter,
+                    uris = listOf(
+                        RemoteUri(
+                            path = archiveFile.url,
+                            mimetype = archiveFile.mimeType,
+                        )
                     )
                 )
             )
-        )
+        }
+        sharedElement(Modifier)
     }
 }
 
