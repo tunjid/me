@@ -62,7 +62,6 @@ import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryRoute
 import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.lifecycle.component1
@@ -86,14 +85,14 @@ data class ArchiveFilesRoute(
     val dndEnabled: Boolean = false,
     val fileType: FileType = FileType.Image
 ) : AppRoute {
-    override val content: @Composable Adaptive.ContainerScope.() -> Unit
-        get() = {
-            ArchiveFilesScreen(
-                stateHolder = rememberRetainedStateHolder(
-                    route = this@ArchiveFilesRoute
-                ),
-            )
-        }
+    @Composable
+    override fun content() {
+        ArchiveFilesScreen(
+            stateHolder = rememberRetainedStateHolder(
+                route = this@ArchiveFilesRoute
+            ),
+        )
+    }
 }
 
 @Composable

@@ -33,11 +33,11 @@ import com.tunjid.me.data.di.create
 import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.network.NetworkMonitor
 import com.tunjid.me.feature.MeApp
-import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryNavigationComponent
-import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryScreenHolderComponent
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesNavigationComponent
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesScreenHolderComponent
 import com.tunjid.me.feature.archivefiles.di.create
+import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryNavigationComponent
+import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryScreenHolderComponent
 import com.tunjid.me.feature.archivegallery.di.create
 import com.tunjid.me.feature.archivelist.di.ArchiveListNavigationComponent
 import com.tunjid.me.feature.archivelist.di.ArchiveListScreenHolderComponent
@@ -123,7 +123,7 @@ fun createMeApp(): MeApp {
             scaffoldComponent = injectedScaffoldComponent,
             dataComponent = injectedDataComponent,
         ),
-        archiveFileComponent = ArchiveGalleryScreenHolderComponent::class.create(
+        archiveGalleryComponent = ArchiveGalleryScreenHolderComponent::class.create(
             scaffoldComponent = injectedScaffoldComponent,
             dataComponent = injectedDataComponent,
         ),

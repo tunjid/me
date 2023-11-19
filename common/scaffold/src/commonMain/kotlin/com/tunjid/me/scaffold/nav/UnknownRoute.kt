@@ -24,24 +24,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class UnknownRoute(override val id: String = "404") : AppRoute, StatelessRoute {
 
-    override val content: @Composable Adaptive.ContainerScope.() -> Unit
-        get() = {
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(),
-                    text = "404",
-                    fontSize = 40.sp
-                )
-            }
+    @Composable
+    override fun content() {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(),
+                text = "404",
+                fontSize = 40.sp
+            )
         }
+    }
 }

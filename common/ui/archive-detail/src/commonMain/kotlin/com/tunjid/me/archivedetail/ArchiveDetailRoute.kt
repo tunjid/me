@@ -43,7 +43,6 @@ import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.PaneAnchor
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.globalui.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.me.scaffold.lifecycle.component1
@@ -62,14 +61,14 @@ data class ArchiveDetailRoute(
     val kind: ArchiveKind,
     val archiveId: ArchiveId
 ) : AppRoute {
-    override val content: @Composable Adaptive.ContainerScope.() -> Unit
-        get() = {
-            ArchiveDetailScreen(
-                stateHolder = rememberRetainedStateHolder(
-                    route = this@ArchiveDetailRoute
-                ),
-            )
-        }
+    @Composable
+    override fun content() {
+        ArchiveDetailScreen(
+            stateHolder = rememberRetainedStateHolder(
+                route = this@ArchiveDetailRoute
+            ),
+        )
+    }
 
     override val children: List<Node> = listOf(ExternalRoute("archives/${kind.type}"))
 

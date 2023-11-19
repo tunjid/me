@@ -35,7 +35,6 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
@@ -46,14 +45,14 @@ import kotlinx.serialization.Serializable
 data class SettingsRoute(
     override val id: String,
 ) : AppRoute {
-    override val content: @Composable Adaptive.ContainerScope.() -> Unit
-        get() = {
-            SettingsScreen(
-                stateHolder = rememberRetainedStateHolder(
-                    route = this@SettingsRoute
-                ),
-            )
-        }
+    @Composable
+    override fun content() {
+        SettingsScreen(
+            stateHolder = rememberRetainedStateHolder(
+                route = this@SettingsRoute
+            ),
+        )
+    }
 }
 
 @Composable

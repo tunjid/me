@@ -31,7 +31,6 @@ import com.tunjid.me.core.model.ArchiveFileId
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.lifecycle.component1
@@ -49,14 +48,14 @@ data class ArchiveGalleryRoute(
     val archiveFileIds: List<ArchiveFileId> = emptyList(),
     val urls: List<String> = emptyList(),
 ) : AppRoute {
-    override val content: @Composable Adaptive.ContainerScope.() -> Unit
-        get() = {
-            ArchiveGalleryScreen(
-                stateHolder = rememberRetainedStateHolder(
-                    route = this@ArchiveGalleryRoute
-                ),
-            )
-        }
+    @Composable
+    override fun content() {
+        ArchiveGalleryScreen(
+            stateHolder = rememberRetainedStateHolder(
+                route = this@ArchiveGalleryRoute
+            ),
+        )
+    }
 }
 
 @Composable

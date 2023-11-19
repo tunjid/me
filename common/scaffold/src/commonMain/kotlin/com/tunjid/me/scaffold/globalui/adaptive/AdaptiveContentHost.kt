@@ -168,7 +168,7 @@ private fun SavedStateAdaptiveContentHost.Render(
                     LocalAdaptiveContentScope provides scope
                 ) {
                     SaveableStateProvider(route.id) {
-                        route.content(scope)
+                        route.content()
                     }
                 }
             }

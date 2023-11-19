@@ -64,7 +64,6 @@ import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
@@ -83,14 +82,14 @@ data class ArchiveEditRoute(
     val kind: ArchiveKind,
     val archiveId: ArchiveId?,
 ) : AppRoute {
-    override val content: @Composable Adaptive.ContainerScope.() -> Unit
-        get() = {
-            ArchiveEditScreen(
-                stateHolder = rememberRetainedStateHolder(
-                    route = this@ArchiveEditRoute
-                )
+    @Composable
+    override fun content() {
+        ArchiveEditScreen(
+            stateHolder = rememberRetainedStateHolder(
+                route = this@ArchiveEditRoute
             )
-        }
+        )
+    }
 
     override val children: List<Node> = when (archiveId) {
         null -> emptyList()

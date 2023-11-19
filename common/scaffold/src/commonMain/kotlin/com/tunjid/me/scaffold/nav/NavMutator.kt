@@ -38,7 +38,15 @@ import com.tunjid.treenav.current
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.strings.RouteParser
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
 const val NavName = "App"
@@ -58,7 +66,8 @@ data class ExternalRoute(
 ) : Route
 
 interface AppRoute : Route {
-    val content: @Composable Adaptive.ContainerScope.() -> Unit
+    @Composable
+    fun content()
 
     /**
      * Defines what route to show in the supporting panel alongside this route
