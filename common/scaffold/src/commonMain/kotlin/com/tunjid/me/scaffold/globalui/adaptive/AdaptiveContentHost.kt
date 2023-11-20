@@ -230,15 +230,6 @@ private fun SavedStateAdaptiveContentHost.SavedStateCleanupEffect(
     }
 }
 
-/**
- * Checks if any of the new routes coming in has any conflicts with those animating out.
- */
-private fun Adaptive.NavigationState.hasConflictingRoutes(
-    animatingOutIds: Set<String>
-) = animatingOutIds.contains(primaryRoute.id)
-        || secondaryRoute?.id?.let(animatingOutIds::contains) == true
-        || transientPrimaryRoute?.id?.let(animatingOutIds::contains) == true
-
 @Composable
 private fun AnimatedVisibilityScope.modifierFor(
     containerState: Adaptive.ContainerState
