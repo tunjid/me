@@ -145,6 +145,7 @@ private fun FilesGrid(
     actions: (Action) -> Unit,
 ) {
     LazyVerticalGrid(
+        modifier = Modifier.fillMaxSize(),
         state = lazyGridState,
         columns = when (fileType) {
             FileType.Image -> GridCells.Adaptive(100.dp)
