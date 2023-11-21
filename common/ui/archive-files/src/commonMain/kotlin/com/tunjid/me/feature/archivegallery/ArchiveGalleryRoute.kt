@@ -60,6 +60,7 @@ data class ArchiveGalleryRoute(
 
 @Composable
 internal fun ArchiveGalleryScreen(
+    modifier: Modifier = Modifier,
     stateHolder: ArchiveGalleryStateHolder,
 ) {
     GlobalUi()
@@ -72,7 +73,7 @@ internal fun ArchiveGalleryScreen(
     HorizontalPager(
         state = pagerState,
         beyondBoundsPageCount = 0,
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         key = { index -> items[index].key }
     ) { index ->
         val file = items[index]

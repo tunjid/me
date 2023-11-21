@@ -74,6 +74,7 @@ data class ArchiveListRoute(
 
 @Composable
 private fun ArchiveScreen(
+    modifier: Modifier = Modifier,
     stateHolder: ArchiveListStateHolder,
 ) {
     val (state, actions) = stateHolder
@@ -112,7 +113,9 @@ private fun ArchiveScreen(
             }
     }
 
-    Column {
+    Column(
+        modifier = modifier,
+    ) {
         ArchiveFilters(
             queryState = state.queryState,
             onChanged = actions

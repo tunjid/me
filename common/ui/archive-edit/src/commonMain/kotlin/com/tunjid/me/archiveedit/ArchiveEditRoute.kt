@@ -107,6 +107,7 @@ data class ArchiveEditRoute(
 
 @Composable
 private fun ArchiveEditScreen(
+    modifier: Modifier = Modifier,
     stateHolder: ArchiveEditStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -129,7 +130,7 @@ private fun ArchiveEditScreen(
     }
 
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .dropTarget(
                 onStarted = { _, _ ->
                     val (action, acceptedDrag) = when (state.hasStoragePermissions) {

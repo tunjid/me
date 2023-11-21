@@ -65,6 +65,7 @@ data class ProfileRoute(
 
 @Composable
 private fun ProfileScreen(
+    modifier: Modifier = Modifier,
     stateHolder: ProfileStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -81,7 +82,7 @@ private fun ProfileScreen(
     )
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,

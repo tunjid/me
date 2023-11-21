@@ -72,16 +72,6 @@ data class ArchiveFilesParentRoute(
 
     @Composable
     override fun content() {
-        ScreenUiState(
-            UiState(
-                toolbarShows = true,
-                toolbarTitle = "Files",
-                fabShows = false,
-                fabExtended = true,
-                navVisibility = NavVisibility.Visible,
-                statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
-            )
-        )
         ArchiveFilesParentScreen(
             children = children.filterIsInstance<ArchiveFilesRoute>(),
         )
@@ -90,12 +80,24 @@ data class ArchiveFilesParentRoute(
 
 @Composable
 private fun ArchiveFilesParentScreen(
+    modifier: Modifier = Modifier,
     children: List<ArchiveFilesRoute>
 ) {
+    ScreenUiState(
+        UiState(
+            toolbarShows = true,
+            toolbarTitle = "Files",
+            fabShows = false,
+            fabExtended = true,
+            navVisibility = NavVisibility.Visible,
+            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+        )
+    )
+
     val pagerState = rememberPagerState { children.size }
     var lastTabClicked by remember { mutableStateOf<Int?>(pagerState.currentPage) }
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         Tabs(
             currentTabIndex = pagerState.currentPage,

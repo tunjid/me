@@ -97,6 +97,7 @@ data class ArchiveFilesRoute(
 
 @Composable
 internal fun ArchiveFilesScreen(
+    modifier: Modifier = Modifier,
     stateHolder: ArchiveFilesStateHolder,
 ) {
     val (state, actions) = stateHolder
@@ -105,7 +106,7 @@ internal fun ArchiveFilesScreen(
     GlobalUi()
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         FilesGrid(
             dndEnabled = state.dndEnabled,

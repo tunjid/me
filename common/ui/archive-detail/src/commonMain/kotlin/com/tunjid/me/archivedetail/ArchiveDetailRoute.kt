@@ -77,6 +77,7 @@ data class ArchiveDetailRoute(
 
 @Composable
 private fun ArchiveDetailScreen(
+    modifier: Modifier = Modifier,
     stateHolder: ArchiveDetailStateHolder
 ) {
     val (state, actions) = stateHolder
@@ -106,7 +107,7 @@ private fun ArchiveDetailScreen(
     }
 
     LazyColumn(
-        modifier = Modifier,
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         state = scrollState
     ) {
