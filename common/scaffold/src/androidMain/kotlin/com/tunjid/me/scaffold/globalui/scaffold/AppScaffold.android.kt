@@ -21,6 +21,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
+import com.tunjid.me.scaffold.globalui.adaptive.LocalAdaptiveContentScope
 import com.tunjid.me.scaffold.globalui.isFromLeft
 import com.tunjid.me.scaffold.globalui.progress
 import com.tunjid.me.scaffold.globalui.touchX
@@ -46,15 +48,6 @@ internal actual fun Modifier.backPreviewModifier(): Modifier =
             targetValue = 1f - (backStatus.progress * 0.15F),
             label = "back preview modifier scale"
         )
-        var elevation by remember { mutableStateOf(0.dp) }
-        LaunchedEffect(Unit) {
-            animate(
-                initialValue = 0f,
-                targetValue = 4f,
-                animationSpec = spring(stiffness = Spring.StiffnessVeryLow)
-            ) { value, _ -> elevation = value.dp }
-        }
-
         Modifier
             .layout { measurable, constraints ->
                 val placeable = measurable.measure(
@@ -94,12 +87,27 @@ internal actual fun Modifier.backPreviewModifier(): Modifier =
                     placeable.placeRelative(x = xOffset, y = yOffset)
                 }
             }
-            .background(
-                color = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation),
-                shape = RoundedCornerShape(16.dp)
-            )
             // Disable interactions in the preview container
             .pointerInput(Unit) {}
     }
+
+actual fun Modifier.backPreviewBackgroundModifier(): Modifier = composed {
+    val scope = LocalAdaptiveContentScope.current
+    if (scope?.containerState?.container != Adaptive.Container.TransientPrimary)
+        return@composed this
+
+    var elevation by remember { mutableStateOf(0.dp) }
+    LaunchedEffect(Unit) {
+        animate(
+            initialValue = 0f,
+            targetValue = 4f,
+            animationSpec = spring(stiffness = Spring.StiffnessVeryLow)
+        ) { value, _ -> elevation = value.dp }
+    }
+    background(
+        color = MaterialTheme.colorScheme.surfaceColorAtElevation(elevation),
+        shape = RoundedCornerShape(16.dp)
+    )
+}
 
 private const val BACK_PREVIEW_PADDING = 8

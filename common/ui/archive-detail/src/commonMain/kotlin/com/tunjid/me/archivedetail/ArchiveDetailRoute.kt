@@ -45,6 +45,7 @@ import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.globalui.scaffold.SecondaryPaneCloseBackHandler
+import com.tunjid.me.scaffold.globalui.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
@@ -64,6 +65,7 @@ data class ArchiveDetailRoute(
     @Composable
     override fun content() {
         ArchiveDetailScreen(
+            modifier = Modifier.backPreviewBackgroundModifier(),
             stateHolder = rememberRetainedStateHolder(
                 route = this@ArchiveDetailRoute
             ),

@@ -65,6 +65,7 @@ import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
+import com.tunjid.me.scaffold.globalui.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
@@ -85,6 +86,7 @@ data class ArchiveEditRoute(
     @Composable
     override fun content() {
         ArchiveEditScreen(
+            modifier = Modifier.backPreviewBackgroundModifier(),
             stateHolder = rememberRetainedStateHolder(
                 route = this@ArchiveEditRoute
             )

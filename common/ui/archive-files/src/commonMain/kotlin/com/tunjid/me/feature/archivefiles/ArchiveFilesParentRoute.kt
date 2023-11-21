@@ -46,6 +46,7 @@ import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.StatelessRoute
 import com.tunjid.treenav.Node
@@ -73,6 +74,7 @@ data class ArchiveFilesParentRoute(
     @Composable
     override fun content() {
         ArchiveFilesParentScreen(
+            modifier = Modifier.backPreviewBackgroundModifier(),
             children = children.filterIsInstance<ArchiveFilesRoute>(),
         )
     }

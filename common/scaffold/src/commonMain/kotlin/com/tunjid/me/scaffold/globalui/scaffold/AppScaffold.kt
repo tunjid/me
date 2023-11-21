@@ -94,6 +94,12 @@ fun Scaffold(
 }
 
 /**
- * Modifier that offers a way to preview content behind the primary content
+ * Modifier for content when it is being previewed
  */
 internal expect fun Modifier.backPreviewModifier(): Modifier
+
+/**
+ * Modifier for content's background when it is being previewed
+ */
+expect fun Modifier.backPreviewBackgroundModifier(): Modifier
+

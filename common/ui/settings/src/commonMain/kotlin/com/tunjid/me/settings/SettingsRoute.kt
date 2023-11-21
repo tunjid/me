@@ -35,6 +35,7 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute
@@ -48,6 +49,7 @@ data class SettingsRoute(
     @Composable
     override fun content() {
         SettingsScreen(
+            modifier = Modifier.backPreviewBackgroundModifier(),
             stateHolder = rememberRetainedStateHolder(
                 route = this@SettingsRoute
             ),
