@@ -16,18 +16,21 @@
 
 package com.tunjid.me.feature.archivegallery
 
+import androidx.compose.ui.geometry.Offset
 import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveFileId
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.emptyTiledList
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.protobuf.ProtoNumber
 
-sealed class Action {
-    data class LoadAround(val query: ArchiveFileQuery) : Action()
+sealed class Action(val key: String) {
+    data class LoadAround(val query: ArchiveFileQuery) : Action("LoadAround")
+    data class Navigate(val navMutation: NavMutation) : Action("Navigate")
 }
 
 @Serializable
@@ -39,6 +42,8 @@ data class State(
     val currentQuery: ArchiveFileQuery,
     @Transient
     val items: TiledList<ArchiveFileQuery, FileItem> = emptyTiledList(),
+    @Transient
+    val pagerOffset: Offset = Offset.Zero,
 ) : ByteSerializable
 
 

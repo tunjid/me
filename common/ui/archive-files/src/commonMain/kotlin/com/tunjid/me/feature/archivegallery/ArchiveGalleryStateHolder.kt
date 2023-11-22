@@ -16,6 +16,8 @@
 
 package com.tunjid.me.feature.archivegallery
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.ui.geometry.Offset
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.FILE_QUERY_LIMIT
 import com.tunjid.me.core.utilities.ByteSerializer
@@ -26,11 +28,15 @@ import com.tunjid.me.feature.archivefiles.pivotRequest
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
+import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.coroutines.SuspendingStateHolder
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
+import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.map
@@ -40,7 +46,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveGalleryStateHolder = ActionStateProducer<Action, StateFlow<State>>
@@ -57,6 +67,7 @@ class ArchiveGalleryStateHolderCreator(
 class ActualArchiveGalleryStateHolder(
     archiveFileRepository: ArchiveFileRepository,
     byteSerializer: ByteSerializer,
+    navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveGalleryRoute,
@@ -77,10 +88,14 @@ class ActualArchiveGalleryStateHolder(
         }
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
-    actionTransform = { actions ->
+    actionTransform = actionTransform@{ actions ->
         actions.toMutationStream {
             when (val action = type()) {
                 is Action.LoadAround -> action.flow.loadMutations(archiveFileRepository)
+                is Action.Navigate -> action.flow.consumeNavActions(
+                    mutationMapper = Action.Navigate::navMutation,
+                    action = navActions
+                )
             }
         }
     }
