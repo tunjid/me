@@ -17,8 +17,17 @@
 package com.tunjid.me.scaffold.globalui.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,9 +38,9 @@ import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.NavStateHolder
-import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.navItemSelected
 import com.tunjid.me.scaffold.nav.navItems
 
@@ -43,7 +52,7 @@ internal fun BoxScope.AppBottomNav(
     globalUiStateHolder: GlobalUiStateHolder,
     navStateHolder: NavStateHolder,
 ) {
-    val nav by navStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = NavState::mainNav)
+    val nav by navStateHolder.state.collectAsStateWithLifecycle()
     val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
         mapper = UiState::bottomNavPositionalState
     )

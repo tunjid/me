@@ -60,6 +60,7 @@ fun main() {
                             density = density,
                             window = window,
                         ),
+                        routeParser = app.routeParser,
                         navStateHolder = app.navStateHolder,
                         globalUiStateHolder = app.globalUiStateHolder,
                     )

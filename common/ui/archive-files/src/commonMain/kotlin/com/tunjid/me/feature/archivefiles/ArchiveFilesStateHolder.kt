@@ -32,7 +32,8 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
-import com.tunjid.me.scaffold.nav.NavState
+import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.ActionStateProducer
@@ -44,6 +45,7 @@ import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.toPivotedTileInputs
 import com.tunjid.tiler.toTiledList
+import com.tunjid.treenav.MultiStackNav
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -61,8 +63,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import me.tatarka.inject.annotations.Inject
-import com.tunjid.me.scaffold.nav.NavMutation
-import com.tunjid.me.scaffold.nav.consumeNavActions
 
 typealias ArchiveFilesStateHolder = ActionStateProducer<Action, StateFlow<State>>
 
@@ -81,7 +81,7 @@ class ActualArchiveFilesStateHolder(
     archiveFileRepository: ArchiveFileRepository,
     byteSerializer: ByteSerializer,
     permissionsFlow: StateFlow<Permissions>,
-    navStateFlow: StateFlow<NavState>,
+    navStateFlow: StateFlow<MultiStackNav>,
     navActions: (NavMutation) -> Unit,
     onPermissionRequested: (Permission) -> Unit,
     scope: CoroutineScope,
@@ -120,6 +120,7 @@ class ActualArchiveFilesStateHolder(
                     scope = scope,
                     archiveFileRepository = archiveFileRepository
                 )
+
                 is Action.Navigate -> action.flow.consumeNavActions(
                     mutationMapper = Action.Navigate::navMutation,
                     action = navActions

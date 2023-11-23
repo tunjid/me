@@ -29,12 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.scaffold.backPreviewModifier
-import com.tunjid.me.scaffold.nav.NavState
+import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.removedRoutes
 import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.strings.RouteParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 
 @Stable
 internal interface AdaptiveContentHost {
@@ -52,7 +53,8 @@ internal interface AdaptiveContentHost {
 
 @Composable
 internal fun SavedStateAdaptiveContentHost(
-    navState: StateFlow<NavState>,
+    routeParser: RouteParser<AppRoute>,
+    navState: StateFlow<MultiStackNav>,
     uiState: StateFlow<UiState>,
     content: @Composable AdaptiveContentHost.() -> Unit
 ) {
@@ -62,6 +64,7 @@ internal fun SavedStateAdaptiveContentHost(
         val adaptiveContentHost = remember(saveableStateHolder) {
             SavedStateAdaptiveContentHost(
                 coroutineScope = coroutineScope,
+                routeParser = routeParser,
                 navStateFlow = navState,
                 uiStateFlow = uiState,
                 saveableStateHolder = saveableStateHolder
@@ -80,17 +83,19 @@ internal fun SavedStateAdaptiveContentHost(
 }
 
 @Stable
-private class SavedStateAdaptiveContentHost(
-    coroutineScope: CoroutineScope,
-    navStateFlow: StateFlow<NavState>,
+internal class SavedStateAdaptiveContentHost(
+    routeParser: RouteParser<AppRoute>,
+    navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>,
+    coroutineScope: CoroutineScope,
     saveableStateHolder: SaveableStateHolder,
 ) : AdaptiveContentHost,
     SaveableStateHolder by saveableStateHolder,
     ActionStateProducer<Action, StateFlow<Adaptive.NavigationState>>
     by coroutineScope.adaptiveNavigationStateMutator(
-        navStateFlow,
-        uiStateFlow
+        routeParser = routeParser,
+        navStateFlow = navStateFlow,
+        uiStateFlow = uiStateFlow
     ) {
 
     override var adaptedState by mutableStateOf(Adaptive.NavigationState.Initial)
@@ -214,12 +219,10 @@ private fun SavedStateAdaptiveContentHost.Render(
  */
 @Composable
 private fun SavedStateAdaptiveContentHost.SavedStateCleanupEffect(
-    navState: StateFlow<NavState>,
+    navState: StateFlow<MultiStackNav>,
 ) {
     val removedRoutesFlow = remember {
-        navState
-            .map { it.mainNav }
-            .removedRoutes()
+        navState.removedRoutes()
     }
     LaunchedEffect(removedRoutesFlow) {
         removedRoutesFlow.collect { routes ->

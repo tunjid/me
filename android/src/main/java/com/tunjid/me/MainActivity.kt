@@ -73,6 +73,7 @@ class MainActivity : AppCompatActivity() {
                             ),
                             view = root
                         ),
+                        routeParser = meApp.routeParser,
                         navStateHolder = meApp.navStateHolder,
                         globalUiStateHolder = meApp.globalUiStateHolder,
                     )

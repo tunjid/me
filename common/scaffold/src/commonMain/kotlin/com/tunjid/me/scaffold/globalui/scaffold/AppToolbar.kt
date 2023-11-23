@@ -47,7 +47,6 @@ import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.globalui.slices.toolbarState
 import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.UnknownRoute
 import com.tunjid.me.scaffold.nav.canGoUp
@@ -64,11 +63,15 @@ internal fun BoxScope.AppToolbar(
     globalUiStateHolder: GlobalUiStateHolder,
     navStateHolder: NavStateHolder,
 ) {
-    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(mapper = UiState::toolbarState)
+    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = UiState::toolbarState
+    )
     val windowSizeClass by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle {
         it.windowSizeClass
     }
-    val canGoUp by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.mainNav.canGoUp }
+    val canGoUp by navStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = MultiStackNav::canGoUp
+    )
     val onUpPressed = remember {
         { navStateHolder.accept { navState.pop() } }
     }
@@ -231,21 +234,18 @@ fun Test() {
                 toolbarTitle = "Hi",
                 toolbarShows = true
             ).asNoOpStateFlowMutator(),
-            navStateHolder = NavState(
-                mainNav = MultiStackNav(
-                    name = "App",
-                    currentIndex = 0,
-                    stacks = listOf(
-                        StackNav(
-                            name = "Preview",
-                            routes = listOf(
-                                UnknownRoute(id = "-"),
-                                UnknownRoute(id = "--")
-                            )
+            navStateHolder = MultiStackNav(
+                name = "App",
+                currentIndex = 0,
+                stacks = listOf(
+                    StackNav(
+                        name = "Preview",
+                        routes = listOf(
+                            UnknownRoute(id = "-"),
+                            UnknownRoute(id = "--")
                         )
                     )
-                ),
-                secondaryRoute = null
+                )
             ).asNoOpStateFlowMutator(),
         )
     }

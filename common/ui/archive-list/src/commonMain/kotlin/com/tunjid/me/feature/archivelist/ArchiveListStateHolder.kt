@@ -32,7 +32,6 @@ import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
 import com.tunjid.me.scaffold.nav.NavMutation
-import com.tunjid.me.scaffold.nav.NavState
 import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
@@ -45,6 +44,7 @@ import com.tunjid.tiler.Tile
 import com.tunjid.tiler.queries
 import com.tunjid.tiler.toPivotedTileInputs
 import com.tunjid.tiler.toTiledList
+import com.tunjid.treenav.MultiStackNav
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -79,7 +79,7 @@ class ActualArchiveListStateHolder(
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
-    navStateFlow: StateFlow<NavState>,
+    navStateFlow: StateFlow<MultiStackNav>,
     navActions: (NavMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
@@ -294,7 +294,8 @@ private fun Flow<Action.Fetch>.fetchMutations(
 
                 val oldQueries = oldItems.queries()
                 val newQueries = newItems.queries()
-                val isDiffFilter = oldQueries.isNotEmpty() && !newQueries.first().hasTheSameFilter(oldQueries.first())
+                val isDiffFilter = oldQueries.isNotEmpty() && !newQueries.first()
+                    .hasTheSameFilter(oldQueries.first())
 
                 // new items were fetched for a different query and placeholders are present, debounce
                 if (isDiffFilter && newItems.hasPlaceholders()) QUERY_CHANGE_DEBOUNCE

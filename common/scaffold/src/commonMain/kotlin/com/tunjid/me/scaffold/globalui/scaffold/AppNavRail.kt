@@ -41,6 +41,7 @@ import com.tunjid.me.scaffold.nav.NavItem
 import com.tunjid.me.scaffold.nav.NavStateHolder
 import com.tunjid.me.scaffold.nav.navItemSelected
 import com.tunjid.me.scaffold.nav.navItems
+import com.tunjid.treenav.MultiStackNav
 
 /**
  * Motionally intelligent nav rail shared amongst nav routes in the app
@@ -57,7 +58,9 @@ internal fun AppNavRail(
         mapper = UiState::windowSizeClass
     )
 
-    val navItems by navStateHolder.state.mappedCollectAsStateWithLifecycle { it.mainNav.navItems }
+    val navItems by navStateHolder.state.mappedCollectAsStateWithLifecycle(
+        mapper = MultiStackNav::navItems
+    )
 
     val statusBarSize = with(LocalDensity.current) {
         containerState.statusBarSize.toDp()

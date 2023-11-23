@@ -38,6 +38,7 @@ import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Order
 import com.tunjid.treenav.flatten
+import com.tunjid.treenav.strings.RouteParser
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
@@ -46,9 +47,10 @@ import me.tatarka.inject.annotations.Inject
 class PersistedMeApp(
     appScope: CoroutineScope,
     byteSerializer: ByteSerializer,
-    navStateStream: StateFlow<NavState>,
+    navStateStream: StateFlow<MultiStackNav>,
     savedStateRepository: SavedStateRepository,
     sync: Sync,
+    override val routeParser: RouteParser<AppRoute>,
     override val navStateHolder: NavStateHolder,
     override val globalUiStateHolder: GlobalUiStateHolder,
     override val lifecycleStateHolder: LifecycleStateHolder,
@@ -59,7 +61,6 @@ class PersistedMeApp(
 
     init {
         navStateStream
-            .map { it.mainNav }
             .removedRoutes()
             .onEach { removedRoutes ->
                 removedRoutes.forEach { route ->
@@ -77,7 +78,7 @@ class PersistedMeApp(
             .flatMapLatest {
                 navStateStream
                     .mapLatest { navState ->
-                        navState.mainNav.toSavedState(byteSerializer)
+                        navState.toSavedState(byteSerializer)
                     }
             }
             .onEach(savedStateRepository::saveState)

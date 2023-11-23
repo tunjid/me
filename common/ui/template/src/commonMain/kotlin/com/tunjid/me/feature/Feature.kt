@@ -24,6 +24,7 @@ import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.NavStateHolder
+import com.tunjid.treenav.strings.RouteParser
 
 const val FeatureWhileSubscribed = 2_000L
 
@@ -48,6 +49,7 @@ fun <T> rememberRetainedStateHolder(route: AppRoute): T {
 }
 
 interface MeApp {
+    val routeParser: RouteParser<AppRoute>
     val navStateHolder: NavStateHolder
     val globalUiStateHolder: GlobalUiStateHolder
     val lifecycleStateHolder: LifecycleStateHolder

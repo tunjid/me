@@ -17,7 +17,6 @@
 package com.tunjid.me.scaffold.di
 
 import com.tunjid.me.core.di.SingletonScope
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.fromBytes
@@ -27,13 +26,17 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.lifecycle.ActualLifecycleStateHolder
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
-import com.tunjid.me.scaffold.nav.*
+import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.NavStateHolder
+import com.tunjid.me.scaffold.nav.PersistedNavStateHolder
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.me.scaffold.savedstate.DataStoreSavedStateRepository
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.Mutation
+import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Route
 import com.tunjid.treenav.strings.RouteParams
 import com.tunjid.treenav.strings.RouteParser
@@ -51,11 +54,12 @@ interface ScreenStateHolderCreator : (CoroutineScope, ByteArray?, AppRoute) -> A
 
 inline fun <reified Route : AppRoute> ((CoroutineScope, ByteArray?, Route) -> Any).downcast(): ScreenStateHolderCreator =
     object : ScreenStateHolderCreator {
-        override fun invoke(scope: CoroutineScope, savedState: ByteArray?, route: AppRoute): Any = this@downcast(
-            scope,
-            savedState,
-            route as Route
-        )
+        override fun invoke(scope: CoroutineScope, savedState: ByteArray?, route: AppRoute): Any =
+            this@downcast(
+                scope,
+                savedState,
+                route as Route
+            )
     }
 
 typealias SavedStateCache = (AppRoute) -> ByteArray?
@@ -115,7 +119,8 @@ abstract class InjectedScaffoldComponent(
 
     @SingletonScope
     @Provides
-    fun routeParser(): RouteParser<AppRoute> = routeParserFrom(*(module.routeMatchers).toTypedArray())
+    fun routeParser(): RouteParser<AppRoute> =
+        routeParserFrom(*(module.routeMatchers).toTypedArray())
 
     @SingletonScope
     @Provides
@@ -139,7 +144,7 @@ abstract class InjectedScaffoldComponent(
     @Provides
     fun navStateStream(
         navStateHolder: NavStateHolder
-    ): StateFlow<NavState> = navStateHolder.state
+    ): StateFlow<MultiStackNav> = navStateHolder.state
 
     @Provides
     fun navActions(): (NavMutation) -> Unit = navStateHolder.accept

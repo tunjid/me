@@ -18,10 +18,10 @@ package com.tunjid.me.scaffold
 
 import androidx.compose.animation.core.spring
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.NavState
-import com.tunjid.me.scaffold.nav.primaryRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.mapToMutation
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.current
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -30,11 +30,11 @@ import kotlinx.coroutines.flow.map
 /**
  * Updates [State] with whether it is the primary navigation container
  */
-fun <State> StateFlow<NavState>.isInPrimaryNavMutations(
+fun <State> StateFlow<MultiStackNav>.isInPrimaryNavMutations(
     route: AppRoute,
     mutation: State.(Boolean) -> State,
 ): Flow<Mutation<State>> =
-    map { route.id == it.primaryRoute.id }
+    map { route.id == it.current?.id }
         .distinctUntilChanged()
         .mapToMutation { isInPrimaryNav ->
             mutation(isInPrimaryNav)

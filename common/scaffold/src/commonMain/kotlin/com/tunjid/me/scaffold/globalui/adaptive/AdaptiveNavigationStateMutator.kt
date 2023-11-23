@@ -5,14 +5,16 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.NavState
-import com.tunjid.me.scaffold.nav.primaryRoute
-import com.tunjid.me.scaffold.nav.primaryRouteOnBackPress
+import com.tunjid.me.scaffold.nav.UnknownRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
+import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Order
+import com.tunjid.treenav.current
+import com.tunjid.treenav.pop
+import com.tunjid.treenav.strings.RouteParser
 import com.tunjid.treenav.traverse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -33,13 +35,15 @@ internal sealed class Action {
 }
 
 internal fun CoroutineScope.adaptiveNavigationStateMutator(
-    navStateFlow: StateFlow<NavState>,
+    routeParser: RouteParser<AppRoute>,
+    navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>,
 ) = actionStateFlowProducer<Action, Adaptive.NavigationState>(
     initialState = Adaptive.NavigationState.Initial,
     started = SharingStarted.WhileSubscribed(3_000),
     mutationFlows = listOf(
         adaptiveNavigationStateMutations(
+            routeParser = routeParser,
             navStateFlow = navStateFlow,
             uiStateFlow = uiStateFlow
         )
@@ -58,31 +62,33 @@ internal fun CoroutineScope.adaptiveNavigationStateMutator(
 )
 
 private fun adaptiveNavigationStateMutations(
-    navStateFlow: StateFlow<NavState>,
+    routeParser: RouteParser<AppRoute>,
+    navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>
 ): Flow<Mutation<Adaptive.NavigationState>> = combine(
     flow = navStateFlow.withIndex(),
     flow2 = uiStateFlow.distinctUntilChangedBy {
         listOf(it.backStatus, it.windowSizeClass, it.routeContainerState)
     },
-) { (navId, navState), uiState ->
+) { (navId, multiStackNav), uiState ->
     // If there is a back preview in progress, show the back primary route in the
     // primary container
-    val visiblePrimaryRoute = navState.primaryRouteOnBackPress.takeIf {
+    val primaryRoute = multiStackNav.primaryRouteOnBackPress.takeIf {
         uiState.backStatus.previewState == BackStatus.PreviewState.Previewing
-    } ?: navState.primaryRoute
+    } ?: multiStackNav.primaryRoute
+    val secondaryRoute = primaryRoute.supportingRoute?.let(routeParser::parse)
 
     Adaptive.NavigationState(
         navId = navId,
-        primaryRoute = visiblePrimaryRoute,
-        secondaryRoute = navState.secondaryRoute.takeIf { route ->
-            route?.id != visiblePrimaryRoute.id
+        primaryRoute = primaryRoute,
+        secondaryRoute = secondaryRoute.takeIf { route ->
+            route?.id != primaryRoute.id
                     && uiState.windowSizeClass > WindowSizeClass.COMPACT
         },
-        transientPrimaryRoute = navState.primaryRoute.takeIf { route ->
+        transientPrimaryRoute = multiStackNav.primaryRoute.takeIf { route ->
             uiState.backStatus.previewState == BackStatus.PreviewState.Previewing
-                    && route.id != visiblePrimaryRoute.id
-                    && route.id != navState.secondaryRoute?.id
+                    && route.id != primaryRoute.id
+                    && route.id != secondaryRoute?.id
         },
         windowSizeClass = uiState.windowSizeClass,
         adaptation = when (uiState.backStatus.previewState) {
@@ -97,7 +103,7 @@ private fun adaptiveNavigationStateMutations(
             )
         },
         backStackIds = mutableSetOf<String>().apply {
-            navState.mainNav.traverse(Order.DepthFirst) { add(it.id) }
+            multiStackNav.traverse(Order.DepthFirst) { add(it.id) }
         },
         // Tentative, decide downstream
         routeIdsAnimatingOut = emptySet(),
@@ -292,3 +298,7 @@ private val AdaptiveRouteInContainerLookups: List<(Adaptive.NavigationState) -> 
     Adaptive.NavigationState::secondaryRoute,
     Adaptive.NavigationState::transientPrimaryRoute,
 )
+
+private val MultiStackNav.primaryRoute: AppRoute get() = current as? AppRoute ?: UnknownRoute()
+
+private val MultiStackNav.primaryRouteOnBackPress: AppRoute? get() = pop().current as? AppRoute

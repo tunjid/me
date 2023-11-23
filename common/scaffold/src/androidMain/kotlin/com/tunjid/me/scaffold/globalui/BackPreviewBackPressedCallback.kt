@@ -75,7 +75,7 @@ fun ComponentActivity.integrateBackActions(
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             navStateHolder.state.map { navState ->
                 // If the nav stack can be popped, then this callback is enabled
-                navState.mainNav != navState.mainNav.pop()
+                navState != navState.pop()
             }
                 .distinctUntilChanged()
                 .collect(backPressedCallback::isEnabled::set)

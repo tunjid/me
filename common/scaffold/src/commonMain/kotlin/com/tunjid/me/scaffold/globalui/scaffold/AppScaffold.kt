@@ -28,7 +28,9 @@ import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
 import com.tunjid.me.scaffold.globalui.adaptive.SavedStateAdaptiveContentHost
+import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.NavStateHolder
+import com.tunjid.treenav.strings.RouteParser
 
 /**
  * Root scaffold for the app
@@ -36,6 +38,7 @@ import com.tunjid.me.scaffold.nav.NavStateHolder
 @Composable
 fun Scaffold(
     modifier: Modifier,
+    routeParser: RouteParser<AppRoute>,
     navStateHolder: NavStateHolder,
     globalUiStateHolder: GlobalUiStateHolder,
 ) {
@@ -55,6 +58,7 @@ fun Scaffold(
                     navStateHolder = navStateHolder,
                 )
                 SavedStateAdaptiveContentHost(
+                    routeParser = routeParser,
                     navState = navStateHolder.state,
                     uiState = globalUiStateHolder.state
                 ) {
