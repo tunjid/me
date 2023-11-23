@@ -50,13 +50,11 @@ abstract class ArchiveEditNavigationComponent {
     fun archiveEditRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "archives/{kind}/{id}/edit",
-            routeMapper = { (route: String, pathKeys: Map<String, String>) ->
-                val archiveId = ArchiveId(pathKeys["id"] ?: "")
-                val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
+            routeMapper = { params ->
                 ArchiveEditRoute(
-                    id = route,
-                    kind = kind,
-                    archiveId = archiveId
+                    route = params.route,
+                    pathArgs = params.pathArgs,
+                    queryArgs = params.queryArgs
                 )
             }
         )
@@ -66,12 +64,11 @@ abstract class ArchiveEditNavigationComponent {
     fun archiveCreateRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "archives/{kind}/create",
-            routeMapper = { (route, pathKeys) ->
-                val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
+            routeMapper = { params ->
                 ArchiveEditRoute(
-                    id = route,
-                    kind = kind,
-                    archiveId = null
+                    route = params.route,
+                    pathArgs = params.pathArgs,
+                    queryArgs = params.queryArgs
                 )
             }
         )

@@ -44,7 +44,9 @@ fun GlobalUi(state: State, actions: (Action) ->  Unit) {
             fabClickListener = rememberFunction(state.archive?.id) {
                 val archiveId = state.archive?.id
                 if (archiveId != null) actions(Action.Navigate {
-                    navState.push("archives/${state.kind.type}/${archiveId.value}/edit".toRoute)
+                    navState.push(
+                        "archives/${state.kind.type}/${archiveId.value}/edit?thumbnail=${state.archive.thumbnail}".toRoute
+                    )
                 })
             },
             insetFlags = InsetFlags.NO_BOTTOM,

@@ -279,7 +279,9 @@ private fun GridCell(
             query = query,
             archive = item.archive,
             onArchiveSelected = { archive ->
-                navigate("archives/${archive.kind.type}/${archive.id.value}")
+                navigate(
+                    "archives/${archive.kind.type}/${archive.id.value}?thumbnail=${archive.thumbnail}"
+                )
             },
             onCategoryClicked = onCategoryClicked
         )

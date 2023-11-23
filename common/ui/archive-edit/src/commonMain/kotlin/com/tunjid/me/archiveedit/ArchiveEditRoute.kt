@@ -79,10 +79,21 @@ private const val BODY_INDEX = 11
 
 @Serializable
 data class ArchiveEditRoute(
-    override val id: String,
-    val kind: ArchiveKind,
-    val archiveId: ArchiveId?,
+    val route: String,
+    val pathArgs: Map<String, String>,
+    val queryArgs: Map<String, List<String>>,
 ) : AppRoute {
+
+    override val id: String get() = route.split("?").first()
+
+    val archiveId: ArchiveId? get() = pathArgs["id"]?.let(::ArchiveId)
+    val kind: ArchiveKind
+        get() = ArchiveKind.entries
+            .firstOrNull { it.type == pathArgs["kind"] }
+            ?: ArchiveKind.Articles
+
+    val archiveThumbnail: String? get() = queryArgs["thumbnail"]?.firstOrNull()
+
     @Composable
     override fun content() {
         ArchiveEditScreen(
@@ -93,7 +104,7 @@ data class ArchiveEditRoute(
         )
     }
 
-    override val children: List<Node> = when (archiveId) {
+    override val children: List<Node> = when (val archiveId = archiveId) {
         null -> emptyList()
         else -> listOf(
             ExternalRoute(

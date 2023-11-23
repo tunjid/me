@@ -50,13 +50,11 @@ abstract class ArchiveDetailNavigationComponent {
     fun archiveDetailRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "archives/{kind}/{id}",
-            routeMapper = { (route: String, pathKeys: Map<String, String>) ->
-                val archiveId = ArchiveId(pathKeys["id"] ?: "")
-                val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] } ?: ArchiveKind.Articles
+            routeMapper = { params ->
                 ArchiveDetailRoute(
-                    id = route,
-                    kind = kind,
-                    archiveId = archiveId
+                    route = params.route,
+                    pathArgs = params.pathArgs,
+                    queryArgs = params.queryArgs
                 )
             }
         )

@@ -84,7 +84,7 @@ class ActualArchiveEditStateHolder(
 ) : ArchiveEditStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         kind = route.kind,
-        sharedElementKey = thumbnailSharedElementKey(route.archiveId),
+        sharedElementKey = thumbnailSharedElementKey(route.archiveThumbnail),
         upsert = ArchiveUpsert(id = route.archiveId),
         navBarSize = uiStateFlow.value.navBarSize,
         hasStoragePermissions = permissionsFlow.value.isGranted(Permission.ReadExternalStorage)
@@ -132,10 +132,11 @@ class ActualArchiveEditStateHolder(
 private fun Flow<Action>.withInitialLoad(
     route: ArchiveEditRoute,
 ) = onStart {
-    if (route.archiveId != null) emit(
+    val archiveId = route.archiveId
+    if (archiveId != null) emit(
         Action.Load.InitialLoad(
             kind = route.kind,
-            id = route.archiveId,
+            id = archiveId,
         )
     )
 }
@@ -366,6 +367,7 @@ private fun ArchiveRepository.textBodyMutations(
     .filterNotNull()
     .mapToMutation { archive ->
         copy(
+            sharedElementKey = thumbnailSharedElementKey(archive.thumbnail),
             thumbnail = archive.thumbnail,
             body = TextFieldValue(
                 text = archive.body

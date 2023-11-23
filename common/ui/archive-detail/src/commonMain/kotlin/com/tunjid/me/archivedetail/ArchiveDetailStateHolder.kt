@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
@@ -68,7 +69,7 @@ class ActualArchiveDetailStateHolder(
 ) : ArchiveDetailStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         kind = route.kind,
-        sharedElementKey = thumbnailSharedElementKey(route.archiveId),
+        sharedElementKey = thumbnailSharedElementKey(route.archiveThumbnail),
         navBarSize = uiStateFlow.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
@@ -116,11 +117,13 @@ private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
         }
 
 private fun ArchiveRepository.archiveLoadMutations(
-    id: ArchiveId,
+    id: ArchiveId?,
 ): Flow<Mutation<State>> =
-    archiveStream(id = id)
+    if (id == null) emptyFlow()
+    else archiveStream(id = id)
         .mapToMutation { fetchedArchive ->
             copy(
+                sharedElementKey = thumbnailSharedElementKey(fetchedArchive?.thumbnail),
                 wasDeleted = archive != null && fetchedArchive == null,
                 archive = fetchedArchive
             )

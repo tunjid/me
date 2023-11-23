@@ -251,7 +251,7 @@ private fun ImageFile(
             }
     ) {
         val sharedElement = rememberSharedContent(
-            key = thumbnailSharedElementKey(archiveFile.id)
+            key = thumbnailSharedElementKey(archiveFile.url)
         ) { sharedElementModifier ->
             val imagePainter = rememberAsyncRasterPainter(
                 imageUri = archiveFile.url,

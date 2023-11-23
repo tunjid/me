@@ -121,7 +121,7 @@ internal fun ArchiveGalleryScreen(
     ) { index ->
         val file = items[index]
         val sharedElement = rememberSharedContent(
-            thumbnailSharedElementKey(file.archiveFileId)
+            thumbnailSharedElementKey(file.url)
         ) { modifier ->
             val imagePainter = rememberAsyncRasterPainter(
                 imageUri = file.url,

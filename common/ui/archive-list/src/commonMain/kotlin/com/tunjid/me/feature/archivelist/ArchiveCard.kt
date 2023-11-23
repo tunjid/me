@@ -124,7 +124,7 @@ fun ArchiveCard(
     onCategoryClicked: (Descriptor.Category) -> Unit,
 ) {
     val thumb = rememberSharedContent(
-        key = thumbnailSharedElementKey(archive.id),
+        key = thumbnailSharedElementKey(archive.thumbnail),
     ) { innerModifier ->
         AsyncRasterImage(
             imageUrl = archive.thumbnail,

@@ -58,10 +58,20 @@ private const val BODY_KEY = 3
 
 @Serializable
 data class ArchiveDetailRoute(
-    override val id: String,
-    val kind: ArchiveKind,
-    val archiveId: ArchiveId
+    val route: String,
+    val pathArgs: Map<String, String>,
+    val queryArgs: Map<String, List<String>>,
 ) : AppRoute {
+
+    override val id: String get() = route.split("?").first()
+
+    val archiveId: ArchiveId? = pathArgs["id"]?.let(::ArchiveId)
+
+    val kind = ArchiveKind.entries.firstOrNull { it.type == pathArgs["kind"] }
+        ?: ArchiveKind.Articles
+
+    val archiveThumbnail: String? get() = queryArgs["thumbnail"]?.firstOrNull()
+
     @Composable
     override fun content() {
         ArchiveDetailScreen(
