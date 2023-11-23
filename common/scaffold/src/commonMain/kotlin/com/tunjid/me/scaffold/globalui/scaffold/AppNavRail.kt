@@ -68,7 +68,9 @@ internal fun AppNavRail(
     val toolbarHeight = windowSizeClass.toolbarSize() countIf !containerState.toolbarOverlaps
 
     val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
-    val navRailWidth by animateDpAsState(windowSizeClass.navRailWidth())
+    val navRailWidth by animateDpAsState(
+        targetValue = windowSizeClass.navRailWidth() countIf containerState.navRailVisible
+    )
 
     NavigationRail(
         modifier = Modifier

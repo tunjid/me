@@ -366,7 +366,7 @@ private fun routeContainerPadding(
     val toolbarHeight = state.windowSizeClass.toolbarSize() countIf !state.toolbarOverlaps
     val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
 
-    val navRailSize = state.windowSizeClass.navRailWidth()
+    val navRailSize = state.windowSizeClass.navRailWidth() countIf state.navRailVisible
 
     val startClearance by animateDpAsState(targetValue = navRailSize)
 
