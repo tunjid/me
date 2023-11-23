@@ -214,8 +214,6 @@ object Adaptive {
     }
 }
 
-fun Adaptive.Adaptation.Swap.containersExcludingDestination() = Adaptive.Container.entries - setOf(to)
-
 internal fun Adaptive.NavigationState.containerStateFor(
     slot: Adaptive.Slot
 ): Adaptive.ContainerState {

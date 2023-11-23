@@ -194,37 +194,55 @@ private fun Adaptive.NavigationState.adaptTo(
 
             else -> when (newAdaptation) {
                 // Everything is good to go, the route being dismissed will have its slot free
-                Adaptive.Adaptation.TransientDismissal -> current.copy(
-                    adaptation = newAdaptation,
-                    previousContainersToRoutes = Adaptive.Container.entries.associateWith(
-                        valueSelector = ::routeFor
-                    ),
-                    routeIdsToAdaptiveSlots = routeIdsToAdaptiveSlots
-                )
-
-                else -> {
-                    val excludedSlots = newAdaptation.containersExcludingDestination()
-                        .map(::slotFor)
+                Adaptive.Adaptation.TransientDismissal -> {
+                    val currentRouteIds = AdaptiveRouteInContainerLookups
+                        .map { current.let(it)?.id }
                         .toSet()
 
-                    val vacatedSlot = Adaptive.Slot.entries.first {
-                        !excludedSlots.contains(it)
-                    }
+                    val unusedSlots = routeIdsToAdaptiveSlots
+                        .filterKeys { !currentRouteIds.contains(it) }
+                        .values
+                        .toMutableList()
 
                     current.copy(
                         adaptation = newAdaptation,
                         previousContainersToRoutes = Adaptive.Container.entries.associateWith(
                             valueSelector = ::routeFor
                         ),
-                        routeIdsToAdaptiveSlots = when (
-                            val newRoute = current.routeFor(newAdaptation.from)
-                        ) {
-                            null -> routeIdsToAdaptiveSlots
-                            else -> routeIdsToAdaptiveSlots - routeFor(vacatedSlot)?.id + Pair(
-                                first = newRoute.id,
-                                second = vacatedSlot
-                            )
-                        }
+                        routeIdsToAdaptiveSlots = AdaptiveRouteInContainerLookups
+                            .mapNotNull { lookup ->
+                                val route = lookup(current) ?: return@mapNotNull null
+                                route.id to when (
+                                    val existingSlot = routeIdsToAdaptiveSlots[route.id]
+                                ) {
+                                    null -> unusedSlots.removeAt(index = 0)
+                                    else -> existingSlot
+                                }
+                            }.toMap()
+                    )
+                }
+
+                else -> {
+                    val swappedRoute = routeFor(newAdaptation.from)
+                    val swappedSlot = slotFor(newAdaptation.from)
+                        ?: throw IllegalArgumentException("Attempted move from a null slot")
+
+                    val freeSlots = Adaptive.Slot.entries
+                        .filterNot { swappedSlot == it }
+                        .toMutableList()
+
+                    current.copy(
+                        adaptation = newAdaptation,
+                        previousContainersToRoutes = Adaptive.Container.entries.associateWith(
+                            valueSelector = ::routeFor
+                        ),
+                        routeIdsToAdaptiveSlots = AdaptiveRouteInContainerLookups
+                            .mapNotNull { lookup ->
+                                val route = lookup(current) ?: return@mapNotNull null
+                                route.id to if (route.id == swappedRoute?.id) swappedSlot
+                                else freeSlots.removeAt(index = 0)
+                            }
+                            .toMap()
                     )
                 }
             }
