@@ -65,26 +65,10 @@ fun ComponentActivity.integrateBackActions(
     globalUiStateHolder: GlobalUiStateHolder,
     navStateHolder: NavStateHolder,
 ) {
-    val backPressedCallback = object : OnBackPressedCallback(true) {
-        override fun handleOnBackProgressed(backEvent: BackEventCompat) {
-            globalUiStateHolder.accept { copy(backStatus = backEvent.toBackStatus()) }
-        }
-
-        override fun handleOnBackPressed() {
-            // Dismiss back preview
-            globalUiStateHolder.accept {
-                copy(backStatus = BackStatus.None(BackStatus.PreviewState.CommittedAfterPreview))
-            }
-            // Pop navigation
-            navStateHolder.accept { navState.pop() }
-        }
-
-        override fun handleOnBackCancelled() {
-            globalUiStateHolder.accept {
-                copy(backStatus = BackStatus.None(BackStatus.PreviewState.CancelledAfterPreview))
-            }
-        }
-    }
+    val backPressedCallback = BackPreviewBackPressedCallback(
+        globalUiStateHolder = globalUiStateHolder,
+        navStateHolder = navStateHolder
+    )
     onBackPressedDispatcher.addCallback(backPressedCallback)
 
     lifecycleScope.launch {
@@ -95,6 +79,30 @@ fun ComponentActivity.integrateBackActions(
             }
                 .distinctUntilChanged()
                 .collect(backPressedCallback::isEnabled::set)
+        }
+    }
+}
+
+private class BackPreviewBackPressedCallback(
+    private val globalUiStateHolder: GlobalUiStateHolder,
+    private val navStateHolder: NavStateHolder,
+) : OnBackPressedCallback(true) {
+    override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+        globalUiStateHolder.accept { copy(backStatus = backEvent.toBackStatus()) }
+    }
+
+    override fun handleOnBackPressed() {
+        // Dismiss back preview
+        globalUiStateHolder.accept {
+            copy(backStatus = BackStatus.None(BackStatus.PreviewState.CommittedAfterPreview))
+        }
+        // Pop navigation
+        navStateHolder.accept { navState.pop() }
+    }
+
+    override fun handleOnBackCancelled() {
+        globalUiStateHolder.accept {
+            copy(backStatus = BackStatus.None(BackStatus.PreviewState.CancelledAfterPreview))
         }
     }
 }
