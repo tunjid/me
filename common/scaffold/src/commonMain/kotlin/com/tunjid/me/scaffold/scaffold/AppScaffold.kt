@@ -72,13 +72,13 @@ fun Scaffold(
                             }
                         },
                         primaryContent = {
-                            routeIn(Adaptive.Container.Primary).invoke()
+                            routeIn(Adaptive.Container.Primary)
                         },
                         secondaryContent = {
-                            routeIn(Adaptive.Container.Secondary).invoke()
+                            routeIn(Adaptive.Container.Secondary)
                         },
                         transientPrimaryContent = {
-                            routeIn(Adaptive.Container.TransientPrimary).invoke()
+                            routeIn(Adaptive.Container.TransientPrimary)
                         },
                     )
                 }
