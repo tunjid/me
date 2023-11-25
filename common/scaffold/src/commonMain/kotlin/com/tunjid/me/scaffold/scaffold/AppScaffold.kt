@@ -29,7 +29,7 @@ import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.adaptive.Adaptive
 import com.tunjid.me.scaffold.adaptive.SavedStateAdaptiveContentHost
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.NavStateHolder
+import com.tunjid.me.scaffold.nav.NavigationStateHolder
 import com.tunjid.treenav.strings.RouteParser
 
 /**
@@ -39,7 +39,7 @@ import com.tunjid.treenav.strings.RouteParser
 fun Scaffold(
     modifier: Modifier,
     routeParser: RouteParser<AppRoute>,
-    navStateHolder: NavStateHolder,
+    navStateHolder: NavigationStateHolder,
     globalUiStateHolder: GlobalUiStateHolder,
 ) {
     CompositionLocalProvider(

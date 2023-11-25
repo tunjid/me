@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.tunjid.me.scaffold.nav.NavStateHolder
+import com.tunjid.me.scaffold.nav.NavigationStateHolder
 import com.tunjid.treenav.pop
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectIndexed
@@ -63,7 +63,7 @@ internal fun BackEventCompat.toBackStatus() = PreviewBackStatus(
 
 fun ComponentActivity.integrateBackActions(
     globalUiStateHolder: GlobalUiStateHolder,
-    navStateHolder: NavStateHolder,
+    navStateHolder: NavigationStateHolder,
 ) {
     val backPressedCallback = BackPreviewBackPressedCallback(
         globalUiStateHolder = globalUiStateHolder,
@@ -85,7 +85,7 @@ fun ComponentActivity.integrateBackActions(
 
 private class BackPreviewBackPressedCallback(
     private val globalUiStateHolder: GlobalUiStateHolder,
-    private val navStateHolder: NavStateHolder,
+    private val navStateHolder: NavigationStateHolder,
 ) : OnBackPressedCallback(true) {
     override fun handleOnBackProgressed(backEvent: BackEventCompat) {
         globalUiStateHolder.accept { copy(backStatus = backEvent.toBackStatus()) }

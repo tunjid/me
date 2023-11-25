@@ -114,7 +114,7 @@ data class ArchiveEditRoute(
     }
 
 
-    override val supportingRoute
+    override val secondaryRoute
         get() = children.firstOrNull()?.id
 }
 

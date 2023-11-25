@@ -27,7 +27,7 @@ import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.ui.lazy.staggeredgrid.LazyStaggeredGridState
 import com.tunjid.me.core.utilities.ByteSerializable
-import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.NavigationMutation
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.emptyTiledList
 import com.tunjid.tiler.filterIsInstance
@@ -126,7 +126,7 @@ sealed class Action(val key: String) {
 
     data class ToggleFilter(val isExpanded: Boolean? = null) : Action(key = "ToggleFilter")
 
-    data class Navigate(val navMutation: NavMutation) : Action(key = "Navigate")
+    data class Navigate(val navigationMutation: NavigationMutation) : Action(key = "Navigate")
 }
 
 sealed class ArchiveItem(val contentType: String) {

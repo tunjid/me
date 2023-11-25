@@ -49,8 +49,8 @@ import me.tatarka.inject.annotations.Inject
 
 const val NavName = "App"
 
-typealias NavStateHolder = ActionStateProducer<NavMutation, StateFlow<MultiStackNav>>
-typealias NavMutation = NavigationContext.() -> MultiStackNav
+typealias NavigationStateHolder = ActionStateProducer<NavigationMutation, StateFlow<MultiStackNav>>
+typealias NavigationMutation = NavigationContext.() -> MultiStackNav
 
 private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(
     durationMillis = 700
@@ -70,7 +70,7 @@ interface AppRoute : Route {
     /**
      * Defines what route to show in the secondary panel alongside this route
      */
-    val supportingRoute: String?
+    val secondaryRoute: String?
         get() = null
 
     fun transitionsFor(
@@ -116,7 +116,7 @@ data class NavItem(
     val selected: Boolean
 )
 
-private val EmptyNavState = MultiStackNav(
+private val EmptyNavigationState = MultiStackNav(
     name = "emptyMultiStack",
     stacks = listOf(
         StackNav(
@@ -127,12 +127,12 @@ private val EmptyNavState = MultiStackNav(
 )
 
 @Inject
-class PersistedNavStateHolder(
+class PersistedNavigationStateHolder(
     appScope: CoroutineScope,
     savedStateRepository: SavedStateRepository,
     routeParser: RouteParser<AppRoute>,
-) : NavStateHolder by appScope.actionStateFlowProducer(
-    initialState = EmptyNavState,
+) : NavigationStateHolder by appScope.actionStateFlowProducer(
+    initialState = EmptyNavigationState,
     started = SharingStarted.Eagerly,
     actionTransform = { navMutations ->
         flow {
@@ -157,9 +157,12 @@ class PersistedNavStateHolder(
     },
 )
 
+/**
+ * A helper function for generic state producers to consume navigation actions
+ */
 fun <Action, State> Flow<Action>.consumeNavActions(
-    mutationMapper: (Action) -> NavMutation,
-    action: (NavMutation) -> Unit
+    mutationMapper: (Action) -> NavigationMutation,
+    action: (NavigationMutation) -> Unit
 ) = flatMapLatest {
     action(mutationMapper(it))
     emptyFlow<Mutation<State>>()

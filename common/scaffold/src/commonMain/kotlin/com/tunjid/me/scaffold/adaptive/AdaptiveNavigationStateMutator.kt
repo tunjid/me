@@ -76,7 +76,7 @@ private fun adaptiveNavigationStateMutations(
     val primaryRoute = multiStackNav.primaryRouteOnBackPress.takeIf {
         uiState.backStatus.previewState == BackStatus.PreviewState.Previewing
     } ?: multiStackNav.primaryRoute
-    val secondaryRoute = primaryRoute.supportingRoute?.let(routeParser::parse)
+    val secondaryRoute = primaryRoute.secondaryRoute?.let(routeParser::parse)
 
     Adaptive.NavigationState(
         navId = navId,

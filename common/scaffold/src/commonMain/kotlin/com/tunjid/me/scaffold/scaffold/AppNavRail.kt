@@ -38,7 +38,7 @@ import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.nav.NavItem
-import com.tunjid.me.scaffold.nav.NavStateHolder
+import com.tunjid.me.scaffold.nav.NavigationStateHolder
 import com.tunjid.me.scaffold.nav.navItemSelected
 import com.tunjid.me.scaffold.nav.navItems
 import com.tunjid.treenav.MultiStackNav
@@ -49,7 +49,7 @@ import com.tunjid.treenav.MultiStackNav
 @Composable
 internal fun AppNavRail(
     globalUiStateHolder: GlobalUiStateHolder,
-    navStateHolder: NavStateHolder,
+    navStateHolder: NavigationStateHolder,
 ) {
     val containerState by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
         mapper = UiState::routeContainerState
@@ -90,7 +90,7 @@ internal fun AppNavRail(
 @Composable
 private fun NavRailItem(
     item: NavItem,
-    navStateHolder: NavStateHolder,
+    navStateHolder: NavigationStateHolder,
 ) {
     val alpha = if (item.selected) 1f else 0.6f
     NavigationRailItem(

@@ -47,7 +47,7 @@ import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.globalui.slices.toolbarState
 import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.nav.NavStateHolder
+import com.tunjid.me.scaffold.nav.NavigationStateHolder
 import com.tunjid.me.scaffold.nav.UnknownRoute
 import com.tunjid.me.scaffold.nav.canGoUp
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
@@ -61,7 +61,7 @@ import com.tunjid.treenav.pop
 @Composable
 internal fun BoxScope.AppToolbar(
     globalUiStateHolder: GlobalUiStateHolder,
-    navStateHolder: NavStateHolder,
+    navStateHolder: NavigationStateHolder,
 ) {
     val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
         mapper = UiState::toolbarState

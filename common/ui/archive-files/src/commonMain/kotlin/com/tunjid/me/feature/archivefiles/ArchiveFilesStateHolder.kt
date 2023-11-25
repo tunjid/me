@@ -32,7 +32,7 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
-import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.NavigationMutation
 import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
@@ -82,7 +82,7 @@ class ActualArchiveFilesStateHolder(
     byteSerializer: ByteSerializer,
     permissionsFlow: StateFlow<Permissions>,
     navStateFlow: StateFlow<MultiStackNav>,
-    navActions: (NavMutation) -> Unit,
+    navActions: (NavigationMutation) -> Unit,
     onPermissionRequested: (Permission) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,

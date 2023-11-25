@@ -23,7 +23,7 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
-import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.NavigationMutation
 import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
@@ -45,7 +45,7 @@ class SettingsStateHolderCreator(
 class ActualSettingsStateHolder(
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
-    navActions: (NavMutation) -> Unit,
+    navActions: (NavigationMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
@@ -67,7 +67,7 @@ class ActualSettingsStateHolder(
         actions.toMutationStream {
             when (val type = type()) {
                 is Action.Navigate -> type.flow.consumeNavActions(
-                    mutationMapper = Action.Navigate::navMutation,
+                    mutationMapper = Action.Navigate::navigationMutation,
                     action = navActions
                 )
             }

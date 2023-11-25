@@ -31,7 +31,7 @@ import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
-import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.NavigationMutation
 import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
@@ -62,7 +62,7 @@ class ActualArchiveDetailStateHolder(
     byteSerializer: ByteSerializer,
     uiStateFlow: StateFlow<UiState>,
     navStateFlow: StateFlow<MultiStackNav>,
-    navActions: (NavMutation) -> Unit,
+    navActions: (NavigationMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveDetailRoute,

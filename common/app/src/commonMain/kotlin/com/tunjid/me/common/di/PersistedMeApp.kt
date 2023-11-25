@@ -51,7 +51,7 @@ class PersistedMeApp(
     savedStateRepository: SavedStateRepository,
     sync: Sync,
     override val routeParser: RouteParser<AppRoute>,
-    override val navStateHolder: NavStateHolder,
+    override val navStateHolder: NavigationStateHolder,
     override val globalUiStateHolder: GlobalUiStateHolder,
     override val lifecycleStateHolder: LifecycleStateHolder,
     private val savedStateCache: SavedStateCache,

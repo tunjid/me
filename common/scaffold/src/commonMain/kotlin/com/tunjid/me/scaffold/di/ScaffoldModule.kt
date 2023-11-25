@@ -27,9 +27,9 @@ import com.tunjid.me.scaffold.lifecycle.ActualLifecycleStateHolder
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
 import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.NavMutation
-import com.tunjid.me.scaffold.nav.NavStateHolder
-import com.tunjid.me.scaffold.nav.PersistedNavStateHolder
+import com.tunjid.me.scaffold.nav.NavigationMutation
+import com.tunjid.me.scaffold.nav.NavigationStateHolder
+import com.tunjid.me.scaffold.nav.PersistedNavigationStateHolder
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
@@ -143,11 +143,11 @@ abstract class InjectedScaffoldComponent(
     @SingletonScope
     @Provides
     fun navStateStream(
-        navStateHolder: NavStateHolder
+        navStateHolder: NavigationStateHolder
     ): StateFlow<MultiStackNav> = navStateHolder.state
 
     @Provides
-    fun navActions(): (NavMutation) -> Unit = navStateHolder.accept
+    fun navActions(): (NavigationMutation) -> Unit = navStateHolder.accept
 
     @SingletonScope
     @Provides
@@ -167,7 +167,7 @@ abstract class InjectedScaffoldComponent(
         lifecycleStateHolder: LifecycleStateHolder
     ): StateFlow<Lifecycle> = lifecycleStateHolder.state
 
-    val PersistedNavStateHolder.bind: NavStateHolder
+    val PersistedNavigationStateHolder.bind: NavigationStateHolder
         @SingletonScope
         @Provides get() = this
 
@@ -183,5 +183,5 @@ abstract class InjectedScaffoldComponent(
         @SingletonScope
         @Provides get() = this
 
-    abstract val navStateHolder: NavStateHolder
+    abstract val navStateHolder: NavigationStateHolder
 }

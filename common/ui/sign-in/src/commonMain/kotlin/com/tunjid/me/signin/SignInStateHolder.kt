@@ -28,7 +28,7 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.nav.NavigationContext
-import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.NavigationMutation
 import com.tunjid.me.scaffold.nav.canGoUp
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
@@ -54,7 +54,7 @@ class SignInStateHolderCreator(
 @Inject
 class ActualSignInStateHolder(
     authRepository: AuthRepository,
-    navActions: (NavMutation) -> Unit,
+    navActions: (NavigationMutation) -> Unit,
     byteSerializer: ByteSerializer,
     scope: CoroutineScope,
     savedState: ByteArray?,
@@ -95,7 +95,7 @@ private fun Flow<Action.MessageConsumed>.messageConsumptionMutations(): Flow<Mut
 
 private fun Flow<Action.Submit>.submissionMutations(
     authRepository: AuthRepository,
-    navActions: (NavMutation) -> Unit
+    navActions: (NavigationMutation) -> Unit
 ): Flow<Mutation<State>> =
     debounce(200)
         .mapLatestToManyMutations { (request) ->

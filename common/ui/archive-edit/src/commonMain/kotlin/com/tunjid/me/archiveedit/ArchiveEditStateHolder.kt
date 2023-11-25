@@ -33,7 +33,7 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
-import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.NavigationMutation
 import com.tunjid.me.scaffold.nav.consumeNavActions
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
@@ -77,7 +77,7 @@ class ActualArchiveEditStateHolder(
     uiStateFlow: StateFlow<UiState>,
     permissionsFlow: StateFlow<Permissions>,
     onPermissionRequested: (Permission) -> Unit,
-    navActions: (NavMutation) -> Unit,
+    navActions: (NavigationMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveEditRoute,

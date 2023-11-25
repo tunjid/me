@@ -84,7 +84,7 @@ data class ArchiveDetailRoute(
 
     override val children: List<Node> = listOf(ExternalRoute("archives/${kind.type}"))
 
-    override val supportingRoute get() = children.first().id
+    override val secondaryRoute get() = children.first().id
 }
 
 @Composable

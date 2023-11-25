@@ -19,7 +19,6 @@ package com.tunjid.me.archivedetail
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.tunjid.me.core.model.Archive
-import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.ChipInfo
@@ -27,13 +26,13 @@ import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
-import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.NavigationMutation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.protobuf.ProtoNumber
 
 sealed class Action {
-    data class Navigate(val navMutation: NavMutation) : Action()
+    data class Navigate(val navMutation: NavigationMutation) : Action()
 }
 
 @Serializable

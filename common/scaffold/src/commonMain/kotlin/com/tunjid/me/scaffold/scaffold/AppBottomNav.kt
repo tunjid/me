@@ -40,7 +40,7 @@ import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.nav.NavStateHolder
+import com.tunjid.me.scaffold.nav.NavigationStateHolder
 import com.tunjid.me.scaffold.nav.navItemSelected
 import com.tunjid.me.scaffold.nav.navItems
 
@@ -50,7 +50,7 @@ import com.tunjid.me.scaffold.nav.navItems
 @Composable
 internal fun BoxScope.AppBottomNav(
     globalUiStateHolder: GlobalUiStateHolder,
-    navStateHolder: NavStateHolder,
+    navStateHolder: NavigationStateHolder,
 ) {
     val nav by navStateHolder.state.collectAsStateWithLifecycle()
     val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(

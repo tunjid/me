@@ -26,7 +26,7 @@ import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
-import com.tunjid.me.scaffold.nav.NavMutation
+import com.tunjid.me.scaffold.nav.NavigationMutation
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
@@ -172,7 +172,7 @@ sealed class Action(val key: String) {
 
     data class RequestPermission(val permission: Permission) : Action("RequestPermission")
 
-    data class Navigate(val navMutation: NavMutation) : Action(key = "Navigate")
+    data class Navigate(val navMutation: NavigationMutation) : Action(key = "Navigate")
 }
 
 @Serializable
