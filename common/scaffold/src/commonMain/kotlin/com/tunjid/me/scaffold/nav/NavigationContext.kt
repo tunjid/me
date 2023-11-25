@@ -19,15 +19,19 @@ package com.tunjid.me.scaffold.nav
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.RouteParser
 
-interface NavContext {
+/**
+ * provides a context for navigation actions, most commonly parsing a string route to a fully
+ * type route.
+ */
+interface NavigationContext {
     val navState: MultiStackNav
     val String.toRoute: AppRoute
 }
 
-class ImmutableNavContext(
+internal class ImmutableNavigationContext(
     private val state: MultiStackNav,
     private val routeParser: RouteParser<AppRoute>
-) : NavContext {
+) : NavigationContext {
     override val navState: MultiStackNav get() = state
 
     override val String.toRoute: AppRoute

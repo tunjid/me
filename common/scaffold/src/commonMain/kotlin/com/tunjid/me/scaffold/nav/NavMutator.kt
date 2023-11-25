@@ -50,7 +50,7 @@ import me.tatarka.inject.annotations.Inject
 const val NavName = "App"
 
 typealias NavStateHolder = ActionStateProducer<NavMutation, StateFlow<MultiStackNav>>
-typealias NavMutation = NavContext.() -> MultiStackNav
+typealias NavMutation = NavigationContext.() -> MultiStackNav
 
 private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(
     durationMillis = 700
@@ -68,7 +68,7 @@ interface AppRoute : Route {
     fun content()
 
     /**
-     * Defines what route to show in the supporting panel alongside this route
+     * Defines what route to show in the secondary panel alongside this route
      */
     val supportingRoute: String?
         get() = null
@@ -81,6 +81,8 @@ interface AppRoute : Route {
             is Adaptive.Adaptation.Change -> Adaptive.Transitions(
                 enter = fadeIn(
                     animationSpec = RouteTransitionAnimationSpec,
+                    // This is needed because I can't exclude shared elements from transitions
+                    // so to actually see them move, state fading in from 0.1f
                     initialAlpha = 0.1f
                 ),
                 exit = fadeOut(
@@ -114,7 +116,7 @@ data class NavItem(
     val selected: Boolean
 )
 
-val EmptyNavState = MultiStackNav(
+private val EmptyNavState = MultiStackNav(
     name = "emptyMultiStack",
     stacks = listOf(
         StackNav(
@@ -143,7 +145,7 @@ class PersistedNavStateHolder(
                 navMutations.map { navMutation ->
                     mutation {
                         navMutation(
-                            ImmutableNavContext(
+                            ImmutableNavigationContext(
                                 state = this,
                                 routeParser = routeParser
                             )
@@ -155,7 +157,6 @@ class PersistedNavStateHolder(
     },
 )
 
-
 fun <Action, State> Flow<Action>.consumeNavActions(
     mutationMapper: (Action) -> NavMutation,
     action: (NavMutation) -> Unit
@@ -164,24 +165,27 @@ fun <Action, State> Flow<Action>.consumeNavActions(
     emptyFlow<Mutation<State>>()
 }
 
-fun RouteParser<AppRoute>.parseMultiStackNav(savedState: SavedState) =
-    savedState.navigation.fold(
-        initial = MultiStackNav(name = "AppNav"),
-        operation = { multiStackNav, routesForStack ->
-            multiStackNav.copy(
-                stacks = multiStackNav.stacks +
-                        routesForStack.fold(
-                            initial = StackNav(
-                                name = routesForStack.firstOrNull() ?: "Unknown"
-                            ),
-                            operation = innerFold@{ stackNav, route ->
-                                stackNav.copy(
-                                    routes = stackNav.routes + (
-                                            parse(routeString = route) ?: UnknownRoute()
-                                            )
-                                )
-                            }
-                        )
-            )
-        }
-    ).copy(currentIndex = savedState.activeNav)
+private fun RouteParser<AppRoute>.parseMultiStackNav(savedState: SavedState) =
+    savedState.navigation
+        .fold(
+            initial = MultiStackNav(name = "AppNav"),
+            operation = { multiStackNav, routesForStack ->
+                multiStackNav.copy(
+                    stacks = multiStackNav.stacks +
+                            routesForStack.fold(
+                                initial = StackNav(
+                                    name = routesForStack.firstOrNull() ?: "Unknown"
+                                ),
+                                operation = innerFold@{ stackNav, route ->
+                                    val resolvedRoute = parse(routeString = route) ?: UnknownRoute()
+                                    stackNav.copy(
+                                        routes = stackNav.routes + resolvedRoute
+                                    )
+                                }
+                            )
+                )
+            }
+        )
+        .copy(
+            currentIndex = savedState.activeNav
+        )

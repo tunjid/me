@@ -27,7 +27,7 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
-import com.tunjid.me.scaffold.nav.NavContext
+import com.tunjid.me.scaffold.nav.NavigationContext
 import com.tunjid.me.scaffold.nav.NavMutation
 import com.tunjid.me.scaffold.nav.canGoUp
 import com.tunjid.mutator.ActionStateProducer
@@ -105,12 +105,12 @@ private fun Flow<Action.Submit>.submissionMutations(
                     copy(messages = messages + "Error signing in: ${result.message}")
                 }
 
-                else -> navActions(NavContext::resetNav)
+                else -> navActions(NavigationContext::resetNav)
             }
             emit { copy(isSubmitting = false) }
         }
 
-private fun NavContext.resetNav(): MultiStackNav {
+private fun NavigationContext.resetNav(): MultiStackNav {
     var newNav = navState
     for (i in 0.until(navState.stacks.size)) {
         newNav = newNav.switch(i)

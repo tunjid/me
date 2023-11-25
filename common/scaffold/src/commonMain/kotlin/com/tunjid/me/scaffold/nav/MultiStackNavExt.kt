@@ -31,7 +31,7 @@ val MultiStackNav.navItems
     get() = stacks
         .map { it.name }
         .mapIndexed { index, name ->
-            val kind = ArchiveKind.values().firstOrNull {
+            val kind = ArchiveKind.entries.firstOrNull {
                 name.contains(it.type)
             }
             NavItem(
@@ -42,12 +42,6 @@ val MultiStackNav.navItems
             )
         }
 
-val MultiStackNav.secondaryRoute: String?
-    get() = when (val current = current) {
-        is AppRoute -> current.supportingRoute
-        else -> null
-    }
-
 fun MultiStackNav.navItemSelected(item: NavItem) =
     if (item.selected) popToRoot(indexToPop = item.index)
     else switch(toIndex = item.index)
@@ -57,8 +51,8 @@ fun MultiStackNav.navItemSelected(item: NavItem) =
  */
 fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AppRoute>> =
     distinctUntilChanged()
-        .scan(initial = listOf(emptyNav, emptyNav)) { list, newNav ->
-            (list + newNav).takeLast(2)
+        .scan(initial = emptyNav to emptyNav) { navPair, newNav ->
+            navPair.copy(first = navPair.second, second = newNav)
         }
         .map { (prevNav: MultiStackNav, currentNav: MultiStackNav) ->
             (prevNav - currentNav).filterIsInstance<AppRoute>()
