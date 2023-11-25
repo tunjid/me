@@ -1,4 +1,4 @@
-package com.tunjid.me.scaffold.globalui.adaptive
+package com.tunjid.me.scaffold.adaptive
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector

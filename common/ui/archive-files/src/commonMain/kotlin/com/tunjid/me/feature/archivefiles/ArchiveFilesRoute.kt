@@ -62,8 +62,8 @@ import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryRoute
 import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
-import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
+import com.tunjid.me.scaffold.adaptive.rememberSharedContent
+import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute

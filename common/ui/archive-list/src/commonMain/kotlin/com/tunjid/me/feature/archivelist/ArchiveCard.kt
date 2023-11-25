@@ -58,8 +58,8 @@ import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
-import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
-import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
+import com.tunjid.me.scaffold.adaptive.rememberSharedContent
+import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import kotlinx.datetime.Clock.System
 
 @Composable

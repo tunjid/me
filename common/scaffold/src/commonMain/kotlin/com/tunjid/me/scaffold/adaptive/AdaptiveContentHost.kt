@@ -1,4 +1,4 @@
-package com.tunjid.me.scaffold.globalui.adaptive
+package com.tunjid.me.scaffold.adaptive
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibilityScope

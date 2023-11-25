@@ -1,4 +1,4 @@
-package com.tunjid.me.scaffold.globalui.adaptive
+package com.tunjid.me.scaffold.adaptive
 
 import com.tunjid.me.scaffold.globalui.BackStatus
 import com.tunjid.me.scaffold.globalui.UiState

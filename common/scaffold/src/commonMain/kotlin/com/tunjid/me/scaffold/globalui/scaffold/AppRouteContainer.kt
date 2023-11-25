@@ -65,9 +65,9 @@ import com.tunjid.me.scaffold.adaptiveSpringSpec
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.WindowSizeClass.COMPACT
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive.Adaptation.Companion.PrimaryToSecondary
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive.Adaptation.Companion.SecondaryToPrimary
+import com.tunjid.me.scaffold.adaptive.Adaptive
+import com.tunjid.me.scaffold.adaptive.Adaptive.Adaptation.Companion.PrimaryToSecondary
+import com.tunjid.me.scaffold.adaptive.Adaptive.Adaptation.Companion.SecondaryToPrimary
 import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.navRailWidth

@@ -21,8 +21,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
-import com.tunjid.me.scaffold.globalui.adaptive.LocalAdaptiveContentScope
+import com.tunjid.me.scaffold.adaptive.Adaptive
+import com.tunjid.me.scaffold.adaptive.LocalAdaptiveContentScope
 import com.tunjid.me.scaffold.globalui.isFromLeft
 import com.tunjid.me.scaffold.globalui.progress
 import com.tunjid.me.scaffold.globalui.touchX

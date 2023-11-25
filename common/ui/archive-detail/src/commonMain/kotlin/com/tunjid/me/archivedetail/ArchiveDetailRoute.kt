@@ -43,7 +43,7 @@ import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.PaneAnchor
-import com.tunjid.me.scaffold.globalui.adaptive.rememberSharedContent
+import com.tunjid.me.scaffold.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.globalui.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.me.scaffold.globalui.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.lifecycle.component1

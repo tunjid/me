@@ -24,7 +24,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.tunjid.me.scaffold.globalui.adaptive.Adaptive
+import com.tunjid.me.scaffold.adaptive.Adaptive
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.ActionStateProducer

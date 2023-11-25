@@ -26,7 +26,7 @@ import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.globalui.PaneAnchor
-import com.tunjid.me.scaffold.globalui.adaptive.thumbnailSharedElementKey
+import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.nav.NavMutation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
