@@ -93,7 +93,7 @@ internal fun AppRouteContainer(
     val paddingValues = routeContainerPadding(state.routeContainerPositionalState)
     val (startClearance, topClearance, _, bottomClearance) = paddingValues
 
-    val hasNavContent = state.routeFor(Adaptive.Container.Secondary) != null
+    val hasSecondaryContent = state.routeFor(Adaptive.Container.Secondary) != null
     val windowSizeClass = state.windowSizeClass
     val adaptation = state.adaptation
 
@@ -135,7 +135,7 @@ internal fun AppRouteContainer(
                 )
                 AnimatedVisibility(
                     modifier = Modifier.align(Alignment.CenterStart),
-                    visible = hasNavContent && windowSizeClass > COMPACT
+                    visible = hasSecondaryContent && windowSizeClass > COMPACT
                 ) {
                     DraggableThumb(
                         paneAnchorState = paneSplitState
@@ -145,11 +145,11 @@ internal fun AppRouteContainer(
         )
     }
 
-    LaunchedEffect(windowSizeClass, hasNavContent) {
+    LaunchedEffect(windowSizeClass, hasSecondaryContent) {
         // Delay briefly so the animation runs
         delay(5)
         paneSplitState.moveTo(
-            if (hasNavContent) when (windowSizeClass) {
+            if (hasSecondaryContent) when (windowSizeClass) {
                 COMPACT -> PaneAnchor.Zero
                 WindowSizeClass.MEDIUM -> PaneAnchor.OneThirds
                 WindowSizeClass.EXPANDED -> PaneAnchor.Half
