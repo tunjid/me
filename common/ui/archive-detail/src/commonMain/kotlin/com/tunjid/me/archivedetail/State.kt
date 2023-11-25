@@ -26,13 +26,16 @@ import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
+import com.tunjid.me.scaffold.nav.NavigationAction
 import com.tunjid.me.scaffold.nav.NavigationMutation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.protobuf.ProtoNumber
 
 sealed class Action {
-    data class Navigate(val navMutation: NavigationMutation) : Action()
+    data class Navigate(
+        override val navigationMutation: NavigationMutation
+    ) : Action(), NavigationAction
 }
 
 @Serializable

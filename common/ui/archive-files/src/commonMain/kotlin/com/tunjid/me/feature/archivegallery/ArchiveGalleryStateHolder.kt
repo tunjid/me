@@ -27,7 +27,7 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.nav.NavigationMutation
-import com.tunjid.me.scaffold.nav.consumeNavActions
+import com.tunjid.me.scaffold.nav.consumeNavigationActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
@@ -84,9 +84,8 @@ class ActualArchiveGalleryStateHolder(
         actions.toMutationStream {
             when (val action = type()) {
                 is Action.LoadAround -> action.flow.loadMutations(archiveFileRepository)
-                is Action.Navigate -> action.flow.consumeNavActions(
-                    mutationMapper = Action.Navigate::navMutation,
-                    action = navActions
+                is Action.Navigate -> action.flow.consumeNavigationActions(
+                    navigationMutationConsumer = navActions
                 )
             }
         }

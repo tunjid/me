@@ -17,6 +17,7 @@
 package com.tunjid.me.settings
 
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.scaffold.nav.NavigationAction
 import com.tunjid.me.scaffold.nav.NavigationMutation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -30,5 +31,7 @@ data class State(
 ) : ByteSerializable
 
 sealed class Action {
-    data class Navigate(val navigationMutation: NavigationMutation) : Action()
+    data class Navigate(
+        override val navigationMutation: NavigationMutation
+    ) : Action(), NavigationAction
 }

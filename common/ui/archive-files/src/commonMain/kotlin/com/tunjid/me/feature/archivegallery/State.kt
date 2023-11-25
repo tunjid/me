@@ -21,6 +21,7 @@ import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveFileId
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.scaffold.nav.NavigationAction
 import com.tunjid.me.scaffold.nav.NavigationMutation
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.emptyTiledList
@@ -30,7 +31,9 @@ import kotlinx.serialization.protobuf.ProtoNumber
 
 sealed class Action(val key: String) {
     data class LoadAround(val query: ArchiveFileQuery) : Action("LoadAround")
-    data class Navigate(val navMutation: NavigationMutation) : Action("Navigate")
+    data class Navigate(
+        override val navigationMutation: NavigationMutation
+    ) : Action("Navigate"), NavigationAction
 }
 
 @Serializable

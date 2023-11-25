@@ -24,7 +24,7 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.nav.NavigationMutation
-import com.tunjid.me.scaffold.nav.consumeNavActions
+import com.tunjid.me.scaffold.nav.consumeNavigationActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.mapToMutation
@@ -66,9 +66,8 @@ class ActualSettingsStateHolder(
     actionTransform = { actions ->
         actions.toMutationStream {
             when (val type = type()) {
-                is Action.Navigate -> type.flow.consumeNavActions(
-                    mutationMapper = Action.Navigate::navigationMutation,
-                    action = navActions
+                is Action.Navigate -> type.flow.consumeNavigationActions(
+                    navigationMutationConsumer = navActions
                 )
             }
         }

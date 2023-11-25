@@ -32,7 +32,7 @@ import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
 import com.tunjid.me.scaffold.nav.NavigationMutation
-import com.tunjid.me.scaffold.nav.consumeNavActions
+import com.tunjid.me.scaffold.nav.consumeNavigationActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.SuspendingStateHolder
@@ -114,9 +114,8 @@ class ActualArchiveListStateHolder(
 
                 is Action.ListStateChanged -> action.flow.listStateChangeMutations()
                 is Action.ToggleFilter -> action.flow.filterToggleMutations()
-                is Action.Navigate -> action.flow.consumeNavActions(
-                    mutationMapper = Action.Navigate::navigationMutation,
-                    action = navActions
+                is Action.Navigate -> action.flow.consumeNavigationActions(
+                    navigationMutationConsumer = navActions
                 )
             }
         }

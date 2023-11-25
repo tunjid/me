@@ -32,7 +32,7 @@ import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
 import com.tunjid.me.scaffold.nav.NavigationMutation
-import com.tunjid.me.scaffold.nav.consumeNavActions
+import com.tunjid.me.scaffold.nav.consumeNavigationActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
@@ -88,9 +88,8 @@ class ActualArchiveDetailStateHolder(
     actionTransform = { actions ->
         actions.toMutationStream {
             when (val type = type()) {
-                is Action.Navigate -> type.flow.consumeNavActions(
-                    mutationMapper = Action.Navigate::navMutation,
-                    action = navActions
+                is Action.Navigate -> type.flow.consumeNavigationActions(
+                    navigationMutationConsumer = navActions
                 )
             }
         }

@@ -52,6 +52,13 @@ const val NavName = "App"
 typealias NavigationStateHolder = ActionStateProducer<NavigationMutation, StateFlow<MultiStackNav>>
 typealias NavigationMutation = NavigationContext.() -> MultiStackNav
 
+/**
+ * An action that causes mutations to navigation
+ */
+interface NavigationAction {
+    val navigationMutation: NavigationMutation
+}
+
 private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(
     durationMillis = 700
 )
@@ -160,11 +167,10 @@ class PersistedNavigationStateHolder(
 /**
  * A helper function for generic state producers to consume navigation actions
  */
-fun <Action, State> Flow<Action>.consumeNavActions(
-    mutationMapper: (Action) -> NavigationMutation,
-    action: (NavigationMutation) -> Unit
-) = flatMapLatest {
-    action(mutationMapper(it))
+fun <Action : NavigationAction, State> Flow<Action>.consumeNavigationActions(
+    navigationMutationConsumer: (NavigationMutation) -> Unit
+) = flatMapLatest { action ->
+    navigationMutationConsumer(action.navigationMutation)
     emptyFlow<Mutation<State>>()
 }
 

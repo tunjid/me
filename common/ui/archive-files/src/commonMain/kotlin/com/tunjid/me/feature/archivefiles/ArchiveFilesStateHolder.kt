@@ -33,7 +33,7 @@ import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
 import com.tunjid.me.scaffold.nav.NavigationMutation
-import com.tunjid.me.scaffold.nav.consumeNavActions
+import com.tunjid.me.scaffold.nav.consumeNavigationActions
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.ActionStateProducer
@@ -121,9 +121,8 @@ class ActualArchiveFilesStateHolder(
                     archiveFileRepository = archiveFileRepository
                 )
 
-                is Action.Navigate -> action.flow.consumeNavActions(
-                    mutationMapper = Action.Navigate::navMutation,
-                    action = navActions
+                is Action.Navigate -> action.flow.consumeNavigationActions(
+                    navigationMutationConsumer = navActions
                 )
             }
         }

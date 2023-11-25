@@ -18,7 +18,14 @@ package com.tunjid.me.archiveedit
 
 
 import androidx.compose.ui.text.input.TextFieldValue
-import com.tunjid.me.core.model.*
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveUpsert
+import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.Result
+import com.tunjid.me.core.model.minus
+import com.tunjid.me.core.model.plus
+import com.tunjid.me.core.model.singular
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.LocalUri
@@ -26,15 +33,15 @@ import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.nav.NavigationMutation
-import com.tunjid.me.scaffold.nav.consumeNavActions
+import com.tunjid.me.scaffold.nav.consumeNavigationActions
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.ActionStateProducer
@@ -113,9 +120,8 @@ class ActualArchiveEditStateHolder(
                         onPermissionRequested = onPermissionRequested
                     )
 
-                    is Action.Navigate -> action.flow.consumeNavActions(
-                        mutationMapper = Action.Navigate::navMutation,
-                        action = navActions
+                    is Action.Navigate -> action.flow.consumeNavigationActions(
+                        navigationMutationConsumer = navActions
                     )
 
                     is Action.Load -> action.flow.loadMutations(
@@ -220,7 +226,11 @@ private fun Flow<Action.Drop>.dropMutations(
                     thumbnail = uri.path,
                     upsert = upsert.copy(thumbnail = uri.path)
                 )
-                else -> copy(toUpload = null, messages = messages + "Only png, jpg and gif uploads are supported")
+
+                else -> copy(
+                    toUpload = null,
+                    messages = messages + "Only png, jpg and gif uploads are supported"
+                )
             }
         }
     }
@@ -336,7 +346,8 @@ private fun Flow<Action.Load>.loadMutations(
                     emit { copy(isSubmitting = false, messages = messages + message) }
 
                     // Start monitoring the created archive
-                    val id = upsert.id ?: (result as? Result.Success)?.item ?: return@mapLatestToManyMutations
+                    val id = upsert.id ?: (result as? Result.Success)?.item
+                    ?: return@mapLatestToManyMutations
 
                     emitAll(
                         listOfNotNull(

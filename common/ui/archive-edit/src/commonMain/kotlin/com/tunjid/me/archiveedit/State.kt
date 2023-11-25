@@ -26,6 +26,7 @@ import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
+import com.tunjid.me.scaffold.nav.NavigationAction
 import com.tunjid.me.scaffold.nav.NavigationMutation
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.mutator.Mutation
@@ -76,15 +77,15 @@ sealed class Action(val key: String) {
     sealed class TextEdit : Action("TextEdit") {
 
         data class Title(
-             val value: String
+            val value: String
         ) : TextEdit()
 
         data class Description(
-             val value: String
+            val value: String
         ) : TextEdit()
 
         data class VideoUrl(
-             val value: String
+            val value: String
         ) : TextEdit()
 
         sealed class Body : TextEdit() {
@@ -113,9 +114,11 @@ sealed class Action(val key: String) {
                         upsert = upsert.copy(body = textFieldValue.text)
                     )
                 }
+
                 is Body.CursorIndex -> mutation {
                     copy(body = body.copy(selection = TextRange(index = index)))
                 }
+
                 is Body.ImageDrop -> mutation {
                     val existingText = body.text
                     val startSubstring = existingText.substring(
@@ -172,7 +175,9 @@ sealed class Action(val key: String) {
 
     data class RequestPermission(val permission: Permission) : Action("RequestPermission")
 
-    data class Navigate(val navMutation: NavigationMutation) : Action(key = "Navigate")
+    data class Navigate(
+        override val navigationMutation: NavigationMutation
+    ) : Action(key = "Navigate"), NavigationAction
 }
 
 @Serializable
