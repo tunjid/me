@@ -29,8 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.backPreviewModifier
-import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.removedRoutes
+import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.removedRoutes
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.RouteParser

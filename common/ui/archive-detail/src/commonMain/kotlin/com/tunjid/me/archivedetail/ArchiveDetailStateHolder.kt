@@ -31,8 +31,8 @@ import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
-import com.tunjid.me.scaffold.nav.NavigationMutation
-import com.tunjid.me.scaffold.nav.consumeNavigationActions
+import com.tunjid.me.scaffold.navigation.NavigationMutation
+import com.tunjid.me.scaffold.navigation.consumeNavigationActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer

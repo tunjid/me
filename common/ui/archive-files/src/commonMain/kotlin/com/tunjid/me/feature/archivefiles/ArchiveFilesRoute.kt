@@ -66,7 +66,7 @@ import com.tunjid.me.scaffold.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.navigation.AppRoute
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.push

@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.tunjid.me.scaffold.nav.NavigationStateHolder
+import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.treenav.pop
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectIndexed

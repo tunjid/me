@@ -26,8 +26,8 @@ import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
-import com.tunjid.me.scaffold.nav.NavigationAction
-import com.tunjid.me.scaffold.nav.NavigationMutation
+import com.tunjid.me.scaffold.navigation.NavigationAction
+import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation

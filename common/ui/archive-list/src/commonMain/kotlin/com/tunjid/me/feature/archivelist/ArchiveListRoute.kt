@@ -49,7 +49,7 @@ import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.navigation.AppRoute
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.queryAtOrNull
 import com.tunjid.treenav.push

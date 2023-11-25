@@ -26,10 +26,10 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.lifecycle.ActualLifecycleStateHolder
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
-import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.NavigationMutation
-import com.tunjid.me.scaffold.nav.NavigationStateHolder
-import com.tunjid.me.scaffold.nav.PersistedNavigationStateHolder
+import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.NavigationMutation
+import com.tunjid.me.scaffold.navigation.NavigationStateHolder
+import com.tunjid.me.scaffold.navigation.PersistedNavigationStateHolder
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.me.scaffold.permissions.PermissionsProvider

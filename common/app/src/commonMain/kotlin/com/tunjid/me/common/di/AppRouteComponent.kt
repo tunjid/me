@@ -27,7 +27,7 @@ import com.tunjid.me.feature.archivefiles.di.ArchiveFilesNavigationComponent
 import com.tunjid.me.feature.archivelist.di.ArchiveListNavigationComponent
 import com.tunjid.me.profile.di.ProfileNavigationComponent
 import com.tunjid.me.scaffold.di.SavedStateType
-import com.tunjid.me.scaffold.nav.AppRoute
+import com.tunjid.me.scaffold.navigation.AppRoute
 import com.tunjid.me.settings.di.SettingsNavigationComponent
 import com.tunjid.me.signin.di.SignInNavigationComponent
 import com.tunjid.treenav.strings.UrlRouteMatcher

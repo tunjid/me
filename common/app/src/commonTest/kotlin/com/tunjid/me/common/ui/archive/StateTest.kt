@@ -23,7 +23,7 @@ import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.DelegatingByteSerializer
 import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.core.utilities.toBytes
-import com.tunjid.me.scaffold.nav.ByteSerializableRoute
+import com.tunjid.me.scaffold.navigation.ByteSerializableRoute
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic

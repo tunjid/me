@@ -40,8 +40,8 @@ import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
-import com.tunjid.me.scaffold.nav.NavigationMutation
-import com.tunjid.me.scaffold.nav.consumeNavigationActions
+import com.tunjid.me.scaffold.navigation.NavigationMutation
+import com.tunjid.me.scaffold.navigation.consumeNavigationActions
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.ActionStateProducer

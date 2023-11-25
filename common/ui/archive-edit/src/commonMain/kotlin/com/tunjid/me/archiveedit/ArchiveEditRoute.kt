@@ -68,8 +68,8 @@ import com.tunjid.me.scaffold.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.ExternalRoute
+import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.ExternalRoute
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.treenav.Node
 import kotlinx.coroutines.launch

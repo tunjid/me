@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.scaffold.nav
+package com.tunjid.me.scaffold.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -46,8 +46,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
-
-const val NavName = "App"
 
 typealias NavigationStateHolder = ActionStateProducer<NavigationMutation, StateFlow<MultiStackNav>>
 typealias NavigationMutation = NavigationContext.() -> MultiStackNav

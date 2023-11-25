@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.scaffold.nav
+package com.tunjid.me.scaffold.navigation
 
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.RouteParser

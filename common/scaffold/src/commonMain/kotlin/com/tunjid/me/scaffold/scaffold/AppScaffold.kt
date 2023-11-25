@@ -28,8 +28,8 @@ import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.adaptive.Adaptive
 import com.tunjid.me.scaffold.adaptive.SavedStateAdaptiveContentHost
-import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.NavigationStateHolder
+import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.treenav.strings.RouteParser
 
 /**

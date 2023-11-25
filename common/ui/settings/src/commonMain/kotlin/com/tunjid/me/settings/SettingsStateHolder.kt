@@ -23,8 +23,8 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
-import com.tunjid.me.scaffold.nav.NavigationMutation
-import com.tunjid.me.scaffold.nav.consumeNavigationActions
+import com.tunjid.me.scaffold.navigation.NavigationMutation
+import com.tunjid.me.scaffold.navigation.consumeNavigationActions
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.mapToMutation

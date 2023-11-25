@@ -37,10 +37,10 @@ import com.tunjid.me.scaffold.globalui.navRailWidth
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.nav.NavItem
-import com.tunjid.me.scaffold.nav.NavigationStateHolder
-import com.tunjid.me.scaffold.nav.navItemSelected
-import com.tunjid.me.scaffold.nav.navItems
+import com.tunjid.me.scaffold.navigation.NavItem
+import com.tunjid.me.scaffold.navigation.NavigationStateHolder
+import com.tunjid.me.scaffold.navigation.navItemSelected
+import com.tunjid.me.scaffold.navigation.navItems
 import com.tunjid.treenav.MultiStackNav
 
 /**

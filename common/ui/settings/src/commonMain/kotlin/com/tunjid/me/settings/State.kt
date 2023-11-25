@@ -17,8 +17,8 @@
 package com.tunjid.me.settings
 
 import com.tunjid.me.core.utilities.ByteSerializable
-import com.tunjid.me.scaffold.nav.NavigationAction
-import com.tunjid.me.scaffold.nav.NavigationMutation
+import com.tunjid.me.scaffold.navigation.NavigationAction
+import com.tunjid.me.scaffold.navigation.NavigationMutation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 

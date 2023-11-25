@@ -21,8 +21,8 @@ import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveFileId
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.utilities.ByteSerializable
-import com.tunjid.me.scaffold.nav.NavigationAction
-import com.tunjid.me.scaffold.nav.NavigationMutation
+import com.tunjid.me.scaffold.navigation.NavigationAction
+import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.emptyTiledList
 import kotlinx.serialization.Serializable

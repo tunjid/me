@@ -73,7 +73,7 @@ import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.navRailWidth
 import com.tunjid.me.scaffold.globalui.slices.RouteContainerPositionalState
 import com.tunjid.me.scaffold.globalui.toolbarSize
-import com.tunjid.me.scaffold.nav.ExpandAll
+import com.tunjid.me.scaffold.navigation.ExpandAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

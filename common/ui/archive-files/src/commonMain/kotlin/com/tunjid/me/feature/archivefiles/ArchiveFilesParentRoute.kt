@@ -47,8 +47,8 @@ import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.me.scaffold.nav.AppRoute
-import com.tunjid.me.scaffold.nav.StatelessRoute
+import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.StatelessRoute
 import com.tunjid.treenav.Node
 import kotlinx.serialization.Serializable
 

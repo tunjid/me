@@ -45,7 +45,7 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.ui.ChipEditInfo
 import com.tunjid.me.core.ui.Chips
-import com.tunjid.me.scaffold.nav.icon
+import com.tunjid.me.scaffold.navigation.icon
 
 @Composable
 fun ArchiveFilters(

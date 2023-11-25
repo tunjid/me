@@ -23,8 +23,8 @@ import com.tunjid.me.core.utilities.DelegatingByteSerializer
 import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.feature.archivelist.ArchiveListRoute
-import com.tunjid.me.scaffold.nav.ByteSerializableRoute
-import com.tunjid.me.scaffold.nav.toByteSerializable
+import com.tunjid.me.scaffold.navigation.ByteSerializableRoute
+import com.tunjid.me.scaffold.navigation.toByteSerializable
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.treenav.MultiStackNav
 import kotlinx.serialization.modules.SerializersModule

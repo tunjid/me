@@ -40,9 +40,9 @@ import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.nav.NavigationStateHolder
-import com.tunjid.me.scaffold.nav.navItemSelected
-import com.tunjid.me.scaffold.nav.navItems
+import com.tunjid.me.scaffold.navigation.NavigationStateHolder
+import com.tunjid.me.scaffold.navigation.navItemSelected
+import com.tunjid.me.scaffold.navigation.navItems
 
 /**
  * Motionally intelligent bottom nav shared amongst nav routes in the app

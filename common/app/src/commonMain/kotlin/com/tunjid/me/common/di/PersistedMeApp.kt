@@ -30,7 +30,7 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
-import com.tunjid.me.scaffold.nav.*
+import com.tunjid.me.scaffold.navigation.*
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.me.sync.di.Sync

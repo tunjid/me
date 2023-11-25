@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.scaffold.nav
+package com.tunjid.me.scaffold.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -29,7 +29,7 @@ val MultiStackNav.canGoUp get() = stacks.getOrNull(currentIndex)?.canGoUp == tru
 
 val MultiStackNav.navItems
     get() = stacks
-        .map { it.name }
+        .map(StackNav::name)
         .mapIndexed { index, name ->
             val kind = ArchiveKind.entries.firstOrNull {
                 name.contains(it.type)
@@ -51,7 +51,7 @@ fun MultiStackNav.navItemSelected(item: NavItem) =
  */
 fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AppRoute>> =
     distinctUntilChanged()
-        .scan(initial = emptyNav to emptyNav) { navPair, newNav ->
+        .scan(initial = EmptyNavigationState to EmptyNavigationState) { navPair, newNav ->
             navPair.copy(first = navPair.second, second = newNav)
         }
         .map { (prevNav: MultiStackNav, currentNav: MultiStackNav) ->
@@ -69,8 +69,8 @@ private fun StackNav.popToRoot() = copy(
     routes = routes.take(1)
 )
 
-private val emptyNav = MultiStackNav(
-    name = NavName,
+private val EmptyNavigationState = MultiStackNav(
+    name = "App",
     currentIndex = 0,
     stacks = listOf(),
 )
