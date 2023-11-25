@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.scaffold.globalui.scaffold
+package com.tunjid.me.scaffold.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.BoxScope

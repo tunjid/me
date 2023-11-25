@@ -65,7 +65,7 @@ import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.adaptive.rememberSharedContent
-import com.tunjid.me.scaffold.globalui.scaffold.backPreviewBackgroundModifier
+import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute

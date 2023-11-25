@@ -1,4 +1,4 @@
-package com.tunjid.me.scaffold.globalui.scaffold
+package com.tunjid.me.scaffold.scaffold
 
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate

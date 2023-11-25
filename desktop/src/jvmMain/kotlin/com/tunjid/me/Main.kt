@@ -31,7 +31,7 @@ import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.feature.MeApp
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
-import com.tunjid.me.scaffold.globalui.scaffold.Scaffold
+import com.tunjid.me.scaffold.scaffold.Scaffold
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
 import com.tunjid.mutator.mutation

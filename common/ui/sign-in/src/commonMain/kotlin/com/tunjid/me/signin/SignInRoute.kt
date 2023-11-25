@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.globalui.scaffold.backPreviewBackgroundModifier
+import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.nav.AppRoute

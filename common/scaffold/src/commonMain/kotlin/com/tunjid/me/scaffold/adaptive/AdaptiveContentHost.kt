@@ -28,7 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.scaffold.backPreviewModifier
+import com.tunjid.me.scaffold.scaffold.backPreviewModifier
 import com.tunjid.me.scaffold.nav.AppRoute
 import com.tunjid.me.scaffold.nav.removedRoutes
 import com.tunjid.mutator.ActionStateProducer

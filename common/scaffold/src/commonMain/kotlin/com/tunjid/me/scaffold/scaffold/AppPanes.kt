@@ -1,4 +1,4 @@
-package com.tunjid.me.scaffold.globalui.scaffold
+package com.tunjid.me.scaffold.scaffold
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
