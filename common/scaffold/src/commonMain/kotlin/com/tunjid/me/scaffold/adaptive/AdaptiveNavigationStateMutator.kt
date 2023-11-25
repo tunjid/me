@@ -1,5 +1,9 @@
 package com.tunjid.me.scaffold.adaptive
 
+import com.tunjid.me.scaffold.adaptive.Adaptive.Adaptation.Companion.PrimaryToTransient
+import com.tunjid.me.scaffold.adaptive.Adaptive.Container.Primary
+import com.tunjid.me.scaffold.adaptive.Adaptive.Container.Secondary
+import com.tunjid.me.scaffold.adaptive.Adaptive.Container.TransientPrimary
 import com.tunjid.me.scaffold.globalui.BackStatus
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
@@ -80,20 +84,22 @@ private fun adaptiveNavigationStateMutations(
 
     Adaptive.NavigationState(
         navId = navId,
-        primaryRoute = primaryRoute,
-        secondaryRoute = secondaryRoute.takeIf { route ->
-            route?.id != primaryRoute.id
-                    && uiState.windowSizeClass > WindowSizeClass.COMPACT
-        },
-        transientPrimaryRoute = multiStackNav.primaryRoute.takeIf { route ->
-            uiState.backStatus.previewState == BackStatus.PreviewState.Previewing
-                    && route.id != primaryRoute.id
-                    && route.id != secondaryRoute?.id
-        },
+        containersToRoutes = mapOf(
+            Primary to primaryRoute,
+            Secondary to secondaryRoute.takeIf { route ->
+                route?.id != primaryRoute.id
+                        && uiState.windowSizeClass > WindowSizeClass.COMPACT
+            },
+            Adaptive.Container.TransientPrimary to multiStackNav.primaryRoute.takeIf { route ->
+                uiState.backStatus.previewState == BackStatus.PreviewState.Previewing
+                        && route.id != primaryRoute.id
+                        && route.id != secondaryRoute?.id
+            },
+        ),
         windowSizeClass = uiState.windowSizeClass,
         adaptation = when (uiState.backStatus.previewState) {
             BackStatus.PreviewState.Previewing -> Adaptive.Adaptation.Swap(
-                from = Adaptive.Container.Primary,
+                from = Primary,
                 to = Adaptive.Container.TransientPrimary,
             )
 
@@ -133,12 +139,18 @@ private fun Adaptive.NavigationState.adaptTo(
 ): Adaptive.NavigationState {
     val newAdaptation = when (current.adaptation) {
         // Moved from primary container to transient, keep as is
-        Adaptive.Adaptation.PrimaryToTransient -> current.adaptation
+        PrimaryToTransient -> current.adaptation
         else -> when {
-            primaryRoute.id == current.secondaryRoute?.id -> Adaptive.Adaptation.PrimaryToSecondary
-            current.primaryRoute.id == secondaryRoute?.id -> Adaptive.Adaptation.SecondaryToPrimary
-            adaptation == Adaptive.Adaptation.PrimaryToTransient
-                    && current.transientPrimaryRoute == null -> when (current.navId) {
+            containersToRoutes[Primary]?.id == current.containersToRoutes[Secondary]?.id -> {
+                Adaptive.Adaptation.PrimaryToSecondary
+            }
+
+            containersToRoutes[Secondary]?.id == current.containersToRoutes[Primary]?.id -> {
+                Adaptive.Adaptation.SecondaryToPrimary
+            }
+
+            adaptation == PrimaryToTransient
+                    && current.containersToRoutes[TransientPrimary] == null -> when (current.navId) {
                 navId -> when {
                     current.adaptation is Adaptive.Adaptation.Change
                             && current.adaptation.previewState
@@ -270,9 +282,9 @@ private fun Flow<Action.RouteExitEnd>.routeExitEndMutations(): Flow<Mutation<Ada
  * Checks if any of the new routes coming in has any conflicts with those animating out.
  */
 private fun Adaptive.NavigationState.hasConflictingRoutes() =
-    routeIdsAnimatingOut.contains(primaryRoute.id)
-            || secondaryRoute?.id?.let(routeIdsAnimatingOut::contains) == true
-            || transientPrimaryRoute?.id?.let(routeIdsAnimatingOut::contains) == true
+    routeIdsAnimatingOut.contains(routeFor(Primary)?.id)
+            || routeFor(Secondary)?.id?.let(routeIdsAnimatingOut::contains) == true
+            || routeFor(TransientPrimary)?.id?.let(routeIdsAnimatingOut::contains) == true
 
 /**
  * Trims unneeded metadata from the [Adaptive.NavigationState]
@@ -292,12 +304,11 @@ private fun Adaptive.NavigationState.prune(): Adaptive.NavigationState = copy(
     }
 )
 
+private val AdaptiveRouteInContainerLookups: List<Adaptive.NavigationState.() -> AppRoute?> =
+    Adaptive.Container.entries.map { container ->
+        { routeFor(container) }
+    }
 
-private val AdaptiveRouteInContainerLookups: List<(Adaptive.NavigationState) -> AppRoute?> = listOf(
-    Adaptive.NavigationState::primaryRoute,
-    Adaptive.NavigationState::secondaryRoute,
-    Adaptive.NavigationState::transientPrimaryRoute,
-)
 
 private val MultiStackNav.primaryRoute: AppRoute get() = current as? AppRoute ?: UnknownRoute()
 

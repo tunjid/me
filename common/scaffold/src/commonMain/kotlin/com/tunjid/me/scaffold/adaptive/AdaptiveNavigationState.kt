@@ -46,7 +46,7 @@ object Adaptive {
 
         val canAnimateSharedElements: Boolean
 
-        fun isCurrentlyShared(key: Any) : Boolean
+        fun isCurrentlyShared(key: Any): Boolean
 
         @Composable
         fun rememberSharedContent(
@@ -154,31 +154,13 @@ object Adaptive {
          */
         val navId: Int,
         /**
-         * The route in the primary navigation container
-         */
-        val primaryRoute: AppRoute,
-        /**
-         * The route in the secondary navigation container
-         */
-        val secondaryRoute: AppRoute?,
-        /**
-         * The route that will show up in the primary navigation container after back is pressed.
-         * This is used to preview the incoming route in the primary navigation container after a
-         * back press. If a back destination does not need to be previewed, it will be null.
-         */
-        val transientPrimaryRoute: AppRoute?,
-        /**
          * Describes moves between the primary and secondary navigation containers.
          */
         val adaptation: Adaptation,
         /**
-         * A set of route ids that may be returned to.
+         * A mapping of [Container] to the routes in them
          */
-        val backStackIds: Set<String>,
-        /**
-         * A set of route ids that are animating out.
-         */
-        val routeIdsAnimatingOut: Set<String>,
+        val containersToRoutes: Map<Container, AppRoute?>,
         /**
          * A mapping of route ids to the adaptive slots they are currently in.
          */
@@ -187,6 +169,14 @@ object Adaptive {
          * A mapping of adaptive container to the routes that were last in them.
          */
         val previousContainersToRoutes: Map<Container, AppRoute?>,
+        /**
+         * A set of route ids that may be returned to.
+         */
+        val backStackIds: Set<String>,
+        /**
+         * A set of route ids that are animating out.
+         */
+        val routeIdsAnimatingOut: Set<String>,
         /**
          * The window size class of the current screen configuration
          */
@@ -199,11 +189,9 @@ object Adaptive {
         companion object {
             internal val Initial = NavigationState(
                 navId = -1,
-                primaryRoute = UnknownRoute(Slot.One.name),
-                secondaryRoute = null,
-                transientPrimaryRoute = null,
                 adaptation = Adaptation.Change(previewState = BackStatus.PreviewState.NoPreview),
                 windowSizeClass = WindowSizeClass.COMPACT,
+                containersToRoutes = mapOf(Container.Primary to UnknownRoute(Slot.One.name)),
                 routeIdsToAdaptiveSlots = Slot.entries.associateBy(Slot::name),
                 backStackIds = emptySet(),
                 routeIdsAnimatingOut = emptySet(),
@@ -232,33 +220,25 @@ internal fun Adaptive.NavigationState.slotFor(
     container: Adaptive.Container?
 ): Adaptive.Slot? = when (container) {
     null -> null
-    Adaptive.Container.Primary -> routeIdsToAdaptiveSlots[primaryRoute.id]
-    Adaptive.Container.Secondary -> routeIdsToAdaptiveSlots[secondaryRoute?.id]
-    Adaptive.Container.TransientPrimary -> routeIdsToAdaptiveSlots[transientPrimaryRoute?.id]
+    else -> routeIdsToAdaptiveSlots[containersToRoutes[container]?.id]
 }
 
 internal fun Adaptive.NavigationState.containerFor(
     route: AppRoute
-): Adaptive.Container? = when (route.id) {
-    primaryRoute.id -> Adaptive.Container.Primary
-    secondaryRoute?.id -> Adaptive.Container.Secondary
-    transientPrimaryRoute?.id -> Adaptive.Container.TransientPrimary
-    else -> null
+): Adaptive.Container? = containersToRoutes.firstNotNullOfOrNull { (container, containerRoute) ->
+    if (containerRoute?.id == route.id) container else null
 }
 
 internal fun Adaptive.NavigationState.routeFor(
     slot: Adaptive.Slot
-): AppRoute? = when (slot) {
-    routeIdsToAdaptiveSlots[primaryRoute.id] -> primaryRoute
-    routeIdsToAdaptiveSlots[secondaryRoute?.id] -> secondaryRoute
-    routeIdsToAdaptiveSlots[transientPrimaryRoute?.id] -> transientPrimaryRoute
-    else -> null
+): AppRoute? = routeIdsToAdaptiveSlots.firstNotNullOfOrNull { (routeId, routeSlot) ->
+    if (routeSlot == slot) containersToRoutes.firstNotNullOfOrNull { (_, route) ->
+        if (route?.id == routeId) route
+        else null
+    }
+    else null
 }
 
 internal fun Adaptive.NavigationState.routeFor(
     container: Adaptive.Container
-): AppRoute? = when (container) {
-    Adaptive.Container.Primary -> primaryRoute
-    Adaptive.Container.Secondary -> secondaryRoute
-    Adaptive.Container.TransientPrimary -> transientPrimaryRoute
-}
+): AppRoute? = containersToRoutes[container]
