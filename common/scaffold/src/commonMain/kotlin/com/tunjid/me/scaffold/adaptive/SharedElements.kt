@@ -15,7 +15,6 @@ import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -50,14 +49,11 @@ internal class SharedElementData<T>(
 
     val moveableSharedElement: @Composable (Any?, Modifier) -> Unit =
         movableContentOf { state, modifier ->
-            println("STATE: $state")
-            val currentState by rememberUpdatedState(state)
-
             @Suppress("UNCHECKED_CAST")
             sharedElement(
                 // The shared element composable will be created by the first screen and reused by
                 // subsequent screens. This updates the state from other screens so changes are seen.
-                currentState as T,
+                state as T,
                 Modifier
                     .sharedElement(
                         enabled = LocalAdaptiveContentScope.current?.canAnimateSharedElements == true,

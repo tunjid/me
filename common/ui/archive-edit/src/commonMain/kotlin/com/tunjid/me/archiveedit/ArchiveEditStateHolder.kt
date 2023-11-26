@@ -93,6 +93,7 @@ class ActualArchiveEditStateHolder(
         kind = route.kind,
         sharedElementKey = thumbnailSharedElementKey(route.archiveThumbnail),
         upsert = ArchiveUpsert(id = route.archiveId),
+        thumbnail = route.archiveThumbnail,
         navBarSize = uiStateFlow.value.navBarSize,
         hasStoragePermissions = permissionsFlow.value.isGranted(Permission.ReadExternalStorage)
     ),
