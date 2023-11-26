@@ -49,10 +49,10 @@ object Adaptive {
         fun isCurrentlyShared(key: Any): Boolean
 
         @Composable
-        fun rememberSharedContent(
+        fun <T> rememberSharedContent(
             key: Any,
-            sharedElement: @Composable (Modifier) -> Unit
-        ): @Composable (Modifier) -> Unit
+            sharedElement: @Composable (T, Modifier) -> Unit
+        ): @Composable (T, Modifier) -> Unit
     }
 
     /**

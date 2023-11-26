@@ -15,6 +15,7 @@ import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -24,7 +25,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
-import androidx.compose.ui.zIndex
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -33,12 +33,11 @@ fun thumbnailSharedElementKey(
 ) = "thumbnail-$property"
 
 @Stable
-internal class SharedElementData(
-    sharedElement: @Composable (Modifier) -> Unit,
+internal class SharedElementData<T>(
+    sharedElement: @Composable (T, Modifier) -> Unit,
     onRemoved: () -> Unit
-)  {
+) {
     private var inCount by mutableIntStateOf(0)
-    var currentSharedElement by mutableStateOf(sharedElement)
 
     val offsetAnimation = DeferredAnimation(
         vectorConverter = IntOffset.VectorConverter,
@@ -49,23 +48,30 @@ internal class SharedElementData(
         animationSpec = sharedElementSpring()
     )
 
-    val moveableSharedElement = movableContentOf<Modifier> { modifier ->
-        sharedElement(
-            Modifier
-                .zIndex(20f)
-                .sharedElement(
-                    enabled = LocalAdaptiveContentScope.current?.canAnimateSharedElements == true,
-                    sharedElementData = this,
-                ) then modifier
-        )
+    val moveableSharedElement: @Composable (Any?, Modifier) -> Unit =
+        movableContentOf { state, modifier ->
+            println("STATE: $state")
+            val currentState by rememberUpdatedState(state)
 
-        DisposableEffect(Unit) {
-            ++inCount
-            onDispose {
-                if (--inCount <= 0) onRemoved()
+            @Suppress("UNCHECKED_CAST")
+            sharedElement(
+                // The shared element composable will be created by the first screen and reused by
+                // subsequent screens. This updates the state from other screens so changes are seen.
+                currentState as T,
+                Modifier
+                    .sharedElement(
+                        enabled = LocalAdaptiveContentScope.current?.canAnimateSharedElements == true,
+                        sharedElementData = this,
+                    ) then modifier,
+            )
+
+            DisposableEffect(Unit) {
+                ++inCount
+                onDispose {
+                    if (--inCount <= 0) onRemoved()
+                }
             }
         }
-    }
 }
 
 /**
@@ -74,7 +80,7 @@ internal class SharedElementData(
  */
 internal fun Modifier.sharedElement(
     enabled: Boolean,
-    sharedElementData: SharedElementData,
+    sharedElementData: SharedElementData<*>,
 ): Modifier = composed {
     val coroutineScope = rememberCoroutineScope()
     // TODO: Optimize the not enabled path

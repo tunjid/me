@@ -65,12 +65,12 @@ import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.adaptive.rememberSharedContent
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.navigation.AppRoute
 import com.tunjid.me.scaffold.navigation.ExternalRoute
 import com.tunjid.me.scaffold.permissions.Permission
+import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.treenav.Node
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -133,11 +133,11 @@ private fun ArchiveEditScreen(
         onAction = actions
     )
 
-    val thumbnail = rememberSharedContent(
+    val thumbnail = rememberSharedContent<String?>(
         key = state.sharedElementKey,
-    ) { innerModifier ->
+    ) { imageUrl, innerModifier ->
         AsyncRasterImage(
-            imageUrl = state.thumbnail,
+            imageUrl = imageUrl,
             modifier = innerModifier
         )
     }
@@ -164,6 +164,7 @@ private fun ArchiveEditScreen(
         state = scrollState,
     ) {
         dragDropThumbnail(
+            thumbnailUrl = state.thumbnail,
             thumbnail = thumbnail,
             hasStoragePermission = state.hasStoragePermissions,
             dragLocation = state.dragLocation,
@@ -212,7 +213,8 @@ private fun ArchiveEditScreen(
 }
 
 private fun LazyListScope.dragDropThumbnail(
-    thumbnail: @Composable (Modifier) -> Unit,
+    thumbnailUrl: String?,
+    thumbnail: @Composable (String?, Modifier) -> Unit,
     hasStoragePermission: Boolean,
     dragLocation: DragLocation,
     onAction: (Action) -> Unit,
@@ -230,6 +232,7 @@ private fun LazyListScope.dragDropThumbnail(
             .padding(horizontal = 16.dp)
     ) {
         thumbnail(
+            thumbnailUrl,
             Modifier
 //                .fillParentMaxWidth()
                 .align(Alignment.Center)
@@ -251,7 +254,8 @@ private fun LazyListScope.dragDropThumbnail(
                         onAction(Action.Drop(uris = uris))
                         true
                     },
-                ) { onAction(Action.Drag.Thumbnail(inside = false)) }
+                    onEnded = { onAction(Action.Drag.Thumbnail(inside = false)) },
+                ),
         )
     }
 }

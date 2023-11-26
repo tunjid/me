@@ -120,11 +120,11 @@ internal fun ArchiveGalleryScreen(
         key = { index -> items[index].key }
     ) { index ->
         val file = items[index]
-        val sharedElement = rememberSharedContent(
+        val sharedElement = rememberSharedContent<String?>(
             thumbnailSharedElementKey(file.url)
-        ) { modifier ->
+        ) { imageUrl, modifier ->
             val imagePainter = rememberAsyncRasterPainter(
-                imageUri = file.url,
+                imageUri = imageUrl,
             )
             if (imagePainter != null) Image(
                 modifier = modifier,
@@ -135,6 +135,7 @@ internal fun ArchiveGalleryScreen(
         }
 
         sharedElement(
+            file.url,
             Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)

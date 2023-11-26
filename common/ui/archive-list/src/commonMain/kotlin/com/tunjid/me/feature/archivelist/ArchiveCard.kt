@@ -123,11 +123,11 @@ fun ArchiveCard(
     onArchiveSelected: (Archive) -> Unit,
     onCategoryClicked: (Descriptor.Category) -> Unit,
 ) {
-    val thumb = rememberSharedContent(
+    val thumb = rememberSharedContent<String?>(
         key = thumbnailSharedElementKey(archive.thumbnail),
-    ) { innerModifier ->
+    ) { imageUrl, innerModifier ->
         AsyncRasterImage(
-            imageUrl = archive.thumbnail,
+            imageUrl = imageUrl,
             modifier = innerModifier
         )
     }
@@ -139,6 +139,7 @@ fun ArchiveCard(
         content = {
             Column {
                 thumb(
+                    archive.thumbnail,
                     modifier
                         .fillMaxWidth()
                         .aspectRatio(16f / 9f)

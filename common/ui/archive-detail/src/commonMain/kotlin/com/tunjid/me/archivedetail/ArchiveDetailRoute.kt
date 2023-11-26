@@ -109,12 +109,12 @@ private fun ArchiveDetailScreen(
         enabled = state.isInPrimaryNav && state.hasSecondaryPanel
     )
 
-    val thumbnail = rememberSharedContent(
+    val thumbnail = rememberSharedContent<String?>(
         key = state.sharedElementKey,
-    ) { modifier ->
+    ) { imageUrl, innerModifier ->
         AsyncRasterImage(
-            imageUrl = state.archive?.thumbnail,
-            modifier = modifier
+            imageUrl = imageUrl,
+            modifier = innerModifier
         )
     }
 
@@ -125,11 +125,12 @@ private fun ArchiveDetailScreen(
     ) {
         item {
             thumbnail(
+                state.archive?.thumbnail,
                 Modifier
                     .heightIn(max = 300.dp)
                     .aspectRatio(ratio = 16f / 9f)
                     .padding(horizontal = 16.dp)
-                    .clip(MaterialTheme.shapes.medium)
+                    .clip(MaterialTheme.shapes.medium),
             )
         }
         item {

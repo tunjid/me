@@ -46,10 +46,10 @@ internal interface AdaptiveContentHost {
 
     fun isCurrentlyShared(key: Any): Boolean
 
-    fun createOrUpdateSharedElement(
+    fun <T> createOrUpdateSharedElement(
         key: Any,
-        sharedElement: @Composable (Modifier) -> Unit,
-    ): @Composable (Modifier) -> Unit
+        sharedElement: @Composable (T, Modifier) -> Unit,
+    ): @Composable (T, Modifier) -> Unit
 }
 
 @Composable
@@ -112,7 +112,7 @@ internal class SavedStateAdaptiveContentHost(
             }
         }
 
-    private val keysToSharedElements = mutableStateMapOf<Any, SharedElementData>()
+    private val keysToSharedElements = mutableStateMapOf<Any, SharedElementData<*>>()
 
     @Composable
     override fun routeIn(container: Adaptive.Container?) {
@@ -123,18 +123,18 @@ internal class SavedStateAdaptiveContentHost(
     override fun isCurrentlyShared(key: Any): Boolean =
         keysToSharedElements.contains(key)
 
-    override fun createOrUpdateSharedElement(
+    override fun <T> createOrUpdateSharedElement(
         key: Any,
-        sharedElement: @Composable (Modifier) -> Unit,
-    ): @Composable (Modifier) -> Unit {
+        sharedElement: @Composable (T, Modifier) -> Unit,
+    ): @Composable (T, Modifier) -> Unit {
         val sharedElementData = keysToSharedElements.getOrPut(key) {
-            SharedElementData(sharedElement) { keysToSharedElements.remove(key) }
+            SharedElementData(
+                sharedElement = sharedElement,
+                onRemoved = { keysToSharedElements.remove(key) }
+            )
         }
-        return sharedElementData.moveableSharedElement.also {
-            if (sharedElementData.currentSharedElement != sharedElement) {
-                sharedElementData.currentSharedElement = sharedElement
-            }
-        }
+        // Can't really guarantee that the caller will use the same key for the right type
+        return sharedElementData.moveableSharedElement
     }
 }
 

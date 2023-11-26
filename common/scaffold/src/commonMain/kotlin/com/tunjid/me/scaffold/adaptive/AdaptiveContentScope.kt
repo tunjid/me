@@ -46,10 +46,10 @@ internal class AnimatedAdaptiveContentScope(
         adaptiveContentHost.isCurrentlyShared(key)
 
     @Composable
-    override fun rememberSharedContent(
+    override fun <T> rememberSharedContent(
         key: Any,
-        sharedElement: @Composable (Modifier) -> Unit
-    ): @Composable (Modifier) -> Unit {
+        sharedElement: @Composable (T, Modifier) -> Unit
+    ): @Composable (T, Modifier) -> Unit {
         val currentNavigationState = adaptiveContentHost.adaptedState
         // This container state may be animating out. Look up the actual current route
         val currentRouteInContainer = containerState.container?.let(
@@ -60,7 +60,10 @@ internal class AnimatedAdaptiveContentScope(
         // Do not use the shared element if this content is being animated out
         if (!isCurrentlyAnimatingIn) return sharedElement
 
-        return adaptiveContentHost.createOrUpdateSharedElement(key, sharedElement)
+        return adaptiveContentHost.createOrUpdateSharedElement(
+            key = key,
+            sharedElement = sharedElement
+        )
     }
 }
 
@@ -70,10 +73,10 @@ internal class AnimatedAdaptiveContentScope(
  * @param sharedElement the element to be shared
  */
 @Composable
-fun rememberSharedContent(
+fun <T> rememberSharedContent(
     key: Any,
-    sharedElement: @Composable (Modifier) -> Unit
-): @Composable (Modifier) -> Unit =
+    sharedElement: @Composable (T, Modifier) -> Unit
+): @Composable (T, Modifier) -> Unit =
     when (val scope = LocalAdaptiveContentScope.current) {
         null -> throw IllegalArgumentException(
             "This may only be called from an adaptive content scope"
@@ -86,7 +89,9 @@ fun rememberSharedContent(
             // Allow shared elements in the primary or transient primary content only
             Adaptive.Container.Primary -> when {
                 // Show a blank space for shared elements between the destinations
-                scope.isInPreview && scope.isCurrentlyShared(key) -> EmptyElement
+                scope.isInPreview && scope.isCurrentlyShared(key) -> { _, modifier ->
+                    Box(modifier)
+                }
                 // If previewing and it won't be shared, show the item as is
                 scope.isInPreview -> sharedElement
                 // Share the element
@@ -108,8 +113,6 @@ fun rememberSharedContent(
 internal val LocalAdaptiveContentScope = staticCompositionLocalOf<Adaptive.ContainerScope?> {
     null
 }
-
-private val EmptyElement: @Composable (Modifier) -> Unit = { modifier -> Box(modifier) }
 
 internal val Adaptive.ContainerScope.isInPreview: Boolean
     get() = containerState.container == Adaptive.Container.Primary
