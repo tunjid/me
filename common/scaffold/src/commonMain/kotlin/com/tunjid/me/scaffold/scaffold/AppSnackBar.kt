@@ -23,10 +23,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.peek
@@ -65,19 +70,17 @@ internal fun BoxScope.AppSnackBar(
 
     val showing = head != null
     val position by animateDpAsState(
-        if (showing) -(16.dp + (state.windowSizeClass.bottomNavSize() countIf state.bottomNavVisible))
+        if (showing) -with(LocalDensity.current) {
+            16.dp + when {
+                state.keyboardSize > 0 -> state.keyboardSize.toDp()
+                else -> state.windowSizeClass.bottomNavSize() countIf state.bottomNavVisible
+            }
+        }
         else snackbarPeek
     )
-    val fabOffset by animateDpAsState(
+    val snackbarOffset by animateDpAsState(
         if (showing) with(LocalDensity.current) {
-            16.dp + when {
-                state.keyboardSize > 0 -> state.keyboardSize.toDp() +
-                        snackbarHeight.toDp()
-
-                else -> (state.windowSizeClass.bottomNavSize() countIf state.bottomNavVisible) +
-                        state.navBarSize.toDp() +
-                        snackbarHeight.toDp()
-            }
+            snackbarHeight.toDp() + (16.dp countIf (state.keyboardSize > 0))
         }
         else 0.dp
     )
@@ -87,7 +90,7 @@ internal fun BoxScope.AppSnackBar(
             .align(Alignment.BottomCenter)
             .padding(horizontal = 16.dp)
             .widthIn(max = 400.dp)
-            .onGloballyPositioned { snackbarHeight = it.size.height }
+            .onSizeChanged { snackbarHeight = it.height }
             .offset(y = position),
         content = { Text(text = head ?: "") }
     )
@@ -104,7 +107,7 @@ internal fun BoxScope.AppSnackBar(
         if (position == snackbarPeek && !canShow) canShow = true
     }
 
-    LaunchedEffect(fabOffset) {
-        globalUiStateHolder.accept { copy(snackbarOffset = fabOffset) }
+    LaunchedEffect(snackbarOffset) {
+        globalUiStateHolder.accept { copy(snackbarOffset = snackbarOffset) }
     }
 }

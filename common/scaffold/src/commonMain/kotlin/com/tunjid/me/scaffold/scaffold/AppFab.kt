@@ -21,9 +21,19 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,13 +71,11 @@ internal fun BoxScope.AppFab(
     val position by animateDpAsState(
         when {
             state.fabVisible -> -with(LocalDensity.current) {
-                16.dp + when {
-                    state.keyboardSize > 0 -> state.keyboardSize.toDp() +
-                            state.snackbarOffset
+                16.dp + state.snackbarOffset + when {
+                    state.keyboardSize > 0 -> state.keyboardSize.toDp()
 
                     else -> (windowSizeClass.bottomNavSize() countIf state.bottomNavVisible) +
-                            state.navBarSize.toDp() +
-                            state.snackbarOffset
+                            state.navBarSize.toDp()
                 }
             }
 
