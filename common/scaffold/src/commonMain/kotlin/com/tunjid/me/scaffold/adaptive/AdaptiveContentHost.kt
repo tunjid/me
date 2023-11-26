@@ -30,12 +30,16 @@ import androidx.compose.ui.layout.LookaheadScope
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.backPreviewModifier
 import com.tunjid.me.scaffold.navigation.AppRoute
-import com.tunjid.me.scaffold.navigation.removedRoutes
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.RouteParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.scan
 
 @Stable
 internal interface AdaptiveContentHost {
@@ -80,7 +84,7 @@ internal fun SavedStateAdaptiveContentHost(
         }
 
         adaptiveContentHost.content()
-        adaptiveContentHost.SavedStateCleanupEffect(navState)
+        adaptiveContentHost.SavedStateCleanupEffect()
     }
 }
 
@@ -222,18 +226,30 @@ private fun SavedStateAdaptiveContentHost.Render(
  * Clean up after navigation routes that have been discarded
  */
 @Composable
-private fun SavedStateAdaptiveContentHost.SavedStateCleanupEffect(
-    navState: StateFlow<MultiStackNav>,
-) {
-    val removedRoutesFlow = remember {
-        navState.removedRoutes()
-    }
-    LaunchedEffect(removedRoutesFlow) {
-        removedRoutesFlow.collect { routes ->
-            routes.forEach { route ->
-                removeState(route.id)
+private fun SavedStateAdaptiveContentHost.SavedStateCleanupEffect() {
+    LaunchedEffect(Unit) {
+        val routeIdsInBackStack = state
+            .map { it.backStackIds }
+            .distinctUntilChanged()
+
+        val routesAnimatedOut = state
+            .distinctUntilChangedBy(Adaptive.NavigationState::routeIdsAnimatingOut)
+            .scan(emptySet<String>() to emptySet<String>()) { pair, state ->
+                pair.copy(first = pair.second, second = state.routeIdsAnimatingOut)
             }
-        }
+            .map { (old, new) -> old - new }
+
+        combine(
+            routeIdsInBackStack,
+            routesAnimatedOut,
+            ::Pair
+        )
+            .distinctUntilChanged()
+            .collect { (backStackIds, animatedOutRouteIds) ->
+                animatedOutRouteIds
+                    .filterNot(backStackIds::contains)
+                    .forEach(::removeState)
+            }
     }
 }
 

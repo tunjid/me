@@ -66,7 +66,12 @@ private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(
  */
 data class ExternalRoute(
     override val id: String,
-) : Route
+) : AppRoute, StatelessRoute {
+
+    // Does not render, just used during traversal to find secondary routes associated with a route
+    @Composable
+    override fun content() = Unit
+}
 
 interface AppRoute : Route {
     @Composable
