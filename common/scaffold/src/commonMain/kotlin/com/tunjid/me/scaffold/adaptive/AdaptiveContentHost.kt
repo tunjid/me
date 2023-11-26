@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.StateFlow
 internal interface AdaptiveContentHost {
 
     val adaptedState: Adaptive.NavigationState
+
     @Composable
     fun routeIn(container: Adaptive.Container?)
 
@@ -138,7 +139,7 @@ internal class SavedStateAdaptiveContentHost(
 }
 
 /**
- * Renders [containerState] into is [Adaptive.Container] with scopes that allow for animations
+ * Renders [slot] into is [Adaptive.Container] with scopes that allow for animations
  * and shared elements.
  */
 @Composable
@@ -159,6 +160,8 @@ private fun SavedStateAdaptiveContentHost.Render(
                 animatedContentScope = this
             )
         }
+        // While technically a backwards write, it stabilizes and ensures the values are
+        // correct at first composition
         scope.containerState = targetContainerState
         // Animate if not fully visible or by the effects to run later
         scope.canAnimateSharedElements = scope.canAnimateSharedElements
