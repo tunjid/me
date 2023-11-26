@@ -106,8 +106,7 @@ internal class SavedStateAdaptiveContentHost(
             map[null] = {}
             Adaptive.Slot.entries.forEach { slot ->
                 map[slot] = movableContentOf {
-                    val containerState = adaptedState.containerStateFor(slot)
-                    Render(containerState)
+                    Render(slot)
                 }
             }
         }
@@ -144,9 +143,9 @@ internal class SavedStateAdaptiveContentHost(
  */
 @Composable
 private fun SavedStateAdaptiveContentHost.Render(
-    containerState: Adaptive.ContainerState,
+    slot: Adaptive.Slot,
 ) {
-    val containerTransition = updateTransition(containerState)
+    val containerTransition = updateTransition(adaptedState.containerStateFor(slot))
     containerTransition.AnimatedContent(
         contentKey = { it.currentRoute?.id },
         transitionSpec = {
@@ -169,7 +168,7 @@ private fun SavedStateAdaptiveContentHost.Render(
         when (val route = targetContainerState.currentRoute) {
             null -> Unit
             else -> Box(
-                modifier = modifierFor(containerState)
+                modifier = modifierFor(targetContainerState)
             ) {
                 CompositionLocalProvider(
                     LocalAdaptiveContentScope provides scope
