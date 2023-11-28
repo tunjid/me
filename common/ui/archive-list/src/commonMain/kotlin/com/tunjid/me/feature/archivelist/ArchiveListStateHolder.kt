@@ -47,20 +47,17 @@ import com.tunjid.tiler.toTiledList
 import com.tunjid.treenav.MultiStackNav
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.scan
-import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformWhile
 import me.tatarka.inject.annotations.Inject
 
@@ -102,7 +99,6 @@ class ActualArchiveListStateHolder(
         actions.toMutationStream(keySelector = Action::key) {
             when (val action = type()) {
                 is Action.Fetch -> action.flow.fetchMutations(
-                    scope = scope,
                     stateHolder = this@stateHolder,
                     repo = archiveRepository
                 )
@@ -222,114 +218,113 @@ private fun Flow<Action.ListStateChanged>.listStateChangeMutations(): Flow<Mutat
 /**
  * Converts requests to fetch archives into a list of archives to render
  */
-private fun Flow<Action.Fetch>.fetchMutations(
-    scope: CoroutineScope,
+private suspend fun Flow<Action.Fetch>.fetchMutations(
     stateHolder: SuspendingStateHolder<State>,
     repo: ArchiveRepository,
 ): Flow<Mutation<State>> {
-    val queries = merge(
-        filterIsInstance<Action.Fetch.LoadAround>().map {
-            LoadReason.LoadMore(it.query)
-        },
-        filterIsInstance<Action.Fetch.QueryChange>().map { action ->
-            action.loadReason(stateHolder.state(), repo)
-        }
-    )
-        .distinctUntilChanged()
-        .scan(null, ArchiveQuery?::stabilizeQuery)
-        .filterNotNull()
-        .distinctUntilChanged()
-        .shareIn(
-            scope = scope,
-            started = SharingStarted.WhileSubscribed(),
-            replay = 1
-        )
-    val columnChanges = filterIsInstance<Action.Fetch.NoColumnsChanged>()
-        .stateIn(
-            scope = scope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = Action.Fetch.NoColumnsChanged(noColumns = 2)
-        )
+    val currentState = stateHolder.state()
+    val queries = MutableStateFlow(currentState.queryState.currentQuery)
+    val numColumns = MutableStateFlow(2)
 
-    val archivesAvailable = queries
-        .flatMapLatest(repo::count)
-
-    val pivotInputs = queries.toPivotedTileInputs(
-        pivotRequests = columnChanges
-            .map { it.noColumns }
-            .map(::pivotRequest)
-            .distinctUntilChanged()
-    )
-
-    val limitInputs = columnChanges
-        .map { columnChange ->
-            Tile.Limiter<ArchiveQuery, ArchiveItem.Card>(
-                maxQueries = 4 * columnChange.noColumns,
-                itemSizeHint = null,
+    return map { action ->
+        when (action) {
+            is Action.Fetch.LoadAround -> queries.value = queries.value.stabilizeQuery(
+                LoadReason.LoadMore(currentState.queryState.currentQuery)
             )
-        }
 
-    val archiveItems = merge(
-        pivotInputs,
-        limitInputs
-    )
-        .toTiledList(
-            repo.archiveTiler(
-                limiter = Tile.Limiter(
-                    maxQueries = 4,
+            is Action.Fetch.QueryChange -> queries.value = queries.value.stabilizeQuery(
+                action.loadReason(
+                    state = stateHolder.state(),
+                    repo = repo
+                )
+            )
+
+            is Action.Fetch.NoColumnsChanged -> numColumns.value = action.noColumns
+        }
+    }
+        // Only emit once
+        .distinctUntilChanged()
+        // Flatmap to the fields defined earlier
+        .flatMapLatest {
+            val archivesAvailable = queries.flatMapLatest(repo::count)
+
+            val pivotInputs = queries.toPivotedTileInputs(
+                pivotRequests = numColumns
+                    .map(::pivotRequest)
+                    .distinctUntilChanged()
+            )
+            val limitInputs = numColumns.map { noColumns ->
+                Tile.Limiter<ArchiveQuery, ArchiveItem.Card>(
+                    maxQueries = 4 * noColumns,
                     itemSizeHint = null,
                 )
-            )
-        )
-
-    return merge(
-        // list item mutations
-        archiveItems
-            .map { stateHolder.state().items to it }
-            // To preserve keys, when items are fetched for changes in the query, debounce emissions
-            .debounce { (oldItems, newItems) ->
-                // new items are still loading, debounce
-                if (newItems.isEmpty()) return@debounce QUERY_CHANGE_DEBOUNCE
-
-                val oldQueries = oldItems.queries()
-                val newQueries = newItems.queries()
-                val isDiffFilter = oldQueries.isNotEmpty() && !newQueries.first()
-                    .hasTheSameFilter(oldQueries.first())
-
-                // new items were fetched for a different query and placeholders are present, debounce
-                if (isDiffFilter && newItems.hasPlaceholders()) QUERY_CHANGE_DEBOUNCE
-                else 0L
             }
-            .mapToMutation { (_, newItems) ->
-                copy(
-                    isLoading = false,
-                    listState = listState ?: savedListState.initialListState(),
-                    items = preserveKeys(newItems = newItems).itemsWithHeaders,
+            val archiveItems = merge(
+                pivotInputs,
+                limitInputs
+            )
+                .toTiledList(
+                    repo.archiveTiler(
+                        limiter = Tile.Limiter(
+                            maxQueries = 4,
+                            itemSizeHint = null,
+                        )
+                    )
                 )
-            },
-        // item available mutations
-        archivesAvailable.mapToMutation { count ->
-            copy(queryState = queryState.copy(count = count))
-        },
-        // query state mutations
-        queries.mapToMutation { query ->
-            copy(
-                queryState = queryState.copy(
-                    currentQuery = query,
-                    suggestedDescriptors = queryState.suggestedDescriptors.filterNot { descriptor ->
-                        val contentFilter = query.contentFilter
-                        when (descriptor) {
-                            is Descriptor.Category -> contentFilter.categories.contains(
-                                descriptor
-                            )
 
-                            is Descriptor.Tag -> contentFilter.tags.contains(descriptor)
-                        }
-                    },
-                )
+            val listItemMutations: Flow<Mutation<State>> = archiveItems
+                .map { stateHolder.state().items to it }
+                // To preserve keys, when items are fetched for changes in the query, debounce emissions
+                .debounce { (oldItems, newItems) ->
+                    // new items are still loading, debounce
+                    if (newItems.isEmpty()) return@debounce QUERY_CHANGE_DEBOUNCE
+
+                    val oldQueries = oldItems.queries()
+                    val newQueries = newItems.queries()
+                    val isDiffFilter = oldQueries.isNotEmpty() && !newQueries.first()
+                        .hasTheSameFilter(oldQueries.first())
+
+                    // new items were fetched for a different query and placeholders are present, debounce
+                    if (isDiffFilter && newItems.hasPlaceholders()) QUERY_CHANGE_DEBOUNCE
+                    else 0L
+                }
+                .mapToMutation { (_, newItems) ->
+                    copy(
+                        isLoading = false,
+                        listState = listState ?: savedListState.initialListState(),
+                        items = preserveKeys(newItems = newItems).itemsWithHeaders,
+                    )
+                }
+
+            val itemsAvailableMutations: Flow<Mutation<State>> = archivesAvailable
+                .mapToMutation { count ->
+                    copy(queryState = queryState.copy(count = count))
+                }
+            val queryStateMutations: Flow<Mutation<State>> = queries
+                .mapToMutation { query ->
+                    copy(
+                        queryState = queryState.copy(
+                            currentQuery = query,
+                            suggestedDescriptors = queryState.suggestedDescriptors.filterNot { descriptor ->
+                                val contentFilter = query.contentFilter
+                                when (descriptor) {
+                                    is Descriptor.Category -> contentFilter.categories.contains(
+                                        descriptor
+                                    )
+
+                                    is Descriptor.Tag -> contentFilter.tags.contains(descriptor)
+                                }
+                            },
+                        )
+                    )
+                }
+
+            merge(
+                listItemMutations,
+                itemsAvailableMutations,
+                queryStateMutations
             )
         }
-    )
 }
 
 private suspend fun Action.Fetch.QueryChange.loadReason(
@@ -376,17 +371,14 @@ private suspend fun Action.Fetch.QueryChange.loadReason(
  * Make sure [ArchiveQuery.offset] is in multiples of [ArchiveQuery.limit] and that load more queries match the
  * current query
  */
-private fun ArchiveQuery?.stabilizeQuery(
+private fun ArchiveQuery.stabilizeQuery(
     reason: LoadReason,
-): ArchiveQuery? {
-    val query = when (this) {
-        null -> reason.query
-        else -> when (reason) {
-            is LoadReason.QueryChange -> reason.query
-            is LoadReason.LoadMore -> when {
-                reason.query.hasTheSameFilter(this) -> reason.query
-                else -> return null
-            }
+): ArchiveQuery {
+    val query = when (reason) {
+        is LoadReason.QueryChange -> reason.query
+        is LoadReason.LoadMore -> when {
+            reason.query.hasTheSameFilter(this) -> reason.query
+            else -> return this
         }
     }
 
