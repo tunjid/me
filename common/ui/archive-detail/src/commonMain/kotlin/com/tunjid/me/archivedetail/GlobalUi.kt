@@ -46,7 +46,7 @@ fun GlobalUi(state: State, actions: (Action) -> Unit) {
                     imageVector = Icons.Default.Email
                 )
             ),
-            toolbarMenuClickListener = rememberFunction {
+            toolbarMenuClickListener = rememberFunction(state.archive?.id) {
                 when (it.id) {
                     "gallery" -> if (state.archive != null) actions(Action.Navigate {
                         navState.push(
