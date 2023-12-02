@@ -56,11 +56,9 @@ abstract class ArchiveGalleryNavigationComponent {
                                 queryParams: Map<String, List<String>>,
                             ) ->
                 ArchiveGalleryRoute(
-                    id = route,
-                    pageOffset = queryParams["offset"]?.firstOrNull()?.toIntOrNull() ?: 0,
-                    archiveId = ArchiveId(pathKeys["id"] ?: ""),
-                    archiveFileIds = queryParams["fileId"]?.map(::ArchiveFileId) ?: emptyList(),
-                    urls = queryParams["url"] ?: emptyList()
+                    route = route,
+                    pathArgs = pathKeys,
+                    queryArgs = queryParams
                 )
             }
         )

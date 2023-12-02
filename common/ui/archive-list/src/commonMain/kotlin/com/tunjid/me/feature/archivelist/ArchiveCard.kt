@@ -32,8 +32,12 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -42,6 +46,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -49,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveKind.Articles
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
@@ -120,8 +126,7 @@ fun ArchiveCard(
     modifier: Modifier = Modifier,
     query: ArchiveQuery,
     archive: Archive,
-    onArchiveSelected: (Archive) -> Unit,
-    onCategoryClicked: (Descriptor.Category) -> Unit,
+    actions: (Action) -> Unit,
 ) {
     val thumb = rememberSharedContent<String?>(
         key = thumbnailSharedElementKey(archive.thumbnail),
@@ -134,7 +139,7 @@ fun ArchiveCard(
     ElevatedCard(
         modifier = modifier,
         onClick = {
-            onArchiveSelected(archive)
+            actions(Action.Navigate.Detail(archive = archive))
         },
         content = {
             Column {
@@ -145,13 +150,22 @@ fun ArchiveCard(
                         .aspectRatio(16f / 9f)
                 )
                 Spacer(Modifier.height(8.dp))
-                ArchiveDate(archive.prettyDate)
+                ArchiveDate(
+                    archiveId = archive.id,
+                    kind = archive.kind,
+                    prettyDate = archive.prettyDate,
+                    actions = actions,
+                )
                 Spacer(Modifier.height(8.dp))
                 ArchiveDetails(
                     title = archive.title,
                     description = archive.description,
                     chipInfoList = archive.descriptorChips<Descriptor.Category>(query = query),
-                    onCategoryClicked = onCategoryClicked
+                    onCategoryClicked = { category ->
+                        actions(
+                            Action.Fetch.QueryChange.ToggleCategory(category)
+                        )
+                    }
                 )
                 Spacer(Modifier.height(24.dp))
                 ArchiveCardFooter(
@@ -185,14 +199,54 @@ private fun ArchiveDetails(
 }
 
 @Composable
-private fun ArchiveDate(prettyDate: String) {
-    Text(
+private fun ArchiveDate(
+    archiveId: ArchiveId,
+    kind: ArchiveKind,
+    prettyDate: String,
+    actions: (Action) -> Unit
+) {
+    Row(
         modifier = Modifier
-            .padding(horizontal = 8.dp)
-            .wrapContentWidth(),
-        text = prettyDate,
-        fontSize = 12.sp,
-    )
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            modifier = Modifier
+                .wrapContentWidth(),
+            text = prettyDate,
+            fontSize = 12.sp,
+        )
+        Spacer(
+            modifier = Modifier.width(24.dp)
+        )
+        AssistChip(
+            modifier = Modifier,
+            onClick = {
+                actions(
+                    Action.Navigate.Files(
+                        archiveId = archiveId,
+                        kind = kind
+                    )
+                )
+            },
+            shape = MaterialTheme.shapes.small,
+            label = {
+                Text(
+                    text = "Gallery",
+                    fontSize = 12.sp,
+                )
+            },
+            trailingIcon = {
+                Icon(
+                    modifier = Modifier
+                        .scale(0.8f),
+                    imageVector = Icons.Filled.ExitToApp,
+                    contentDescription = "Date"
+                )
+            }
+        )
+    }
 }
 
 @Composable

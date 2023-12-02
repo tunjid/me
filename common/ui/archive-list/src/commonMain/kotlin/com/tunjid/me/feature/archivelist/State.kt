@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.tunjid.me.core.model.Archive
 import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.hasTheSameFilter
@@ -35,6 +36,9 @@ import com.tunjid.tiler.filterIsInstance
 import com.tunjid.tiler.map
 import com.tunjid.tiler.queryAtOrNull
 import com.tunjid.tiler.tiles
+import com.tunjid.treenav.current
+import com.tunjid.treenav.push
+import com.tunjid.treenav.swap
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
@@ -110,9 +114,9 @@ sealed class Action(val key: String) {
 
             data class ToggleCategory(val category: Descriptor.Category) : QueryChange()
 
-            object ClearDescriptors : QueryChange()
+            data object ClearDescriptors : QueryChange()
 
-            object ToggleOrder : QueryChange()
+            data object ToggleOrder : QueryChange()
         }
     }
 
@@ -127,9 +131,30 @@ sealed class Action(val key: String) {
 
     data class ToggleFilter(val isExpanded: Boolean? = null) : Action(key = "ToggleFilter")
 
-    data class Navigate(
-        override val navigationMutation: NavigationMutation
-    ) : Action(key = "Navigate"), NavigationAction
+    sealed class Navigate : Action(key = "Navigate"), NavigationAction {
+
+        data class Detail(val archive: Archive) : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                val path =
+                    "archives/${archive.kind.type}/${archive.id.value}?thumbnail=${archive.thumbnail}"
+                if (navState.current is ArchiveListRoute) navState.push(route = path.toRoute)
+                else navState.swap(route = path.toRoute)
+            }
+        }
+
+        data class Files(
+            val archiveId: ArchiveId,
+            val kind: ArchiveKind
+        ) : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                navState.push("archives/${kind.type}/${archiveId.value}/files".toRoute)
+            }
+        }
+
+        data class Generic(
+            override val navigationMutation: NavigationMutation
+        ) : Navigate()
+    }
 }
 
 sealed class ArchiveItem(val contentType: String) {

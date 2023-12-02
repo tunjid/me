@@ -239,14 +239,12 @@ private fun ImageFile(
             .aspectRatio(1f)
             .clickable {
                 actions(Action.Navigate {
-                    navState.push(
-                        ArchiveGalleryRoute(
-                            id = "archive/${archiveFile.archiveId.value}/gallery",
-                            archiveId = archiveFile.archiveId,
-                            archiveFileIds = listOf(archiveFile.id),
-                            urls = listOf(archiveFile.url)
-                        )
-                    )
+                    val fileIdQueryParams = "fileId=${archiveFile.id.value}"
+                    val urlQueryParams = "url=${archiveFile.url}"
+                    val route =
+                        "archive/${archiveFile.archiveId.value}/gallery?${fileIdQueryParams}&$urlQueryParams".toRoute
+
+                    navState.push(route)
                 })
             }
     ) {

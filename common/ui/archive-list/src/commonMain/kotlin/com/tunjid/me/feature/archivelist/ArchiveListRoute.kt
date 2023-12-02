@@ -40,20 +40,17 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
-import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.StickyHeaderStaggeredGrid
 import com.tunjid.me.core.ui.lazy.staggeredgrid.*
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.me.core.ui.scrollbar.scrollbarState
 import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.queryAtOrNull
-import com.tunjid.treenav.push
-import com.tunjid.treenav.swap
 import kotlinx.coroutines.flow.*
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
@@ -237,17 +234,7 @@ private fun ArchiveList(
                             .animateItemPlacement(animationSpec = ItemPlacementSpec),
                         item = item,
                         query = currentQuery,
-                        onCategoryClicked = { category ->
-                            actions(
-                                Action.Fetch.QueryChange.ToggleCategory(category)
-                            )
-                        },
-                        navigate = { path ->
-                            actions(Action.Navigate {
-                                if (isInPrimaryNav) navState.push(route = path.toRoute)
-                                else navState.swap(route = path.toRoute)
-                            })
-                        }
+                        actions = actions,
                     )
                 }
             )
@@ -260,8 +247,7 @@ private fun GridCell(
     modifier: Modifier = Modifier,
     item: ArchiveItem,
     query: ArchiveQuery,
-    onCategoryClicked: (Descriptor.Category) -> Unit,
-    navigate: (String) -> Unit,
+    actions: (Action) -> Unit,
 ) {
     when (item) {
         is ArchiveItem.Header -> StickyHeader(
@@ -278,20 +264,14 @@ private fun GridCell(
             modifier = modifier,
             query = query,
             archive = item.archive,
-            onArchiveSelected = { archive ->
-                navigate(
-                    "archives/${archive.kind.type}/${archive.id.value}?thumbnail=${archive.thumbnail}"
-                )
-            },
-            onCategoryClicked = onCategoryClicked
+            actions = actions,
         )
 
         is ArchiveItem.Card.PlaceHolder -> ArchiveCard(
             modifier = modifier,
             query = query,
             archive = item.archive,
-            onArchiveSelected = { },
-            onCategoryClicked = { },
+            actions = { },
         )
     }
 }

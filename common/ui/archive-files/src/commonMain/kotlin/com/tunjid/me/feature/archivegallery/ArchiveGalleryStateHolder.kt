@@ -23,6 +23,7 @@ import com.tunjid.me.data.repository.ArchiveFileRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.feature.archivefiles.archiveFilesTiler
 import com.tunjid.me.feature.archivefiles.pivotRequest
+import com.tunjid.me.feature.archivegallery.FileItem.PlaceHolder
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
@@ -72,10 +73,7 @@ class ActualArchiveGalleryStateHolder(
         items = buildTiledList {
             addAll(
                 query = ArchiveFileQuery(route.archiveId),
-                items = route.archiveFileIds.zip(
-                    other = route.urls,
-                    transform = FileItem::PlaceHolder
-                )
+                items = route.urls.map(::PlaceHolder)
             )
         }
     ),

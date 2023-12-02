@@ -18,7 +18,6 @@ package com.tunjid.me.feature.archivegallery
 
 import androidx.compose.ui.geometry.Offset
 import com.tunjid.me.core.model.ArchiveFile
-import com.tunjid.me.core.model.ArchiveFileId
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.navigation.NavigationAction
@@ -52,7 +51,6 @@ data class State(
 
 sealed class FileItem {
     data class PlaceHolder(
-        val archiveFileId: ArchiveFileId,
         val url: String
     ) : FileItem()
 
@@ -61,15 +59,10 @@ sealed class FileItem {
     ) : FileItem()
 }
 
-val FileItem.archiveFileId: ArchiveFileId
-    get() = when (this) {
-        is FileItem.File -> archiveFile.id
-        is FileItem.PlaceHolder -> archiveFileId
-    }
 val FileItem.key: String
     get() = when (this) {
-        is FileItem.File -> archiveFile.id.value
-        is FileItem.PlaceHolder -> archiveFileId.value
+        is FileItem.File -> url
+        is FileItem.PlaceHolder -> url
     }
 
 val FileItem.url: String

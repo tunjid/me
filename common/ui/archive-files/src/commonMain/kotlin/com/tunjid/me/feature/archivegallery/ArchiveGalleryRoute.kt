@@ -36,7 +36,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.round
-import com.tunjid.me.core.model.ArchiveFileId
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.feature.rememberRetainedStateHolder
@@ -60,12 +59,18 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ArchiveGalleryRoute(
-    override val id: String,
-    val archiveId: ArchiveId,
-    val pageOffset: Int = 0,
-    val archiveFileIds: List<ArchiveFileId> = emptyList(),
-    val urls: List<String> = emptyList(),
+    val route: String,
+    val pathArgs: Map<String, String>,
+    val queryArgs: Map<String, List<String>>,
 ) : AppRoute {
+
+    override val id: String get() = route.split("?").first()
+
+    val archiveId: ArchiveId = pathArgs.getValue("id").let(::ArchiveId)
+    val pageOffset get() = queryArgs["offset"]?.firstOrNull()?.toIntOrNull() ?: 0
+
+    val urls get() = queryArgs["url"] ?: emptyList()
+
     @Composable
     override fun content() {
         ArchiveGalleryScreen(
