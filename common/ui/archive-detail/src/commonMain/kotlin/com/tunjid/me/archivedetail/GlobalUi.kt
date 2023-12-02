@@ -28,6 +28,7 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.currentUiState
 import com.tunjid.me.scaffold.globalui.rememberFunction
 import com.tunjid.treenav.push
+import com.tunjid.treenav.strings.routeString
 
 @Composable
 fun GlobalUi(state: State, actions: (Action) ->  Unit) {
@@ -45,7 +46,14 @@ fun GlobalUi(state: State, actions: (Action) ->  Unit) {
                 val archiveId = state.archive?.id
                 if (archiveId != null) actions(Action.Navigate {
                     navState.push(
-                        "archives/${state.kind.type}/${archiveId.value}/edit?thumbnail=${state.archive.thumbnail}".toRoute
+                        routeString(
+                            path = "archives/${state.kind.type}/${archiveId.value}/edit",
+                            queryParams = mapOf(
+                                "thumbnail" to listOfNotNull(
+                                    state.archive.thumbnail
+                                )
+                            )
+                        ).toRoute
                     )
                 })
             },

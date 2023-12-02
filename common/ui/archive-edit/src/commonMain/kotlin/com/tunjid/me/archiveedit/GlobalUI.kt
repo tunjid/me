@@ -27,6 +27,7 @@ import com.tunjid.me.core.ui.icons.Preview
 import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.treenav.push
+import com.tunjid.treenav.strings.routeString
 
 @Composable
 internal fun GlobalUi(
@@ -59,7 +60,12 @@ internal fun GlobalUi(
                     "preview", "edit" -> onAction(Action.ToggleEditView)
                     "gallery" -> onAction(Action.Navigate {
                         navState.push(
-                            "archives/${state.kind.type}/${state.upsert.id?.value}/files?dndEnabled=true".toRoute
+                            routeString(
+                                path = "archives/${state.kind.type}/${state.upsert.id?.value}/files",
+                                queryParams = mapOf(
+                                    "dndEnabled" to listOf(true.toString())
+                                )
+                            ).toRoute
                         )
                     })
                 }

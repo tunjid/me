@@ -68,8 +68,10 @@ import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.navigation.AppRoute
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
+import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.push
+import com.tunjid.treenav.strings.routeString
 import kotlinx.serialization.Serializable
 
 enum class FileType(
@@ -115,6 +117,7 @@ data class ArchiveFilesRoute(
     @Composable
     override fun content() {
         ArchiveFilesScreen(
+            modifier = Modifier.backPreviewBackgroundModifier(),
             stateHolder = rememberRetainedStateHolder(
                 route = this@ArchiveFilesRoute
             ),
@@ -266,12 +269,15 @@ private fun ImageFile(
             .aspectRatio(1f)
             .clickable {
                 actions(Action.Navigate {
-                    val fileIdQueryParams = "fileId=${archiveFile.id.value}"
-                    val urlQueryParams = "url=${archiveFile.url}"
-                    val route =
-                        "archive/${archiveFile.archiveId.value}/gallery?${fileIdQueryParams}&$urlQueryParams".toRoute
-
-                    navState.push(route)
+                    navState.push(
+                        routeString(
+                            path = "archive/${archiveFile.archiveId.value}/gallery",
+                            queryParams = mapOf(
+                                "fileId" to listOf(archiveFile.id.value),
+                                "url" to listOf(archiveFile.url)
+                            )
+                        ).toRoute
+                    )
                 })
             }
     ) {
