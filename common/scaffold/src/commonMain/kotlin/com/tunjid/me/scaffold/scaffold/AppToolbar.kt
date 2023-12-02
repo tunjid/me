@@ -240,9 +240,9 @@ fun Test() {
                 stacks = listOf(
                     StackNav(
                         name = "Preview",
-                        routes = listOf(
-                            UnknownRoute(id = "-"),
-                            UnknownRoute(id = "--")
+                        children = listOf(
+                            UnknownRoute(path = "-"),
+                            UnknownRoute(path = "--")
                         )
                     )
                 )

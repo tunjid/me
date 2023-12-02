@@ -60,31 +60,58 @@ import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.maxSize
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.core.utilities.RemoteUri
-import com.tunjid.me.feature.archivegallery.ArchiveGalleryRoute
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
 
-enum class FileType(val mimeTypes: Set<String>) {
-    Image(imageMimetypes),
-    Misc(miscMimeTypes)
+enum class FileType(
+    val kind: String,
+    val mimeTypes: Set<String>
+) {
+    Image(
+        kind = "image/*",
+        mimeTypes = imageMimetypes
+    ),
+    Misc(
+        kind = "",
+        mimeTypes = miscMimeTypes
+    )
 }
 
 @Serializable
 data class ArchiveFilesRoute(
-    override val id: String,
-    val kind: ArchiveKind,
-    val archiveId: ArchiveId,
-    val dndEnabled: Boolean = false,
-    val fileType: FileType = FileType.Image
+    override val routeParams: SerializedRouteParams,
 ) : AppRoute {
+
+    val archiveId get() = ArchiveId(routeParams.pathArgs["id"] ?: "")
+    val kind
+        get() = ArchiveKind.entries.firstOrNull { it.type == routeParams.pathArgs["kind"] }
+            ?: ArchiveKind.Articles
+
+    val dndEnabled
+        get() = routeParams.queryParams["dndEnabled"]
+            ?.map(String::toBooleanStrictOrNull)
+            ?.any(true::equals)
+            ?: false
+
+    val fileType: FileType
+        get() {
+            val type = routeParams.pathArgs["type"]
+            return when {
+                type == null -> FileType.Misc
+                "image" in type -> FileType.Image
+                else -> FileType.Misc
+            }
+        }
+
     @Composable
     override fun content() {
         ArchiveFilesScreen(

@@ -32,8 +32,9 @@ import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.mutation
 import com.tunjid.treenav.MultiStackNav
-import com.tunjid.treenav.Route
 import com.tunjid.treenav.StackNav
+import com.tunjid.treenav.strings.Route
+import com.tunjid.treenav.strings.RouteParams
 import com.tunjid.treenav.strings.RouteParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -65,8 +66,14 @@ private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(
  * A route that has a id for a [Route] defined in another module
  */
 data class ExternalRoute(
-    override val id: String,
+    val path: String,
 ) : AppRoute, StatelessRoute {
+
+    override val routeParams: RouteParams = RouteParams(
+        route = path,
+        pathArgs = emptyMap(),
+        queryParams = emptyMap(),
+    )
 
     // Does not render, just used during traversal to find secondary routes associated with a route
     @Composable
@@ -74,6 +81,9 @@ data class ExternalRoute(
 }
 
 interface AppRoute : Route {
+
+    override val id get() = routeParams.route.split("?").first()
+
     @Composable
     fun content()
 
@@ -131,7 +141,7 @@ private val EmptyNavigationState = MultiStackNav(
     stacks = listOf(
         StackNav(
             name = "emptyStack",
-            routes = listOf(UnknownRoute())
+            children = listOf(UnknownRoute())
         )
     )
 )
@@ -191,7 +201,7 @@ private fun RouteParser<AppRoute>.parseMultiStackNav(savedState: SavedState) =
                                 operation = innerFold@{ stackNav, route ->
                                     val resolvedRoute = parse(routeString = route) ?: UnknownRoute()
                                     stackNav.copy(
-                                        routes = stackNav.routes + resolvedRoute
+                                        children = stackNav.children + resolvedRoute
                                     )
                                 }
                             )

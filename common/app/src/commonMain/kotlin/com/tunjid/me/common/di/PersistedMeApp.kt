@@ -123,7 +123,7 @@ class PersistedMeApp(
         activeNav = currentIndex,
         navigation = stacks.fold(listOf()) { listOfLists, stackNav ->
             listOfLists.plus(
-                element = stackNav.routes
+                element = stackNav.children
                     .filterIsInstance<AppRoute>()
                     .fold(listOf()) { stackList, route ->
                         stackList + route.id

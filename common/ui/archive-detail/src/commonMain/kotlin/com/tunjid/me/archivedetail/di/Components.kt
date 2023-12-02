@@ -48,13 +48,7 @@ abstract class ArchiveDetailNavigationComponent {
     fun archiveDetailRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "archives/{kind}/{id}",
-            routeMapper = { params ->
-                ArchiveDetailRoute(
-                    route = params.route,
-                    pathArgs = params.pathArgs,
-                    queryArgs = params.queryArgs
-                )
-            }
+            routeMapper = ::ArchiveDetailRoute
         )
 }
 

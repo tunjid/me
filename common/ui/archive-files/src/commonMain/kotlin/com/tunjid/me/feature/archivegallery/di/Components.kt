@@ -16,8 +16,6 @@
 
 package com.tunjid.me.feature.archivegallery.di
 
-import com.tunjid.me.core.model.ArchiveFileId
-import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivegallery.ActualArchiveGalleryStateHolder
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryRoute
@@ -50,17 +48,7 @@ abstract class ArchiveGalleryNavigationComponent {
     fun archiveFileRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "archive/{id}/gallery",
-            routeMapper = { (
-                                route: String,
-                                pathKeys: Map<String, String>,
-                                queryParams: Map<String, List<String>>,
-                            ) ->
-                ArchiveGalleryRoute(
-                    route = route,
-                    pathArgs = pathKeys,
-                    queryArgs = queryParams
-                )
-            }
+            routeMapper = ::ArchiveGalleryRoute,
         )
 }
 

@@ -48,11 +48,7 @@ abstract class SignInNavigationComponent {
     fun profileRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "sign-in",
-            routeMapper = { (route: String) ->
-                SignInRoute(
-                    id = route,
-                )
-            }
+            routeMapper = ::SignInRoute,
         )
 }
 

@@ -69,6 +69,7 @@ import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.navigation.AppRoute
 import com.tunjid.me.scaffold.navigation.ExternalRoute
+import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.treenav.Node
@@ -79,20 +80,18 @@ private const val BODY_INDEX = 11
 
 @Serializable
 data class ArchiveEditRoute(
-    val route: String,
-    val pathArgs: Map<String, String>,
-    val queryArgs: Map<String, List<String>>,
+    override val routeParams: SerializedRouteParams,
 ) : AppRoute {
 
-    override val id: String get() = route.split("?").first()
+    override val id: String get() = routeParams.route.split("?").first()
 
-    val archiveId: ArchiveId? get() = pathArgs["id"]?.let(::ArchiveId)
+    val archiveId: ArchiveId? get() = routeParams.pathArgs["id"]?.let(::ArchiveId)
     val kind: ArchiveKind
         get() = ArchiveKind.entries
-            .firstOrNull { it.type == pathArgs["kind"] }
+            .firstOrNull { it.type == routeParams.pathArgs["kind"] }
             ?: ArchiveKind.Articles
 
-    val archiveThumbnail: String? get() = queryArgs["thumbnail"]?.firstOrNull()
+    val archiveThumbnail: String? get() = routeParams.queryParams["thumbnail"]?.firstOrNull()
 
     @Composable
     override fun content() {
@@ -108,7 +107,7 @@ data class ArchiveEditRoute(
         null -> emptyList()
         else -> listOf(
             ExternalRoute(
-                id = "archives/${kind.type}/${archiveId.value}/files?type=image&dndEnabled=true"
+                path = "archives/${kind.type}/${archiveId.value}/files/image"
             )
         )
     }

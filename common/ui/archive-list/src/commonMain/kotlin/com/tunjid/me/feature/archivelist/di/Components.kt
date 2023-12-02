@@ -16,12 +16,11 @@
 
 package com.tunjid.me.feature.archivelist.di
 
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivelist.ActualArchiveListStateHolder
+import com.tunjid.me.feature.archivelist.ArchiveListRoute
 import com.tunjid.me.feature.archivelist.ArchiveListStateHolder
 import com.tunjid.me.feature.archivelist.ArchiveListStateHolderCreator
-import com.tunjid.me.feature.archivelist.ArchiveListRoute
 import com.tunjid.me.feature.archivelist.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
@@ -49,16 +48,7 @@ abstract class ArchiveListNavigationComponent {
     fun archiveListRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "archives/{kind}",
-            routeMapper = { (route: String, pathKeys: Map<String, String>) ->
-                val kindString = pathKeys["kind"]
-                val kind = ArchiveKind.values()
-                    .firstOrNull { it.type == kindString }
-                    ?: ArchiveKind.Articles
-                ArchiveListRoute(
-                    id = route,
-                    kind = kind
-                )
-            }
+            routeMapper = ::ArchiveListRoute
         )
 }
 

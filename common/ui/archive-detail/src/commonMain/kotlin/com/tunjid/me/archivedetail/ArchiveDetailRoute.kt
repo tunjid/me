@@ -50,27 +50,25 @@ import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.navigation.AppRoute
 import com.tunjid.me.scaffold.navigation.ExternalRoute
+import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.treenav.Node
 import com.tunjid.treenav.pop
+import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.Serializable
 
 private const val BODY_KEY = 3
 
 @Serializable
 data class ArchiveDetailRoute(
-    val route: String,
-    val pathArgs: Map<String, String>,
-    val queryArgs: Map<String, List<String>>,
+    override val routeParams: SerializedRouteParams,
 ) : AppRoute {
 
-    override val id: String get() = route.split("?").first()
+    val archiveId: ArchiveId? = routeParams.pathArgs["id"]?.let(::ArchiveId)
 
-    val archiveId: ArchiveId? = pathArgs["id"]?.let(::ArchiveId)
-
-    val kind = ArchiveKind.entries.firstOrNull { it.type == pathArgs["kind"] }
+    val kind = ArchiveKind.entries.firstOrNull { it.type == routeParams.pathArgs["kind"] }
         ?: ArchiveKind.Articles
 
-    val archiveThumbnail: String? get() = queryArgs["thumbnail"]?.firstOrNull()
+    val archiveThumbnail: String? get() = routeParams.queryParams["thumbnail"]?.firstOrNull()
 
     @Composable
     override fun content() {
@@ -82,7 +80,11 @@ data class ArchiveDetailRoute(
         )
     }
 
-    override val children: List<Node> = listOf(ExternalRoute("archives/${kind.type}"))
+    override val children: List<Node> = listOf(
+        ExternalRoute(
+            path = "archives/${kind.type}"
+        )
+    )
 
     override val secondaryRoute get() = children.first().id
 }

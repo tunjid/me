@@ -48,11 +48,7 @@ abstract class SettingsNavigationComponent {
     fun settingsRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "settings",
-            routeMapper = { (route: String) ->
-                SettingsRoute(
-                    id = route,
-                )
-            }
+            routeMapper = ::SettingsRoute,
         )
 }
 

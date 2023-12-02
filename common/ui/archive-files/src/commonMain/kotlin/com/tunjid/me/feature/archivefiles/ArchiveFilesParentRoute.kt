@@ -48,26 +48,30 @@ import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.navigation.StatelessRoute
 import com.tunjid.treenav.Node
+import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ArchiveFilesParentRoute(
-    override val id: String,
-    val kind: ArchiveKind,
-    val archiveId: ArchiveId,
-    val dndEnabled: Boolean,
+    override val routeParams: SerializedRouteParams,
 ) : AppRoute, StatelessRoute {
+
+    private val archiveId get() = ArchiveId(routeParams.pathArgs["id"] ?: "")
+    private val kind
+        get() = ArchiveKind.entries.firstOrNull { it.type == routeParams.pathArgs["kind"] }
+            ?: ArchiveKind.Articles
 
     override val children: List<Node> = FileType.entries
         .map { fileType ->
             ArchiveFilesRoute(
-                id = "$id?type=${fileType.name.lowercase()}",
-                kind = kind,
-                archiveId = archiveId,
-                dndEnabled = dndEnabled,
-                fileType = fileType
+                routeParams = RouteParams(
+                    route = "archives/${kind.type}/${archiveId.value}/files/${fileType.kind}",
+                    pathArgs = routeParams.pathArgs + ("type" to fileType.kind),
+                    queryParams = routeParams.queryParams
+                ),
             )
         }
 

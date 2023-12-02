@@ -44,6 +44,7 @@ import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.mutation
@@ -59,17 +60,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ArchiveGalleryRoute(
-    val route: String,
-    val pathArgs: Map<String, String>,
-    val queryArgs: Map<String, List<String>>,
+    override val routeParams: SerializedRouteParams,
 ) : AppRoute {
 
-    override val id: String get() = route.split("?").first()
+    val archiveId: ArchiveId = routeParams.pathArgs.getValue("id").let(::ArchiveId)
+    val pageOffset get() = routeParams.queryParams["offset"]?.firstOrNull()?.toIntOrNull() ?: 0
 
-    val archiveId: ArchiveId = pathArgs.getValue("id").let(::ArchiveId)
-    val pageOffset get() = queryArgs["offset"]?.firstOrNull()?.toIntOrNull() ?: 0
-
-    val urls get() = queryArgs["url"] ?: emptyList()
+    val urls get() = routeParams.queryParams["url"] ?: emptyList()
 
     @Composable
     override fun content() {

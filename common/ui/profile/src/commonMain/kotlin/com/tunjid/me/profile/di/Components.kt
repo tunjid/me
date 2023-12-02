@@ -48,11 +48,7 @@ abstract class ProfileNavigationComponent {
     fun profileRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "profile",
-            routeMapper = { (route: String) ->
-                ProfileRoute(
-                    id = route,
-                )
-            }
+            routeMapper = ::ProfileRoute
         )
 }
 

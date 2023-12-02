@@ -137,8 +137,8 @@ sealed class Action(val key: String) {
             override val navigationMutation: NavigationMutation = {
                 val path =
                     "archives/${archive.kind.type}/${archive.id.value}?thumbnail=${archive.thumbnail}"
-                if (navState.current is ArchiveListRoute) navState.push(route = path.toRoute)
-                else navState.swap(route = path.toRoute)
+                if (navState.current is ArchiveListRoute) navState.push(node = path.toRoute)
+                else navState.swap(node = path.toRoute)
             }
         }
 

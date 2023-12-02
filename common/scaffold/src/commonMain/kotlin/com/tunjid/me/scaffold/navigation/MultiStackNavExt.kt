@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 
-val MultiStackNav.canGoUp get() = stacks.getOrNull(currentIndex)?.canGoUp == true
+val MultiStackNav.canGoUp get() = stacks.getOrNull(currentIndex)?.canPop == true
 
 val MultiStackNav.navItems
     get() = stacks
@@ -66,7 +66,7 @@ private fun MultiStackNav.popToRoot(indexToPop: Int) = copy(
 )
 
 private fun StackNav.popToRoot() = copy(
-    routes = routes.take(1)
+    children = children.take(1)
 )
 
 private val EmptyNavigationState = MultiStackNav(

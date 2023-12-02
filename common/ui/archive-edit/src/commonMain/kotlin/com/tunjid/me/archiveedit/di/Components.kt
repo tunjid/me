@@ -48,13 +48,7 @@ abstract class ArchiveEditNavigationComponent {
     fun archiveEditRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "archives/{kind}/{id}/edit",
-            routeMapper = { params ->
-                ArchiveEditRoute(
-                    route = params.route,
-                    pathArgs = params.pathArgs,
-                    queryArgs = params.queryArgs
-                )
-            }
+            routeMapper = ::ArchiveEditRoute,
         )
 
     @IntoMap
@@ -62,13 +56,7 @@ abstract class ArchiveEditNavigationComponent {
     fun archiveCreateRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "archives/{kind}/create",
-            routeMapper = { params ->
-                ArchiveEditRoute(
-                    route = params.route,
-                    pathArgs = params.pathArgs,
-                    queryArgs = params.queryArgs
-                )
-            }
+            routeMapper = ::ArchiveEditRoute,
         )
 }
 

@@ -48,6 +48,7 @@ import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.queryAtOrNull
@@ -57,9 +58,12 @@ import kotlin.math.abs
 
 @Serializable
 data class ArchiveListRoute(
-    override val id: String,
-    val kind: ArchiveKind,
+    override val routeParams: SerializedRouteParams,
 ) : AppRoute {
+
+    val kind = ArchiveKind.entries.firstOrNull { it.type == routeParams.pathArgs["kind"] }
+        ?: ArchiveKind.Articles
+
     @Composable
     override fun content() {
         ArchiveScreen(

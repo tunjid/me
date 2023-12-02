@@ -16,15 +16,12 @@
 
 package com.tunjid.me.feature.archivefiles.di
 
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivefiles.ActualArchiveFilesStateHolder
 import com.tunjid.me.feature.archivefiles.ArchiveFilesParentRoute
 import com.tunjid.me.feature.archivefiles.ArchiveFilesRoute
 import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolder
 import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolderCreator
-import com.tunjid.me.feature.archivefiles.FileType
 import com.tunjid.me.feature.archivefiles.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
@@ -49,50 +46,19 @@ abstract class ArchiveFilesNavigationComponent {
 
     @IntoMap
     @Provides
-    fun archiveFilesRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
+    fun archiveFilesParentRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
         routeAndMatcher(
             routePattern = "archives/{kind}/{id}/files",
-            routeMapper = { (
-                                route: String,
-                                pathKeys: Map<String, String>,
-                                queryKeys: Map<String, List<String>>
-                            ) ->
-                val archiveId = ArchiveId(pathKeys["id"] ?: "")
-                val kind = ArchiveKind.values().firstOrNull { it.type == pathKeys["kind"] }
-                    ?: ArchiveKind.Articles
-                val types = queryKeys["type"] ?: emptyList()
-                when {
-                    types.isEmpty() -> ArchiveFilesParentRoute(
-                        id = route,
-                        kind = kind,
-                        archiveId = archiveId,
-                        dndEnabled = queryKeys.dndEnabled(),
-                        )
-
-                    "image" in types -> ArchiveFilesRoute(
-                        id = route,
-                        kind = kind,
-                        archiveId = archiveId,
-                        dndEnabled = queryKeys.dndEnabled(),
-                        fileType = FileType.Image
-                    )
-
-                    else -> ArchiveFilesRoute(
-                        id = route,
-                        kind = kind,
-                        archiveId = archiveId,
-                        dndEnabled = queryKeys.dndEnabled(),
-                        fileType = FileType.Misc
-                    )
-                }
-            }
+            routeMapper = ::ArchiveFilesParentRoute
         )
 
-    private fun Map<String, List<String>>.dndEnabled() =
-        (this["dndEnabled"]
-            ?.map(String::toBooleanStrictOrNull)
-            ?.any(true::equals)
-            ?: false)
+    @IntoMap
+    @Provides
+    fun archiveFilesRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
+        routeAndMatcher(
+            routePattern = "archives/{kind}/{id}/files/{type}",
+            routeMapper = ::ArchiveFilesRoute
+        )
 }
 
 @Component
