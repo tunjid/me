@@ -23,7 +23,7 @@ import com.tunjid.me.data.repository.ArchiveFileRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.feature.archivefiles.archiveFilesTiler
 import com.tunjid.me.feature.archivefiles.pivotRequest
-import com.tunjid.me.feature.archivegallery.FileItem.PlaceHolder
+import com.tunjid.me.feature.archivegallery.GalleryItem.PlaceHolder
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
@@ -104,5 +104,5 @@ private fun Flow<Action.LoadAround>.loadMutations(
             )
         )
         .mapToMutation {
-            copy(items = it.map(FileItem::File))
+            copy(items = it.map(GalleryItem::File))
         }

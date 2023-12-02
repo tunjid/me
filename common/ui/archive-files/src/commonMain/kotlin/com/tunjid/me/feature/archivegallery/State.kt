@@ -43,30 +43,30 @@ data class State(
     @ProtoNumber(2)
     val currentQuery: ArchiveFileQuery,
     @Transient
-    val items: TiledList<ArchiveFileQuery, FileItem> = emptyTiledList(),
+    val items: TiledList<ArchiveFileQuery, GalleryItem> = emptyTiledList(),
     @Transient
     val pagerOffset: Offset = Offset.Zero,
 ) : ByteSerializable
 
 
-sealed class FileItem {
+sealed class GalleryItem {
     data class PlaceHolder(
         val url: String
-    ) : FileItem()
+    ) : GalleryItem()
 
     data class File(
         val archiveFile: ArchiveFile
-    ) : FileItem()
+    ) : GalleryItem()
 }
 
-val FileItem.key: String
+val GalleryItem.key: String
     get() = when (this) {
-        is FileItem.File -> url
-        is FileItem.PlaceHolder -> url
+        is GalleryItem.File -> url
+        is GalleryItem.PlaceHolder -> url
     }
 
-val FileItem.url: String
+val GalleryItem.url: String
     get() = when (this) {
-        is FileItem.File -> archiveFile.url
-        is FileItem.PlaceHolder -> url
+        is GalleryItem.File -> archiveFile.url
+        is GalleryItem.PlaceHolder -> url
     }
