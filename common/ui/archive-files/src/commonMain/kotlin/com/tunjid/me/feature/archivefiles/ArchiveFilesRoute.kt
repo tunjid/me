@@ -25,7 +25,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -56,7 +55,6 @@ import com.tunjid.me.core.model.imageMimetypes
 import com.tunjid.me.core.model.miscMimeTypes
 import com.tunjid.me.core.ui.dragdrop.dragSource
 import com.tunjid.me.core.ui.dragdrop.dropTarget
-import com.tunjid.me.core.ui.maxSize
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.feature.rememberRetainedStateHolder
@@ -264,7 +262,7 @@ private fun ImageFile(
     fileItem: FileItem,
     actions: (Action) -> Unit,
 ) {
-    BoxWithConstraints(
+    Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
             .aspectRatio(1f)
@@ -291,7 +289,6 @@ private fun ImageFile(
         ) { imageUrl, sharedElementModifier ->
             val imagePainter = rememberAsyncRasterPainter(
                 imageUri = imageUrl,
-                size = maxSize()
             )
             if (imagePainter != null && fileItem is FileItem.File) Image(
                 painter = imagePainter,
