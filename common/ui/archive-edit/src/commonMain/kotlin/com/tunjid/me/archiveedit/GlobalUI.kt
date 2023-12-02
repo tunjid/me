@@ -64,7 +64,8 @@ internal fun GlobalUi(
                             routeString(
                                 path = "archives/${state.kind.type}/${state.upsert.id?.value}/files",
                                 queryParams = mapOf(
-                                    "dndEnabled" to listOf(true.toString())
+                                    "dndEnabled" to listOf(true.toString()),
+                                    "url" to listOfNotNull(state.upsert.thumbnail),
                                 )
                             ).toRoute
                         )

@@ -52,7 +52,9 @@ fun GlobalUi(state: State, actions: (Action) -> Unit) {
                         navState.push(
                             routeString(
                                 path = "archives/${state.kind.type}/${state.archive.id.value}/files",
-                                queryParams = emptyMap()
+                                queryParams = mapOf(
+                                    "url" to listOfNotNull(state.archive.thumbnail)
+                                )
                             ).toRoute
                         )
                     })
