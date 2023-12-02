@@ -156,7 +156,7 @@ sealed class Action(val key: String) {
                 navState.push(
                     routeString(
                         path = "archives/${kind.type}/${archiveId.value}/files/image",
-                        queryParams = mapOf("thumbnail" to listOfNotNull(thumbnail))
+                        queryParams = mapOf("url" to listOfNotNull(thumbnail))
                     ).toRoute
                 )
             }
