@@ -43,6 +43,8 @@ import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutation
 import com.tunjid.tiler.Tile
+import com.tunjid.tiler.buildTiledList
+import com.tunjid.tiler.map
 import com.tunjid.tiler.toPivotedTileInputs
 import com.tunjid.tiler.toTiledList
 import com.tunjid.treenav.MultiStackNav
@@ -92,6 +94,12 @@ class ActualArchiveFilesStateHolder(
         archiveId = route.archiveId,
         dndEnabled = route.dndEnabled,
         fileType = route.fileType,
+        items = buildTiledList {
+            addAll(
+                query = ArchiveFileQuery(route.archiveId),
+                items = route.urls.map(FileItem::PlaceHolder)
+            )
+        }
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     mutationFlows = listOf(
@@ -177,7 +185,7 @@ private fun Flow<Action.Fetch>.loadMutations(
         )
     )
         .map {
-            mutation { copy(files = it) }
+            mutation { copy(items = it.map(FileItem::File)) }
         }
 }
 

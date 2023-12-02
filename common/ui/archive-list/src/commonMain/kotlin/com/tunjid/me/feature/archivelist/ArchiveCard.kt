@@ -152,6 +152,7 @@ fun ArchiveCard(
                 Spacer(Modifier.height(8.dp))
                 ArchiveDate(
                     archiveId = archive.id,
+                    thumbnail = archive.thumbnail,
                     kind = archive.kind,
                     prettyDate = archive.prettyDate,
                     actions = actions,
@@ -201,6 +202,7 @@ private fun ArchiveDetails(
 @Composable
 private fun ArchiveDate(
     archiveId: ArchiveId,
+    thumbnail: String?,
     kind: ArchiveKind,
     prettyDate: String,
     actions: (Action) -> Unit
@@ -226,6 +228,7 @@ private fun ArchiveDate(
                 actions(
                     Action.Navigate.Files(
                         archiveId = archiveId,
+                        thumbnail = thumbnail,
                         kind = kind
                     )
                 )

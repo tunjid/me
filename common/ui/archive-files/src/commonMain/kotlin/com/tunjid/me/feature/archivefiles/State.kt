@@ -21,6 +21,7 @@ import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.Uri
+import com.tunjid.me.feature.archivegallery.url
 import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.permissions.Permission
@@ -36,7 +37,7 @@ enum class DragLocation {
 }
 
 sealed class UploadInfo {
-    object None : UploadInfo()
+    data object None : UploadInfo()
 
     data class Message(
         val message: String
@@ -69,7 +70,7 @@ data class State(
     @Transient
     val dragLocation: DragLocation = DragLocation.Inactive,
     @Transient
-    val files: TiledList<ArchiveFileQuery, ArchiveFile> = emptyTiledList(),
+    val items: TiledList<ArchiveFileQuery, FileItem> = emptyTiledList(),
 ) : ByteSerializable
 
 fun State.startQuery() = ArchiveFileQuery(
@@ -94,3 +95,25 @@ sealed class Action(val key: String) {
         override val navigationMutation: NavigationMutation
     ) : Action(key = "Navigate"), NavigationAction
 }
+
+sealed class FileItem {
+    data class PlaceHolder(
+        val url: String
+    ) : FileItem()
+
+    data class File(
+        val archiveFile: ArchiveFile
+    ) : FileItem()
+}
+
+val FileItem.key: String
+    get() = when (this) {
+        is FileItem.File -> url
+        is FileItem.PlaceHolder -> url
+    }
+
+val FileItem.url: String
+    get() = when (this) {
+        is FileItem.File -> archiveFile.url
+        is FileItem.PlaceHolder -> url
+    }

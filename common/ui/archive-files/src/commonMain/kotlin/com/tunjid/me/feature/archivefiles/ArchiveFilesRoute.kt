@@ -50,7 +50,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.imageMimetypes
@@ -104,6 +103,8 @@ data class ArchiveFilesRoute(
             ?.any(true::equals)
             ?: false
 
+    val urls get() = routeParams.queryParams["url"] ?: emptyList()
+
     val fileType: FileType
         get() {
             val type = routeParams.pathArgs["type"]
@@ -141,7 +142,7 @@ internal fun ArchiveFilesScreen(
         FilesGrid(
             dndEnabled = state.dndEnabled,
             fileType = state.fileType,
-            files = state.files,
+            files = state.items,
             lazyGridState = gridState,
             actions = actions
         )
@@ -154,7 +155,7 @@ internal fun ArchiveFilesScreen(
         UploadInfo(state.uploadInfo)
 
         gridState.PivotedTilingEffect(
-            items = state.files,
+            items = state.items,
             onQueryChanged = { query ->
                 actions(
                     Action.Fetch.LoadAround(
@@ -171,7 +172,7 @@ private fun FilesGrid(
     dndEnabled: Boolean,
     lazyGridState: LazyGridState,
     fileType: FileType,
-    files: List<ArchiveFile>,
+    files: List<FileItem>,
     actions: (Action) -> Unit,
 ) {
     LazyVerticalGrid(
@@ -186,23 +187,23 @@ private fun FilesGrid(
     ) {
         items(
             items = files,
-            key = ArchiveFile::url,
+            key = FileItem::key,
             span = {
                 actions(Action.Fetch.ColumnSizeChanged(maxLineSpan))
                 GridItemSpan(1)
             },
-            itemContent = { archiveFile ->
+            itemContent = { fileItem ->
                 when (fileType) {
                     FileType.Image -> ImageFile(
                         modifier = Modifier.animateItemPlacement(),
                         dndEnabled = dndEnabled,
-                        archiveFile = archiveFile,
+                        fileItem = fileItem,
                         actions = actions
                     )
 
                     FileType.Misc -> TextFile(
                         modifier = Modifier.animateItemPlacement(),
-                        archiveFile = archiveFile
+                        fileItem = fileItem
                     )
                 }
             }
@@ -260,7 +261,7 @@ private fun FilesDrop(
 private fun ImageFile(
     modifier: Modifier = Modifier,
     dndEnabled: Boolean,
-    archiveFile: ArchiveFile,
+    fileItem: FileItem,
     actions: (Action) -> Unit,
 ) {
     BoxWithConstraints(
@@ -268,6 +269,10 @@ private fun ImageFile(
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
             .aspectRatio(1f)
             .clickable {
+                val archiveFile = when (fileItem) {
+                    is FileItem.File -> fileItem.archiveFile
+                    is FileItem.PlaceHolder -> return@clickable
+                }
                 actions(Action.Navigate {
                     navState.push(
                         routeString(
@@ -282,13 +287,13 @@ private fun ImageFile(
             }
     ) {
         val sharedElement = rememberSharedContent<String?>(
-            key = thumbnailSharedElementKey(archiveFile.url)
+            key = thumbnailSharedElementKey(fileItem.url)
         ) { imageUrl, sharedElementModifier ->
             val imagePainter = rememberAsyncRasterPainter(
                 imageUri = imageUrl,
                 size = maxSize()
             )
-            if (imagePainter != null) Image(
+            if (imagePainter != null && fileItem is FileItem.File) Image(
                 painter = imagePainter,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
@@ -297,25 +302,25 @@ private fun ImageFile(
                     dragShadowPainter = imagePainter,
                     uris = listOf(
                         RemoteUri(
-                            path = archiveFile.url,
-                            mimetype = archiveFile.mimeType,
+                            path = fileItem.archiveFile.url,
+                            mimetype = fileItem.archiveFile.mimeType,
                         )
                     )
                 )
             )
         }
-        sharedElement(archiveFile.url, Modifier)
+        sharedElement(fileItem.url, Modifier)
     }
 }
 
 @Composable
 private fun TextFile(
     modifier: Modifier = Modifier,
-    archiveFile: ArchiveFile,
+    fileItem: FileItem,
 ) {
     Text(
         modifier = modifier,
-        text = archiveFile.url
+        text = fileItem.url
     )
 }
 

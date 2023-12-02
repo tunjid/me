@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
@@ -52,7 +53,7 @@ internal fun GlobalUi(
                 ToolbarItem(
                     id = "gallery",
                     text = "Gallery",
-                    imageVector = Icons.Default.Face
+                    imageVector = Icons.Default.Email
                 )
             ),
             toolbarMenuClickListener = rememberFunction {

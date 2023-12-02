@@ -149,10 +149,16 @@ sealed class Action(val key: String) {
 
         data class Files(
             val archiveId: ArchiveId,
+            val thumbnail: String?,
             val kind: ArchiveKind
         ) : Navigate() {
             override val navigationMutation: NavigationMutation = {
-                navState.push("archives/${kind.type}/${archiveId.value}/files/image".toRoute)
+                navState.push(
+                    routeString(
+                        path = "archives/${kind.type}/${archiveId.value}/files/image",
+                        queryParams = mapOf("thumbnail" to listOfNotNull(thumbnail))
+                    ).toRoute
+                )
             }
         }
 
