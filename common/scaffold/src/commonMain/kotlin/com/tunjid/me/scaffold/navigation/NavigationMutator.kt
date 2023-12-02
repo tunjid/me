@@ -98,31 +98,38 @@ interface AppRoute : Route {
     ): Adaptive.Transitions = when (state.container) {
         Adaptive.Container.Primary,
         Adaptive.Container.Secondary -> when (state.adaptation) {
-            is Adaptive.Adaptation.Change -> Adaptive.Transitions(
-                enter = fadeIn(
-                    animationSpec = RouteTransitionAnimationSpec,
-                    // This is needed because I can't exclude shared elements from transitions
-                    // so to actually see them move, state fading in from 0.1f
-                    initialAlpha = 0.1f
-                ),
-                exit = fadeOut(
-                    animationSpec = RouteTransitionAnimationSpec
-                )
-            )
+            Adaptive.Adaptation.PrimaryToSecondary,
+            Adaptive.Adaptation.SecondaryToPrimary -> NoTransition
+            else -> DefaultTransition
+        }
 
-            is Adaptive.Adaptation.Swap -> Adaptive.Transitions(
+        Adaptive.Container.TransientPrimary -> when(state.adaptation) {
+            Adaptive.Adaptation.PrimaryToTransient -> Adaptive.Transitions(
                 enter = EnterTransition.None,
                 exit = ExitTransition.None,
             )
+            else -> DefaultTransition
         }
-
-        Adaptive.Container.TransientPrimary,
-        null -> Adaptive.Transitions(
-            enter = EnterTransition.None,
-            exit = ExitTransition.None,
-        )
+        null -> NoTransition
     }
 }
+
+private val DefaultTransition = Adaptive.Transitions(
+    enter = fadeIn(
+        animationSpec = RouteTransitionAnimationSpec,
+        // This is needed because I can't exclude shared elements from transitions
+        // so to actually see them move, state fading in from 0.1f
+        initialAlpha = 0.1f
+    ),
+    exit = fadeOut(
+        animationSpec = RouteTransitionAnimationSpec
+    )
+)
+
+private val NoTransition = Adaptive.Transitions(
+    enter = EnterTransition.None,
+    exit = ExitTransition.None,
+)
 
 /**
  * [AppRoute] instances with no state holder
