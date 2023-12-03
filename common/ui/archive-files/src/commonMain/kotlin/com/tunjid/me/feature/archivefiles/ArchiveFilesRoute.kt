@@ -262,10 +262,33 @@ private fun ImageFile(
     fileItem: FileItem,
     actions: (Action) -> Unit,
 ) {
-    Box(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
+    val sharedElement = rememberSharedContent<String?>(
+        key = thumbnailSharedElementKey(fileItem.url)
+    ) { imageUrl, sharedElementModifier ->
+        val imagePainter = rememberAsyncRasterPainter(
+            imageUri = imageUrl,
+        )
+        if (imagePainter != null && fileItem is FileItem.File) Image(
+            painter = imagePainter,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = if (!dndEnabled) sharedElementModifier
+            else sharedElementModifier.dragSource(
+                dragShadowPainter = imagePainter,
+                uris = listOf(
+                    RemoteUri(
+                        path = fileItem.archiveFile.url,
+                        mimetype = fileItem.archiveFile.mimeType,
+                    )
+                )
+            )
+        )
+    }
+    sharedElement(
+        fileItem.url,
+        modifier
             .aspectRatio(1f)
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
             .clickable {
                 val archiveFile = when (fileItem) {
                     is FileItem.File -> fileItem.archiveFile
@@ -283,31 +306,7 @@ private fun ImageFile(
                     )
                 })
             }
-    ) {
-        val sharedElement = rememberSharedContent<String?>(
-            key = thumbnailSharedElementKey(fileItem.url)
-        ) { imageUrl, sharedElementModifier ->
-            val imagePainter = rememberAsyncRasterPainter(
-                imageUri = imageUrl,
-            )
-            if (imagePainter != null && fileItem is FileItem.File) Image(
-                painter = imagePainter,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = if (!dndEnabled) sharedElementModifier
-                else sharedElementModifier.dragSource(
-                    dragShadowPainter = imagePainter,
-                    uris = listOf(
-                        RemoteUri(
-                            path = fileItem.archiveFile.url,
-                            mimetype = fileItem.archiveFile.mimeType,
-                        )
-                    )
-                )
-            )
-        }
-        sharedElement(fileItem.url, Modifier)
-    }
+    )
 }
 
 @Composable
