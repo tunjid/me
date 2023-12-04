@@ -78,7 +78,11 @@ private fun adaptiveNavigationStateMutations(
         listOf(it.backStatus, it.windowSizeClass, it.routeContainerState)
     },
 ) { (navId, multiStackNav), uiState ->
-    routeParser.adaptiveNavigationState(multiStackNav, uiState, navId)
+    routeParser.adaptiveNavigationState(
+        multiStackNav = multiStackNav,
+        uiState = uiState,
+        navId = navId
+    )
 }
     .distinctUntilChanged()
     .scan(
