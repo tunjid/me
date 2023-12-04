@@ -195,11 +195,18 @@ private fun adaptTo(
                 }
                 updatedRouteIdsToAdaptiveSlots[currentRoute.id] = slot
             }
+            while (updatedRouteIdsToAdaptiveSlots.size < Adaptive.Slot.entries.size) {
+                val unUsedSlot = Adaptive.Slot.entries.first { slot ->
+                    !updatedRouteIdsToAdaptiveSlots.containsValue(slot)
+                }
+                updatedRouteIdsToAdaptiveSlots[unUsedSlot.name] = unUsedSlot
+            }
             new.copy(
                 adaptation = newAdaptation,
-                previousContainersToRoutes = Adaptive.Container.entries.associateWith(old::routeFor),
-                // Keep old routeIdsToSlots in the new map for future changes
-                routeIdsToAdaptiveSlots = old.routeIdsToAdaptiveSlots + updatedRouteIdsToAdaptiveSlots
+                previousContainersToRoutes = Adaptive.Container.entries.associateWith(
+                    valueSelector = old::routeFor
+                ),
+                routeIdsToAdaptiveSlots = updatedRouteIdsToAdaptiveSlots
             )
         }
 
@@ -250,7 +257,7 @@ private fun adaptTo(
                         ?: throw IllegalArgumentException("Attempted move from a null slot")
 
                     val freeSlots = Adaptive.Slot.entries
-                        .filterNot { swappedSlot == it }
+                        .filterNot(swappedSlot::equals)
                         .toMutableList()
 
                     new.copy(
