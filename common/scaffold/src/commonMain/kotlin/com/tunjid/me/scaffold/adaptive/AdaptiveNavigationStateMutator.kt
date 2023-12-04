@@ -82,15 +82,14 @@ private fun adaptiveNavigationStateMutations(
 }
     .distinctUntilChanged()
     .scan(
-        initial = adaptTo(
-            old = Adaptive.NavigationState.Initial,
+        initial = Adaptive.NavigationState.Initial.adaptTo(
             new = routeParser.adaptiveNavigationState(
                 multiStackNav = navStateFlow.value,
                 uiState = uiStateFlow.value,
                 navId = -1,
             )
         ),
-        operation = ::adaptTo
+        operation = Adaptive.NavigationState::adaptTo
     )
     .mapToMutation { newState ->
         // Replace the entire state except the knowledge of routes animating in and out
@@ -154,10 +153,10 @@ private fun RouteParser<AppRoute>.adaptiveNavigationState(
  * A method that adapts changes in navigation to different containers while allowing for them
  * to be animated easily.
  */
-private fun adaptTo(
-    old: Adaptive.NavigationState,
+private fun Adaptive.NavigationState.adaptTo(
     new: Adaptive.NavigationState,
 ): Adaptive.NavigationState {
+    val old = this
     val newAdaptation = when (new.adaptation) {
         // Moved from primary container to transient, keep as is
         PrimaryToTransient -> new.adaptation
