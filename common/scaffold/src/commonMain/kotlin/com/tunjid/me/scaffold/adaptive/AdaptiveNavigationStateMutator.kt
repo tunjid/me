@@ -78,14 +78,40 @@ private fun adaptiveNavigationStateMutations(
         listOf(it.backStatus, it.windowSizeClass, it.routeContainerState)
     },
 ) { (navId, multiStackNav), uiState ->
+    routeParser.adaptiveNavigationState(multiStackNav, uiState, navId)
+}
+    .distinctUntilChanged()
+    .scan(
+        initial = adaptTo(
+            old = Adaptive.NavigationState.Initial,
+            new = routeParser.adaptiveNavigationState(
+                multiStackNav = navStateFlow.value,
+                uiState = uiStateFlow.value,
+                navId = -1,
+            )
+        ),
+        operation = ::adaptTo
+    )
+    .mapToMutation { newState ->
+        // Replace the entire state except the knowledge of routes animating in and out
+        newState.copy(routeIdsAnimatingOut = routeIdsAnimatingOut)
+    }
+
+private fun RouteParser<AppRoute>.adaptiveNavigationState(
+    multiStackNav: MultiStackNav,
+    uiState: UiState,
+    navId: Int
+): Adaptive.NavigationState {
     // If there is a back preview in progress, show the back primary route in the
     // primary container
     val primaryRoute = multiStackNav.primaryRouteOnBackPress.takeIf {
         uiState.backStatus.previewState == BackStatus.PreviewState.Previewing
     } ?: multiStackNav.primaryRoute
-    val secondaryRoute = primaryRoute.secondaryRoute?.let(routeParser::parse)
 
-    Adaptive.NavigationState(
+    // Parse the secondary route from the primary route
+    val secondaryRoute = primaryRoute.secondaryRoute?.let(this::parse)
+
+    return Adaptive.NavigationState(
         navId = navId,
         containersToRoutes = mapOf(
             Primary to primaryRoute,
@@ -93,7 +119,7 @@ private fun adaptiveNavigationStateMutations(
                 route?.id != primaryRoute.id
                         && uiState.windowSizeClass > WindowSizeClass.COMPACT
             },
-            Adaptive.Container.TransientPrimary to multiStackNav.primaryRoute.takeIf { route ->
+            TransientPrimary to multiStackNav.primaryRoute.takeIf { route ->
                 uiState.backStatus.previewState == BackStatus.PreviewState.Previewing
                         && route.id != primaryRoute.id
                         && route.id != secondaryRoute?.id
@@ -103,7 +129,7 @@ private fun adaptiveNavigationStateMutations(
         adaptation = when (uiState.backStatus.previewState) {
             BackStatus.PreviewState.Previewing -> Adaptive.Adaptation.Swap(
                 from = Primary,
-                to = Adaptive.Container.TransientPrimary,
+                to = TransientPrimary,
             )
 
             // Tentative, decide downstream
@@ -123,15 +149,6 @@ private fun adaptiveNavigationStateMutations(
         routeContainerPositionalState = uiState.routeContainerState,
     )
 }
-    .distinctUntilChanged()
-    .scan(
-        initial = Adaptive.NavigationState.Initial,
-        operation = ::adaptTo
-    )
-    .mapToMutation { newState ->
-        // Replace the entire state except the knowledge of routes animating in and out
-        newState.copy(routeIdsAnimatingOut = routeIdsAnimatingOut)
-    }
 
 /**
  * A method that adapts changes in navigation to different containers while allowing for them
