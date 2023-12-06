@@ -29,6 +29,7 @@ fun GlobalUi() {
     ScreenUiState(
         UiState(
             toolbarShows = false,
+            toolbarOverlaps = true,
             fabShows = false,
             fabExtended = false,
             navVisibility = NavVisibility.Gone,

@@ -138,9 +138,7 @@ internal fun ArchiveGalleryScreen(
 
         sharedElement(
             file.url,
-            Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
+            Modifier.fillMaxSize()
         )
     }
 
