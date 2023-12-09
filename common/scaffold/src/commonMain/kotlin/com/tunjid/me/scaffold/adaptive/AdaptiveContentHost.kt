@@ -133,6 +133,7 @@ internal class SavedStateAdaptiveContentHost(
     ): @Composable (T, Modifier) -> Unit {
         val sharedElementData = keysToSharedElements.getOrPut(key) {
             SharedElementData(
+                key = key,
                 sharedElement = sharedElement,
                 onRemoved = { keysToSharedElements.remove(key) }
             )

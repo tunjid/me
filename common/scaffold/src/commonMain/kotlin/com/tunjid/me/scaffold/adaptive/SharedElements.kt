@@ -33,6 +33,7 @@ fun thumbnailSharedElementKey(
 
 @Stable
 internal class SharedElementData<T>(
+    private val  key: Any,
     sharedElement: @Composable (T, Modifier) -> Unit,
     onRemoved: () -> Unit
 ) {
@@ -56,7 +57,9 @@ internal class SharedElementData<T>(
                 state as T,
                 Modifier
                     .sharedElement(
-                        enabled = LocalAdaptiveContentScope.current?.canAnimateSharedElements == true,
+                        enabled = LocalAdaptiveContentScope.current.let {
+                            it?.canAnimateSharedElements == true && it.isCurrentlyShared(key)
+                        },
                         sharedElementData = this,
                     ) then modifier,
             )

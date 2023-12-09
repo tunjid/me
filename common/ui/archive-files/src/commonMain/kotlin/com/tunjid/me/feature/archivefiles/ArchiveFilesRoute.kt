@@ -193,14 +193,14 @@ private fun FilesGrid(
             itemContent = { fileItem ->
                 when (fileType) {
                     FileType.Image -> ImageFile(
-                        modifier = Modifier.animateItemPlacement(),
+                        modifier = Modifier,
                         dndEnabled = dndEnabled,
                         fileItem = fileItem,
                         actions = actions
                     )
 
                     FileType.Misc -> TextFile(
-                        modifier = Modifier.animateItemPlacement(),
+                        modifier = Modifier,
                         fileItem = fileItem
                     )
                 }
