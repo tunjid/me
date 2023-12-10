@@ -18,9 +18,11 @@ package com.tunjid.me.scaffold.scaffold
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -358,18 +360,27 @@ private fun routeContainerPadding(
         state.navBarSize.toDp()
     } countIf state.insetDescriptor.hasBottomInset
 
-    val bottomClearance by animateDpAsState(targetValue = insetClearance + navBarClearance)
+    val bottomClearance by animateDpAsState(
+        targetValue = insetClearance + navBarClearance,
+        animationSpec = ContainerSizeSpring
+    )
 
     val statusBarSize = with(LocalDensity.current) {
         state.statusBarSize.toDp()
     } countIf state.insetDescriptor.hasTopInset
 
     val toolbarHeight = state.windowSizeClass.toolbarSize() countIf !state.toolbarOverlaps
-    val topClearance by animateDpAsState(targetValue = statusBarSize + toolbarHeight)
+    val topClearance by animateDpAsState(
+        targetValue = statusBarSize + toolbarHeight,
+        animationSpec = ContainerSizeSpring
+    )
 
     val navRailSize = state.windowSizeClass.navRailWidth() countIf state.navRailVisible
 
-    val startClearance by animateDpAsState(targetValue = navRailSize)
+    val startClearance by animateDpAsState(
+        targetValue = navRailSize,
+        animationSpec = ContainerSizeSpring
+    )
 
     paddingValues[0] = startClearance
     paddingValues[1] = topClearance
@@ -409,6 +420,11 @@ private val DraggableDividerSizeDp = 48.dp
 private val MinPaneWidth = 120.dp
 
 private val ContentSizeSpring = adaptiveSpringSpec(
+    visibilityThreshold = Dp.VisibilityThreshold
+)
+
+private val ContainerSizeSpring = spring(
+    stiffness = Spring.StiffnessHigh,
     visibilityThreshold = Dp.VisibilityThreshold
 )
 
