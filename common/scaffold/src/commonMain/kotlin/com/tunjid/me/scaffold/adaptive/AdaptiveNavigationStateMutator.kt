@@ -274,6 +274,7 @@ private fun Adaptive.NavigationState.adaptTo(
                 else -> {
                     val swappedRoute = old.routeFor(newAdaptation.from)
                     val swappedSlot = old.slotFor(newAdaptation.from)
+                        ?: Adaptive.Slot.entries.firstOrNull { old.routeFor(it) == null }
                         ?: throw IllegalArgumentException("Attempted move from a null slot")
 
                     val freeSlots = Adaptive.Slot.entries
