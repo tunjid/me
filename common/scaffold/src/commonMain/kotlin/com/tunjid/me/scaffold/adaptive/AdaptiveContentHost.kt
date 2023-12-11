@@ -78,9 +78,7 @@ internal fun SavedStateAdaptiveContentHost(
         }
 
         LaunchedEffect(adaptiveContentHost) {
-            adaptiveContentHost.state.collect(
-                adaptiveContentHost::adaptedState::set
-            )
+            adaptiveContentHost.update()
         }
 
         adaptiveContentHost.content()
@@ -89,7 +87,7 @@ internal fun SavedStateAdaptiveContentHost(
 }
 
 @Stable
-internal class SavedStateAdaptiveContentHost(
+private class SavedStateAdaptiveContentHost(
     routeParser: RouteParser<AppRoute>,
     navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>,
@@ -105,6 +103,7 @@ internal class SavedStateAdaptiveContentHost(
     ) {
 
     override var adaptedState by mutableStateOf(Adaptive.NavigationState.Initial)
+        private set
 
     private val slotsToRoutes =
         mutableStateMapOf<Adaptive.Slot?, @Composable () -> Unit>().also { map ->
@@ -141,6 +140,8 @@ internal class SavedStateAdaptiveContentHost(
         // Can't really guarantee that the caller will use the same key for the right type
         return sharedElementData.moveableSharedElement
     }
+
+    suspend fun update(): Unit = state.collect(::adaptedState::set)
 }
 
 /**
