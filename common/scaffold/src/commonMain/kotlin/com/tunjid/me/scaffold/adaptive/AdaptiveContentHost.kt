@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.backPreviewModifier
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.RouteParser
@@ -59,7 +59,7 @@ internal interface AdaptiveContentHost {
 
 @Composable
 internal fun SavedStateAdaptiveContentHost(
-    routeParser: RouteParser<AppRoute>,
+    routeParser: RouteParser<AdaptiveRoute>,
     navState: StateFlow<MultiStackNav>,
     uiState: StateFlow<UiState>,
     content: @Composable AdaptiveContentHost.() -> Unit
@@ -88,7 +88,7 @@ internal fun SavedStateAdaptiveContentHost(
 
 @Stable
 private class SavedStateAdaptiveContentHost(
-    routeParser: RouteParser<AppRoute>,
+    routeParser: RouteParser<AdaptiveRoute>,
     navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>,
     coroutineScope: CoroutineScope,

@@ -32,14 +32,14 @@ import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class SignInRoute(
     override val routeParams: SerializedRouteParams,
-) : AppRoute {
+) : AdaptiveRoute {
     @Composable
     override fun content() {
         SignInScreen(

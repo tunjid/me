@@ -49,13 +49,13 @@ fun MultiStackNav.navItemSelected(item: NavItem) =
 /**
  * Route diff between consecutive emissions of [MultiStackNav]
  */
-fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AppRoute>> =
+fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AdaptiveRoute>> =
     distinctUntilChanged()
         .scan(initial = EmptyNavigationState to EmptyNavigationState) { navPair, newNav ->
             navPair.copy(first = navPair.second, second = newNav)
         }
         .map { (prevNav: MultiStackNav, currentNav: MultiStackNav) ->
-            (prevNav - currentNav).filterIsInstance<AppRoute>()
+            (prevNav - currentNav).filterIsInstance<AdaptiveRoute>()
         }
 
 private fun MultiStackNav.popToRoot(indexToPop: Int) = copy(

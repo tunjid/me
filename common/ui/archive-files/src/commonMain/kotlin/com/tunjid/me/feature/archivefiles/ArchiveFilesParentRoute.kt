@@ -47,7 +47,7 @@ import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.navigation.StatelessRoute
 import com.tunjid.treenav.Node
@@ -57,7 +57,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ArchiveFilesParentRoute(
     override val routeParams: SerializedRouteParams,
-) : AppRoute, StatelessRoute {
+) : AdaptiveRoute, StatelessRoute {
 
     private val archiveId get() = ArchiveId(routeParams.pathArgs["id"] ?: "")
     private val kind

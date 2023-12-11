@@ -67,7 +67,7 @@ import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.ExternalRoute
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
@@ -81,7 +81,7 @@ private const val BODY_INDEX = 11
 @Serializable
 data class ArchiveEditRoute(
     override val routeParams: SerializedRouteParams,
-) : AppRoute {
+) : AdaptiveRoute {
 
     override val id: String get() = routeParams.route.split("?").first()
 

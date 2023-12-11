@@ -46,7 +46,7 @@ import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import kotlinx.serialization.Serializable
@@ -54,7 +54,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ProfileRoute(
     override val routeParams: SerializedRouteParams,
-) : AppRoute {
+) : AdaptiveRoute {
     @Composable
     override fun content() {
         ProfileScreen(

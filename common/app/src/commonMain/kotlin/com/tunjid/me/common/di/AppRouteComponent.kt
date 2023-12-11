@@ -27,7 +27,7 @@ import com.tunjid.me.feature.archivefiles.di.ArchiveFilesNavigationComponent
 import com.tunjid.me.feature.archivelist.di.ArchiveListNavigationComponent
 import com.tunjid.me.profile.di.ProfileNavigationComponent
 import com.tunjid.me.scaffold.di.SavedStateType
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.me.settings.di.SettingsNavigationComponent
 import com.tunjid.me.signin.di.SignInNavigationComponent
 import com.tunjid.treenav.strings.UrlRouteMatcher
@@ -49,7 +49,7 @@ abstract class AppRouteComponent(
     @Component val settingsNavigationComponent: SettingsNavigationComponent,
     @Component val signInNavigationComponent: SignInNavigationComponent,
 ) {
-    internal abstract val routeMatcherMap: Map<String, UrlRouteMatcher<AppRoute>>
+    internal abstract val routeMatcherMap: Map<String, UrlRouteMatcher<AdaptiveRoute>>
 
     abstract val allScreenStatePolymorphic: Set<SavedStateType>
 
@@ -71,10 +71,10 @@ val AppRouteComponent.allRouteMatchers
     get() = routeMatcherMap
         .toList()
         .sortedWith(routeMatchingComparator())
-        .map(Pair<String, UrlRouteMatcher<AppRoute>>::second)
+        .map(Pair<String, UrlRouteMatcher<AdaptiveRoute>>::second)
 
 private fun routeMatchingComparator() =
-    compareBy<Pair<String, UrlRouteMatcher<AppRoute>>>(
+    compareBy<Pair<String, UrlRouteMatcher<AdaptiveRoute>>>(
         // Order by number of path segments firs
         { (key) -> key.split("/").size },
         // Match more specific segments first, route params should be matched later

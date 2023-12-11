@@ -26,7 +26,7 @@ import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.treenav.strings.UrlRouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
@@ -45,7 +45,7 @@ abstract class ArchiveDetailNavigationComponent {
 
     @IntoMap
     @Provides
-    fun archiveDetailRouteParser(): Pair<String, UrlRouteMatcher<AppRoute>> =
+    fun archiveDetailRouteParser(): Pair<String, UrlRouteMatcher<AdaptiveRoute>> =
         routeAndMatcher(
             routePattern = "archives/{kind}/{id}",
             routeMapper = ::ArchiveDetailRoute

@@ -8,7 +8,7 @@ import com.tunjid.me.scaffold.globalui.BackStatus
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.UnknownRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
@@ -38,7 +38,7 @@ internal sealed class Action {
 }
 
 internal fun CoroutineScope.adaptiveNavigationStateMutator(
-    routeParser: RouteParser<AppRoute>,
+    routeParser: RouteParser<AdaptiveRoute>,
     navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>,
 ) = actionStateFlowProducer<Action, Adaptive.NavigationState>(
@@ -69,7 +69,7 @@ internal fun CoroutineScope.adaptiveNavigationStateMutator(
  * UI window configuration.
  */
 private fun adaptiveNavigationStateMutations(
-    routeParser: RouteParser<AppRoute>,
+    routeParser: RouteParser<AdaptiveRoute>,
     navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>
 ): Flow<Mutation<Adaptive.NavigationState>> = combine(
@@ -100,7 +100,7 @@ private fun adaptiveNavigationStateMutations(
         newState.copy(routeIdsAnimatingOut = routeIdsAnimatingOut)
     }
 
-private fun RouteParser<AppRoute>.adaptiveNavigationState(
+private fun RouteParser<AdaptiveRoute>.adaptiveNavigationState(
     multiStackNav: MultiStackNav,
     uiState: UiState,
     navId: Int
@@ -336,12 +336,12 @@ private fun Adaptive.NavigationState.prune(): Adaptive.NavigationState = copy(
     }
 )
 
-private val AdaptiveRouteInContainerLookups: List<Adaptive.NavigationState.() -> AppRoute?> =
+private val AdaptiveRouteInContainerLookups: List<Adaptive.NavigationState.() -> AdaptiveRoute?> =
     Adaptive.Container.entries.map { container ->
         { routeFor(container) }
     }
 
 
-private val MultiStackNav.primaryRoute: AppRoute get() = current as? AppRoute ?: UnknownRoute()
+private val MultiStackNav.primaryRoute: AdaptiveRoute get() = current as? AdaptiveRoute ?: UnknownRoute()
 
-private val MultiStackNav.primaryRouteOnBackPress: AppRoute? get() = pop().current as? AppRoute
+private val MultiStackNav.primaryRouteOnBackPress: AdaptiveRoute? get() = pop().current as? AdaptiveRoute

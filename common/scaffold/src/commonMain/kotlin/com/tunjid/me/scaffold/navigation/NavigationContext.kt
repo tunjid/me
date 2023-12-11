@@ -25,15 +25,15 @@ import com.tunjid.treenav.strings.RouteParser
  */
 interface NavigationContext {
     val navState: MultiStackNav
-    val String.toRoute: AppRoute
+    val String.toRoute: AdaptiveRoute
 }
 
 internal class ImmutableNavigationContext(
     private val state: MultiStackNav,
-    private val routeParser: RouteParser<AppRoute>
+    private val routeParser: RouteParser<AdaptiveRoute>
 ) : NavigationContext {
     override val navState: MultiStackNav get() = state
 
-    override val String.toRoute: AppRoute
+    override val String.toRoute: AdaptiveRoute
         get() = routeParser.parse(this) ?: UnknownRoute()
 }

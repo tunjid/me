@@ -26,7 +26,7 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.lifecycle.ActualLifecycleStateHolder
 import com.tunjid.me.scaffold.lifecycle.Lifecycle
 import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.navigation.PersistedNavigationStateHolder
@@ -50,11 +50,11 @@ import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 import okio.Path
 
-interface ScreenStateHolderCreator : (CoroutineScope, ByteArray?, AppRoute) -> Any
+interface ScreenStateHolderCreator : (CoroutineScope, ByteArray?, AdaptiveRoute) -> Any
 
-inline fun <reified Route : AppRoute> ((CoroutineScope, ByteArray?, Route) -> Any).downcast(): ScreenStateHolderCreator =
+inline fun <reified Route : AdaptiveRoute> ((CoroutineScope, ByteArray?, Route) -> Any).downcast(): ScreenStateHolderCreator =
     object : ScreenStateHolderCreator {
-        override fun invoke(scope: CoroutineScope, savedState: ByteArray?, route: AppRoute): Any =
+        override fun invoke(scope: CoroutineScope, savedState: ByteArray?, route: AdaptiveRoute): Any =
             this@downcast(
                 scope,
                 savedState,
@@ -62,7 +62,7 @@ inline fun <reified Route : AppRoute> ((CoroutineScope, ByteArray?, Route) -> An
             )
     }
 
-typealias SavedStateCache = (AppRoute) -> ByteArray?
+typealias SavedStateCache = (AdaptiveRoute) -> ByteArray?
 
 fun <T : Route> routeAndMatcher(
     routePattern: String,
@@ -84,7 +84,7 @@ data class SavedStateType(
 class ScaffoldModule(
     val appScope: CoroutineScope,
     val savedStatePath: Path,
-    val routeMatchers: List<UrlRouteMatcher<AppRoute>>,
+    val routeMatchers: List<UrlRouteMatcher<AdaptiveRoute>>,
     val permissionsProvider: PermissionsProvider,
     val byteSerializer: ByteSerializer,
 )
@@ -119,7 +119,7 @@ abstract class InjectedScaffoldComponent(
 
     @SingletonScope
     @Provides
-    fun routeParser(): RouteParser<AppRoute> =
+    fun routeParser(): RouteParser<AdaptiveRoute> =
         routeParserFrom(*(module.routeMatchers).toTypedArray())
 
     @SingletonScope

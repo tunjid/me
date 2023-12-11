@@ -62,7 +62,7 @@ import com.tunjid.me.scaffold.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
@@ -88,7 +88,7 @@ enum class FileType(
 @Serializable
 data class ArchiveFilesRoute(
     override val routeParams: SerializedRouteParams,
-) : AppRoute {
+) : AdaptiveRoute {
 
     val archiveId get() = ArchiveId(routeParams.pathArgs["id"] ?: "")
     val kind

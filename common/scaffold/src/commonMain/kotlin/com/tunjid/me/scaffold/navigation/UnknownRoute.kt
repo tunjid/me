@@ -65,7 +65,7 @@ private object RouteParamsSerializer : KSerializer<RouteParams> {
 }
 
 @Serializable
-data class UnknownRoute(val path: String = "404") : AppRoute, StatelessRoute {
+data class UnknownRoute(val path: String = "404") : AdaptiveRoute, StatelessRoute {
     override val routeParams: RouteParams get() = RouteParams(
         route = path,
         pathArgs = emptyMap(),

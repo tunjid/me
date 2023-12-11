@@ -17,7 +17,7 @@
 package com.tunjid.me.scaffold
 
 import androidx.compose.animation.core.spring
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.treenav.MultiStackNav
@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.map
  * Updates [State] with whether it is the primary navigation container
  */
 fun <State> StateFlow<MultiStackNav>.isInPrimaryNavMutations(
-    route: AppRoute,
+    route: AdaptiveRoute,
     mutation: State.(Boolean) -> State,
 ): Flow<Mutation<State>> =
     map { route.id == it.current?.id }

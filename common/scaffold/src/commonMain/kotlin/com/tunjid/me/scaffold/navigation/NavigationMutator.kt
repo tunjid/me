@@ -16,15 +16,8 @@
 
 package com.tunjid.me.scaffold.navigation
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.tunjid.me.scaffold.adaptive.Adaptive
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.ActionStateProducer
@@ -58,16 +51,12 @@ interface NavigationAction {
     val navigationMutation: NavigationMutation
 }
 
-private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(
-    durationMillis = 700
-)
-
 /**
  * A route that has a id for a [Route] defined in another module
  */
 data class ExternalRoute(
     val path: String,
-) : AppRoute, StatelessRoute {
+) : AdaptiveRoute, StatelessRoute {
 
     override val routeParams: RouteParams = RouteParams(
         route = path,
@@ -80,64 +69,10 @@ data class ExternalRoute(
     override fun content() = Unit
 }
 
-interface AppRoute : Route {
-
-    override val id get() = routeParams.route.split("?").first()
-
-    @Composable
-    fun content()
-
-    /**
-     * Defines what route to show in the secondary panel alongside this route
-     */
-    val secondaryRoute: String?
-        get() = null
-
-    fun transitionsFor(
-        state: Adaptive.ContainerState
-    ): Adaptive.Transitions = when (state.container) {
-        Adaptive.Container.Primary,
-        Adaptive.Container.Secondary -> when (state.adaptation) {
-            Adaptive.Adaptation.PrimaryToSecondary,
-            Adaptive.Adaptation.SecondaryToPrimary -> NoTransition
-            else -> DefaultTransition
-        }
-
-        Adaptive.Container.TransientPrimary -> when(state.adaptation) {
-            Adaptive.Adaptation.PrimaryToTransient -> when (state.container) {
-                Adaptive.Container.Secondary -> DefaultTransition
-                else -> Adaptive.Transitions(
-                    enter = EnterTransition.None,
-                    exit = ExitTransition.None,
-                )
-            }
-            else -> DefaultTransition
-        }
-        null -> NoTransition
-    }
-}
-
-private val DefaultTransition = Adaptive.Transitions(
-    enter = fadeIn(
-        animationSpec = RouteTransitionAnimationSpec,
-        // This is needed because I can't exclude shared elements from transitions
-        // so to actually see them move, state fading in from 0.1f
-        initialAlpha = 0.1f
-    ),
-    exit = fadeOut(
-        animationSpec = RouteTransitionAnimationSpec
-    )
-)
-
-private val NoTransition = Adaptive.Transitions(
-    enter = EnterTransition.None,
-    exit = ExitTransition.None,
-)
-
 /**
- * [AppRoute] instances with no state holder
+ * [AdaptiveRoute] instances with no state holder
  */
-interface StatelessRoute : AppRoute
+interface StatelessRoute : AdaptiveRoute
 
 data class NavItem(
     val name: String,
@@ -160,7 +95,7 @@ private val EmptyNavigationState = MultiStackNav(
 class PersistedNavigationStateHolder(
     appScope: CoroutineScope,
     savedStateRepository: SavedStateRepository,
-    routeParser: RouteParser<AppRoute>,
+    routeParser: RouteParser<AdaptiveRoute>,
 ) : NavigationStateHolder by appScope.actionStateFlowProducer(
     initialState = EmptyNavigationState,
     started = SharingStarted.Eagerly,
@@ -197,7 +132,7 @@ fun <Action : NavigationAction, State> Flow<Action>.consumeNavigationActions(
     emptyFlow<Mutation<State>>()
 }
 
-private fun RouteParser<AppRoute>.parseMultiStackNav(savedState: SavedState) =
+private fun RouteParser<AdaptiveRoute>.parseMultiStackNav(savedState: SavedState) =
     savedState.navigation
         .fold(
             initial = MultiStackNav(name = "AppNav"),

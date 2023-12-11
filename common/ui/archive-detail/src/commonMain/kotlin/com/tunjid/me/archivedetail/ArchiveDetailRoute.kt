@@ -48,12 +48,11 @@ import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.ExternalRoute
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.treenav.Node
 import com.tunjid.treenav.pop
-import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.Serializable
 
 private const val BODY_KEY = 3
@@ -61,7 +60,7 @@ private const val BODY_KEY = 3
 @Serializable
 data class ArchiveDetailRoute(
     override val routeParams: SerializedRouteParams,
-) : AppRoute {
+) : AdaptiveRoute {
 
     val archiveId: ArchiveId? = routeParams.pathArgs["id"]?.let(::ArchiveId)
 

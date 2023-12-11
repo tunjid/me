@@ -50,14 +50,14 @@ class PersistedMeApp(
     navStateStream: StateFlow<MultiStackNav>,
     savedStateRepository: SavedStateRepository,
     sync: Sync,
-    override val routeParser: RouteParser<AppRoute>,
+    override val routeParser: RouteParser<AdaptiveRoute>,
     override val navStateHolder: NavigationStateHolder,
     override val globalUiStateHolder: GlobalUiStateHolder,
     override val lifecycleStateHolder: LifecycleStateHolder,
     private val savedStateCache: SavedStateCache,
     private val allScreenStateHolders: Map<String, ScreenStateHolderCreator>,
 ) : MeApp {
-    private val routeStateHolderCache = mutableMapOf<AppRoute, ScopeHolder>()
+    private val routeStateHolderCache = mutableMapOf<AdaptiveRoute, ScopeHolder>()
 
     init {
         navStateStream
@@ -97,7 +97,7 @@ class PersistedMeApp(
 
     override val screenStateHolderCache: ScreenStateHolderCache = object : ScreenStateHolderCache {
         @Suppress("UNCHECKED_CAST")
-        override fun <T> screenStateHolderFor(route: AppRoute): T =
+        override fun <T> screenStateHolderFor(route: AdaptiveRoute): T =
             routeStateHolderCache.getOrPut(route) {
                 val routeScope = CoroutineScope(
                     SupervisorJob() + Dispatchers.Main.immediate
@@ -124,14 +124,14 @@ class PersistedMeApp(
         navigation = stacks.fold(listOf()) { listOfLists, stackNav ->
             listOfLists.plus(
                 element = stackNav.children
-                    .filterIsInstance<AppRoute>()
+                    .filterIsInstance<AdaptiveRoute>()
                     .fold(listOf()) { stackList, route ->
                         stackList + route.id
                     }
             )
         },
         routeStates = flatten(order = Order.BreadthFirst)
-            .filterIsInstance<AppRoute>()
+            .filterIsInstance<AdaptiveRoute>()
             .fold(mutableMapOf()) { map, route ->
                 val stateHolder = screenStateHolderCache.screenStateHolderFor<Any>(route)
                 val state = (stateHolder as? ActionStateProducer<*, *>)?.state ?: return@fold map

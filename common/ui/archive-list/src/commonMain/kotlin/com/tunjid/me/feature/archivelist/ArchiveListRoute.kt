@@ -47,7 +47,7 @@ import com.tunjid.me.core.ui.scrollbar.scrollbarState
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.lifecycle.component1
 import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.navigation.AppRoute
+import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.tiler.TiledList
@@ -59,7 +59,7 @@ import kotlin.math.abs
 @Serializable
 data class ArchiveListRoute(
     override val routeParams: SerializedRouteParams,
-) : AppRoute {
+) : AdaptiveRoute {
 
     val kind = ArchiveKind.entries.firstOrNull { it.type == routeParams.pathArgs["kind"] }
         ?: ArchiveKind.Articles
