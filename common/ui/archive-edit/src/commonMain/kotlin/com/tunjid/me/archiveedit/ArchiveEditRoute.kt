@@ -112,9 +112,8 @@ data class ArchiveEditRoute(
         )
     }
 
-
     override val secondaryRoute
-        get() = children.firstOrNull()?.id
+        get() = children.filterIsInstance<ExternalRoute>().firstOrNull()
 }
 
 @Composable

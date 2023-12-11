@@ -112,7 +112,7 @@ private fun RouteParser<AdaptiveRoute>.adaptiveNavigationState(
     } ?: multiStackNav.primaryRoute
 
     // Parse the secondary route from the primary route
-    val secondaryRoute = primaryRoute.secondaryRoute?.let(this::parse)
+    val secondaryRoute = primaryRoute.secondaryRoute?.id?.let(this::parse)
 
     return Adaptive.NavigationState(
         navId = navId,

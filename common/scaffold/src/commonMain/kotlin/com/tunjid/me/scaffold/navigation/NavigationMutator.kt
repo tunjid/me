@@ -16,7 +16,6 @@
 
 package com.tunjid.me.scaffold.navigation
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
@@ -26,8 +25,6 @@ import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.mutation
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.StackNav
-import com.tunjid.treenav.strings.Route
-import com.tunjid.treenav.strings.RouteParams
 import com.tunjid.treenav.strings.RouteParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -50,29 +47,6 @@ typealias NavigationMutation = NavigationContext.() -> MultiStackNav
 interface NavigationAction {
     val navigationMutation: NavigationMutation
 }
-
-/**
- * A route that has a id for a [Route] defined in another module
- */
-data class ExternalRoute(
-    val path: String,
-) : AdaptiveRoute, StatelessRoute {
-
-    override val routeParams: RouteParams = RouteParams(
-        route = path,
-        pathArgs = emptyMap(),
-        queryParams = emptyMap(),
-    )
-
-    // Does not render, just used during traversal to find secondary routes associated with a route
-    @Composable
-    override fun content() = Unit
-}
-
-/**
- * [AdaptiveRoute] instances with no state holder
- */
-interface StatelessRoute : AdaptiveRoute
 
 data class NavItem(
     val name: String,

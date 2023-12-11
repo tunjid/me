@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import com.tunjid.me.scaffold.adaptive.Adaptive
 import com.tunjid.treenav.strings.Route
+import com.tunjid.treenav.strings.RouteParams
 
 /**
  * Route implementation with adaptive semantics
@@ -23,7 +24,7 @@ interface AdaptiveRoute : Route {
     /**
      * Defines what route to show in the secondary panel alongside this route
      */
-    val secondaryRoute: String?
+    val secondaryRoute: ExternalRoute?
         get() = null
 
     fun transitionsFor(
@@ -33,10 +34,11 @@ interface AdaptiveRoute : Route {
         Adaptive.Container.Secondary -> when (state.adaptation) {
             Adaptive.Adaptation.PrimaryToSecondary,
             Adaptive.Adaptation.SecondaryToPrimary -> NoTransition
+
             else -> DefaultTransition
         }
 
-        Adaptive.Container.TransientPrimary -> when(state.adaptation) {
+        Adaptive.Container.TransientPrimary -> when (state.adaptation) {
             Adaptive.Adaptation.PrimaryToTransient -> when (state.container) {
                 Adaptive.Container.Secondary -> DefaultTransition
                 else -> Adaptive.Transitions(
@@ -44,10 +46,37 @@ interface AdaptiveRoute : Route {
                     exit = ExitTransition.None,
                 )
             }
+
             else -> DefaultTransition
         }
+
         null -> NoTransition
     }
+}
+
+/**
+ * [AdaptiveRoute] instances with no state holder
+ */
+interface StatelessRoute : AdaptiveRoute
+
+
+/**
+ * A route that has a id for a [Route] defined in another module
+ */
+@JvmInline
+value class ExternalRoute(
+    val path: String,
+) : AdaptiveRoute, StatelessRoute {
+    override val routeParams: RouteParams
+        get() = RouteParams(
+            route = path,
+            pathArgs = emptyMap(),
+            queryParams = emptyMap(),
+        )
+
+    // Does not render, just used during traversal to find secondary routes associated with a route
+    @Composable
+    override fun content() = Unit
 }
 
 private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(
