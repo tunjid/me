@@ -224,19 +224,19 @@ private suspend fun Flow<Action.Fetch>.fetchMutations(
     stateHolder: SuspendingStateHolder<State>,
     repo: ArchiveRepository,
 ): Flow<Mutation<State>> {
-    val startingState = stateHolder.state()
+    val startingQuery = stateHolder.state().queryState.currentQuery
     return scan(
         initial = Triple(
-            startingState,
-            MutableStateFlow(startingState.queryState.currentQuery),
-            MutableStateFlow(2)
+            startingQuery,
+            MutableStateFlow(startingQuery),
+            MutableStateFlow(value = 2)
         )
     ) { accumulator, action ->
-        val (stateAtStart, queries, numColumns) = accumulator
+        val (queryAtStart, queries, numColumns) = accumulator
         when (action) {
             is Action.Fetch.LoadAround -> queries.value = queries.value.stabilizeQuery(
                 LoadReason.LoadMore(
-                    stateAtStart.queryState.currentQuery
+                    queryAtStart
                 )
             )
 
