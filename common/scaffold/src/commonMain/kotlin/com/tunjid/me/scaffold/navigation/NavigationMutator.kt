@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// See YouTrack: KTIJ-18375
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
 package com.tunjid.me.scaffold.navigation
 
 import androidx.compose.ui.graphics.vector.ImageVector

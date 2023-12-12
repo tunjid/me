@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+// See YouTrack: KTIJ-18375
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
 package com.tunjid.me.archivedetail
-
 
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.utilities.ByteSerializer

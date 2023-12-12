@@ -1,3 +1,5 @@
+// See YouTrack: KTIJ-18375
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
 package com.tunjid.me.scaffold.adaptive
 
 import com.tunjid.me.scaffold.adaptive.Adaptive.Adaptation.Companion.PrimaryToTransient
