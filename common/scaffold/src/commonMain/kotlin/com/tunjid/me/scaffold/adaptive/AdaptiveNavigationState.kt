@@ -106,7 +106,7 @@ object Adaptive {
         /**
          * Routes were changed in containers
          */
-        data class Change(val previewState: BackStatus.PreviewState) : Adaptation()
+        data object Change : Adaptation()
 
         /**
          * Routes were swapped in between containers
@@ -189,14 +189,14 @@ object Adaptive {
         companion object {
             internal val Initial = NavigationState(
                 navId = -1,
-                adaptation = Adaptation.Change(previewState = BackStatus.PreviewState.NoPreview),
+                adaptation = Adaptation.Change,
                 windowSizeClass = WindowSizeClass.COMPACT,
                 containersToRoutes = mapOf(Container.Primary to UnknownRoute(Slot.One.name)),
                 routeIdsToAdaptiveSlots = Slot.entries.associateBy(Slot::name),
                 backStackIds = emptySet(),
                 routeIdsAnimatingOut = emptySet(),
                 previousContainersToRoutes = emptyMap(),
-                routeContainerPositionalState = UiState().routeContainerState
+                routeContainerPositionalState = UiState().routeContainerState,
             )
         }
     }
