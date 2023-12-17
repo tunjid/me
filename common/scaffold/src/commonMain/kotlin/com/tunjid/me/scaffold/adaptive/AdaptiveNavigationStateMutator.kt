@@ -6,9 +6,9 @@ package com.tunjid.me.scaffold.adaptive
 import com.tunjid.me.scaffold.adaptive.Adaptive.Container.Primary
 import com.tunjid.me.scaffold.adaptive.Adaptive.Container.Secondary
 import com.tunjid.me.scaffold.adaptive.Adaptive.Container.TransientPrimary
-import com.tunjid.me.scaffold.globalui.BackStatus
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
+import com.tunjid.me.scaffold.globalui.isPreviewing
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.UnknownRoute
@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.scan
-import kotlinx.coroutines.flow.withIndex
 
 internal sealed class Action {
     data class RouteExitStart(val routeId: String) : Action()
@@ -75,24 +74,18 @@ private fun adaptiveNavigationStateMutations(
     navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>
 ): Flow<Mutation<Adaptive.NavigationState>> = combine(
-    flow = navStateFlow.withIndex(),
+    flow = navStateFlow,
     flow2 = uiStateFlow.distinctUntilChangedBy {
-        listOf(it.backStatus, it.windowSizeClass, it.routeContainerState)
+        listOf(it.backStatus.isPreviewing, it.routeContainerState)
     },
-) { (navId, multiStackNav), uiState ->
-    routeParser.adaptiveNavigationState(
-        multiStackNav = multiStackNav,
-        uiState = uiState,
-        navId = navId
-    )
-}
+    transform = routeParser::adaptiveNavigationState
+)
     .distinctUntilChanged()
     .scan(
         initial = Adaptive.NavigationState.Initial.adaptTo(
             new = routeParser.adaptiveNavigationState(
                 multiStackNav = navStateFlow.value,
                 uiState = uiStateFlow.value,
-                navId = -1,
             )
         ),
         operation = Adaptive.NavigationState::adaptTo
@@ -105,19 +98,17 @@ private fun adaptiveNavigationStateMutations(
 private fun RouteParser<AdaptiveRoute>.adaptiveNavigationState(
     multiStackNav: MultiStackNav,
     uiState: UiState,
-    navId: Int
 ): Adaptive.NavigationState {
     // If there is a back preview in progress, show the back primary route in the
     // primary container
     val primaryRoute = multiStackNav.primaryRouteOnBackPress.takeIf {
-        uiState.backStatus.previewState == BackStatus.PreviewState.Previewing
+        uiState.backStatus.isPreviewing
     } ?: multiStackNav.primaryRoute
 
     // Parse the secondary route from the primary route
     val secondaryRoute = primaryRoute.secondaryRoute?.id?.let(this::parse)
 
     return Adaptive.NavigationState(
-        navId = navId,
         containersToRoutes = mapOf(
             Primary to primaryRoute,
             Secondary to secondaryRoute.takeIf { route ->
@@ -125,21 +116,14 @@ private fun RouteParser<AdaptiveRoute>.adaptiveNavigationState(
                         && uiState.windowSizeClass > WindowSizeClass.COMPACT
             },
             TransientPrimary to multiStackNav.primaryRoute.takeIf { route ->
-                uiState.backStatus.previewState == BackStatus.PreviewState.Previewing
+                uiState.backStatus.isPreviewing
                         && route.id != primaryRoute.id
                         && route.id != secondaryRoute?.id
             },
         ),
         windowSizeClass = uiState.windowSizeClass,
-        adaptation = when (uiState.backStatus.previewState) {
-            BackStatus.PreviewState.Previewing -> Adaptive.Adaptation.Swap(
-                from = Primary,
-                to = TransientPrimary,
-            )
-
-            // Tentative, decide downstream
-            else -> Adaptive.Adaptation.Change
-        },
+        // Tentative, decide downstream
+        adaptation = Adaptive.Adaptation.Change,
         backStackIds = mutableSetOf<String>().apply {
             multiStackNav.traverse(Order.DepthFirst) { add(it.id) }
         },
@@ -199,7 +183,8 @@ private fun Adaptive.NavigationState.adaptTo(
 
     return new.copy(
         adaptation = swapAdaptations.firstOrNull { it.to != it.from }
-            ?: if (old.navId == new.navId) old.adaptation else new.adaptation,
+            ?: if (old.containersToRoutes == new.containersToRoutes) old.adaptation
+            else new.adaptation,
         previousContainersToRoutes = Adaptive.Container.entries.associateWith(
             valueSelector = old::routeFor
         ),

@@ -49,6 +49,8 @@ fun ScreenUiState(state: UiState) {
                     navMode = navMode,
                     windowSizeClass = windowSizeClass,
                     systemUI = systemUI,
+                    backStatus = backStatus,
+                    paneAnchor = paneAnchor,
                     fabClickListener = fabClickListener,
                     toolbarMenuClickListener = toolbarMenuClickListener,
                     altToolbarMenuClickListener = altToolbarMenuClickListener,

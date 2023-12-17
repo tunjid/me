@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
-import com.tunjid.me.scaffold.globalui.BackStatus
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.slices.RouteContainerPositionalState
@@ -150,10 +149,6 @@ object Adaptive {
     @Immutable
     internal data class NavigationState(
         /**
-         * Monotonously increasing id for changes in navigation state
-         */
-        val navId: Int,
-        /**
          * Describes moves between the primary and secondary navigation containers.
          */
         val adaptation: Adaptation,
@@ -188,7 +183,6 @@ object Adaptive {
     ) {
         companion object {
             internal val Initial = NavigationState(
-                navId = -1,
                 adaptation = Adaptation.Change,
                 windowSizeClass = WindowSizeClass.COMPACT,
                 containersToRoutes = mapOf(Container.Primary to UnknownRoute(Slot.One.name)),

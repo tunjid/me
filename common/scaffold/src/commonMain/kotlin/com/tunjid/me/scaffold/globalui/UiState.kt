@@ -62,7 +62,7 @@ data class UiState(
     val windowSizeClass: WindowSizeClass = WindowSizeClass.COMPACT,
     val isImmersive: Boolean = false,
     val systemUI: SystemUI = NoOpSystemUI,
-    val backStatus: BackStatus = BackStatus.None(),
+    val backStatus: BackStatus = BackStatus.None,
     val paneAnchor: PaneAnchor = PaneAnchor.Zero,
     val fabClickListener: (Unit) -> Unit = emptyCallback(),
     val toolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),
