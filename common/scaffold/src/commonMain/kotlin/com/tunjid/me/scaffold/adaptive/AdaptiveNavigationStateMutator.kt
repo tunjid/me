@@ -46,8 +46,7 @@ internal fun CoroutineScope.adaptiveNavigationStateMutator(
     initialState = Adaptive.NavigationState.Initial,
     started = SharingStarted.WhileSubscribed(3_000),
     mutationFlows = listOf(
-        adaptiveNavigationStateMutations(
-            routeParser = routeParser,
+        routeParser.adaptiveNavigationStateMutations(
             navStateFlow = navStateFlow,
             uiStateFlow = uiStateFlow
         )
@@ -69,8 +68,7 @@ internal fun CoroutineScope.adaptiveNavigationStateMutator(
  * Adapts the [MultiStackNav] navigation state to one best optimized for display in the current
  * UI window configuration.
  */
-private fun adaptiveNavigationStateMutations(
-    routeParser: RouteParser<AdaptiveRoute>,
+private fun RouteParser<AdaptiveRoute>.adaptiveNavigationStateMutations(
     navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>
 ): Flow<Mutation<Adaptive.NavigationState>> = combine(
@@ -78,12 +76,12 @@ private fun adaptiveNavigationStateMutations(
     flow2 = uiStateFlow.distinctUntilChangedBy {
         listOf(it.backStatus.isPreviewing, it.routeContainerState)
     },
-    transform = routeParser::adaptiveNavigationState
+    transform = this::adaptiveNavigationState
 )
     .distinctUntilChanged()
     .scan(
         initial = Adaptive.NavigationState.Initial.adaptTo(
-            new = routeParser.adaptiveNavigationState(
+            new = adaptiveNavigationState(
                 multiStackNav = navStateFlow.value,
                 uiState = uiStateFlow.value,
             )
