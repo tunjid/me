@@ -112,4 +112,4 @@ actual val BackStatus.isFromLeft: Boolean
 
 actual val BackStatus.isPreviewing: Boolean
     get() =
-        this is PreviewBackStatus
+        if (this is PreviewBackStatus) isPreviewing else false
