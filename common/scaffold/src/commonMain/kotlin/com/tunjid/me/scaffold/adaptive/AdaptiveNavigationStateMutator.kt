@@ -144,7 +144,7 @@ private fun Adaptive.NavigationState.adaptTo(
 ): Adaptive.NavigationState {
     val old = this
 
-    val availableSlots = Adaptive.Slot.entries.toMutableSet()
+    val availableSlots = Adaptive.Container.slots.toMutableSet()
     val unplacedRouteIds = new.containersToRoutes.values.mapNotNull { it?.id }.toMutableSet()
 
     val routeIdsToAdaptiveSlots = mutableMapOf<String?, Adaptive.Slot>()

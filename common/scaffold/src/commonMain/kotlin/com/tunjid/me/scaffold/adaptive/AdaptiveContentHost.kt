@@ -108,7 +108,7 @@ private class SavedStateAdaptiveContentHost(
     private val slotsToRoutes =
         mutableStateMapOf<Adaptive.Slot?, @Composable () -> Unit>().also { map ->
             map[null] = {}
-            Adaptive.Slot.entries.forEach { slot ->
+            Adaptive.Container.slots.forEach { slot ->
                 map[slot] = movableContentOf {
                     Render(slot)
                 }

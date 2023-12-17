@@ -58,15 +58,18 @@ object Adaptive {
      * A layout in the hierarchy that hosts an [AdaptiveRoute]
      */
     enum class Container {
-        Primary, Secondary, TransientPrimary
+        Primary, Secondary, TransientPrimary;
+
+        companion object {
+            internal val slots = Container.entries.indices.map(Adaptive::Slot)
+        }
     }
 
     /**
      * A spot taken by an [AdaptiveRoute] that may be moved in from [Container] to [Container]
      */
-    internal enum class Slot {
-        One, Two, Three
-    }
+    @JvmInline
+    internal value class Slot(val index: Int)
 
     /**
      * Information about content in an [Adaptive.Container]
@@ -130,16 +133,6 @@ object Adaptive {
                 from = Container.Primary,
                 to = Container.TransientPrimary
             )
-
-            val TransientToPrimary = Swap(
-                from = Container.TransientPrimary,
-                to = Container.Primary
-            )
-
-            val TransientDismissal = Swap(
-                from = Container.TransientPrimary,
-                to = null
-            )
         }
     }
 
@@ -185,8 +178,10 @@ object Adaptive {
             internal val Initial = NavigationState(
                 adaptation = Adaptation.Change,
                 windowSizeClass = WindowSizeClass.COMPACT,
-                containersToRoutes = mapOf(Container.Primary to UnknownRoute(Slot.One.name)),
-                routeIdsToAdaptiveSlots = Slot.entries.associateBy(Slot::name),
+                containersToRoutes = mapOf(
+                    Container.Primary to UnknownRoute(Container.slots.first().toString())
+                ),
+                routeIdsToAdaptiveSlots = Container.slots.associateBy(Slot::toString),
                 backStackIds = emptySet(),
                 routeIdsAnimatingOut = emptySet(),
                 previousContainersToRoutes = emptyMap(),
