@@ -41,10 +41,7 @@ interface AdaptiveRoute : Route {
         Adaptive.Container.TransientPrimary -> when (state.adaptation) {
             Adaptive.Adaptation.PrimaryToTransient -> when (state.container) {
                 Adaptive.Container.Secondary -> DefaultTransition
-                else -> Adaptive.Transitions(
-                    enter = EnterTransition.None,
-                    exit = ExitTransition.None,
-                )
+                else -> NoTransition
             }
 
             else -> DefaultTransition
