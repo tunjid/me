@@ -16,7 +16,6 @@
 
 package com.tunjid.me.feature.archivelist
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -63,7 +61,6 @@ import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.Chips
-import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.scaffold.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import kotlinx.datetime.Clock.System
@@ -299,17 +296,13 @@ private fun ArchiveCardFooter(
         val height = 40.dp
         val modifier = Modifier
             .size(height)
-        val painter = rememberAsyncRasterPainter(authorImageUrl)
 
-        if (painter != null) {
-            Image(
-                painter = painter,
-                contentScale = ContentScale.Crop,
-                contentDescription = null,
-                modifier = modifier.clip(CircleShape)
-            )
-            Spacer(Modifier.width(8.dp))
-        } else Box(modifier = modifier)
+        AsyncRasterImage(
+            imageUrl = authorImageUrl,
+            modifier = modifier.clip(CircleShape),
+        )
+        Spacer(Modifier.width(8.dp))
+
         Column(
             modifier = Modifier.height(height),
             verticalArrangement = Arrangement.SpaceBetween

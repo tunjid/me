@@ -16,10 +16,10 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.feature.archivegallery
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -34,10 +34,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.round
 import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.ui.rememberAsyncRasterPainter
+import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
@@ -125,14 +124,9 @@ internal fun ArchiveGalleryScreen(
         val sharedElement = rememberSharedContent<String?>(
             thumbnailSharedElementKey(file.url)
         ) { imageUrl, modifier ->
-            val imagePainter = rememberAsyncRasterPainter(
-                imageUri = imageUrl,
-            )
-            if (imagePainter != null) Image(
-                modifier = modifier,
-                painter = imagePainter,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+            AsyncRasterImage(
+                imageUrl = imageUrl,
+                modifier = modifier
             )
         }
 

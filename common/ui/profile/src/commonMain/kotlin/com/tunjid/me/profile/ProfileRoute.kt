@@ -37,8 +37,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.FormField
-import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
@@ -91,18 +91,15 @@ private fun ProfileScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val user = state.signedInUser
-        val painter = if (user != null) rememberAsyncRasterPainter(user.imageUrl) else null
 
         Spacer(modifier = Modifier.height(32.dp))
         val imageModifier = Modifier
             .padding(horizontal = 16.dp)
             .size(96.dp)
 
-        if (user != null && painter != null) Image(
-            painter = painter,
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
-            modifier = imageModifier.clip(CircleShape)
+        if (user != null) AsyncRasterImage(
+            imageUrl = user.imageUrl,
+            modifier = modifier.clip(CircleShape),
         ) else Image(
             imageVector = Icons.Default.Person,
             contentScale = ContentScale.Crop,

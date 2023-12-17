@@ -44,10 +44,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
@@ -262,18 +268,21 @@ private fun ImageFile(
     fileItem: FileItem,
     actions: (Action) -> Unit,
 ) {
+    var size by remember { mutableStateOf<IntSize?>(null) }
     val sharedElement = rememberSharedContent<String?>(
         key = thumbnailSharedElementKey(fileItem.url)
     ) { imageUrl, sharedElementModifier ->
+        val imageModifier = sharedElementModifier.onSizeChanged { size = it }
         val imagePainter = rememberAsyncRasterPainter(
             imageUri = imageUrl,
+            size = size,
         )
         if (imagePainter != null && fileItem is FileItem.File) Image(
             painter = imagePainter,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = if (!dndEnabled) sharedElementModifier
-            else sharedElementModifier.dragSource(
+            modifier = if (!dndEnabled) imageModifier
+            else imageModifier.dragSource(
                 dragShadowPainter = imagePainter,
                 uris = listOf(
                     RemoteUri(
