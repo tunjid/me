@@ -27,7 +27,6 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.slices.RouteContainerPositionalState
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
-import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.UnknownRoute
 
 /**

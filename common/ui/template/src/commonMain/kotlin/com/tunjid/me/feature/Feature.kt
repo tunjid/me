@@ -22,7 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
-import com.tunjid.me.scaffold.navigation.AdaptiveRoute
+import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.treenav.strings.RouteParser
 

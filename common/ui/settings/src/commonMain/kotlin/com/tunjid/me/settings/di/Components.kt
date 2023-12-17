@@ -21,7 +21,7 @@ import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.navigation.AdaptiveRoute
+import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.settings.ActualSettingsStateHolder
 import com.tunjid.me.settings.SettingsStateHolder
 import com.tunjid.me.settings.SettingsStateHolderCreator

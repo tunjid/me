@@ -19,6 +19,7 @@ package com.tunjid.me.scaffold.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.treenav.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged

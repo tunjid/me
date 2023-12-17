@@ -19,6 +19,7 @@
 package com.tunjid.me.scaffold.navigation
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.ActionStateProducer

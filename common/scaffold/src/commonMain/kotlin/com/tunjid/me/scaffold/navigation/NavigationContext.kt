@@ -16,6 +16,7 @@
 
 package com.tunjid.me.scaffold.navigation
 
+import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.RouteParser
 

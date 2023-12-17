@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.backPreviewModifier
-import com.tunjid.me.scaffold.navigation.AdaptiveRoute
 import com.tunjid.mutator.ActionStateProducer
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.RouteParser

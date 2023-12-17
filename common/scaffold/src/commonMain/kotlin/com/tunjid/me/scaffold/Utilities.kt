@@ -17,7 +17,7 @@
 package com.tunjid.me.scaffold
 
 import androidx.compose.animation.core.spring
-import com.tunjid.me.scaffold.navigation.AdaptiveRoute
+import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.treenav.MultiStackNav

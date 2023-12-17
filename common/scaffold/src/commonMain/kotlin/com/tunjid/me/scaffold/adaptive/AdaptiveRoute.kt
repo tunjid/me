@@ -1,4 +1,4 @@
-package com.tunjid.me.scaffold.navigation
+package com.tunjid.me.scaffold.adaptive
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -7,7 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
-import com.tunjid.me.scaffold.adaptive.Adaptive
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteParams
 
