@@ -126,7 +126,7 @@ private fun ArchiveDetailScreen(
     ) {
         item {
             thumbnail(
-                state.archive?.thumbnail,
+                state.headerThumbnail,
                 Modifier
                     .heightIn(max = 300.dp)
                     .aspectRatio(ratio = 16f / 9f)

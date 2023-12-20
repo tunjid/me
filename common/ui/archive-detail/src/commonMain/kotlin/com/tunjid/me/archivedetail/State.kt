@@ -53,7 +53,7 @@ data class State(
     @ProtoNumber(6)
     val isInPrimaryNav: Boolean = false,
     @ProtoNumber(7)
-    val sharedElementKey: String = thumbnailSharedElementKey(property = null),
+    val routeThumbnailUrl: String? = null,
     // Read this from the DB
     @Transient
     val archive: Archive? = null,
@@ -63,7 +63,13 @@ data class State(
     val paneAnchor: PaneAnchor? = null,
 ) : ByteSerializable
 
-val State.canEdit: Boolean get() = signedInUserId != null && signedInUserId == archive?.author?.id
+val State.canEdit: Boolean
+    get() = signedInUserId != null && signedInUserId == archive?.author?.id
+
+val State.headerThumbnail
+    get() = archive?.thumbnail ?: routeThumbnailUrl
+val State.sharedElementKey
+    get() = thumbnailSharedElementKey(headerThumbnail)
 
 @Composable
 inline fun <reified T : Descriptor> State.descriptorChips() =

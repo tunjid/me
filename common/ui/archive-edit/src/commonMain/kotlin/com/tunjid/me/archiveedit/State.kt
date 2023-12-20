@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// See YouTrack: KTIJ-18375
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
 
 package com.tunjid.me.archiveedit
 
@@ -58,7 +60,7 @@ data class State(
     @ProtoNumber(10)
     val chipsState: ChipsState = ChipsState(),
     @ProtoNumber(11)
-    val sharedElementKey: String = thumbnailSharedElementKey(property = null),
+    val routeThumbnailUrl: String? = null,
     @Transient
     val thumbnail: String? = null,
     @Transient
@@ -72,6 +74,11 @@ data class State(
     @Transient
     val messages: MessageQueue = MessageQueue(),
 ) : ByteSerializable
+
+val State.headerThumbnail
+    get() = thumbnail ?: routeThumbnailUrl
+val State.sharedElementKey
+    get() = thumbnailSharedElementKey(headerThumbnail)
 
 sealed class Action(val key: String) {
     sealed class TextEdit : Action("TextEdit") {

@@ -28,7 +28,6 @@ import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
-import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
@@ -70,7 +69,7 @@ class ActualArchiveDetailStateHolder(
 ) : ArchiveDetailStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         kind = route.kind,
-        sharedElementKey = thumbnailSharedElementKey(route.archiveThumbnail),
+        routeThumbnailUrl = route.archiveThumbnail,
         navBarSize = uiStateFlow.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
@@ -123,7 +122,6 @@ private fun ArchiveRepository.archiveLoadMutations(
     else archiveStream(id = id)
         .mapToMutation { fetchedArchive ->
             copy(
-                sharedElementKey = thumbnailSharedElementKey(fetchedArchive?.thumbnail),
                 wasDeleted = archive != null && fetchedArchive == null,
                 archive = fetchedArchive
             )
