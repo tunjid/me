@@ -95,12 +95,3 @@ class ActualLifecycleStateHolder(
     initialState = Lifecycle(),
     actionTransform = { it }
 )
-
-@Composable
-operator fun <Action : Any, State : Any> ActionStateProducer<Action, StateFlow<State>>.component1()
-: State = state.collectAsStateWithLifecycle().value
-
-@Composable
-operator fun <Action : Any, State : Any> ActionStateProducer<Action, StateFlow<State>>.component2()
-: (Action) -> Unit = remember { accept }
-
