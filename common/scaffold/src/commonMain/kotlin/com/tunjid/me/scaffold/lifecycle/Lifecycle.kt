@@ -60,11 +60,11 @@ inline fun <T, R> StateFlow<T>.mappedCollectAsStateWithLifecycle(
     context: CoroutineContext = Dispatchers.Main.immediate,
     crossinline mapper: @DisallowComposableCalls (T) -> R
 ): State<R> {
-    val lifecycle = LocalLifecycleStateHolder.current.state
+    val lifecycleStateFlow = LocalLifecycleStateHolder.current.state
     val scope = rememberCoroutineScope()
-    val lifecycleBoundState = remember {
+    val lifecycleBoundState = remember(lifecycleStateFlow) {
         mapState(scope = scope, mapper = mapper)
-            .monitorWhenActive(lifecycle)
+            .monitorWhenActive(lifecycleStateFlow)
     }
     val initial = remember { mapper(value) }
 
