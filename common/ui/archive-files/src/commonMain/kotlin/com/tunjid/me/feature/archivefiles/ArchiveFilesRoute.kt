@@ -63,11 +63,10 @@ import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.feature.rememberRetainedStateHolder
+import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
-import com.tunjid.me.scaffold.lifecycle.component1
-import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
@@ -120,21 +119,23 @@ data class ArchiveFilesRoute(
 
     @Composable
     override fun content() {
+        val stateHolder = rememberRetainedStateHolder<ArchiveFilesStateHolder>(
+            route = this@ArchiveFilesRoute
+        )
         ArchiveFilesScreen(
+            state = stateHolder.state.collectAsStateWithLifecycle().value,
+            actions = stateHolder.accept,
             modifier = Modifier.backPreviewBackgroundModifier(),
-            stateHolder = rememberRetainedStateHolder(
-                route = this@ArchiveFilesRoute
-            ),
         )
     }
 }
 
 @Composable
 internal fun ArchiveFilesScreen(
+    state: State,
+    actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
-    stateHolder: ArchiveFilesStateHolder,
 ) {
-    val (state, actions) = stateHolder
     val gridState = rememberLazyGridState()
 
     GlobalUi()

@@ -45,9 +45,8 @@ import com.tunjid.me.core.ui.lazy.staggeredgrid.*
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.me.core.ui.scrollbar.scrollbarState
 import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.lifecycle.component1
-import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.tiler.TiledList
@@ -66,21 +65,23 @@ data class ArchiveListRoute(
 
     @Composable
     override fun content() {
+        val stateHolder = rememberRetainedStateHolder<ArchiveListStateHolder>(
+            route = this@ArchiveListRoute
+        )
         ArchiveScreen(
+            state = stateHolder.state.collectAsStateWithLifecycle().value,
+            actions = stateHolder.accept,
             modifier = Modifier.backPreviewBackgroundModifier(),
-            stateHolder = rememberRetainedStateHolder(
-                route = this@ArchiveListRoute
-            ),
         )
     }
 }
 
 @Composable
 private fun ArchiveScreen(
+    state: State,
+    actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
-    stateHolder: ArchiveListStateHolder,
 ) {
-    val (state, actions) = stateHolder
     val updatedItems by rememberUpdatedState(state.items)
 
     GlobalUi(

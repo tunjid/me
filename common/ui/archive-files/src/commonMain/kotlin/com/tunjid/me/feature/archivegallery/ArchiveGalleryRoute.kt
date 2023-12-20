@@ -38,11 +38,10 @@ import androidx.compose.ui.unit.round
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.feature.rememberRetainedStateHolder
+import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
-import com.tunjid.me.scaffold.lifecycle.component1
-import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.mapToMutation
@@ -69,22 +68,24 @@ data class ArchiveGalleryRoute(
 
     @Composable
     override fun content() {
+        val stateHolder = rememberRetainedStateHolder<ArchiveGalleryStateHolder>(
+            route = this@ArchiveGalleryRoute
+        )
         ArchiveGalleryScreen(
-            stateHolder = rememberRetainedStateHolder(
-                route = this@ArchiveGalleryRoute
-            ),
+            state = stateHolder.state.collectAsStateWithLifecycle().value,
+            actions = stateHolder.accept,
         )
     }
 }
 
 @Composable
 internal fun ArchiveGalleryScreen(
+    state: State,
+    actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
-    stateHolder: ArchiveGalleryStateHolder,
 ) {
     GlobalUi()
 
-    val (state, actions) = stateHolder
     val items by rememberUpdatedState(state.items)
 
     val pagerState = rememberPagerState { items.size }

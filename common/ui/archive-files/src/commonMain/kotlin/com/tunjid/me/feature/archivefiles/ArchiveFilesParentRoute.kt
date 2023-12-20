@@ -50,6 +50,7 @@ import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.adaptive.StatelessRoute
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.treenav.Node
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.Serializable
@@ -113,8 +114,10 @@ private fun ArchiveFilesParentScreen(
         HorizontalPager(
             state = pagerState,
         ) { index ->
+            val stateHolder = rememberRetainedStateHolder<ArchiveFilesStateHolder>(children[index])
             ArchiveFilesScreen(
-                stateHolder = rememberRetainedStateHolder(children[index])
+                state = stateHolder.state.collectAsStateWithLifecycle().value,
+                actions = stateHolder.accept,
             )
         }
     }

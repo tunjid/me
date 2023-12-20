@@ -31,15 +31,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.feature.rememberRetainedStateHolder
+import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.me.scaffold.lifecycle.component1
-import com.tunjid.me.scaffold.lifecycle.component2
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
+import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
 
@@ -49,21 +48,23 @@ data class SettingsRoute(
 ) : AdaptiveRoute {
     @Composable
     override fun content() {
+        val stateHolder = rememberRetainedStateHolder<SettingsStateHolder>(
+            route = this@SettingsRoute
+        )
         SettingsScreen(
+            state = stateHolder.state.collectAsStateWithLifecycle().value,
+            actions = stateHolder.accept,
             modifier = Modifier.backPreviewBackgroundModifier(),
-            stateHolder = rememberRetainedStateHolder(
-                route = this@SettingsRoute
-            ),
         )
     }
 }
 
 @Composable
 private fun SettingsScreen(
+    state: State,
+    actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
-    stateHolder: SettingsStateHolder
 ) {
-    val (state, actions) = stateHolder
     val scrollState = rememberScrollState()
 
     ScreenUiState(

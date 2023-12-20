@@ -64,11 +64,10 @@ import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.adaptive.rememberSharedContent
-import com.tunjid.me.scaffold.lifecycle.component1
-import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.adaptive.ExternalRoute
+import com.tunjid.me.scaffold.adaptive.rememberSharedContent
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
@@ -95,11 +94,13 @@ data class ArchiveEditRoute(
 
     @Composable
     override fun content() {
+        val stateHolder = rememberRetainedStateHolder<ArchiveEditStateHolder>(
+            route = this@ArchiveEditRoute
+        )
         ArchiveEditScreen(
+            state = stateHolder.state.collectAsStateWithLifecycle().value,
+            actions = stateHolder.accept,
             modifier = Modifier.backPreviewBackgroundModifier(),
-            stateHolder = rememberRetainedStateHolder(
-                route = this@ArchiveEditRoute
-            )
         )
     }
 
@@ -118,10 +119,10 @@ data class ArchiveEditRoute(
 
 @Composable
 private fun ArchiveEditScreen(
+    state: State,
+    actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
-    stateHolder: ArchiveEditStateHolder
 ) {
-    val (state, actions) = stateHolder
     val upsert = state.upsert
     val scrollState = rememberLazyListState()
     val scope = rememberCoroutineScope()

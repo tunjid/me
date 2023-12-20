@@ -42,15 +42,14 @@ import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.globalui.PaneAnchor
-import com.tunjid.me.scaffold.adaptive.rememberSharedContent
-import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.me.scaffold.lifecycle.component1
-import com.tunjid.me.scaffold.lifecycle.component2
 import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.adaptive.ExternalRoute
+import com.tunjid.me.scaffold.adaptive.rememberSharedContent
+import com.tunjid.me.scaffold.globalui.PaneAnchor
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
+import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
+import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.treenav.Node
 import com.tunjid.treenav.pop
 import kotlinx.serialization.Serializable
@@ -71,11 +70,13 @@ data class ArchiveDetailRoute(
 
     @Composable
     override fun content() {
+        val stateHolder = rememberRetainedStateHolder<ArchiveDetailStateHolder>(
+            route = this@ArchiveDetailRoute
+        )
         ArchiveDetailScreen(
+            state = stateHolder.state.collectAsStateWithLifecycle().value,
+            actions = stateHolder.accept,
             modifier = Modifier.backPreviewBackgroundModifier(),
-            stateHolder = rememberRetainedStateHolder(
-                route = this@ArchiveDetailRoute
-            ),
         )
     }
 
@@ -90,10 +91,10 @@ data class ArchiveDetailRoute(
 
 @Composable
 private fun ArchiveDetailScreen(
+    state: State,
+    actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
-    stateHolder: ArchiveDetailStateHolder
 ) {
-    val (state, actions) = stateHolder
     val scrollState = rememberLazyListState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
     val bodyInViewport = scrollState.isInViewport(BODY_KEY)
