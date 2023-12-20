@@ -39,7 +39,6 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -83,17 +82,17 @@ private fun SettingsScreen(
             .verticalScroll(state = scrollState),
         horizontalAlignment = Alignment.Start,
     ) {
-        state.routes.forEach { path ->
+        state.routes.forEach { externalRoute ->
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        actions(Action.Navigate { navState.push(path.toRoute) })
+                        actions(Action.Navigate.External(externalRoute))
                     },
                 content = {
                     Text(
                         modifier = Modifier.padding(16.dp),
-                        text = path,
+                        text = externalRoute.path,
                     )
                 }
             )

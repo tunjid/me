@@ -24,15 +24,20 @@ import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.emptyTiledList
+import com.tunjid.treenav.pop
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.protobuf.ProtoNumber
 
 sealed class Action(val key: String) {
     data class LoadAround(val query: ArchiveFileQuery) : Action("LoadAround")
-    data class Navigate(
-        override val navigationMutation: NavigationMutation
-    ) : Action("Navigate"), NavigationAction
+    sealed class Navigate: Action(key = "Navigate"), NavigationAction {
+        data object Pop : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                navState.pop()
+            }
+        }
+    }
 }
 
 @Serializable

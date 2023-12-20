@@ -16,19 +16,20 @@
 
 package com.tunjid.me.archiveedit
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Face
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
 import com.tunjid.me.core.ui.icons.Preview
-import com.tunjid.me.scaffold.globalui.*
+import com.tunjid.me.scaffold.globalui.InsetFlags
+import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.rememberFunction
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
-import com.tunjid.treenav.push
-import com.tunjid.treenav.strings.routeString
 
 @Composable
 internal fun GlobalUi(
@@ -59,17 +60,16 @@ internal fun GlobalUi(
             toolbarMenuClickListener = rememberFunction {
                 when (it.id) {
                     "preview", "edit" -> onAction(Action.ToggleEditView)
-                    "gallery" -> onAction(Action.Navigate {
-                        navState.push(
-                            routeString(
-                                path = "archives/${state.kind.type}/${state.upsert.id?.value}/files",
-                                queryParams = mapOf(
-                                    "dndEnabled" to listOf(true.toString()),
-                                    "url" to listOfNotNull(state.upsert.thumbnail),
-                                )
-                            ).toRoute
+                    "gallery" -> when (val archiveId = state.upsert.id) {
+                        null -> Unit
+                        else -> onAction(
+                            Action.Navigate.Files(
+                                kind = state.kind,
+                                archiveId = archiveId,
+                                thumbnail = state.headerThumbnail,
+                            )
                         )
-                    })
+                    }
                 }
             },
             fabShows = true,

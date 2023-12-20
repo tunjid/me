@@ -47,7 +47,6 @@ import com.tunjid.mutator.coroutines.actionStateFlowProducer
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.mutation
 import com.tunjid.tiler.compose.PivotedTilingEffect
-import com.tunjid.treenav.pop
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -110,11 +109,11 @@ internal fun ArchiveGalleryScreen(
                         )
                     },
                     onDragEnd = {
-                        if (offset.getDistanceSquared() > 300 * 300) actions(Action.Navigate { navState.pop() })
+                        if (offset.getDistanceSquared() > 300 * 300) actions(Action.Navigate.Pop)
                         else offsetActions(Gesture.Release)
                     },
                     onDragCancel = {
-                        if (offset.getDistanceSquared() > 300 * 300) actions(Action.Navigate { navState.pop() })
+                        if (offset.getDistanceSquared() > 300 * 300) actions(Action.Navigate.Pop)
                         else offsetActions(Gesture.Release)
                     }
                 )

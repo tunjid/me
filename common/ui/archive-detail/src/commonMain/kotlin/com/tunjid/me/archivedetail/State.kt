@@ -19,6 +19,7 @@ package com.tunjid.me.archivedetail
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.tunjid.me.core.model.Archive
+import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.ChipInfo
@@ -28,14 +29,56 @@ import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
+import com.tunjid.treenav.pop
+import com.tunjid.treenav.push
+import com.tunjid.treenav.strings.routeString
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.protobuf.ProtoNumber
 
-sealed class Action {
-    data class Navigate(
-        override val navigationMutation: NavigationMutation
-    ) : Action(), NavigationAction
+sealed class Action(val key: String) {
+
+    sealed class Navigate: Action(key = "Navigate"), NavigationAction {
+        data object Pop : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                navState.pop()
+            }
+        }
+
+        data class Edit(
+            val kind: ArchiveKind,
+            val archiveId: ArchiveId,
+            val thumbnail: String?
+        ) : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                navState.push(
+                    routeString(
+                        path = "archives/${kind.type}/${archiveId.value}/edit",
+                        queryParams = mapOf(
+                            "thumbnail" to listOfNotNull(thumbnail)
+                        )
+                    ).toRoute
+                )
+            }
+        }
+
+        data class Files(
+            val kind: ArchiveKind,
+            val archiveId: ArchiveId,
+            val thumbnail: String?
+        ) : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                navState.push(
+                    routeString(
+                        path = "archives/${kind.type}/${archiveId.value}/files",
+                        queryParams = mapOf(
+                            "url" to listOfNotNull(thumbnail)
+                        )
+                    ).toRoute
+                )
+            }
+        }
+    }
 }
 
 @Serializable

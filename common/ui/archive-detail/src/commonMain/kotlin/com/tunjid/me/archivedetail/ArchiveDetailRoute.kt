@@ -51,7 +51,6 @@ import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.treenav.Node
-import com.tunjid.treenav.pop
 import kotlinx.serialization.Serializable
 
 private const val BODY_KEY = 3
@@ -193,13 +192,13 @@ private fun ArchiveDetailScreen(
     // Pop nav if this archive does not exist anymore
     val wasDeleted = state.wasDeleted
     LaunchedEffect(wasDeleted) {
-        if (wasDeleted) actions(Action.Navigate { navState.pop() })
+        if (wasDeleted) actions(Action.Navigate.Pop)
     }
 
     // If the user fully expands the secondary pane, pop this destination back to the list
     LaunchedEffect(state.hasSecondaryPanel, state.paneAnchor) {
         if (state.hasSecondaryPanel && state.paneAnchor == PaneAnchor.Full) {
-            actions(Action.Navigate { navState.pop() })
+            actions(Action.Navigate.Pop)
         }
     }
 }

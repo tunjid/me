@@ -71,8 +71,6 @@ import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.tiler.compose.PivotedTilingEffect
-import com.tunjid.treenav.push
-import com.tunjid.treenav.strings.routeString
 import kotlinx.serialization.Serializable
 
 enum class FileType(
@@ -303,17 +301,13 @@ private fun ImageFile(
                     is FileItem.File -> fileItem.archiveFile
                     is FileItem.PlaceHolder -> return@clickable
                 }
-                actions(Action.Navigate {
-                    navState.push(
-                        routeString(
-                            path = "archive/${archiveFile.archiveId.value}/gallery",
-                            queryParams = mapOf(
-                                "fileId" to listOf(archiveFile.id.value),
-                                "url" to listOf(archiveFile.url)
-                            )
-                        ).toRoute
+                actions(
+                    Action.Navigate.Gallery(
+                        archiveId = archiveFile.archiveId,
+                        fileId = archiveFile.id,
+                        thumbnail = archiveFile.url
                     )
-                })
+                )
             }
     )
 }

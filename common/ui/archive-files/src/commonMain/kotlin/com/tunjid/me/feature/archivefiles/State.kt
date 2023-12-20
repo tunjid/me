@@ -17,16 +17,18 @@
 package com.tunjid.me.feature.archivefiles
 
 import com.tunjid.me.core.model.ArchiveFile
+import com.tunjid.me.core.model.ArchiveFileId
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.Uri
-import com.tunjid.me.feature.archivegallery.url
 import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.tiler.TiledList
 import com.tunjid.tiler.emptyTiledList
+import com.tunjid.treenav.push
+import com.tunjid.treenav.strings.routeString
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.protobuf.ProtoNumber
@@ -91,9 +93,25 @@ sealed class Action(val key: String) {
         data class ColumnSizeChanged(val size: Int) : Fetch()
     }
 
-    data class Navigate(
-        override val navigationMutation: NavigationMutation
-    ) : Action(key = "Navigate"), NavigationAction
+    sealed class Navigate : Action(key = "Navigate"), NavigationAction {
+        data class Gallery(
+            val archiveId: ArchiveId,
+            val fileId: ArchiveFileId,
+            val thumbnail: String?
+        ) : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                navState.push(
+                    routeString(
+                        path = "archive/${archiveId.value}/gallery",
+                        queryParams = mapOf(
+                            "fileId" to listOf(fileId.value),
+                            "url" to listOfNotNull(thumbnail)
+                        )
+                    ).toRoute
+                )
+            }
+        }
+    }
 }
 
 sealed class FileItem {

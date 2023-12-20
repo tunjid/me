@@ -16,12 +16,14 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.settings
 
 
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
+import com.tunjid.me.scaffold.adaptive.ExternalRoute
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
@@ -61,12 +63,12 @@ class ActualSettingsStateHolder(
                 routes = listOfNotNull(
                     "profile".takeIf { isSignedIn },
                     "sign-in".takeIf { !isSignedIn }
-                )
+                ).map(::ExternalRoute)
             )
         }
     ),
     actionTransform = { actions ->
-        actions.toMutationStream {
+        actions.toMutationStream(keySelector = Action::key) {
             when (val type = type()) {
                 is Action.Navigate -> type.flow.consumeNavigationActions(
                     navigationMutationConsumer = navActions

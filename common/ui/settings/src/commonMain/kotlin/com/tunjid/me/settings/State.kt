@@ -17,21 +17,31 @@
 package com.tunjid.me.settings
 
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.scaffold.adaptive.ExternalRoute
 import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
+import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Serializable
 data class State(
     @Transient
-    val routes: List<String> = listOf(
-        "sign-in"
+    val routes: List<ExternalRoute> = listOf(
+        ExternalRoute(path = "sign-in")
     )
 ) : ByteSerializable
 
-sealed class Action {
-    data class Navigate(
-        override val navigationMutation: NavigationMutation
-    ) : Action(), NavigationAction
+sealed class Action(val key: String) {
+    sealed class Navigate : Action(key = "Navigate"), NavigationAction {
+        data class External(
+            val externalRoute: ExternalRoute
+        ) : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                navState.push(
+                    externalRoute.path.toRoute
+                )
+            }
+        }
+    }
 }

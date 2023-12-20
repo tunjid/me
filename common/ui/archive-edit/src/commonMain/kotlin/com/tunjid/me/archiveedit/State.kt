@@ -20,7 +20,12 @@ package com.tunjid.me.archiveedit
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import com.tunjid.me.core.model.*
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.ArchiveUpsert
+import com.tunjid.me.core.model.Descriptor
+import com.tunjid.me.core.model.Message
+import com.tunjid.me.core.model.MessageQueue
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
@@ -33,6 +38,8 @@ import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.mutation
+import com.tunjid.treenav.push
+import com.tunjid.treenav.strings.routeString
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.protobuf.ProtoNumber
@@ -182,9 +189,25 @@ sealed class Action(val key: String) {
 
     data class RequestPermission(val permission: Permission) : Action("RequestPermission")
 
-    data class Navigate(
-        override val navigationMutation: NavigationMutation
-    ) : Action(key = "Navigate"), NavigationAction
+    sealed class Navigate : Action(key = "Navigate"), NavigationAction {
+        data class Files(
+            val kind: ArchiveKind,
+            val archiveId: ArchiveId,
+            val thumbnail: String?
+        ) : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                navState.push(
+                    routeString(
+                        path = "archives/${kind.type}/${archiveId.value}/files",
+                        queryParams = mapOf(
+                            "dndEnabled" to listOf(true.toString()),
+                            "url" to listOfNotNull(thumbnail)
+                        )
+                    ).toRoute
+                )
+            }
+        }
+    }
 }
 
 @Serializable

@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
-import com.tunjid.me.core.ui.icons.Preview
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
@@ -30,8 +29,6 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.currentUiState
 import com.tunjid.me.scaffold.globalui.rememberFunction
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
-import com.tunjid.treenav.push
-import com.tunjid.treenav.strings.routeString
 
 @Composable
 fun GlobalUi(state: State, actions: (Action) -> Unit) {
@@ -48,16 +45,13 @@ fun GlobalUi(state: State, actions: (Action) -> Unit) {
             ),
             toolbarMenuClickListener = rememberFunction(state.archive?.id) {
                 when (it.id) {
-                    "gallery" -> if (state.archive != null) actions(Action.Navigate {
-                        navState.push(
-                            routeString(
-                                path = "archives/${state.kind.type}/${state.archive.id.value}/files",
-                                queryParams = mapOf(
-                                    "url" to listOfNotNull(state.archive.thumbnail)
-                                )
-                            ).toRoute
+                    "gallery" -> if (state.archive != null) actions(
+                        Action.Navigate.Files(
+                            kind = state.kind,
+                            archiveId = state.archive.id,
+                            thumbnail = state.archive.thumbnail,
                         )
-                    })
+                    )
                 }
             },
             navVisibility = NavVisibility.Visible,
@@ -68,18 +62,13 @@ fun GlobalUi(state: State, actions: (Action) -> Unit) {
             fabIcon = Icons.Default.Edit,
             fabClickListener = rememberFunction(state.archive?.id) {
                 val archiveId = state.archive?.id
-                if (archiveId != null) actions(Action.Navigate {
-                    navState.push(
-                        routeString(
-                            path = "archives/${state.kind.type}/${archiveId.value}/edit",
-                            queryParams = mapOf(
-                                "thumbnail" to listOfNotNull(
-                                    state.archive.thumbnail
-                                )
-                            )
-                        ).toRoute
+                if (archiveId != null) actions(
+                    Action.Navigate.Edit(
+                        kind = state.kind,
+                        archiveId = state.archive.id,
+                        thumbnail = state.archive.thumbnail,
                     )
-                })
+                )
             },
             insetFlags = InsetFlags.NO_BOTTOM,
             statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
