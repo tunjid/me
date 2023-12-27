@@ -68,6 +68,7 @@ import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.WindowSizeClass.COMPACT
 import com.tunjid.me.scaffold.adaptive.Adaptive
+import com.tunjid.me.scaffold.adaptive.Adaptive.Adaptation.Change.contains
 import com.tunjid.me.scaffold.adaptive.Adaptive.Adaptation.Companion.PrimaryToSecondary
 import com.tunjid.me.scaffold.adaptive.Adaptive.Adaptation.Companion.SecondaryToPrimary
 import com.tunjid.me.scaffold.adaptive.routeFor
@@ -97,7 +98,6 @@ internal fun AppRouteContainer(
 
     val hasSecondaryContent = state.routeFor(Adaptive.Container.Secondary) != null
     val windowSizeClass = state.windowSizeClass
-    val adaptation = state.adaptation
 
     val density = LocalDensity.current
     val paneSplitState = remember(::PaneAnchorState)
@@ -119,7 +119,7 @@ internal fun AppRouteContainer(
             content = {
                 SecondaryContentContainer(
                     modifier = secondaryContentModifier(
-                        adaptation = adaptation,
+                        adaptation = state.swapAdaptations.firstOrNull { Adaptive.Container.Secondary in it },
                         width = with(density) { paneSplitState.width.toDp() },
                         maxWidth = with(density) { paneSplitState.maxWidth.toDp() },
                     ),
@@ -128,7 +128,7 @@ internal fun AppRouteContainer(
                 PrimaryContentContainer(
                     modifier = primaryContentModifier(
                         windowSizeClass = windowSizeClass,
-                        adaptation = adaptation,
+                        adaptation = state.swapAdaptations.firstOrNull { Adaptive.Container.Primary in it },
                         secondaryContentWidth = with(density) { paneSplitState.width.toDp() },
                         maxWidth = with(density) { paneSplitState.maxWidth.toDp() }
                     ),
@@ -247,7 +247,7 @@ private fun BoxScope.DraggableThumb(
 @Composable
 private fun primaryContentModifier(
     windowSizeClass: WindowSizeClass,
-    adaptation: Adaptive.Adaptation,
+    adaptation: Adaptive.Adaptation?,
     secondaryContentWidth: Dp,
     maxWidth: Dp,
 ): Modifier {
@@ -296,7 +296,7 @@ private fun primaryContentModifier(
 
 @Composable
 private fun secondaryContentModifier(
-    adaptation: Adaptive.Adaptation,
+    adaptation: Adaptive.Adaptation?,
     width: Dp,
     maxWidth: Dp,
 ): Modifier {

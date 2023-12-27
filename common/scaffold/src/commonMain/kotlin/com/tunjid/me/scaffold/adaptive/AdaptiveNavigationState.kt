@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
+import com.tunjid.me.scaffold.adaptive.Adaptive.Adaptation.Change.contains
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.slices.RouteContainerPositionalState
@@ -117,6 +118,8 @@ object Adaptive {
             val to: Container?,
         ) : Adaptation()
 
+       operator fun Swap.contains(container: Container?) = container == from || container == to
+
         companion object {
             val PrimaryToSecondary = Swap(
                 from = Container.Primary,
@@ -141,9 +144,9 @@ object Adaptive {
     @Immutable
     internal data class NavigationState(
         /**
-         * Describes moves between the primary and secondary navigation containers.
+         * Moves between containers within a navigation sequence.
          */
-        val adaptation: Adaptation,
+        val swapAdaptations: Set<Adaptation.Swap>,
         /**
          * A mapping of [Container] to the routes in them
          */
@@ -175,7 +178,7 @@ object Adaptive {
     ) {
         companion object {
             internal val Initial = NavigationState(
-                adaptation = Adaptation.Change,
+                swapAdaptations = emptySet(),
                 windowSizeClass = WindowSizeClass.COMPACT,
                 containersToRoutes = mapOf(
                     Container.Primary to UnknownRoute(Container.slots.first().toString())
@@ -200,7 +203,8 @@ internal fun Adaptive.NavigationState.containerStateFor(
         currentRoute = route,
         previousRoute = previousContainersToRoutes[container],
         container = container,
-        adaptation = adaptation,
+        adaptation = swapAdaptations.firstOrNull { container in it }
+            ?: Adaptive.Adaptation.Change,
     )
 }
 

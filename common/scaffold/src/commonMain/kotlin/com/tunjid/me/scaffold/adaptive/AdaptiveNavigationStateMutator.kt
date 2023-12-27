@@ -120,7 +120,7 @@ private fun RouteParser<AdaptiveRoute>.adaptiveNavigationState(
         ),
         windowSizeClass = uiState.windowSizeClass,
         // Tentative, decide downstream
-        adaptation = Adaptive.Adaptation.Change,
+        swapAdaptations = emptySet(),
         backStackIds = mutableSetOf<String>().apply {
             multiStackNav.traverse(Order.DepthFirst) { add(it.id) }
         },
@@ -147,31 +147,31 @@ private fun Adaptive.NavigationState.adaptTo(
     val unplacedRouteIds = new.containersToRoutes.values.mapNotNull { it?.id }.toMutableSet()
 
     val routeIdsToAdaptiveSlots = mutableMapOf<String?, Adaptive.Slot>()
-    val swapAdaptations = mutableListOf<Adaptive.Adaptation.Swap>()
+    val swapAdaptations = mutableSetOf<Adaptive.Adaptation.Swap>()
 
     for ((toContainer, toRoute) in new.containersToRoutes.entries) {
         if (toRoute == null) continue
-        val (fromContainer) = containersToRoutes.entries.firstOrNull { (_, oldRoute) ->
-            toRoute.id == oldRoute?.id
-        } ?: continue
-        swapAdaptations.add(
-            Adaptive.Adaptation.Swap(
+        for ((fromContainer, fromRoute) in old.containersToRoutes.entries) {
+            if (toRoute.id != fromRoute?.id) continue
+            val swap = Adaptive.Adaptation.Swap(
                 from = fromContainer,
                 to = toContainer
             )
-        )
-    }
+            if (toContainer != fromContainer) {
+                swapAdaptations.add(swap)
+            }
 
-    for (swap in swapAdaptations) {
-        val fromRouteId = old.routeFor(swap.from)?.id
-            ?.also(unplacedRouteIds::remove)
-            ?: throw IllegalArgumentException("A swap cannot occur from a null route")
+            val fromRouteId = old.routeFor(swap.from)?.id
+                ?.also(unplacedRouteIds::remove)
+                ?: throw IllegalArgumentException("A swap cannot occur from a null route")
 
-        val movedSlot = old.routeIdsToAdaptiveSlots[old.routeFor(swap.from)?.id]
-            ?.also(availableSlots::remove)
-            ?: throw IllegalArgumentException("A swap cannot occur from a null slot")
+            val movedSlot = old.routeIdsToAdaptiveSlots[old.routeFor(swap.from)?.id]
+                ?.also(availableSlots::remove)
+                ?: throw IllegalArgumentException("A swap cannot occur from a null slot")
 
-        routeIdsToAdaptiveSlots[fromRouteId] = movedSlot
+            routeIdsToAdaptiveSlots[fromRouteId] = movedSlot
+            break
+        }
     }
 
     unplacedRouteIds.forEach { routeId ->
@@ -179,9 +179,10 @@ private fun Adaptive.NavigationState.adaptTo(
     }
 
     return new.copy(
-        adaptation = swapAdaptations.firstOrNull { it.to != it.from }
-            ?: if (old.containersToRoutes == new.containersToRoutes) old.adaptation
-            else new.adaptation,
+        swapAdaptations = when(old.containersToRoutes.mapValues { it.value?.id }) {
+            new.containersToRoutes.mapValues { it.value?.id } -> old.swapAdaptations
+            else -> swapAdaptations
+        },
         previousContainersToRoutes = Adaptive.Container.entries.associateWith(
             valueSelector = old::routeFor
         ),
