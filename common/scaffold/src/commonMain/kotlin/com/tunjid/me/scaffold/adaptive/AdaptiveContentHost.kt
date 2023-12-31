@@ -25,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import com.tunjid.me.scaffold.globalui.UiState
@@ -37,6 +38,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 
@@ -44,6 +47,8 @@ import kotlinx.coroutines.flow.scan
 internal interface AdaptiveContentHost {
 
     val adaptedState: Adaptive.NavigationState
+
+    val hasAnimatingSharedElements: Boolean
 
     @Composable
     fun routeIn(container: Adaptive.Container?)
@@ -115,6 +120,9 @@ private class SavedStateAdaptiveContentHost(
         }
 
     private val keysToSharedElements = mutableStateMapOf<Any, SharedElementData<*>>()
+
+    override val hasAnimatingSharedElements: Boolean
+        get() = keysToSharedElements.values.any(SharedElementData<*>::isRunning)
 
     @Composable
     override fun routeIn(container: Adaptive.Container?) {
@@ -188,7 +196,6 @@ private fun SavedStateAdaptiveContentHost.Render(
             }
         }
 
-        // Transitions only run for change adaptations
         LaunchedEffect(transition.isRunning, transition.currentState) {
             // Change transitions can stop animating shared elements when the transition is complete
             scope.canAnimateSharedElements = when {
@@ -200,8 +207,16 @@ private fun SavedStateAdaptiveContentHost.Render(
 
                         EnterExitState.Visible -> false
                     }
-                    // No-op on swaps
-                    is Adaptive.Adaptation.Swap -> scope.canAnimateSharedElements
+                    is Adaptive.Adaptation.Swap -> {
+                        // Wait until the swap becomes a change, if it ever does
+                        snapshotFlow { containerTransition.targetState.adaptation }
+                            .filterIsInstance<Adaptive.Adaptation.Change>()
+                            .first()
+                        // Wait for shared elements to stop animating
+                        snapshotFlow { hasAnimatingSharedElements }
+                            .first(false::equals)
+                        false
+                    }
                 }
             }
         }

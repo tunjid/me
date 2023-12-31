@@ -6,6 +6,7 @@ import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -33,7 +34,7 @@ fun thumbnailSharedElementKey(
 
 @Stable
 internal class SharedElementData<T>(
-    private val  key: Any,
+    private val key: Any,
     sharedElement: @Composable (T, Modifier) -> Unit,
     onRemoved: () -> Unit
 ) {
@@ -41,12 +42,20 @@ internal class SharedElementData<T>(
 
     val offsetAnimation = DeferredAnimation(
         vectorConverter = IntOffset.VectorConverter,
-        animationSpec = sharedElementSpring()
+        animationSpec = spring(
+            stiffness = Spring.StiffnessLow,
+            visibilityThreshold = IntOffset.VisibilityThreshold
+        )
     )
     val sizeAnimation = DeferredAnimation(
         vectorConverter = IntSize.VectorConverter,
-        animationSpec = sharedElementSpring()
+        animationSpec = spring(
+            stiffness = Spring.StiffnessMedium,
+            visibilityThreshold = IntSize.VisibilityThreshold
+        )
     )
+
+    val isRunning get() = offsetAnimation.isRunning || sizeAnimation.isRunning
 
     val moveableSharedElement: @Composable (Any?, Modifier) -> Unit =
         movableContentOf { state, modifier ->
@@ -119,6 +128,7 @@ internal class DeferredAnimation<T, V : AnimationVector>(
     private val animationSpec: FiniteAnimationSpec<T>
 ) {
     val value: T? get() = animatable?.value ?: target
+    val isRunning get() = animatable?.isRunning == true
 
     private var target: T? by mutableStateOf(null)
     private var animatable: Animatable<T, V>? = null
@@ -142,5 +152,3 @@ internal class DeferredAnimation<T, V : AnimationVector>(
         return animatable?.value ?: targetValue
     }
 }
-
-private fun <T> sharedElementSpring() = spring<T>(stiffness = Spring.StiffnessLow)
