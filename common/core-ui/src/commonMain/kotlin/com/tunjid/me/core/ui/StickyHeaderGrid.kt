@@ -27,9 +27,12 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridItemInfo
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisallowComposableCalls
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.IntOffset
@@ -109,13 +112,14 @@ inline fun <LazyState : ScrollableState, LazyItem> StickyHeaderLayout(
     stickyHeader: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
-    val headerOffset by remember(lazyState) {
-        derivedStateOf {
+    var headerOffset by remember { mutableIntStateOf(0) }
+    LaunchedEffect(lazyState) {
+        snapshotFlow {
             val startOffset = viewportStart(lazyState)
             val visibleItems = lazyItems(lazyState)
             val firstCompletelyVisibleItem = visibleItems.firstOrNull { lazyItem ->
                 lazyItemOffset(lazyItem) >= startOffset
-            } ?: return@derivedStateOf 0
+            } ?: return@snapshotFlow 0
 
             when (headerMatcher(firstCompletelyVisibleItem)) {
                 false -> 0
@@ -124,6 +128,7 @@ inline fun <LazyState : ScrollableState, LazyItem> StickyHeaderLayout(
                     .let { difference -> if (difference < 0) 0 else -difference }
             }
         }
+            .collect { headerOffset = it }
     }
     Box(modifier = modifier.clipToBounds()) {
         content()
