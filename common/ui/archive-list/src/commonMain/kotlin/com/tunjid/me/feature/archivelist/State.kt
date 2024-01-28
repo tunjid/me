@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
+// See YouTrack: KTIJ-18375
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.feature.archivelist
 
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.tunjid.me.core.model.Archive
@@ -26,7 +30,6 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.hasTheSameFilter
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
-import com.tunjid.me.core.ui.lazy.staggeredgrid.LazyStaggeredGridState
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation

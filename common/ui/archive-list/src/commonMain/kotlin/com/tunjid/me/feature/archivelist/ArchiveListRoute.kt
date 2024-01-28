@@ -22,6 +22,12 @@ import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridItemInfo
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,7 +47,6 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.ui.StickyHeaderStaggeredGrid
-import com.tunjid.me.core.ui.lazy.staggeredgrid.*
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.me.core.ui.scrollbar.scrollbarState
 import com.tunjid.me.feature.rememberRetainedStateHolder
@@ -49,8 +54,7 @@ import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.tiler.TiledList
-import com.tunjid.tiler.queryAtOrNull
+import com.tunjid.tiler.compose.PivotedTilingEffect
 import kotlinx.coroutines.flow.*
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
@@ -179,8 +183,6 @@ private fun ArchiveScreen(
     gridState.PivotedTilingEffect(
         items = state.items,
         indexSelector = kotlin.ranges.IntRange::first,
-        itemsList = { layoutInfo.visibleItemsInfo },
-        indexForItem = LazyStaggeredGridItemInfo::index,
         onQueryChanged = {
             actions(Action.Fetch.LoadAround(it ?: state.queryState.currentQuery))
         }
@@ -401,27 +403,6 @@ private fun LazyStaggeredGridState.scrollbarThumbPositionFunction(
 //    )
 //}
 
-@Composable
-private inline fun <Query, LazyState : Any, LazyStateItem> LazyState.PivotedTilingEffect(
-    items: TiledList<Query, *>,
-    noinline onQueryChanged: (Query?) -> Unit,
-    crossinline indexSelector: IntRange.() -> Int = kotlin.ranges.IntRange::first,
-    crossinline itemsList: LazyState.() -> List<LazyStateItem>,
-    crossinline indexForItem: (LazyStateItem) -> Int?,
-) {
-    val updatedItems by rememberUpdatedState(items)
-    LaunchedEffect(this) {
-        snapshotFlow {
-            val visibleItemsInfo = itemsList(this@PivotedTilingEffect)
-            val index = indexSelector(visibleItemsInfo.indices)
-            val lazyStateItem = visibleItemsInfo.getOrNull(index)
-            val itemIndex = lazyStateItem?.let(indexForItem)
-            itemIndex?.let(updatedItems::queryAtOrNull)
-        }
-            .distinctUntilChanged()
-            .collect(onQueryChanged)
-    }
-}
 
 private val ItemSizeSpec = itemSpring(IntSize.VisibilityThreshold)
 private val ItemPlacementSpec = itemSpring(IntOffset.VisibilityThreshold)
