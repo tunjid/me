@@ -16,24 +16,51 @@
 
 package com.tunjid.me.feature.archivefiles.di
 
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivefiles.ActualArchiveFilesStateHolder
 import com.tunjid.me.feature.archivefiles.ArchiveFilesParentRoute
 import com.tunjid.me.feature.archivefiles.ArchiveFilesRoute
 import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolder
 import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolderCreator
+import com.tunjid.me.feature.archivefiles.FileType
 import com.tunjid.me.feature.archivefiles.State
+import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
+import com.tunjid.treenav.strings.RouteParams
 import com.tunjid.treenav.strings.UrlRouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
+
+internal val RouteParams.archiveId get() = ArchiveId(pathArgs["id"] ?: "")
+internal val RouteParams.kind
+    get() = ArchiveKind.entries.firstOrNull { it.type == pathArgs["kind"] }
+        ?: ArchiveKind.Articles
+
+internal val RouteParams.dndEnabled
+    get() = queryParams["dndEnabled"]
+        ?.map(String::toBooleanStrictOrNull)
+        ?.any(true::equals)
+        ?: false
+
+internal val RouteParams.urls get() = queryParams["url"] ?: emptyList()
+
+internal val RouteParams.fileType: FileType
+    get() {
+        val type = pathArgs["type"]
+        return when {
+            type == null -> FileType.Misc
+            "image" in type -> FileType.Image
+            else -> FileType.Misc
+        }
+    }
 
 @Component
 abstract class ArchiveFilesNavigationComponent {

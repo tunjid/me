@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.feature.archivefiles.di.fileType
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
@@ -108,7 +109,7 @@ private fun ArchiveFilesParentScreen(
     ) {
         Tabs(
             currentTabIndex = pagerState.currentPage,
-            titles = children.map { it.fileType.name },
+            titles = children.map { it.routeParams.fileType.name },
             onTabClicked = { lastTabClicked = it }
         )
         HorizontalPager(

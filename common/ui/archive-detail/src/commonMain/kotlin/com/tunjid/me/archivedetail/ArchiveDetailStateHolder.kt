@@ -18,6 +18,9 @@
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
 package com.tunjid.me.archivedetail
 
+import com.tunjid.me.archivedetail.di.archiveId
+import com.tunjid.me.archivedetail.di.archiveThumbnail
+import com.tunjid.me.archivedetail.di.kind
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.ArchiveRepository
@@ -68,8 +71,8 @@ class ActualArchiveDetailStateHolder(
     route: ArchiveDetailRoute,
 ) : ArchiveDetailStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
-        kind = route.kind,
-        routeThumbnailUrl = route.archiveThumbnail,
+        kind = route.routeParams.kind,
+        routeThumbnailUrl = route.routeParams.archiveThumbnail,
         navBarSize = uiStateFlow.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
@@ -78,7 +81,7 @@ class ActualArchiveDetailStateHolder(
         uiStateFlow.paneMutations(),
         authRepository.authMutations(),
         archiveRepository.archiveLoadMutations(
-            id = route.archiveId
+            id = route.routeParams.archiveId
         ),
         navStateFlow.isInPrimaryNavMutations(
             route = route,

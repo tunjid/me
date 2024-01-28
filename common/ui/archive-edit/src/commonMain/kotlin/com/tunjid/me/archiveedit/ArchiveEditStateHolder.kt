@@ -20,6 +20,9 @@ package com.tunjid.me.archiveedit
 
 
 import androidx.compose.ui.text.input.TextFieldValue
+import com.tunjid.me.archiveedit.di.archiveId
+import com.tunjid.me.archiveedit.di.archiveThumbnail
+import com.tunjid.me.archiveedit.di.kind
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveUpsert
@@ -92,9 +95,9 @@ class ActualArchiveEditStateHolder(
     route: ArchiveEditRoute,
 ) : ArchiveEditStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
-        kind = route.kind,
-        routeThumbnailUrl = route.archiveThumbnail,
-        upsert = ArchiveUpsert(id = route.archiveId),
+        kind = route.routeParams.kind,
+        routeThumbnailUrl = route.routeParams.archiveThumbnail,
+        upsert = ArchiveUpsert(id = route.routeParams.archiveId),
         navBarSize = uiStateFlow.value.navBarSize,
         hasStoragePermissions = permissionsFlow.value.isGranted(Permission.ReadExternalStorage)
     ),
@@ -140,10 +143,10 @@ class ActualArchiveEditStateHolder(
 private fun Flow<Action>.withInitialLoad(
     route: ArchiveEditRoute,
 ) = onStart {
-    val archiveId = route.archiveId
+    val archiveId = route.routeParams.archiveId
     if (archiveId != null) emit(
         Action.Load.InitialLoad(
-            kind = route.kind,
+            kind = route.routeParams.kind,
             id = archiveId,
         )
     )

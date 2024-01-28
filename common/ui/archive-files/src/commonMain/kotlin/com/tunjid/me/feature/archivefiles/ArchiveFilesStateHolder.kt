@@ -30,6 +30,10 @@ import com.tunjid.me.data.repository.ArchiveFileRepository
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
+import com.tunjid.me.feature.archivefiles.di.archiveId
+import com.tunjid.me.feature.archivefiles.di.dndEnabled
+import com.tunjid.me.feature.archivefiles.di.fileType
+import com.tunjid.me.feature.archivefiles.di.urls
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
@@ -93,13 +97,13 @@ class ActualArchiveFilesStateHolder(
     route: ArchiveFilesRoute,
 ) : ArchiveFilesStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
-        archiveId = route.archiveId,
-        dndEnabled = route.dndEnabled,
-        fileType = route.fileType,
+        archiveId = route.routeParams.archiveId,
+        dndEnabled = route.routeParams.dndEnabled,
+        fileType = route.routeParams.fileType,
         items = buildTiledList {
             addAll(
-                query = ArchiveFileQuery(route.archiveId),
-                items = route.urls.map(FileItem::PlaceHolder)
+                query = ArchiveFileQuery(route.routeParams.archiveId),
+                items = route.routeParams.urls.map(FileItem::PlaceHolder)
             )
         }
     ),
@@ -116,7 +120,7 @@ class ActualArchiveFilesStateHolder(
         actions.toMutationStream(keySelector = Action::key) {
             when (val action = type()) {
                 is Action.Drop -> action.flow.dropMutations(
-                    archiveId = route.archiveId,
+                    archiveId = route.routeParams.archiveId,
                     archiveRepository = archiveRepository,
                     archiveFileRepository = archiveFileRepository
                 )

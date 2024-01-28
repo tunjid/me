@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.round
-import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
@@ -59,12 +58,6 @@ import kotlinx.serialization.Serializable
 data class ArchiveGalleryRoute(
     override val routeParams: SerializedRouteParams,
 ) : AdaptiveRoute {
-
-    val archiveId: ArchiveId = routeParams.pathArgs.getValue("id").let(::ArchiveId)
-    val pageOffset get() = routeParams.queryParams["offset"]?.firstOrNull()?.toIntOrNull() ?: 0
-
-    val urls get() = routeParams.queryParams["url"] ?: emptyList()
-
     @Composable
     override fun content() {
         val stateHolder = rememberRetainedStateHolder<ArchiveGalleryStateHolder>(

@@ -64,9 +64,6 @@ data class ArchiveListRoute(
     override val routeParams: SerializedRouteParams,
 ) : AdaptiveRoute {
 
-    val kind = ArchiveKind.entries.firstOrNull { it.type == routeParams.pathArgs["kind"] }
-        ?: ArchiveKind.Articles
-
     @Composable
     override fun content() {
         val stateHolder = rememberRetainedStateHolder<ArchiveListStateHolder>(

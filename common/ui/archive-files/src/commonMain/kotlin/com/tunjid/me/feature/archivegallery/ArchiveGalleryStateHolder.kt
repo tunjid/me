@@ -26,6 +26,9 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.feature.archivefiles.archiveFilesTiler
 import com.tunjid.me.feature.archivefiles.pivotRequest
 import com.tunjid.me.feature.archivegallery.GalleryItem.PlaceHolder
+import com.tunjid.me.feature.archivegallery.di.archiveId
+import com.tunjid.me.feature.archivegallery.di.pageOffset
+import com.tunjid.me.feature.archivegallery.di.urls
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
@@ -69,13 +72,13 @@ class ActualArchiveGalleryStateHolder(
 ) : ArchiveGalleryStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         currentQuery = ArchiveFileQuery(
-            archiveId = route.archiveId,
-            offset = route.pageOffset,
+            archiveId = route.routeParams.archiveId,
+            offset = route.routeParams.pageOffset,
         ),
         items = buildTiledList {
             addAll(
-                query = ArchiveFileQuery(route.archiveId),
-                items = route.urls.map(::PlaceHolder)
+                query = ArchiveFileQuery(route.routeParams.archiveId),
+                items = route.routeParams.urls.map(::PlaceHolder)
             )
         }
     ),

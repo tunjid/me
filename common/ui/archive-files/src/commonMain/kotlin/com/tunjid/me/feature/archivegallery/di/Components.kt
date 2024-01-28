@@ -16,6 +16,7 @@
 
 package com.tunjid.me.feature.archivegallery.di
 
+import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivegallery.ActualArchiveGalleryStateHolder
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryRoute
@@ -27,12 +28,20 @@ import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
+import com.tunjid.treenav.strings.RouteParams
 import com.tunjid.treenav.strings.UrlRouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
+
+internal val RouteParams.archiveId: ArchiveId
+    get() = pathArgs.getValue("id").let(::ArchiveId)
+internal val RouteParams.pageOffset
+    get() = queryParams["offset"]?.firstOrNull()?.toIntOrNull() ?: 0
+internal val RouteParams.urls
+    get() = queryParams["url"] ?: emptyList()
 
 @Component
 abstract class ArchiveGalleryNavigationComponent {

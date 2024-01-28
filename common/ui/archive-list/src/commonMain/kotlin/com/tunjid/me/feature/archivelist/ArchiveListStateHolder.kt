@@ -16,6 +16,7 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.feature.archivelist
 
 import com.tunjid.me.core.model.ArchiveContentFilter
@@ -29,6 +30,7 @@ import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
+import com.tunjid.me.feature.archivelist.di.kind
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
@@ -86,7 +88,7 @@ class ActualArchiveListStateHolder(
 ) : ArchiveListStateHolder by scope.actionStateFlowProducer(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         queryState = QueryState(
-            currentQuery = ArchiveQuery(kind = route.kind),
+            currentQuery = ArchiveQuery(kind = route.routeParams.kind),
         )
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
@@ -107,7 +109,7 @@ class ActualArchiveListStateHolder(
 
                 is Action.FilterChanged -> action.flow.filterChangedMutations(
                     repo = archiveRepository,
-                    kind = route.kind
+                    kind = route.routeParams.kind
                 )
 
                 is Action.ListStateChanged -> action.flow.listStateChangeMutations()

@@ -56,8 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.halilibo.richtext.markdown.Markdown
 import com.halilibo.richtext.ui.material3.Material3RichText
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.archiveedit.di.archiveId
+import com.tunjid.me.archiveedit.di.kind
 import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.NestedScrollTextContainer
@@ -82,16 +82,6 @@ data class ArchiveEditRoute(
     override val routeParams: SerializedRouteParams,
 ) : AdaptiveRoute {
 
-    override val id: String get() = routeParams.route.split("?").first()
-
-    val archiveId: ArchiveId? get() = routeParams.pathArgs["id"]?.let(::ArchiveId)
-    val kind: ArchiveKind
-        get() = ArchiveKind.entries
-            .firstOrNull { it.type == routeParams.pathArgs["kind"] }
-            ?: ArchiveKind.Articles
-
-    val archiveThumbnail: String? get() = routeParams.queryParams["thumbnail"]?.firstOrNull()
-
     @Composable
     override fun content() {
         val stateHolder = rememberRetainedStateHolder<ArchiveEditStateHolder>(
@@ -104,11 +94,11 @@ data class ArchiveEditRoute(
         )
     }
 
-    override val children: List<Node> = when (val archiveId = archiveId) {
+    override val children: List<Node> = when (val archiveId = routeParams.archiveId) {
         null -> emptyList()
         else -> listOf(
             ExternalRoute(
-                path = "archives/${kind.type}/${archiveId.value}/files/image"
+                path = "archives/${routeParams.kind.type}/${archiveId.value}/files/image"
             )
         )
     }

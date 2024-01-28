@@ -34,8 +34,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.archivedetail.di.kind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.Chips
@@ -60,13 +59,6 @@ data class ArchiveDetailRoute(
     override val routeParams: SerializedRouteParams,
 ) : AdaptiveRoute {
 
-    val archiveId: ArchiveId? = routeParams.pathArgs["id"]?.let(::ArchiveId)
-
-    val kind = ArchiveKind.entries.firstOrNull { it.type == routeParams.pathArgs["kind"] }
-        ?: ArchiveKind.Articles
-
-    val archiveThumbnail: String? get() = routeParams.queryParams["thumbnail"]?.firstOrNull()
-
     @Composable
     override fun content() {
         val stateHolder = rememberRetainedStateHolder<ArchiveDetailStateHolder>(
@@ -81,7 +73,7 @@ data class ArchiveDetailRoute(
 
     override val children: List<Node> = listOf(
         ExternalRoute(
-            path = "archives/${kind.type}"
+            path = "archives/${routeParams.kind.type}"
         )
     )
 

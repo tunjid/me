@@ -92,29 +92,6 @@ data class ArchiveFilesRoute(
     override val routeParams: SerializedRouteParams,
 ) : AdaptiveRoute {
 
-    val archiveId get() = ArchiveId(routeParams.pathArgs["id"] ?: "")
-    val kind
-        get() = ArchiveKind.entries.firstOrNull { it.type == routeParams.pathArgs["kind"] }
-            ?: ArchiveKind.Articles
-
-    val dndEnabled
-        get() = routeParams.queryParams["dndEnabled"]
-            ?.map(String::toBooleanStrictOrNull)
-            ?.any(true::equals)
-            ?: false
-
-    val urls get() = routeParams.queryParams["url"] ?: emptyList()
-
-    val fileType: FileType
-        get() {
-            val type = routeParams.pathArgs["type"]
-            return when {
-                type == null -> FileType.Misc
-                "image" in type -> FileType.Image
-                else -> FileType.Misc
-            }
-        }
-
     @Composable
     override fun content() {
         val stateHolder = rememberRetainedStateHolder<ArchiveFilesStateHolder>(
