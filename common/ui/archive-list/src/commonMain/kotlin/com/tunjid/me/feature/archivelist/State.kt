@@ -137,6 +137,12 @@ sealed class Action(val key: String) {
 
     sealed class Navigate : Action(key = "Navigate"), NavigationAction {
 
+        data class Create(val kind: ArchiveKind) : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                navState.push(node = "archives/${kind.type}/create".toRoute)
+            }
+        }
+
         data class Detail(val archive: Archive) : Navigate() {
             override val navigationMutation: NavigationMutation = {
                 val route = routeString(
@@ -165,9 +171,11 @@ sealed class Action(val key: String) {
             }
         }
 
-        data class Generic(
-            override val navigationMutation: NavigationMutation
-        ) : Navigate()
+        data object SignIn : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                navState.push("sign-in".toRoute)
+            }
+        }
     }
 }
 

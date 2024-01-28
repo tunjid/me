@@ -67,9 +67,7 @@ fun GlobalUi(
                     )
 
                     SIGN_IN -> onAction(
-                        Action.Navigate.Generic {
-                            navState.push("sign-in".toRoute)
-                        }
+                        Action.Navigate.SignIn
                     )
                 }
             },
@@ -78,11 +76,7 @@ fun GlobalUi(
             fabText = "Create",
             fabIcon = Icons.Default.Add,
             fabClickListener = rememberFunction {
-                onAction(Action.Navigate.Generic {
-                    val kind = state.queryState.currentQuery.kind
-                    val route = "archives/${kind.type}/create".toRoute
-                    navState.push(route)
-                })
+                onAction(Action.Navigate.Create(kind = state.queryState.currentQuery.kind))
             },
             insetFlags = InsetFlags.NO_BOTTOM,
             navVisibility = NavVisibility.Visible,
