@@ -36,9 +36,9 @@ import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.consumeNavigationActions
-import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.treenav.MultiStackNav
@@ -51,7 +51,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
-typealias ArchiveDetailStateHolder = ActionStateProducer<Action, StateFlow<State>>
+typealias ArchiveDetailStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ArchiveDetailStateHolderCreator(
@@ -69,14 +69,14 @@ class ActualArchiveDetailStateHolder(
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveDetailRoute,
-) : ArchiveDetailStateHolder by scope.actionStateFlowProducer(
+) : ArchiveDetailStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         kind = route.routeParams.kind,
         routeThumbnailUrl = route.routeParams.archiveThumbnail,
         navBarSize = uiStateFlow.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
-    mutationFlows = listOf(
+    inputs = listOf(
         uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
         uiStateFlow.paneMutations(),
         authRepository.authMutations(),

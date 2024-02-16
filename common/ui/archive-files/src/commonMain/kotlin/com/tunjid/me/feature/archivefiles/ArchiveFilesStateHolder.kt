@@ -42,12 +42,12 @@ import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.consumeNavigationActions
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
-import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.mutator.mutation
+import com.tunjid.mutator.mutationOf 
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.map
@@ -72,7 +72,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import me.tatarka.inject.annotations.Inject
 
-typealias ArchiveFilesStateHolder = ActionStateProducer<Action, StateFlow<State>>
+typealias ArchiveFilesStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ArchiveFilesStateHolderCreator(
@@ -95,7 +95,7 @@ class ActualArchiveFilesStateHolder(
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveFilesRoute,
-) : ArchiveFilesStateHolder by scope.actionStateFlowProducer(
+) : ArchiveFilesStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         archiveId = route.routeParams.archiveId,
         dndEnabled = route.routeParams.dndEnabled,
@@ -108,7 +108,7 @@ class ActualArchiveFilesStateHolder(
         }
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
-    mutationFlows = listOf(
+    inputs = listOf(
         authRepository.authMutations(),
         navStateFlow.isInPrimaryNavMutations(
             route = route,
@@ -191,7 +191,7 @@ private fun Flow<Action.Fetch>.loadMutations(
         )
     )
         .map {
-            mutation { copy(items = it.map(FileItem::File)) }
+            mutationOf { copy(items = it.map(FileItem::File)) }
         }
 }
 

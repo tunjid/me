@@ -26,16 +26,16 @@ import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
-import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.mutator.mutation
+import com.tunjid.mutator.mutationOf 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
 
-typealias ProfileStateHolder = ActionStateProducer<Action, StateFlow<State>>
+typealias ProfileStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ProfileStateHolderCreator(
@@ -50,11 +50,11 @@ class ActualProfileStateHolder(
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
     route: ProfileRoute,
-) : ProfileStateHolder by scope.actionStateFlowProducer(
+) : ProfileStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
-    mutationFlows = listOf(
-        authRepository.signedInUserStream.map { mutation { copy(signedInUser = it) } },
+    inputs = listOf(
+        authRepository.signedInUserStream.map { mutationOf { copy(signedInUser = it) } },
     ),
     actionTransform = { actions ->
         actions.toMutationStream {
@@ -67,7 +67,7 @@ class ActualProfileStateHolder(
 
 private fun Flow<Action.FieldChanged>.formEditMutations(): Flow<Mutation<State>> =
     map { (updatedField) ->
-        mutation {
+        mutationOf {
             copy(fields = fields.update(updatedField))
         }
     }

@@ -12,7 +12,7 @@ import com.tunjid.me.scaffold.globalui.isPreviewing
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.navigation.UnknownRoute
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.treenav.MultiStackNav
@@ -41,10 +41,10 @@ internal fun CoroutineScope.adaptiveNavigationStateMutator(
     routeParser: RouteParser<AdaptiveRoute>,
     navStateFlow: StateFlow<MultiStackNav>,
     uiStateFlow: StateFlow<UiState>,
-) = actionStateFlowProducer<Action, Adaptive.NavigationState>(
+) = actionStateFlowMutator<Action, Adaptive.NavigationState>(
     initialState = Adaptive.NavigationState.Initial,
     started = SharingStarted.WhileSubscribed(3_000),
-    mutationFlows = listOf(
+    inputs = listOf(
         routeParser.adaptiveNavigationStateMutations(
             navStateFlow = navStateFlow,
             uiStateFlow = uiStateFlow

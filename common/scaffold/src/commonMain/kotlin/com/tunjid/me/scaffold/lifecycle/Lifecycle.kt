@@ -20,9 +20,9 @@ package com.tunjid.me.scaffold.lifecycle
 
 import androidx.compose.runtime.*
 import com.tunjid.me.core.utilities.mapState
-import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 import kotlin.coroutines.CoroutineContext
 
-typealias LifecycleStateHolder = ActionStateProducer<Mutation<Lifecycle>, StateFlow<Lifecycle>>
+typealias LifecycleStateHolder = ActionStateMutator<Mutation<Lifecycle>, StateFlow<Lifecycle>>
 
 data class Lifecycle(
     val isInForeground: Boolean = true,
@@ -90,7 +90,7 @@ fun <T> StateFlow<T>.collectAsStateWithLifecycle(
 @Inject
 class ActualLifecycleStateHolder(
     appScope: CoroutineScope,
-) : LifecycleStateHolder by appScope.actionStateFlowProducer(
+) : LifecycleStateHolder by appScope.actionStateFlowMutator(
     started = SharingStarted.Eagerly,
     initialState = Lifecycle(),
     actionTransform = { it }

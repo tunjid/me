@@ -33,7 +33,7 @@ found [here](https://github.com/tunjid/tunji-web-deux).
 
 Some ideas explored include:
 
-* [Mutators](https://github.com/tunjid/Mutator) as abstract data types for the production and mutation of state
+* [Mutators](https://github.com/tunjid/Mutator) as abstract data types for the production and mutationOf of state
 * Reactive app architecture as a driver of app state
 * Android insets and IME (keyboard) behavior as state
 * Android permissions as state
@@ -119,7 +119,7 @@ immutable classes. The root of the app is a `MultiStackNav` and navigation is
 controlled by a `NavStateHolder` defined as:
 
 ```
-typealias NavStateHolder = ActionStateProducer<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
+typealias NavStateHolder = ActionStateMutator<Mutation<MultiStackNav>, StateFlow<MultiStackNav>>
 ```
 
 #### Global UI as state
@@ -131,7 +131,7 @@ for visual semantic differences between Android and desktop. Android for example
 The definition for the `GlobalUiStateHolder` is:
 
 ```
-typealias GlobalUiStateHolder = ActionStateProducer<Mutation<UiState>, StateFlow<UiState>>
+typealias GlobalUiStateHolder = ActionStateMutator<Mutation<UiState>, StateFlow<UiState>>
 ```
 
 #### Paging as state

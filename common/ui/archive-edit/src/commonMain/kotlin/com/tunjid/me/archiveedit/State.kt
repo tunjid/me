@@ -37,7 +37,7 @@ import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.mutation
+import com.tunjid.mutator.mutationOf 
 import com.tunjid.treenav.push
 import com.tunjid.treenav.strings.routeString
 import kotlinx.serialization.Serializable
@@ -119,21 +119,21 @@ sealed class Action(val key: String) {
 
         val mutation: Mutation<State>
             get() = when (this) {
-                is Title -> mutation { copy(upsert = upsert.copy(title = value)) }
-                is Description -> mutation { copy(upsert = upsert.copy(description = value)) }
-                is VideoUrl -> mutation { copy(upsert = upsert.copy(videoUrl = value)) }
-                is Body.Edit -> mutation {
+                is Title -> mutationOf { copy(upsert = upsert.copy(title = value)) }
+                is Description -> mutationOf { copy(upsert = upsert.copy(description = value)) }
+                is VideoUrl -> mutationOf { copy(upsert = upsert.copy(videoUrl = value)) }
+                is Body.Edit -> mutationOf {
                     copy(
                         body = textFieldValue,
                         upsert = upsert.copy(body = textFieldValue.text)
                     )
                 }
 
-                is Body.CursorIndex -> mutation {
+                is Body.CursorIndex -> mutationOf {
                     copy(body = body.copy(selection = TextRange(index = index)))
                 }
 
-                is Body.ImageDrop -> mutation {
+                is Body.ImageDrop -> mutationOf {
                     val existingText = body.text
                     val startSubstring = existingText.substring(
                         startIndex = 0,

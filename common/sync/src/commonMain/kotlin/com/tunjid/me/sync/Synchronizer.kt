@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// See YouTrack: KTIJ-18375
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
 package com.tunjid.me.sync
 
 import com.tunjid.me.common.sync.AppDatabase
@@ -27,6 +29,7 @@ import com.tunjid.me.data.network.exponentialBackoff
 import com.tunjid.me.sync.di.SyncableLocator
 import com.tunjid.mutator.coroutines.splitByType
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
@@ -93,6 +96,8 @@ internal class InMemorySynchronizer(
     init {
         // Process sync requests for each key in parallel.
         input.splitByType(
+            capacity = 64,
+            onBufferOverflow = BufferOverflow.SUSPEND,
             typeSelector = { it },
             keySelector = ChangeListKey::model,
             transform = {

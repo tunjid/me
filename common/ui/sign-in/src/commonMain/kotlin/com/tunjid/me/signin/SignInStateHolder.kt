@@ -32,13 +32,13 @@ import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.navigation.NavigationContext
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.canGoUp
-import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapLatestToManyMutations
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.mutator.mutation
+import com.tunjid.mutator.mutationOf 
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.switch
@@ -46,7 +46,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
 
-typealias SignInStateHolder = ActionStateProducer<Action, StateFlow<State>>
+typealias SignInStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class SignInStateHolderCreator(
@@ -62,11 +62,11 @@ class ActualSignInStateHolder(
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
     route: SignInRoute,
-) : SignInStateHolder by scope.actionStateFlowProducer(
+) : SignInStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
-    mutationFlows = listOf(
-        authRepository.isSignedIn.map { mutation { copy(isSignedIn = it) } },
+    inputs = listOf(
+        authRepository.isSignedIn.map { mutationOf { copy(isSignedIn = it) } },
     ),
     actionTransform = { actions ->
         actions.toMutationStream {

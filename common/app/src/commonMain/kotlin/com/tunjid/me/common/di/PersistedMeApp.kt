@@ -36,7 +36,7 @@ import com.tunjid.me.scaffold.navigation.*
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.me.sync.di.Sync
-import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Order
 import com.tunjid.treenav.flatten
@@ -136,7 +136,7 @@ class PersistedMeApp(
             .filterIsInstance<AdaptiveRoute>()
             .fold(mutableMapOf()) { map, route ->
                 val stateHolder = screenStateHolderCache.screenStateHolderFor<Any>(route)
-                val state = (stateHolder as? ActionStateProducer<*, *>)?.state ?: return@fold map
+                val state = (stateHolder as? ActionStateMutator<*, *>)?.state ?: return@fold map
                 val serializable = (state as? StateFlow<*>)?.value ?: return@fold map
                 if (serializable is ByteSerializable) map[route.id] =
                     byteSerializer.toBytes(serializable)

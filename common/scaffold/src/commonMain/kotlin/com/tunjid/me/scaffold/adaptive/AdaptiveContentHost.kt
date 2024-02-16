@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LookaheadScope
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.backPreviewModifier
-import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.RouteParser
 import kotlinx.coroutines.CoroutineScope
@@ -99,7 +99,7 @@ private class SavedStateAdaptiveContentHost(
     saveableStateHolder: SaveableStateHolder,
 ) : AdaptiveContentHost,
     SaveableStateHolder by saveableStateHolder,
-    ActionStateProducer<Action, StateFlow<Adaptive.NavigationState>>
+    ActionStateMutator<Action, StateFlow<Adaptive.NavigationState>>
     by coroutineScope.adaptiveNavigationStateMutator(
         routeParser = routeParser,
         navStateFlow = navStateFlow,

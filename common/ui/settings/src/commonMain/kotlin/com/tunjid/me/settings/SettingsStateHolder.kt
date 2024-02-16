@@ -29,8 +29,8 @@ import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.consumeNavigationActions
-import com.tunjid.mutator.ActionStateProducer
-import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.ActionStateMutator
+import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import kotlinx.coroutines.CoroutineScope
@@ -38,7 +38,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import me.tatarka.inject.annotations.Inject
 
-typealias SettingsStateHolder = ActionStateProducer<Action, StateFlow<State>>
+typealias SettingsStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class SettingsStateHolderCreator(
@@ -54,10 +54,10 @@ class ActualSettingsStateHolder(
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
     route: SettingsRoute,
-) : SettingsStateHolder by scope.actionStateFlowProducer(
+) : SettingsStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
-    mutationFlows = listOf(
+    inputs = listOf(
         authRepository.isSignedIn.mapToMutation { isSignedIn ->
             copy(
                 routes = listOfNotNull(

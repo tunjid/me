@@ -19,7 +19,7 @@ package com.tunjid.me.scaffold.globalui
 import androidx.compose.runtime.*
 import com.tunjid.me.scaffold.adaptive.Adaptive
 import com.tunjid.me.scaffold.adaptive.LocalAdaptiveContentScope
-import com.tunjid.mutator.mutation
+import com.tunjid.mutator.mutationOf 
 
 val currentUiState
     @ReadOnlyComposable
@@ -43,7 +43,7 @@ fun ScreenUiState(state: UiState) {
 
     LaunchedEffect(updatedState, scope.containerState) {
         if (scope.containerState.container == Adaptive.Container.Primary) uiStateHolder.accept(
-            mutation {
+            mutationOf {
                 // Preserve things that should not be overwritten
                 updatedState.copy(
                     navMode = navMode,

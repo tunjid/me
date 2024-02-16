@@ -49,13 +49,13 @@ import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.consumeNavigationActions
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
-import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapLatestToManyMutations
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.mutator.mutation
+import com.tunjid.mutator.mutationOf 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -73,7 +73,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
 import me.tatarka.inject.annotations.Inject
 
-typealias ArchiveEditStateHolder = ActionStateProducer<Action, StateFlow<State>>
+typealias ArchiveEditStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ArchiveEditStateHolderCreator(
@@ -93,7 +93,7 @@ class ActualArchiveEditStateHolder(
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveEditRoute,
-) : ArchiveEditStateHolder by scope.actionStateFlowProducer(
+) : ArchiveEditStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         kind = route.routeParams.kind,
         routeThumbnailUrl = route.routeParams.archiveThumbnail,
@@ -102,7 +102,7 @@ class ActualArchiveEditStateHolder(
         hasStoragePermissions = permissionsFlow.value.isGranted(Permission.ReadExternalStorage)
     ),
     started = SharingStarted.WhileSubscribed(),
-    mutationFlows = listOf(
+    inputs = listOf(
         uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
         permissionsFlow.storagePermissionMutations(),
         authRepository.authMutations(),
@@ -223,7 +223,7 @@ private fun Flow<Action.Drop>.dropMutations(
                 else -> validMimeTypes.any { it.contains(uri.path.split(".").lastOrNull() ?: "") }
             }
         }
-        mutation {
+        mutationOf {
             when (uri) {
                 is LocalUri -> copy(toUpload = uri, thumbnail = uri.path)
                 is Uri -> copy(

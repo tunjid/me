@@ -34,9 +34,9 @@ import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.consumeNavigationActions
-import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.tiler.Tile
@@ -51,7 +51,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
-typealias ArchiveGalleryStateHolder = ActionStateProducer<Action, StateFlow<State>>
+typealias ArchiveGalleryStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ArchiveGalleryStateHolderCreator(
@@ -69,7 +69,7 @@ class ActualArchiveGalleryStateHolder(
     scope: CoroutineScope,
     savedState: ByteArray?,
     route: ArchiveGalleryRoute,
-) : ArchiveGalleryStateHolder by scope.actionStateFlowProducer(
+) : ArchiveGalleryStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         currentQuery = ArchiveFileQuery(
             archiveId = route.routeParams.archiveId,

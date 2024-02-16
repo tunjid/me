@@ -28,7 +28,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
-import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.ActionStateMutator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.stateIn
@@ -37,7 +37,7 @@ import lift.onActivitiesChanged
 
 private data class PermissionsCache(
     val activeActivity: ComponentActivity? = null,
-    val map: Map<ComponentActivity, Map<String, ActionStateProducer<Unit, StateFlow<Boolean>>>> = mapOf()
+    val map: Map<ComponentActivity, Map<String, ActionStateMutator<Unit, StateFlow<Boolean>>>> = mapOf()
 )
 
 /**
@@ -54,7 +54,7 @@ internal fun Context.permissionsStateHolder(
             override val state: StateFlow<Permissions> = permissionsCacheStateHolder.state
                 .flatMapLatest { cache ->
                     // Flatten output state of each individual permission mutator.
-                    val permissionsToStateHolders: Map<String, ActionStateProducer<Unit, StateFlow<Boolean>>>? =
+                    val permissionsToStateHolders: Map<String, ActionStateMutator<Unit, StateFlow<Boolean>>>? =
                         cache.activeActivity?.let(cache.map::get)
 
                     val flows: List<Flow<Pair<String, Boolean>>>? = permissionsToStateHolders?.entries
@@ -89,7 +89,7 @@ internal fun Context.permissionsStateHolder(
  */
 private fun Context.permissionsCacheStateHolder(
     permissions: List<String>
-) = object : ActionStateProducer<String, StateFlow<PermissionsCache>> {
+) = object : ActionStateMutator<String, StateFlow<PermissionsCache>> {
     val stateFlow = MutableStateFlow(PermissionsCache())
 
     init {
@@ -141,7 +141,7 @@ private fun Context.permissionsCacheStateHolder(
 /**
  * Creates a [StateHolder] whose output is the state of a single [permissionString]'s granted status.
  */
-private fun ComponentActivity.permissionStateHolder(permissionString: String): ActionStateProducer<Unit, StateFlow<Boolean>> {
+private fun ComponentActivity.permissionStateHolder(permissionString: String): ActionStateMutator<Unit, StateFlow<Boolean>> {
     val permissionStateFlow = MutableStateFlow(hasPermission(permissionString))
     val isActiveStateFlow = MutableStateFlow(lifecycle.currentState != Lifecycle.State.DESTROYED)
 
@@ -156,7 +156,7 @@ private fun ComponentActivity.permissionStateHolder(permissionString: String): A
         isActiveStateFlow.value = event != Lifecycle.Event.ON_DESTROY
     })
 
-    return object : ActionStateProducer<Unit, StateFlow<Boolean>> {
+    return object : ActionStateMutator<Unit, StateFlow<Boolean>> {
         override val state: StateFlow<Boolean> = combine(
             permissionStateFlow,
             isActiveStateFlow,

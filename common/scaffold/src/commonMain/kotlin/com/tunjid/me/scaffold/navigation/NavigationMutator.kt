@@ -22,10 +22,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
-import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.actionStateFlowProducer
-import com.tunjid.mutator.mutation
+import com.tunjid.mutator.coroutines.actionStateFlowMutator
+import com.tunjid.mutator.mutationOf 
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.StackNav
 import com.tunjid.treenav.strings.RouteParser
@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
-typealias NavigationStateHolder = ActionStateProducer<NavigationMutation, StateFlow<MultiStackNav>>
+typealias NavigationStateHolder = ActionStateMutator<NavigationMutation, StateFlow<MultiStackNav>>
 typealias NavigationMutation = NavigationContext.() -> MultiStackNav
 
 /**
@@ -73,7 +73,7 @@ class PersistedNavigationStateHolder(
     appScope: CoroutineScope,
     savedStateRepository: SavedStateRepository,
     routeParser: RouteParser<AdaptiveRoute>,
-) : NavigationStateHolder by appScope.actionStateFlowProducer(
+) : NavigationStateHolder by appScope.actionStateFlowMutator(
     initialState = EmptyNavigationState,
     started = SharingStarted.Eagerly,
     actionTransform = { navMutations ->
@@ -85,7 +85,7 @@ class PersistedNavigationStateHolder(
             emit { multiStackNav }
             emitAll(
                 navMutations.map { navMutation ->
-                    mutation {
+                    mutationOf {
                         navMutation(
                             ImmutableNavigationContext(
                                 state = this,

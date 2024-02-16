@@ -42,9 +42,9 @@ import com.tunjid.me.scaffold.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
-import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
-import com.tunjid.mutator.mutation
+import com.tunjid.mutator.mutationOf 
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.callbackFlow
@@ -142,13 +142,13 @@ sealed class Gesture {
     data object Release : Gesture()
 }
 
-private fun CoroutineScope.offsetMutator() = actionStateFlowProducer<Gesture, Offset>(
+private fun CoroutineScope.offsetMutator() = actionStateFlowMutator<Gesture, Offset>(
     initialState = Offset.Zero,
     actionTransform = { actions ->
         actions.flatMapLatest { action ->
             when (action) {
                 is Gesture.Drag -> flowOf(
-                    mutation {
+                    mutationOf {
                         copy(x = x + action.offset.x, y = y + action.offset.y)
                     }
                 )

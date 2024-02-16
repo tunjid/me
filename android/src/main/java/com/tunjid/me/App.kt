@@ -19,7 +19,7 @@ package com.tunjid.me
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import com.tunjid.mutator.mutation
+import com.tunjid.mutator.mutationOf 
 
 class App : Application() {
 
@@ -32,7 +32,7 @@ class App : Application() {
 
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             private fun updateStatus(isInForeground: Boolean) =
-                lifecycleActions(mutation {
+                lifecycleActions(mutationOf {
                     copy(isInForeground = isInForeground)
                 })
 

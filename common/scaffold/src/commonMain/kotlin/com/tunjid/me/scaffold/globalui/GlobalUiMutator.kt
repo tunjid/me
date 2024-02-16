@@ -19,11 +19,11 @@
 package com.tunjid.me.scaffold.globalui
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.tunjid.mutator.ActionStateProducer
+import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.coroutines.actionStateFlowProducer
+import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.asNoOpStateFlowMutator
-import com.tunjid.mutator.mutation
+import com.tunjid.mutator.mutationOf 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,12 +31,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
-typealias GlobalUiStateHolder = ActionStateProducer<Mutation<UiState>, StateFlow<UiState>>
+typealias GlobalUiStateHolder = ActionStateMutator<Mutation<UiState>, StateFlow<UiState>>
 
 @Inject
 class ActualGlobalUiStateHolder(
     appScope: CoroutineScope,
-) : GlobalUiStateHolder by appScope.actionStateFlowProducer(
+) : GlobalUiStateHolder by appScope.actionStateFlowMutator(
     initialState = UiState(),
     actionTransform = { it }
 )
@@ -50,4 +50,4 @@ fun <State : Any> StateFlow<UiState>.navBarSizeMutations(
 ): Flow<Mutation<State>> =
     map { it.navBarSize }
         .distinctUntilChanged()
-        .map { mutation { mutation(this, it) } }
+        .map { mutationOf { mutation(this, it) } }

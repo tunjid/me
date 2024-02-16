@@ -41,7 +41,7 @@ import com.tunjid.me.scaffold.globalui.integrateBackActions
 import com.tunjid.me.scaffold.scaffold.Scaffold
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
-import com.tunjid.mutator.mutation
+import com.tunjid.mutator.mutationOf 
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -118,7 +118,7 @@ private fun MainActivity.AdaptNavigation(globalUiStateHolder: GlobalUiStateHolde
 //    }
 
     LaunchedEffect(widthWindowSizeClass) {
-        globalUiStateHolder.accept(mutation {
+        globalUiStateHolder.accept(mutationOf {
             copy(
                 windowSizeClass = widthWindowSizeClass,
                 navMode = when (widthWindowSizeClass) {
