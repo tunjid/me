@@ -89,36 +89,33 @@ internal class SharedElementData<T>(
 internal fun Modifier.sharedElement(
     enabled: Boolean,
     sharedElementData: SharedElementData<*>,
-): Modifier = composed {
-    val coroutineScope = rememberCoroutineScope()
-    // TODO: Optimize the not enabled path
-    intermediateLayout { measurable, _ ->
-        val (width, height) = sharedElementData.sizeAnimation.updateTarget(
-            coroutineScope = coroutineScope,
-            targetValue = lookaheadSize,
+): Modifier = this then intermediateLayout { measurable, _ ->
+    val (width, height) = sharedElementData.sizeAnimation.updateTarget(
+        coroutineScope = this,
+        targetValue = lookaheadSize,
+    )
+    val animatedConstraints = Constraints.fixed(width, height)
+    val placeable = measurable.measure(animatedConstraints)
+
+    layout(placeable.width, placeable.height) layout@{
+        val currentCoordinates = coordinates ?: return@layout placeable.place(x = 0, y = 0)
+        val targetOffset = lookaheadScopeCoordinates.localLookaheadPositionOf(
+            currentCoordinates
         )
-        val animatedConstraints = Constraints.fixed(width, height)
-        val placeable = measurable.measure(animatedConstraints)
+        val animatedOffset = sharedElementData.offsetAnimation.updateTarget(
+            coroutineScope = this@intermediateLayout,
+            targetValue = targetOffset.round(),
+        )
 
-        layout(placeable.width, placeable.height) layout@{
-            val currentCoordinates = coordinates ?: return@layout placeable.place(x = 0, y = 0)
-            val targetOffset = lookaheadScopeCoordinates.localLookaheadPositionOf(
-                currentCoordinates
-            )
-            val animatedOffset = sharedElementData.offsetAnimation.updateTarget(
-                coroutineScope,
-                targetOffset.round(),
-            )
-            val currentOffset = lookaheadScopeCoordinates.localPositionOf(
-                sourceCoordinates = currentCoordinates,
-                relativeToSource = Offset.Zero
-            ).round()
+        if (!enabled) return@layout placeable.place(x = 0, y = 0)
 
-            val (x, y) = animatedOffset - currentOffset
+        val currentOffset = lookaheadScopeCoordinates.localPositionOf(
+            sourceCoordinates = currentCoordinates,
+            relativeToSource = Offset.Zero
+        ).round()
 
-            if (enabled) placeable.place(x = x, y = y)
-            else placeable.place(x = 0, y = 0)
-        }
+        val (x, y) = animatedOffset - currentOffset
+        placeable.place(x = x, y = y)
     }
 }
 

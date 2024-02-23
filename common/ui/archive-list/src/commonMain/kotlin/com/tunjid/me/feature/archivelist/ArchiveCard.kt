@@ -142,7 +142,7 @@ fun ArchiveCard(
             Column {
                 thumb(
                     archive.thumbnail,
-                    modifier
+                    Modifier
                         .fillMaxWidth()
                         .aspectRatio(16f / 9f)
                 )
