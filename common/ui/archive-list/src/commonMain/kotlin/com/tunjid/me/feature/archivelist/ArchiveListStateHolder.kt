@@ -225,113 +225,109 @@ private fun Flow<Action.ListStateChanged>.listStateChangeMutations(): Flow<Mutat
 private suspend fun Flow<Action.Fetch>.fetchMutations(
     stateHolder: SuspendingStateHolder<State>,
     repo: ArchiveRepository,
-): Flow<Mutation<State>> {
-    val startingQuery = stateHolder.state().queryState.currentQuery
-    return scan(
-        initial = Triple(
-            startingQuery,
-            MutableStateFlow(startingQuery),
-            MutableStateFlow(value = 2)
+): Flow<Mutation<State>> = scan(
+    initial = Pair(
+        MutableStateFlow(value = stateHolder.state().queryState.currentQuery),
+        MutableStateFlow(value = 1)
+    )
+) { accumulator, action ->
+    val (queries, numColumns) = accumulator
+    when (action) {
+        is Action.Fetch.LoadAround -> queries.value = queries.value.stabilizeQuery(
+            LoadReason.LoadMore(
+                action.query
+            )
         )
-    ) { accumulator, action ->
-        val (queryAtStart, queries, numColumns) = accumulator
-        when (action) {
-            is Action.Fetch.LoadAround -> queries.value = queries.value.stabilizeQuery(
-                LoadReason.LoadMore(
-                    queryAtStart
-                )
-            )
 
-            is Action.Fetch.QueryChange -> queries.value = queries.value.stabilizeQuery(
-                action.loadReason(
-                    state = stateHolder.state(),
-                    repo = repo
-                )
+        is Action.Fetch.QueryChange -> queries.value = queries.value.stabilizeQuery(
+            action.loadReason(
+                state = stateHolder.state(),
+                repo = repo
             )
+        )
 
-            is Action.Fetch.NoColumnsChanged -> numColumns.value = action.noColumns
-        }
-        // Emit the same item with each action
-        accumulator
+        is Action.Fetch.NoColumnsChanged -> numColumns.value = action.noColumns
     }
-        // Only emit once
-        .distinctUntilChanged()
-        // Flatmap to the fields defined earlier
-        .flatMapLatest { (_, queries, numColumns) ->
-            val archivesAvailable = queries.flatMapLatest(
-                repo::count
+    // Emit the same item with each action
+    accumulator
+}
+    // Only emit once
+    .distinctUntilChanged()
+    // Flatmap to the fields defined earlier
+    .flatMapLatest { (queries, numColumns) ->
+        val archivesAvailable = queries.flatMapLatest(
+            repo::count
+        )
+        val pivotInputs = queries.toPivotedTileInputs(
+            pivotRequests = numColumns
+                .map(::pivotRequest)
+                .distinctUntilChanged()
+        )
+        val limitInputs = numColumns.map { noColumns ->
+            Tile.Limiter<ArchiveQuery, ArchiveItem.Card>(
+                maxQueries = 4 * noColumns,
+                itemSizeHint = null,
             )
-            val pivotInputs = queries.toPivotedTileInputs(
-                pivotRequests = numColumns
-                    .map(::pivotRequest)
-                    .distinctUntilChanged()
-            )
-            val limitInputs = numColumns.map { noColumns ->
-                Tile.Limiter<ArchiveQuery, ArchiveItem.Card>(
-                    maxQueries = 4 * noColumns,
+        }
+        val archiveItems = merge(pivotInputs, limitInputs).toTiledList(
+            repo.archiveTiler(
+                limiter = Tile.Limiter(
+                    maxQueries = 4,
                     itemSizeHint = null,
                 )
+            )
+        )
+        val listItemMutations: Flow<Mutation<State>> = archiveItems
+            .map { stateHolder.state().items to it }
+            // To preserve keys, when items are fetched for changes in the query, debounce emissions
+            .debounce { (oldItems, newItems) ->
+                // new items are still loading, debounce
+                if (newItems.isEmpty()) return@debounce QUERY_CHANGE_DEBOUNCE
+
+                val oldQueries = oldItems.queries()
+                val newQueries = newItems.queries()
+                val isDiffFilter = oldQueries.isNotEmpty() && !newQueries.first()
+                    .hasTheSameFilter(oldQueries.first())
+
+                // new items were fetched for a different query and placeholders are present, debounce
+                if (isDiffFilter && newItems.hasPlaceholders()) QUERY_CHANGE_DEBOUNCE
+                else 0L
             }
-            val archiveItems = merge(pivotInputs, limitInputs).toTiledList(
-                repo.archiveTiler(
-                    limiter = Tile.Limiter(
-                        maxQueries = 4,
-                        itemSizeHint = null,
+            .mapToMutation { (_, newItems) ->
+                copy(
+                    isLoading = false,
+                    listState = listState ?: savedListState.initialListState(),
+                    items = preserveKeys(newItems = newItems).itemsWithHeaders,
+                )
+            }
+        val itemsAvailableMutations: Flow<Mutation<State>> = archivesAvailable
+            .mapToMutation { count ->
+                copy(queryState = queryState.copy(count = count))
+            }
+        val queryStateMutations: Flow<Mutation<State>> = queries
+            .mapToMutation { query ->
+                copy(
+                    queryState = queryState.copy(
+                        currentQuery = query,
+                        suggestedDescriptors = queryState.suggestedDescriptors.filterNot { descriptor ->
+                            val contentFilter = query.contentFilter
+                            when (descriptor) {
+                                is Descriptor.Category -> contentFilter.categories.contains(
+                                    descriptor
+                                )
+
+                                is Descriptor.Tag -> contentFilter.tags.contains(descriptor)
+                            }
+                        },
                     )
                 )
-            )
-            val listItemMutations: Flow<Mutation<State>> = archiveItems
-                .map { stateHolder.state().items to it }
-                // To preserve keys, when items are fetched for changes in the query, debounce emissions
-                .debounce { (oldItems, newItems) ->
-                    // new items are still loading, debounce
-                    if (newItems.isEmpty()) return@debounce QUERY_CHANGE_DEBOUNCE
-
-                    val oldQueries = oldItems.queries()
-                    val newQueries = newItems.queries()
-                    val isDiffFilter = oldQueries.isNotEmpty() && !newQueries.first()
-                        .hasTheSameFilter(oldQueries.first())
-
-                    // new items were fetched for a different query and placeholders are present, debounce
-                    if (isDiffFilter && newItems.hasPlaceholders()) QUERY_CHANGE_DEBOUNCE
-                    else 0L
-                }
-                .mapToMutation { (_, newItems) ->
-                    copy(
-                        isLoading = false,
-                        listState = listState ?: savedListState.initialListState(),
-                        items = preserveKeys(newItems = newItems).itemsWithHeaders,
-                    )
-                }
-            val itemsAvailableMutations: Flow<Mutation<State>> = archivesAvailable
-                .mapToMutation { count ->
-                    copy(queryState = queryState.copy(count = count))
-                }
-            val queryStateMutations: Flow<Mutation<State>> = queries
-                .mapToMutation { query ->
-                    copy(
-                        queryState = queryState.copy(
-                            currentQuery = query,
-                            suggestedDescriptors = queryState.suggestedDescriptors.filterNot { descriptor ->
-                                val contentFilter = query.contentFilter
-                                when (descriptor) {
-                                    is Descriptor.Category -> contentFilter.categories.contains(
-                                        descriptor
-                                    )
-
-                                    is Descriptor.Tag -> contentFilter.tags.contains(descriptor)
-                                }
-                            },
-                        )
-                    )
-                }
-            merge(
-                listItemMutations,
-                itemsAvailableMutations,
-                queryStateMutations
-            )
-        }
-}
+            }
+        merge(
+            listItemMutations,
+            itemsAvailableMutations,
+            queryStateMutations
+        )
+    }
 
 private suspend fun Action.Fetch.QueryChange.loadReason(
     state: State,
