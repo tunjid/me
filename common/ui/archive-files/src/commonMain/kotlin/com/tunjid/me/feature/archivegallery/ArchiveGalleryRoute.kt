@@ -89,7 +89,7 @@ internal fun ArchiveGalleryScreen(
 
     HorizontalPager(
         state = pagerState,
-        beyondBoundsPageCount = 0,
+//        beyondBoundsPageCount = 0,
         modifier = modifier
             .fillMaxSize()
             .offset { offset.round() }
