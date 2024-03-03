@@ -1,31 +1,18 @@
-/*
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.tunjid.me.scaffold.adaptive
+package com.tunjid.scaffold.adaptive
 
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import com.tunjid.me.scaffold.scaffold.SavedStateAdaptiveContentState
+import com.tunjid.scaffold.adaptive.Adaptive.key
 
 /**
  * An implementation of [Adaptive.ContainerScope] that supports animations and shared elements
@@ -33,24 +20,23 @@ import androidx.compose.ui.Modifier
 @Stable
 internal class AnimatedAdaptiveContentScope(
     containerState: Adaptive.ContainerState,
-    val adaptiveContentHost: AdaptiveContentHost,
+    val adaptiveContentHost: SavedStateAdaptiveContentState,
     val animatedContentScope: AnimatedContentScope
 ) : Adaptive.ContainerScope, AnimatedVisibilityScope by animatedContentScope {
 
+    override val key: String by derivedStateOf { containerState.key }
+
     override var containerState by mutableStateOf(containerState)
-    override var canAnimateSharedElements: Boolean by mutableStateOf(
-        value = containerState.adaptation != Adaptive.Adaptation.PrimaryToTransient
-    )
 
     override fun isCurrentlyShared(key: Any): Boolean =
         adaptiveContentHost.isCurrentlyShared(key)
 
     @Composable
-    override fun <T> rememberSharedContent(
+    override fun <T> sharedElementOf(
         key: Any,
         sharedElement: @Composable (T, Modifier) -> Unit
     ): @Composable (T, Modifier) -> Unit {
-        val currentNavigationState = adaptiveContentHost.adaptedState
+        val currentNavigationState = adaptiveContentHost.navigationState
         // This container state may be animating out. Look up the actual current route
         val currentRouteInContainer = containerState.container?.let(
             currentNavigationState::routeFor
@@ -73,7 +59,7 @@ internal class AnimatedAdaptiveContentScope(
  * @param sharedElement the element to be shared
  */
 @Composable
-fun <T> rememberSharedContent(
+fun <T> sharedElementOf(
     key: Any,
     sharedElement: @Composable (T, Modifier) -> Unit
 ): @Composable (T, Modifier) -> Unit =
@@ -89,19 +75,19 @@ fun <T> rememberSharedContent(
             // Allow shared elements in the primary or transient primary content only
             Adaptive.Container.Primary -> when {
                 // Show a blank space for shared elements between the destinations
-                scope.isInPreview && scope.isCurrentlyShared(key) -> { _, modifier ->
+                scope.isPreviewingBack && scope.isCurrentlyShared(key) -> { _, modifier ->
                     Box(modifier)
                 }
                 // If previewing and it won't be shared, show the item as is
-                scope.isInPreview -> sharedElement
+                scope.isPreviewingBack -> sharedElement
                 // Share the element
-                else -> scope.rememberSharedContent(
+                else -> scope.sharedElementOf(
                     key = key,
                     sharedElement = sharedElement
                 )
             }
             // Share the element when in the transient container
-            Adaptive.Container.TransientPrimary -> scope.rememberSharedContent(
+            Adaptive.Container.TransientPrimary -> scope.sharedElementOf(
                 key = key,
                 sharedElement = sharedElement
             )
@@ -114,6 +100,6 @@ internal val LocalAdaptiveContentScope = staticCompositionLocalOf<Adaptive.Conta
     null
 }
 
-internal val Adaptive.ContainerScope.isInPreview: Boolean
+internal val Adaptive.ContainerScope.isPreviewingBack: Boolean
     get() = containerState.container == Adaptive.Container.Primary
             && containerState.adaptation == Adaptive.Adaptation.PrimaryToTransient

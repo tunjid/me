@@ -22,6 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toComposeRect
 import androidx.compose.ui.platform.ComposeView
@@ -73,7 +75,10 @@ class MainActivity : AppCompatActivity() {
                             ),
                             view = root
                         ),
-                        routeParser = meApp.routeParser,
+                        adaptiveContentState = meApp.adaptiveContentStateCreator(
+                            rememberCoroutineScope(),
+                            rememberSaveableStateHolder()
+                        ),
                         navStateHolder = meApp.navStateHolder,
                         globalUiStateHolder = meApp.globalUiStateHolder,
                     )

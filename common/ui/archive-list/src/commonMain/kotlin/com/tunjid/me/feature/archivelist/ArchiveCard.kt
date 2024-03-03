@@ -61,7 +61,7 @@ import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.Chips
-import com.tunjid.me.scaffold.adaptive.rememberSharedContent
+import com.tunjid.scaffold.adaptive.sharedElementOf
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import kotlinx.datetime.Clock.System
 
@@ -125,7 +125,7 @@ fun ArchiveCard(
     archive: Archive,
     actions: (Action) -> Unit,
 ) {
-    val thumb = rememberSharedContent<String?>(
+    val thumb = sharedElementOf<String?>(
         key = thumbnailSharedElementKey(archive.thumbnail),
     ) { imageUrl, innerModifier ->
         AsyncRasterImage(

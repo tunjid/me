@@ -47,11 +47,9 @@ import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
-import com.tunjid.me.scaffold.navigation.SerializedRouteParams
-import com.tunjid.me.scaffold.adaptive.StatelessRoute
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
+import com.tunjid.me.scaffold.navigation.SerializedRouteParams
+import com.tunjid.scaffold.adaptive.StatelessRoute
 import com.tunjid.treenav.Node
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.Serializable
@@ -59,7 +57,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ArchiveFilesParentRoute(
     override val routeParams: SerializedRouteParams,
-) : AdaptiveRoute, StatelessRoute {
+) : StatelessRoute() {
 
     private val archiveId get() = ArchiveId(routeParams.pathArgs["id"] ?: "")
     private val kind
@@ -70,24 +68,16 @@ data class ArchiveFilesParentRoute(
         .map { fileType ->
             ArchiveFilesRoute(
                 routeParams = RouteParams(
-                    route = "archives/${kind.type}/${archiveId.value}/files/${fileType.kind}",
+                    pathAndQueries = "/archives/${kind.type}/${archiveId.value}/files/${fileType.kind}",
                     pathArgs = routeParams.pathArgs + ("type" to fileType.kind),
                     queryParams = routeParams.queryParams
                 ),
             )
         }
-
-    @Composable
-    override fun content() {
-        ArchiveFilesParentScreen(
-            modifier = Modifier.backPreviewBackgroundModifier(),
-            children = children.filterIsInstance<ArchiveFilesRoute>(),
-        )
-    }
 }
 
 @Composable
-private fun ArchiveFilesParentScreen(
+internal fun ArchiveFilesParentScreen(
     modifier: Modifier = Modifier,
     children: List<ArchiveFilesRoute>
 ) {

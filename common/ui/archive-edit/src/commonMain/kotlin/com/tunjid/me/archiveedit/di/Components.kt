@@ -16,26 +16,36 @@
 
 package com.tunjid.me.archiveedit.di
 
+import androidx.compose.ui.Modifier
 import com.tunjid.me.archiveedit.ActualArchiveEditStateHolder
 import com.tunjid.me.archiveedit.ArchiveEditRoute
+import com.tunjid.me.archiveedit.ArchiveEditScreen
 import com.tunjid.me.archiveedit.ArchiveEditStateHolder
 import com.tunjid.me.archiveedit.ArchiveEditStateHolderCreator
 import com.tunjid.me.archiveedit.State
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
+import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
+import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.scaffold.adaptive.ExternalRoute
+import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
-import com.tunjid.treenav.strings.UrlRouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
+
+private const val EditRoutePattern = "/archives/{kind}/{id}/edit"
+
+private const val CreateRoutePattern = "/archives/{kind}/create"
 
 internal val RouteParams.archiveId: ArchiveId?
     get() = pathArgs["id"]?.let(::ArchiveId)
@@ -58,19 +68,52 @@ abstract class ArchiveEditNavigationComponent {
 
     @IntoMap
     @Provides
-    fun archiveEditRouteParser(): Pair<String, UrlRouteMatcher<AdaptiveRoute>> =
+    fun archiveEditRouteParser(): Pair<String, RouteMatcher> =
         routeAndMatcher(
-            routePattern = "archives/{kind}/{id}/edit",
+            routePattern = EditRoutePattern,
             routeMapper = ::ArchiveEditRoute,
         )
 
     @IntoMap
     @Provides
-    fun archiveCreateRouteParser(): Pair<String, UrlRouteMatcher<AdaptiveRoute>> =
+    fun archiveCreateRouteParser(): Pair<String, RouteMatcher> =
         routeAndMatcher(
-            routePattern = "archives/{kind}/create",
+            routePattern = CreateRoutePattern,
             routeMapper = ::ArchiveEditRoute,
         )
+
+    @IntoMap
+    @Provides
+    fun editRouteAdaptiveConfiguration() = EditRoutePattern to adaptiveRouteConfiguration(
+        secondaryRoute = { route ->
+            route.children.first() as? ExternalRoute
+        },
+        render = { route ->
+            val stateHolder = rememberRetainedStateHolder<ArchiveEditStateHolder>(
+                route = route
+            )
+            ArchiveEditScreen(
+                state = stateHolder.state.collectAsStateWithLifecycle().value,
+                actions = stateHolder.accept,
+                modifier = Modifier.backPreviewBackgroundModifier(),
+            )
+        }
+    )
+
+    @IntoMap
+    @Provides
+    fun createRouteAdaptiveConfiguration() = CreateRoutePattern to adaptiveRouteConfiguration(
+        render = { route ->
+            val stateHolder = rememberRetainedStateHolder<ArchiveEditStateHolder>(
+                route = route
+            )
+            ArchiveEditScreen(
+                state = stateHolder.state.collectAsStateWithLifecycle().value,
+                actions = stateHolder.accept,
+                modifier = Modifier.backPreviewBackgroundModifier(),
+            )
+        }
+    )
 }
 
 @Component

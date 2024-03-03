@@ -30,36 +30,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.treenav.strings.Route
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class SettingsRoute(
     override val routeParams: SerializedRouteParams,
-) : AdaptiveRoute {
-    @Composable
-    override fun content() {
-        val stateHolder = rememberRetainedStateHolder<SettingsStateHolder>(
-            route = this@SettingsRoute
-        )
-        SettingsScreen(
-            state = stateHolder.state.collectAsStateWithLifecycle().value,
-            actions = stateHolder.accept,
-            modifier = Modifier.backPreviewBackgroundModifier(),
-        )
-    }
-}
+) : Route
 
 @Composable
-private fun SettingsScreen(
+internal fun SettingsScreen(
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,

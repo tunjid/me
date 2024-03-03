@@ -26,9 +26,9 @@ import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.globalui.PaneAnchor
-import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
+import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.push
 import com.tunjid.treenav.strings.routeString
@@ -38,7 +38,7 @@ import kotlinx.serialization.protobuf.ProtoNumber
 
 sealed class Action(val key: String) {
 
-    sealed class Navigate: Action(key = "Navigate"), NavigationAction {
+    sealed class Navigate : Action(key = "Navigate"), NavigationAction {
         data object Pop : Navigate() {
             override val navigationMutation: NavigationMutation = {
                 navState.pop()
@@ -53,7 +53,7 @@ sealed class Action(val key: String) {
             override val navigationMutation: NavigationMutation = {
                 navState.push(
                     routeString(
-                        path = "archives/${kind.type}/${archiveId.value}/edit",
+                        path = "/archives/${kind.type}/${archiveId.value}/edit",
                         queryParams = mapOf(
                             "thumbnail" to listOfNotNull(thumbnail)
                         )
@@ -70,7 +70,7 @@ sealed class Action(val key: String) {
             override val navigationMutation: NavigationMutation = {
                 navState.push(
                     routeString(
-                        path = "archives/${kind.type}/${archiveId.value}/files",
+                        path = "/archives/${kind.type}/${archiveId.value}/files",
                         queryParams = mapOf(
                             "url" to listOfNotNull(thumbnail)
                         )

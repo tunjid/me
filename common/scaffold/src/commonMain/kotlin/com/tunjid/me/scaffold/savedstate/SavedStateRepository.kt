@@ -48,8 +48,8 @@ data class SavedState(
 private val defaultSavedState = SavedState(
     isEmpty = true,
     navigation = ArchiveKind.values()
-        .map { "archives/${it.type}" }
-        .plus("settings")
+        .map { "/archives/${it.type}" }
+        .plus("/settings")
         .map(::listOf),
     routeStates = emptyMap()
 )

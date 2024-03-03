@@ -21,13 +21,13 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.adaptive.Adaptive
-import com.tunjid.me.scaffold.adaptive.LocalAdaptiveContentScope
 import com.tunjid.me.scaffold.globalui.isFromLeft
 import com.tunjid.me.scaffold.globalui.progress
 import com.tunjid.me.scaffold.globalui.touchX
 import com.tunjid.me.scaffold.globalui.touchY
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
+import com.tunjid.scaffold.adaptive.Adaptive
+import com.tunjid.scaffold.adaptive.LocalAdaptiveContentScope
 import kotlin.math.roundToInt
 
 // Previews back content as specified by the material motion spec for Android predictive back:

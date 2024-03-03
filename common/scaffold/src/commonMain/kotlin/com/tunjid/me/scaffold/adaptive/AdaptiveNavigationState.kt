@@ -1,34 +1,12 @@
-/*
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.tunjid.me.scaffold.adaptive
+package com.tunjid.scaffold.adaptive
 
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.compose.ui.Modifier
-import com.tunjid.me.scaffold.adaptive.Adaptive.Adaptation.Change.contains
-import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.adaptive.SharedElementScope
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
-import com.tunjid.me.scaffold.globalui.slices.RouteContainerPositionalState
-import com.tunjid.me.scaffold.globalui.slices.routeContainerState
-import com.tunjid.me.scaffold.navigation.UnknownRoute
+import com.tunjid.treenav.strings.Route
 
 /**
  * Namespace for adaptive layout changes in an app
@@ -39,23 +17,18 @@ object Adaptive {
      * Scope for adaptive content that can show up in an arbitrary [Container]
      */
     @Stable
-    interface ContainerScope : AnimatedVisibilityScope {
+    internal interface ContainerScope : AnimatedVisibilityScope, SharedElementScope {
+
+        /**
+         * Unique key to identify this scope
+         */
+        val key: String
 
         val containerState: ContainerState
-
-        val canAnimateSharedElements: Boolean
-
-        fun isCurrentlyShared(key: Any): Boolean
-
-        @Composable
-        fun <T> rememberSharedContent(
-            key: Any,
-            sharedElement: @Composable (T, Modifier) -> Unit
-        ): @Composable (T, Modifier) -> Unit
     }
 
     /**
-     * A layout in the hierarchy that hosts an [AdaptiveRoute]
+     * A layout in the hierarchy that hosts an [AdaptiveRouteConfiguration]
      */
     enum class Container {
         Primary, Secondary, TransientPrimary;
@@ -66,21 +39,23 @@ object Adaptive {
     }
 
     /**
-     * A spot taken by an [AdaptiveRoute] that may be moved in from [Container] to [Container]
+     * A spot taken by an [AdaptiveRouteConfiguration] that may be moved in from [Container] to [Container]
      */
     @JvmInline
-    internal value class Slot(val index: Int)
+    value class Slot internal constructor(val index: Int)
 
     /**
      * Information about content in an [Adaptive.Container]
      */
     @Stable
     sealed interface ContainerState {
-        val currentRoute: AdaptiveRoute?
-        val previousRoute: AdaptiveRoute?
+        val currentRoute: Route?
+        val previousRoute: Route?
         val container: Container?
         val adaptation: Adaptation
     }
+
+    internal val ContainerState.key get() = "${currentRoute?.id}-$container"
 
     /**
      * Describes how a route transitions after an adaptive change
@@ -95,8 +70,8 @@ object Adaptive {
      */
     internal data class SlotContainerState(
         val slot: Slot?,
-        override val currentRoute: AdaptiveRoute?,
-        override val previousRoute: AdaptiveRoute?,
+        override val currentRoute: Route?,
+        override val previousRoute: Route?,
         override val container: Container?,
         override val adaptation: Adaptation,
     ) : ContainerState
@@ -118,7 +93,7 @@ object Adaptive {
             val to: Container?,
         ) : Adaptation()
 
-       operator fun Swap.contains(container: Container?) = container == from || container == to
+        operator fun Swap.contains(container: Container?) = container == from || container == to
 
         companion object {
             val PrimaryToSecondary = Swap(
@@ -138,99 +113,34 @@ object Adaptive {
         }
     }
 
-    /**
-     * Data structure for managing navigation as it adapts to various layout configurations
-     */
-    @Immutable
-    internal data class NavigationState(
-        /**
-         * Moves between containers within a navigation sequence.
-         */
-        val swapAdaptations: Set<Adaptation.Swap>,
-        /**
-         * A mapping of [Container] to the routes in them
-         */
-        val containersToRoutes: Map<Container, AdaptiveRoute?>,
-        /**
-         * A mapping of route ids to the adaptive slots they are currently in.
-         */
-        val routeIdsToAdaptiveSlots: Map<String?, Slot>,
-        /**
-         * A mapping of adaptive container to the routes that were last in them.
-         */
-        val previousContainersToRoutes: Map<Container, AdaptiveRoute?>,
-        /**
-         * A set of route ids that may be returned to.
-         */
-        val backStackIds: Set<String>,
-        /**
-         * A set of route ids that are animating out.
-         */
-        val routeIdsAnimatingOut: Set<String>,
-        /**
-         * The window size class of the current screen configuration
-         */
-        val windowSizeClass: WindowSizeClass,
-        /**
-         * The positionalState of route containers
-         */
-        val routeContainerPositionalState: RouteContainerPositionalState,
-    ) {
-        companion object {
-            internal val Initial = NavigationState(
-                swapAdaptations = emptySet(),
-                windowSizeClass = WindowSizeClass.COMPACT,
-                containersToRoutes = mapOf(
-                    Container.Primary to UnknownRoute(Container.slots.first().toString())
-                ),
-                routeIdsToAdaptiveSlots = Container.slots.associateBy(Slot::toString),
-                backStackIds = emptySet(),
-                routeIdsAnimatingOut = emptySet(),
-                previousContainersToRoutes = emptyMap(),
-                routeContainerPositionalState = UiState().routeContainerState,
-            )
-        }
+    interface NavigationState {
+
+        val routeIds: Collection<String>
+
+        val windowSizeClass: WindowSizeClass
+        fun containerStateFor(
+            slot: Slot
+        ): ContainerState
+
+        fun slotFor(
+            container: Container?
+        ): Slot?
+
+        fun containerFor(
+            route: Route
+        ): Container?
+
+        fun routeFor(
+            slot: Slot
+        ): Route?
+
+        fun routeFor(
+            container: Container
+        ): Route?
+
+        fun adaptationIn(
+            container: Container
+        ): Adaptation?
     }
-}
 
-internal fun Adaptive.NavigationState.containerStateFor(
-    slot: Adaptive.Slot
-): Adaptive.ContainerState {
-    val route = routeFor(slot)
-    val container = route?.let(::containerFor)
-    return Adaptive.SlotContainerState(
-        slot = slot,
-        currentRoute = route,
-        previousRoute = previousContainersToRoutes[container],
-        container = container,
-        adaptation = swapAdaptations.firstOrNull { container in it }
-            ?: Adaptive.Adaptation.Change,
-    )
 }
-
-internal fun Adaptive.NavigationState.slotFor(
-    container: Adaptive.Container?
-): Adaptive.Slot? = when (container) {
-    null -> null
-    else -> routeIdsToAdaptiveSlots[containersToRoutes[container]?.id]
-}
-
-internal fun Adaptive.NavigationState.containerFor(
-    route: AdaptiveRoute
-): Adaptive.Container? = containersToRoutes.firstNotNullOfOrNull { (container, containerRoute) ->
-    if (containerRoute?.id == route.id) container else null
-}
-
-internal fun Adaptive.NavigationState.routeFor(
-    slot: Adaptive.Slot
-): AdaptiveRoute? = routeIdsToAdaptiveSlots.firstNotNullOfOrNull { (routeId, routeSlot) ->
-    if (routeSlot == slot) containersToRoutes.firstNotNullOfOrNull { (_, route) ->
-        if (route?.id == routeId) route
-        else null
-    }
-    else null
-}
-
-internal fun Adaptive.NavigationState.routeFor(
-    container: Adaptive.Container
-): AdaptiveRoute? = containersToRoutes[container]

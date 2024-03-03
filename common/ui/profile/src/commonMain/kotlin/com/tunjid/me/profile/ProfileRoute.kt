@@ -39,36 +39,21 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.FormField
-import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.treenav.strings.Route
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ProfileRoute(
     override val routeParams: SerializedRouteParams,
-) : AdaptiveRoute {
-    @Composable
-    override fun content() {
-        val stateHolder = rememberRetainedStateHolder<ProfileStateHolder>(
-            route = this@ProfileRoute
-        )
-        ProfileScreen(
-            state = stateHolder.state.collectAsStateWithLifecycle().value,
-            actions = stateHolder.accept,
-            modifier = Modifier.backPreviewBackgroundModifier(),
-        )
-    }
-}
+) : Route
 
 @Composable
-private fun ProfileScreen(
+internal fun ProfileScreen(
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,

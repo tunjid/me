@@ -16,25 +16,32 @@
 
 package com.tunjid.me.feature.archivelist.di
 
+import androidx.compose.ui.Modifier
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivelist.ActualArchiveListStateHolder
 import com.tunjid.me.feature.archivelist.ArchiveListRoute
+import com.tunjid.me.feature.archivelist.ArchiveListScreen
 import com.tunjid.me.feature.archivelist.ArchiveListStateHolder
 import com.tunjid.me.feature.archivelist.ArchiveListStateHolderCreator
 import com.tunjid.me.feature.archivelist.State
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
+import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
+import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
-import com.tunjid.treenav.strings.UrlRouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
+
+private const val RoutePattern = "/archives/{kind}"
 
 internal val RouteParams.kind
     get() = ArchiveKind.entries.firstOrNull { it.type == pathArgs["kind"] } ?: ArchiveKind.Articles
@@ -50,11 +57,26 @@ abstract class ArchiveListNavigationComponent {
 
     @IntoMap
     @Provides
-    fun archiveListRouteParser(): Pair<String, UrlRouteMatcher<AdaptiveRoute>> =
+    fun archiveListRouteParser(): Pair<String, RouteMatcher> =
         routeAndMatcher(
-            routePattern = "archives/{kind}",
+            routePattern = RoutePattern,
             routeMapper = ::ArchiveListRoute
         )
+
+    @IntoMap
+    @Provides
+    fun routeAdaptiveConfiguration() = RoutePattern to adaptiveRouteConfiguration(
+        render = { route ->
+            val stateHolder = rememberRetainedStateHolder<ArchiveListStateHolder>(
+                route = route
+            )
+            ArchiveListScreen(
+                modifier = Modifier.backPreviewBackgroundModifier(),
+                state = stateHolder.state.collectAsStateWithLifecycle().value,
+                actions = stateHolder.accept
+            )
+        }
+    )
 }
 
 @Component

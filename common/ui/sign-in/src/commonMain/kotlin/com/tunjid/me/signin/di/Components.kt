@@ -16,23 +16,30 @@
 
 package com.tunjid.me.signin.di
 
+import androidx.compose.ui.Modifier
 import com.tunjid.me.data.di.InjectedDataComponent
+import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
+import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.signin.ActualSignInStateHolder
+import com.tunjid.me.signin.SignInRoute
+import com.tunjid.me.signin.SignInScreen
 import com.tunjid.me.signin.SignInStateHolder
 import com.tunjid.me.signin.SignInStateHolderCreator
-import com.tunjid.me.signin.SignInRoute
 import com.tunjid.me.signin.State
-import com.tunjid.treenav.strings.UrlRouteMatcher
+import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
+
+private const val RoutePattern = "/sign-in"
 
 @Component
 abstract class SignInNavigationComponent {
@@ -45,11 +52,26 @@ abstract class SignInNavigationComponent {
 
     @IntoMap
     @Provides
-    fun profileRouteParser(): Pair<String, UrlRouteMatcher<AdaptiveRoute>> =
+    fun profileRouteParser(): Pair<String, RouteMatcher> =
         routeAndMatcher(
-            routePattern = "sign-in",
+            routePattern = RoutePattern,
             routeMapper = ::SignInRoute,
         )
+
+    @IntoMap
+    @Provides
+    fun routeAdaptiveConfiguration() = RoutePattern to adaptiveRouteConfiguration(
+        render = { route ->
+            val stateHolder = rememberRetainedStateHolder<SignInStateHolder>(
+                route = route
+            )
+            SignInScreen(
+                state = stateHolder.state.collectAsStateWithLifecycle().value,
+                actions = stateHolder.accept,
+                modifier = Modifier.backPreviewBackgroundModifier(),
+            )
+        }
+    )
 }
 
 @Component

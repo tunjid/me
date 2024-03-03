@@ -32,7 +32,7 @@ import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.data.di.create
 import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.network.NetworkMonitor
-import com.tunjid.me.feature.MeApp
+import com.tunjid.me.common.di.MeApp
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesNavigationComponent
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesScreenHolderComponent
 import com.tunjid.me.feature.archivefiles.di.create
@@ -98,6 +98,7 @@ fun createMeApp(): MeApp {
             savedStatePath = savedStatePath(),
             permissionsProvider = PlatformPermissionsProvider(),
             routeMatchers = appRouteComponent.allRouteMatchers,
+            routeConfigurationMap = appRouteComponent.routeConfigurationMap,
             byteSerializer = appRouteComponent.byteSerializer,
         )
     )

@@ -23,7 +23,6 @@ package com.tunjid.me.settings
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
-import com.tunjid.me.scaffold.adaptive.ExternalRoute
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.downcast
 import com.tunjid.me.scaffold.di.restoreState
@@ -33,6 +32,7 @@ import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
+import com.tunjid.scaffold.adaptive.ExternalRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -61,8 +61,8 @@ class ActualSettingsStateHolder(
         authRepository.isSignedIn.mapToMutation { isSignedIn ->
             copy(
                 routes = listOfNotNull(
-                    "profile".takeIf { isSignedIn },
-                    "sign-in".takeIf { !isSignedIn }
+                    "/profile".takeIf { isSignedIn },
+                    "/sign-in".takeIf { !isSignedIn }
                 ).map(::ExternalRoute)
             )
         }

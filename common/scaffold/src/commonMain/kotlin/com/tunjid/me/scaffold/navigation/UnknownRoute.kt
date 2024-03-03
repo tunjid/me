@@ -24,8 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
-import com.tunjid.me.scaffold.adaptive.StatelessRoute
+import com.tunjid.scaffold.adaptive.StatelessRoute
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -49,7 +48,7 @@ private object RouteParamsSerializer : KSerializer<RouteParams> {
 
     override fun serialize(encoder: Encoder, value: RouteParams) {
         val surrogate = RouteParamsSurrogate(
-            route = value.route,
+            route = value.pathAndQueries,
             pathArgs = value.pathArgs,
             queryParams = value.queryParams
         )
@@ -59,7 +58,7 @@ private object RouteParamsSerializer : KSerializer<RouteParams> {
     override fun deserialize(decoder: Decoder): RouteParams {
         val surrogate = decoder.decodeSerializableValue(RouteParamsSurrogate.serializer())
         return RouteParams(
-            route = surrogate.route,
+            pathAndQueries = surrogate.route,
             pathArgs = surrogate.pathArgs,
             queryParams = surrogate.queryParams
         )
@@ -67,25 +66,26 @@ private object RouteParamsSerializer : KSerializer<RouteParams> {
 }
 
 @Serializable
-data class UnknownRoute(val path: String = "404") : AdaptiveRoute, StatelessRoute {
-    override val routeParams: RouteParams get() = RouteParams(
-        route = path,
-        pathArgs = emptyMap(),
-        queryParams = emptyMap()
-    )
+data class UnknownRoute(val path: String = "404") : StatelessRoute() {
+    override val routeParams: RouteParams
+        get() = RouteParams(
+            pathAndQueries = path,
+            pathArgs = emptyMap(),
+            queryParams = emptyMap()
+        )
+}
 
-    @Composable
-    override fun content() {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(),
-                text = "404",
-                fontSize = 40.sp
-            )
-        }
+@Composable
+internal fun RouteNotFound() {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(),
+            text = "404",
+            fontSize = 40.sp
+        )
     }
 }

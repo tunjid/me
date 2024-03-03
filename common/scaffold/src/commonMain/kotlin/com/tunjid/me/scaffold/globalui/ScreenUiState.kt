@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
+// See YouTrack: KTIJ-18375
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.scaffold.globalui
 
-import androidx.compose.runtime.*
-import com.tunjid.me.scaffold.adaptive.Adaptive
-import com.tunjid.me.scaffold.adaptive.LocalAdaptiveContentScope
-import com.tunjid.mutator.mutationOf 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import com.tunjid.mutator.mutationOf
+import com.tunjid.scaffold.adaptive.Adaptive
+import com.tunjid.scaffold.adaptive.LocalAdaptiveContentScope
 
 val currentUiState
     @ReadOnlyComposable

@@ -19,7 +19,6 @@
 package com.tunjid.me.scaffold.navigation
 
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.ActionStateMutator
@@ -72,7 +71,7 @@ private val EmptyNavigationState = MultiStackNav(
 class PersistedNavigationStateHolder(
     appScope: CoroutineScope,
     savedStateRepository: SavedStateRepository,
-    routeParser: RouteParser<AdaptiveRoute>,
+    routeParser: RouteParser,
 ) : NavigationStateHolder by appScope.actionStateFlowMutator(
     initialState = EmptyNavigationState,
     started = SharingStarted.Eagerly,
@@ -109,7 +108,7 @@ fun <Action : NavigationAction, State> Flow<Action>.consumeNavigationActions(
     emptyFlow<Mutation<State>>()
 }
 
-private fun RouteParser<AdaptiveRoute>.parseMultiStackNav(savedState: SavedState) =
+private fun RouteParser.parseMultiStackNav(savedState: SavedState) =
     savedState.navigation
         .fold(
             initial = MultiStackNav(name = "AppNav"),
@@ -121,7 +120,7 @@ private fun RouteParser<AdaptiveRoute>.parseMultiStackNav(savedState: SavedState
                                     name = routesForStack.firstOrNull() ?: "Unknown"
                                 ),
                                 operation = innerFold@{ stackNav, route ->
-                                    val resolvedRoute = parse(routeString = route) ?: UnknownRoute()
+                                    val resolvedRoute = parse(pathAndQueries = route) ?: UnknownRoute()
                                     stackNav.copy(
                                         children = stackNav.children + resolvedRoute
                                     )

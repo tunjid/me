@@ -32,12 +32,12 @@ import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
-import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.mutator.Mutation
-import com.tunjid.mutator.mutationOf 
+import com.tunjid.mutator.mutationOf
+import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.treenav.push
 import com.tunjid.treenav.strings.routeString
 import kotlinx.serialization.Serializable
@@ -198,7 +198,7 @@ sealed class Action(val key: String) {
             override val navigationMutation: NavigationMutation = {
                 navState.push(
                     routeString(
-                        path = "archives/${kind.type}/${archiveId.value}/files",
+                        path = "/archives/${kind.type}/${archiveId.value}/files",
                         queryParams = mapOf(
                             "dndEnabled" to listOf(true.toString()),
                             "url" to listOfNotNull(thumbnail)

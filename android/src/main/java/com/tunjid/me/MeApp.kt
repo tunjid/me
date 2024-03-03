@@ -34,7 +34,7 @@ import com.tunjid.me.data.di.create
 import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.NetworkMonitor
-import com.tunjid.me.feature.MeApp
+import com.tunjid.me.common.di.MeApp
 import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryNavigationComponent
 import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryScreenHolderComponent
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesNavigationComponent
@@ -106,6 +106,7 @@ fun createMeApp(context: Context): MeApp {
                 context = context
             ),
             routeMatchers = appRouteComponent.allRouteMatchers.toList(),
+            routeConfigurationMap = appRouteComponent.routeConfigurationMap,
             byteSerializer = appRouteComponent.byteSerializer,
         )
     )

@@ -19,8 +19,12 @@ package com.tunjid.me.scaffold.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
-import com.tunjid.treenav.*
+import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.StackNav
+import com.tunjid.treenav.canPop
+import com.tunjid.treenav.minus
+import com.tunjid.treenav.strings.Route
+import com.tunjid.treenav.switch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -50,13 +54,13 @@ fun MultiStackNav.navItemSelected(item: NavItem) =
 /**
  * Route diff between consecutive emissions of [MultiStackNav]
  */
-fun Flow<MultiStackNav>.removedRoutes(): Flow<List<AdaptiveRoute>> =
+fun Flow<MultiStackNav>.removedRoutes(): Flow<List<Route>> =
     distinctUntilChanged()
         .scan(initial = EmptyNavigationState to EmptyNavigationState) { navPair, newNav ->
             navPair.copy(first = navPair.second, second = newNav)
         }
         .map { (prevNav: MultiStackNav, currentNav: MultiStackNav) ->
-            (prevNav - currentNav).filterIsInstance<AdaptiveRoute>()
+            (prevNav - currentNav).filterIsInstance<Route>()
         }
 
 private fun MultiStackNav.popToRoot(indexToPop: Int) = copy(

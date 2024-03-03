@@ -63,15 +63,12 @@ import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
-import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
-import com.tunjid.me.scaffold.adaptive.ExternalRoute
-import com.tunjid.me.scaffold.adaptive.rememberSharedContent
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.scaffold.adaptive.ExternalRoute
+import com.tunjid.scaffold.adaptive.sharedElementOf
 import com.tunjid.treenav.Node
+import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -80,35 +77,20 @@ private const val BODY_INDEX = 11
 @Serializable
 data class ArchiveEditRoute(
     override val routeParams: SerializedRouteParams,
-) : AdaptiveRoute {
-
-    @Composable
-    override fun content() {
-        val stateHolder = rememberRetainedStateHolder<ArchiveEditStateHolder>(
-            route = this@ArchiveEditRoute
-        )
-        ArchiveEditScreen(
-            state = stateHolder.state.collectAsStateWithLifecycle().value,
-            actions = stateHolder.accept,
-            modifier = Modifier.backPreviewBackgroundModifier(),
-        )
-    }
+) : Route {
 
     override val children: List<Node> = when (val archiveId = routeParams.archiveId) {
         null -> emptyList()
         else -> listOf(
             ExternalRoute(
-                path = "archives/${routeParams.kind.type}/${archiveId.value}/files/image"
+                path = "/archives/${routeParams.kind.type}/${archiveId.value}/files/image"
             )
         )
     }
-
-    override val secondaryRoute
-        get() = children.filterIsInstance<ExternalRoute>().firstOrNull()
 }
 
 @Composable
-private fun ArchiveEditScreen(
+internal fun ArchiveEditScreen(
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
@@ -122,7 +104,7 @@ private fun ArchiveEditScreen(
         onAction = actions
     )
 
-    val thumbnail = rememberSharedContent<String?>(
+    val thumbnail = sharedElementOf<String?>(
         key = state.sharedElementKey,
     ) { imageUrl, innerModifier ->
         AsyncRasterImage(

@@ -20,38 +20,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
-import com.tunjid.me.scaffold.navigation.NavigationStateHolder
-import com.tunjid.treenav.strings.RouteParser
+import com.tunjid.treenav.strings.Route
 
 const val FeatureWhileSubscribed = 2_000L
 
 
 interface ScreenStateHolderCache {
-    fun <T> screenStateHolderFor(route: AdaptiveRoute): T
+    fun <T> screenStateHolderFor(route: Route): T
 }
 
 val LocalScreenStateHolderCache: ProvidableCompositionLocal<ScreenStateHolderCache> =
     staticCompositionLocalOf {
         object : ScreenStateHolderCache {
-            override fun <T> screenStateHolderFor(route: AdaptiveRoute): T {
+            override fun <T> screenStateHolderFor(route: Route): T {
                 TODO("Not yet implemented")
             }
         }
     }
 
 @Composable
-fun <T> rememberRetainedStateHolder(route: AdaptiveRoute): T {
+fun <T> rememberRetainedStateHolder(route: Route): T {
     val cache = LocalScreenStateHolderCache.current
     return remember(cache) { cache.screenStateHolderFor(route) }
 }
 
-interface MeApp {
-    val routeParser: RouteParser<AdaptiveRoute>
-    val navStateHolder: NavigationStateHolder
-    val globalUiStateHolder: GlobalUiStateHolder
-    val lifecycleStateHolder: LifecycleStateHolder
-    val screenStateHolderCache: ScreenStateHolderCache
-}

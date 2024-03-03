@@ -67,17 +67,16 @@ import com.tunjid.me.scaffold.adaptiveSpringSpec
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.WindowSizeClass.COMPACT
-import com.tunjid.me.scaffold.adaptive.Adaptive
-import com.tunjid.me.scaffold.adaptive.Adaptive.Adaptation.Change.contains
-import com.tunjid.me.scaffold.adaptive.Adaptive.Adaptation.Companion.PrimaryToSecondary
-import com.tunjid.me.scaffold.adaptive.Adaptive.Adaptation.Companion.SecondaryToPrimary
-import com.tunjid.me.scaffold.adaptive.routeFor
 import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.keyboardSize
 import com.tunjid.me.scaffold.globalui.navRailWidth
 import com.tunjid.me.scaffold.globalui.slices.RouteContainerPositionalState
 import com.tunjid.me.scaffold.globalui.toolbarSize
 import com.tunjid.me.scaffold.navigation.ExpandAll
+import com.tunjid.scaffold.adaptive.Adaptive
+import com.tunjid.scaffold.adaptive.Adaptive.Adaptation.Companion.PrimaryToSecondary
+import com.tunjid.scaffold.adaptive.Adaptive.Adaptation.Companion.SecondaryToPrimary
+import com.tunjid.me.scaffold.adaptive.AdaptiveContentState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -86,18 +85,17 @@ import kotlinx.coroutines.launch
  * Motionally intelligent, adaptive container for the hosting the navigation routes
  */
 @Composable
-internal fun AppRouteContainer(
-    state: Adaptive.NavigationState,
+internal fun AdaptiveContentContainer(
+    contentState: AdaptiveContentState,
+    positionalState: RouteContainerPositionalState,
     onPaneAnchorChanged: (PaneAnchor) -> Unit,
-    primaryContent: @Composable () -> Unit,
-    secondaryContent: @Composable () -> Unit,
-    transientPrimaryContent: @Composable () -> Unit,
 ) {
-    val paddingValues = routeContainerPadding(state.routeContainerPositionalState)
+    val navigationState = contentState.navigationState
+    val paddingValues = routeContainerPadding(positionalState)
     val (startClearance, topClearance, _, bottomClearance) = paddingValues
 
-    val hasSecondaryContent = state.routeFor(Adaptive.Container.Secondary) != null
-    val windowSizeClass = state.windowSizeClass
+    val hasSecondaryContent = navigationState.routeFor(Adaptive.Container.Secondary) != null
+    val windowSizeClass = navigationState.windowSizeClass
 
     val density = LocalDensity.current
     val paneSplitState = remember(::PaneAnchorState)
@@ -119,21 +117,28 @@ internal fun AppRouteContainer(
             content = {
                 SecondaryContentContainer(
                     modifier = secondaryContentModifier(
-                        adaptation = state.swapAdaptations.firstOrNull { Adaptive.Container.Secondary in it },
+                        adaptation = navigationState.adaptationIn(Adaptive.Container.Secondary),
                         width = with(density) { paneSplitState.width.toDp() },
                         maxWidth = with(density) { paneSplitState.maxWidth.toDp() },
                     ),
-                    secondaryContent = secondaryContent
+                    secondaryContent = {
+                        contentState.RouteIn(container = Adaptive.Container.Secondary)
+                    }
                 )
                 PrimaryContentContainer(
                     modifier = primaryContentModifier(
                         windowSizeClass = windowSizeClass,
-                        adaptation = state.swapAdaptations.firstOrNull { Adaptive.Container.Primary in it },
+                        adaptation = navigationState.adaptationIn(Adaptive.Container.Primary),
                         secondaryContentWidth = with(density) { paneSplitState.width.toDp() },
                         maxWidth = with(density) { paneSplitState.maxWidth.toDp() }
                     ),
-                    primaryContent = primaryContent,
-                    transientPrimaryContent = transientPrimaryContent,
+                    primaryContent = {
+                        contentState.RouteIn(container = Adaptive.Container.Primary)
+
+                    },
+                    transientPrimaryContent = {
+                        contentState.RouteIn(container = Adaptive.Container.TransientPrimary)
+                    },
                 )
                 AnimatedVisibility(
                     modifier = Modifier.align(Alignment.CenterStart),

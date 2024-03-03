@@ -17,9 +17,9 @@
 package com.tunjid.me.settings
 
 import com.tunjid.me.core.utilities.ByteSerializable
-import com.tunjid.me.scaffold.adaptive.ExternalRoute
 import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
+import com.tunjid.scaffold.adaptive.ExternalRoute
 import com.tunjid.treenav.push
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -28,7 +28,7 @@ import kotlinx.serialization.Transient
 data class State(
     @Transient
     val routes: List<ExternalRoute> = listOf(
-        ExternalRoute(path = "sign-in")
+        ExternalRoute(path = "/sign-in")
     )
 ) : ByteSerializable
 

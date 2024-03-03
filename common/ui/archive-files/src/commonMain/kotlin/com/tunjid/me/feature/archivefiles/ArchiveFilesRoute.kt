@@ -54,23 +54,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.imageMimetypes
 import com.tunjid.me.core.model.miscMimeTypes
 import com.tunjid.me.core.ui.dragdrop.dragSource
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.rememberAsyncRasterPainter
 import com.tunjid.me.core.utilities.RemoteUri
-import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
-import com.tunjid.me.scaffold.adaptive.rememberSharedContent
-import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.scaffold.adaptive.sharedElementOf
+import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.tiler.compose.PivotedTilingEffect
+import com.tunjid.treenav.strings.Route
 import kotlinx.serialization.Serializable
 
 enum class FileType(
@@ -90,20 +85,7 @@ enum class FileType(
 @Serializable
 data class ArchiveFilesRoute(
     override val routeParams: SerializedRouteParams,
-) : AdaptiveRoute {
-
-    @Composable
-    override fun content() {
-        val stateHolder = rememberRetainedStateHolder<ArchiveFilesStateHolder>(
-            route = this@ArchiveFilesRoute
-        )
-        ArchiveFilesScreen(
-            state = stateHolder.state.collectAsStateWithLifecycle().value,
-            actions = stateHolder.accept,
-            modifier = Modifier.backPreviewBackgroundModifier(),
-        )
-    }
-}
+) : Route
 
 @Composable
 internal fun ArchiveFilesScreen(
@@ -244,7 +226,7 @@ private fun ImageFile(
     actions: (Action) -> Unit,
 ) {
     var size by remember { mutableStateOf<IntSize?>(null) }
-    val sharedElement = rememberSharedContent<String?>(
+    val sharedElement = sharedElementOf<String?>(
         key = thumbnailSharedElementKey(fileItem.url)
     ) { imageUrl, sharedElementModifier ->
         val imageModifier = sharedElementModifier.onSizeChanged { size = it }

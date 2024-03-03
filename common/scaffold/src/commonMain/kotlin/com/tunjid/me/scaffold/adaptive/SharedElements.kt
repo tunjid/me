@@ -10,23 +10,34 @@ import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
+import com.tunjid.scaffold.adaptive.Adaptive
+import com.tunjid.scaffold.adaptive.LocalAdaptiveContentScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
+internal interface SharedElementScope {
+    fun isCurrentlyShared(key: Any): Boolean
+
+    @Composable
+    fun <T> sharedElementOf(
+        key: Any,
+        sharedElement: @Composable (T, Modifier) -> Unit
+    ): @Composable (T, Modifier) -> Unit
+}
 
 fun thumbnailSharedElementKey(
     property: Any?
@@ -34,31 +45,40 @@ fun thumbnailSharedElementKey(
 
 @Stable
 internal class SharedElementData<T>(
-    private val key: Any,
     sharedElement: @Composable (T, Modifier) -> Unit,
     onRemoved: () -> Unit
 ) {
     private var inCount by mutableIntStateOf(0)
+    var canAnimate by mutableStateOf(true)
 
     val offsetAnimation = DeferredAnimation(
         vectorConverter = IntOffset.VectorConverter,
         animationSpec = spring(
-            stiffness = Spring.StiffnessLow,
+            stiffness = Spring.StiffnessMediumLow,
+            dampingRatio = 0.9f,
             visibilityThreshold = IntOffset.VisibilityThreshold
         )
     )
     val sizeAnimation = DeferredAnimation(
         vectorConverter = IntSize.VectorConverter,
         animationSpec = spring(
-            stiffness = Spring.StiffnessMedium,
+            stiffness = Spring.StiffnessMediumLow,
             visibilityThreshold = IntSize.VisibilityThreshold
         )
     )
 
-    val isRunning get() = offsetAnimation.isRunning || sizeAnimation.isRunning
-
     val moveableSharedElement: @Composable (Any?, Modifier) -> Unit =
         movableContentOf { state, modifier ->
+            val scope = LocalAdaptiveContentScope.current
+            SideEffect {
+                when (scope?.containerState?.container) {
+                    Adaptive.Container.Primary -> canAnimate = scope.transition.isRunning
+                    Adaptive.Container.Secondary -> canAnimate = scope.transition.isRunning
+                    Adaptive.Container.TransientPrimary -> canAnimate = false
+                    null -> Unit
+                }
+            }
+
             @Suppress("UNCHECKED_CAST")
             sharedElement(
                 // The shared element composable will be created by the first screen and reused by
@@ -66,9 +86,6 @@ internal class SharedElementData<T>(
                 state as T,
                 Modifier
                     .sharedElement(
-                        enabled = LocalAdaptiveContentScope.current.let {
-                            it?.canAnimateSharedElements == true && it.isCurrentlyShared(key)
-                        },
                         sharedElementData = this,
                     ) then modifier,
             )
@@ -87,7 +104,6 @@ internal class SharedElementData<T>(
  * LookaheadLayout, whenever there's a change in the layout.
  */
 internal fun Modifier.sharedElement(
-    enabled: Boolean,
     sharedElementData: SharedElementData<*>,
 ): Modifier = this then intermediateLayout { measurable, _ ->
     val (width, height) = sharedElementData.sizeAnimation.updateTarget(
@@ -98,7 +114,10 @@ internal fun Modifier.sharedElement(
     val placeable = measurable.measure(animatedConstraints)
 
     layout(placeable.width, placeable.height) layout@{
-        val currentCoordinates = coordinates ?: return@layout placeable.place(x = 0, y = 0)
+        val currentCoordinates = coordinates ?: return@layout placeable.place(
+            x = 0,
+            y = 0
+        )
         val targetOffset = lookaheadScopeCoordinates.localLookaheadPositionOf(
             currentCoordinates
         )
@@ -107,7 +126,10 @@ internal fun Modifier.sharedElement(
             targetValue = targetOffset.round(),
         )
 
-        if (!enabled) return@layout placeable.place(x = 0, y = 0)
+        if (!sharedElementData.canAnimate) return@layout placeable.place(
+            x = 0,
+            y = 0
+        )
 
         val currentOffset = lookaheadScopeCoordinates.localPositionOf(
             sourceCoordinates = currentCoordinates,
@@ -115,7 +137,10 @@ internal fun Modifier.sharedElement(
         ).round()
 
         val (x, y) = animatedOffset - currentOffset
-        placeable.place(x = x, y = y)
+        placeable.place(
+            x = x,
+            y = y
+        )
     }
 }
 
@@ -125,7 +150,6 @@ internal class DeferredAnimation<T, V : AnimationVector>(
     private val animationSpec: FiniteAnimationSpec<T>
 ) {
     val value: T? get() = animatable?.value ?: target
-    val isRunning get() = animatable?.isRunning == true
 
     private var target: T? by mutableStateOf(null)
     private var animatable: Animatable<T, V>? = null

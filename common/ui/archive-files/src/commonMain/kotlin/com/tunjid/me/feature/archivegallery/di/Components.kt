@@ -20,21 +20,26 @@ import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivegallery.ActualArchiveGalleryStateHolder
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryRoute
+import com.tunjid.me.feature.archivegallery.ArchiveGalleryScreen
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryStateHolder
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryStateHolderCreator
 import com.tunjid.me.feature.archivegallery.State
+import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
+import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
-import com.tunjid.treenav.strings.UrlRouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
+
+private const val RoutePattern = "/archive/{id}/gallery"
 
 internal val RouteParams.archiveId: ArchiveId
     get() = pathArgs.getValue("id").let(::ArchiveId)
@@ -54,11 +59,25 @@ abstract class ArchiveGalleryNavigationComponent {
 
     @IntoMap
     @Provides
-    fun archiveFileRouteParser(): Pair<String, UrlRouteMatcher<AdaptiveRoute>> =
+    fun archiveFileRouteParser(): Pair<String, RouteMatcher> =
         routeAndMatcher(
-            routePattern = "archive/{id}/gallery",
+            routePattern = RoutePattern,
             routeMapper = ::ArchiveGalleryRoute,
         )
+
+    @IntoMap
+    @Provides
+    fun routeAdaptiveConfiguration() = RoutePattern to adaptiveRouteConfiguration(
+        render = { route ->
+            val stateHolder = rememberRetainedStateHolder<ArchiveGalleryStateHolder>(
+                route = route
+            )
+            ArchiveGalleryScreen(
+                state = stateHolder.state.collectAsStateWithLifecycle().value,
+                actions = stateHolder.accept,
+            )
+        }
+    )
 }
 
 @Component

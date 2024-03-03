@@ -139,14 +139,14 @@ sealed class Action(val key: String) {
 
         data class Create(val kind: ArchiveKind) : Navigate() {
             override val navigationMutation: NavigationMutation = {
-                navState.push(node = "archives/${kind.type}/create".toRoute)
+                navState.push(node = "/archives/${kind.type}/create".toRoute)
             }
         }
 
         data class Detail(val archive: Archive) : Navigate() {
             override val navigationMutation: NavigationMutation = {
                 val route = routeString(
-                    path = "archives/${archive.kind.type}/${archive.id.value}",
+                    path = "/archives/${archive.kind.type}/${archive.id.value}",
                     queryParams = mapOf(
                         "thumbnail" to listOfNotNull(archive.thumbnail),
                     )
@@ -164,7 +164,7 @@ sealed class Action(val key: String) {
             override val navigationMutation: NavigationMutation = {
                 navState.push(
                     routeString(
-                        path = "archives/${kind.type}/${archiveId.value}/files/image",
+                        path = "/archives/${kind.type}/${archiveId.value}/files/image",
                         queryParams = mapOf("url" to listOfNotNull(thumbnail))
                     ).toRoute
                 )
@@ -173,7 +173,7 @@ sealed class Action(val key: String) {
 
         data object SignIn : Navigate() {
             override val navigationMutation: NavigationMutation = {
-                navState.push("sign-in".toRoute)
+                navState.push("/sign-in".toRoute)
             }
         }
     }

@@ -16,23 +16,30 @@
 
 package com.tunjid.me.profile.di
 
+import androidx.compose.ui.Modifier
 import com.tunjid.me.data.di.InjectedDataComponent
+import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.profile.ActualProfileStateHolder
+import com.tunjid.me.profile.ProfileRoute
+import com.tunjid.me.profile.ProfileScreen
 import com.tunjid.me.profile.ProfileStateHolder
 import com.tunjid.me.profile.ProfileStateHolderCreator
-import com.tunjid.me.profile.ProfileRoute
 import com.tunjid.me.profile.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
-import com.tunjid.treenav.strings.UrlRouteMatcher
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
+import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
+
+private const val RoutePattern = "/profile"
 
 @Component
 abstract class ProfileNavigationComponent {
@@ -45,11 +52,26 @@ abstract class ProfileNavigationComponent {
 
     @IntoMap
     @Provides
-    fun profileRouteParser(): Pair<String, UrlRouteMatcher<AdaptiveRoute>> =
+    fun profileRouteParser(): Pair<String, RouteMatcher> =
         routeAndMatcher(
-            routePattern = "profile",
+            routePattern = RoutePattern,
             routeMapper = ::ProfileRoute
         )
+
+    @IntoMap
+    @Provides
+    fun routeAdaptiveConfiguration() = RoutePattern to adaptiveRouteConfiguration(
+        render = { route ->
+            val stateHolder = rememberRetainedStateHolder<ProfileStateHolder>(
+                route = route
+            )
+            ProfileScreen(
+                state = stateHolder.state.collectAsStateWithLifecycle().value,
+                actions = stateHolder.accept,
+                modifier = Modifier.backPreviewBackgroundModifier(),
+            )
+        }
+    )
 }
 
 @Component

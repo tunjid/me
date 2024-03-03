@@ -102,7 +102,7 @@ sealed class Action(val key: String) {
             override val navigationMutation: NavigationMutation = {
                 navState.push(
                     routeString(
-                        path = "archive/${archiveId.value}/gallery",
+                        path = "/archive/${archiveId.value}/gallery",
                         queryParams = mapOf(
                             "fileId" to listOf(fileId.value),
                             "url" to listOfNotNull(thumbnail)

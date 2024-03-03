@@ -36,16 +36,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.round
 import com.tunjid.me.core.ui.AsyncRasterImage
-import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
-import com.tunjid.me.scaffold.adaptive.rememberSharedContent
-import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
-import com.tunjid.mutator.mutationOf 
+import com.tunjid.mutator.mutationOf
+import com.tunjid.scaffold.adaptive.sharedElementOf
+import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.tiler.compose.PivotedTilingEffect
+import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -53,22 +51,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class ArchiveGalleryRoute(
     override val routeParams: SerializedRouteParams,
-) : AdaptiveRoute {
-    @Composable
-    override fun content() {
-        val stateHolder = rememberRetainedStateHolder<ArchiveGalleryStateHolder>(
-            route = this@ArchiveGalleryRoute
-        )
-        ArchiveGalleryScreen(
-            state = stateHolder.state.collectAsStateWithLifecycle().value,
-            actions = stateHolder.accept,
-        )
-    }
-}
+) : Route
 
 @Composable
 internal fun ArchiveGalleryScreen(
@@ -114,7 +100,7 @@ internal fun ArchiveGalleryScreen(
         key = { index -> items[index].key }
     ) { index ->
         val file = items[index]
-        val sharedElement = rememberSharedContent<String?>(
+        val sharedElement = sharedElementOf<String?>(
             thumbnailSharedElementKey(file.url)
         ) { imageUrl, modifier ->
             AsyncRasterImage(

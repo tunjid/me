@@ -28,32 +28,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
-import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.treenav.strings.Route
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class SignInRoute(
     override val routeParams: SerializedRouteParams,
-) : AdaptiveRoute {
-    @Composable
-    override fun content() {
-        val stateHolder = rememberRetainedStateHolder<SignInStateHolder>(
-            route = this@SignInRoute
-        )
-        SignInScreen(
-            state = stateHolder.state.collectAsStateWithLifecycle().value,
-            actions = stateHolder.accept,
-            modifier = Modifier.backPreviewBackgroundModifier(),
-        )
-    }
-}
+) : Route
 
 @Composable
-private fun SignInScreen(
+internal fun SignInScreen(
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,

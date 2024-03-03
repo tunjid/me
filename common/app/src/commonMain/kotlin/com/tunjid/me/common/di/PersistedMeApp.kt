@@ -16,6 +16,7 @@
 
 package com.tunjid.me.common.di
 
+import androidx.compose.runtime.saveable.SaveableStateHolder
 import com.tunjid.me.core.sync.changeListKey
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
@@ -23,26 +24,37 @@ import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.modelEvents
-import com.tunjid.me.feature.MeApp
 import com.tunjid.me.feature.ScreenStateHolderCache
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
-import com.tunjid.me.scaffold.adaptive.StatelessRoute
+import com.tunjid.me.scaffold.di.AdaptiveRouter
 import com.tunjid.me.scaffold.di.SavedStateCache
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
-import com.tunjid.me.scaffold.navigation.*
+import com.tunjid.me.scaffold.navigation.NavigationStateHolder
+import com.tunjid.me.scaffold.navigation.removedRoutes
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
+import com.tunjid.me.scaffold.scaffold.SavedStateAdaptiveContentState
 import com.tunjid.me.sync.di.Sync
 import com.tunjid.mutator.ActionStateMutator
+import com.tunjid.scaffold.adaptive.StatelessRoute
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Order
 import com.tunjid.treenav.flatten
-import com.tunjid.treenav.strings.RouteParser
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import com.tunjid.treenav.strings.Route
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -52,14 +64,15 @@ class PersistedMeApp(
     navStateStream: StateFlow<MultiStackNav>,
     savedStateRepository: SavedStateRepository,
     sync: Sync,
-    override val routeParser: RouteParser<AdaptiveRoute>,
     override val navStateHolder: NavigationStateHolder,
     override val globalUiStateHolder: GlobalUiStateHolder,
     override val lifecycleStateHolder: LifecycleStateHolder,
     private val savedStateCache: SavedStateCache,
     private val allScreenStateHolders: Map<String, ScreenStateHolderCreator>,
+    override val adaptiveContentStateCreator: (CoroutineScope, SaveableStateHolder) -> SavedStateAdaptiveContentState,
+    override val adaptiveRouter: AdaptiveRouter,
 ) : MeApp {
-    private val routeStateHolderCache = mutableMapOf<AdaptiveRoute, ScopeHolder>()
+    private val routeStateHolderCache = mutableMapOf<Route, ScopeHolder>()
 
     init {
         navStateStream
@@ -99,7 +112,7 @@ class PersistedMeApp(
 
     override val screenStateHolderCache: ScreenStateHolderCache = object : ScreenStateHolderCache {
         @Suppress("UNCHECKED_CAST")
-        override fun <T> screenStateHolderFor(route: AdaptiveRoute): T =
+        override fun <T> screenStateHolderFor(route: Route): T =
             routeStateHolderCache.getOrPut(route) {
                 val routeScope = CoroutineScope(
                     SupervisorJob() + Dispatchers.Main.immediate
@@ -126,14 +139,14 @@ class PersistedMeApp(
         navigation = stacks.fold(listOf()) { listOfLists, stackNav ->
             listOfLists.plus(
                 element = stackNav.children
-                    .filterIsInstance<AdaptiveRoute>()
+                    .filterIsInstance<Route>()
                     .fold(listOf()) { stackList, route ->
                         stackList + route.id
                     }
             )
         },
         routeStates = flatten(order = Order.BreadthFirst)
-            .filterIsInstance<AdaptiveRoute>()
+            .filterIsInstance<Route>()
             .fold(mutableMapOf()) { map, route ->
                 val stateHolder = screenStateHolderCache.screenStateHolderFor<Any>(route)
                 val state = (stateHolder as? ActionStateMutator<*, *>)?.state ?: return@fold map
@@ -148,3 +161,4 @@ private data class ScopeHolder(
     val scope: CoroutineScope,
     val stateHolder: Any,
 )
+

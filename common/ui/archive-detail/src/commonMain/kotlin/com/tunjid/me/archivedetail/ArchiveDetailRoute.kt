@@ -40,16 +40,13 @@ import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.isInViewport
-import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
-import com.tunjid.me.scaffold.adaptive.ExternalRoute
-import com.tunjid.me.scaffold.adaptive.rememberSharedContent
 import com.tunjid.me.scaffold.globalui.PaneAnchor
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.scaffold.adaptive.ExternalRoute
+import com.tunjid.scaffold.adaptive.sharedElementOf
 import com.tunjid.treenav.Node
+import com.tunjid.treenav.strings.Route
 import kotlinx.serialization.Serializable
 
 private const val BODY_KEY = 3
@@ -57,31 +54,17 @@ private const val BODY_KEY = 3
 @Serializable
 data class ArchiveDetailRoute(
     override val routeParams: SerializedRouteParams,
-) : AdaptiveRoute {
-
-    @Composable
-    override fun content() {
-        val stateHolder = rememberRetainedStateHolder<ArchiveDetailStateHolder>(
-            route = this@ArchiveDetailRoute
-        )
-        ArchiveDetailScreen(
-            state = stateHolder.state.collectAsStateWithLifecycle().value,
-            actions = stateHolder.accept,
-            modifier = Modifier.backPreviewBackgroundModifier(),
-        )
-    }
+) : Route {
 
     override val children: List<Node> = listOf(
         ExternalRoute(
-            path = "archives/${routeParams.kind.type}"
+            path = "/archives/${routeParams.kind.type}"
         )
     )
-
-    override val secondaryRoute get() = children.filterIsInstance<ExternalRoute>().first()
 }
 
 @Composable
-private fun ArchiveDetailScreen(
+internal fun ArchiveDetailScreen(
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
@@ -102,7 +85,7 @@ private fun ArchiveDetailScreen(
         enabled = state.isInPrimaryNav && state.hasSecondaryPanel
     )
 
-    val thumbnail = rememberSharedContent<String?>(
+    val thumbnail = sharedElementOf<String?>(
         key = state.sharedElementKey,
     ) { imageUrl, innerModifier ->
         AsyncRasterImage(

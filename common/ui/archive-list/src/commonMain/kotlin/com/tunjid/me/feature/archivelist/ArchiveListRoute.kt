@@ -44,17 +44,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.ui.StickyHeaderStaggeredGrid
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.me.core.ui.scrollbar.scrollbarState
-import com.tunjid.me.feature.rememberRetainedStateHolder
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.tiler.compose.PivotedTilingEffect
+import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.flow.*
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
@@ -62,23 +58,10 @@ import kotlin.math.abs
 @Serializable
 data class ArchiveListRoute(
     override val routeParams: SerializedRouteParams,
-) : AdaptiveRoute {
-
-    @Composable
-    override fun content() {
-        val stateHolder = rememberRetainedStateHolder<ArchiveListStateHolder>(
-            route = this@ArchiveListRoute
-        )
-        ArchiveScreen(
-            state = stateHolder.state.collectAsStateWithLifecycle().value,
-            actions = stateHolder.accept,
-            modifier = Modifier.backPreviewBackgroundModifier(),
-        )
-    }
-}
+) : Route
 
 @Composable
-private fun ArchiveScreen(
+internal fun ArchiveListScreen(
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,

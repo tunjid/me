@@ -16,23 +16,30 @@
 
 package com.tunjid.me.settings.di
 
+import androidx.compose.ui.Modifier
 import com.tunjid.me.data.di.InjectedDataComponent
+import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.adaptive.AdaptiveRoute
+import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
+import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.me.settings.ActualSettingsStateHolder
+import com.tunjid.me.settings.SettingsRoute
+import com.tunjid.me.settings.SettingsScreen
 import com.tunjid.me.settings.SettingsStateHolder
 import com.tunjid.me.settings.SettingsStateHolderCreator
-import com.tunjid.me.settings.SettingsRoute
 import com.tunjid.me.settings.State
-import com.tunjid.treenav.strings.UrlRouteMatcher
+import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
+
+private const val RoutePattern = "/settings"
 
 @Component
 abstract class SettingsNavigationComponent {
@@ -45,11 +52,26 @@ abstract class SettingsNavigationComponent {
 
     @IntoMap
     @Provides
-    fun settingsRouteParser(): Pair<String, UrlRouteMatcher<AdaptiveRoute>> =
+    fun settingsRouteParser(): Pair<String, RouteMatcher> =
         routeAndMatcher(
-            routePattern = "settings",
+            routePattern = RoutePattern,
             routeMapper = ::SettingsRoute,
         )
+
+    @IntoMap
+    @Provides
+    fun routeAdaptiveConfiguration() = RoutePattern to adaptiveRouteConfiguration(
+        render = { route ->
+            val stateHolder = rememberRetainedStateHolder<SettingsStateHolder>(
+                route = route
+            )
+            SettingsScreen(
+                state = stateHolder.state.collectAsStateWithLifecycle().value,
+                actions = stateHolder.accept,
+                modifier = Modifier.backPreviewBackgroundModifier(),
+            )
+        }
+    )
 }
 
 @Component
