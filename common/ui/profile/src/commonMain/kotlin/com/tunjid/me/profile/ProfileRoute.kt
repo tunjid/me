@@ -39,6 +39,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.FormField
+import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
@@ -84,7 +85,10 @@ internal fun ProfileScreen(
             .size(96.dp)
 
         if (user != null) AsyncRasterImage(
-            imageUrl = user.imageUrl,
+            args = MediaArgs(
+                url = user.imageUrl,
+                contentScale = ContentScale.Crop,
+            ),
             modifier = modifier.clip(CircleShape),
         ) else Image(
             imageVector = Icons.Default.Person,

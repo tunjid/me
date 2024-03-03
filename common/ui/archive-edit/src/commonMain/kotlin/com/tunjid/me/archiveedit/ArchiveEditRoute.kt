@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
@@ -60,6 +61,7 @@ import com.tunjid.me.archiveedit.di.archiveId
 import com.tunjid.me.archiveedit.di.kind
 import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.ui.AsyncRasterImage
+import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
@@ -104,11 +106,11 @@ internal fun ArchiveEditScreen(
         onAction = actions
     )
 
-    val thumbnail = sharedElementOf<String?>(
+    val thumbnail = sharedElementOf<MediaArgs>(
         key = state.sharedElementKey,
-    ) { imageUrl, innerModifier ->
+    ) { args, innerModifier ->
         AsyncRasterImage(
-            imageUrl = imageUrl,
+            args = args,
             modifier = innerModifier
         )
     }
@@ -185,7 +187,7 @@ internal fun ArchiveEditScreen(
 
 private fun LazyListScope.dragDropThumbnail(
     thumbnailUrl: String?,
-    thumbnail: @Composable (String?, Modifier) -> Unit,
+    thumbnail: @Composable (MediaArgs, Modifier) -> Unit,
     hasStoragePermission: Boolean,
     dragLocation: DragLocation,
     onAction: (Action) -> Unit,
@@ -203,7 +205,10 @@ private fun LazyListScope.dragDropThumbnail(
             .padding(horizontal = 16.dp)
     ) {
         thumbnail(
-            thumbnailUrl,
+            MediaArgs(
+                url = thumbnailUrl,
+                contentScale = ContentScale.Crop
+            ),
             Modifier
 //                .fillParentMaxWidth()
                 .align(Alignment.Center)

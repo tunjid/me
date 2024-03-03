@@ -18,7 +18,6 @@ package com.tunjid.me.feature.archivefiles
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -56,14 +55,13 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.imageMimetypes
 import com.tunjid.me.core.model.miscMimeTypes
-import com.tunjid.me.core.ui.dragdrop.dragSource
+import com.tunjid.me.core.ui.AsyncRasterImage
+import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.core.ui.dragdrop.dropTarget
-import com.tunjid.me.core.ui.rememberAsyncRasterPainter
-import com.tunjid.me.core.utilities.RemoteUri
+import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.scaffold.adaptive.sharedElementOf
-import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.strings.Route
 import kotlinx.serialization.Serializable
@@ -226,32 +224,34 @@ private fun ImageFile(
     actions: (Action) -> Unit,
 ) {
     var size by remember { mutableStateOf<IntSize?>(null) }
-    val sharedElement = sharedElementOf<String?>(
+    val sharedElement = sharedElementOf<MediaArgs>(
         key = thumbnailSharedElementKey(fileItem.url)
-    ) { imageUrl, sharedElementModifier ->
+    ) { args, sharedElementModifier ->
         val imageModifier = sharedElementModifier.onSizeChanged { size = it }
-        val imagePainter = rememberAsyncRasterPainter(
-            imageUri = imageUrl,
-            size = size,
+
+        if (fileItem is FileItem.File) AsyncRasterImage(
+            args = args,
+            modifier = imageModifier
         )
-        if (imagePainter != null && fileItem is FileItem.File) Image(
-            painter = imagePainter,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = if (!dndEnabled) imageModifier
-            else imageModifier.dragSource(
-                dragShadowPainter = imagePainter,
-                uris = listOf(
-                    RemoteUri(
-                        path = fileItem.archiveFile.url,
-                        mimetype = fileItem.archiveFile.mimeType,
-                    )
-                )
-            )
-        )
+
+//        when {
+//            !dndEnabled -> imageModifier
+//            else -> imageModifier.dragSource(
+//                dragShadowPainter = imagePainter,
+//                uris = listOf(
+//                    RemoteUri(
+//                        path = fileItem.archiveFile.url,
+//                        mimetype = fileItem.archiveFile.mimeType,
+//                    )
+//                )
+//            )
+//        }
     }
     sharedElement(
-        fileItem.url,
+        MediaArgs(
+            url = fileItem.url,
+            contentScale = ContentScale.Crop,
+        ),
         modifier
             .aspectRatio(1f)
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))

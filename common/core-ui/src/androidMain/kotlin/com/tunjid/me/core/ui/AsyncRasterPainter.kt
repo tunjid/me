@@ -17,41 +17,18 @@
 package com.tunjid.me.core.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.IntSize
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import coil.size.Scale
-import coil.size.Size
+import androidx.compose.ui.Modifier
+import coil.compose.AsyncImage
 
 @Composable
-actual fun rememberAsyncRasterPainter(
-    imageUri: String?,
-    size: IntSize?,
-    contentScale: ContentScale,
-): Painter? =
-    rememberAsyncImagePainter(
-        ImageRequest.Builder(LocalContext.current)
-            .data(data = imageUri)
-            .scale(
-                when (contentScale) {
-                    ContentScale.Fit -> Scale.FIT
-                    ContentScale.Crop -> Scale.FILL
-                    else -> Scale.FILL
-                }
-            )
-            .let { builder ->
-                when (size) {
-                    null -> builder
-                    else -> builder.size(
-                        Size(
-                            width = size.width,
-                            height = size.height
-                        )
-                    )
-                }
-            }
-            .build()
+actual fun AsyncRasterImage(
+    args: MediaArgs,
+    modifier: Modifier,
+) {
+    AsyncImage(
+        modifier = modifier,
+        model = args.url,
+        contentDescription = args.description,
+        contentScale = args.contentScale
     )
+}

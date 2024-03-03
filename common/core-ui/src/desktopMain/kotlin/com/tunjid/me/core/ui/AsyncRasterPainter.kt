@@ -16,13 +16,20 @@
 
 package com.tunjid.me.core.ui
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,11 +45,33 @@ private data class Key(
     val sizeBucket: SizeBucket,
 )
 
+@Composable
+actual fun AsyncRasterImage(
+    args: MediaArgs,
+    modifier: Modifier,
+) {
+    var size by remember { mutableStateOf<IntSize?>(null) }
+    val imageModifier = modifier.onSizeChanged { size = it }
+
+    val painter = rememberAsyncRasterPainter(
+        imageUri = args.url,
+        contentScale = args.contentScale,
+        size = size,
+    )
+    if (painter != null) Image(
+        modifier = imageModifier,
+        painter = painter,
+        contentScale = args.contentScale,
+        contentDescription = args.description,
+    )
+    else Box(imageModifier)
+}
+
 /*
 An implementation of an aysnc raster painter with an in memory LRU cache and temp disk cache.
 */
 @Composable
-actual fun rememberAsyncRasterPainter(
+private fun rememberAsyncRasterPainter(
     imageUri: String?,
     size: IntSize?,
     contentScale: ContentScale,

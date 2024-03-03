@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -61,8 +62,9 @@ import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.Chips
-import com.tunjid.scaffold.adaptive.sharedElementOf
+import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
+import com.tunjid.scaffold.adaptive.sharedElementOf
 import kotlinx.datetime.Clock.System
 
 @Composable
@@ -125,11 +127,11 @@ fun ArchiveCard(
     archive: Archive,
     actions: (Action) -> Unit,
 ) {
-    val thumb = sharedElementOf<String?>(
+    val thumb = sharedElementOf<MediaArgs>(
         key = thumbnailSharedElementKey(archive.thumbnail),
-    ) { imageUrl, innerModifier ->
+    ) { args, innerModifier ->
         AsyncRasterImage(
-            imageUrl = imageUrl,
+            args = args,
             modifier = innerModifier
         )
     }
@@ -141,7 +143,10 @@ fun ArchiveCard(
         content = {
             Column {
                 thumb(
-                    archive.thumbnail,
+                    MediaArgs(
+                        url = archive.thumbnail,
+                        contentScale = ContentScale.Crop,
+                    ),
                     Modifier
                         .fillMaxWidth()
                         .aspectRatio(16f / 9f)
@@ -298,7 +303,10 @@ private fun ArchiveCardFooter(
             .size(height)
 
         AsyncRasterImage(
-            imageUrl = authorImageUrl,
+            MediaArgs(
+                url = authorImageUrl,
+                contentScale = ContentScale.Crop,
+            ),
             modifier = modifier.clip(CircleShape),
         )
         Spacer(Modifier.width(8.dp))

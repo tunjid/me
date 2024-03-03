@@ -34,8 +34,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.round
 import com.tunjid.me.core.ui.AsyncRasterImage
+import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
@@ -100,17 +102,20 @@ internal fun ArchiveGalleryScreen(
         key = { index -> items[index].key }
     ) { index ->
         val file = items[index]
-        val sharedElement = sharedElementOf<String?>(
+        val sharedElement = sharedElementOf<MediaArgs>(
             thumbnailSharedElementKey(file.url)
-        ) { imageUrl, modifier ->
+        ) { args, modifier ->
             AsyncRasterImage(
-                imageUrl = imageUrl,
+                args = args,
                 modifier = modifier
             )
         }
 
         sharedElement(
-            file.url,
+            MediaArgs(
+                url = file.url,
+                contentScale = ContentScale.Crop
+            ),
             Modifier.fillMaxSize()
         )
     }

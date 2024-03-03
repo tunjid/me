@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
@@ -38,6 +39,7 @@ import com.tunjid.me.archivedetail.di.kind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.Chips
+import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.scaffold.globalui.PaneAnchor
@@ -85,11 +87,11 @@ internal fun ArchiveDetailScreen(
         enabled = state.isInPrimaryNav && state.hasSecondaryPanel
     )
 
-    val thumbnail = sharedElementOf<String?>(
+    val thumbnail = sharedElementOf<MediaArgs>(
         key = state.sharedElementKey,
-    ) { imageUrl, innerModifier ->
+    ) { args, innerModifier ->
         AsyncRasterImage(
-            imageUrl = imageUrl,
+            args = args,
             modifier = innerModifier
         )
     }
@@ -101,7 +103,10 @@ internal fun ArchiveDetailScreen(
     ) {
         item {
             thumbnail(
-                state.headerThumbnail,
+                MediaArgs(
+                    url = state.headerThumbnail,
+                    contentScale = ContentScale.Crop,
+                ),
                 Modifier
                     .heightIn(max = 300.dp)
                     .aspectRatio(ratio = 16f / 9f)

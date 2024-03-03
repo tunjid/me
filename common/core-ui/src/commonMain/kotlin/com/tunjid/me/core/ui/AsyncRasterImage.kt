@@ -16,36 +16,11 @@
 
 package com.tunjid.me.core.ui
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntSize
 
 @Composable
-fun AsyncRasterImage(
-    imageUrl: String?,
+expect fun AsyncRasterImage(
+    args: MediaArgs,
     modifier: Modifier = Modifier,
-) {
-    var size by remember { mutableStateOf<IntSize?>(null) }
-    val imageModifier = modifier.onSizeChanged { size = it }
-
-    val painter = rememberAsyncRasterPainter(
-        imageUri = imageUrl,
-        contentScale = ContentScale.Crop,
-        size = size,
-    )
-    if (painter != null) Image(
-        modifier = imageModifier,
-        painter = painter,
-        contentScale = ContentScale.Crop,
-        contentDescription = "Thumbnail",
-    )
-    else Box(imageModifier)
-}
+)
