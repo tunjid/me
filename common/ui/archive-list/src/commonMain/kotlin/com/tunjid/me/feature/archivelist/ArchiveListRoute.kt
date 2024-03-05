@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// See YouTrack: KTIJ-18375
+@file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
 package com.tunjid.me.feature.archivelist
 
 import androidx.compose.animation.animateContentSize
@@ -44,10 +46,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.tunjid.composables.scrollbars.scrollbarState
+import com.tunjid.composables.stickyheader.StickyHeaderStaggeredGrid
 import com.tunjid.me.core.model.ArchiveQuery
-import com.tunjid.me.core.ui.StickyHeaderStaggeredGrid
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
-import com.tunjid.me.core.ui.scrollbar.scrollbarState
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.strings.Route

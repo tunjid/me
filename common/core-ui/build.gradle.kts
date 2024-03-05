@@ -38,6 +38,8 @@ kotlin {
 
                 implementation(libs.kotlinx.serialization.cbor)
                 implementation(libs.kotlinx.serialization.json)
+
+                implementation(libs.tunjid.composables)
             }
         }
         named("androidMain") {

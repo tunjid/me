@@ -42,6 +42,7 @@ tartakaKotlinInject = "0.6.3"
 tunjidStateHolder = "1.1.0"
 tunjidTiler = "1.1.0-rc02"
 tunjidTreeNav = "0.0.7"
+tunjidComposables = "0.0.0"
 turbine = "0.12.1"
 
 [libraries]
@@ -129,6 +130,7 @@ socketio-client-jvm = { group = "io.socket", name = "socket.io-client", version.
 squareup-okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 tartaka-kotlin-inject-compiler = { group = "me.tatarka.inject", name = "kotlin-inject-compiler-ksp", version.ref = "tartakaKotlinInject" }
 tartaka-kotlin-inject-runtime = { group = "me.tatarka.inject", name = "kotlin-inject-runtime", version.ref = "tartakaKotlinInject" }
+tunjid-composables = { group = "com.tunjid.composables", name = "composables", version.ref = "tunjidComposables" }
 tunjid-mutator-core-common = { group = "com.tunjid.mutator", name = "core", version.ref = "tunjidStateHolder" }
 tunjid-mutator-core-jvm = { group = "com.tunjid.mutator", name = "core-jvm", version.ref = "tunjidStateHolder" }
 tunjid-mutator-coroutines-common = { group = "com.tunjid.mutator", name = "coroutines", version.ref = "tunjidStateHolder" }
