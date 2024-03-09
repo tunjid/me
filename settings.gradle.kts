@@ -33,7 +33,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Me"
+rootProject.name = "me"
 include(
     ":common:core",
     ":common:core-ui",
