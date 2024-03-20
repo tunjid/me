@@ -26,13 +26,13 @@ const val FeatureWhileSubscribed = 2_000L
 
 
 interface ScreenStateHolderCache {
-    fun <T> screenStateHolderFor(route: Route): T
+    fun <T> screenStateHolderFor(route: Route): T?
 }
 
 val LocalScreenStateHolderCache: ProvidableCompositionLocal<ScreenStateHolderCache> =
     staticCompositionLocalOf {
         object : ScreenStateHolderCache {
-            override fun <T> screenStateHolderFor(route: Route): T {
+            override fun <T> screenStateHolderFor(route: Route): T? {
                 TODO("Not yet implemented")
             }
         }
@@ -41,6 +41,10 @@ val LocalScreenStateHolderCache: ProvidableCompositionLocal<ScreenStateHolderCac
 @Composable
 fun <T> rememberRetainedStateHolder(route: Route): T {
     val cache = LocalScreenStateHolderCache.current
-    return remember(cache) { cache.screenStateHolderFor(route) }
+    return remember(cache) {
+        cache.screenStateHolderFor(route) as? T ?: throw IllegalArgumentException(
+            "No state holder has been registered for route ${route.id}"
+        )
+    }
 }
 

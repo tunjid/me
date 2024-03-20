@@ -30,7 +30,8 @@ import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.mutator.mutationOf 
+import com.tunjid.mutator.mutationOf
+import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import me.tatarka.inject.annotations.Inject
@@ -39,7 +40,7 @@ typealias ProfileStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ProfileStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ProfileRoute) -> ProfileStateHolder
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> ProfileStateHolder
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
@@ -49,7 +50,7 @@ class ActualProfileStateHolder(
     scope: CoroutineScope,
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
-    route: ProfileRoute,
+    route: Route,
 ) : ProfileStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),

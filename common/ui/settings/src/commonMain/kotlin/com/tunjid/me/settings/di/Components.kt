@@ -88,7 +88,7 @@ abstract class SettingsScreenHolderComponent(
     fun settingsStateHolderCreator(
         assist: SettingsStateHolderCreator
     ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = SettingsRoute::class.simpleName!!,
+        first = RoutePattern,
         second = assist
     )
 }

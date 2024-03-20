@@ -94,7 +94,7 @@ abstract class ArchiveGalleryScreenHolderComponent(
     fun archiveFileStateHolderCreator(
         assist: ArchiveGalleryStateHolderCreator
     ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = ArchiveGalleryRoute::class.simpleName!!,
+        first = RoutePattern,
         second = assist
     )
 }

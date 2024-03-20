@@ -42,7 +42,9 @@ import com.tunjid.scaffold.adaptive.StatelessRoute
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.Order
 import com.tunjid.treenav.flatten
+import com.tunjid.treenav.strings.PathPattern
 import com.tunjid.treenav.strings.Route
+import com.tunjid.treenav.strings.RouteTrie
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -72,7 +74,7 @@ class PersistedMeApp(
     override val adaptiveContentStateCreator: (CoroutineScope, SaveableStateHolder) -> SavedStateAdaptiveContentState,
     override val adaptiveRouter: AdaptiveRouter,
 ) : MeApp {
-    private val routeStateHolderCache = mutableMapOf<Route, ScopeHolder>()
+    private val routeStateHolderCache = mutableMapOf<Route, ScopeHolder?>()
 
     init {
         navStateStream
@@ -111,24 +113,30 @@ class PersistedMeApp(
     }
 
     override val screenStateHolderCache: ScreenStateHolderCache = object : ScreenStateHolderCache {
+        private val stateHolderTrie = RouteTrie<ScreenStateHolderCreator>().apply {
+            allScreenStateHolders
+                .mapKeys { (template) -> PathPattern(template) }
+                .forEach(::set)
+        }
+
         @Suppress("UNCHECKED_CAST")
-        override fun <T> screenStateHolderFor(route: Route): T =
+        override fun <T> screenStateHolderFor(route: Route): T? =
             routeStateHolderCache.getOrPut(route) {
+                val stateHolderCreator = stateHolderTrie[route] ?: return@getOrPut null
+
                 val routeScope = CoroutineScope(
                     SupervisorJob() + Dispatchers.Main.immediate
                 )
                 ScopeHolder(
                     scope = routeScope,
-                    stateHolder = when (route) {
-                        !is StatelessRoute -> allScreenStateHolders
-                            .getValue(route::class.simpleName!!)
-                            .invoke(routeScope, savedStateCache(route), route)
-
-                        else -> route
-                    }
+                    stateHolder = stateHolderCreator(
+                        routeScope,
+                        savedStateCache(route),
+                        route
+                    )
                 )
 
-            }.stateHolder as T
+            }?.stateHolder as? T
     }
 
     private fun MultiStackNav.toSavedState(

@@ -88,7 +88,7 @@ abstract class SignInScreenHolderComponent(
     fun settingsStateHolderCreator(
         assist: SignInStateHolderCreator
     ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = SignInRoute::class.simpleName!!,
+        first = RoutePattern,
         second = assist
     )
 }

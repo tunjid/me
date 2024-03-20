@@ -33,6 +33,7 @@ import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.scaffold.adaptive.ExternalRoute
+import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -42,7 +43,7 @@ typealias SettingsStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class SettingsStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: SettingsRoute) -> SettingsStateHolder
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> SettingsStateHolder
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
@@ -53,7 +54,7 @@ class ActualSettingsStateHolder(
     scope: CoroutineScope,
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
-    route: SettingsRoute,
+    route: Route,
 ) : SettingsStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
