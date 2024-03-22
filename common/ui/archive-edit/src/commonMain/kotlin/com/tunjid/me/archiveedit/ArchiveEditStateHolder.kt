@@ -57,6 +57,7 @@ import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutationOf
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
+import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -78,7 +79,7 @@ typealias ArchiveEditStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ArchiveEditStateHolderCreator(
-    creator: (scope: CoroutineScope, savedStae: ByteArray?, route: ArchiveEditRoute) -> ArchiveEditStateHolder,
+    creator: (scope: CoroutineScope, savedStae: ByteArray?, route: Route) -> ArchiveEditStateHolder,
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
@@ -93,7 +94,7 @@ class ActualArchiveEditStateHolder(
     navActions: (NavigationMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
-    route: ArchiveEditRoute,
+    route: Route,
 ) : ArchiveEditStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         kind = route.routeParams.kind,
@@ -142,7 +143,7 @@ class ActualArchiveEditStateHolder(
  * Start the load by monitoring the archive if it exists already
  */
 private fun Flow<Action>.withInitialLoad(
-    route: ArchiveEditRoute,
+    route: Route,
 ) = onStart {
     val archiveId = route.routeParams.archiveId
     if (archiveId != null) emit(

@@ -36,7 +36,6 @@ import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.me.scaffold.savedstate.DataStoreSavedStateRepository
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
-import com.tunjid.me.scaffold.scaffold.AdaptiveContentStateFactory
 import com.tunjid.mutator.Mutation
 import com.tunjid.scaffold.adaptive.Adaptive
 import com.tunjid.scaffold.adaptive.AdaptiveRouteConfiguration
@@ -60,13 +59,13 @@ interface ScreenStateHolderCreator : (CoroutineScope, ByteArray?, Route) -> Any
 
 typealias SavedStateCache = (Route) -> ByteArray?
 
-inline fun <reified R : Route> ((CoroutineScope, ByteArray?, R) -> Any).downcast(): ScreenStateHolderCreator =
+fun ((CoroutineScope, ByteArray?, Route) -> Any).downcast(): ScreenStateHolderCreator =
     object : ScreenStateHolderCreator {
         override fun invoke(scope: CoroutineScope, savedState: ByteArray?, route: Route): Any =
             this@downcast(
                 scope,
                 savedState,
-                route as R
+                route,
             )
     }
 

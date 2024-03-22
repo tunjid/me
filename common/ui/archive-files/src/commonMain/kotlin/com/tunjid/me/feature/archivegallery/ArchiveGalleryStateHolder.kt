@@ -44,6 +44,7 @@ import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.map
 import com.tunjid.tiler.toPivotedTileInputs
 import com.tunjid.tiler.toTiledList
+import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -55,7 +56,7 @@ typealias ArchiveGalleryStateHolder = ActionStateMutator<Action, StateFlow<State
 
 @Inject
 class ArchiveGalleryStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveGalleryRoute) -> ArchiveGalleryStateHolder,
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> ArchiveGalleryStateHolder,
 ) : ScreenStateHolderCreator by creator.downcast()
 
 /**
@@ -68,7 +69,7 @@ class ActualArchiveGalleryStateHolder(
     navActions: (NavigationMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
-    route: ArchiveGalleryRoute,
+    route: Route,
 ) : ArchiveGalleryStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         currentQuery = ArchiveFileQuery(

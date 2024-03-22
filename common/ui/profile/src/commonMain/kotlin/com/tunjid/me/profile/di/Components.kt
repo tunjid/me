@@ -88,7 +88,7 @@ abstract class ProfileScreenHolderComponent(
     fun settingsStateHolderCreator(
         assist: ProfileStateHolderCreator
     ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = ProfileRoute::class.simpleName!!,
+        first = RoutePattern,
         second = assist
     )
 }

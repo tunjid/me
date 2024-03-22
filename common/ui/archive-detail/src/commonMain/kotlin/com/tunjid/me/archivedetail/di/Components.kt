@@ -105,7 +105,7 @@ abstract class ArchiveDetailScreenHolderComponent(
     fun archiveListStateHolderCreator(
         assist: ArchiveDetailStateHolderCreator
     ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = ArchiveDetailRoute::class.simpleName!!,
+        first = RoutePattern,
         second = assist
     )
 }

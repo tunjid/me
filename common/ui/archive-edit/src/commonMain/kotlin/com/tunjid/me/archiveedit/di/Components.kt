@@ -127,10 +127,19 @@ abstract class ArchiveEditScreenHolderComponent(
 
     @IntoMap
     @Provides
-    fun archiveListStateHolderCreator(
+    fun archiveCreateStateHolderCreator(
         assist: ArchiveEditStateHolderCreator
     ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = ArchiveEditRoute::class.simpleName!!,
+        first = CreateRoutePattern,
+        second = assist
+    )
+
+    @IntoMap
+    @Provides
+    fun archiveEditStateHolderCreator(
+        assist: ArchiveEditStateHolderCreator
+    ): Pair<String, ScreenStateHolderCreator> = Pair(
+        first = EditRoutePattern,
         second = assist
     )
 }

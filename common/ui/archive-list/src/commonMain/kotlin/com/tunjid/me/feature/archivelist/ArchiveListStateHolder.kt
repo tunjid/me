@@ -49,6 +49,7 @@ import com.tunjid.tiler.queries
 import com.tunjid.tiler.toPivotedTileInputs
 import com.tunjid.tiler.toTiledList
 import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,7 +70,7 @@ typealias ArchiveListStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ArchiveListStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveListRoute) -> ArchiveListStateHolder,
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> ArchiveListStateHolder,
 ) : ScreenStateHolderCreator by creator.downcast()
 
 /**
@@ -84,7 +85,7 @@ class ActualArchiveListStateHolder(
     navActions: (NavigationMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
-    route: ArchiveListRoute,
+    route: Route,
 ) : ArchiveListStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         queryState = QueryState(

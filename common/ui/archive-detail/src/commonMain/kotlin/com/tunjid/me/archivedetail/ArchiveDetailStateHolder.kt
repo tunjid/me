@@ -42,6 +42,7 @@ import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -55,7 +56,7 @@ typealias ArchiveDetailStateHolder = ActionStateMutator<Action, StateFlow<State>
 
 @Inject
 class ArchiveDetailStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveDetailRoute) -> ArchiveDetailStateHolder,
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> ArchiveDetailStateHolder,
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
@@ -68,7 +69,7 @@ class ActualArchiveDetailStateHolder(
     navActions: (NavigationMutation) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
-    route: ArchiveDetailRoute,
+    route: Route,
 ) : ArchiveDetailStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         kind = route.routeParams.kind,

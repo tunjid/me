@@ -41,6 +41,7 @@ import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutationOf 
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.pop
+import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.switch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
@@ -50,7 +51,7 @@ typealias SignInStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class SignInStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: SignInRoute) -> SignInStateHolder
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> SignInStateHolder
 ) : ScreenStateHolderCreator by creator.downcast()
 
 @Inject
@@ -61,7 +62,7 @@ class ActualSignInStateHolder(
     scope: CoroutineScope,
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
-    route: SignInRoute,
+    route: Route,
 ) : SignInStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),

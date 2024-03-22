@@ -54,6 +54,7 @@ import com.tunjid.tiler.map
 import com.tunjid.tiler.toPivotedTileInputs
 import com.tunjid.tiler.toTiledList
 import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -76,7 +77,7 @@ typealias ArchiveFilesStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ArchiveFilesStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: ArchiveFilesRoute) -> ArchiveFilesStateHolder,
+    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> ArchiveFilesStateHolder,
 ) : ScreenStateHolderCreator by creator.downcast()
 
 /**
@@ -94,7 +95,7 @@ class ActualArchiveFilesStateHolder(
     onPermissionRequested: (Permission) -> Unit,
     scope: CoroutineScope,
     savedState: ByteArray?,
-    route: ArchiveFilesRoute,
+    route: Route,
 ) : ArchiveFilesStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         archiveId = route.routeParams.archiveId,
