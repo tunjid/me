@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
@@ -57,7 +58,9 @@ import com.tunjid.me.core.model.imageMimetypes
 import com.tunjid.me.core.model.miscMimeTypes
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.MediaArgs
+import com.tunjid.me.core.ui.dragdrop.dragSource
 import com.tunjid.me.core.ui.dragdrop.dropTarget
+import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
@@ -71,7 +74,7 @@ enum class FileType(
     val mimeTypes: Set<String>
 ) {
     Image(
-        kind = "image/*",
+        kind = "image",
         mimeTypes = imageMimetypes
     ),
     Misc(
@@ -231,21 +234,19 @@ private fun ImageFile(
 
         if (fileItem is FileItem.File) AsyncRasterImage(
             args = args,
-            modifier = imageModifier
+            modifier = when {
+                !dndEnabled -> imageModifier
+                else -> imageModifier.dragSource(
+                    dragShadowPainter = ColorPainter(Color.Green),
+                    uris = listOf(
+                        RemoteUri(
+                            path = fileItem.archiveFile.url,
+                            mimetype = fileItem.archiveFile.mimeType,
+                        )
+                    )
+                )
+            }
         )
-
-//        when {
-//            !dndEnabled -> imageModifier
-//            else -> imageModifier.dragSource(
-//                dragShadowPainter = imagePainter,
-//                uris = listOf(
-//                    RemoteUri(
-//                        path = fileItem.archiveFile.url,
-//                        mimetype = fileItem.archiveFile.mimeType,
-//                    )
-//                )
-//            )
-//        }
     }
     sharedElement(
         MediaArgs(
@@ -255,19 +256,19 @@ private fun ImageFile(
         modifier
             .aspectRatio(1f)
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
-            .clickable {
-                val archiveFile = when (fileItem) {
-                    is FileItem.File -> fileItem.archiveFile
-                    is FileItem.PlaceHolder -> return@clickable
-                }
-                actions(
-                    Action.Navigate.Gallery(
-                        archiveId = archiveFile.archiveId,
-                        fileId = archiveFile.id,
-                        thumbnail = archiveFile.url
-                    )
-                )
-            }
+//            .clickable {
+//                val archiveFile = when (fileItem) {
+//                    is FileItem.File -> fileItem.archiveFile
+//                    is FileItem.PlaceHolder -> return@clickable
+//                }
+//                actions(
+//                    Action.Navigate.Gallery(
+//                        archiveId = archiveFile.archiveId,
+//                        fileId = archiveFile.id,
+//                        thumbnail = archiveFile.url
+//                    )
+//                )
+//            }
     )
 }
 
