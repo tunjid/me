@@ -63,6 +63,8 @@ data class State(
     val isInPrimaryNav: Boolean = true,
     @ProtoNumber(3)
     val hasStoragePermissions: Boolean = false,
+    @ProtoNumber(5)
+    val currentQuery: ArchiveFileQuery,
     @Transient
     val dndEnabled: Boolean = false,
     @Transient

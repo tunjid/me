@@ -75,14 +75,16 @@ abstract class StatelessRoute : Route
 /**
  * A route that has a id for a [Route] defined in another module
  */
-class ExternalRoute(
+data class ExternalRoute(
     val path: String,
+    val pathArgs: Map<String, String> = emptyMap(),
+    val queryParams: Map<String, List<String>> = emptyMap(),
 ) : StatelessRoute() {
     override val routeParams: RouteParams
         get() = RouteParams(
             pathAndQueries = path,
-            pathArgs = emptyMap(),
-            queryParams = emptyMap(),
+            pathArgs = pathArgs,
+            queryParams = queryParams,
         )
 }
 

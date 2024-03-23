@@ -85,7 +85,14 @@ data class ArchiveEditRoute(
         null -> emptyList()
         else -> listOf(
             ExternalRoute(
-                path = "/archives/${routeParams.kind.type}/${archiveId.value}/files/image"
+                path = "/archives/${routeParams.kind.type}/${archiveId.value}/files/image",
+                pathArgs = mapOf(
+                    "id" to archiveId.value,
+                    "type" to "image",
+                ),
+                queryParams = mapOf(
+                    "dndEnabled" to listOf("true")
+                )
             )
         )
     }

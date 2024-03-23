@@ -16,6 +16,7 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.feature.archivefiles
 
 import com.tunjid.me.core.model.ArchiveFile
@@ -44,10 +45,11 @@ import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
+import com.tunjid.mutator.coroutines.SuspendingStateHolder
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.mutator.mutationOf 
+import com.tunjid.mutator.mutationOf
 import com.tunjid.tiler.Tile
 import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.map
@@ -58,19 +60,20 @@ import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.scan
 import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveFilesStateHolder = ActionStateMutator<Action, StateFlow<State>>
@@ -100,6 +103,9 @@ class ActualArchiveFilesStateHolder(
     initialState = byteSerializer.restoreState(savedState) ?: State(
         archiveId = route.routeParams.archiveId,
         dndEnabled = route.routeParams.dndEnabled,
+        currentQuery = ArchiveFileQuery(
+            archiveId = route.routeParams.archiveId,
+        ),
         fileType = route.routeParams.fileType,
         items = buildTiledList {
             addAll(
@@ -107,7 +113,7 @@ class ActualArchiveFilesStateHolder(
                 items = route.routeParams.urls.map(FileItem::PlaceHolder)
             )
         }
-    ),
+    ).also { println("ROUTE: $route") },
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     inputs = listOf(
         authRepository.authMutations(),
@@ -117,7 +123,7 @@ class ActualArchiveFilesStateHolder(
         ),
         permissionsFlow.storagePermissionMutations(),
     ),
-    actionTransform = { actions ->
+    actionTransform = stateHolder@{ actions ->
         actions.toMutationStream(keySelector = Action::key) {
             when (val action = type()) {
                 is Action.Drop -> action.flow.dropMutations(
@@ -132,7 +138,7 @@ class ActualArchiveFilesStateHolder(
                 )
 
                 is Action.Fetch -> action.flow.loadMutations(
-                    scope = scope,
+                    stateHolder = this@stateHolder,
                     archiveFileRepository = archiveFileRepository
                 )
 
@@ -154,47 +160,65 @@ private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
             )
         }
 
-private fun Flow<Action.Fetch>.loadMutations(
-    scope: CoroutineScope,
+private suspend fun Flow<Action.Fetch>.loadMutations(
+    stateHolder: SuspendingStateHolder<State>,
     archiveFileRepository: ArchiveFileRepository,
-): Flow<Mutation<State>> {
-    val columnSizes =
-        filterIsInstance<Action.Fetch.ColumnSizeChanged>()
-            .map { it.size }
-            .stateIn(
-                scope = scope,
-                started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
-                initialValue = 1
-            )
+): Flow<Mutation<State>> = scan(
+    initial = Pair(
+        MutableStateFlow(value = stateHolder.state().currentQuery),
+        MutableStateFlow(value = 1)
+    )
+) { accumulator, action ->
+    val (queries, numColumns) = accumulator
+    when (action) {
+        is Action.Fetch.LoadAround -> queries.value = action.query
+        is Action.Fetch.ColumnSizeChanged -> numColumns.value = action.size
+    }
+    // Emit the same item with each action
+    accumulator
+}
+    // Only emit once
+    .distinctUntilChanged()
+    .flatMapLatest { (queries, numColumns) ->
+        val pivotInputs = queries.toPivotedTileInputs(
+            numColumns.map(::pivotRequest)
+        )
+        val limitInputs: Flow<Tile.Limiter<ArchiveFileQuery, ArchiveFile>> = numColumns
+            .map { columnSize ->
+                Tile.Limiter(
+                    maxQueries = columnSize * 3,
+                    itemSizeHint = FILE_QUERY_LIMIT,
+                )
+            }
 
-    val pivotInputs: Flow<Tile.Input<ArchiveFileQuery, ArchiveFile>> =
-        filterIsInstance<Action.Fetch.LoadAround>()
-            .map { it.query }
-            .toPivotedTileInputs(columnSizes.map(::pivotRequest))
-
-    val limitInputs: Flow<Tile.Limiter<ArchiveFileQuery, ArchiveFile>> = columnSizes
-        .map { columnSize ->
-            Tile.Limiter(
-                maxQueries = columnSize * 3,
-                itemSizeHint = FILE_QUERY_LIMIT,
-            )
-        }
-
-    return merge(
-        pivotInputs,
-        limitInputs
-    ).toTiledList(
-        archiveFileRepository.archiveFilesTiler(
-            limiter = Tile.Limiter(
-                maxQueries = 3,
-                itemSizeHint = FILE_QUERY_LIMIT,
+        val listMutations: Flow<Mutation<State>> = merge(
+            pivotInputs,
+            limitInputs
+        ).toTiledList(
+            archiveFileRepository.archiveFilesTiler(
+                limiter = Tile.Limiter(
+                    maxQueries = 3,
+                    itemSizeHint = FILE_QUERY_LIMIT,
+                )
             )
         )
-    )
-        .map {
-            mutationOf { copy(items = it.map(FileItem::File)) }
-        }
-}
+            .onEach {
+                println("Fetched ${it.size}")
+            }
+            .map {
+                mutationOf { copy(items = it.map(FileItem::File)) }
+            }
+
+        val currentQueryMutations: Flow<Mutation<State>> =
+            queries.mapToMutation {
+                copy(currentQuery = it)
+            }
+
+        merge(
+            currentQueryMutations,
+            listMutations
+        )
+    }
 
 /**
  * Empty mutations proxied to [onPermissionRequested] to request permissions
