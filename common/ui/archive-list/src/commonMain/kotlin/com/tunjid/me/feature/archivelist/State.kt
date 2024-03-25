@@ -41,6 +41,7 @@ import com.tunjid.tiler.queryAtOrNull
 import com.tunjid.tiler.tiles
 import com.tunjid.treenav.current
 import com.tunjid.treenav.push
+import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.routeString
 import com.tunjid.treenav.swap
 import kotlinx.datetime.TimeZone
@@ -144,15 +145,21 @@ sealed class Action(val key: String) {
         }
 
         data class Detail(val archive: Archive) : Navigate() {
-            override val navigationMutation: NavigationMutation = {
+            override val navigationMutation: NavigationMutation = mutation@{
                 val route = routeString(
                     path = "/archives/${archive.kind.type}/${archive.id.value}",
                     queryParams = mapOf(
                         "thumbnail" to listOfNotNull(archive.thumbnail),
                     )
                 ).toRoute
-                if (navState.current is ArchiveListRoute) navState.push(node = route)
-                else navState.swap(node = route)
+                val current = navState.current
+                if (current !is Route) return@mutation navState.push(node = route)
+
+                when (current.routeParams.pathArgs.size) {
+                    // Assumption that this means we're on the list page and not the details page
+                    1 -> navState.push(node = route)
+                    else -> navState.swap(node = route)
+                }
             }
         }
 

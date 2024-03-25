@@ -7,8 +7,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import com.tunjid.me.scaffold.navigation.SerializedRouteParams
+import com.tunjid.treenav.Node
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteParams
+import kotlinx.serialization.Serializable
 
 /**
  * Route implementation with adaptive semantics
@@ -29,7 +32,7 @@ interface AdaptiveRouteConfiguration {
 }
 
 fun adaptiveRouteConfiguration(
-    secondaryRoute: (Route) -> ExternalRoute? = { null },
+    secondaryRoute: (Route) -> Route? = { null },
     transitions: (Adaptive.ContainerState) -> Adaptive.Transitions = { state ->
         when (state.container) {
             Adaptive.Container.Primary,
@@ -73,20 +76,58 @@ fun adaptiveRouteConfiguration(
 abstract class StatelessRoute : Route
 
 /**
- * A route that has a id for a [Route] defined in another module
+ * Basic route definition
  */
-data class ExternalRoute(
-    val path: String,
-    val pathArgs: Map<String, String> = emptyMap(),
-    val queryParams: Map<String, List<String>> = emptyMap(),
-) : StatelessRoute() {
-    override val routeParams: RouteParams
-        get() = RouteParams(
+@Serializable
+private class BasicRoute(
+    override val routeParams: SerializedRouteParams,
+    override val children: List<Node> = emptyList(),
+) : Route {
+
+    constructor(
+        path: String,
+        pathArgs: Map<String, String> = emptyMap(),
+        queryParams: Map<String, List<String>> = emptyMap(),
+        children: List<Node> = emptyList(),
+    ) : this(
+        routeParams = RouteParams(
             pathAndQueries = path,
             pathArgs = pathArgs,
             queryParams = queryParams,
-        )
+        ),
+        children = children
+    )
+
+    override fun toString(): String = id
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Route) return false
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int = id.hashCode()
 }
+
+fun routeOf(
+    params: RouteParams,
+    children: List<Node> = emptyList(),
+): Route = BasicRoute(
+    routeParams = params,
+    children = children
+)
+
+fun routeOf(
+    path: String,
+    pathArgs: Map<String, String> = emptyMap(),
+    queryParams: Map<String, List<String>> = emptyMap(),
+    children: List<Node> = listOf(),
+): Route = BasicRoute(
+    path = path,
+    pathArgs = pathArgs,
+    queryParams = queryParams,
+    children = children
+)
 
 private val RouteTransitionAnimationSpec: FiniteAnimationSpec<Float> = tween(
     durationMillis = 700

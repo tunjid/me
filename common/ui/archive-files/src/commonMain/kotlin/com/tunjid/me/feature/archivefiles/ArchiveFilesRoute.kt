@@ -20,7 +20,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -62,12 +61,11 @@ import com.tunjid.me.core.ui.dragdrop.dragSource
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
-import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
+import com.tunjid.scaffold.adaptive.routeOf
 import com.tunjid.scaffold.adaptive.sharedElementOf
 import com.tunjid.tiler.compose.PivotedTilingEffect
-import com.tunjid.treenav.strings.Route
-import kotlinx.serialization.Serializable
+import com.tunjid.treenav.strings.RouteParams
 
 enum class FileType(
     val kind: String,
@@ -78,15 +76,16 @@ enum class FileType(
         mimeTypes = imageMimetypes
     ),
     Misc(
-        kind = "",
+        kind = "misc",
         mimeTypes = miscMimeTypes
     )
 }
 
-@Serializable
-data class ArchiveFilesRoute(
-    override val routeParams: SerializedRouteParams,
-) : Route
+fun ArchiveFilesRoute(
+    routeParams: RouteParams,
+) = routeOf(
+    params = routeParams
+)
 
 @Composable
 internal fun ArchiveFilesScreen(

@@ -37,6 +37,7 @@ import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
 import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteParams
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
@@ -102,7 +103,7 @@ abstract class ArchiveFilesNavigationComponent {
         render = { route ->
             ArchiveFilesParentScreen(
                 modifier = Modifier.backPreviewBackgroundModifier(),
-                children = route.children.filterIsInstance<ArchiveFilesRoute>(),
+                children = route.children.filterIsInstance<Route>(),
             )
         }
     )

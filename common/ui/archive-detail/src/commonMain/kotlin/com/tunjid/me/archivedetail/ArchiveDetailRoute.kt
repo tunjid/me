@@ -43,27 +43,26 @@ import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.scaffold.globalui.PaneAnchor
-import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
-import com.tunjid.scaffold.adaptive.ExternalRoute
+import com.tunjid.scaffold.adaptive.routeOf
 import com.tunjid.scaffold.adaptive.sharedElementOf
-import com.tunjid.treenav.Node
-import com.tunjid.treenav.strings.Route
-import kotlinx.serialization.Serializable
+import com.tunjid.treenav.strings.RouteParams
 
 private const val BODY_KEY = 3
 
-@Serializable
-data class ArchiveDetailRoute(
-    override val routeParams: SerializedRouteParams,
-) : Route {
-
-    override val children: List<Node> = listOf(
-        ExternalRoute(
-            path = "/archives/${routeParams.kind.type}"
+fun ArchiveDetailRoute(
+    routeParams: RouteParams,
+) = routeOf(
+    params = routeParams,
+    children = listOf(
+        routeOf(
+            path = "/archives/${routeParams.kind.type}",
+            pathArgs = mapOf(
+                "kind" to routeParams.kind.type
+            )
         )
     )
-}
+)
 
 @Composable
 internal fun ArchiveDetailScreen(

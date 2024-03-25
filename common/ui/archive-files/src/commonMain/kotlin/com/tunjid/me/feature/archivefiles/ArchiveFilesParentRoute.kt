@@ -40,46 +40,38 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.feature.archivefiles.di.archiveId
 import com.tunjid.me.feature.archivefiles.di.fileType
+import com.tunjid.me.feature.archivefiles.di.kind
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.me.scaffold.navigation.SerializedRouteParams
-import com.tunjid.scaffold.adaptive.StatelessRoute
-import com.tunjid.treenav.Node
+import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteParams
-import kotlinx.serialization.Serializable
 
-@Serializable
-data class ArchiveFilesParentRoute(
-    override val routeParams: SerializedRouteParams,
-) : StatelessRoute() {
-
-    private val archiveId get() = ArchiveId(routeParams.pathArgs["id"] ?: "")
-    private val kind
-        get() = ArchiveKind.entries.firstOrNull { it.type == routeParams.pathArgs["kind"] }
-            ?: ArchiveKind.Articles
-
-    override val children: List<Node> = FileType.entries
+fun ArchiveFilesParentRoute(
+    routeParams: RouteParams,
+) = routeOf(
+    params = routeParams,
+    children = FileType.entries
         .map { fileType ->
-            ArchiveFilesRoute(
-                routeParams = RouteParams(
-                    pathAndQueries = "/archives/${kind.type}/${archiveId.value}/files/${fileType.kind}",
+            routeOf(
+                params = RouteParams(
+                    pathAndQueries = "/archives/${routeParams.kind.type}/${routeParams.archiveId.value}/files/${fileType.kind}",
                     pathArgs = routeParams.pathArgs + ("type" to fileType.kind),
                     queryParams = routeParams.queryParams
                 ),
             )
         }
-}
+)
 
 @Composable
 internal fun ArchiveFilesParentScreen(
     modifier: Modifier = Modifier,
-    children: List<ArchiveFilesRoute>
+    children: List<Route>
 ) {
     ScreenUiState(
         UiState(
