@@ -16,10 +16,13 @@
 
 package com.tunjid.me.core.utilities
 
-import io.ktor.utils.io.core.*
-import io.ktor.utils.io.streams.*
+import io.ktor.utils.io.core.Input
+import io.ktor.utils.io.streams.asInput
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.nio.file.Files
+import kotlin.io.path.extension
 
 actual class ActualUriConverter : UriConverter {
     override fun toInput(uri: LocalUri): Input = when (uri) {
@@ -33,8 +36,20 @@ actual class ActualUriConverter : UriConverter {
     }
 
     override suspend fun mimeType(uri: LocalUri): String = when (uri) {
-        is FileUri -> Files.probeContentType(uri.file.toPath())
-        else -> throw IllegalArgumentException("Unknown URI type")
+        is FileUri -> when (val probedMimetype =
+            withContext(Dispatchers.IO) {
+                Files.probeContentType(uri.file.toPath())
+            }) {
+            null -> when (uri.file.toPath().extension) {
+                "wasm" -> "application/wasm"
+                "map" -> "application/json"
+                else -> throw IllegalArgumentException("Unknown mimeType for ${uri.path}")
+            }
+
+            else -> probedMimetype
+        }
+
+        else -> throw IllegalArgumentException("Unknown mimeType for ${uri.path}")
     }
 
     override suspend fun contentLength(uri: LocalUri): Long? = when (uri) {
