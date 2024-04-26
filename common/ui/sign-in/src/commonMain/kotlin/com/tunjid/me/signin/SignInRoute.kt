@@ -28,14 +28,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
-import com.tunjid.me.scaffold.navigation.SerializedRouteParams
-import com.tunjid.treenav.strings.Route
-import kotlinx.serialization.Serializable
+import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.treenav.strings.RouteParams
 
-@Serializable
-data class SignInRoute(
-    override val routeParams: SerializedRouteParams,
-) : Route
+fun SignInRoute(
+    routeParams: RouteParams,
+) = routeOf(
+    params = routeParams,
+)
 
 @Composable
 internal fun SignInScreen(

@@ -34,14 +34,14 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.navigation.SerializedRouteParams
-import com.tunjid.treenav.strings.Route
-import kotlinx.serialization.Serializable
+import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.treenav.strings.RouteParams
 
-@Serializable
-data class SettingsRoute(
-    override val routeParams: SerializedRouteParams,
-) : Route
+fun SettingsRoute(
+    routeParams: RouteParams,
+) = routeOf(
+    params = routeParams,
+)
 
 @Composable
 internal fun SettingsScreen(
@@ -77,7 +77,7 @@ internal fun SettingsScreen(
                 content = {
                     Text(
                         modifier = Modifier.padding(16.dp),
-                        text = externalRoute.path,
+                        text = externalRoute.id,
                     )
                 }
             )

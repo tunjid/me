@@ -44,14 +44,14 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.navigation.SerializedRouteParams
-import com.tunjid.treenav.strings.Route
-import kotlinx.serialization.Serializable
+import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.treenav.strings.RouteParams
 
-@Serializable
-data class ProfileRoute(
-    override val routeParams: SerializedRouteParams,
-) : Route
+fun ProfileRoute(
+    routeParams: RouteParams,
+) = routeOf(
+    params = routeParams,
+)
 
 @Composable
 internal fun ProfileScreen(

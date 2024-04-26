@@ -65,26 +65,23 @@ import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
-import com.tunjid.me.scaffold.navigation.SerializedRouteParams
 import com.tunjid.me.scaffold.permissions.Permission
-import com.tunjid.scaffold.adaptive.ExternalRoute
+import com.tunjid.scaffold.adaptive.routeOf
 import com.tunjid.scaffold.adaptive.sharedElementOf
-import com.tunjid.treenav.Node
 import com.tunjid.treenav.strings.Route
+import com.tunjid.treenav.strings.RouteParams
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 
 private const val BODY_INDEX = 11
 
-@Serializable
-data class ArchiveEditRoute(
-    override val routeParams: SerializedRouteParams,
-) : Route {
-
-    override val children: List<Node> = when (val archiveId = routeParams.archiveId) {
+fun ArchiveEditRoute(
+    routeParams: RouteParams,
+): Route = routeOf(
+    params = routeParams,
+    children = when (val archiveId = routeParams.archiveId) {
         null -> emptyList()
         else -> listOf(
-            ExternalRoute(
+            routeOf(
                 path = "/archives/${routeParams.kind.type}/${archiveId.value}/files/image",
                 pathArgs = mapOf(
                     "id" to archiveId.value,
@@ -96,7 +93,7 @@ data class ArchiveEditRoute(
             )
         )
     }
-}
+)
 
 @Composable
 internal fun ArchiveEditScreen(

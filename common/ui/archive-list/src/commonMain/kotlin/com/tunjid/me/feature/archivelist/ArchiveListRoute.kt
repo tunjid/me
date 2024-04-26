@@ -16,6 +16,7 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.feature.archivelist
 
 import androidx.compose.animation.animateContentSize
@@ -50,17 +51,17 @@ import com.tunjid.composables.scrollbars.scrollbarState
 import com.tunjid.composables.stickyheader.StickyHeaderStaggeredGrid
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
-import com.tunjid.me.scaffold.navigation.SerializedRouteParams
+import com.tunjid.scaffold.adaptive.routeOf
 import com.tunjid.tiler.compose.PivotedTilingEffect
-import com.tunjid.treenav.strings.Route
+import com.tunjid.treenav.strings.RouteParams
 import kotlinx.coroutines.flow.*
-import kotlinx.serialization.Serializable
 import kotlin.math.abs
 
-@Serializable
-data class ArchiveListRoute(
-    override val routeParams: SerializedRouteParams,
-) : Route
+fun ArchiveListRoute(
+    routeParams: RouteParams,
+) = routeOf(
+    params = routeParams
+)
 
 @Composable
 internal fun ArchiveListScreen(

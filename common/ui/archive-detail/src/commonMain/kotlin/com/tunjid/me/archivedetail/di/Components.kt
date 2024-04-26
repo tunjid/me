@@ -33,10 +33,11 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.scaffold.adaptive.ExternalRoute
 import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
-import com.tunjid.treenav.strings.RouteParams
+import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
+import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
@@ -76,7 +77,7 @@ abstract class ArchiveDetailNavigationComponent {
     @Provides
     fun routeAdaptiveConfiguration() = RoutePattern to adaptiveRouteConfiguration(
         secondaryRoute = { route ->
-            route.children.first() as? ExternalRoute
+            route.children.first() as? Route
         },
         render = { route ->
             val stateHolder = rememberRetainedStateHolder<ArchiveDetailStateHolder>(

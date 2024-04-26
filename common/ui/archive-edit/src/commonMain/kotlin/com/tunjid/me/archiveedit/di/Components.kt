@@ -33,8 +33,8 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.scaffold.adaptive.ExternalRoute
 import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
@@ -86,7 +86,7 @@ abstract class ArchiveEditNavigationComponent {
     @Provides
     fun editRouteAdaptiveConfiguration() = EditRoutePattern to adaptiveRouteConfiguration(
         secondaryRoute = { route ->
-            route.children.first() as? ExternalRoute
+            route.children.first() as? Route
         },
         render = { route ->
             val stateHolder = rememberRetainedStateHolder<ArchiveEditStateHolder>(

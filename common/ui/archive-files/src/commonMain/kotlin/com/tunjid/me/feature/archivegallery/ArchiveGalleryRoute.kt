@@ -38,25 +38,25 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.round
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.MediaArgs
-import com.tunjid.me.scaffold.navigation.SerializedRouteParams
+import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.mutationOf
+import com.tunjid.scaffold.adaptive.routeOf
 import com.tunjid.scaffold.adaptive.sharedElementOf
-import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.tiler.compose.PivotedTilingEffect
-import com.tunjid.treenav.strings.Route
+import com.tunjid.treenav.strings.RouteParams
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
-import kotlinx.serialization.Serializable
 
-@Serializable
-data class ArchiveGalleryRoute(
-    override val routeParams: SerializedRouteParams,
-) : Route
+fun ArchiveGalleryRoute(
+    routeParams: RouteParams,
+) = routeOf(
+    params = routeParams
+)
 
 @Composable
 internal fun ArchiveGalleryScreen(
