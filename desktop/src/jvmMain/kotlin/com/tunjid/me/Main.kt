@@ -19,24 +19,23 @@ package com.tunjid.me
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import com.tunjid.me.common.di.MeApp
+import com.tunjid.me.common.ui.adaptiveContentState
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
 import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.common.di.MeApp
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
-import com.tunjid.me.scaffold.scaffold.Scaffold
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
-import com.tunjid.mutator.mutationOf 
+import com.tunjid.me.scaffold.scaffold.Scaffold
+import com.tunjid.mutator.mutationOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.awt.event.WindowEvent
 import java.awt.event.WindowFocusListener
@@ -62,10 +61,7 @@ fun main() {
                             density = density,
                             window = window,
                         ),
-                        adaptiveContentState = app.adaptiveContentStateCreator(
-                            rememberCoroutineScope(),
-                            rememberSaveableStateHolder()
-                        ),
+                        adaptiveContentState = app.adaptiveContentState(),
                         navStateHolder = app.navStateHolder,
                         globalUiStateHolder = app.globalUiStateHolder,
                     )

@@ -27,29 +27,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.tunjid.me.scaffold.adaptive.AdaptiveContentState
+import com.tunjid.me.scaffold.adaptive.SharedElementData
 import com.tunjid.me.scaffold.di.AdaptiveRouter
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.scaffold.adaptive.Adaptive
-import com.tunjid.me.scaffold.adaptive.AdaptiveContentState
 import com.tunjid.scaffold.adaptive.AnimatedAdaptiveContentScope
 import com.tunjid.scaffold.adaptive.LocalAdaptiveContentScope
-import com.tunjid.me.scaffold.adaptive.SharedElementData
 import com.tunjid.treenav.MultiStackNav
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
-
-@Inject
-class AdaptiveContentStateFactory(
-    val adaptiveContentStateCreator: (CoroutineScope, SaveableStateHolder) -> AdaptiveContentState,
-) {
-//    fun create(
-//        scope: CoroutineScope,
-//        saveableStateHolder: SaveableStateHolder?,
-//    ): SavedStateAdaptiveContentState
-}
 
 @Stable
 @Inject
