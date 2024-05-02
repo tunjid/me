@@ -22,8 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toComposeRect
 import androidx.compose.ui.platform.ComposeView
@@ -31,6 +29,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
+import com.tunjid.me.common.ui.adaptiveContentState
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.me.core.ui.dragdrop.DragTrigger
 import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
@@ -40,10 +39,10 @@ import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.insetMutations
 import com.tunjid.me.scaffold.globalui.integrateBackActions
-import com.tunjid.me.scaffold.scaffold.Scaffold
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
-import com.tunjid.mutator.mutationOf 
+import com.tunjid.me.scaffold.scaffold.Scaffold
+import com.tunjid.mutator.mutationOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -75,10 +74,7 @@ class MainActivity : AppCompatActivity() {
                             ),
                             view = root
                         ),
-                        adaptiveContentState = meApp.adaptiveContentStateCreator(
-                            rememberCoroutineScope(),
-                            rememberSaveableStateHolder()
-                        ),
+                        adaptiveContentState = meApp.adaptiveContentState(),
                         navStateHolder = meApp.navStateHolder,
                         globalUiStateHolder = meApp.globalUiStateHolder,
                     )
