@@ -17,6 +17,7 @@
 plugins {
     id("android-library-convention")
     id("kotlin-library-convention")
+    alias(libs.plugins.compose.compiler)
     id("org.jetbrains.compose")
     kotlin("plugin.serialization")
     id("ksp-convention")

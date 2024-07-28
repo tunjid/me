@@ -45,6 +45,7 @@ import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.switch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 typealias SignInStateHolder = ActionStateMutator<Action, StateFlow<State>>
@@ -59,9 +60,12 @@ class ActualSignInStateHolder(
     authRepository: AuthRepository,
     navActions: (NavigationMutation) -> Unit,
     byteSerializer: ByteSerializer,
+    @Assisted
     scope: CoroutineScope,
+    @Assisted
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
+    @Assisted
     route: Route,
 ) : SignInStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(),

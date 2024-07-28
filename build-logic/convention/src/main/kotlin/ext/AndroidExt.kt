@@ -39,14 +39,6 @@ fun org.gradle.api.Project.commonConfiguration(
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        val composeCompilerVersion = versionCatalog
-            .findVersion("androidxComposeCompiler")
-            .get()
-            .requiredVersion
-        println("USING VERSION $composeCompilerVersion")
-        kotlinCompilerExtensionVersion = composeCompilerVersion
-    }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11

@@ -72,6 +72,7 @@ fun org.gradle.api.Project.configureKotlinMultiplatform(
 }
 
 private fun KotlinTarget.configureKsp(project: Project) {
+
     println("Target name: $targetName. Metadata? ${targetName == "metadata"}")
     if (targetName != "metadata") {
         project.dependencies {
@@ -82,11 +83,11 @@ private fun KotlinTarget.configureKsp(project: Project) {
         }
     }
 
-    compilations.configureEach {
-        kotlinSourceSets.forEach { sourceSet ->
-            println("Target name: $targetName. sourceSet name: ${sourceSet.name}")
-
-            sourceSet.kotlin.srcDir("build/generated/ksp/$targetName/${sourceSet.name}/kotlin")
-        }
-    }
+//    compilations.configureEach {
+//        kotlinSourceSets.forEach { sourceSet ->
+//            println("Target name: $targetName. sourceSet name: ${sourceSet.name}")
+//
+//            sourceSet.kotlin.srcDir("build/generated/ksp/$targetName/${sourceSet.name}/kotlin")
+//        }
+//    }
 }

@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveDetailStateHolder = ActionStateMutator<Action, StateFlow<State>>
@@ -67,8 +68,11 @@ class ActualArchiveDetailStateHolder(
     uiStateFlow: StateFlow<UiState>,
     navStateFlow: StateFlow<MultiStackNav>,
     navActions: (NavigationMutation) -> Unit,
+    @Assisted
     scope: CoroutineScope,
+    @Assisted
     savedState: ByteArray?,
+    @Assisted
     route: Route,
 ) : ArchiveDetailStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(

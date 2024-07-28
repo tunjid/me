@@ -109,13 +109,13 @@ fun ArchiveQuery.hasTheSameFilter(
         && contentFilter.tags.toSet() == other.contentFilter.tags.toSet()
         && contentFilter.categories.toSet() == other.contentFilter.categories.toSet()
 
-private class CategorySerializer(
-    backing: KSerializer<Category> = descriptorSerializer(Descriptor::Category),
-) : KSerializer<Category> by backing
+private class CategorySerializer : KSerializer<Category> by descriptorSerializer(
+    creator = Descriptor::Category
+)
 
-private class TagSerializer(
-    backing: KSerializer<Tag> = descriptorSerializer(Descriptor::Tag),
-) : KSerializer<Tag> by backing
+private class TagSerializer : KSerializer<Tag> by descriptorSerializer(
+    creator = Descriptor::Tag
+)
 
 private fun <T : Descriptor> descriptorSerializer(creator: (String) -> T) =
     object : KSerializer<T> {

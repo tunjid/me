@@ -3,42 +3,41 @@ accompanist = "0.28.0"
 apacheCommonsImaging = "1.0-alpha3"
 androidDesugarJdkLibs = "2.0.4"
 androidGradlePlugin = "8.0.2"
-androidxActivity = "1.8.2"
-androidxAppCompat = "1.6.1"
-androidxCore = "1.12.0"
-androidxLifecycle = "2.7.0"
-androidxWindow = "1.2.0"
+androidxActivity = "1.9.1"
+androidxAppCompat = "1.7.0"
+androidxCore = "1.13.1"
+androidxLifecycle = "2.8.4"
+androidxWindow = "1.3.0"
 coil = "2.2.2"
-androidxCompose = "1.7.0-SNAPSHOT"
+androidxCompose = "1.7.0-beta05"
 androidxMaterial3 = "1.0.1"
-androidxComposeCompiler = "1.5.8"
-androidxDataStore = "1.1.0-beta01"
+androidxDataStore = "1.1.1"
 androidxEspresso = "3.5.1"
 androidxTest = "1.5.0"
 androidxTestExt = "1.1.5"
 androidxWork = "2.9.0"
 googleMaterial = "1.11.0"
-gradleKotlinDsl = "4.0.7"
+gradleKotlinDsl = "4.4.0"
 jakeWhartonRetrofit = "1.0.0"
-jetbrainsCompose = "1.6.0-rc01"
+jetbrainsCompose = "1.7.0-alpha02"
 junit4 = "4.13.2"
 kinject = "2.0.0"
-kotlin = "1.9.22"
-kotlinxCoroutines = "1.7.3"
-kotlinxDatetime = "0.4.0"
+kotlin = "2.0.0"
+kotlinxCoroutines = "1.9.0-RC"
+kotlinxDatetime = "0.5.0"
 kotlinxSerialization = "1.5.1"
 imageIO = "3.9.4"
-ksp = "1.9.22-1.0.17"
+ksp = "2.0.0-1.0.23"
 ktor = "2.2.4"
 mockk = "1.12.3"
 okhttp = "4.12.0"
-okio = "3.3.0"
+okio = "3.4.0"
 retrofit = "2.9.0"
 richtext = "0.16.0"
 richeditor = "1.0.0-rc01"
 socketio = "2.0.0"
 sqldelight = "2.0.0"
-tartakaKotlinInject = "0.6.3"
+tartakaKotlinInject = "0.7.1"
 tunjidStateHolder = "1.1.0"
 tunjidTiler = "1.1.0-rc02"
 tunjidTreeNav = "0.0.7"
@@ -81,6 +80,7 @@ cashapp-sqldelight-driver-jvm = { group = "app.cash.sqldelight", name = "sqlite-
 cashapp-sqldelight-coroutines-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
 cashapp-sqldelight-gradlePlugin = { group = "app.cash.sqldelight", name = "gradle-plugin", version.ref = "sqldelight" }
 cashapp-turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+compose-compiler-plugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
 google-devtools-kspPlugin = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
 gradle-kotlinDslPlugin = { group = "org.gradle.kotlin", name = "gradle-kotlin-dsl-plugins", version.ref = "gradleKotlinDsl" }
@@ -129,7 +129,7 @@ richtext-material3 = { group = "com.halilibo.compose-richtext", name = "richtext
 socketio-client-jvm = { group = "io.socket", name = "socket.io-client", version.ref = "socketio" }
 squareup-okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 tartaka-kotlin-inject-compiler = { group = "me.tatarka.inject", name = "kotlin-inject-compiler-ksp", version.ref = "tartakaKotlinInject" }
-tartaka-kotlin-inject-runtime = { group = "me.tatarka.inject", name = "kotlin-inject-runtime", version.ref = "tartakaKotlinInject" }
+tartaka-kotlin-inject-runtime = { group = "me.tatarka.inject", name = "kotlin-inject-runtime-kmp", version.ref = "tartakaKotlinInject" }
 tunjid-composables = { group = "com.tunjid.composables", name = "composables", version.ref = "tunjidComposables" }
 tunjid-mutator-core-common = { group = "com.tunjid.mutator", name = "core", version.ref = "tunjidStateHolder" }
 tunjid-mutator-core-jvm = { group = "com.tunjid.mutator", name = "core-jvm", version.ref = "tunjidStateHolder" }
@@ -149,6 +149,7 @@ android-application = { id = "com.android.application", version.ref = "androidGr
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 android-test = { id = "com.android.test", version.ref = "androidGradlePlugin" }
 androidx-compose = { id = "com.android.test", version.ref = "androidGradlePlugin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "jetbrainsCompose" }
 kotlin-mpp = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

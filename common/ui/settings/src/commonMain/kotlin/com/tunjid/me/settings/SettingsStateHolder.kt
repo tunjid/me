@@ -37,6 +37,7 @@ import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 typealias SettingsStateHolder = ActionStateMutator<Action, StateFlow<State>>
@@ -51,9 +52,12 @@ class ActualSettingsStateHolder(
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
     navActions: (NavigationMutation) -> Unit,
+    @Assisted
     scope: CoroutineScope,
+    @Assisted
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
+    @Assisted
     route: Route,
 ) : SettingsStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(),
