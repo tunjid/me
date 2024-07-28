@@ -22,6 +22,9 @@ plugins {
 }
 android {
     namespace = "com.tunjid.me.sync"
+    buildFeatures {
+        compose = false
+    }
 }
 
 kotlin {

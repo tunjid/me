@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
  * Sets common values for Android Applications and Libraries
  */
 fun org.gradle.api.Project.commonConfiguration(
-    extension: CommonExtension<*, *, *, *>
+    extension: CommonExtension<*, *, *, *, *, *>
 ) = extension.apply {
     compileSdk = 34
 
@@ -38,14 +38,6 @@ fun org.gradle.api.Project.commonConfiguration(
 
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        val composeCompilerVersion = versionCatalog
-            .findVersion("androidxComposeCompiler")
-            .get()
-            .requiredVersion
-        println("USING VERSION $composeCompilerVersion")
-        kotlinCompilerExtensionVersion = composeCompilerVersion
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true

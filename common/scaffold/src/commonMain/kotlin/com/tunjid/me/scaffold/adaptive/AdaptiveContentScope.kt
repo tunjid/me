@@ -2,8 +2,12 @@ package com.tunjid.scaffold.adaptive
 
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -11,6 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import com.tunjid.me.scaffold.adaptive.AdaptiveContentState
 import com.tunjid.me.scaffold.scaffold.SavedStateAdaptiveContentState
 import com.tunjid.scaffold.adaptive.Adaptive.key
 
@@ -98,6 +104,26 @@ fun <T> sharedElementOf(
 
 internal val LocalAdaptiveContentScope = staticCompositionLocalOf<Adaptive.ContainerScope?> {
     null
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+internal val LocalSharedTransitionScope = staticCompositionLocalOf<SharedTransitionScope> {
+    TODO()
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+fun AdaptiveContentRoot(
+    adaptiveContentState: AdaptiveContentState,
+    content: @Composable () -> Unit
+) {
+    SharedTransitionLayout(
+        modifier = Modifier
+    ) {
+        CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+            content()
+        }
+    }
 }
 
 internal val Adaptive.ContainerScope.isPreviewingBack: Boolean

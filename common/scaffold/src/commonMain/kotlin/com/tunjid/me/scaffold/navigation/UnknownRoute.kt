@@ -43,7 +43,7 @@ private class RouteParamsSurrogate(
     val queryParams: Map<String, List<String>>,
 )
 
-private object RouteParamsSerializer : KSerializer<RouteParams> {
+internal object RouteParamsSerializer : KSerializer<RouteParams> {
     override val descriptor: SerialDescriptor = RouteParamsSurrogate.serializer().descriptor
 
     override fun serialize(encoder: Encoder, value: RouteParams) {

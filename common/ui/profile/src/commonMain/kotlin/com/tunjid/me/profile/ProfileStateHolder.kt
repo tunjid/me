@@ -34,6 +34,7 @@ import com.tunjid.mutator.mutationOf
 import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 typealias ProfileStateHolder = ActionStateMutator<Action, StateFlow<State>>
@@ -47,9 +48,12 @@ class ProfileStateHolderCreator(
 class ActualProfileStateHolder(
     authRepository: AuthRepository,
     byteSerializer: ByteSerializer,
+    @Assisted
     scope: CoroutineScope,
+    @Assisted
     savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
+    @Assisted
     route: Route,
 ) : ProfileStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(),

@@ -73,6 +73,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveEditStateHolder = ActionStateMutator<Action, StateFlow<State>>
@@ -92,8 +93,11 @@ class ActualArchiveEditStateHolder(
     permissionsFlow: StateFlow<Permissions>,
     onPermissionRequested: (Permission) -> Unit,
     navActions: (NavigationMutation) -> Unit,
+    @Assisted
     scope: CoroutineScope,
+    @Assisted
     savedState: ByteArray?,
+    @Assisted
     route: Route,
 ) : ArchiveEditStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(

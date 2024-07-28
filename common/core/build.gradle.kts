@@ -17,21 +17,19 @@
 plugins {
     id("android-library-convention")
     id("kotlin-library-convention")
-    id("org.jetbrains.compose")
     kotlin("plugin.serialization")
 }
 android {
     namespace = "com.tunjid.me.core"
+    buildFeatures {
+        compose = false
+    }
 }
 
 kotlin {
     sourceSets {
         named("commonMain") {
             dependencies {
-                implementation(libs.jetbrains.compose.ui.ui)
-                implementation(libs.jetbrains.compose.ui.util)
-                implementation(libs.jetbrains.compose.runtime)
-
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.cbor)

@@ -62,7 +62,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.zIndex
-import com.tunjid.me.core.utilities.countIf
+import com.tunjid.me.scaffold.countIf
 import com.tunjid.me.scaffold.adaptiveSpringSpec
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.WindowSizeClass

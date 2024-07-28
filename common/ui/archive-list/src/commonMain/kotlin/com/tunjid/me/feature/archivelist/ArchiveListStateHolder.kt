@@ -64,6 +64,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.transformWhile
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveListStateHolder = ActionStateMutator<Action, StateFlow<State>>
@@ -83,8 +84,11 @@ class ActualArchiveListStateHolder(
     byteSerializer: ByteSerializer,
     navStateFlow: StateFlow<MultiStackNav>,
     navActions: (NavigationMutation) -> Unit,
+    @Assisted
     scope: CoroutineScope,
+    @Assisted
     savedState: ByteArray?,
+    @Assisted
     route: Route,
 ) : ArchiveListStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(

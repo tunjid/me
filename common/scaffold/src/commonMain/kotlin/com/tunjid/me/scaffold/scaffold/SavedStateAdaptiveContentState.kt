@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.scaffold.adaptive.AdaptiveContentState
-import com.tunjid.me.scaffold.adaptive.SharedElementData
+import com.tunjid.me.scaffold.adaptive.MovableSharedElementData
 import com.tunjid.me.scaffold.di.AdaptiveRouter
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
@@ -75,7 +75,7 @@ class SavedStateAdaptiveContentState(
             }
         }
 
-    private val keysToSharedElements = mutableStateMapOf<Any, SharedElementData<*>>()
+    private val keysToSharedElements = mutableStateMapOf<Any, MovableSharedElementData<*>>()
 
     @Composable
     override fun RouteIn(container: Adaptive.Container?) {
@@ -90,14 +90,14 @@ class SavedStateAdaptiveContentState(
         key: Any,
         sharedElement: @Composable (T, Modifier) -> Unit,
     ): @Composable (T, Modifier) -> Unit {
-        val sharedElementData = keysToSharedElements.getOrPut(key) {
-            SharedElementData(
+        val movableSharedElementData = keysToSharedElements.getOrPut(key) {
+            MovableSharedElementData(
                 sharedElement = sharedElement,
                 onRemoved = { keysToSharedElements.remove(key) }
             )
         }
         // Can't really guarantee that the caller will use the same key for the right type
-        return sharedElementData.moveableSharedElement
+        return movableSharedElementData.moveableSharedElement
     }
 }
 

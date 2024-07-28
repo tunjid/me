@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveGalleryStateHolder = ActionStateMutator<Action, StateFlow<State>>
@@ -67,8 +68,11 @@ class ActualArchiveGalleryStateHolder(
     archiveFileRepository: ArchiveFileRepository,
     byteSerializer: ByteSerializer,
     navActions: (NavigationMutation) -> Unit,
+    @Assisted
     scope: CoroutineScope,
+    @Assisted
     savedState: ByteArray?,
+    @Assisted
     route: Route,
 ) : ArchiveGalleryStateHolder by scope.actionStateFlowMutator(
     initialState = byteSerializer.restoreState(savedState) ?: State(

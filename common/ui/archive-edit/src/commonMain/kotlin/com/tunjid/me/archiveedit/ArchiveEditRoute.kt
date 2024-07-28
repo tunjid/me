@@ -389,10 +389,11 @@ private fun LazyListScope.spacer(size: Dp) = item {
 }
 
 @Composable
-private fun Unstyled() = TextFieldDefaults.textFieldColors(
-    containerColor = Color.Transparent,
+private fun Unstyled() = TextFieldDefaults.colors(
+    focusedContainerColor = Color.Transparent,
     focusedIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = Color.Transparent,
     cursorColor = MaterialTheme.colorScheme.onSurface,
 )
+

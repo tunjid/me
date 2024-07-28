@@ -23,7 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.LookaheadScope
+import com.tunjid.me.scaffold.adaptive.AdaptiveContentState
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.LocalGlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.PaneAnchor
@@ -31,7 +31,7 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.slices.routeContainerState
 import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
-import com.tunjid.me.scaffold.adaptive.AdaptiveContentState
+import com.tunjid.scaffold.adaptive.AdaptiveContentRoot
 
 /**
  * Root scaffold for the app
@@ -59,7 +59,7 @@ fun Scaffold(
                     navStateHolder = navStateHolder,
                 )
                 // Root LookaheadScope used to anchor all shared element transitions
-                LookaheadScope {
+                AdaptiveContentRoot(adaptiveContentState) {
                     AdaptiveContentContainer(
                         contentState = adaptiveContentState,
                         positionalState = globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
