@@ -16,17 +16,12 @@
 
 package com.tunjid.me.core.utilities
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
-import kotlin.coroutines.CoroutineContext
-
-infix fun Dp.countIf(condition: Boolean) = if (condition) this else 0.dp
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 inline fun <T, R> StateFlow<T>.mapState(
     scope: CoroutineScope,

@@ -19,6 +19,8 @@
 package com.tunjid.me.scaffold
 
 import androidx.compose.animation.core.spring
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.treenav.MultiStackNav
@@ -28,6 +30,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+
+infix fun Dp.countIf(condition: Boolean) = if (condition) this else 0.dp
 
 /**
  * Updates [State] with whether it is the primary navigation container
