@@ -22,7 +22,7 @@ android {
     commonConfiguration(this)
 
     defaultConfig {
-        targetSdk = 31
+        targetSdk = 34
     }
     configurations.all {
         coerceComposeVersion(this)
