@@ -22,7 +22,7 @@ android {
     commonConfiguration(this)
 
     defaultConfig {
-        targetSdk = 31
+        lint.targetSdk = 34
     }
 
     sourceSets {
