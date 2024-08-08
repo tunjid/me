@@ -34,21 +34,19 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.tunjid.composables.scrollbars.scrollbarState
-import com.tunjid.composables.stickyheader.StickyHeaderStaggeredGrid
+import com.tunjid.composables.scrollbars.scrollable.staggeredgrid.rememberScrollbarThumbMover
+import com.tunjid.composables.scrollbars.scrollable.staggeredgrid.scrollbarState
+import com.tunjid.composables.stickyheader.staggeredgrid.StickyHeaderStaggeredGrid
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.scaffold.adaptive.routeOf
@@ -149,9 +147,26 @@ internal fun ArchiveListScreen(
                     state = scrollbarState,
                     scrollInProgress = gridState.isScrollInProgress,
                     orientation = Orientation.Vertical,
-                    onThumbMoved = gridState.scrollbarThumbPositionFunction(
-                        state = state,
-                        actions = actions
+                    onThumbMoved = gridState.rememberScrollbarThumbMover(
+                        itemsAvailable = state.queryState.count.toInt(),
+                        scroll = scroll@{ index ->
+                            actions(
+                                Action.Fetch.LoadAround(
+                                    query = state.queryState.currentQuery.copy(offset = index)
+                                )
+                            )
+
+                            // Fast path
+                            val fastIndex = updatedItems.indexOfFirst { it.index == index }
+                                .takeIf { it > -1 }
+                            if (fastIndex != null) return@scroll gridState.scrollToItem(fastIndex)
+
+                            // Slow path
+                            gridState.scrollToItem(
+                                snapshotFlow { updatedItems.indexOfFirst { it.index == index } }
+                                    .first { it > -1 }
+                            )
+                        }
                     ),
                 )
             }
@@ -221,7 +236,7 @@ private fun ArchiveList(
                     GridCell(
                         modifier = Modifier
                             .animateContentSize(animationSpec = ItemSizeSpec)
-                            .animateItemPlacement(animationSpec = ItemPlacementSpec),
+                            .animateItem(),
                         item = item,
                         query = currentQuery,
                         actions = actions,
@@ -332,44 +347,6 @@ private fun GridSizeUpdateEffect(
     }
 }
 
-@Composable
-private fun LazyStaggeredGridState.scrollbarThumbPositionFunction(
-    state: State,
-    actions: (Action) -> Unit,
-): (Float) -> Unit {
-
-    var percentage by remember { mutableStateOf<Float?>(null) }
-    val updatedState by rememberUpdatedState(state)
-
-    // Trigger the load to fetch the data required
-    LaunchedEffect(percentage) {
-        val currentPercentage = percentage ?: return@LaunchedEffect
-        val indexToFind = (state.queryState.count * currentPercentage).toInt()
-        actions(
-            Action.Fetch.LoadAround(
-                state.queryState.currentQuery.copy(
-                    offset = indexToFind
-                )
-            )
-        )
-
-        // Fast path
-        val fastIndex = updatedState.items.indexOfFirst { it.index == indexToFind }
-            .takeIf { it > -1 }
-        if (fastIndex != null) return@LaunchedEffect scrollToItem(fastIndex)
-
-        // Slow path
-        scrollToItem(
-            snapshotFlow { updatedState.items.indexOfFirst { it.index == indexToFind } }
-                .first { it > -1 }
-        )
-
-    }
-    return remember {
-        { percentage = it }
-    }
-}
-
 //@Preview
 //@Composable
 //private fun PreviewLoadingState() {
@@ -388,7 +365,6 @@ private fun LazyStaggeredGridState.scrollbarThumbPositionFunction(
 
 
 private val ItemSizeSpec = itemSpring(IntSize.VisibilityThreshold)
-private val ItemPlacementSpec = itemSpring(IntOffset.VisibilityThreshold)
 
 private fun <T> itemSpring(
     visibilityThreshold: T
