@@ -36,10 +36,10 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.Route
-import com.tunjid.treenav.strings.RouteParams
 import com.tunjid.treenav.strings.RouteMatcher
+import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
@@ -99,8 +99,8 @@ abstract class ArchiveFilesNavigationComponent {
 
     @IntoMap
     @Provides
-    fun filesParentRouteAdaptiveConfiguration() = FilesParentRoutePattern to adaptiveRouteConfiguration(
-        render = { route ->
+    fun filesParentRouteAdaptiveConfiguration() = FilesParentRoutePattern to threePaneListDetailStrategy(
+        render = { route: Route ->
             ArchiveFilesParentScreen(
                 modifier = Modifier.backPreviewBackgroundModifier(),
                 children = route.children.filterIsInstance<Route>(),
@@ -110,7 +110,7 @@ abstract class ArchiveFilesNavigationComponent {
 
     @IntoMap
     @Provides
-    fun filesRouteAdaptiveConfiguration() = FilesRoutePattern to adaptiveRouteConfiguration(
+    fun filesRouteAdaptiveConfiguration() = FilesRoutePattern to threePaneListDetailStrategy(
         render = { route ->
             val stateHolder = rememberRetainedStateHolder<ArchiveFilesStateHolder>(
                 route = route

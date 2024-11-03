@@ -31,45 +31,6 @@ interface AdaptiveRouteConfiguration {
     fun secondaryRoute(route: Route): Route?
 }
 
-fun adaptiveRouteConfiguration(
-    secondaryRoute: (Route) -> Route? = { null },
-    transitions: (Adaptive.ContainerState) -> Adaptive.Transitions = { state ->
-        when (state.container) {
-            Adaptive.Container.Primary,
-            Adaptive.Container.Secondary -> when (state.adaptation) {
-                Adaptive.Adaptation.PrimaryToSecondary,
-                Adaptive.Adaptation.SecondaryToPrimary -> NoTransition
-
-                else -> DefaultTransition
-            }
-
-            Adaptive.Container.TransientPrimary -> when (state.adaptation) {
-                Adaptive.Adaptation.PrimaryToTransient -> when (state.container) {
-                    Adaptive.Container.Secondary -> DefaultTransition
-                    else -> NoTransition
-                }
-
-                else -> DefaultTransition
-            }
-
-            null -> NoTransition
-        }
-    },
-    render: @Composable (Route) -> Unit
-) = object : AdaptiveRouteConfiguration {
-
-    @Composable
-    override fun Render(route: Route) {
-        render(route)
-    }
-
-    override fun secondaryRoute(route: Route): Route? =
-        secondaryRoute(route)
-
-    override fun transitionsFor(state: Adaptive.ContainerState): Adaptive.Transitions =
-        transitions(state)
-}
-
 /**
  * [AdaptiveRouteConfiguration] instances with no state holder
  */

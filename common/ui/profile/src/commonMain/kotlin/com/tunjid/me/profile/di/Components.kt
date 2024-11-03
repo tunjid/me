@@ -31,7 +31,7 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
@@ -60,7 +60,7 @@ abstract class ProfileNavigationComponent {
 
     @IntoMap
     @Provides
-    fun routeAdaptiveConfiguration() = RoutePattern to adaptiveRouteConfiguration(
+    fun routeAdaptiveConfiguration() = RoutePattern to threePaneListDetailStrategy(
         render = { route ->
             val stateHolder = rememberRetainedStateHolder<ProfileStateHolder>(
                 route = route

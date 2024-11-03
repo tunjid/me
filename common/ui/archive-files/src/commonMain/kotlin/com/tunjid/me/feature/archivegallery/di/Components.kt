@@ -30,7 +30,7 @@ import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
@@ -67,7 +67,7 @@ abstract class ArchiveGalleryNavigationComponent {
 
     @IntoMap
     @Provides
-    fun routeAdaptiveConfiguration() = RoutePattern to adaptiveRouteConfiguration(
+    fun routeAdaptiveConfiguration() = RoutePattern to threePaneListDetailStrategy(
         render = { route ->
             val stateHolder = rememberRetainedStateHolder<ArchiveGalleryStateHolder>(
                 route = route

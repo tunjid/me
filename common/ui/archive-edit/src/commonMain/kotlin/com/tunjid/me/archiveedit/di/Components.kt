@@ -33,7 +33,8 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.compose.threepane.ThreePane
+import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
@@ -84,9 +85,12 @@ abstract class ArchiveEditNavigationComponent {
 
     @IntoMap
     @Provides
-    fun editRouteAdaptiveConfiguration() = EditRoutePattern to adaptiveRouteConfiguration(
-        secondaryRoute = { route ->
-            route.children.first() as? Route
+    fun editRouteAdaptiveConfiguration() = EditRoutePattern to threePaneListDetailStrategy(
+        paneMapping = { route ->
+            mapOf(
+                ThreePane.Primary to route,
+                ThreePane.Secondary to route.children.first() as? Route,
+            )
         },
         render = { route ->
             val stateHolder = rememberRetainedStateHolder<ArchiveEditStateHolder>(
@@ -102,7 +106,7 @@ abstract class ArchiveEditNavigationComponent {
 
     @IntoMap
     @Provides
-    fun createRouteAdaptiveConfiguration() = CreateRoutePattern to adaptiveRouteConfiguration(
+    fun createRouteAdaptiveConfiguration() = CreateRoutePattern to threePaneListDetailStrategy(
         render = { route ->
             val stateHolder = rememberRetainedStateHolder<ArchiveEditStateHolder>(
                 route = route

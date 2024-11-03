@@ -33,8 +33,8 @@ import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
-import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.treenav.compose.threepane.ThreePane
+import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
@@ -75,9 +75,12 @@ abstract class ArchiveDetailNavigationComponent {
 
     @IntoMap
     @Provides
-    fun routeAdaptiveConfiguration() = RoutePattern to adaptiveRouteConfiguration(
-        secondaryRoute = { route ->
-            route.children.first() as? Route
+    fun routeAdaptiveConfiguration() = RoutePattern to threePaneListDetailStrategy(
+        paneMapping = { route ->
+            mapOf(
+                ThreePane.Primary to route,
+                ThreePane.Secondary to route.children.first() as? Route,
+            )
         },
         render = { route ->
             val stateHolder = rememberRetainedStateHolder<ArchiveDetailStateHolder>(

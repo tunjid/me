@@ -31,7 +31,7 @@ import com.tunjid.me.signin.SignInScreen
 import com.tunjid.me.signin.SignInStateHolder
 import com.tunjid.me.signin.SignInStateHolderCreator
 import com.tunjid.me.signin.State
-import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
@@ -60,7 +60,7 @@ abstract class SignInNavigationComponent {
 
     @IntoMap
     @Provides
-    fun routeAdaptiveConfiguration() = RoutePattern to adaptiveRouteConfiguration(
+    fun routeAdaptiveConfiguration() = RoutePattern to threePaneListDetailStrategy(
         render = { route ->
             val stateHolder = rememberRetainedStateHolder<SignInStateHolder>(
                 route = route

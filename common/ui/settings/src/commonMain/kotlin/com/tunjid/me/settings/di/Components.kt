@@ -31,7 +31,7 @@ import com.tunjid.me.settings.SettingsScreen
 import com.tunjid.me.settings.SettingsStateHolder
 import com.tunjid.me.settings.SettingsStateHolderCreator
 import com.tunjid.me.settings.State
-import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
@@ -60,7 +60,7 @@ abstract class SettingsNavigationComponent {
 
     @IntoMap
     @Provides
-    fun routeAdaptiveConfiguration() = RoutePattern to adaptiveRouteConfiguration(
+    fun routeAdaptiveConfiguration() = RoutePattern to threePaneListDetailStrategy(
         render = { route ->
             val stateHolder = rememberRetainedStateHolder<SettingsStateHolder>(
                 route = route
