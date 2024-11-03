@@ -16,9 +16,11 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.signin
 
 
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.core.model.Result
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
@@ -27,8 +29,6 @@ import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.di.downcast
-import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.navigation.NavigationContext
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.canGoUp
@@ -38,7 +38,7 @@ import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapLatestToManyMutations
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.mutator.mutationOf 
+import com.tunjid.mutator.mutationOf
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.strings.Route
@@ -52,8 +52,13 @@ typealias SignInStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class SignInStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> SignInStateHolder
-) : ScreenStateHolderCreator by creator.downcast()
+    private val creator: (scope: CoroutineScope, route: Route) -> ActualSignInStateHolder
+) : ScreenStateHolderCreator {
+    override fun invoke(
+        scope: CoroutineScope,
+        route: Route
+    ): ActualSignInStateHolder = creator.invoke(scope, route)
+}
 
 @Inject
 class ActualSignInStateHolder(
@@ -62,13 +67,11 @@ class ActualSignInStateHolder(
     byteSerializer: ByteSerializer,
     @Assisted
     scope: CoroutineScope,
-    @Assisted
-    savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
     @Assisted
     route: Route,
-) : SignInStateHolder by scope.actionStateFlowMutator(
-    initialState = byteSerializer.restoreState(savedState) ?: State(),
+) : ViewModel(scope), SignInStateHolder by scope.actionStateFlowMutator(
+    initialState = State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     inputs = listOf(
         authRepository.isSignedIn.map { mutationOf { copy(isSignedIn = it) } },

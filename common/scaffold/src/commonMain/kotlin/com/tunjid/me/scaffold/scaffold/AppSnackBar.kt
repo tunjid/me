@@ -1,20 +1,4 @@
-/*
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.tunjid.me.scaffold.scaffold
+package com.tunjid.scaffold.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.BoxScope
@@ -26,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,15 +18,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.tunjid.me.core.model.Message
+import com.tunjid.me.core.model.MessageQueue
 import com.tunjid.me.core.model.peek
 import com.tunjid.me.scaffold.countIf
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.keyboardSize
-import com.tunjid.me.scaffold.globalui.slices.snackbarPositionalState
-import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
+import com.tunjid.me.scaffold.globalui.slices.SnackbarPositionalState
 import kotlinx.coroutines.delay
 
 private val snackbarPeek = 56.dp
@@ -51,20 +36,13 @@ private val snackbarPeek = 56.dp
  */
 @Composable
 internal fun BoxScope.AppSnackBar(
-    globalUiStateHolder: GlobalUiStateHolder,
+    state: SnackbarPositionalState,
+    queue: MessageQueue,
+    onMessageClicked: (Message) -> Unit,
+    onSnackbarOffsetChanged: (Dp) -> Unit,
 ) {
-    val queue by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
-        mapper = UiState::snackbarMessages
-    )
-    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
-        mapper = UiState::snackbarPositionalState
-    )
-    val messageConsumer by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
-        mapper = UiState::snackbarMessageConsumer
-    )
-
     var canShow by remember { mutableStateOf(true) }
-    var snackbarHeight by remember { mutableStateOf(0) }
+    var snackbarHeight by remember { mutableIntStateOf(0) }
     val message = queue.peek()?.takeIf { canShow }
     val head = message?.value
 
@@ -99,7 +77,7 @@ internal fun BoxScope.AppSnackBar(
         if (head != null) {
             delay(1000)
             canShow = false
-            messageConsumer(message)
+            onMessageClicked(message)
         }
     }
 
@@ -108,6 +86,6 @@ internal fun BoxScope.AppSnackBar(
     }
 
     LaunchedEffect(snackbarOffset) {
-        globalUiStateHolder.accept { copy(snackbarOffset = snackbarOffset) }
+        onSnackbarOffsetChanged(snackbarOffset)
     }
 }

@@ -17,6 +17,9 @@
 package com.tunjid.me.signin.di
 
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
@@ -60,10 +63,13 @@ abstract class SignInNavigationComponent {
 
     @IntoMap
     @Provides
-    fun routeAdaptiveConfiguration() = RoutePattern to threePaneListDetailStrategy(
+    fun routeAdaptiveConfiguration(
+        assist: SignInStateHolderCreator
+    ) = RoutePattern to threePaneListDetailStrategy(
         render = { route ->
-            val stateHolder = rememberRetainedStateHolder<SignInStateHolder>(
-                route = route
+            val stateHolder = assist.invoke(
+                LocalLifecycleOwner.current.lifecycleScope,
+                route,
             )
             SignInScreen(
                 state = stateHolder.state.collectAsStateWithLifecycle().value,
@@ -80,15 +86,15 @@ abstract class SignInScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualSignInStateHolder.bind: SignInStateHolder
-        @Provides get() = this
-
-    @IntoMap
-    @Provides
-    fun settingsStateHolderCreator(
-        assist: SignInStateHolderCreator
-    ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = RoutePattern,
-        second = assist
-    )
+//    val ActualSignInStateHolder.bind: SignInStateHolder
+//        @Provides get() = this
+//
+//    @IntoMap
+//    @Provides
+//    fun settingsStateHolderCreator(
+//        assist: SignInStateHolderCreator
+//    ): Pair<String, ScreenStateHolderCreator> = Pair(
+//        first = RoutePattern,
+//        second = assist
+//    )
 }

@@ -16,6 +16,7 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.scaffold.lifecycle
 
 import androidx.compose.runtime.*
@@ -35,16 +36,13 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 import kotlin.coroutines.CoroutineContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 typealias LifecycleStateHolder = ActionStateMutator<Mutation<Lifecycle>, StateFlow<Lifecycle>>
 
 data class Lifecycle(
     val isInForeground: Boolean = true,
 )
-
-val LocalLifecycleStateHolder = staticCompositionLocalOf {
-    Lifecycle().asNoOpStateFlowMutator<Mutation<Lifecycle>, Lifecycle>()
-}
 
 fun <T> Flow<T>.monitorWhenActive(lifecycleStateFlow: StateFlow<Lifecycle>) =
     lifecycleStateFlow
@@ -60,31 +58,12 @@ inline fun <T, R> StateFlow<T>.mappedCollectAsStateWithLifecycle(
     context: CoroutineContext = Dispatchers.Main.immediate,
     crossinline mapper: @DisallowComposableCalls (T) -> R
 ): State<R> {
-    val lifecycleStateFlow = LocalLifecycleStateHolder.current.state
-    val scope = rememberCoroutineScope()
-    val lifecycleBoundState = remember(lifecycleStateFlow) {
-        mapState(scope = scope, mapper = mapper)
-            .monitorWhenActive(lifecycleStateFlow)
+    val state = collectAsStateWithLifecycle(context = context)
+    return remember {
+        derivedStateOf {
+            mapper(state.value)
+        }
     }
-    val initial = remember { mapper(value) }
-
-    return lifecycleBoundState.collectAsState(
-        context = context,
-        initial = initial
-    )
-}
-
-@Composable
-fun <T> StateFlow<T>.collectAsStateWithLifecycle(
-    context: CoroutineContext = Dispatchers.Main.immediate,
-): State<T> {
-    val lifecycle = LocalLifecycleStateHolder.current.state
-    val lifecycleBoundState = remember { monitorWhenActive(lifecycle) }
-    val initial = remember { value }
-    return lifecycleBoundState.collectAsState(
-        context = context,
-        initial = initial
-    )
 }
 
 @Inject

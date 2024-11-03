@@ -17,6 +17,7 @@
 package com.tunjid.me.scaffold.di
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
@@ -39,7 +40,10 @@ import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.Mutation
 import com.tunjid.scaffold.adaptive.Adaptive
 import com.tunjid.scaffold.adaptive.AdaptiveRouteConfiguration
+import com.tunjid.scaffold.scaffold.MeAppState
 import com.tunjid.treenav.MultiStackNav
+import com.tunjid.treenav.compose.PaneStrategy
+import com.tunjid.treenav.compose.threepane.ThreePane
 import com.tunjid.treenav.strings.PathPattern
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
@@ -55,27 +59,19 @@ import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 import okio.Path
 
-interface ScreenStateHolderCreator : (CoroutineScope, ByteArray?, Route) -> Any
+interface ScreenStateHolderCreator : (CoroutineScope, Route) -> ViewModel
 
 typealias SavedStateCache = (Route) -> ByteArray?
 
-fun ((CoroutineScope, ByteArray?, Route) -> Any).downcast(): ScreenStateHolderCreator =
+fun ((CoroutineScope, Route) -> ViewModel).downcast(): ScreenStateHolderCreator =
     object : ScreenStateHolderCreator {
-        override fun invoke(scope: CoroutineScope, savedState: ByteArray?, route: Route): Any =
+        override fun invoke(scope: CoroutineScope, route: Route): ViewModel =
             this@downcast(
                 scope,
-                savedState,
                 route,
             )
     }
 
-interface AdaptiveRouter {
-    fun destination(route: Route): @Composable () -> Unit
-
-    fun secondaryRouteFor(route: Route): Route?
-
-    fun transitionsFor(state: Adaptive.ContainerState): Adaptive.Transitions?
-}
 
 fun <T : Route> routeAndMatcher(
     routePattern: String,
@@ -98,7 +94,7 @@ class ScaffoldModule(
     val appScope: CoroutineScope,
     val savedStatePath: Path,
     val routeMatchers: List<RouteMatcher>,
-    val routeConfigurationMap: Map<String, AdaptiveRouteConfiguration>,
+    val routeConfigurationMap: Map<String, PaneStrategy<ThreePane, Route>>,
     val permissionsProvider: PermissionsProvider,
     val byteSerializer: ByteSerializer,
 )
@@ -138,26 +134,13 @@ abstract class InjectedScaffoldComponent(
 
     @SingletonScope
     @Provides
-    fun router(): AdaptiveRouter {
-        val configurationTrie = RouteTrie<AdaptiveRouteConfiguration>().apply {
-            module.routeConfigurationMap
-                .mapKeys { (template) -> PathPattern(template) }
-                .forEach(::set)
-        }
-
-        return object : AdaptiveRouter {
-            override fun secondaryRouteFor(route: Route): Route? =
-                configurationTrie[route]?.secondaryRoute(route)
-
-            override fun transitionsFor(state: Adaptive.ContainerState): Adaptive.Transitions? =
-                state.currentRoute?.let(configurationTrie::get)?.transitionsFor(state)
-
-
-            override fun destination(route: Route): @Composable () -> Unit = {
-                configurationTrie[route]?.Render(route) ?: RouteNotFound()
-            }
-        }
-    }
+    fun appState(
+        navigationStateHolder: NavigationStateHolder,
+        globalUiStateHolder: GlobalUiStateHolder,
+    ): MeAppState = MeAppState(
+        routeConfigurationMap = module.routeConfigurationMap,
+        navigationStateHolder = navigationStateHolder, globalUiStateHolder = globalUiStateHolder
+    )
 
     @SingletonScope
     @Provides

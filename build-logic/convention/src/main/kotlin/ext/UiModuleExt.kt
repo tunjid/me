@@ -31,6 +31,11 @@ fun org.gradle.api.Project.configureUiModule(
                 implementation(project(":common:scaffold"))
                 implementation(project(":common:ui:template"))
 
+                api(libs.findLibrary("androidx-lifecycle-runtime-ktx").get())
+                api(libs.findLibrary("androidx-lifecycle-runtime-compose").get())
+                api(libs.findLibrary("androidx-lifecycle-viewmodel-ktx").get())
+                api(libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())
+
                 implementation(libs.findLibrary("jetbrains-compose-runtime").get())
                 implementation(libs.findLibrary("jetbrains-compose-animation").get())
                 implementation(libs.findLibrary("jetbrains-compose-material3").get())

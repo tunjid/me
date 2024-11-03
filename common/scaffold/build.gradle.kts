@@ -34,6 +34,11 @@ kotlin {
 
                 implementation(libs.androidx.datastore.core.okio)
 
+                implementation(libs.androidx.lifecycle.runtime.ktx)
+                implementation(libs.androidx.lifecycle.runtime.compose)
+                implementation(libs.androidx.lifecycle.viewmodel.ktx)
+                implementation(libs.androidx.lifecycle.viewmodel.compose)
+
                 implementation(libs.jetbrains.compose.ui.tooling)
                 implementation(libs.jetbrains.compose.ui.util)
                 implementation(libs.jetbrains.compose.ui.ui)
@@ -52,6 +57,7 @@ kotlin {
 
                 implementation(libs.squareup.okio)
 
+                implementation(libs.tunjid.composables)
                 implementation(libs.tunjid.treenav.compose.common)
                 implementation(libs.tunjid.treenav.core.common)
                 implementation(libs.tunjid.treenav.strings.common)
@@ -66,7 +72,6 @@ kotlin {
                 implementation(libs.androidx.core.ktx)
                 implementation(libs.androidx.appcompat)
                 implementation(libs.androidx.activity.compose)
-                implementation(libs.androidx.lifecycle.ktx)
             }
         }
         named("desktopMain") {

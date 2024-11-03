@@ -1,20 +1,4 @@
-/*
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.tunjid.me.scaffold.scaffold
+package com.tunjid.scaffold.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.BoxScope
@@ -34,34 +18,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.bottomNavSize
-import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
-import com.tunjid.me.scaffold.navigation.NavigationStateHolder
-import com.tunjid.me.scaffold.navigation.navItemSelected
-import com.tunjid.me.scaffold.navigation.navItems
+import com.tunjid.scaffold.globalui.bottomNavSize
+import com.tunjid.scaffold.globalui.slices.BottomNavPositionalState
+import com.tunjid.scaffold.navigation.NavItem
 
 /**
  * Motionally intelligent bottom nav shared amongst nav routes in the app
  */
 @Composable
 internal fun BoxScope.AppBottomNav(
-    globalUiStateHolder: GlobalUiStateHolder,
-    navStateHolder: NavigationStateHolder,
+    navItems: List<NavItem>,
+    positionalState: BottomNavPositionalState,
+    onNavItemSelected: (NavItem) -> Unit,
 ) {
-    val nav by navStateHolder.state.collectAsStateWithLifecycle()
-    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
-        mapper = UiState::bottomNavPositionalState
-    )
-    val windowSizeClass = state.windowSizeClass
+    val windowSizeClass = positionalState.windowSizeClass
 
     val bottomNavPosition by animateDpAsState(
         when {
-            state.bottomNavVisible -> 0.dp
-            else -> windowSizeClass.bottomNavSize() + with(LocalDensity.current) { state.navBarSize.toDp() }
+            positionalState.bottomNavVisible -> 0.dp
+            else -> windowSizeClass.bottomNavSize() + with(LocalDensity.current) { positionalState.navBarSize.toDp() }
         }
     )
 
@@ -79,7 +54,7 @@ internal fun BoxScope.AppBottomNav(
             windowInsets = WindowInsets(left = 0, top = 0, right = 0, bottom = 0)
         ) {
 
-            nav.navItems
+            navItems
                 .forEach { navItem ->
                     NavigationBarItem(
                         icon = {
@@ -91,7 +66,7 @@ internal fun BoxScope.AppBottomNav(
                         label = { Text(navItem.name) },
                         selected = navItem.selected,
                         onClick = {
-                            navStateHolder.accept { navState.navItemSelected(item = navItem) }
+                            onNavItemSelected(navItem)
                         }
                     )
                 }
@@ -100,8 +75,8 @@ internal fun BoxScope.AppBottomNav(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(with(LocalDensity.current) {
-                    state.navBarSize.toDp()
+                    positionalState.navBarSize.toDp()
                 })
-        ){}
+        ) {}
     }
 }

@@ -17,7 +17,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import com.tunjid.me.scaffold.adaptive.AdaptiveContentState
-import com.tunjid.me.scaffold.scaffold.SavedStateAdaptiveContentState
 import com.tunjid.scaffold.adaptive.Adaptive.key
 
 /**

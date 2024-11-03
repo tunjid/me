@@ -24,7 +24,7 @@ import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.bottomNavVisible
 import com.tunjid.me.scaffold.globalui.navRailVisible
 
-internal data class RouteContainerPositionalState(
+internal data class UiChromeState(
     val statusBarSize: Int,
     val toolbarOverlaps: Boolean,
     val navRailVisible: Boolean,
@@ -35,8 +35,8 @@ internal data class RouteContainerPositionalState(
     override val insetDescriptor: InsetDescriptor
 ) : KeyboardAware
 
-internal val UiState.routeContainerState
-    get() = RouteContainerPositionalState(
+internal val UiState.uiChromeState
+    get() = UiChromeState(
         statusBarSize = systemUI.static.statusBarSize,
         insetDescriptor = insetFlags,
         toolbarOverlaps = toolbarOverlaps,

@@ -30,6 +30,9 @@ import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.settings.di.SettingsNavigationComponent
 import com.tunjid.me.signin.di.SignInNavigationComponent
 import com.tunjid.scaffold.adaptive.AdaptiveRouteConfiguration
+import com.tunjid.treenav.compose.PaneStrategy
+import com.tunjid.treenav.compose.threepane.ThreePane
+import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -51,7 +54,7 @@ abstract class AppRouteComponent(
 ) {
     internal abstract val routeMatcherMap: Map<String, RouteMatcher>
 
-    abstract val routeConfigurationMap: Map<String, AdaptiveRouteConfiguration>
+    abstract val routeConfigurationMap: Map<String, PaneStrategy<ThreePane, Route>>
 
     abstract val allScreenStatePolymorphic: Set<SavedStateType>
 

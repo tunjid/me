@@ -36,6 +36,7 @@ import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
 import com.tunjid.me.scaffold.scaffold.Scaffold
 import com.tunjid.mutator.mutationOf
+import com.tunjid.scaffold.scaffold.MeApp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.awt.event.WindowEvent
 import java.awt.event.WindowFocusListener
@@ -56,14 +57,12 @@ fun main() {
                     LocalScreenStateHolderCache provides app.screenStateHolderCache,
                     LocalLifecycleStateHolder provides app.lifecycleStateHolder,
                 ) {
-                    Scaffold(
+                    MeApp(
                         modifier = Modifier.rootDragDropModifier(
                             density = density,
                             window = window,
                         ),
-                        adaptiveContentState = app.adaptiveContentState(),
-                        navStateHolder = app.navStateHolder,
-                        globalUiStateHolder = app.globalUiStateHolder,
+                        meAppState = app.appState,
                     )
                 }
             }

@@ -43,6 +43,7 @@ import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
 import com.tunjid.me.scaffold.scaffold.Scaffold
 import com.tunjid.mutator.mutationOf
+import com.tunjid.scaffold.scaffold.MeApp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -66,7 +67,7 @@ class MainActivity : AppCompatActivity() {
                     LocalScreenStateHolderCache provides meApp.screenStateHolderCache,
                     LocalLifecycleStateHolder provides meApp.lifecycleStateHolder,
                 ) {
-                    Scaffold(
+                    MeApp(
                         modifier = Modifier.rootDragDropModifier(
                             dragTriggers = setOf(
                                 DragTrigger.LongPress,
@@ -74,9 +75,7 @@ class MainActivity : AppCompatActivity() {
                             ),
                             view = root
                         ),
-                        adaptiveContentState = meApp.adaptiveContentState(),
-                        navStateHolder = meApp.navStateHolder,
-                        globalUiStateHolder = meApp.globalUiStateHolder,
+                        meAppState = meApp.appState,
                     )
                 }
                 AdaptNavigation(globalUiStateHolder = meApp.globalUiStateHolder)

@@ -110,7 +110,9 @@ abstract class ArchiveFilesNavigationComponent {
 
     @IntoMap
     @Provides
-    fun filesRouteAdaptiveConfiguration() = FilesRoutePattern to threePaneListDetailStrategy(
+    fun filesRouteAdaptiveConfiguration(
+
+    ) = FilesRoutePattern to threePaneListDetailStrategy(
         render = { route ->
             val stateHolder = rememberRetainedStateHolder<ArchiveFilesStateHolder>(
                 route = route
