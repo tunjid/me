@@ -19,13 +19,12 @@
 package com.tunjid.me.profile
 
 
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.core.ui.update
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.di.downcast
-import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
@@ -33,7 +32,10 @@ import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutationOf
 import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -41,8 +43,13 @@ typealias ProfileStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ProfileStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> ProfileStateHolder
-) : ScreenStateHolderCreator by creator.downcast()
+    private val creator: (scope: CoroutineScope, route: Route) -> ActualProfileStateHolder
+) : ScreenStateHolderCreator {
+    override fun invoke(
+        scope: CoroutineScope,
+        route: Route
+    ): ActualProfileStateHolder = creator.invoke(scope, route)
+}
 
 @Inject
 class ActualProfileStateHolder(
@@ -50,13 +57,11 @@ class ActualProfileStateHolder(
     byteSerializer: ByteSerializer,
     @Assisted
     scope: CoroutineScope,
-    @Assisted
-    savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
     @Assisted
     route: Route,
-) : ProfileStateHolder by scope.actionStateFlowMutator(
-    initialState = byteSerializer.restoreState(savedState) ?: State(),
+) : ViewModel(viewModelScope = scope), ProfileStateHolder by scope.actionStateFlowMutator(
+    initialState = State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     inputs = listOf(
         authRepository.signedInUserStream.map { mutationOf { copy(signedInUser = it) } },

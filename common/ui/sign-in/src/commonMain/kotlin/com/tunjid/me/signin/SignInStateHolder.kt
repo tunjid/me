@@ -70,7 +70,7 @@ class ActualSignInStateHolder(
     @Suppress("UNUSED_PARAMETER")
     @Assisted
     route: Route,
-) : ViewModel(scope), SignInStateHolder by scope.actionStateFlowMutator(
+) : ViewModel(viewModelScope = scope), SignInStateHolder by scope.actionStateFlowMutator(
     initialState = State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     inputs = listOf(

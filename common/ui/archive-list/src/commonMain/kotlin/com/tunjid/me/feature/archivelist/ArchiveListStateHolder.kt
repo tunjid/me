@@ -19,6 +19,7 @@
 
 package com.tunjid.me.feature.archivelist
 
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.core.model.ArchiveContentFilter
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
@@ -71,8 +72,13 @@ typealias ArchiveListStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ArchiveListStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> ArchiveListStateHolder,
-) : ScreenStateHolderCreator by creator.downcast()
+    private val creator: (scope: CoroutineScope, route: Route) -> ActualArchiveListStateHolder
+) : ScreenStateHolderCreator {
+    override fun invoke(
+        scope: CoroutineScope,
+        route: Route
+    ): ActualArchiveListStateHolder = creator.invoke(scope, route)
+}
 
 /**
  * Manages [State] for [ArchiveListRoute]
@@ -87,11 +93,9 @@ class ActualArchiveListStateHolder(
     @Assisted
     scope: CoroutineScope,
     @Assisted
-    savedState: ByteArray?,
-    @Assisted
     route: Route,
-) : ArchiveListStateHolder by scope.actionStateFlowMutator(
-    initialState = byteSerializer.restoreState(savedState) ?: State(
+) :  ViewModel(viewModelScope = scope), ArchiveListStateHolder by scope.actionStateFlowMutator(
+    initialState = State(
         queryState = QueryState(
             currentQuery = ArchiveQuery(kind = route.routeParams.kind),
         )

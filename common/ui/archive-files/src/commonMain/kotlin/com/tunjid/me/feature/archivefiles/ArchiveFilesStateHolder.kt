@@ -19,6 +19,8 @@
 
 package com.tunjid.me.feature.archivefiles
 
+import androidx.compose.runtime.Stable
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.ArchiveId
@@ -79,10 +81,16 @@ import me.tatarka.inject.annotations.Inject
 
 typealias ArchiveFilesStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
+@Stable
 @Inject
 class ArchiveFilesStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> ArchiveFilesStateHolder,
-) : ScreenStateHolderCreator by creator.downcast()
+    private val creator: (scope: CoroutineScope, route: Route) -> ActualArchiveFilesStateHolder
+) : ScreenStateHolderCreator {
+    override fun invoke(
+        scope: CoroutineScope,
+        route: Route
+    ): ActualArchiveFilesStateHolder = creator.invoke(scope, route)
+}
 
 /**
  * Manages [State] for [ArchiveFilesRoute]
@@ -100,11 +108,9 @@ class ActualArchiveFilesStateHolder(
     @Assisted
     scope: CoroutineScope,
     @Assisted
-    savedState: ByteArray?,
-    @Assisted
     route: Route,
-) : ArchiveFilesStateHolder by scope.actionStateFlowMutator(
-    initialState = byteSerializer.restoreState(savedState) ?: State(
+) :  ViewModel(viewModelScope = scope), ArchiveFilesStateHolder by scope.actionStateFlowMutator(
+    initialState = State(
         archiveId = route.routeParams.archiveId,
         dndEnabled = route.routeParams.dndEnabled,
         currentQuery = ArchiveFileQuery(

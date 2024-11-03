@@ -16,7 +16,6 @@
 
 package com.tunjid.me
 
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -26,15 +25,11 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.tunjid.me.common.di.MeApp
-import com.tunjid.me.common.ui.adaptiveContentState
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
-import com.tunjid.me.feature.LocalScreenStateHolderCache
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
-import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
-import com.tunjid.me.scaffold.scaffold.Scaffold
 import com.tunjid.mutator.mutationOf
 import com.tunjid.scaffold.scaffold.MeApp
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -53,18 +48,13 @@ fun main() {
         ) {
             val density = LocalDensity.current.density
             AppTheme {
-                CompositionLocalProvider(
-                    LocalScreenStateHolderCache provides app.screenStateHolderCache,
-                    LocalLifecycleStateHolder provides app.lifecycleStateHolder,
-                ) {
-                    MeApp(
-                        modifier = Modifier.rootDragDropModifier(
-                            density = density,
-                            window = window,
-                        ),
-                        meAppState = app.appState,
-                    )
-                }
+                MeApp(
+                    modifier = Modifier.rootDragDropModifier(
+                        density = density,
+                        window = window,
+                    ),
+                    meAppState = app.appState,
+                )
             }
 
             LaunchedEffect(true) {

@@ -17,25 +17,23 @@
 package com.tunjid.me.feature.archivefiles.di
 
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
-import com.tunjid.me.feature.archivefiles.ActualArchiveFilesStateHolder
 import com.tunjid.me.feature.archivefiles.ArchiveFilesParentRoute
 import com.tunjid.me.feature.archivefiles.ArchiveFilesParentScreen
 import com.tunjid.me.feature.archivefiles.ArchiveFilesRoute
 import com.tunjid.me.feature.archivefiles.ArchiveFilesScreen
-import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolder
 import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolderCreator
 import com.tunjid.me.feature.archivefiles.FileType
 import com.tunjid.me.feature.archivefiles.State
-import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
-import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
@@ -99,28 +97,32 @@ abstract class ArchiveFilesNavigationComponent {
 
     @IntoMap
     @Provides
-    fun filesParentRouteAdaptiveConfiguration() = FilesParentRoutePattern to threePaneListDetailStrategy(
-        render = { route: Route ->
-            ArchiveFilesParentScreen(
-                modifier = Modifier.backPreviewBackgroundModifier(),
-                children = route.children.filterIsInstance<Route>(),
-            )
-        }
-    )
+    fun filesParentRouteAdaptiveConfiguration(
+        creator: ArchiveFilesStateHolderCreator
+    ) = FilesParentRoutePattern to threePaneListDetailStrategy(
+            render = { route: Route ->
+                ArchiveFilesParentScreen(
+                    modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
+                    creator = creator,
+                    children = route.children.filterIsInstance<Route>(),
+                )
+            }
+        )
 
     @IntoMap
     @Provides
     fun filesRouteAdaptiveConfiguration(
-
+        creator: ArchiveFilesStateHolderCreator
     ) = FilesRoutePattern to threePaneListDetailStrategy(
         render = { route ->
-            val stateHolder = rememberRetainedStateHolder<ArchiveFilesStateHolder>(
-                route = route
+            val stateHolder = creator.invoke(
+                LocalLifecycleOwner.current.lifecycleScope,
+                route,
             )
             ArchiveFilesScreen(
                 state = stateHolder.state.collectAsStateWithLifecycle().value,
                 actions = stateHolder.accept,
-                modifier = Modifier.backPreviewBackgroundModifier(),
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
             )
         }
     )
@@ -132,15 +134,15 @@ abstract class ArchiveFilesScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualArchiveFilesStateHolder.bind: ArchiveFilesStateHolder
-        @Provides get() = this
-
-    @IntoMap
-    @Provides
-    fun archiveFilesStateHolderCreator(
-        assist: ArchiveFilesStateHolderCreator
-    ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = FilesRoutePattern,
-        second = assist
-    )
+//    val ActualArchiveFilesStateHolder.bind: ArchiveFilesStateHolder
+//        @Provides get() = this
+//
+//    @IntoMap
+//    @Provides
+//    fun archiveFilesStateHolderCreator(
+//        assist: ArchiveFilesStateHolderCreator
+//    ): Pair<String, ScreenStateHolderCreator> = Pair(
+//        first = FilesRoutePattern,
+//        second = assist
+//    )
 }

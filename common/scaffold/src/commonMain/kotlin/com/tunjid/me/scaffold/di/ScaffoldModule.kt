@@ -16,7 +16,6 @@
 
 package com.tunjid.me.scaffold.di
 
-import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.core.utilities.ByteSerializable
@@ -31,25 +30,20 @@ import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.navigation.PersistedNavigationStateHolder
-import com.tunjid.me.scaffold.navigation.RouteNotFound
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.me.scaffold.savedstate.DataStoreSavedStateRepository
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.Mutation
-import com.tunjid.scaffold.adaptive.Adaptive
-import com.tunjid.scaffold.adaptive.AdaptiveRouteConfiguration
 import com.tunjid.scaffold.scaffold.MeAppState
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.compose.PaneStrategy
 import com.tunjid.treenav.compose.threepane.ThreePane
-import com.tunjid.treenav.strings.PathPattern
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
 import com.tunjid.treenav.strings.RouteParser
-import com.tunjid.treenav.strings.RouteTrie
 import com.tunjid.treenav.strings.routeParserFrom
 import com.tunjid.treenav.strings.urlRouteMatcher
 import kotlinx.coroutines.CoroutineScope

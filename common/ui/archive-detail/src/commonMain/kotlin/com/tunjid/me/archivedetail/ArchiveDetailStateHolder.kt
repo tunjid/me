@@ -16,8 +16,10 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.archivedetail
 
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.archivedetail.di.archiveId
 import com.tunjid.me.archivedetail.di.archiveThumbnail
 import com.tunjid.me.archivedetail.di.kind
@@ -27,8 +29,6 @@ import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.di.downcast
-import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.navBarSize
@@ -57,8 +57,13 @@ typealias ArchiveDetailStateHolder = ActionStateMutator<Action, StateFlow<State>
 
 @Inject
 class ArchiveDetailStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> ArchiveDetailStateHolder,
-) : ScreenStateHolderCreator by creator.downcast()
+    private val creator: (scope: CoroutineScope, route: Route) -> ActualArchiveDetailStateHolder
+) : ScreenStateHolderCreator {
+    override fun invoke(
+        scope: CoroutineScope,
+        route: Route
+    ): ActualArchiveDetailStateHolder = creator.invoke(scope, route)
+}
 
 @Inject
 class ActualArchiveDetailStateHolder(
@@ -71,11 +76,9 @@ class ActualArchiveDetailStateHolder(
     @Assisted
     scope: CoroutineScope,
     @Assisted
-    savedState: ByteArray?,
-    @Assisted
     route: Route,
-) : ArchiveDetailStateHolder by scope.actionStateFlowMutator(
-    initialState = byteSerializer.restoreState(savedState) ?: State(
+) : ViewModel(viewModelScope = scope), ArchiveDetailStateHolder by scope.actionStateFlowMutator(
+    initialState = State(
         kind = route.routeParams.kind,
         routeThumbnailUrl = route.routeParams.archiveThumbnail,
         navBarSize = uiStateFlow.value.navBarSize,

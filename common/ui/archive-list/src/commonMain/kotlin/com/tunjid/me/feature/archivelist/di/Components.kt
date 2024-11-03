@@ -17,6 +17,9 @@
 package com.tunjid.me.feature.archivelist.di
 
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivelist.ActualArchiveListStateHolder
@@ -25,13 +28,11 @@ import com.tunjid.me.feature.archivelist.ArchiveListScreen
 import com.tunjid.me.feature.archivelist.ArchiveListStateHolder
 import com.tunjid.me.feature.archivelist.ArchiveListStateHolderCreator
 import com.tunjid.me.feature.archivelist.State
-import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
@@ -65,13 +66,16 @@ abstract class ArchiveListNavigationComponent {
 
     @IntoMap
     @Provides
-    fun routeAdaptiveConfiguration() = RoutePattern to threePaneListDetailStrategy(
+    fun routeAdaptiveConfiguration(
+        creator: ArchiveListStateHolderCreator
+    ) = RoutePattern to threePaneListDetailStrategy(
         render = { route ->
-            val stateHolder = rememberRetainedStateHolder<ArchiveListStateHolder>(
-                route = route
+            val stateHolder = creator.invoke(
+                LocalLifecycleOwner.current.lifecycleScope,
+                route,
             )
             ArchiveListScreen(
-                modifier = Modifier.backPreviewBackgroundModifier(),
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
                 state = stateHolder.state.collectAsStateWithLifecycle().value,
                 actions = stateHolder.accept
             )
@@ -85,15 +89,15 @@ abstract class ArchiveListScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualArchiveListStateHolder.bind: ArchiveListStateHolder
-        @Provides get() = this
-
-    @IntoMap
-    @Provides
-    fun archiveListStateHolderCreator(
-        assist: ArchiveListStateHolderCreator
-    ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = RoutePattern,
-        second = assist
-    )
+//    val ActualArchiveListStateHolder.bind: ArchiveListStateHolder
+//        @Provides get() = this
+//
+//    @IntoMap
+//    @Provides
+//    fun archiveListStateHolderCreator(
+//        assist: ArchiveListStateHolderCreator
+//    ): Pair<String, ScreenStateHolderCreator> = Pair(
+//        first = RoutePattern,
+//        second = assist
+//    )
 }

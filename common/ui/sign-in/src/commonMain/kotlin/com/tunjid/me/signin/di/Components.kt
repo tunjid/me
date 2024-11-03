@@ -21,19 +21,14 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.tunjid.me.data.di.InjectedDataComponent
-import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
-import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.me.signin.ActualSignInStateHolder
 import com.tunjid.me.signin.SignInRoute
 import com.tunjid.me.signin.SignInScreen
-import com.tunjid.me.signin.SignInStateHolder
 import com.tunjid.me.signin.SignInStateHolderCreator
 import com.tunjid.me.signin.State
+import com.tunjid.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
@@ -64,17 +59,17 @@ abstract class SignInNavigationComponent {
     @IntoMap
     @Provides
     fun routeAdaptiveConfiguration(
-        assist: SignInStateHolderCreator
+        creator: SignInStateHolderCreator
     ) = RoutePattern to threePaneListDetailStrategy(
         render = { route ->
-            val stateHolder = assist.invoke(
+            val stateHolder = creator.invoke(
                 LocalLifecycleOwner.current.lifecycleScope,
                 route,
             )
             SignInScreen(
                 state = stateHolder.state.collectAsStateWithLifecycle().value,
                 actions = stateHolder.accept,
-                modifier = Modifier.backPreviewBackgroundModifier(),
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
             )
         }
     )

@@ -21,6 +21,7 @@ package com.tunjid.me.archiveedit
 
 
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.archiveedit.di.archiveId
 import com.tunjid.me.archiveedit.di.archiveThumbnail
 import com.tunjid.me.archiveedit.di.kind
@@ -80,8 +81,13 @@ typealias ArchiveEditStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ArchiveEditStateHolderCreator(
-    creator: (scope: CoroutineScope, savedStae: ByteArray?, route: Route) -> ArchiveEditStateHolder,
-) : ScreenStateHolderCreator by creator.downcast()
+    private val creator: (scope: CoroutineScope, route: Route) -> ActualArchiveEditStateHolder,
+) : ScreenStateHolderCreator {
+    override fun invoke(
+        scope: CoroutineScope,
+        route: Route
+    ): ActualArchiveEditStateHolder = creator.invoke(scope, route)
+}
 
 @Inject
 class ActualArchiveEditStateHolder(
@@ -96,11 +102,9 @@ class ActualArchiveEditStateHolder(
     @Assisted
     scope: CoroutineScope,
     @Assisted
-    savedState: ByteArray?,
-    @Assisted
     route: Route,
-) : ArchiveEditStateHolder by scope.actionStateFlowMutator(
-    initialState = byteSerializer.restoreState(savedState) ?: State(
+) : ViewModel(viewModelScope = scope), ArchiveEditStateHolder by scope.actionStateFlowMutator(
+    initialState = State(
         kind = route.routeParams.kind,
         routeThumbnailUrl = route.routeParams.archiveThumbnail,
         upsert = ArchiveUpsert(id = route.routeParams.archiveId),

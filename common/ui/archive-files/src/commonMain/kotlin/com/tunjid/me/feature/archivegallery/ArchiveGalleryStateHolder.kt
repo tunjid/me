@@ -16,8 +16,10 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.feature.archivegallery
 
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.FILE_QUERY_LIMIT
 import com.tunjid.me.core.utilities.ByteSerializer
@@ -30,8 +32,6 @@ import com.tunjid.me.feature.archivegallery.di.archiveId
 import com.tunjid.me.feature.archivegallery.di.pageOffset
 import com.tunjid.me.feature.archivegallery.di.urls
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.di.downcast
-import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.consumeNavigationActions
 import com.tunjid.mutator.ActionStateMutator
@@ -57,8 +57,13 @@ typealias ArchiveGalleryStateHolder = ActionStateMutator<Action, StateFlow<State
 
 @Inject
 class ArchiveGalleryStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> ArchiveGalleryStateHolder,
-) : ScreenStateHolderCreator by creator.downcast()
+    private val creator: (scope: CoroutineScope, route: Route) -> ActualArchiveGalleryStateHolder
+) : ScreenStateHolderCreator {
+    override fun invoke(
+        scope: CoroutineScope,
+        route: Route
+    ): ActualArchiveGalleryStateHolder = creator.invoke(scope, route)
+}
 
 /**
  * Manages [State] for [ArchiveGalleryRoute]
@@ -71,11 +76,9 @@ class ActualArchiveGalleryStateHolder(
     @Assisted
     scope: CoroutineScope,
     @Assisted
-    savedState: ByteArray?,
-    @Assisted
     route: Route,
-) : ArchiveGalleryStateHolder by scope.actionStateFlowMutator(
-    initialState = byteSerializer.restoreState(savedState) ?: State(
+) : ViewModel(viewModelScope = scope), ArchiveGalleryStateHolder by scope.actionStateFlowMutator(
+    initialState = State(
         currentQuery = ArchiveFileQuery(
             archiveId = route.routeParams.archiveId,
             offset = route.routeParams.pageOffset,

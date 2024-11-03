@@ -17,8 +17,10 @@
 package com.tunjid.me.profile.di
 
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.tunjid.me.data.di.InjectedDataComponent
-import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.profile.ActualProfileStateHolder
 import com.tunjid.me.profile.ProfileRoute
 import com.tunjid.me.profile.ProfileScreen
@@ -29,8 +31,7 @@ import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
@@ -60,15 +61,18 @@ abstract class ProfileNavigationComponent {
 
     @IntoMap
     @Provides
-    fun routeAdaptiveConfiguration() = RoutePattern to threePaneListDetailStrategy(
+    fun routeAdaptiveConfiguration(
+        creator: ProfileStateHolderCreator
+    ) = RoutePattern to threePaneListDetailStrategy(
         render = { route ->
-            val stateHolder = rememberRetainedStateHolder<ProfileStateHolder>(
-                route = route
+            val stateHolder = creator.invoke(
+                LocalLifecycleOwner.current.lifecycleScope,
+                route,
             )
             ProfileScreen(
                 state = stateHolder.state.collectAsStateWithLifecycle().value,
                 actions = stateHolder.accept,
-                modifier = Modifier.backPreviewBackgroundModifier(),
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
             )
         }
     )
@@ -80,15 +84,15 @@ abstract class ProfileScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualProfileStateHolder.bind: ProfileStateHolder
-        @Provides get() = this
-
-    @IntoMap
-    @Provides
-    fun settingsStateHolderCreator(
-        assist: ProfileStateHolderCreator
-    ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = RoutePattern,
-        second = assist
-    )
+//    val ActualProfileStateHolder.bind: ProfileStateHolder
+//        @Provides get() = this
+//
+//    @IntoMap
+//    @Provides
+//    fun settingsStateHolderCreator(
+//        assist: ProfileStateHolderCreator
+//    ): Pair<String, ScreenStateHolderCreator> = Pair(
+//        first = RoutePattern,
+//        second = assist
+//    )
 }

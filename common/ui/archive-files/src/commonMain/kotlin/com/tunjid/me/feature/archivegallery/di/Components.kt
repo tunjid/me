@@ -16,6 +16,9 @@
 
 package com.tunjid.me.feature.archivegallery.di
 
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivegallery.ActualArchiveGalleryStateHolder
@@ -24,12 +27,10 @@ import com.tunjid.me.feature.archivegallery.ArchiveGalleryScreen
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryStateHolder
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryStateHolderCreator
 import com.tunjid.me.feature.archivegallery.State
-import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
@@ -67,10 +68,13 @@ abstract class ArchiveGalleryNavigationComponent {
 
     @IntoMap
     @Provides
-    fun routeAdaptiveConfiguration() = RoutePattern to threePaneListDetailStrategy(
+    fun routeAdaptiveConfiguration(
+        creator: ArchiveGalleryStateHolderCreator
+    ) = RoutePattern to threePaneListDetailStrategy(
         render = { route ->
-            val stateHolder = rememberRetainedStateHolder<ArchiveGalleryStateHolder>(
-                route = route
+            val stateHolder = creator.invoke(
+                LocalLifecycleOwner.current.lifecycleScope,
+                route,
             )
             ArchiveGalleryScreen(
                 state = stateHolder.state.collectAsStateWithLifecycle().value,
@@ -86,15 +90,15 @@ abstract class ArchiveGalleryScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualArchiveGalleryStateHolder.bind: ArchiveGalleryStateHolder
-        @Provides get() = this
-
-    @IntoMap
-    @Provides
-    fun archiveFileStateHolderCreator(
-        assist: ArchiveGalleryStateHolderCreator
-    ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = RoutePattern,
-        second = assist
-    )
+//    val ActualArchiveGalleryStateHolder.bind: ArchiveGalleryStateHolder
+//        @Provides get() = this
+//
+//    @IntoMap
+//    @Provides
+//    fun archiveFileStateHolderCreator(
+//        assist: ArchiveGalleryStateHolderCreator
+//    ): Pair<String, ScreenStateHolderCreator> = Pair(
+//        first = RoutePattern,
+//        second = assist
+//    )
 }
