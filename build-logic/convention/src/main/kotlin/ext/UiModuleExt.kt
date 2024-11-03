@@ -37,6 +37,7 @@ fun org.gradle.api.Project.configureUiModule(
                 implementation(libs.findLibrary("jetbrains-compose-foundation-layout").get())
 
                 implementation(libs.findLibrary("kotlinx-coroutines-core").get())
+                api(libs.findLibrary("tunjid-treenav-compose-common").get())
                 api(libs.findLibrary("tunjid-treenav-core-common").get())
                 api(libs.findLibrary("tunjid-treenav-strings-common").get())
             }
