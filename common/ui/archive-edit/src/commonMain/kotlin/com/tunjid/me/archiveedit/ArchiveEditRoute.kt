@@ -66,7 +66,7 @@ import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.scaffold.permissions.Permission
-import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.scaffold.adaptive.sharedElementOf
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteParams

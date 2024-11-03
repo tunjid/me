@@ -16,7 +16,9 @@
 
 package com.tunjid.me.feature.archivefiles.di
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -33,7 +35,10 @@ import com.tunjid.me.feature.archivefiles.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
+import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
@@ -105,6 +110,16 @@ abstract class ArchiveFilesNavigationComponent {
                     modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
                     creator = creator,
                     children = route.children.filterIsInstance<Route>(),
+                )
+                ScreenUiState(
+                    UiState(
+                        toolbarShows = true,
+                        toolbarTitle = "Files",
+                        fabShows = false,
+                        fabExtended = true,
+                        navVisibility = NavVisibility.Visible,
+                        statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+                    )
                 )
             }
         )

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 
 interface BackStatus {
     data object None: BackStatus
+    data object DragDismiss : BackStatus
 }
 
 internal expect class PreviewBackStatus: BackStatus

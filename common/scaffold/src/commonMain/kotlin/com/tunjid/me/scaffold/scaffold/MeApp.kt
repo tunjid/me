@@ -22,7 +22,9 @@ import com.tunjid.me.scaffold.globalui.slices.snackbarPositionalState
 import com.tunjid.me.scaffold.globalui.slices.uiChromeState
 import com.tunjid.scaffold.scaffold.PaneAnchorState.Companion.DraggableThumb
 import com.tunjid.scaffold.scaffold.PaneAnchorState.Companion.MinPaneWidth
-import com.tunjid.scaffold.scaffold.configuration.predictiveBackConfiguration
+import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackConfiguration
+import com.tunjid.me.scaffold.scaffold.restrictedSizePlacement
+import com.tunjid.me.scaffold.scaffold.routePanePadding
 import com.tunjid.treenav.compose.PaneState
 import com.tunjid.treenav.compose.PanedNavHost
 import com.tunjid.treenav.compose.configurations.animatePaneBoundsConfiguration

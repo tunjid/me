@@ -62,7 +62,7 @@ private val EmptyNavigationState = MultiStackNav(
     stacks = listOf(
         StackNav(
             name = "emptyStack",
-            children = listOf(UnknownRoute())
+            children = listOf(unknownRoute())
         )
     )
 )
@@ -120,7 +120,7 @@ private fun RouteParser.parseMultiStackNav(savedState: SavedState) =
                                     name = routesForStack.firstOrNull() ?: "Unknown"
                                 ),
                                 operation = innerFold@{ stackNav, route ->
-                                    val resolvedRoute = parse(pathAndQueries = route) ?: UnknownRoute()
+                                    val resolvedRoute = parse(pathAndQueries = route) ?: unknownRoute()
                                     stackNav.copy(
                                         children = stackNav.children + resolvedRoute
                                     )

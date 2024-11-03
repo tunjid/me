@@ -36,5 +36,5 @@ internal class ImmutableNavigationContext(
     override val navState: MultiStackNav get() = state
 
     override val String.toRoute: Route
-        get() = routeParser.parse(this) ?: UnknownRoute()
+        get() = routeParser.parse(this) ?: unknownRoute()
 }

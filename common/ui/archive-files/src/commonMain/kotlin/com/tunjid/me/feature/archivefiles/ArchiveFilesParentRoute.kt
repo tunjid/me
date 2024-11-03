@@ -38,7 +38,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,10 +45,7 @@ import androidx.lifecycle.lifecycleScope
 import com.tunjid.me.feature.archivefiles.di.archiveId
 import com.tunjid.me.feature.archivefiles.di.fileType
 import com.tunjid.me.feature.archivefiles.di.kind
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteParams
 
@@ -75,17 +71,6 @@ internal fun ArchiveFilesParentScreen(
     creator: ArchiveFilesStateHolderCreator,
     children: List<Route>
 ) {
-    ScreenUiState(
-        UiState(
-            toolbarShows = true,
-            toolbarTitle = "Files",
-            fabShows = false,
-            fabExtended = true,
-            navVisibility = NavVisibility.Visible,
-            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
-        )
-    )
-
     val pagerState = rememberPagerState { children.size }
     var lastTabClicked by remember { mutableStateOf<Int?>(pagerState.currentPage) }
     Column(

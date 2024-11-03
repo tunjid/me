@@ -12,7 +12,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import com.tunjid.composables.dragtodismiss.dragToDismiss
-import com.tunjid.scaffold.globalui.BackStatus
+import com.tunjid.me.scaffold.globalui.BackStatus
+import com.tunjid.me.scaffold.scaffold.rememberUpdatedStateIf
 import com.tunjid.treenav.compose.PanedNavHostScope
 import com.tunjid.treenav.compose.threepane.ThreePane
 import com.tunjid.treenav.strings.Route

@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 
 sealed class NavMode {
@@ -36,8 +37,14 @@ sealed class NavVisibility {
     data object GoneIfBottomNav : NavVisibility()
 }
 
-enum class PaneAnchor {
-    Zero, OneThirds, Half, TwoThirds, Full
+enum class PaneAnchor(
+    val fraction: Float
+) {
+    Zero(fraction = 0f),
+    OneThirds(fraction = 1 / 3f),
+    Half(fraction = 1 / 2f),
+    TwoThirds(fraction = 2 / 3f),
+    Full(fraction = 1f),
 }
 
 data class UiState(

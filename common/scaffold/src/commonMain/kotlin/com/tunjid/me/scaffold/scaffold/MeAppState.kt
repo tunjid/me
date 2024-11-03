@@ -15,9 +15,9 @@ import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.navigation.NavItem
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
-import com.tunjid.me.scaffold.navigation.UnknownRoute
 import com.tunjid.me.scaffold.navigation.navItemSelected
 import com.tunjid.me.scaffold.navigation.navItems
+import com.tunjid.me.scaffold.navigation.unknownRoute
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.compose.PaneStrategy
 import com.tunjid.treenav.compose.PanedNavHostConfiguration
@@ -61,7 +61,7 @@ class MeAppState @Inject constructor(
     private val navHostConfiguration = panedNavHostConfiguration(
         navigationState = multiStackNavState,
         destinationTransform = { multiStackNav ->
-            multiStackNav.current as? Route ?: UnknownRoute("")
+            multiStackNav.current as? Route ?: unknownRoute("")
         },
         strategyTransform = { node ->
             configurationTrie[node]!!

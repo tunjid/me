@@ -28,7 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
-import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.treenav.strings.RouteParams
 
 fun SignInRoute(

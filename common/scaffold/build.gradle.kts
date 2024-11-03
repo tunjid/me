@@ -39,6 +39,9 @@ kotlin {
                 implementation(libs.androidx.lifecycle.viewmodel.ktx)
                 implementation(libs.androidx.lifecycle.viewmodel.compose)
 
+                implementation(libs.androidx.window.core)
+                implementation(libs.androidx.window.window)
+
                 implementation(libs.jetbrains.compose.ui.tooling)
                 implementation(libs.jetbrains.compose.ui.util)
                 implementation(libs.jetbrains.compose.ui.ui)

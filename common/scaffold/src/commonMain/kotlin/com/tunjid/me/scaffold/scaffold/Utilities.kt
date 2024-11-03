@@ -1,4 +1,4 @@
-package com.tunjid.scaffold.scaffold
+package com.tunjid.me.scaffold.scaffold
 
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VisibilityThreshold
@@ -17,11 +17,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
-import com.tunjid.scaffold.countIf
-import com.tunjid.scaffold.globalui.bottomNavSize
-import com.tunjid.scaffold.globalui.keyboardSize
-import com.tunjid.scaffold.globalui.navRailWidth
-import com.tunjid.scaffold.globalui.slices.UiChromeState
+import com.tunjid.me.scaffold.countIf
+import com.tunjid.me.scaffold.globalui.bottomNavSize
+import com.tunjid.me.scaffold.globalui.keyboardSize
+import com.tunjid.me.scaffold.globalui.navRailWidth
+import com.tunjid.me.scaffold.globalui.slices.UiChromeState
 
 
 @Composable

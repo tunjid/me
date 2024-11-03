@@ -28,10 +28,10 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.tunjid.scaffold.countIf
-import com.tunjid.scaffold.globalui.bottomNavSize
-import com.tunjid.scaffold.globalui.keyboardSize
-import com.tunjid.scaffold.globalui.slices.FabState
+import com.tunjid.me.scaffold.countIf
+import com.tunjid.me.scaffold.globalui.bottomNavSize
+import com.tunjid.me.scaffold.globalui.keyboardSize
+import com.tunjid.me.scaffold.globalui.slices.FabState
 
 /**
  * Common motionally intelligent Floating Action button shared amongst nav routes in the app

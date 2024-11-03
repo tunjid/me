@@ -18,9 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.tunjid.scaffold.globalui.bottomNavSize
-import com.tunjid.scaffold.globalui.slices.BottomNavPositionalState
-import com.tunjid.scaffold.navigation.NavItem
+import com.tunjid.me.scaffold.globalui.bottomNavSize
+import com.tunjid.me.scaffold.globalui.slices.BottomNavPositionalState
+import com.tunjid.me.scaffold.navigation.NavItem
 
 /**
  * Motionally intelligent bottom nav shared amongst nav routes in the app

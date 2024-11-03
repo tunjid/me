@@ -62,7 +62,7 @@ import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.utilities.RemoteUri
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.permissions.Permission
-import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.scaffold.adaptive.sharedElementOf
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.strings.RouteParams

@@ -28,7 +28,7 @@ import com.tunjid.me.signin.SignInRoute
 import com.tunjid.me.signin.SignInScreen
 import com.tunjid.me.signin.SignInStateHolderCreator
 import com.tunjid.me.signin.State
-import com.tunjid.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
+import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass

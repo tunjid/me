@@ -2,6 +2,7 @@ package com.tunjid.scaffold.scaffold
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -22,7 +23,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.UnfoldMore
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -47,17 +47,17 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import com.tunjid.composables.splitlayout.SplitLayoutState
-import com.tunjid.scaffold.adaptiveSpringSpec
-import com.tunjid.scaffold.globalui.BackHandler
-import com.tunjid.scaffold.globalui.EXPANDED
-import com.tunjid.scaffold.globalui.PaneAnchor
-import com.tunjid.scaffold.globalui.progress
+import com.tunjid.me.scaffold.globalui.BackHandler
+import com.tunjid.me.scaffold.globalui.EXPANDED
+import com.tunjid.me.scaffold.globalui.PaneAnchor
+import com.tunjid.me.scaffold.globalui.progress
+import com.tunjid.me.scaffold.navigation.ExpandAll
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-private val PaneSpring = adaptiveSpringSpec(
+private val PaneSpring = spring(
     visibilityThreshold = 0.1f
 )
 
@@ -212,7 +212,7 @@ internal class PaneAnchorState(
                             .align(Alignment.Center)
                             .rotate(degrees = 90f)
                             .scale(scale = 0.6f),
-                        imageVector = Icons.Filled.UnfoldMore,
+                        imageVector = Icons.Filled.ExpandAll,
                         contentDescription = "Drag",
                         colorFilter = ColorFilter.tint(
                             color = MaterialTheme.colorScheme.surface

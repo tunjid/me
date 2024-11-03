@@ -44,8 +44,9 @@ import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
-import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.scaffold.adaptive.sharedElementOf
+import com.tunjid.scaffold.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.treenav.strings.RouteParams
 
 private const val BODY_KEY = 3

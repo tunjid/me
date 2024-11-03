@@ -1,4 +1,4 @@
-package com.tunjid.scaffold.scaffold.configuration
+package com.tunjid.me.scaffold.scaffold.configuration
 
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
@@ -20,20 +20,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.window.core.layout.WindowSizeClass
-import com.tunjid.scaffold.globalui.BackStatus
-import com.tunjid.scaffold.globalui.COMPACT
-import com.tunjid.scaffold.globalui.PreviewBackStatus
-import com.tunjid.scaffold.globalui.isFromLeft
-import com.tunjid.scaffold.globalui.isPreviewing
-import com.tunjid.scaffold.globalui.progress
-import com.tunjid.scaffold.globalui.touchX
-import com.tunjid.scaffold.globalui.touchY
-import com.tunjid.scaffold.scaffold.rememberUpdatedStateIf
+import com.tunjid.me.scaffold.globalui.BackStatus
+import com.tunjid.me.scaffold.globalui.COMPACT
+import com.tunjid.me.scaffold.globalui.isPreviewing
+import com.tunjid.me.scaffold.globalui.progress
+import com.tunjid.me.scaffold.globalui.touchX
+import com.tunjid.me.scaffold.globalui.touchY
+import com.tunjid.me.scaffold.scaffold.rememberUpdatedStateIf
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.compose.PaneScope
 import com.tunjid.treenav.compose.PanedNavHostConfiguration
@@ -134,8 +134,6 @@ private val FillSizeModifier = Modifier.fillMaxSize()
 private fun Modifier.predictiveBackModifier(
     backStatus: BackStatus
 ): Modifier {
-    val configuration = LocalConfiguration.current
-
     if (backStatus is BackStatus.DragDismiss) {
         return this
     }
@@ -148,49 +146,76 @@ private fun Modifier.predictiveBackModifier(
     // TODO: This should not be necessary. Figure out why a frame renders without this
     //  being applied and yet the transient primary container is visible.
     val rememberedBackStatus by rememberUpdatedStateIf(backStatus) {
-        it is PreviewBackStatus
+        it !is BackStatus.DragDismiss && it !is BackStatus.None
     }
 
-    return layout { measurable, constraints ->
-        val placeable = measurable.measure(
-            constraints.copy(
-                maxWidth = (constraints.maxWidth * scale).roundToInt(),
-                minWidth = (constraints.minWidth * scale).roundToInt(),
-                maxHeight = (constraints.maxHeight * scale).roundToInt(),
-                minHeight = (constraints.minHeight * scale).roundToInt(),
-            )
+    val touchOffsetState = remember {
+        derivedStateOf {
+            Offset(rememberedBackStatus.touchX, rememberedBackStatus.touchY).round()
+        }
+    }
+    val progressState = remember {
+        derivedStateOf { backStatus.progress }
+    }
+
+    return predictiveBackModifier(
+        touchOffsetState,
+        progressState,
+    )
+}
+
+// Previews back content as specified by the material motion spec for Android predictive back:
+// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
+private fun Modifier.predictiveBackModifier(
+    touchOffsetState: State<IntOffset>,
+    progressState: State<Float>,
+): Modifier = layout { measurable, constraints ->
+    val touchOffset by touchOffsetState
+    val progress by progressState
+    val scale = 1f - (progress * 0.15F)
+
+    val placeable = measurable.measure(
+        if (progress.isNaN()) constraints
+        else constraints.copy(
+            maxWidth = (constraints.maxWidth * scale).roundToInt(),
+            minWidth = (constraints.minWidth * scale).roundToInt(),
+            maxHeight = (constraints.maxHeight * scale).roundToInt(),
+            minHeight = (constraints.minHeight * scale).roundToInt(),
         )
-        val paneWidth = placeable.width
-        val paneHeight = placeable.height
-
-        val scaledWidth = paneWidth * scale
-        val spaceOnEachSide = (paneWidth - scaledWidth) / 2
-        val margin = (BACK_PREVIEW_PADDING * rememberedBackStatus.progress).dp.roundToPx()
-
-        val xOffset = ((spaceOnEachSide - margin) * when {
-            rememberedBackStatus.isFromLeft -> 1
-            else -> -1
-        }).toInt()
-
-        val maxYShift = ((paneHeight / 20) - BACK_PREVIEW_PADDING)
-        val isOrientedHorizontally = paneWidth > paneHeight
-        val screenSize = when {
-            isOrientedHorizontally -> configuration.screenWidthDp
-            else -> configuration.screenHeightDp
-        }.dp.roundToPx()
-        val touchPoint = when {
-            isOrientedHorizontally -> rememberedBackStatus.touchX
-            else -> rememberedBackStatus.touchY
-        }
-        val verticalProgress = (touchPoint / screenSize) - 0.5f
-        val yOffset = (verticalProgress * maxYShift).roundToInt()
-
-        layout(placeable.width, placeable.height) {
-            placeable.placeRelative(x = xOffset, y = yOffset)
-        }
+    )
+    if (progress.isNaN()) return@layout layout(placeable.width, placeable.height) {
+        placeable.place(0, 0)
     }
-        // Disable interactions in the preview pane
-        .pointerInput(Unit) {}
+
+    val paneWidth = (placeable.width * scale).fastRoundToInt()
+    val paneHeight = (placeable.height * scale).fastRoundToInt()
+
+    val scaledWidth = paneWidth * scale
+    val spaceOnEachSide = (paneWidth - scaledWidth) / 2
+    val margin = (BACK_PREVIEW_PADDING * progress).dp.roundToPx()
+    val isFromLeft = touchOffset.x < paneWidth / 2
+
+    val xOffset = ((spaceOnEachSide - margin) * when {
+        isFromLeft -> 1
+        else -> -1
+    }).toInt()
+
+    val maxYShift = ((paneHeight / 20) - BACK_PREVIEW_PADDING)
+    val isOrientedHorizontally = paneWidth > paneHeight
+    val screenSize = when {
+        isOrientedHorizontally -> paneWidth
+        else -> paneHeight
+    }.dp.roundToPx()
+    val touchPoint = when {
+        isOrientedHorizontally -> touchOffset.x
+        else -> touchOffset.y
+    }
+    val verticalProgress = (touchPoint / screenSize) - 0.5f
+    val yOffset = (verticalProgress * maxYShift).roundToInt()
+
+    layout(placeable.width, placeable.height) {
+        placeable.placeRelative(x = xOffset, y = -yOffset)
+    }
 }
 
 @Composable

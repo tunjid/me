@@ -42,7 +42,7 @@ import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.mutationOf
-import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.scaffold.adaptive.sharedElementOf
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.strings.RouteParams

@@ -34,7 +34,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -49,7 +48,7 @@ import com.tunjid.composables.scrollbars.scrollable.staggeredgrid.scrollbarState
 import com.tunjid.composables.stickyheader.staggeredgrid.StickyHeaderStaggeredGrid
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
-import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.coroutines.flow.*
