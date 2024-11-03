@@ -52,6 +52,7 @@ kotlin {
 
                 implementation(libs.squareup.okio)
 
+                implementation(libs.tunjid.treenav.compose.common)
                 implementation(libs.tunjid.treenav.core.common)
                 implementation(libs.tunjid.treenav.strings.common)
 

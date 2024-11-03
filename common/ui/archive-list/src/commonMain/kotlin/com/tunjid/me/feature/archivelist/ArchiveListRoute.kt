@@ -44,7 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.tunjid.composables.scrollbars.scrollable.staggeredgrid.rememberScrollbarThumbMover
+import com.tunjid.composables.scrollbars.scrollable.rememberScrollbarThumbMover
 import com.tunjid.composables.scrollbars.scrollable.staggeredgrid.scrollbarState
 import com.tunjid.composables.stickyheader.staggeredgrid.StickyHeaderStaggeredGrid
 import com.tunjid.me.core.model.ArchiveQuery
@@ -89,19 +89,6 @@ internal fun ArchiveListScreen(
     }
 
     val cardWidth = 320.dp
-    val stickyHeaderItem by produceState<ArchiveItem.Header?>(
-        initialValue = null,
-        key1 = state.isLoading
-    ) {
-        visibleItemsFlow
-            .map { itemInfoList -> itemInfoList.firstOrNull()?.index }
-            .distinctUntilChanged()
-            .collect { firstIndex ->
-                val item = firstIndex?.let(updatedItems::getOrNull)
-                value = item?.stickyHeader
-            }
-    }
-
     Column(
         modifier = modifier,
     ) {
@@ -113,14 +100,16 @@ internal fun ArchiveListScreen(
         StickyHeaderStaggeredGrid(
             modifier = Modifier,
             state = gridState,
-            headerMatcher = { it.key.isHeaderKey },
-            stickyHeader = {
-                stickyHeaderItem?.let { item ->
-                    StickyHeader(
-                        modifier = Modifier.fillMaxWidth(),
-                        item = item
-                    )
-                }
+            isStickyHeaderItem = { it.key.isHeaderKey },
+            stickyHeader = { index, _, _ ->
+                updatedItems.getOrNull(index)
+                    ?.stickyHeader
+                    ?.let { item ->
+                        StickyHeader(
+                            modifier = Modifier.fillMaxWidth(),
+                            item = item
+                        )
+                    }
             }
         ) {
             Box {
@@ -147,7 +136,7 @@ internal fun ArchiveListScreen(
                     state = scrollbarState,
                     scrollInProgress = gridState.isScrollInProgress,
                     orientation = Orientation.Vertical,
-                    onThumbMoved = gridState.rememberScrollbarThumbMover(
+                    onThumbMoved = rememberScrollbarThumbMover(
                         itemsAvailable = state.queryState.count.toInt(),
                         scroll = scroll@{ index ->
                             actions(
