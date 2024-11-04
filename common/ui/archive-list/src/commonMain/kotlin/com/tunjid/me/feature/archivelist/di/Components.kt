@@ -16,12 +16,25 @@
 
 package com.tunjid.me.feature.archivelist.di
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
+import com.tunjid.me.feature.archivelist.Action
+import com.tunjid.me.feature.archivelist.ActualArchiveListStateHolder
 import com.tunjid.me.feature.archivelist.ArchiveListRoute
 import com.tunjid.me.feature.archivelist.ArchiveListScreen
 import com.tunjid.me.feature.archivelist.ArchiveListStateHolderCreator
@@ -29,8 +42,17 @@ import com.tunjid.me.feature.archivelist.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
+import com.tunjid.me.scaffold.globalui.InsetFlags
+import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
+import com.tunjid.treenav.compose.PaneScope
+import com.tunjid.treenav.compose.threepane.ThreePane
+import com.tunjid.treenav.compose.threepane.configurations.movableSharedElementScope
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
+import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
@@ -60,24 +82,6 @@ abstract class ArchiveListNavigationComponent {
             routePattern = RoutePattern,
             routeMapper = ::ArchiveListRoute
         )
-
-    @IntoMap
-    @Provides
-    fun routeAdaptiveConfiguration(
-        creator: ArchiveListStateHolderCreator
-    ) = RoutePattern to threePaneListDetailStrategy(
-        render = { route ->
-            val stateHolder = creator.invoke(
-                LocalLifecycleOwner.current.lifecycleScope,
-                route,
-            )
-            ArchiveListScreen(
-                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
-                state = stateHolder.state.collectAsStateWithLifecycle().value,
-                actions = stateHolder.accept
-            )
-        }
-    )
 }
 
 @Component
@@ -86,15 +90,86 @@ abstract class ArchiveListScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-//    val ActualArchiveListStateHolder.bind: ArchiveListStateHolder
-//        @Provides get() = this
-//
-//    @IntoMap
-//    @Provides
-//    fun archiveListStateHolderCreator(
-//        assist: ArchiveListStateHolderCreator
-//    ): Pair<String, ScreenStateHolderCreator> = Pair(
-//        first = RoutePattern,
-//        second = assist
-//    )
+    @IntoMap
+    @Provides
+    fun routeAdaptiveConfiguration(
+        creator: ArchiveListStateHolderCreator
+    ) = RoutePattern to threePaneListDetailStrategy(
+        render = { route ->
+            val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
+            val viewModel = viewModel<ActualArchiveListStateHolder> {
+                creator.invoke(
+                    scope = lifecycleCoroutineScope,
+                    route = route,
+                )
+            }
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            ArchiveListScreen(
+                movableSharedElementScope = movableSharedElementScope(),
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
+                state = state,
+                actions = viewModel.accept
+            )
+            GlobalUi(
+                state = state,
+                onAction = viewModel.accept,
+            )
+        }
+    )
 }
+
+@Composable
+private fun PaneScope<ThreePane, Route>.GlobalUi(
+    state: State,
+    onAction: (Action) -> Unit
+) {
+    val queryState = state.queryState
+    val query = queryState.currentQuery
+    val isSignedIn = state.isSignedIn
+
+    ScreenUiState(
+        UiState(
+            toolbarShows = true,
+            toolbarTitle = query.kind.name,
+            toolbarItems = listOfNotNull(
+                ToolbarItem(
+                    id = SORT_ORDER,
+                    text =
+                    if (state.queryState.currentQuery.desc) "Ascending"
+                    else "Descending",
+                    imageVector =
+                    if (state.queryState.currentQuery.desc) Icons.Default.KeyboardArrowUp
+                    else Icons.Default.KeyboardArrowDown
+                ),
+                ToolbarItem(
+                    id = SIGN_IN,
+                    text = "Sign In",
+                    imageVector = Icons.Default.AccountBox
+                ).takeIf { !isSignedIn }
+            ),
+            toolbarMenuClickListener = rememberUpdatedState { item: ToolbarItem ->
+                when (item.id) {
+                    SORT_ORDER -> onAction(
+                        Action.Fetch.QueryChange.ToggleOrder
+                    )
+                    SIGN_IN -> onAction(
+                        Action.Navigate.SignIn
+                    )
+                }
+            }.value,
+//            fabShows = if (state.hasFetchedAuthStatus) isSignedIn else currentUiState.fabShows,
+            fabExtended = true,
+            fabText = "Create",
+            fabIcon = Icons.Default.Add,
+            fabClickListener = rememberUpdatedState { _: Unit ->
+                onAction(Action.Navigate.Create(kind = state.queryState.currentQuery.kind))
+            }.value,
+            insetFlags = InsetFlags.NO_BOTTOM,
+            navVisibility = NavVisibility.Visible,
+            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+        )
+    )
+}
+
+private const val SORT_ORDER = "SORT_ORDER"
+private const val SIGN_IN = "SIGN_IN"

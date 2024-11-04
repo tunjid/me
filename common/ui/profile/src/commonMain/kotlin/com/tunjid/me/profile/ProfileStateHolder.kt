@@ -54,7 +54,6 @@ class ProfileStateHolderCreator(
 @Inject
 class ActualProfileStateHolder(
     authRepository: AuthRepository,
-    byteSerializer: ByteSerializer,
     @Assisted
     scope: CoroutineScope,
     @Suppress("UNUSED_PARAMETER")

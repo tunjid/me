@@ -16,11 +16,16 @@
 
 package com.tunjid.me.profile.di
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tunjid.me.data.di.InjectedDataComponent
+import com.tunjid.me.profile.ActualProfileStateHolder
 import com.tunjid.me.profile.ProfileRoute
 import com.tunjid.me.profile.ProfileScreen
 import com.tunjid.me.profile.ProfileStateHolderCreator
@@ -28,6 +33,10 @@ import com.tunjid.me.profile.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
+import com.tunjid.me.scaffold.globalui.InsetFlags
+import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
@@ -55,24 +64,6 @@ abstract class ProfileNavigationComponent {
             routePattern = RoutePattern,
             routeMapper = ::ProfileRoute
         )
-
-    @IntoMap
-    @Provides
-    fun routeAdaptiveConfiguration(
-        creator: ProfileStateHolderCreator
-    ) = RoutePattern to threePaneListDetailStrategy(
-        render = { route ->
-            val stateHolder = creator.invoke(
-                LocalLifecycleOwner.current.lifecycleScope,
-                route,
-            )
-            ProfileScreen(
-                state = stateHolder.state.collectAsStateWithLifecycle().value,
-                actions = stateHolder.accept,
-                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
-            )
-        }
-    )
 }
 
 @Component
@@ -81,15 +72,35 @@ abstract class ProfileScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-//    val ActualProfileStateHolder.bind: ProfileStateHolder
-//        @Provides get() = this
-//
-//    @IntoMap
-//    @Provides
-//    fun settingsStateHolderCreator(
-//        assist: ProfileStateHolderCreator
-//    ): Pair<String, ScreenStateHolderCreator> = Pair(
-//        first = RoutePattern,
-//        second = assist
-//    )
+    @IntoMap
+    @Provides
+    fun routeAdaptiveConfiguration(
+        creator: ProfileStateHolderCreator
+    ) = RoutePattern to threePaneListDetailStrategy(
+        render = { route ->
+            val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
+            val viewModel = viewModel<ActualProfileStateHolder> {
+                creator.invoke(
+                    scope = lifecycleCoroutineScope,
+                    route = route,
+                )
+            }
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            ProfileScreen(
+                state = state,
+                actions = viewModel.accept,
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
+            )
+
+            ScreenUiState(
+                UiState(
+                    toolbarShows = true,
+                    toolbarTitle = "Profile",
+                    navVisibility = NavVisibility.Gone,
+                    insetFlags = InsetFlags.NO_BOTTOM,
+                    statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+                )
+            )
+        }
+    )
 }

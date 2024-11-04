@@ -98,12 +98,12 @@ fun createMeApp(): MeApp {
             savedStatePath = savedStatePath(),
             permissionsProvider = PlatformPermissionsProvider(),
             routeMatchers = appRouteComponent.allRouteMatchers,
-            routeConfigurationMap = appRouteComponent.routeConfigurationMap,
             byteSerializer = appRouteComponent.byteSerializer,
         )
     )
 
     val appScreenStateHolderComponent = AppScreenStateHolderComponent::class.create(
+        scaffoldComponent = injectedScaffoldComponent,
         syncComponent = InjectedSyncComponent::class.create(
             module = SyncModule(
                 appScope = appScope,

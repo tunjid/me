@@ -64,7 +64,6 @@ class SignInStateHolderCreator(
 class ActualSignInStateHolder(
     authRepository: AuthRepository,
     navActions: (NavigationMutation) -> Unit,
-    byteSerializer: ByteSerializer,
     @Assisted
     scope: CoroutineScope,
     @Suppress("UNUSED_PARAMETER")

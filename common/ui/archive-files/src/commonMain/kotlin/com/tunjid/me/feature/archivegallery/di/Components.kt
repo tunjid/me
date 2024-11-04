@@ -16,9 +16,14 @@
 
 package com.tunjid.me.feature.archivegallery.di
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivegallery.ActualArchiveGalleryStateHolder
@@ -29,9 +34,16 @@ import com.tunjid.me.feature.archivegallery.ArchiveGalleryStateHolderCreator
 import com.tunjid.me.feature.archivegallery.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
-import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
+import com.tunjid.me.scaffold.globalui.InsetFlags
+import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.treenav.compose.PaneScope
+import com.tunjid.treenav.compose.threepane.ThreePane
+import com.tunjid.treenav.compose.threepane.configurations.movableSharedElementScope
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
+import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
@@ -65,23 +77,6 @@ abstract class ArchiveGalleryNavigationComponent {
             routePattern = RoutePattern,
             routeMapper = ::ArchiveGalleryRoute,
         )
-
-    @IntoMap
-    @Provides
-    fun routeAdaptiveConfiguration(
-        creator: ArchiveGalleryStateHolderCreator
-    ) = RoutePattern to threePaneListDetailStrategy(
-        render = { route ->
-            val stateHolder = creator.invoke(
-                LocalLifecycleOwner.current.lifecycleScope,
-                route,
-            )
-            ArchiveGalleryScreen(
-                state = stateHolder.state.collectAsStateWithLifecycle().value,
-                actions = stateHolder.accept,
-            )
-        }
-    )
 }
 
 @Component
@@ -90,15 +85,42 @@ abstract class ArchiveGalleryScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-//    val ActualArchiveGalleryStateHolder.bind: ArchiveGalleryStateHolder
-//        @Provides get() = this
-//
-//    @IntoMap
-//    @Provides
-//    fun archiveFileStateHolderCreator(
-//        assist: ArchiveGalleryStateHolderCreator
-//    ): Pair<String, ScreenStateHolderCreator> = Pair(
-//        first = RoutePattern,
-//        second = assist
-//    )
+    @IntoMap
+    @Provides
+    fun routeAdaptiveConfiguration(
+        creator: ArchiveGalleryStateHolderCreator
+    ) = RoutePattern to threePaneListDetailStrategy(
+        render = { route ->
+            val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
+            val viewModel = viewModel<ActualArchiveGalleryStateHolder> {
+                creator.invoke(
+                    scope = lifecycleCoroutineScope,
+                    route = route,
+                )
+            }
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            ArchiveGalleryScreen(
+                movableSharedElementScope = movableSharedElementScope(),
+                state = state,
+                actions = viewModel.accept,
+            )
+            GlobalUi()
+        }
+    )
+}
+
+@Composable
+private fun PaneScope<ThreePane, Route>.GlobalUi() {
+    ScreenUiState(
+        UiState(
+            toolbarShows = false,
+            toolbarOverlaps = true,
+            fabShows = false,
+            fabExtended = false,
+            navVisibility = NavVisibility.Gone,
+            insetFlags = InsetFlags.NONE,
+            statusBarColor = Color.Transparent.toArgb(),
+            navBarColor = Color.Transparent.toArgb(),
+        )
+    )
 }

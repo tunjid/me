@@ -29,7 +29,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 fun org.gradle.api.Project.commonConfiguration(
     extension: CommonExtension<*, *, *, *, *, *>
 ) = extension.apply {
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         // Could have been 21, but I need sqlite 3.24.0 for upserts

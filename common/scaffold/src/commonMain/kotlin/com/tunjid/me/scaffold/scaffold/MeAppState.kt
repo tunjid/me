@@ -24,6 +24,7 @@ import com.tunjid.treenav.compose.PanedNavHostConfiguration
 import com.tunjid.treenav.compose.SavedStatePanedNavHostState
 import com.tunjid.treenav.compose.panedNavHostConfiguration
 import com.tunjid.treenav.compose.threepane.ThreePane
+import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.current
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.strings.PathPattern
@@ -64,7 +65,10 @@ class MeAppState @Inject constructor(
             multiStackNav.current as? Route ?: unknownRoute("")
         },
         strategyTransform = { node ->
-            configurationTrie[node]!!
+            configurationTrie[node] ?: threePaneListDetailStrategy(
+                paneMapping = { emptyMap() },
+                render = {},
+            )
         }
     )
 

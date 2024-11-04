@@ -16,6 +16,7 @@
 
 package com.tunjid.me.archiveedit
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -65,9 +66,9 @@ import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
-import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.adaptive.routeOf
-import com.tunjid.scaffold.adaptive.sharedElementOf
+import com.tunjid.me.scaffold.permissions.Permission
+import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.coroutines.launch
@@ -95,8 +96,10 @@ fun ArchiveEditRoute(
     }
 )
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun ArchiveEditScreen(
+    movableSharedElementScope: MovableSharedElementScope,
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
@@ -105,12 +108,8 @@ internal fun ArchiveEditScreen(
     val scrollState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val isBodyInViewPort = scrollState.isInViewport(BODY_INDEX)
-    GlobalUi(
-        state = state,
-        onAction = actions
-    )
 
-    val thumbnail = sharedElementOf<MediaArgs>(
+    val thumbnail = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
         key = state.sharedElementKey,
     ) { args, innerModifier ->
         AsyncRasterImage(

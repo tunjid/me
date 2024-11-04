@@ -88,7 +88,6 @@ class ScaffoldModule(
     val appScope: CoroutineScope,
     val savedStatePath: Path,
     val routeMatchers: List<RouteMatcher>,
-    val routeConfigurationMap: Map<String, PaneStrategy<ThreePane, Route>>,
     val permissionsProvider: PermissionsProvider,
     val byteSerializer: ByteSerializer,
 )
@@ -125,16 +124,6 @@ abstract class InjectedScaffoldComponent(
     @Provides
     fun routeParser(): RouteParser =
         routeParserFrom(*(module.routeMatchers).toTypedArray())
-
-    @SingletonScope
-    @Provides
-    fun appState(
-        navigationStateHolder: NavigationStateHolder,
-        globalUiStateHolder: GlobalUiStateHolder,
-    ): MeAppState = MeAppState(
-        routeConfigurationMap = module.routeConfigurationMap,
-        navigationStateHolder = navigationStateHolder, globalUiStateHolder = globalUiStateHolder
-    )
 
     @SingletonScope
     @Provides

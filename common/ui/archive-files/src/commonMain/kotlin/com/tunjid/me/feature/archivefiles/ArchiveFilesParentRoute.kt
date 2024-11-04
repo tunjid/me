@@ -46,6 +46,7 @@ import com.tunjid.me.feature.archivefiles.di.archiveId
 import com.tunjid.me.feature.archivefiles.di.fileType
 import com.tunjid.me.feature.archivefiles.di.kind
 import com.tunjid.me.scaffold.adaptive.routeOf
+import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteParams
 
@@ -67,6 +68,7 @@ fun ArchiveFilesParentRoute(
 
 @Composable
 internal fun ArchiveFilesParentScreen(
+    movableSharedElementScope: MovableSharedElementScope,
     modifier: Modifier = Modifier,
     creator: ArchiveFilesStateHolderCreator,
     children: List<Route>
@@ -89,6 +91,7 @@ internal fun ArchiveFilesParentScreen(
                 children[index],
             )
             ArchiveFilesScreen(
+                movableSharedElementScope = movableSharedElementScope,
                 state = stateHolder.state.collectAsStateWithLifecycle().value,
                 actions = stateHolder.accept,
             )

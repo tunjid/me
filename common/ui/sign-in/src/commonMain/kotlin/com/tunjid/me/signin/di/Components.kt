@@ -16,19 +16,33 @@
 
 package com.tunjid.me.signin.di
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tunjid.me.core.model.Message
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
+import com.tunjid.me.scaffold.globalui.InsetFlags
+import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
+import com.tunjid.me.signin.Action
+import com.tunjid.me.signin.ActualSignInStateHolder
 import com.tunjid.me.signin.SignInRoute
 import com.tunjid.me.signin.SignInScreen
 import com.tunjid.me.signin.SignInStateHolderCreator
 import com.tunjid.me.signin.State
-import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
+import com.tunjid.me.signin.sessionRequest
+import com.tunjid.me.signin.submitButtonEnabled
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
@@ -56,23 +70,6 @@ abstract class SignInNavigationComponent {
             routeMapper = ::SignInRoute,
         )
 
-    @IntoMap
-    @Provides
-    fun routeAdaptiveConfiguration(
-        creator: SignInStateHolderCreator
-    ) = RoutePattern to threePaneListDetailStrategy(
-        render = { route ->
-            val stateHolder = creator.invoke(
-                LocalLifecycleOwner.current.lifecycleScope,
-                route,
-            )
-            SignInScreen(
-                state = stateHolder.state.collectAsStateWithLifecycle().value,
-                actions = stateHolder.accept,
-                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
-            )
-        }
-    )
 }
 
 @Component
@@ -81,15 +78,47 @@ abstract class SignInScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-//    val ActualSignInStateHolder.bind: SignInStateHolder
-//        @Provides get() = this
-//
-//    @IntoMap
-//    @Provides
-//    fun settingsStateHolderCreator(
-//        assist: SignInStateHolderCreator
-//    ): Pair<String, ScreenStateHolderCreator> = Pair(
-//        first = RoutePattern,
-//        second = assist
-//    )
+    @IntoMap
+    @Provides
+    fun routeAdaptiveConfiguration(
+        creator: SignInStateHolderCreator
+    ) = RoutePattern to threePaneListDetailStrategy(
+        render = { route ->
+            val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
+            val viewModel = viewModel<ActualSignInStateHolder> {
+                creator.invoke(
+                    scope = lifecycleCoroutineScope,
+                    route = route,
+                )
+            }
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            SignInScreen(
+                state = state,
+                actions = viewModel.accept,
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
+            )
+
+            ScreenUiState(
+                UiState(
+                    toolbarShows = true,
+                    toolbarTitle = "Sign In",
+                    fabShows = true,
+                    fabEnabled = state.submitButtonEnabled,
+                    fabText = "Submit",
+                    fabClickListener = rememberUpdatedState { _: Unit ->
+                        viewModel.accept(
+                            Action.Submit(request = state.sessionRequest)
+                        )
+                    }.value,
+                    snackbarMessages = state.messages,
+                    snackbarMessageConsumer = rememberUpdatedState { message: Message ->
+                        viewModel.accept(Action.MessageConsumed(message))
+                    }.value,
+                    navVisibility = NavVisibility.Gone,
+                    insetFlags = InsetFlags.NO_BOTTOM,
+                    statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+                )
+            )
+        }
+    )
 }

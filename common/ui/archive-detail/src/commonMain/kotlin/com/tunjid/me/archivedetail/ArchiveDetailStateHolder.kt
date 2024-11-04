@@ -20,6 +20,7 @@
 package com.tunjid.me.archivedetail
 
 import androidx.lifecycle.ViewModel
+import androidx.window.core.layout.WindowSizeClass
 import com.tunjid.me.archivedetail.di.archiveId
 import com.tunjid.me.archivedetail.di.archiveThumbnail
 import com.tunjid.me.archivedetail.di.kind
@@ -29,8 +30,8 @@ import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
+import com.tunjid.me.scaffold.globalui.COMPACT
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
@@ -69,7 +70,6 @@ class ArchiveDetailStateHolderCreator(
 class ActualArchiveDetailStateHolder(
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
-    byteSerializer: ByteSerializer,
     uiStateFlow: StateFlow<UiState>,
     navStateFlow: StateFlow<MultiStackNav>,
     navActions: (NavigationMutation) -> Unit,
@@ -108,7 +108,7 @@ class ActualArchiveDetailStateHolder(
 )
 
 private fun StateFlow<UiState>.paneMutations(): Flow<Mutation<State>> =
-    map { (it.windowSizeClass > WindowSizeClass.COMPACT) to it.paneAnchor }
+    map { (it.windowSizeClass.minWidthDp > WindowSizeClass.COMPACT.minWidthDp) to it.paneAnchor }
         .distinctUntilChanged()
         .mapToMutation { (hasSecondaryPanel, paneSplit) ->
             copy(

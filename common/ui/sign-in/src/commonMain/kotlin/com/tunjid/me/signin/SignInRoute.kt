@@ -45,11 +45,6 @@ internal fun SignInScreen(
 ) {
     val scrollState = rememberScrollState()
 
-    GlobalUi(
-        state = state,
-        onAction = actions
-    )
-
     Column(
         modifier = modifier
             .fillMaxSize()

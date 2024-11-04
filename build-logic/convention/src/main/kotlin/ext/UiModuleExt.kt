@@ -35,6 +35,8 @@ fun org.gradle.api.Project.configureUiModule(
                 api(libs.findLibrary("androidx-lifecycle-runtime-compose").get())
                 api(libs.findLibrary("androidx-lifecycle-viewmodel-ktx").get())
                 api(libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())
+                api(libs.findLibrary("androidx-window-core").get())
+                api(libs.findLibrary("androidx-window-window").get())
 
                 implementation(libs.findLibrary("jetbrains-compose-runtime").get())
                 implementation(libs.findLibrary("jetbrains-compose-animation").get())

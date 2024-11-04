@@ -19,6 +19,7 @@
 
 package com.tunjid.me.feature.archivegallery
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,13 +39,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.round
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.MediaArgs
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.mutationOf
-import com.tunjid.me.scaffold.adaptive.routeOf
-import com.tunjid.scaffold.adaptive.sharedElementOf
 import com.tunjid.tiler.compose.PivotedTilingEffect
+import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.callbackFlow
@@ -58,14 +59,14 @@ fun ArchiveGalleryRoute(
     params = routeParams
 )
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun ArchiveGalleryScreen(
+    movableSharedElementScope: MovableSharedElementScope,
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    GlobalUi()
-
     val items by rememberUpdatedState(state.items)
 
     val pagerState = rememberPagerState { items.size }
@@ -102,7 +103,7 @@ internal fun ArchiveGalleryScreen(
         key = { index -> items[index].key }
     ) { index ->
         val file = items[index]
-        val sharedElement = sharedElementOf<MediaArgs>(
+        val sharedElement = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
             thumbnailSharedElementKey(file.url)
         ) { args, modifier ->
             AsyncRasterImage(

@@ -29,7 +29,6 @@ import com.tunjid.me.profile.di.ProfileNavigationComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.settings.di.SettingsNavigationComponent
 import com.tunjid.me.signin.di.SignInNavigationComponent
-import com.tunjid.scaffold.adaptive.AdaptiveRouteConfiguration
 import com.tunjid.treenav.compose.PaneStrategy
 import com.tunjid.treenav.compose.threepane.ThreePane
 import com.tunjid.treenav.strings.Route
@@ -40,7 +39,7 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
-@SingletonScope
+//@SingletonScope
 @Component
 abstract class AppRouteComponent(
     @Component val archiveListNavigationComponent: ArchiveListNavigationComponent,
@@ -53,8 +52,6 @@ abstract class AppRouteComponent(
     @Component val signInNavigationComponent: SignInNavigationComponent,
 ) {
     internal abstract val routeMatcherMap: Map<String, RouteMatcher>
-
-    abstract val routeConfigurationMap: Map<String, PaneStrategy<ThreePane, Route>>
 
     abstract val allScreenStatePolymorphic: Set<SavedStateType>
 

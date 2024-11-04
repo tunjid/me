@@ -24,11 +24,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import androidx.window.core.layout.WindowSizeClass
 import com.tunjid.me.common.di.MeApp
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
+import com.tunjid.me.scaffold.globalui.COMPACT
 import com.tunjid.me.scaffold.globalui.NavMode
-import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.mutator.mutationOf
 import com.tunjid.scaffold.scaffold.MeApp

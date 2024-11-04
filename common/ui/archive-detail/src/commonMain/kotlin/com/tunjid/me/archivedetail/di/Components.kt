@@ -16,10 +16,21 @@
 
 package com.tunjid.me.archivedetail.di
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tunjid.me.archivedetail.Action
+import com.tunjid.me.archivedetail.ActualArchiveDetailStateHolder
 import com.tunjid.me.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.archivedetail.ArchiveDetailScreen
 import com.tunjid.me.archivedetail.ArchiveDetailStateHolderCreator
@@ -30,8 +41,15 @@ import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
+import com.tunjid.me.scaffold.globalui.InsetFlags
+import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
+import com.tunjid.treenav.compose.PaneScope
 import com.tunjid.treenav.compose.threepane.ThreePane
+import com.tunjid.treenav.compose.threepane.configurations.movableSharedElementScope
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
@@ -70,6 +88,13 @@ abstract class ArchiveDetailNavigationComponent {
             routePattern = RoutePattern,
             routeMapper = ::ArchiveDetailRoute
         )
+}
+
+@Component
+abstract class ArchiveDetailScreenHolderComponent(
+    @Component val dataComponent: InjectedDataComponent,
+    @Component val scaffoldComponent: InjectedScaffoldComponent
+) {
 
     @IntoMap
     @Provides
@@ -83,34 +108,71 @@ abstract class ArchiveDetailNavigationComponent {
             )
         },
         render = { route ->
-            val stateHolder = creator.invoke(
-                LocalLifecycleOwner.current.lifecycleScope,
-                route,
-            )
+            val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
+            val viewModel = viewModel<ActualArchiveDetailStateHolder> {
+                    creator.invoke(
+                        scope = lifecycleCoroutineScope,
+                        route = route,
+                    )
+                }
+            val state by viewModel.state.collectAsStateWithLifecycle()
             ArchiveDetailScreen(
+                movableSharedElementScope = movableSharedElementScope(),
                 modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
-                state = stateHolder.state.collectAsStateWithLifecycle().value,
-                actions = stateHolder.accept
+                state = state,
+                actions = viewModel.accept
+            )
+            GlobalUi(
+                state = state,
+                actions = viewModel.accept
             )
         }
     )
+
 }
 
-@Component
-abstract class ArchiveDetailScreenHolderComponent(
-    @Component val dataComponent: InjectedDataComponent,
-    @Component val scaffoldComponent: InjectedScaffoldComponent
-) {
-
-//    val ActualArchiveDetailStateHolder.bind: ArchiveDetailStateHolder
-//        @Provides get() = this
-//
-//    @IntoMap
-//    @Provides
-//    fun archiveListStateHolderCreator(
-//        assist: ArchiveDetailStateHolderCreator
-//    ): Pair<String, ScreenStateHolderCreator> = Pair(
-//        first = RoutePattern,
-//        second = assist
-//    )
+@Composable
+private fun PaneScope<ThreePane, Route>.GlobalUi(state: State, actions: (Action) -> Unit) {
+    ScreenUiState(
+        UiState(
+            toolbarShows = true,
+            toolbarTitle = state.archive?.title ?: "Detail",
+            toolbarItems = listOf(
+                ToolbarItem(
+                    id = "gallery",
+                    text = "Gallery",
+                    imageVector = Icons.Default.Email
+                )
+            ),
+            toolbarMenuClickListener = rememberUpdatedState { it: ToolbarItem ->
+                when (it.id) {
+                    "gallery" -> if (state.archive != null) actions(
+                        Action.Navigate.Files(
+                            kind = state.kind,
+                            archiveId = state.archive.id,
+                            thumbnail = state.archive.thumbnail,
+                        )
+                    )
+                }
+            }.value,
+            navVisibility = NavVisibility.Visible,
+            // Prevents UI from jittering as load starts
+//            fabShows = if (state.hasFetchedAuthStatus) state.canEdit else currentUiState.fabShows,
+            fabExtended = true,
+            fabText = "Edit",
+            fabIcon = Icons.Default.Edit,
+            fabClickListener = rememberUpdatedState { _: Unit ->
+                val archiveId = state.archive?.id
+                if (archiveId != null) actions(
+                    Action.Navigate.Edit(
+                        kind = state.kind,
+                        archiveId = state.archive.id,
+                        thumbnail = state.archive.thumbnail,
+                    )
+                )
+            }.value,
+            insetFlags = InsetFlags.NO_BOTTOM,
+            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+        )
+    )
 }

@@ -38,6 +38,7 @@ richeditor = "1.0.0-rc01"
 socketio = "2.0.0"
 sqldelight = "2.0.0"
 tartakaKotlinInject = "0.7.1"
+tartakaKotlinInjectAnvil = "0.0.5"
 tunjidStateHolder = "1.1.0"
 tunjidTiler = "1.1.0"
 tunjidTreeNav = "0.0.10"
@@ -135,6 +136,9 @@ socketio-client-jvm = { group = "io.socket", name = "socket.io-client", version.
 squareup-okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 tartaka-kotlin-inject-compiler = { group = "me.tatarka.inject", name = "kotlin-inject-compiler-ksp", version.ref = "tartakaKotlinInject" }
 tartaka-kotlin-inject-runtime = { group = "me.tatarka.inject", name = "kotlin-inject-runtime-kmp", version.ref = "tartakaKotlinInject" }
+tartaka-kotlin-inject-anvil-compiler = { group = "software.amazon.lastmile.kotlin.inject.anvil", name = "compiler", version.ref = "tartakaKotlinInjectAnvil" }
+tartaka-kotlin-inject-anvil-runtime = { group = "software.amazon.lastmile.kotlin.inject.anvil", name = "runtime", version.ref = "tartakaKotlinInjectAnvil" }
+tartaka-kotlin-inject-anvil-runtime-optional = { group = "software.amazon.lastmile.kotlin.inject.anvil", name = "runtime-optional", version.ref = "tartakaKotlinInjectAnvil" }
 tunjid-composables = { group = "com.tunjid.composables", name = "composables", version.ref = "tunjidComposables" }
 tunjid-mutator-core-common = { group = "com.tunjid.mutator", name = "core", version.ref = "tunjidStateHolder" }
 tunjid-mutator-core-jvm = { group = "com.tunjid.mutator", name = "core-jvm", version.ref = "tunjidStateHolder" }

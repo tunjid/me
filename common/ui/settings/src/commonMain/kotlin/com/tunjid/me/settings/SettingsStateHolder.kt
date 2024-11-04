@@ -54,7 +54,6 @@ class SettingsStateHolderCreator(
 @Inject
 class ActualSettingsStateHolder(
     authRepository: AuthRepository,
-    byteSerializer: ByteSerializer,
     navActions: (NavigationMutation) -> Unit,
     @Assisted
     scope: CoroutineScope,

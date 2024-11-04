@@ -93,7 +93,6 @@ class ArchiveEditStateHolderCreator(
 class ActualArchiveEditStateHolder(
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
-    byteSerializer: ByteSerializer,
     uriConverter: UriConverter,
     uiStateFlow: StateFlow<UiState>,
     permissionsFlow: StateFlow<Permissions>,

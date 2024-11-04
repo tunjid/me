@@ -87,7 +87,6 @@ class ArchiveListStateHolderCreator(
 class ActualArchiveListStateHolder(
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
-    byteSerializer: ByteSerializer,
     navStateFlow: StateFlow<MultiStackNav>,
     navActions: (NavigationMutation) -> Unit,
     @Assisted

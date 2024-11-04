@@ -29,21 +29,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.core.ui.MediaArgs
-import com.tunjid.me.scaffold.globalui.InsetFlags
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.treenav.strings.RouteParams
 
@@ -60,16 +54,6 @@ internal fun ProfileScreen(
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
-
-    ScreenUiState(
-        UiState(
-            toolbarShows = true,
-            toolbarTitle = "Profile",
-            navVisibility = NavVisibility.Gone,
-            insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
-        )
-    )
 
     Column(
         modifier = modifier

@@ -98,7 +98,6 @@ class ActualArchiveFilesStateHolder(
     authRepository: AuthRepository,
     archiveRepository: ArchiveRepository,
     archiveFileRepository: ArchiveFileRepository,
-    byteSerializer: ByteSerializer,
     permissionsFlow: StateFlow<Permissions>,
     navStateFlow: StateFlow<MultiStackNav>,
     navActions: (NavigationMutation) -> Unit,

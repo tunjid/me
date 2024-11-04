@@ -16,6 +16,7 @@
 
 package com.tunjid.me.feature.archivefiles
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -60,11 +61,11 @@ import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.core.ui.dragdrop.dragSource
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.utilities.RemoteUri
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.permissions.Permission
-import com.tunjid.me.scaffold.adaptive.routeOf
-import com.tunjid.scaffold.adaptive.sharedElementOf
 import com.tunjid.tiler.compose.PivotedTilingEffect
+import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.strings.RouteParams
 
 enum class FileType(
@@ -89,18 +90,18 @@ fun ArchiveFilesRoute(
 
 @Composable
 internal fun ArchiveFilesScreen(
+    movableSharedElementScope: MovableSharedElementScope,
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val gridState = rememberLazyGridState()
 
-    GlobalUi()
-
     Box(
         modifier = modifier.fillMaxSize()
     ) {
         FilesGrid(
+            movableSharedElementScope = movableSharedElementScope,
             dndEnabled = state.dndEnabled,
             fileType = state.fileType,
             files = state.items,
@@ -130,6 +131,7 @@ internal fun ArchiveFilesScreen(
 
 @Composable
 private fun FilesGrid(
+    movableSharedElementScope: MovableSharedElementScope,
     dndEnabled: Boolean,
     lazyGridState: LazyGridState,
     fileType: FileType,
@@ -156,6 +158,7 @@ private fun FilesGrid(
             itemContent = { fileItem ->
                 when (fileType) {
                     FileType.Image -> ImageFile(
+                        movableSharedElementScope = movableSharedElementScope,
                         modifier = Modifier,
                         dndEnabled = dndEnabled,
                         fileItem = fileItem,
@@ -218,15 +221,17 @@ private fun FilesDrop(
     )
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ImageFile(
+    movableSharedElementScope: MovableSharedElementScope,
     modifier: Modifier = Modifier,
     dndEnabled: Boolean,
     fileItem: FileItem,
     actions: (Action) -> Unit,
 ) {
     var size by remember { mutableStateOf<IntSize?>(null) }
-    val sharedElement = sharedElementOf<MediaArgs>(
+    val sharedElement = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
         key = thumbnailSharedElementKey(fileItem.url)
     ) { args, sharedElementModifier ->
         val imageModifier = sharedElementModifier.onSizeChanged { size = it }

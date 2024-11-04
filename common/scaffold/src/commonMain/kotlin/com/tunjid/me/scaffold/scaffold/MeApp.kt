@@ -2,6 +2,7 @@ package com.tunjid.scaffold.scaffold
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +14,9 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import com.tunjid.composables.splitlayout.SplitLayout
 import com.tunjid.composables.splitlayout.SplitLayoutState
 import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
@@ -143,7 +146,8 @@ fun MeApp(
                                     state = remember {
                                         derivedStateOf { meAppState.globalUi.uiChromeState }
                                     }
-                                ),
+                                )
+                            ,
                             itemSeparators = { _, offset ->
                                 DraggableThumb(
                                     splitLayoutState = splitLayoutState,

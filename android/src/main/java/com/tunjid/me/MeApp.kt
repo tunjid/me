@@ -106,12 +106,12 @@ fun createMeApp(context: Context): MeApp {
                 context = context
             ),
             routeMatchers = appRouteComponent.allRouteMatchers.toList(),
-            routeConfigurationMap = appRouteComponent.routeConfigurationMap,
             byteSerializer = appRouteComponent.byteSerializer,
         )
     )
 
     val appScreenStateHolderComponent = AppScreenStateHolderComponent::class.create(
+        scaffoldComponent = injectedScaffoldComponent,
         syncComponent = InjectedSyncComponent::class.create(
             module = SyncModule(
                 appScope = appScope,

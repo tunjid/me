@@ -71,7 +71,6 @@ class ArchiveGalleryStateHolderCreator(
 @Inject
 class ActualArchiveGalleryStateHolder(
     archiveFileRepository: ArchiveFileRepository,
-    byteSerializer: ByteSerializer,
     navActions: (NavigationMutation) -> Unit,
     @Assisted
     scope: CoroutineScope,

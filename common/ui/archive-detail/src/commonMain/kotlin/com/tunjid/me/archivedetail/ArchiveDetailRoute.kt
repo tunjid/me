@@ -16,6 +16,7 @@
 
 package com.tunjid.me.archivedetail
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,11 +43,10 @@ import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.isInViewport
-import com.tunjid.me.scaffold.globalui.PaneAnchor
-import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.me.scaffold.adaptive.routeOf
-import com.tunjid.scaffold.adaptive.sharedElementOf
+import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.scaffold.scaffold.SecondaryPaneCloseBackHandler
+import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.strings.RouteParams
 
 private const val BODY_KEY = 3
@@ -65,8 +65,10 @@ fun ArchiveDetailRoute(
     )
 )
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun ArchiveDetailScreen(
+    movableSharedElementScope: MovableSharedElementScope,
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
@@ -75,11 +77,6 @@ internal fun ArchiveDetailScreen(
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
     val bodyInViewport = scrollState.isInViewport(BODY_KEY)
 
-    GlobalUi(
-        state = state,
-        actions = actions
-    )
-
     val archive = state.archive
 
     // Close the secondary pane when invoking back since it contains the list view
@@ -87,7 +84,7 @@ internal fun ArchiveDetailScreen(
         enabled = state.isInPrimaryNav && state.hasSecondaryPanel
     )
 
-    val thumbnail = sharedElementOf<MediaArgs>(
+    val thumbnail = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
         key = state.sharedElementKey,
     ) { args, innerModifier ->
         AsyncRasterImage(

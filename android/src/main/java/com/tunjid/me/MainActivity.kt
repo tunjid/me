@@ -27,16 +27,12 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.lifecycleScope
+import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.me.core.ui.dragdrop.DragTrigger
 import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.NavMode
-import com.tunjid.me.scaffold.globalui.WindowSizeClass
-import com.tunjid.me.scaffold.globalui.insetMutations
-import com.tunjid.me.scaffold.globalui.integrateBackActions
-import com.tunjid.me.scaffold.globalui.toWindowSizeClass
+import com.tunjid.me.scaffold.globalui.*
 import com.tunjid.mutator.mutationOf
 import com.tunjid.scaffold.scaffold.MeApp
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -59,13 +55,14 @@ class MainActivity : AppCompatActivity() {
         root.setContent {
             AppTheme {
                 MeApp(
-                    modifier = Modifier.rootDragDropModifier(
-                        dragTriggers = setOf(
-                            DragTrigger.LongPress,
-                            DragTrigger.DoubleTap
-                        ),
-                        view = root
-                    ),
+//                    modifier = Modifier.rootDragDropModifier(
+//                        dragTriggers = setOf(
+//                            DragTrigger.LongPress,
+//                            DragTrigger.DoubleTap
+//                        ),
+//                        view = root
+//                    ),
+                    modifier = Modifier,
                     meAppState = meApp.appState,
                 )
                 AdaptNavigation(globalUiStateHolder = meApp.globalUiStateHolder)
@@ -115,6 +112,7 @@ private fun MainActivity.AdaptNavigation(globalUiStateHolder: GlobalUiStateHolde
                     WindowSizeClass.COMPACT -> NavMode.BottomNav
                     WindowSizeClass.MEDIUM -> NavMode.NavRail
                     WindowSizeClass.EXPANDED -> NavMode.NavRail
+                    else -> NavMode.NavRail
                 }
             )
         })

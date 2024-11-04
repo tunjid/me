@@ -17,18 +17,22 @@
 package com.tunjid.me.feature.archivefiles.di
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
+import com.tunjid.me.feature.archivefiles.ActualArchiveFilesStateHolder
 import com.tunjid.me.feature.archivefiles.ArchiveFilesParentRoute
 import com.tunjid.me.feature.archivefiles.ArchiveFilesParentScreen
 import com.tunjid.me.feature.archivefiles.ArchiveFilesRoute
 import com.tunjid.me.feature.archivefiles.ArchiveFilesScreen
+import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolder
 import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolderCreator
 import com.tunjid.me.feature.archivefiles.FileType
 import com.tunjid.me.feature.archivefiles.State
@@ -39,6 +43,7 @@ import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
+import com.tunjid.treenav.compose.threepane.configurations.movableSharedElementScope
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
@@ -99,48 +104,6 @@ abstract class ArchiveFilesNavigationComponent {
             routePattern = FilesRoutePattern,
             routeMapper = ::ArchiveFilesRoute
         )
-
-    @IntoMap
-    @Provides
-    fun filesParentRouteAdaptiveConfiguration(
-        creator: ArchiveFilesStateHolderCreator
-    ) = FilesParentRoutePattern to threePaneListDetailStrategy(
-            render = { route: Route ->
-                ArchiveFilesParentScreen(
-                    modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
-                    creator = creator,
-                    children = route.children.filterIsInstance<Route>(),
-                )
-                ScreenUiState(
-                    UiState(
-                        toolbarShows = true,
-                        toolbarTitle = "Files",
-                        fabShows = false,
-                        fabExtended = true,
-                        navVisibility = NavVisibility.Visible,
-                        statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
-                    )
-                )
-            }
-        )
-
-    @IntoMap
-    @Provides
-    fun filesRouteAdaptiveConfiguration(
-        creator: ArchiveFilesStateHolderCreator
-    ) = FilesRoutePattern to threePaneListDetailStrategy(
-        render = { route ->
-            val stateHolder = creator.invoke(
-                LocalLifecycleOwner.current.lifecycleScope,
-                route,
-            )
-            ArchiveFilesScreen(
-                state = stateHolder.state.collectAsStateWithLifecycle().value,
-                actions = stateHolder.accept,
-                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
-            )
-        }
-    )
 }
 
 @Component
@@ -149,15 +112,61 @@ abstract class ArchiveFilesScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-//    val ActualArchiveFilesStateHolder.bind: ArchiveFilesStateHolder
-//        @Provides get() = this
-//
-//    @IntoMap
-//    @Provides
-//    fun archiveFilesStateHolderCreator(
-//        assist: ArchiveFilesStateHolderCreator
-//    ): Pair<String, ScreenStateHolderCreator> = Pair(
-//        first = FilesRoutePattern,
-//        second = assist
-//    )
+    @IntoMap
+    @Provides
+    fun filesParentRouteAdaptiveConfiguration(
+        creator: ArchiveFilesStateHolderCreator
+    ) = FilesParentRoutePattern to threePaneListDetailStrategy(
+        render = { route: Route ->
+            ArchiveFilesParentScreen(
+                movableSharedElementScope = movableSharedElementScope(),
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
+                creator = creator,
+                children = route.children.filterIsInstance<Route>(),
+            )
+            ScreenUiState(
+                UiState(
+                    toolbarShows = true,
+                    toolbarTitle = "Files",
+                    fabShows = false,
+                    fabExtended = true,
+                    navVisibility = NavVisibility.Visible,
+                    statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+                )
+            )
+        }
+    )
+
+    @IntoMap
+    @Provides
+    fun filesRouteAdaptiveConfiguration(
+        creator: ArchiveFilesStateHolderCreator
+    ) = FilesRoutePattern to threePaneListDetailStrategy(
+        render = { route ->
+            val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
+            val viewModel = viewModel<ActualArchiveFilesStateHolder> {
+                creator.invoke(
+                    scope = lifecycleCoroutineScope,
+                    route = route,
+                )
+            }
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            ArchiveFilesScreen(
+                movableSharedElementScope = movableSharedElementScope(),
+                state = state,
+                actions = viewModel.accept,
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
+            )
+            ScreenUiState(
+                UiState(
+                    toolbarShows = true,
+                    toolbarTitle = "Files",
+                    fabShows = false,
+                    fabExtended = true,
+                    navVisibility = NavVisibility.Visible,
+                    statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+                )
+            )
+        }
+    )
 }

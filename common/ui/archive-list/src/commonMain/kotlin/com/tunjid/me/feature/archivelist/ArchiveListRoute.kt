@@ -50,6 +50,7 @@ import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
 import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.tiler.compose.PivotedTilingEffect
+import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.coroutines.flow.*
 import kotlin.math.abs
@@ -62,17 +63,12 @@ fun ArchiveListRoute(
 
 @Composable
 internal fun ArchiveListScreen(
+    movableSharedElementScope: MovableSharedElementScope,
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val updatedItems by rememberUpdatedState(state.items)
-
-    GlobalUi(
-        state = state,
-        onAction = actions
-    )
-
     val gridState = state.listState ?: LazyStaggeredGridState()
     val scope = rememberCoroutineScope()
     val visibleItemsFlow = remember(state.isLoading) {
@@ -113,6 +109,7 @@ internal fun ArchiveListScreen(
         ) {
             Box {
                 ArchiveList(
+                    movableSharedElementScope = movableSharedElementScope,
                     gridState = gridState,
                     cardWidth = cardWidth,
                     items = state.items,
@@ -187,6 +184,7 @@ internal fun ArchiveListScreen(
 
 @Composable
 private fun ArchiveList(
+    movableSharedElementScope: MovableSharedElementScope,
     gridState: LazyStaggeredGridState,
     items: List<ArchiveItem>,
     currentQuery: ArchiveQuery,
@@ -225,6 +223,7 @@ private fun ArchiveList(
                         modifier = Modifier
                             .animateContentSize(animationSpec = ItemSizeSpec)
                             .animateItem(),
+                        movableSharedElementScope = movableSharedElementScope,
                         item = item,
                         query = currentQuery,
                         actions = actions,
@@ -237,6 +236,7 @@ private fun ArchiveList(
 
 @Composable
 private fun GridCell(
+    movableSharedElementScope: MovableSharedElementScope,
     modifier: Modifier = Modifier,
     item: ArchiveItem,
     query: ArchiveQuery,
@@ -254,6 +254,7 @@ private fun GridCell(
         )
 
         is ArchiveItem.Card.Loaded -> ArchiveCard(
+            movableSharedElementScope = movableSharedElementScope,
             modifier = modifier,
             query = query,
             archive = item.archive,
@@ -261,6 +262,7 @@ private fun GridCell(
         )
 
         is ArchiveItem.Card.PlaceHolder -> ArchiveCard(
+            movableSharedElementScope = movableSharedElementScope,
             modifier = modifier,
             query = query,
             archive = item.archive,
