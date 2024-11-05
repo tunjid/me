@@ -22,6 +22,9 @@ import com.tunjid.me.core.model.Message
 import com.tunjid.me.core.model.MessageQueue
 import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.scaffold.navigation.NavigationAction
+import com.tunjid.me.scaffold.navigation.NavigationMutation
+import com.tunjid.treenav.pop
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -55,11 +58,19 @@ val State.sessionRequest: com.tunjid.me.core.model.SessionRequest
         )
     }
 
-sealed class Action {
-    data class FieldChanged(val field: FormField) : Action()
-    data class Submit(val request: com.tunjid.me.core.model.SessionRequest) : Action()
+sealed class Action(key: String) {
+    data class FieldChanged(val field: FormField) : Action("FieldChanged")
+    data class Submit(val request: com.tunjid.me.core.model.SessionRequest) : Action("Submit")
 
     data class MessageConsumed(
         val message: Message
-    ) : Action()
+    ) : Action("MessageConsumed")
+
+    sealed class Navigate : Action(key = "Navigate"), NavigationAction {
+        data object Pop : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                navState.pop()
+            }
+        }
+    }
 }

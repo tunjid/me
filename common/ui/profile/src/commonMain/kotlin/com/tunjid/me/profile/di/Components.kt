@@ -94,8 +94,6 @@ abstract class ProfileScreenHolderComponent(
 
             ScreenUiState(
                 UiState(
-                    toolbarShows = true,
-                    toolbarTitle = "Profile",
                     navVisibility = NavVisibility.Gone,
                     insetFlags = InsetFlags.NO_BOTTOM,
                     statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),

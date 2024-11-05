@@ -16,72 +16,64 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
-package com.tunjid.me.profile
 
+package com.tunjid.me.feature.archivefilesparent
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
-import com.tunjid.me.core.ui.update
-import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
+import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolderCreator
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.consumeNavigationActions
 import com.tunjid.mutator.ActionStateMutator
-import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.mutator.mutationOf
 import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
-typealias ProfileStateHolder = ActionStateMutator<Action, StateFlow<State>>
+typealias ArchiveFilesParentStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
+@Stable
 @Inject
-class ProfileStateHolderCreator(
-    private val creator: (scope: CoroutineScope, route: Route) -> ActualProfileStateHolder
+class ArchiveFilesParentStateHolderCreator(
+    private val creator: (scope: CoroutineScope, route: Route) -> ActualArchiveFilesParentStateHolder
 ) : ScreenStateHolderCreator {
     override fun invoke(
         scope: CoroutineScope,
         route: Route
-    ): ActualProfileStateHolder = creator.invoke(scope, route)
+    ): ActualArchiveFilesParentStateHolder = creator.invoke(scope, route)
 }
 
+/**
+ * Manages [State] for [ArchiveFilesParentRoute]
+ */
 @Inject
-class ActualProfileStateHolder(
-    authRepository: AuthRepository,
+class ActualArchiveFilesParentStateHolder(
+    childCreator: ArchiveFilesStateHolderCreator,
     navActions: (NavigationMutation) -> Unit,
     @Assisted
     scope: CoroutineScope,
-    @Suppress("UNUSED_PARAMETER")
     @Assisted
     route: Route,
-) : ViewModel(viewModelScope = scope), ProfileStateHolder by scope.actionStateFlowMutator(
-    initialState = State(),
-    started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
-    inputs = listOf(
-        authRepository.signedInUserStream.map { mutationOf { copy(signedInUser = it) } },
-    ),
-    actionTransform = { actions ->
-        actions.toMutationStream {
-            when (val action = type()) {
-                is Action.FieldChanged -> action.flow.formEditMutations()
-                is Action.Navigate -> action.flow.consumeNavigationActions(
-                    navigationMutationConsumer = navActions
-                )
+) : ViewModel(viewModelScope = scope),
+    ArchiveFilesParentStateHolder by scope.actionStateFlowMutator(
+        initialState = State(
+            children = route.children.filterIsInstance<Route>(),
+            childCreator = childCreator,
+        ),
+        started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
+        actionTransform = stateHolder@{ actions ->
+            actions.toMutationStream(keySelector = Action::key) {
+                when (val action = type()) {
+                    is Action.Navigate -> action.flow.consumeNavigationActions(
+                        navigationMutationConsumer = navActions
+                    )
+                }
             }
         }
-    }
-)
-
-private fun Flow<Action.FieldChanged>.formEditMutations(): Flow<Mutation<State>> =
-    map { (updatedField) ->
-        mutationOf {
-            copy(fields = fields.update(updatedField))
-        }
-    }
+    )

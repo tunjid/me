@@ -135,26 +135,6 @@ abstract class ArchiveDetailScreenHolderComponent(
 private fun PaneScope<ThreePane, Route>.GlobalUi(state: State, actions: (Action) -> Unit) {
     ScreenUiState(
         UiState(
-            toolbarShows = true,
-            toolbarTitle = state.archive?.title ?: "Detail",
-            toolbarItems = listOf(
-                ToolbarItem(
-                    id = "gallery",
-                    text = "Gallery",
-                    imageVector = Icons.Default.Email
-                )
-            ),
-            toolbarMenuClickListener = rememberUpdatedState { it: ToolbarItem ->
-                when (it.id) {
-                    "gallery" -> if (state.archive != null) actions(
-                        Action.Navigate.Files(
-                            kind = state.kind,
-                            archiveId = state.archive.id,
-                            thumbnail = state.archive.thumbnail,
-                        )
-                    )
-                }
-            }.value,
             navVisibility = NavVisibility.Visible,
             // Prevents UI from jittering as load starts
 //            fabShows = if (state.hasFetchedAuthStatus) state.canEdit else currentUiState.fabShows,

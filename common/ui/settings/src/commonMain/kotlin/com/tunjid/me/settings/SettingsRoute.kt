@@ -18,17 +18,31 @@ package com.tunjid.me.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
@@ -52,24 +66,48 @@ internal fun SettingsScreen(
     val scrollState = rememberScrollState()
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(state = scrollState),
-        horizontalAlignment = Alignment.Start,
     ) {
-        state.routes.forEach { externalRoute ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        actions(Action.Navigate.External(externalRoute))
-                    },
-                content = {
-                    Text(
-                        modifier = Modifier.padding(16.dp),
-                        text = externalRoute.id,
-                    )
-                }
-            )
+        TopAppBar(
+            modifier = Modifier
+                .windowInsetsPadding(WindowInsets.statusBars),
+            navigationIcon = {
+                Icon(
+                    modifier = Modifier
+                        .clickable { actions(Action.Navigate.Pop) },
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                )
+            },
+            title = {
+                Text(
+                    text = "Settings",
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                )
+            },
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(state = scrollState),
+            horizontalAlignment = Alignment.Start,
+        ) {
+            state.routes.forEach { externalRoute ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            actions(Action.Navigate.External(externalRoute))
+                        },
+                    content = {
+                        Text(
+                            modifier = Modifier.padding(16.dp),
+                            text = externalRoute.id,
+                        )
+                    }
+                )
+            }
         }
     }
 }

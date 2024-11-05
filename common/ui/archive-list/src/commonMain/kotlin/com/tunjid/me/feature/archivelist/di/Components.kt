@@ -123,40 +123,8 @@ private fun PaneScope<ThreePane, Route>.GlobalUi(
     state: State,
     onAction: (Action) -> Unit
 ) {
-    val queryState = state.queryState
-    val query = queryState.currentQuery
-    val isSignedIn = state.isSignedIn
-
     ScreenUiState(
         UiState(
-            toolbarShows = true,
-            toolbarTitle = query.kind.name,
-            toolbarItems = listOfNotNull(
-                ToolbarItem(
-                    id = SORT_ORDER,
-                    text =
-                    if (state.queryState.currentQuery.desc) "Ascending"
-                    else "Descending",
-                    imageVector =
-                    if (state.queryState.currentQuery.desc) Icons.Default.KeyboardArrowUp
-                    else Icons.Default.KeyboardArrowDown
-                ),
-                ToolbarItem(
-                    id = SIGN_IN,
-                    text = "Sign In",
-                    imageVector = Icons.Default.AccountBox
-                ).takeIf { !isSignedIn }
-            ),
-            toolbarMenuClickListener = rememberUpdatedState { item: ToolbarItem ->
-                when (item.id) {
-                    SORT_ORDER -> onAction(
-                        Action.Fetch.QueryChange.ToggleOrder
-                    )
-                    SIGN_IN -> onAction(
-                        Action.Navigate.SignIn
-                    )
-                }
-            }.value,
 //            fabShows = if (state.hasFetchedAuthStatus) isSignedIn else currentUiState.fabShows,
             fabExtended = true,
             fabText = "Create",
@@ -170,6 +138,3 @@ private fun PaneScope<ThreePane, Route>.GlobalUi(
         )
     )
 }
-
-private const val SORT_ORDER = "SORT_ORDER"
-private const val SIGN_IN = "SIGN_IN"

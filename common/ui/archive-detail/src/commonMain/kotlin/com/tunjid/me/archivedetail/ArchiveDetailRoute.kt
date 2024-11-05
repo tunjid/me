@@ -17,14 +17,24 @@
 package com.tunjid.me.archivedetail
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -33,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
@@ -98,6 +109,12 @@ internal fun ArchiveDetailScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         state = scrollState
     ) {
+        stickyHeader {
+            TopAppBar(
+                state = state,
+                actions = actions,
+            )
+        }
         item {
             thumbnail(
                 MediaArgs(
@@ -178,4 +195,53 @@ internal fun ArchiveDetailScreen(
             actions(Action.Navigate.Pop)
         }
     }
+}
+
+
+@Composable
+private fun TopAppBar(
+    state: State,
+    actions: (Action) -> Unit
+) {
+    androidx.compose.material3.TopAppBar(
+        modifier = Modifier
+            .windowInsetsPadding(WindowInsets.statusBars),
+        navigationIcon = {
+            Icon(
+                modifier = Modifier
+                    .clickable { actions(Action.Navigate.Pop) },
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+            )
+        },
+        title = {
+            Text(
+                text = state.archive?.title ?: "Detail",
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+            )
+        },
+        actions = {
+            if (state.archive != null) {
+                IconButton(
+                    onClick = {
+                        actions(
+                            Action.Navigate.Files(
+                                kind = state.kind,
+                                archiveId = state.archive.id,
+                                thumbnail = state.archive.thumbnail,
+                            )
+                        )
+                    },
+                    content = {
+                        Icon(
+                            imageVector = Icons.Default.Email,
+                            contentDescription = "Gallery",
+                        )
+                    }
+                )
+            }
+        },
+    )
 }

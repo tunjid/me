@@ -94,8 +94,6 @@ abstract class SettingsScreenHolderComponent(
             )
             ScreenUiState(
                 UiState(
-                    toolbarShows = true,
-                    toolbarTitle = "Settings",
                     navVisibility = NavVisibility.Visible,
                     insetFlags = InsetFlags.NO_BOTTOM,
                     statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),

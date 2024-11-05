@@ -18,15 +18,12 @@ package com.tunjid.me.common.di
 
 import com.tunjid.me.archivedetail.di.ArchiveDetailScreenHolderComponent
 import com.tunjid.me.archiveedit.di.ArchiveEditScreenHolderComponent
-import com.tunjid.me.core.di.SingletonScope
-import com.tunjid.me.core.utilities.ByteSerializer
-import com.tunjid.me.data.di.InjectedDataComponent
-import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryScreenHolderComponent
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesScreenHolderComponent
+import com.tunjid.me.feature.archivefilesparent.di.ArchiveFilesParentScreenHolderComponent
+import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryScreenHolderComponent
 import com.tunjid.me.feature.archivelist.di.ArchiveListScreenHolderComponent
 import com.tunjid.me.profile.di.ProfileScreenHolderComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
-import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.settings.di.SettingsScreenHolderComponent
@@ -36,9 +33,6 @@ import com.tunjid.scaffold.scaffold.MeAppState
 import com.tunjid.treenav.compose.PaneStrategy
 import com.tunjid.treenav.compose.threepane.ThreePane
 import com.tunjid.treenav.strings.Route
-import com.tunjid.treenav.strings.RouteMatcher
-import com.tunjid.treenav.strings.RouteParser
-import com.tunjid.treenav.strings.routeParserFrom
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -50,6 +44,7 @@ abstract class AppScreenStateHolderComponent(
     @Component val archiveDetailComponent: ArchiveDetailScreenHolderComponent,
     @Component val archiveEditComponent: ArchiveEditScreenHolderComponent,
     @Component val archiveGalleryComponent: ArchiveGalleryScreenHolderComponent,
+    @Component val archiveFilesParentComponent: ArchiveFilesParentScreenHolderComponent,
     @Component val archiveFilesComponent: ArchiveFilesScreenHolderComponent,
     @Component val profileComponent: ProfileScreenHolderComponent,
     @Component val settingsComponent: SettingsScreenHolderComponent,

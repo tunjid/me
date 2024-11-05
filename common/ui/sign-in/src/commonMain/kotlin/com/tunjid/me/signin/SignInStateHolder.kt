@@ -25,13 +25,13 @@ import com.tunjid.me.core.model.Result
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.update
-import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.navigation.NavigationContext
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.canGoUp
+import com.tunjid.me.scaffold.navigation.consumeNavigationActions
 import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
@@ -44,7 +44,11 @@ import com.tunjid.treenav.pop
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.switch
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -83,6 +87,9 @@ class ActualSignInStateHolder(
                 is Action.Submit -> action.flow.submissionMutations(
                     authRepository = authRepository,
                     navActions = navActions
+                )
+                is Action.Navigate -> action.flow.consumeNavigationActions(
+                    navigationMutationConsumer = navActions
                 )
             }
         }

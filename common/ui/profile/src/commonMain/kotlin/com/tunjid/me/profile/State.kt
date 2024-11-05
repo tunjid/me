@@ -19,6 +19,9 @@ package com.tunjid.me.profile
 import androidx.compose.ui.text.input.VisualTransformation
 import com.tunjid.me.core.ui.FormField
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.scaffold.navigation.NavigationAction
+import com.tunjid.me.scaffold.navigation.NavigationMutation
+import com.tunjid.treenav.pop
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -40,8 +43,16 @@ data class State(
     )
 ) : ByteSerializable
 
-sealed class Action {
+sealed class Action(val key: String) {
     data class FieldChanged(
         val field: FormField
-    ) : Action()
+    ) : Action("FieldChanged")
+
+    sealed class Navigate : Action(key = "Navigate"), NavigationAction {
+        data object Pop : Navigate() {
+            override val navigationMutation: NavigationMutation = {
+                navState.pop()
+            }
+        }
+    }
 }

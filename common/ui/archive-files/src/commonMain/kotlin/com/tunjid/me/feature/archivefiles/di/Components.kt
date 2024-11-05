@@ -28,11 +28,8 @@ import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivefiles.ActualArchiveFilesStateHolder
-import com.tunjid.me.feature.archivefiles.ArchiveFilesParentRoute
-import com.tunjid.me.feature.archivefiles.ArchiveFilesParentScreen
 import com.tunjid.me.feature.archivefiles.ArchiveFilesRoute
 import com.tunjid.me.feature.archivefiles.ArchiveFilesScreen
-import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolder
 import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolderCreator
 import com.tunjid.me.feature.archivefiles.FileType
 import com.tunjid.me.feature.archivefiles.State
@@ -45,7 +42,6 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.configurations.movableSharedElementScope
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
-import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
@@ -54,8 +50,7 @@ import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
 
-private const val FilesParentRoutePattern = "/archives/{kind}/{id}/files"
-private const val FilesRoutePattern = "/archives/{kind}/{id}/files/{type}"
+private const val RoutePattern = "/archives/{kind}/{id}/files/{type}"
 
 internal val RouteParams.archiveId get() = ArchiveId(pathArgs["id"] ?: "")
 internal val RouteParams.kind
@@ -91,17 +86,9 @@ abstract class ArchiveFilesNavigationComponent {
 
     @IntoMap
     @Provides
-    fun archiveFilesParentRouteParser(): Pair<String, RouteMatcher> =
-        routeAndMatcher(
-            routePattern = FilesParentRoutePattern,
-            routeMapper = ::ArchiveFilesParentRoute
-        )
-
-    @IntoMap
-    @Provides
     fun archiveFilesRouteParser(): Pair<String, RouteMatcher> =
         routeAndMatcher(
-            routePattern = FilesRoutePattern,
+            routePattern = RoutePattern,
             routeMapper = ::ArchiveFilesRoute
         )
 }
@@ -114,34 +101,9 @@ abstract class ArchiveFilesScreenHolderComponent(
 
     @IntoMap
     @Provides
-    fun filesParentRouteAdaptiveConfiguration(
-        creator: ArchiveFilesStateHolderCreator
-    ) = FilesParentRoutePattern to threePaneListDetailStrategy(
-        render = { route: Route ->
-            ArchiveFilesParentScreen(
-                movableSharedElementScope = movableSharedElementScope(),
-                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
-                creator = creator,
-                children = route.children.filterIsInstance<Route>(),
-            )
-            ScreenUiState(
-                UiState(
-                    toolbarShows = true,
-                    toolbarTitle = "Files",
-                    fabShows = false,
-                    fabExtended = true,
-                    navVisibility = NavVisibility.Visible,
-                    statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
-                )
-            )
-        }
-    )
-
-    @IntoMap
-    @Provides
     fun filesRouteAdaptiveConfiguration(
         creator: ArchiveFilesStateHolderCreator
-    ) = FilesRoutePattern to threePaneListDetailStrategy(
+    ) = RoutePattern to threePaneListDetailStrategy(
         render = { route ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
             val viewModel = viewModel<ActualArchiveFilesStateHolder> {

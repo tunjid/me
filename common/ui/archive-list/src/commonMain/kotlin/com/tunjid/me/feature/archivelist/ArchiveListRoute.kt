@@ -31,6 +31,16 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,6 +50,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -87,6 +99,10 @@ internal fun ArchiveListScreen(
     Column(
         modifier = modifier,
     ) {
+        TopAppBar(
+            state = state,
+            actions = actions,
+        )
         ArchiveFilters(
             queryState = state.queryState,
             onChanged = actions
@@ -179,6 +195,53 @@ internal fun ArchiveListScreen(
     GridSizeUpdateEffect(
         infoFlow = visibleItemsFlow,
         onAction = actions
+    )
+}
+
+@Composable
+private fun TopAppBar(
+    state: State,
+    actions: (Action) -> Unit
+) {
+    TopAppBar(
+        modifier = Modifier
+            .windowInsetsPadding(WindowInsets.statusBars),
+        title = {
+            Text(
+                text = state.queryState.currentQuery.kind.name,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+            )
+        },
+        actions = {
+            IconButton(
+                onClick = {
+                    actions(Action.Fetch.QueryChange.ToggleOrder)
+                },
+                content = {
+                    Icon(
+                        imageVector =
+                        if (state.queryState.currentQuery.desc) Icons.Default.KeyboardArrowUp
+                        else Icons.Default.KeyboardArrowDown,
+                        contentDescription =
+                        if (state.queryState.currentQuery.desc) "Ascending"
+                        else "Descending",
+                    )
+                }
+            )
+            if (!state.isSignedIn) IconButton(
+                onClick = {
+                    actions(Action.Navigate.SignIn)
+                },
+                content = {
+                    Icon(
+                        imageVector = Icons.Default.AccountBox,
+                        contentDescription = "Sign In",
+                    )
+                }
+            )
+        },
     )
 }
 

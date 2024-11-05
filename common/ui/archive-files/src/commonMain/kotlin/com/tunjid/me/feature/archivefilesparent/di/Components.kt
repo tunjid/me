@@ -14,47 +14,51 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.signin.di
+package com.tunjid.me.feature.archivefilesparent.di
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.tunjid.me.core.model.Message
+import com.tunjid.me.core.model.ArchiveId
+import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
+import com.tunjid.me.feature.archivefilesparent.ActualArchiveFilesParentStateHolder
+import com.tunjid.me.feature.archivefilesparent.ArchiveFilesParentRoute
+import com.tunjid.me.feature.archivefilesparent.ArchiveFilesParentScreen
+import com.tunjid.me.feature.archivefilesparent.ArchiveFilesParentStateHolderCreator
+import com.tunjid.me.feature.archivefilesparent.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
-import com.tunjid.me.signin.Action
-import com.tunjid.me.signin.ActualSignInStateHolder
-import com.tunjid.me.signin.SignInRoute
-import com.tunjid.me.signin.SignInScreen
-import com.tunjid.me.signin.SignInStateHolderCreator
-import com.tunjid.me.signin.State
-import com.tunjid.me.signin.sessionRequest
-import com.tunjid.me.signin.submitButtonEnabled
+import com.tunjid.treenav.compose.threepane.configurations.movableSharedElementScope
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
+import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
+import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
 
-private const val RoutePattern = "/sign-in"
+private const val RoutePattern = "/archives/{kind}/{id}/files"
+
+internal val RouteParams.archiveId get() = ArchiveId(pathArgs["id"] ?: "")
+internal val RouteParams.kind
+    get() = ArchiveKind.entries.firstOrNull { it.type == pathArgs["kind"] }
+        ?: ArchiveKind.Articles
 
 @Component
-abstract class SignInNavigationComponent {
+abstract class ArchiveFilesParentNavigationComponent {
 
     @IntoSet
     @Provides
@@ -64,56 +68,44 @@ abstract class SignInNavigationComponent {
 
     @IntoMap
     @Provides
-    fun profileRouteParser(): Pair<String, RouteMatcher> =
+    fun archiveFilesParentRouteParser(): Pair<String, RouteMatcher> =
         routeAndMatcher(
             routePattern = RoutePattern,
-            routeMapper = ::SignInRoute,
+            routeMapper = ::ArchiveFilesParentRoute
         )
-
 }
 
 @Component
-abstract class SignInScreenHolderComponent(
+abstract class ArchiveFilesParentScreenHolderComponent(
     @Component val dataComponent: InjectedDataComponent,
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
     @IntoMap
     @Provides
-    fun routeAdaptiveConfiguration(
-        creator: SignInStateHolderCreator
+    fun filesParentRouteAdaptiveConfiguration(
+        creator: ArchiveFilesParentStateHolderCreator
     ) = RoutePattern to threePaneListDetailStrategy(
-        render = { route ->
+        render = { route: Route ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
-            val viewModel = viewModel<ActualSignInStateHolder> {
+            val viewModel = viewModel<ActualArchiveFilesParentStateHolder> {
                 creator.invoke(
                     scope = lifecycleCoroutineScope,
                     route = route,
                 )
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
-            SignInScreen(
+            ArchiveFilesParentScreen(
+                movableSharedElementScope = movableSharedElementScope(),
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
                 state = state,
                 actions = viewModel.accept,
-                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
             )
-
             ScreenUiState(
                 UiState(
-                    fabShows = true,
-                    fabEnabled = state.submitButtonEnabled,
-                    fabText = "Submit",
-                    fabClickListener = rememberUpdatedState { _: Unit ->
-                        viewModel.accept(
-                            Action.Submit(request = state.sessionRequest)
-                        )
-                    }.value,
-                    snackbarMessages = state.messages,
-                    snackbarMessageConsumer = rememberUpdatedState { message: Message ->
-                        viewModel.accept(Action.MessageConsumed(message))
-                    }.value,
-                    navVisibility = NavVisibility.Gone,
-                    insetFlags = InsetFlags.NO_BOTTOM,
+                    fabShows = false,
+                    fabExtended = true,
+                    navVisibility = NavVisibility.Visible,
                     statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
                 )
             )
