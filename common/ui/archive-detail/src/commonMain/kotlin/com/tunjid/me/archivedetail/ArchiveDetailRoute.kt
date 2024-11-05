@@ -17,13 +17,13 @@
 package com.tunjid.me.archivedetail
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -207,11 +207,19 @@ private fun TopAppBar(
         modifier = Modifier
             .windowInsetsPadding(WindowInsets.statusBars),
         navigationIcon = {
-            Icon(
+            IconButton(
                 modifier = Modifier
-                    .clickable { actions(Action.Navigate.Pop) },
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
+                    .size(56.dp)
+                    .padding(16.dp),
+                onClick = {
+                    actions(Action.Navigate.Pop)
+                },
+                content = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                    )
+                }
             )
         },
         title = {
@@ -225,6 +233,9 @@ private fun TopAppBar(
         actions = {
             if (state.archive != null) {
                 IconButton(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .padding(16.dp),
                     onClick = {
                         actions(
                             Action.Navigate.Files(

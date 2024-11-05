@@ -36,6 +36,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -76,11 +77,19 @@ internal fun ProfileScreen(
             modifier = Modifier
                 .windowInsetsPadding(WindowInsets.statusBars),
             navigationIcon = {
-                Icon(
+                IconButton(
                     modifier = Modifier
-                        .clickable { actions(Action.Navigate.Pop) },
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                        .size(56.dp)
+                        .padding(16.dp),
+                    onClick = {
+                        actions(Action.Navigate.Pop)
+                    },
+                    content = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
                 )
             },
             title = {
