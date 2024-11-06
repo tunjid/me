@@ -18,8 +18,6 @@ package com.tunjid.me.archiveedit.di
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberUpdatedState
@@ -33,11 +31,9 @@ import com.tunjid.me.archiveedit.ArchiveEditRoute
 import com.tunjid.me.archiveedit.ArchiveEditScreen
 import com.tunjid.me.archiveedit.ArchiveEditStateHolderCreator
 import com.tunjid.me.archiveedit.State
-import com.tunjid.me.archiveedit.headerThumbnail
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.Message
-import com.tunjid.me.core.ui.icons.Preview
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
@@ -46,7 +42,6 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.PaneScope
 import com.tunjid.treenav.compose.threepane.ThreePane
@@ -67,6 +62,7 @@ private const val CreateRoutePattern = "/archives/{kind}/create"
 
 internal val RouteParams.archiveId: ArchiveId?
     get() = pathArgs["id"]?.let(::ArchiveId)
+
 internal val RouteParams.kind: ArchiveKind
     get() = ArchiveKind.entries
         .firstOrNull { it.type == pathArgs["kind"] }
@@ -175,40 +171,6 @@ private fun PaneScope<ThreePane, *>.GlobalUi(
 ) {
     ScreenUiState(
         UiState(
-            toolbarShows = true,
-            toolbarTitle = "${if (state.upsert.id == null) "Create" else "Edit"} ${state.kind.name}",
-            toolbarItems = listOfNotNull(
-                ToolbarItem(
-                    id = "preview",
-                    text = "Preview",
-                    imageVector = Icons.Default.Preview
-                ).takeIf { state.isEditing },
-                ToolbarItem(
-                    id = "edit",
-                    text = "Edit",
-                    imageVector = Icons.Default.Edit
-                ).takeIf { !state.isEditing },
-                ToolbarItem(
-                    id = "gallery",
-                    text = "Gallery",
-                    imageVector = Icons.Default.Email
-                )
-            ),
-            toolbarMenuClickListener = rememberUpdatedState { it: ToolbarItem ->
-                when (it.id) {
-                    "preview", "edit" -> onAction(Action.ToggleEditView)
-                    "gallery" -> when (val archiveId = state.upsert.id) {
-                        null -> Unit
-                        else -> onAction(
-                            Action.Navigate.Files(
-                                kind = state.kind,
-                                archiveId = archiveId,
-                                thumbnail = state.headerThumbnail,
-                            )
-                        )
-                    }
-                }
-            }.value,
             fabShows = true,
             fabText = if (state.upsert.id == null) "Create" else "Save",
             fabIcon = Icons.Default.Done,
