@@ -145,7 +145,7 @@ abstract class ArchiveEditScreenHolderComponent(
         paneMapping = { route ->
             mapOf(
                 ThreePane.Primary to route,
-                ThreePane.Secondary to route.children.first() as? Route,
+                ThreePane.Secondary to route.children.firstOrNull() as? Route,
             )
         },
         render = { route ->

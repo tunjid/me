@@ -65,6 +65,10 @@ fun PaneScope<ThreePane, *>.ScreenUiState(state: UiState) {
     }
 }
 
+@Suppress("UnusedReceiverParameter")
+val PaneScope<ThreePane, *>.globalUi
+    @Composable get() = LocalAppState.current.globalUi
+
 /**
  * Generic function that helps override the backing implementation to prevent memory leaks
  */

@@ -43,6 +43,7 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.globalUi
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.PaneScope
 import com.tunjid.treenav.compose.threepane.ThreePane
@@ -121,7 +122,7 @@ private fun PaneScope<ThreePane, Route>.GlobalUi(
 ) {
     ScreenUiState(
         UiState(
-//            fabShows = if (state.hasFetchedAuthStatus) isSignedIn else currentUiState.fabShows,
+            fabShows = if (state.hasFetchedAuthStatus) state.isSignedIn else globalUi.fabShows,
             fabExtended = true,
             fabText = "Create",
             fabIcon = Icons.Default.Add,

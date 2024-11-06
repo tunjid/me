@@ -34,6 +34,7 @@ import com.tunjid.me.archivedetail.ArchiveDetailRoute
 import com.tunjid.me.archivedetail.ArchiveDetailScreen
 import com.tunjid.me.archivedetail.ArchiveDetailStateHolderCreator
 import com.tunjid.me.archivedetail.State
+import com.tunjid.me.archivedetail.canEdit
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
@@ -44,6 +45,7 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.globalui.globalUi
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.PaneScope
 import com.tunjid.treenav.compose.threepane.ThreePane
@@ -135,7 +137,7 @@ private fun PaneScope<ThreePane, Route>.GlobalUi(state: State, actions: (Action)
         UiState(
             navVisibility = NavVisibility.Visible,
             // Prevents UI from jittering as load starts
-//            fabShows = if (state.hasFetchedAuthStatus) state.canEdit else currentUiState.fabShows,
+            fabShows = if (state.hasFetchedAuthStatus) state.canEdit else globalUi.fabShows,
             fabExtended = true,
             fabText = "Edit",
             fabIcon = Icons.Default.Edit,
