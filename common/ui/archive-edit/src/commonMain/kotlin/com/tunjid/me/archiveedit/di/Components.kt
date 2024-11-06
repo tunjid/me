@@ -20,13 +20,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tunjid.me.archiveedit.Action
+import com.tunjid.me.archiveedit.ActualArchiveEditStateHolder
 import com.tunjid.me.archiveedit.ArchiveEditRoute
 import com.tunjid.me.archiveedit.ArchiveEditScreen
 import com.tunjid.me.archiveedit.ArchiveEditStateHolderCreator
@@ -145,20 +149,23 @@ abstract class ArchiveEditScreenHolderComponent(
             )
         },
         render = { route ->
-            val stateHolder = creator.invoke(
-                LocalLifecycleOwner.current.lifecycleScope,
-                route,
-            )
-            val state = stateHolder.state.collectAsStateWithLifecycle().value
+            val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
+            val viewModel = viewModel<ActualArchiveEditStateHolder> {
+                creator.invoke(
+                    scope = lifecycleCoroutineScope,
+                    route = route,
+                )
+            }
+            val state by viewModel.state.collectAsStateWithLifecycle()
             ArchiveEditScreen(
                 movableSharedElementScope = movableSharedElementScope(),
                 state = state,
-                actions = stateHolder.accept,
+                actions = viewModel.accept,
                 modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
             )
             GlobalUi(
                 state = state,
-                onAction = stateHolder.accept,
+                onAction = viewModel.accept,
             )
         }
     )
