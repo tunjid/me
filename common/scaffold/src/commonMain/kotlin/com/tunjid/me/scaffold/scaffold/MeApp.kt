@@ -5,6 +5,7 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -14,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import com.tunjid.composables.splitlayout.SplitLayout
 import com.tunjid.composables.splitlayout.SplitLayoutState
 import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
@@ -106,9 +108,13 @@ fun MeApp(
                                     movableSharedElementHostState
                                 )
                                 .paneModifierConfiguration {
-                                    Modifier.restrictedSizePlacement(
-                                        atStart = paneState.pane == ThreePane.Secondary
-                                    )
+                                    Modifier
+                                        .restrictedSizePlacement(
+                                            atStart = paneState.pane == ThreePane.Secondary
+                                        )
+                                        .padding(
+                                            horizontal = if (splitLayoutState.visibleCount > 1) 16.dp else 0.dp
+                                        )
                                 }
                                 .animatePaneBoundsConfiguration(
                                     lookaheadScope = this@SharedTransitionScope,
