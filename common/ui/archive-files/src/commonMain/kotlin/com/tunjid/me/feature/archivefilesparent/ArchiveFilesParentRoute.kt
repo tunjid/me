@@ -132,7 +132,9 @@ internal fun ArchiveFilesParentScreen(
         ) { index ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
             state.childCreator?.let { creator ->
-                val viewModel = viewModel<ActualArchiveFilesStateHolder> {
+                val viewModel = viewModel<ActualArchiveFilesStateHolder>(
+                    key = state.children[index].id
+                ) {
                     creator.invoke(
                         scope = lifecycleCoroutineScope,
                         route = state.children[index],
