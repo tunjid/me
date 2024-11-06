@@ -22,7 +22,6 @@ package com.tunjid.me.feature.archivegallery
 import androidx.lifecycle.ViewModel
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.FILE_QUERY_LIMIT
-import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.ArchiveFileRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.feature.archivefiles.archiveFilesTiler

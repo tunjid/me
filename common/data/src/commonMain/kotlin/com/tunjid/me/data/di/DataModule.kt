@@ -16,7 +16,13 @@
 
 package com.tunjid.me.data.di
 
-import com.tunjid.me.common.data.*
+import com.tunjid.me.common.data.AppDatabase
+import com.tunjid.me.common.data.ArchiveCategoryEntityQueries
+import com.tunjid.me.common.data.ArchiveEntityQueries
+import com.tunjid.me.common.data.ArchiveFileEntityQueries
+import com.tunjid.me.common.data.ArchiveTagEntityQueries
+import com.tunjid.me.common.data.SessionEntityQueries
+import com.tunjid.me.common.data.UserEntityQueries
 import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.local.databaseDispatcher
@@ -82,7 +88,8 @@ abstract class InjectedDataComponent(
 
     @SingletonScope
     @Provides
-    internal fun archiveTagEntityQueries(): ArchiveTagEntityQueries = module.database.archiveTagEntityQueries
+    internal fun archiveTagEntityQueries(): ArchiveTagEntityQueries =
+        module.database.archiveTagEntityQueries
 
     @SingletonScope
     @Provides

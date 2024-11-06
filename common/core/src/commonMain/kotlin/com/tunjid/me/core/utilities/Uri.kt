@@ -16,7 +16,7 @@
 
 package com.tunjid.me.core.utilities
 
-import io.ktor.utils.io.core.*
+import io.ktor.utils.io.core.Input
 
 
 interface Uri {

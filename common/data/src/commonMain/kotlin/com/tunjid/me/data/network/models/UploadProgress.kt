@@ -16,11 +16,11 @@
 
 package com.tunjid.me.data.network.models
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.plugins.*
-import io.ktor.client.request.forms.*
-import io.ktor.http.content.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.onUpload
+import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.http.content.PartData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 

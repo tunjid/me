@@ -35,7 +35,14 @@ import java.awt.Cursor
 import java.awt.Point
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
-import java.awt.dnd.*
+import java.awt.dnd.DnDConstants
+import java.awt.dnd.DragGestureEvent
+import java.awt.dnd.DragGestureListener
+import java.awt.dnd.DragSourceAdapter
+import java.awt.dnd.DropTargetDragEvent
+import java.awt.dnd.DropTargetDropEvent
+import java.awt.dnd.DropTargetEvent
+import java.awt.dnd.DropTargetListener
 import java.io.File
 import java.io.Serializable
 import java.awt.dnd.DragSource as AwtDragSource

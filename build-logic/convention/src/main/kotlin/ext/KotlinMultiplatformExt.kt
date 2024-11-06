@@ -18,17 +18,17 @@ import ext.configureKotlinJvm
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
+import java.util.Locale
 
-fun org.gradle.api.Project.configureKotlinMultiplatform(
+fun Project.configureKotlinMultiplatform(
     kotlinMultiplatformExtension: KotlinMultiplatformExtension
 ) {
     val project = this@configureKotlinMultiplatform
 
     kotlinMultiplatformExtension.apply {
-        android()
+        androidTarget()
         jvm("desktop")
         sourceSets.apply {
             all {
@@ -77,8 +77,13 @@ private fun KotlinTarget.configureKsp(project: Project) {
     if (targetName != "metadata") {
         project.dependencies {
             add(
-                configurationName = "ksp${targetName.capitalize()}",
-                dependencyNotation = project.versionCatalog.findLibrary("tartaka-kotlin-inject-compiler").get()
+                configurationName = "ksp${targetName.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(
+                        Locale.getDefault()
+                    ) else it.toString()
+                }}",
+                dependencyNotation = project.versionCatalog.findLibrary("tartaka-kotlin-inject-compiler")
+                    .get()
             )
         }
     }

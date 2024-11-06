@@ -310,10 +310,10 @@ fun BoxScope.UploadInfo(info: UploadInfo) {
                 text = message
             )
             if (progress != null) LinearProgressIndicator(
+                progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                progress = progress,
             )
         }
 

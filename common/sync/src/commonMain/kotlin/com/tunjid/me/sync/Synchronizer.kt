@@ -16,6 +16,7 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.sync
 
 import com.tunjid.me.common.sync.AppDatabase

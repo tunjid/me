@@ -19,7 +19,7 @@ package com.tunjid.me
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import com.tunjid.mutator.mutationOf 
+import com.tunjid.mutator.mutationOf
 
 class App : Application() {
 

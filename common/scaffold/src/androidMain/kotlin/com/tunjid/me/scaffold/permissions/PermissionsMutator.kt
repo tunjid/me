@@ -57,8 +57,9 @@ internal fun Context.permissionsStateHolder(
                     val permissionsToStateHolders: Map<String, ActionStateMutator<Unit, StateFlow<Boolean>>>? =
                         cache.activeActivity?.let(cache.map::get)
 
-                    val flows: List<Flow<Pair<String, Boolean>>>? = permissionsToStateHolders?.entries
-                        ?.map { (permission, stateHolder) -> stateHolder.state.map(permission::to) }
+                    val flows: List<Flow<Pair<String, Boolean>>>? =
+                        permissionsToStateHolders?.entries
+                            ?.map { (permission, stateHolder) -> stateHolder.state.map(permission::to) }
 
                     if (flows != null) combine(flows) {
                         MapPermissions(permissionsMap = it.mapNotNull { (key, value) ->

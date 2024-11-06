@@ -24,8 +24,9 @@ import com.tunjid.me.archiveedit.di.ArchiveEditNavigationComponent
 import com.tunjid.me.archiveedit.di.ArchiveEditScreenHolderComponent
 import com.tunjid.me.archiveedit.di.create
 import com.tunjid.me.common.di.AppRouteComponent
-import com.tunjid.me.common.di.allRouteMatchers
 import com.tunjid.me.common.di.AppScreenStateHolderComponent
+import com.tunjid.me.common.di.MeApp
+import com.tunjid.me.common.di.allRouteMatchers
 import com.tunjid.me.common.di.create
 import com.tunjid.me.core.utilities.ActualUriConverter
 import com.tunjid.me.data.di.DataModule
@@ -34,14 +35,13 @@ import com.tunjid.me.data.di.create
 import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.NetworkMonitor
-import com.tunjid.me.common.di.MeApp
-import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryNavigationComponent
-import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryScreenHolderComponent
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesNavigationComponent
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesScreenHolderComponent
 import com.tunjid.me.feature.archivefiles.di.create
 import com.tunjid.me.feature.archivefilesparent.di.ArchiveFilesParentNavigationComponent
 import com.tunjid.me.feature.archivefilesparent.di.ArchiveFilesParentScreenHolderComponent
+import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryNavigationComponent
+import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryScreenHolderComponent
 import com.tunjid.me.feature.archivegallery.di.create
 import com.tunjid.me.feature.archivelist.di.ArchiveListNavigationComponent
 import com.tunjid.me.feature.archivelist.di.ArchiveListScreenHolderComponent

@@ -18,7 +18,6 @@ package com.tunjid.me.archivedetail.di
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,7 +44,6 @@ import com.tunjid.me.scaffold.globalui.InsetFlags
 import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.PaneScope
 import com.tunjid.treenav.compose.threepane.ThreePane
@@ -110,11 +108,11 @@ abstract class ArchiveDetailScreenHolderComponent(
         render = { route ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
             val viewModel = viewModel<ActualArchiveDetailStateHolder> {
-                    creator.invoke(
-                        scope = lifecycleCoroutineScope,
-                        route = route,
-                    )
-                }
+                creator.invoke(
+                    scope = lifecycleCoroutineScope,
+                    route = route,
+                )
+            }
             val state by viewModel.state.collectAsStateWithLifecycle()
             ArchiveDetailScreen(
                 movableSharedElementScope = movableSharedElementScope(),

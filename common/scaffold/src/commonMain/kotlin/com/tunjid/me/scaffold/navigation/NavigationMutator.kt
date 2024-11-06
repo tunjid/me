@@ -16,6 +16,7 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.scaffold.navigation
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -24,7 +25,7 @@ import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
-import com.tunjid.mutator.mutationOf 
+import com.tunjid.mutator.mutationOf
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.StackNav
 import com.tunjid.treenav.strings.RouteParser
@@ -120,7 +121,8 @@ private fun RouteParser.parseMultiStackNav(savedState: SavedState) =
                                     name = routesForStack.firstOrNull() ?: "Unknown"
                                 ),
                                 operation = innerFold@{ stackNav, route ->
-                                    val resolvedRoute = parse(pathAndQueries = route) ?: unknownRoute()
+                                    val resolvedRoute =
+                                        parse(pathAndQueries = route) ?: unknownRoute()
                                     stackNav.copy(
                                         children = stackNav.children + resolvedRoute
                                     )

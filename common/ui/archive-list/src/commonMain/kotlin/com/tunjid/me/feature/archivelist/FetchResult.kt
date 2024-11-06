@@ -18,7 +18,6 @@ package com.tunjid.me.feature.archivelist
 
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.tiler.TiledList
-import com.tunjid.tiler.buildTiledList
 import com.tunjid.tiler.transform
 
 val TiledList<ArchiveQuery, ArchiveItem.Card>.itemsWithHeaders: TiledList<ArchiveQuery, ArchiveItem>

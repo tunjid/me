@@ -51,7 +51,8 @@ internal class DragDropNode(
     private var activeChild: DragDropChild? = null
     private var currentTarget: DropTarget? = null
 
-    override val providedValues: ModifierLocalMap = modifierLocalMapOf(ModifierLocalDragDropParent to this)
+    override val providedValues: ModifierLocalMap =
+        modifierLocalMapOf(ModifierLocalDragDropParent to this)
 
     // start Node
     override fun onAttach() {
@@ -101,7 +102,7 @@ internal class DragDropNode(
         if (childDragStatus != null) return childDragStatus
 
         // No draggable child, attempt to drag self
-        return when(val dragSource = onDragOrDropStarted(DragOrDropStart.Drag(offset))) {
+        return when (val dragSource = onDragOrDropStarted(DragOrDropStart.Drag(offset))) {
             is DragSource -> dragSource.dragInfo(offset)
             is DropTarget -> throw IllegalArgumentException("Attempted to start drag in a drop target")
             null -> null
@@ -114,11 +115,12 @@ internal class DragDropNode(
         coordinates ?: return false
 
         check(currentTarget == null)
-        currentTarget = when(val dropTarget = onDragOrDropStarted(DragOrDropStart.Drop(mimeTypes, position))) {
-            is DragSource -> throw IllegalArgumentException("Attempted to start drop in a drag source")
-            is DropTarget -> dropTarget
-            null -> null
-        }
+        currentTarget =
+            when (val dropTarget = onDragOrDropStarted(DragOrDropStart.Drop(mimeTypes, position))) {
+                is DragSource -> throw IllegalArgumentException("Attempted to start drop in a drag source")
+                is DropTarget -> dropTarget
+                null -> null
+            }
 
         var handledByChild = false
 
@@ -139,12 +141,13 @@ internal class DragDropNode(
         coordinates ?: return
         val currentActiveChild: DragDropChild? = activeChild
 
-        val newChild: DragDropChild? = when (currentActiveChild != null && currentActiveChild.contains(position)) {
-            // Moved within child.
-            true -> currentActiveChild
-            // Position is now outside active child, maybe it entered a different one.
-            false -> children.fastFirstOrNull { it.contains(position) }
-        }
+        val newChild: DragDropChild? =
+            when (currentActiveChild != null && currentActiveChild.contains(position)) {
+                // Moved within child.
+                true -> currentActiveChild
+                // Position is now outside active child, maybe it entered a different one.
+                false -> children.fastFirstOrNull { it.contains(position) }
+            }
         when {
             // Left us and went to a child.
             newChild != null && currentActiveChild == null -> {

@@ -88,6 +88,7 @@ class ActualSignInStateHolder(
                     authRepository = authRepository,
                     navActions = navActions
                 )
+
                 is Action.Navigate -> action.flow.consumeNavigationActions(
                     navigationMutationConsumer = navActions
                 )

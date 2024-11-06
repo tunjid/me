@@ -2,7 +2,6 @@ package com.tunjid.scaffold.scaffold
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,20 +13,18 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import com.tunjid.composables.splitlayout.SplitLayout
 import com.tunjid.composables.splitlayout.SplitLayoutState
 import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
 import com.tunjid.me.scaffold.globalui.slices.fabState
 import com.tunjid.me.scaffold.globalui.slices.snackbarPositionalState
 import com.tunjid.me.scaffold.globalui.slices.uiChromeState
-import com.tunjid.scaffold.scaffold.PaneAnchorState.Companion.DraggableThumb
-import com.tunjid.scaffold.scaffold.PaneAnchorState.Companion.MinPaneWidth
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackConfiguration
 import com.tunjid.me.scaffold.scaffold.restrictedSizePlacement
 import com.tunjid.me.scaffold.scaffold.routePanePadding
+import com.tunjid.scaffold.scaffold.PaneAnchorState.Companion.DraggableThumb
+import com.tunjid.scaffold.scaffold.PaneAnchorState.Companion.MinPaneWidth
 import com.tunjid.treenav.compose.PaneState
 import com.tunjid.treenav.compose.PanedNavHost
 import com.tunjid.treenav.compose.configurations.animatePaneBoundsConfiguration
@@ -146,8 +143,7 @@ fun MeApp(
                                     state = remember {
                                         derivedStateOf { meAppState.globalUi.uiChromeState }
                                     }
-                                )
-                            ,
+                                ),
                             itemSeparators = { _, offset ->
                                 DraggableThumb(
                                     splitLayoutState = splitLayoutState,

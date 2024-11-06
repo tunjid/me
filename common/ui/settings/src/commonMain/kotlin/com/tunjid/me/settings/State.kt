@@ -17,9 +17,9 @@
 package com.tunjid.me.settings
 
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
-import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.push
 import com.tunjid.treenav.strings.Route
@@ -41,6 +41,7 @@ sealed class Action(val key: String) {
                 navState.pop()
             }
         }
+
         data class External(
             val route: Route
         ) : Navigate() {

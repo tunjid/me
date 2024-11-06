@@ -27,14 +27,11 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.hasTheSameFilter
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
-import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.feature.archivelist.di.kind
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.di.downcast
-import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.consumeNavigationActions
@@ -93,7 +90,7 @@ class ActualArchiveListStateHolder(
     scope: CoroutineScope,
     @Assisted
     route: Route,
-) :  ViewModel(viewModelScope = scope), ArchiveListStateHolder by scope.actionStateFlowMutator(
+) : ViewModel(viewModelScope = scope), ArchiveListStateHolder by scope.actionStateFlowMutator(
     initialState = State(
         queryState = QueryState(
             currentQuery = ArchiveQuery(kind = route.routeParams.kind),

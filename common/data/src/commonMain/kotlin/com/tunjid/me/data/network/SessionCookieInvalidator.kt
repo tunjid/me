@@ -19,12 +19,13 @@ package com.tunjid.me.data.network
 import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.data.network.models.NetworkErrorCodes
 import com.tunjid.me.data.network.models.NetworkResponse
-import io.ktor.client.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.observer.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.util.*
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpClientPlugin
+import io.ktor.client.plugins.observer.ResponseHandler
+import io.ktor.client.plugins.observer.ResponseObserver
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.isSuccess
+import io.ktor.util.AttributeKey
 
 class ErrorInterceptorConfig {
     internal var networkErrorConverter: ((String) -> NetworkResponse.Error)? = null

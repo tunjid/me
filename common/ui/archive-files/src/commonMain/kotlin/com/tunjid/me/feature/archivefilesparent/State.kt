@@ -16,26 +16,15 @@
 
 package com.tunjid.me.feature.archivefilesparent
 
-import com.tunjid.me.core.model.ArchiveFile
-import com.tunjid.me.core.model.ArchiveFileId
-import com.tunjid.me.core.model.ArchiveFileQuery
-import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.utilities.ByteSerializable
-import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolderCreator
 import com.tunjid.me.feature.archivegallery.Action.Navigate
 import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
-import com.tunjid.me.scaffold.permissions.Permission
-import com.tunjid.tiler.TiledList
-import com.tunjid.tiler.emptyTiledList
 import com.tunjid.treenav.pop
-import com.tunjid.treenav.push
 import com.tunjid.treenav.strings.Route
-import com.tunjid.treenav.strings.routeString
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlinx.serialization.protobuf.ProtoNumber
 
 
 @Serializable

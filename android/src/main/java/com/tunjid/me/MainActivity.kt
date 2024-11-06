@@ -30,9 +30,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
 import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.me.core.ui.dragdrop.DragTrigger
-import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
-import com.tunjid.me.scaffold.globalui.*
+import com.tunjid.me.scaffold.globalui.COMPACT
+import com.tunjid.me.scaffold.globalui.EXPANDED
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
+import com.tunjid.me.scaffold.globalui.MEDIUM
+import com.tunjid.me.scaffold.globalui.NavMode
+import com.tunjid.me.scaffold.globalui.insetMutations
+import com.tunjid.me.scaffold.globalui.integrateBackActions
+import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.mutator.mutationOf
 import com.tunjid.scaffold.scaffold.MeApp
 import kotlinx.coroutines.flow.distinctUntilChanged

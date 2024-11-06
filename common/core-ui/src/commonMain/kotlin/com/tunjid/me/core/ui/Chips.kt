@@ -33,7 +33,18 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.*
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.InputChip
+import androidx.compose.material3.InputChipDefaults
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.SuggestionChipDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -137,7 +148,7 @@ fun Chips(
                 key = { "${it.text}-${it.kind}" },
                 itemContent = { info ->
                     Chip(
-                        modifier = Modifier.animateItemPlacement(),
+                        modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
                         info = info,
                         onClick = click@{
                             if (onClick == null) return@click
@@ -152,8 +163,7 @@ fun Chips(
                 key = "Input"
             ) {
                 ChipInputField(
-                    modifier = Modifier
-                        .animateItemPlacement()
+                    modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
                         .focusRequester(focusRequester = focusRequester),
                     currentText = editInfo.currentText,
                     editInfo.onChipChanged

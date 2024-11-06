@@ -25,7 +25,6 @@ import com.tunjid.me.archivedetail.di.archiveId
 import com.tunjid.me.archivedetail.di.archiveThumbnail
 import com.tunjid.me.archivedetail.di.kind
 import com.tunjid.me.core.model.ArchiveId
-import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed

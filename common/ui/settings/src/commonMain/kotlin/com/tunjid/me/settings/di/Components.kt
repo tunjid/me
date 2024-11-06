@@ -36,7 +36,6 @@ import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundMod
 import com.tunjid.me.settings.ActualSettingsStateHolder
 import com.tunjid.me.settings.SettingsRoute
 import com.tunjid.me.settings.SettingsScreen
-import com.tunjid.me.settings.SettingsStateHolder
 import com.tunjid.me.settings.SettingsStateHolderCreator
 import com.tunjid.me.settings.State
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy

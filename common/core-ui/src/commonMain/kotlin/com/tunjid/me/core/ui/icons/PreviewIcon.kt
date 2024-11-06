@@ -21,7 +21,7 @@ import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.materialPath
 import androidx.compose.ui.graphics.vector.ImageVector
 
-public val Icons.Filled.Preview: ImageVector
+val Icons.Filled.Preview: ImageVector
     get() {
         if (_preview != null) {
             return _preview!!

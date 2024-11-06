@@ -17,8 +17,11 @@
 package com.tunjid.me.data.network
 
 import com.tunjid.me.common.data.SessionEntityQueries
-import io.ktor.client.plugins.cookies.*
-import io.ktor.http.*
+import io.ktor.client.plugins.cookies.CookiesStorage
+import io.ktor.http.Cookie
+import io.ktor.http.Url
+import io.ktor.http.parseServerSetCookieHeader
+import io.ktor.http.renderSetCookieHeader
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 

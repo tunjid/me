@@ -25,7 +25,6 @@ import com.tunjid.me.core.model.ArchiveFile
 import com.tunjid.me.core.model.ArchiveFileQuery
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.FILE_QUERY_LIMIT
-import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.data.network.models.TransferStatus
@@ -106,7 +105,7 @@ class ActualArchiveFilesStateHolder(
     scope: CoroutineScope,
     @Assisted
     route: Route,
-) :  ViewModel(viewModelScope = scope), ArchiveFilesStateHolder by scope.actionStateFlowMutator(
+) : ViewModel(viewModelScope = scope), ArchiveFilesStateHolder by scope.actionStateFlowMutator(
     initialState = State(
         archiveId = route.routeParams.archiveId,
         dndEnabled = route.routeParams.dndEnabled,

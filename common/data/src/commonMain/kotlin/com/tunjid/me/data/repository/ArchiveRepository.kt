@@ -146,7 +146,13 @@ internal class OfflineFirstArchiveRepository(
             )
                 .asFlow()
                 .mapToList(context = dispatcher)
-                .map { categoriesContainingList -> categoriesContainingList.map { Descriptor.Category(it.category) } },
+                .map { categoriesContainingList ->
+                    categoriesContainingList.map {
+                        Descriptor.Category(
+                            it.category
+                        )
+                    }
+                },
             flow2 = archiveTagQueries.tagsContaining(
                 subString = "%${descriptor.value}%",
                 kind = kind.type,

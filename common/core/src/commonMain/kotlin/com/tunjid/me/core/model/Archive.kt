@@ -16,7 +16,9 @@
 
 package com.tunjid.me.core.model
 
-import com.tunjid.me.core.model.ArchiveKind.*
+import com.tunjid.me.core.model.ArchiveKind.Articles
+import com.tunjid.me.core.model.ArchiveKind.Projects
+import com.tunjid.me.core.model.ArchiveKind.Talks
 import com.tunjid.me.core.utilities.LocalDateTimeSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.KSerializer

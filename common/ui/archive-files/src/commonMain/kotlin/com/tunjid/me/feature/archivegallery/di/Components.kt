@@ -29,7 +29,6 @@ import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivegallery.ActualArchiveGalleryStateHolder
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryRoute
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryScreen
-import com.tunjid.me.feature.archivegallery.ArchiveGalleryStateHolder
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryStateHolderCreator
 import com.tunjid.me.feature.archivegallery.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
