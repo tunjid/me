@@ -31,8 +31,8 @@ import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
 import com.tunjid.me.scaffold.globalui.COMPACT
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
+import com.tunjid.me.scaffold.scaffold.MeApp
 import com.tunjid.mutator.mutationOf
-import com.tunjid.scaffold.scaffold.MeApp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.awt.event.WindowEvent
 import java.awt.event.WindowFocusListener

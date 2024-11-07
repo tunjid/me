@@ -25,10 +25,8 @@ import io.ktor.utils.io.errors.IOException
 import io.ktor.utils.io.streams.asInput
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import kotlin.IllegalArgumentException
 import kotlin.Int
 import kotlin.Long
-import kotlin.NullPointerException
 import kotlin.String
 import android.net.Uri as AndroidUri
 
@@ -64,7 +62,6 @@ actual class ActualUriConverter(
     override suspend fun mimeType(uri: LocalUri): String =
         when (uri) {
             is ContentUri -> uri.mimetype
-                ?: throw NullPointerException("Unknown mime type for $uri")
 
             else -> throw IllegalArgumentException("Unknown URI type")
         }

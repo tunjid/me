@@ -24,8 +24,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import com.tunjid.me.scaffold.scaffold.LocalAppState
 import com.tunjid.mutator.mutationOf
-import com.tunjid.scaffold.scaffold.LocalAppState
 import com.tunjid.treenav.compose.PaneScope
 import com.tunjid.treenav.compose.threepane.ThreePane
 

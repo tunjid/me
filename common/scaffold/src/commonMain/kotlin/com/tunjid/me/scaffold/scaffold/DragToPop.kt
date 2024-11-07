@@ -1,4 +1,4 @@
-package com.tunjid.scaffold.scaffold
+package com.tunjid.me.scaffold.scaffold
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import com.tunjid.composables.dragtodismiss.dragToDismiss
 import com.tunjid.me.scaffold.globalui.BackStatus
-import com.tunjid.me.scaffold.scaffold.rememberUpdatedStateIf
 import com.tunjid.treenav.compose.PanedNavHostScope
 import com.tunjid.treenav.compose.threepane.ThreePane
 import com.tunjid.treenav.strings.Route

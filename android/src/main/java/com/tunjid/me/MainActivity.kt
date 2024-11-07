@@ -38,8 +38,8 @@ import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.insetMutations
 import com.tunjid.me.scaffold.globalui.integrateBackActions
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
+import com.tunjid.me.scaffold.scaffold.MeApp
 import com.tunjid.mutator.mutationOf
-import com.tunjid.scaffold.scaffold.MeApp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch

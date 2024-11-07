@@ -52,7 +52,7 @@ actual class ActualUriConverter : UriConverter {
         else -> throw IllegalArgumentException("Unknown mimeType for ${uri.path}")
     }
 
-    override suspend fun contentLength(uri: LocalUri): Long? = when (uri) {
+    override suspend fun contentLength(uri: LocalUri): Long = when (uri) {
         is FileUri -> uri.file.length()
         else -> throw IllegalArgumentException("Unknown URI type")
     }

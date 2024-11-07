@@ -56,7 +56,7 @@ import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.globalui.PaneAnchor
-import com.tunjid.scaffold.scaffold.SecondaryPaneCloseBackHandler
+import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.strings.RouteParams
 

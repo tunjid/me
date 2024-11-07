@@ -1,4 +1,4 @@
-package com.tunjid.scaffold.scaffold
+package com.tunjid.me.scaffold.scaffold
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect

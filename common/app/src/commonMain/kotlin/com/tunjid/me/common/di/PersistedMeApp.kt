@@ -29,8 +29,8 @@ import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.navigation.removedRoutes
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
+import com.tunjid.me.scaffold.scaffold.MeAppState
 import com.tunjid.me.sync.di.Sync
-import com.tunjid.scaffold.scaffold.MeAppState
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope

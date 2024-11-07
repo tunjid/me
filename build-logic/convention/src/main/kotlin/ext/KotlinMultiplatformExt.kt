@@ -77,11 +77,13 @@ private fun KotlinTarget.configureKsp(project: Project) {
     if (targetName != "metadata") {
         project.dependencies {
             add(
-                configurationName = "ksp${targetName.replaceFirstChar {
-                    if (it.isLowerCase()) it.titlecase(
-                        Locale.getDefault()
-                    ) else it.toString()
-                }}",
+                configurationName = "ksp${
+                    targetName.replaceFirstChar {
+                        if (it.isLowerCase()) it.titlecase(
+                            Locale.getDefault()
+                        ) else it.toString()
+                    }
+                }",
                 dependencyNotation = project.versionCatalog.findLibrary("tartaka-kotlin-inject-compiler")
                     .get()
             )
