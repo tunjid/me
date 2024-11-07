@@ -40,6 +40,7 @@ import com.tunjid.me.feature.archivefiles.di.ArchiveFilesScreenHolderComponent
 import com.tunjid.me.feature.archivefiles.di.create
 import com.tunjid.me.feature.archivefilesparent.di.ArchiveFilesParentNavigationComponent
 import com.tunjid.me.feature.archivefilesparent.di.ArchiveFilesParentScreenHolderComponent
+import com.tunjid.me.feature.archivefilesparent.di.create
 import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryNavigationComponent
 import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryScreenHolderComponent
 import com.tunjid.me.feature.archivegallery.di.create
