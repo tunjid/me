@@ -72,13 +72,6 @@ fun MeApp(
             Box(
                 modifier = modifier.fillMaxSize()
             ) {
-                AppNavRail(
-                    navItems = meAppState.navItems,
-                    uiChromeState = remember {
-                        derivedStateOf { meAppState.globalUi.uiChromeState }
-                    }.value,
-                    onNavItemSelected = meAppState::onNavItemSelected,
-                )
                 // Root LookaheadScope used to anchor all shared element transitions
                 SharedTransitionScope { sharedElementModifier ->
                     val movableSharedElementHostState = remember {
@@ -110,7 +103,8 @@ fun MeApp(
                                 .paneModifierConfiguration {
                                     Modifier
                                         .restrictedSizePlacement(
-                                            atStart = paneState.pane == ThreePane.Secondary
+                                            atStart = paneState.pane == ThreePane.Secondary,
+                                            minWidth = 180.dp,
                                         )
                                         .padding(
                                             horizontal = if (splitLayoutState.visibleCount > 1) 16.dp else 0.dp
@@ -187,6 +181,13 @@ fun MeApp(
                     navItems = meAppState.navItems,
                     positionalState = remember {
                         derivedStateOf { meAppState.globalUi.bottomNavPositionalState }
+                    }.value,
+                    onNavItemSelected = meAppState::onNavItemSelected,
+                )
+                AppNavRail(
+                    navItems = meAppState.navItems,
+                    uiChromeState = remember {
+                        derivedStateOf { meAppState.globalUi.uiChromeState }
                     }.value,
                     onNavItemSelected = meAppState::onNavItemSelected,
                 )

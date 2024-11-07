@@ -74,9 +74,10 @@ internal fun Modifier.routePanePadding(
  * Shifts layouts out of view when the content area is too small instead of resizing them
  */
 internal fun Modifier.restrictedSizePlacement(
-    atStart: Boolean
+    atStart: Boolean,
+    minWidth: Dp,
 ) = layout { measurable, constraints ->
-    val minPanWidth = MinPaneLayoutWidth.roundToPx()
+    val minPanWidth = minWidth.roundToPx()
     val actualConstraints = when {
         constraints.maxWidth < minPanWidth -> constraints.copy(maxWidth = minPanWidth)
         else -> constraints
@@ -92,8 +93,6 @@ internal fun Modifier.restrictedSizePlacement(
         )
     }
 }
-
-private val MinPaneLayoutWidth = 120.dp
 
 private val PaneSizeSpring = spring(
     stiffness = Spring.StiffnessMediumLow,

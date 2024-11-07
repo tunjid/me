@@ -210,7 +210,6 @@ internal class PaneAnchorState(
                     Image(
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .rotate(degrees = 90f)
                             .scale(scale = 0.6f),
                         imageVector = Icons.Filled.ExpandAll,
                         contentDescription = "Drag",
