@@ -31,6 +31,9 @@ kotlin {
             dependencies {
                 api(project(":common:core"))
 
+                implementation(libs.coil.compose)
+                implementation(libs.coil.ktor)
+
                 implementation(libs.jetbrains.compose.runtime)
                 implementation(libs.jetbrains.compose.animation)
                 implementation(libs.jetbrains.compose.material3)
@@ -47,12 +50,14 @@ kotlin {
         }
         named("androidMain") {
             dependencies {
+                implementation(libs.coil.ktor)
+
                 implementation(libs.androidx.core.ktx)
                 implementation(libs.accompanist.flowlayout)
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.androidx.compose.foundation.layout)
 
-                implementation(libs.coil.compose)
+                implementation(libs.ktor.client.android)
             }
         }
         named("desktopMain") {
@@ -60,6 +65,8 @@ kotlin {
                 implementation(libs.ktor.client.java)
                 implementation(libs.apache.commons.imaging)
                 implementation(libs.image.io)
+
+                implementation(libs.ktor.client.java)
             }
         }
         named("commonTest") {

@@ -18,9 +18,18 @@ package com.tunjid.me.core.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import coil3.compose.AsyncImage
+import com.tunjid.composables.ui.interpolate
 
 @Composable
-expect fun AsyncRasterImage(
+fun AsyncRasterImage(
     args: MediaArgs,
     modifier: Modifier = Modifier,
-)
+) {
+    AsyncImage(
+        modifier = modifier,
+        model = args.url,
+        contentDescription = args.description,
+        contentScale = args.contentScale.interpolate()
+    )
+}
