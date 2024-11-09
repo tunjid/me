@@ -2,6 +2,7 @@ package com.tunjid.me.scaffold.scaffold
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -18,6 +19,8 @@ import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.navigation.navItemSelected
 import com.tunjid.me.scaffold.navigation.navItems
 import com.tunjid.me.scaffold.navigation.unknownRoute
+import com.tunjid.me.sync.di.Sync
+import com.tunjid.me.sync.di.keepUpToDate
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.compose.PaneStrategy
 import com.tunjid.treenav.compose.PanedNavHostConfiguration
@@ -40,7 +43,8 @@ import me.tatarka.inject.annotations.Inject
 class MeAppState @Inject constructor(
     private val routeConfigurationMap: Map<String, @JvmSuppressWildcards PaneStrategy<ThreePane, Route>>,
     private val navigationStateHolder: NavigationStateHolder,
-    private val globalUiStateHolder: GlobalUiStateHolder
+    private val globalUiStateHolder: GlobalUiStateHolder,
+    private val sync: Sync,
 ) {
 
     private val multiStackNavState = mutableStateOf(navigationStateHolder.state.value)
@@ -100,6 +104,9 @@ class MeAppState @Inject constructor(
                 }
             }
             onDispose { job.cancel() }
+        }
+        LaunchedEffect(Unit) {
+            sync.keepUpToDate()
         }
         return adaptiveNavHostState
     }

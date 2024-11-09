@@ -30,6 +30,7 @@ import com.tunjid.me.scaffold.scaffold.MeAppState
 import com.tunjid.me.settings.di.SettingsScreenHolderComponent
 import com.tunjid.me.signin.di.SignInScreenHolderComponent
 import com.tunjid.me.sync.di.InjectedSyncComponent
+import com.tunjid.me.sync.di.Sync
 import com.tunjid.treenav.compose.PaneStrategy
 import com.tunjid.treenav.compose.threepane.ThreePane
 import com.tunjid.treenav.strings.Route
@@ -58,10 +59,12 @@ abstract class AppScreenStateHolderComponent(
     fun appState(
         navigationStateHolder: NavigationStateHolder,
         globalUiStateHolder: GlobalUiStateHolder,
+        sync: Sync,
     ): MeAppState = MeAppState(
         routeConfigurationMap = routeConfigurationMap,
         navigationStateHolder = navigationStateHolder,
         globalUiStateHolder = globalUiStateHolder,
+        sync = sync,
     )
 
     abstract val app: PersistedMeApp

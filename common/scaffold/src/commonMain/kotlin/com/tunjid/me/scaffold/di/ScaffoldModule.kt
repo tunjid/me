@@ -24,9 +24,6 @@ import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.scaffold.globalui.ActualGlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.lifecycle.ActualLifecycleStateHolder
-import com.tunjid.me.scaffold.lifecycle.Lifecycle
-import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.navigation.PersistedNavigationStateHolder
@@ -161,21 +158,11 @@ abstract class InjectedScaffoldComponent(
         globalUiStateHolder: GlobalUiStateHolder
     ): (Mutation<UiState>) -> Unit = globalUiStateHolder.accept
 
-    @SingletonScope
-    @Provides
-    fun lifecycleStateStream(
-        lifecycleStateHolder: LifecycleStateHolder
-    ): StateFlow<Lifecycle> = lifecycleStateHolder.state
-
     val PersistedNavigationStateHolder.bind: NavigationStateHolder
         @SingletonScope
         @Provides get() = this
 
     val ActualGlobalUiStateHolder.bind: GlobalUiStateHolder
-        @SingletonScope
-        @Provides get() = this
-
-    val ActualLifecycleStateHolder.bind: LifecycleStateHolder
         @SingletonScope
         @Provides get() = this
 

@@ -31,6 +31,7 @@ kotlin {
         named("commonMain") {
             dependencies {
                 api(project(":common:core"))
+                api(project(":common:sync"))
 
                 implementation(libs.androidx.datastore.core.okio)
 
