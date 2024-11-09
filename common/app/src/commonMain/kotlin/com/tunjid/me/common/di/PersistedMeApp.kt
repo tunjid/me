@@ -20,10 +20,8 @@ import com.tunjid.me.core.sync.changeListKey
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.modelEvents
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
-import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.scaffold.MeAppState
 import com.tunjid.me.sync.di.Sync
 import kotlinx.coroutines.CoroutineScope
@@ -36,8 +34,6 @@ import me.tatarka.inject.annotations.Inject
 class PersistedMeApp(
     appScope: CoroutineScope,
     sync: Sync,
-    override val navStateHolder: NavigationStateHolder,
-    override val globalUiStateHolder: GlobalUiStateHolder,
     override val lifecycleStateHolder: LifecycleStateHolder,
     override val appState: MeAppState,
 ) : MeApp {

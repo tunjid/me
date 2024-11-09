@@ -32,7 +32,6 @@ import com.tunjid.me.scaffold.globalui.COMPACT
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
 import com.tunjid.me.scaffold.scaffold.MeApp
-import com.tunjid.mutator.mutationOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.awt.event.WindowEvent
 import java.awt.event.WindowFocusListener
@@ -75,7 +74,7 @@ fun main() {
                 snapshotFlow(currentWidth::toWindowSizeClass)
                     .distinctUntilChanged()
                     .collect { windowSizeClass ->
-                        app.globalUiStateHolder.accept(mutationOf {
+                        app.appState.updateGlobalUi {
                             copy(
                                 windowSizeClass = windowSizeClass,
                                 navMode = when (windowSizeClass) {
@@ -83,7 +82,7 @@ fun main() {
                                     else -> NavMode.NavRail
                                 }
                             )
-                        })
+                        }
                     }
             }
         }

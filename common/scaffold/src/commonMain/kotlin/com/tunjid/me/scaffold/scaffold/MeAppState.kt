@@ -48,6 +48,7 @@ class MeAppState @Inject constructor(
 
     val navItems by derivedStateOf { multiStackNavState.value.navItems }
     val globalUi by uiState
+    val navigation by multiStackNavState
 
     private var density = Density(1f)
     internal val paneAnchorState by lazy { PaneAnchorState(density) }
