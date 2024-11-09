@@ -17,74 +17,31 @@
 package com.tunjid.me.common.di
 
 import com.tunjid.me.core.sync.changeListKey
-import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.modelEvents
-import com.tunjid.me.scaffold.di.SavedStateCache
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
 import com.tunjid.me.scaffold.lifecycle.monitorWhenActive
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
-import com.tunjid.me.scaffold.navigation.removedRoutes
-import com.tunjid.me.scaffold.savedstate.SavedState
-import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.me.scaffold.scaffold.MeAppState
 import com.tunjid.me.sync.di.Sync
-import com.tunjid.treenav.MultiStackNav
-import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 class PersistedMeApp(
     appScope: CoroutineScope,
-    byteSerializer: ByteSerializer,
-    navStateStream: StateFlow<MultiStackNav>,
-    savedStateRepository: SavedStateRepository,
     sync: Sync,
     override val navStateHolder: NavigationStateHolder,
     override val globalUiStateHolder: GlobalUiStateHolder,
     override val lifecycleStateHolder: LifecycleStateHolder,
-    private val savedStateCache: SavedStateCache,
     override val appState: MeAppState,
 ) : MeApp {
-    private val routeStateHolderCache = mutableMapOf<Route, ScopeHolder?>()
-
     init {
-        navStateStream
-            .removedRoutes()
-            .onEach { removedRoutes ->
-                removedRoutes.forEach { route ->
-                    println("Cleared ${route::class.simpleName}")
-                    val holder = routeStateHolderCache.remove(route)
-                    holder?.scope?.cancel()
-                }
-            }
-            .launchIn(appScope)
-
-        lifecycleStateHolder.state
-            .map { it.isInForeground }
-            .distinctUntilChanged()
-            .onStart { emit(false) }
-            .flatMapLatest {
-                navStateStream
-                    .mapLatest { navState ->
-                        navState.toSavedState(byteSerializer)
-                    }
-            }
-            .onEach(savedStateRepository::saveState)
-            .launchIn(appScope)
-
         modelEvents(
             url = "$ApiUrl/",
             dispatcher = databaseDispatcher()
@@ -95,37 +52,4 @@ class PersistedMeApp(
             .onEach(sync)
             .launchIn(appScope)
     }
-
-    private fun MultiStackNav.toSavedState(
-        byteSerializer: ByteSerializer,
-    ) = SavedState(
-        isEmpty = false,
-        activeNav = currentIndex,
-        navigation = stacks.fold(listOf()) { listOfLists, stackNav ->
-            listOfLists.plus(
-                element = stackNav.children
-                    .filterIsInstance<Route>()
-                    .fold(listOf()) { stackList, route ->
-                        stackList + route.id
-                    }
-            )
-        },
-        routeStates = emptyMap()
-//                routeStates = flatten(order = Order.BreadthFirst)
-//            .filterIsInstance<Route>()
-//            .fold(mutableMapOf()) { map, route ->
-//                val stateHolder = screenStateHolderCache.screenStateHolderFor<Any>(route)
-//                val state = (stateHolder as? ActionStateMutator<*, *>)?.state ?: return@fold map
-//                val serializable = (state as? StateFlow<*>)?.value ?: return@fold map
-//                if (serializable is ByteSerializable) map[route.id] =
-//                    byteSerializer.toBytes(serializable)
-//                map
-//            }
-    )
 }
-
-private data class ScopeHolder(
-    val scope: CoroutineScope,
-    val stateHolder: Any,
-)
-
