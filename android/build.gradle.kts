@@ -90,7 +90,6 @@ dependencies {
 
     implementation(libs.google.material)
 
-    implementation(libs.coil.core)
     implementation(libs.coil.compose)
 
     implementation(libs.tunjid.mutator.core.jvm)
