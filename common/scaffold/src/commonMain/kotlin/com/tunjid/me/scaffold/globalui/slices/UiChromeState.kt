@@ -26,7 +26,6 @@ import com.tunjid.me.scaffold.globalui.navRailVisible
 
 internal data class UiChromeState(
     val statusBarSize: Int,
-    val toolbarOverlaps: Boolean,
     val navRailVisible: Boolean,
     val bottomNavVisible: Boolean,
     val windowSizeClass: WindowSizeClass,
@@ -39,7 +38,6 @@ internal val UiState.uiChromeState
     get() = UiChromeState(
         statusBarSize = systemUI.static.statusBarSize,
         insetDescriptor = insetFlags,
-        toolbarOverlaps = toolbarOverlaps,
         bottomNavVisible = bottomNavVisible,
         navRailVisible = navRailVisible,
         windowSizeClass = windowSizeClass,

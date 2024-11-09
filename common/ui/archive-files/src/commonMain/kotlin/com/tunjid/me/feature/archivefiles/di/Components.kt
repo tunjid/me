@@ -121,8 +121,6 @@ abstract class ArchiveFilesScreenHolderComponent(
             )
             ScreenUiState(
                 UiState(
-                    toolbarShows = true,
-                    toolbarTitle = "Files",
                     fabShows = false,
                     fabExtended = true,
                     navVisibility = NavVisibility.Visible,

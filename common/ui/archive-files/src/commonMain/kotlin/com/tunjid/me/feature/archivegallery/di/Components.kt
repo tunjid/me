@@ -112,8 +112,6 @@ abstract class ArchiveGalleryScreenHolderComponent(
 private fun PaneScope<ThreePane, Route>.GlobalUi() {
     ScreenUiState(
         UiState(
-            toolbarShows = false,
-            toolbarOverlaps = true,
             fabShows = false,
             fabExtended = false,
             navVisibility = NavVisibility.Gone,

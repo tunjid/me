@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
-import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
 
 sealed class NavMode {
     data object BottomNav : NavMode()
@@ -48,10 +47,6 @@ enum class PaneAnchor(
 }
 
 data class UiState(
-    val toolbarItems: List<ToolbarItem> = listOf(),
-    val toolbarShows: Boolean = false,
-    val toolbarOverlaps: Boolean = false,
-    val toolbarTitle: CharSequence = "",
     val fabIcon: ImageVector = Icons.Default.Done,
     val fabShows: Boolean = false,
     val fabExtended: Boolean = true,
@@ -72,8 +67,6 @@ data class UiState(
     val backStatus: BackStatus = BackStatus.None,
     val paneAnchor: PaneAnchor = PaneAnchor.Zero,
     val fabClickListener: (Unit) -> Unit = emptyCallback(),
-    val toolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),
-    val altToolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),
     val snackbarMessageConsumer: (com.tunjid.me.core.model.Message) -> Unit = emptyCallback(),
 )
 
