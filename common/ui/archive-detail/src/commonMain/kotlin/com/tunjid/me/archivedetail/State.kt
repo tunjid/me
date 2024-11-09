@@ -25,10 +25,10 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
+import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
-import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.push
 import com.tunjid.treenav.strings.routeString

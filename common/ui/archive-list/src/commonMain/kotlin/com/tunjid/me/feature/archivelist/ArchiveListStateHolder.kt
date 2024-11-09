@@ -19,6 +19,7 @@
 
 package com.tunjid.me.feature.archivelist
 
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.core.model.ArchiveContentFilter
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveQuery
@@ -26,14 +27,11 @@ import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.hasTheSameFilter
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
-import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.feature.archivelist.di.kind
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.di.downcast
-import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.consumeNavigationActions
@@ -71,8 +69,13 @@ typealias ArchiveListStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ArchiveListStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> ArchiveListStateHolder,
-) : ScreenStateHolderCreator by creator.downcast()
+    private val creator: (scope: CoroutineScope, route: Route) -> ActualArchiveListStateHolder
+) : ScreenStateHolderCreator {
+    override fun invoke(
+        scope: CoroutineScope,
+        route: Route
+    ): ActualArchiveListStateHolder = creator.invoke(scope, route)
+}
 
 /**
  * Manages [State] for [ArchiveListRoute]
@@ -81,17 +84,14 @@ class ArchiveListStateHolderCreator(
 class ActualArchiveListStateHolder(
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
-    byteSerializer: ByteSerializer,
     navStateFlow: StateFlow<MultiStackNav>,
     navActions: (NavigationMutation) -> Unit,
     @Assisted
     scope: CoroutineScope,
     @Assisted
-    savedState: ByteArray?,
-    @Assisted
     route: Route,
-) : ArchiveListStateHolder by scope.actionStateFlowMutator(
-    initialState = byteSerializer.restoreState(savedState) ?: State(
+) : ViewModel(viewModelScope = scope), ArchiveListStateHolder by scope.actionStateFlowMutator(
+    initialState = State(
         queryState = QueryState(
             currentQuery = ArchiveQuery(kind = route.routeParams.kind),
         )

@@ -16,45 +16,10 @@
 
 package com.tunjid.me
 
-import android.app.Activity
 import android.app.Application
-import android.os.Bundle
-import com.tunjid.mutator.mutationOf 
 
 class App : Application() {
 
     val meApp by lazy { createMeApp(this) }
 
-    override fun onCreate() {
-        super.onCreate()
-
-        val lifecycleActions = meApp.lifecycleStateHolder.accept
-
-        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
-            private fun updateStatus(isInForeground: Boolean) =
-                lifecycleActions(mutationOf {
-                    copy(isInForeground = isInForeground)
-                })
-
-            override fun onActivityCreated(p0: Activity, bundle: Bundle?) =
-                updateStatus(isInForeground = true)
-
-            override fun onActivityStarted(p0: Activity) =
-                updateStatus(isInForeground = true)
-
-            override fun onActivityResumed(p0: Activity) =
-                updateStatus(isInForeground = true)
-
-            override fun onActivityPaused(p0: Activity) =
-                updateStatus(isInForeground = false)
-
-            override fun onActivityStopped(p0: Activity) =
-                updateStatus(isInForeground = false)
-
-            override fun onActivitySaveInstanceState(p0: Activity, bundle: Bundle) = Unit
-
-            override fun onActivityDestroyed(p0: Activity) =
-                updateStatus(isInForeground = false)
-        })
-    }
 }

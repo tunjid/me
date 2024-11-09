@@ -24,6 +24,7 @@ import com.tunjid.me.archiveedit.di.ArchiveEditScreenHolderComponent
 import com.tunjid.me.archiveedit.di.create
 import com.tunjid.me.common.di.AppRouteComponent
 import com.tunjid.me.common.di.AppScreenStateHolderComponent
+import com.tunjid.me.common.di.MeApp
 import com.tunjid.me.common.di.allRouteMatchers
 import com.tunjid.me.common.di.create
 import com.tunjid.me.core.utilities.ActualUriConverter
@@ -32,10 +33,12 @@ import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.data.di.create
 import com.tunjid.me.data.local.DatabaseDriverFactory
 import com.tunjid.me.data.network.NetworkMonitor
-import com.tunjid.me.common.di.MeApp
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesNavigationComponent
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesScreenHolderComponent
 import com.tunjid.me.feature.archivefiles.di.create
+import com.tunjid.me.feature.archivefilesparent.di.ArchiveFilesParentNavigationComponent
+import com.tunjid.me.feature.archivefilesparent.di.ArchiveFilesParentScreenHolderComponent
+import com.tunjid.me.feature.archivefilesparent.di.create
 import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryNavigationComponent
 import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryScreenHolderComponent
 import com.tunjid.me.feature.archivegallery.di.create
@@ -73,6 +76,7 @@ fun createMeApp(): MeApp {
         archiveDetailNavigationComponent = ArchiveDetailNavigationComponent::class.create(),
         archiveEditNavigationComponent = ArchiveEditNavigationComponent::class.create(),
         archiveGalleryNavigationComponent = ArchiveGalleryNavigationComponent::class.create(),
+        archiveFilesParentNavigationComponent = ArchiveFilesParentNavigationComponent::class.create(),
         archiveFilesNavigationComponent = ArchiveFilesNavigationComponent::class.create(),
         profileNavigationComponent = ProfileNavigationComponent::class.create(),
         settingsNavigationComponent = SettingsNavigationComponent::class.create(),
@@ -98,12 +102,12 @@ fun createMeApp(): MeApp {
             savedStatePath = savedStatePath(),
             permissionsProvider = PlatformPermissionsProvider(),
             routeMatchers = appRouteComponent.allRouteMatchers,
-            routeConfigurationMap = appRouteComponent.routeConfigurationMap,
             byteSerializer = appRouteComponent.byteSerializer,
         )
     )
 
     val appScreenStateHolderComponent = AppScreenStateHolderComponent::class.create(
+        scaffoldComponent = injectedScaffoldComponent,
         syncComponent = InjectedSyncComponent::class.create(
             module = SyncModule(
                 appScope = appScope,
@@ -125,6 +129,10 @@ fun createMeApp(): MeApp {
             dataComponent = injectedDataComponent,
         ),
         archiveGalleryComponent = ArchiveGalleryScreenHolderComponent::class.create(
+            scaffoldComponent = injectedScaffoldComponent,
+            dataComponent = injectedDataComponent,
+        ),
+        archiveFilesParentComponent = ArchiveFilesParentScreenHolderComponent::class.create(
             scaffoldComponent = injectedScaffoldComponent,
             dataComponent = injectedDataComponent,
         ),

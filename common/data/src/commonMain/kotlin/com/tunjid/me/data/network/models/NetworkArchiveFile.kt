@@ -22,7 +22,6 @@ import com.tunjid.me.common.data.UserEntity
 import com.tunjid.me.core.model.ArchiveFileId
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.utilities.LocalDateTimeSerializer
 import kotlinx.datetime.Instant

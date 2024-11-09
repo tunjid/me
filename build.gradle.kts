@@ -1,5 +1,3 @@
-import org.gradle.accessors.dm.LibrariesForLibs
-
 /*
  * Copyright 2021 Google LLC
  *

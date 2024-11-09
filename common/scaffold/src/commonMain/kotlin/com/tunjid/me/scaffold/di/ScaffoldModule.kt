@@ -16,7 +16,7 @@
 
 package com.tunjid.me.scaffold.di
 
-import androidx.compose.runtime.Composable
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
@@ -24,28 +24,20 @@ import com.tunjid.me.core.utilities.fromBytes
 import com.tunjid.me.scaffold.globalui.ActualGlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.lifecycle.ActualLifecycleStateHolder
-import com.tunjid.me.scaffold.lifecycle.Lifecycle
-import com.tunjid.me.scaffold.lifecycle.LifecycleStateHolder
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.navigation.PersistedNavigationStateHolder
-import com.tunjid.me.scaffold.navigation.RouteNotFound
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.me.scaffold.savedstate.DataStoreSavedStateRepository
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.Mutation
-import com.tunjid.scaffold.adaptive.Adaptive
-import com.tunjid.scaffold.adaptive.AdaptiveRouteConfiguration
 import com.tunjid.treenav.MultiStackNav
-import com.tunjid.treenav.strings.PathPattern
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
 import com.tunjid.treenav.strings.RouteParser
-import com.tunjid.treenav.strings.RouteTrie
 import com.tunjid.treenav.strings.routeParserFrom
 import com.tunjid.treenav.strings.urlRouteMatcher
 import kotlinx.coroutines.CoroutineScope
@@ -55,27 +47,19 @@ import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 import okio.Path
 
-interface ScreenStateHolderCreator : (CoroutineScope, ByteArray?, Route) -> Any
+interface ScreenStateHolderCreator : (CoroutineScope, Route) -> ViewModel
 
 typealias SavedStateCache = (Route) -> ByteArray?
 
-fun ((CoroutineScope, ByteArray?, Route) -> Any).downcast(): ScreenStateHolderCreator =
+fun ((CoroutineScope, Route) -> ViewModel).downcast(): ScreenStateHolderCreator =
     object : ScreenStateHolderCreator {
-        override fun invoke(scope: CoroutineScope, savedState: ByteArray?, route: Route): Any =
+        override fun invoke(scope: CoroutineScope, route: Route): ViewModel =
             this@downcast(
                 scope,
-                savedState,
                 route,
             )
     }
 
-interface AdaptiveRouter {
-    fun destination(route: Route): @Composable () -> Unit
-
-    fun secondaryRouteFor(route: Route): Route?
-
-    fun transitionsFor(state: Adaptive.ContainerState): Adaptive.Transitions?
-}
 
 fun <T : Route> routeAndMatcher(
     routePattern: String,
@@ -98,7 +82,6 @@ class ScaffoldModule(
     val appScope: CoroutineScope,
     val savedStatePath: Path,
     val routeMatchers: List<RouteMatcher>,
-    val routeConfigurationMap: Map<String, AdaptiveRouteConfiguration>,
     val permissionsProvider: PermissionsProvider,
     val byteSerializer: ByteSerializer,
 )
@@ -135,29 +118,6 @@ abstract class InjectedScaffoldComponent(
     @Provides
     fun routeParser(): RouteParser =
         routeParserFrom(*(module.routeMatchers).toTypedArray())
-
-    @SingletonScope
-    @Provides
-    fun router(): AdaptiveRouter {
-        val configurationTrie = RouteTrie<AdaptiveRouteConfiguration>().apply {
-            module.routeConfigurationMap
-                .mapKeys { (template) -> PathPattern(template) }
-                .forEach(::set)
-        }
-
-        return object : AdaptiveRouter {
-            override fun secondaryRouteFor(route: Route): Route? =
-                configurationTrie[route]?.secondaryRoute(route)
-
-            override fun transitionsFor(state: Adaptive.ContainerState): Adaptive.Transitions? =
-                state.currentRoute?.let(configurationTrie::get)?.transitionsFor(state)
-
-
-            override fun destination(route: Route): @Composable () -> Unit = {
-                configurationTrie[route]?.Render(route) ?: RouteNotFound()
-            }
-        }
-    }
 
     @SingletonScope
     @Provides
@@ -198,21 +158,11 @@ abstract class InjectedScaffoldComponent(
         globalUiStateHolder: GlobalUiStateHolder
     ): (Mutation<UiState>) -> Unit = globalUiStateHolder.accept
 
-    @SingletonScope
-    @Provides
-    fun lifecycleStateStream(
-        lifecycleStateHolder: LifecycleStateHolder
-    ): StateFlow<Lifecycle> = lifecycleStateHolder.state
-
     val PersistedNavigationStateHolder.bind: NavigationStateHolder
         @SingletonScope
         @Provides get() = this
 
     val ActualGlobalUiStateHolder.bind: GlobalUiStateHolder
-        @SingletonScope
-        @Provides get() = this
-
-    val ActualLifecycleStateHolder.bind: LifecycleStateHolder
         @SingletonScope
         @Provides get() = this
 

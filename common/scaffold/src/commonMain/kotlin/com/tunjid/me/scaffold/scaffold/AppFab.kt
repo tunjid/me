@@ -1,19 +1,3 @@
-/*
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.tunjid.me.scaffold.scaffold
 
 import androidx.compose.animation.AnimatedContent
@@ -45,12 +29,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.scaffold.countIf
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.bottomNavSize
 import com.tunjid.me.scaffold.globalui.keyboardSize
-import com.tunjid.me.scaffold.globalui.slices.fabState
-import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
+import com.tunjid.me.scaffold.globalui.slices.FabState
 
 /**
  * Common motionally intelligent Floating Action button shared amongst nav routes in the app
@@ -58,14 +39,9 @@ import com.tunjid.me.scaffold.lifecycle.mappedCollectAsStateWithLifecycle
  */
 @Composable
 internal fun BoxScope.AppFab(
-    globalUiStateHolder: GlobalUiStateHolder,
+    state: FabState,
+    onClicked: () -> Unit,
 ) {
-    val state by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
-        mapper = UiState::fabState
-    )
-    val clicks by globalUiStateHolder.state.mappedCollectAsStateWithLifecycle(
-        mapper = UiState::fabClickListener
-    )
     val enabled = state.enabled
     val windowSizeClass = state.windowSizeClass
     val position by animateDpAsState(
@@ -89,7 +65,7 @@ internal fun BoxScope.AppFab(
             .offset(x = (-16).dp, y = position)
             .wrapContentHeight(),
         enabled = enabled,
-        onClick = { if (enabled) clicks(Unit) },
+        onClick = { if (enabled) onClicked() },
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.tertiary
         ),

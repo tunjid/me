@@ -9,8 +9,8 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
-* Configure base Kotlin options for JVM (non-Android)
-*/
+ * Configure base Kotlin options for JVM (non-Android)
+ */
 internal fun org.gradle.api.Project.configureKotlinJvm() {
     extensions.configure<JavaPluginExtension> {
         sourceCompatibility = JavaVersion.VERSION_11

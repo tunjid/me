@@ -18,30 +18,54 @@ package com.tunjid.me.common.di
 
 import com.tunjid.me.archivedetail.di.ArchiveDetailScreenHolderComponent
 import com.tunjid.me.archiveedit.di.ArchiveEditScreenHolderComponent
-import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryScreenHolderComponent
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesScreenHolderComponent
+import com.tunjid.me.feature.archivefilesparent.di.ArchiveFilesParentScreenHolderComponent
+import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryScreenHolderComponent
 import com.tunjid.me.feature.archivelist.di.ArchiveListScreenHolderComponent
 import com.tunjid.me.profile.di.ProfileScreenHolderComponent
-import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
+import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
+import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
+import com.tunjid.me.scaffold.navigation.NavigationStateHolder
+import com.tunjid.me.scaffold.scaffold.MeAppState
 import com.tunjid.me.settings.di.SettingsScreenHolderComponent
 import com.tunjid.me.signin.di.SignInScreenHolderComponent
 import com.tunjid.me.sync.di.InjectedSyncComponent
+import com.tunjid.me.sync.di.Sync
+import com.tunjid.treenav.compose.PaneStrategy
+import com.tunjid.treenav.compose.threepane.ThreePane
+import com.tunjid.treenav.strings.Route
 import me.tatarka.inject.annotations.Component
+import me.tatarka.inject.annotations.Provides
 
 @Component
 abstract class AppScreenStateHolderComponent(
+    @Component val scaffoldComponent: InjectedScaffoldComponent,
     @Component val syncComponent: InjectedSyncComponent,
     @Component val archiveListComponent: ArchiveListScreenHolderComponent,
     @Component val archiveDetailComponent: ArchiveDetailScreenHolderComponent,
     @Component val archiveEditComponent: ArchiveEditScreenHolderComponent,
     @Component val archiveGalleryComponent: ArchiveGalleryScreenHolderComponent,
+    @Component val archiveFilesParentComponent: ArchiveFilesParentScreenHolderComponent,
     @Component val archiveFilesComponent: ArchiveFilesScreenHolderComponent,
     @Component val profileComponent: ProfileScreenHolderComponent,
     @Component val settingsComponent: SettingsScreenHolderComponent,
     @Component val signInComponent: SignInScreenHolderComponent,
 ) {
 
-    abstract val allScreenHolders: Map<String, ScreenStateHolderCreator>
+    abstract val routeConfigurationMap: Map<String, PaneStrategy<ThreePane, Route>>
+
+
+    @Provides
+    fun appState(
+        navigationStateHolder: NavigationStateHolder,
+        globalUiStateHolder: GlobalUiStateHolder,
+        sync: Sync,
+    ): MeAppState = MeAppState(
+        routeConfigurationMap = routeConfigurationMap,
+        navigationStateHolder = navigationStateHolder,
+        globalUiStateHolder = globalUiStateHolder,
+        sync = sync,
+    )
 
     abstract val app: PersistedMeApp
 }

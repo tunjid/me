@@ -31,26 +31,36 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.tunjid.composables.scrollbars.scrollable.staggeredgrid.rememberScrollbarThumbMover
+import com.tunjid.composables.scrollbars.scrollable.rememberScrollbarThumbMover
 import com.tunjid.composables.scrollbars.scrollable.staggeredgrid.scrollbarState
 import com.tunjid.composables.stickyheader.staggeredgrid.StickyHeaderStaggeredGrid
 import com.tunjid.me.core.model.ArchiveQuery
 import com.tunjid.me.core.ui.scrollbar.FastScrollbar
-import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.tiler.compose.PivotedTilingEffect
+import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.coroutines.flow.*
 import kotlin.math.abs
@@ -63,17 +73,12 @@ fun ArchiveListRoute(
 
 @Composable
 internal fun ArchiveListScreen(
+    movableSharedElementScope: MovableSharedElementScope,
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val updatedItems by rememberUpdatedState(state.items)
-
-    GlobalUi(
-        state = state,
-        onAction = actions
-    )
-
     val gridState = state.listState ?: LazyStaggeredGridState()
     val scope = rememberCoroutineScope()
     val visibleItemsFlow = remember(state.isLoading) {
@@ -89,22 +94,13 @@ internal fun ArchiveListScreen(
     }
 
     val cardWidth = 320.dp
-    val stickyHeaderItem by produceState<ArchiveItem.Header?>(
-        initialValue = null,
-        key1 = state.isLoading
-    ) {
-        visibleItemsFlow
-            .map { itemInfoList -> itemInfoList.firstOrNull()?.index }
-            .distinctUntilChanged()
-            .collect { firstIndex ->
-                val item = firstIndex?.let(updatedItems::getOrNull)
-                value = item?.stickyHeader
-            }
-    }
-
     Column(
         modifier = modifier,
     ) {
+        TopAppBar(
+            state = state,
+            actions = actions,
+        )
         ArchiveFilters(
             queryState = state.queryState,
             onChanged = actions
@@ -113,18 +109,21 @@ internal fun ArchiveListScreen(
         StickyHeaderStaggeredGrid(
             modifier = Modifier,
             state = gridState,
-            headerMatcher = { it.key.isHeaderKey },
-            stickyHeader = {
-                stickyHeaderItem?.let { item ->
-                    StickyHeader(
-                        modifier = Modifier.fillMaxWidth(),
-                        item = item
-                    )
-                }
+            isStickyHeaderItem = { it.key.isHeaderKey },
+            stickyHeader = { index, _, _ ->
+                updatedItems.getOrNull(index)
+                    ?.stickyHeader
+                    ?.let { item ->
+                        StickyHeader(
+                            modifier = Modifier.fillMaxWidth(),
+                            item = item
+                        )
+                    }
             }
         ) {
             Box {
                 ArchiveList(
+                    movableSharedElementScope = movableSharedElementScope,
                     gridState = gridState,
                     cardWidth = cardWidth,
                     items = state.items,
@@ -147,7 +146,7 @@ internal fun ArchiveListScreen(
                     state = scrollbarState,
                     scrollInProgress = gridState.isScrollInProgress,
                     orientation = Orientation.Vertical,
-                    onThumbMoved = gridState.rememberScrollbarThumbMover(
+                    onThumbMoved = rememberScrollbarThumbMover(
                         itemsAvailable = state.queryState.count.toInt(),
                         scroll = scroll@{ index ->
                             actions(
@@ -198,7 +197,55 @@ internal fun ArchiveListScreen(
 }
 
 @Composable
+private fun TopAppBar(
+    state: State,
+    actions: (Action) -> Unit
+) {
+    TopAppBar(
+        modifier = Modifier
+            .windowInsetsPadding(WindowInsets.statusBars),
+        title = {
+            Text(
+                text = state.queryState.currentQuery.kind.name,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+            )
+        },
+        actions = {
+            IconButton(
+                onClick = {
+                    actions(Action.Fetch.QueryChange.ToggleOrder)
+                },
+                content = {
+                    Icon(
+                        imageVector =
+                        if (state.queryState.currentQuery.desc) Icons.Default.KeyboardArrowUp
+                        else Icons.Default.KeyboardArrowDown,
+                        contentDescription =
+                        if (state.queryState.currentQuery.desc) "Ascending"
+                        else "Descending",
+                    )
+                }
+            )
+            if (!state.isSignedIn) IconButton(
+                onClick = {
+                    actions(Action.Navigate.SignIn)
+                },
+                content = {
+                    Icon(
+                        imageVector = Icons.Default.AccountBox,
+                        contentDescription = "Sign In",
+                    )
+                }
+            )
+        },
+    )
+}
+
+@Composable
 private fun ArchiveList(
+    movableSharedElementScope: MovableSharedElementScope,
     gridState: LazyStaggeredGridState,
     items: List<ArchiveItem>,
     currentQuery: ArchiveQuery,
@@ -237,6 +284,7 @@ private fun ArchiveList(
                         modifier = Modifier
                             .animateContentSize(animationSpec = ItemSizeSpec)
                             .animateItem(),
+                        movableSharedElementScope = movableSharedElementScope,
                         item = item,
                         query = currentQuery,
                         actions = actions,
@@ -249,6 +297,7 @@ private fun ArchiveList(
 
 @Composable
 private fun GridCell(
+    movableSharedElementScope: MovableSharedElementScope,
     modifier: Modifier = Modifier,
     item: ArchiveItem,
     query: ArchiveQuery,
@@ -266,6 +315,7 @@ private fun GridCell(
         )
 
         is ArchiveItem.Card.Loaded -> ArchiveCard(
+            movableSharedElementScope = movableSharedElementScope,
             modifier = modifier,
             query = query,
             archive = item.archive,
@@ -273,6 +323,7 @@ private fun GridCell(
         )
 
         is ArchiveItem.Card.PlaceHolder -> ArchiveCard(
+            movableSharedElementScope = movableSharedElementScope,
             modifier = modifier,
             query = query,
             archive = item.archive,

@@ -16,9 +16,9 @@
 
 package com.tunjid.me.scaffold.globalui.slices
 
+import androidx.window.core.layout.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.InsetDescriptor
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.bottomNavVisible
 
 internal data class BottomNavPositionalState(

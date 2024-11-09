@@ -17,7 +17,6 @@
 package com.tunjid.me.core.utilities
 
 import kotlinx.datetime.Instant
-import kotlinx.datetime.toInstant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -29,5 +28,5 @@ object LocalDateTimeSerializer : KSerializer<Instant> {
     override fun serialize(encoder: Encoder, value: Instant) =
         encoder.encodeString(value.toString())
 
-    override fun deserialize(decoder: Decoder): Instant = decoder.decodeString().toInstant()
+    override fun deserialize(decoder: Decoder): Instant = Instant.parse(decoder.decodeString())
 }

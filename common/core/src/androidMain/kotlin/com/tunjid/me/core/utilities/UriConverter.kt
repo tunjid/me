@@ -19,11 +19,15 @@ package com.tunjid.me.core.utilities
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.OpenableColumns
-import io.ktor.utils.io.core.*
-import io.ktor.utils.io.errors.*
-import io.ktor.utils.io.streams.*
+import io.ktor.utils.io.core.Input
+import io.ktor.utils.io.core.use
+import io.ktor.utils.io.errors.IOException
+import io.ktor.utils.io.streams.asInput
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import kotlin.Int
+import kotlin.Long
+import kotlin.String
 import android.net.Uri as AndroidUri
 
 
@@ -58,8 +62,6 @@ actual class ActualUriConverter(
     override suspend fun mimeType(uri: LocalUri): String =
         when (uri) {
             is ContentUri -> uri.mimetype
-                ?: context.contentResolver.getType(AndroidUri.parse(uri.path))
-                ?: throw NullPointerException("Unknown mime type for $uri")
 
             else -> throw IllegalArgumentException("Unknown URI type")
         }

@@ -19,12 +19,12 @@ package com.tunjid.me.scaffold.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.materialPath
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
@@ -147,7 +147,7 @@ val com.tunjid.me.core.model.ArchiveKind.icon: ImageVector
 
 private val iconMap = mutableMapOf<com.tunjid.me.core.model.ArchiveKind, ImageVector>()
 
-public val Icons.Filled.Sort: ImageVector
+val Icons.Filled.Sort: ImageVector
     get() {
         if (_sort != null) {
             return _sort!!
@@ -179,7 +179,7 @@ public val Icons.Filled.Sort: ImageVector
 
 private var _sort: ImageVector? = null
 
-public val Icons.Filled.FilterList: ImageVector
+val Icons.Filled.FilterList: ImageVector
     get() {
         if (_filterList != null) {
             return _filterList!!
@@ -212,7 +212,7 @@ public val Icons.Filled.FilterList: ImageVector
 private var _filterList: ImageVector? = null
 
 
-public val Icons.Filled.ExpandAll: ImageVector
+val Icons.Filled.ExpandAll: ImageVector
     get() {
         if (_expandAll != null) {
             return _expandAll!!

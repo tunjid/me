@@ -21,15 +21,22 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.common.data.UserEntityQueries
-import com.tunjid.me.core.model.*
+import com.tunjid.me.core.model.Result
+import com.tunjid.me.core.model.SessionRequest
+import com.tunjid.me.core.model.User
+import com.tunjid.me.core.model.UserId
+import com.tunjid.me.core.model.map
 import com.tunjid.me.data.local.models.toExternalModel
 import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.network.models.NetworkUser
-import com.tunjid.me.data.network.models.item
 import com.tunjid.me.data.network.models.toEntity
 import com.tunjid.me.data.network.models.toResult
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
 interface AuthRepository {
@@ -53,7 +60,7 @@ internal class SessionCookieAuthRepository(
             .mapToList(context = dispatcher)
             .distinctUntilChanged()
             .flatMapLatest { sessions ->
-                val session = sessions?.firstOrNull()
+                val session = sessions.firstOrNull()
                 val userId = session?.user_id
                 if (userId == null) flowOf(null)
                 else userEntityQueries.find(userId)

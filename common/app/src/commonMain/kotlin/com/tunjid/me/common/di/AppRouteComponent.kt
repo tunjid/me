@@ -18,18 +18,17 @@ package com.tunjid.me.common.di
 
 import com.tunjid.me.archivedetail.di.ArchiveDetailNavigationComponent
 import com.tunjid.me.archiveedit.di.ArchiveEditNavigationComponent
-import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.DelegatingByteSerializer
-import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryNavigationComponent
 import com.tunjid.me.feature.archivefiles.di.ArchiveFilesNavigationComponent
+import com.tunjid.me.feature.archivefilesparent.di.ArchiveFilesParentNavigationComponent
+import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryNavigationComponent
 import com.tunjid.me.feature.archivelist.di.ArchiveListNavigationComponent
 import com.tunjid.me.profile.di.ProfileNavigationComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.settings.di.SettingsNavigationComponent
 import com.tunjid.me.signin.di.SignInNavigationComponent
-import com.tunjid.scaffold.adaptive.AdaptiveRouteConfiguration
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -37,21 +36,20 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
-@SingletonScope
+//@SingletonScope
 @Component
 abstract class AppRouteComponent(
     @Component val archiveListNavigationComponent: ArchiveListNavigationComponent,
     @Component val archiveDetailNavigationComponent: ArchiveDetailNavigationComponent,
     @Component val archiveEditNavigationComponent: ArchiveEditNavigationComponent,
     @Component val archiveGalleryNavigationComponent: ArchiveGalleryNavigationComponent,
+    @Component val archiveFilesParentNavigationComponent: ArchiveFilesParentNavigationComponent,
     @Component val archiveFilesNavigationComponent: ArchiveFilesNavigationComponent,
     @Component val profileNavigationComponent: ProfileNavigationComponent,
     @Component val settingsNavigationComponent: SettingsNavigationComponent,
     @Component val signInNavigationComponent: SignInNavigationComponent,
 ) {
     internal abstract val routeMatcherMap: Map<String, RouteMatcher>
-
-    abstract val routeConfigurationMap: Map<String, AdaptiveRouteConfiguration>
 
     abstract val allScreenStatePolymorphic: Set<SavedStateType>
 

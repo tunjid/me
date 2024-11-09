@@ -9,7 +9,8 @@ are production tested, and should not be taken as anything more than its face va
 "Me" is a Kotlin Multiplatform playground for ideas that pop into my head around app architecture.
 These ideas typically center around state, and it's production; a repository of "what ifs?".
 
-It follows the modern android development [architecture guide](https://developer.android.com/topic/architecture), and
+It follows the modern android
+development [architecture guide](https://developer.android.com/topic/architecture), and
 attempts to extend it to envision what building apps will look like in the near future,
 with novel/experimental implementations of fundamental app architecture units including:
 
@@ -33,7 +34,8 @@ found [here](https://github.com/tunjid/tunji-web-deux).
 
 Some ideas explored include:
 
-* [Mutators](https://github.com/tunjid/Mutator) as abstract data types for the production and mutationOf of state
+* [Mutators](https://github.com/tunjid/Mutator) as abstract data types for the production and
+  mutationOf of state
 * Reactive app architecture as a driver of app state
 * Android insets and IME (keyboard) behavior as state
 * Android permissions as state
@@ -49,7 +51,8 @@ Some ideas explored include:
 I try to keep the code at a near production quality, but this often takes a back seat to
 convenience and whim.
 
-Again, the work presented here are the experiments of an immutable state and functional reactive programming zealot.
+Again, the work presented here are the experiments of an immutable state and functional reactive
+programming zealot.
 It's far from objective, caveat emptor.
 
 ## Architecture
@@ -58,7 +61,8 @@ It's far from objective, caveat emptor.
 
 #### Offline-first
 
-The app is a subscriber in a pub-sub liaison with the server. There is no pull to refresh, instead the app pulls diffs
+The app is a subscriber in a pub-sub liaison with the server. There is no pull to refresh, instead
+the app pulls diffs
 of `ChangeListItem` when the server notifies the app of changes made.
 
 The following rules are applied to the data layer:
@@ -73,15 +77,20 @@ The following rules are applied to the data layer:
 
 Pub sub in the app is backed by a change list invalidation based system. Its premise is:
 
-* Each model table on the server will have a sibling table that has a row that tracks a unique id that identifies a CRUD
+* Each model table on the server will have a sibling table that has a row that tracks a unique id
+  that identifies a CRUD
   update (change_list_id). This unique id must have natural ordering.
-* CRUD updates to any model will cause an update for the change_list_id (akin to a new commit in git).
-* The client will then hit an endpoint asking for changes since the last change_list_id it has, or its local HEAD. A
+* CRUD updates to any model will cause an update for the change_list_id (akin to a new commit in
+  git).
+* The client will then hit an endpoint asking for changes since the last change_list_id it has, or
+  its local HEAD. A
   changelist of model ids that have changed will then be sent (akin to a git fetch)
-* The clients will then chew on the change list incrementally, updating its local HEAD as each update is consumed (akin
+* The clients will then chew on the change list incrementally, updating its local HEAD as each
+  update is consumed (akin
   to applying the pulled commits).
 
-Real time updates are implemented with websockets via [socket.io](https://socket.io/). I intend to move the android
+Real time updates are implemented with websockets via [socket.io](https://socket.io/). I intend to
+move the android
 client to FCM for efficiency reasons in the future.
 
 #### Models
@@ -90,30 +99,39 @@ The app offers 3 main data types:
 
 * `Archive`: Content I've produced over the years: Articles, projects and talks.
 * `User`: The creator of the content shown. This is really just me.
-* `SavedState`: App saved state. This is navigation state, and screen sate of each navigation destination.
+* `SavedState`: App saved state. This is navigation state, and screen sate of each navigation
+  destination.
 
 ### Domain Layer
 
-The domain layer offers abstractions that consolidate common patterns and business logic across each future and its screen. There are two main types here:
+The domain layer offers abstractions that consolidate common patterns and business logic across each
+future and its screen. There are two main types here:
 
-* `NavStateHolder`: Manages the app navigation state and interacts with the `SavedStateRepository`. It provides Navigation as state.
-* `GlobalUiStateHolder`: Manages configuration for the app and adapts it over different form factors and screen sizes. It provides app level UI as state.
+* `NavStateHolder`: Manages the app navigation state and interacts with the `SavedStateRepository`.
+  It provides Navigation as state.
+* `GlobalUiStateHolder`: Manages configuration for the app and adapts it over different form factors
+  and screen sizes. It provides app level UI as state.
 
 ### UI Layer
 
 #### State production
 
-All screen level state holders are implemented with [unidirectional data flow as a functional declaration](https://www.tunjid.com/articles/unidirectional-data-flow-as-a-functional-declaration-6230b74f5d785a7ebc8c2a43).
+All screen level state holders are implemented
+with [unidirectional data flow as a functional declaration](https://www.tunjid.com/articles/unidirectional-data-flow-as-a-functional-declaration-6230b74f5d785a7ebc8c2a43).
 
 ### X as state
 
 #### Navigation as state
 
-This app treats navigation as state, and as such, it is completely managed by business logic. The Navigation state
-is persisted in the data layer with the `SavedStateRepository` and exposed to the app via the `NavStateHolder`.
+This app treats navigation as state, and as such, it is completely managed by business logic. The
+Navigation state
+is persisted in the data layer with the `SavedStateRepository` and exposed to the app via
+the `NavStateHolder`.
 
 Each destination in the app is represented by an `AppRoute` that exposes a single `@Composable`
-`Render()` function. The backing data structures for navigation are the tree like [`StackNav`](https://github.com/tunjid/treeNav/blob/develop/treenav/src/commonMain/kotlin/com/tunjid/treenav/StackNav.kt) and
+`Render()` function. The backing data structures for navigation are the tree
+like [`StackNav`](https://github.com/tunjid/treeNav/blob/develop/treenav/src/commonMain/kotlin/com/tunjid/treenav/StackNav.kt)
+and
 [`MultiStackNav`](https://github.com/tunjid/treeNav/blob/develop/treenav/src/commonMain/kotlin/com/tunjid/treenav/MultiStackNav.kt)
 immutable classes. The root of the app is a `MultiStackNav` and navigation is
 controlled by a `NavStateHolder` defined as:
@@ -163,7 +181,8 @@ As the user scrolls, `currentPage` changes and new pages are observed to keep th
 #### State restoration and process death
 
 All types that need to be restored after process death implement the `ByteSerializable` interface.
-This allows them to de serialized compactly into a `ByteArray` which can then be saved to disk with a
+This allows them to de serialized compactly into a `ByteArray` which can then be saved to disk with
+a
 [`DataStore`](https://developer.android.com/topic/libraries/architecture/datastore?gclid=CjwKCAjwtp2bBhAGEiwAOZZTuOs3XNmaNxY65HGo2wnRPqvKt1c18A1dhe4sETq_A3Iyx8DDv6uA1xoCv9kQAvD_BwE&gclsrc=aw.ds)
 instance. The bytes are read or written with a type called the `ByteSerializer`.
 
@@ -174,7 +193,8 @@ Things restored after process death currently include:
 
 #### Lifecycles and component scoping
 
-Screen state holders are scoped to the navigation state. When a route is removed from the navigation state, it's
+Screen state holders are scoped to the navigation state. When a route is removed from the navigation
+state, it's
 state holder has it's `CoroutineScope` cancelled:
 
 ```kotlin
@@ -192,7 +212,8 @@ appScope.launch {
         }
 ```
 
-Lifecycles aware state collection is done with a custom `collectAsStateWithLifecycle` backed by the following lifecycle
+Lifecycles aware state collection is done with a custom `collectAsStateWithLifecycle` backed by the
+following lifecycle
 definition:
 
 ```kotlin

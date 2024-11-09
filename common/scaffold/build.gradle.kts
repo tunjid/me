@@ -31,8 +31,17 @@ kotlin {
         named("commonMain") {
             dependencies {
                 api(project(":common:core"))
+                api(project(":common:sync"))
 
                 implementation(libs.androidx.datastore.core.okio)
+
+                implementation(libs.androidx.lifecycle.runtime.ktx)
+                implementation(libs.androidx.lifecycle.runtime.compose)
+                implementation(libs.androidx.lifecycle.viewmodel.ktx)
+                implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+                implementation(libs.androidx.window.core)
+                implementation(libs.androidx.window.window)
 
                 implementation(libs.jetbrains.compose.ui.tooling)
                 implementation(libs.jetbrains.compose.ui.util)
@@ -52,6 +61,8 @@ kotlin {
 
                 implementation(libs.squareup.okio)
 
+                implementation(libs.tunjid.composables)
+                implementation(libs.tunjid.treenav.compose.common)
                 implementation(libs.tunjid.treenav.core.common)
                 implementation(libs.tunjid.treenav.strings.common)
 
@@ -65,7 +76,6 @@ kotlin {
                 implementation(libs.androidx.core.ktx)
                 implementation(libs.androidx.appcompat)
                 implementation(libs.androidx.activity.compose)
-                implementation(libs.androidx.lifecycle.ktx)
             }
         }
         named("desktopMain") {

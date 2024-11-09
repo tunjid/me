@@ -16,38 +16,41 @@
 
 package com.tunjid.me.feature.archivefiles.di
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.feature.archivefiles.ActualArchiveFilesStateHolder
-import com.tunjid.me.feature.archivefiles.ArchiveFilesParentRoute
-import com.tunjid.me.feature.archivefiles.ArchiveFilesParentScreen
 import com.tunjid.me.feature.archivefiles.ArchiveFilesRoute
 import com.tunjid.me.feature.archivefiles.ArchiveFilesScreen
-import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolder
 import com.tunjid.me.feature.archivefiles.ArchiveFilesStateHolderCreator
 import com.tunjid.me.feature.archivefiles.FileType
 import com.tunjid.me.feature.archivefiles.State
-import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
-import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
-import com.tunjid.treenav.strings.Route
-import com.tunjid.treenav.strings.RouteParams
+import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
+import com.tunjid.treenav.compose.threepane.configurations.movableSharedElementScope
+import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
+import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
 
-private const val FilesParentRoutePattern = "/archives/{kind}/{id}/files"
-private const val FilesRoutePattern = "/archives/{kind}/{id}/files/{type}"
+private const val RoutePattern = "/archives/{kind}/{id}/files/{type}"
 
 internal val RouteParams.archiveId get() = ArchiveId(pathArgs["id"] ?: "")
 internal val RouteParams.kind
@@ -83,45 +86,11 @@ abstract class ArchiveFilesNavigationComponent {
 
     @IntoMap
     @Provides
-    fun archiveFilesParentRouteParser(): Pair<String, RouteMatcher> =
-        routeAndMatcher(
-            routePattern = FilesParentRoutePattern,
-            routeMapper = ::ArchiveFilesParentRoute
-        )
-
-    @IntoMap
-    @Provides
     fun archiveFilesRouteParser(): Pair<String, RouteMatcher> =
         routeAndMatcher(
-            routePattern = FilesRoutePattern,
+            routePattern = RoutePattern,
             routeMapper = ::ArchiveFilesRoute
         )
-
-    @IntoMap
-    @Provides
-    fun filesParentRouteAdaptiveConfiguration() = FilesParentRoutePattern to adaptiveRouteConfiguration(
-        render = { route ->
-            ArchiveFilesParentScreen(
-                modifier = Modifier.backPreviewBackgroundModifier(),
-                children = route.children.filterIsInstance<Route>(),
-            )
-        }
-    )
-
-    @IntoMap
-    @Provides
-    fun filesRouteAdaptiveConfiguration() = FilesRoutePattern to adaptiveRouteConfiguration(
-        render = { route ->
-            val stateHolder = rememberRetainedStateHolder<ArchiveFilesStateHolder>(
-                route = route
-            )
-            ArchiveFilesScreen(
-                state = stateHolder.state.collectAsStateWithLifecycle().value,
-                actions = stateHolder.accept,
-                modifier = Modifier.backPreviewBackgroundModifier(),
-            )
-        }
-    )
 }
 
 @Component
@@ -130,15 +99,34 @@ abstract class ArchiveFilesScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualArchiveFilesStateHolder.bind: ArchiveFilesStateHolder
-        @Provides get() = this
-
     @IntoMap
     @Provides
-    fun archiveFilesStateHolderCreator(
-        assist: ArchiveFilesStateHolderCreator
-    ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = FilesRoutePattern,
-        second = assist
+    fun filesRouteAdaptiveConfiguration(
+        creator: ArchiveFilesStateHolderCreator
+    ) = RoutePattern to threePaneListDetailStrategy(
+        render = { route ->
+            val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
+            val viewModel = viewModel<ActualArchiveFilesStateHolder> {
+                creator.invoke(
+                    scope = lifecycleCoroutineScope,
+                    route = route,
+                )
+            }
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            ArchiveFilesScreen(
+                movableSharedElementScope = movableSharedElementScope(),
+                state = state,
+                actions = viewModel.accept,
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
+            )
+            ScreenUiState(
+                UiState(
+                    fabShows = false,
+                    fabExtended = true,
+                    navVisibility = NavVisibility.Visible,
+                    statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+                )
+            )
+        }
     )
 }

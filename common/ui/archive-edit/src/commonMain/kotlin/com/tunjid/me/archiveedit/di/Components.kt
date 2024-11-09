@@ -16,24 +16,40 @@
 
 package com.tunjid.me.archiveedit.di
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tunjid.me.archiveedit.Action
 import com.tunjid.me.archiveedit.ActualArchiveEditStateHolder
 import com.tunjid.me.archiveedit.ArchiveEditRoute
 import com.tunjid.me.archiveedit.ArchiveEditScreen
-import com.tunjid.me.archiveedit.ArchiveEditStateHolder
 import com.tunjid.me.archiveedit.ArchiveEditStateHolderCreator
 import com.tunjid.me.archiveedit.State
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.Message
 import com.tunjid.me.data.di.InjectedDataComponent
-import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
-import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
-import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.me.scaffold.globalui.InsetFlags
+import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
+import com.tunjid.treenav.compose.PaneScope
+import com.tunjid.treenav.compose.threepane.ThreePane
+import com.tunjid.treenav.compose.threepane.configurations.movableSharedElementScope
+import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
@@ -49,6 +65,7 @@ private const val CreateRoutePattern = "/archives/{kind}/create"
 
 internal val RouteParams.archiveId: ArchiveId?
     get() = pathArgs["id"]?.let(::ArchiveId)
+
 internal val RouteParams.kind: ArchiveKind
     get() = ArchiveKind.entries
         .firstOrNull { it.type == pathArgs["kind"] }
@@ -81,39 +98,6 @@ abstract class ArchiveEditNavigationComponent {
             routePattern = CreateRoutePattern,
             routeMapper = ::ArchiveEditRoute,
         )
-
-    @IntoMap
-    @Provides
-    fun editRouteAdaptiveConfiguration() = EditRoutePattern to adaptiveRouteConfiguration(
-        secondaryRoute = { route ->
-            route.children.first() as? Route
-        },
-        render = { route ->
-            val stateHolder = rememberRetainedStateHolder<ArchiveEditStateHolder>(
-                route = route
-            )
-            ArchiveEditScreen(
-                state = stateHolder.state.collectAsStateWithLifecycle().value,
-                actions = stateHolder.accept,
-                modifier = Modifier.backPreviewBackgroundModifier(),
-            )
-        }
-    )
-
-    @IntoMap
-    @Provides
-    fun createRouteAdaptiveConfiguration() = CreateRoutePattern to adaptiveRouteConfiguration(
-        render = { route ->
-            val stateHolder = rememberRetainedStateHolder<ArchiveEditStateHolder>(
-                route = route
-            )
-            ArchiveEditScreen(
-                state = stateHolder.state.collectAsStateWithLifecycle().value,
-                actions = stateHolder.accept,
-                modifier = Modifier.backPreviewBackgroundModifier(),
-            )
-        }
-    )
 }
 
 @Component
@@ -122,24 +106,101 @@ abstract class ArchiveEditScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualArchiveEditStateHolder.bind: ArchiveEditStateHolder
-        @Provides get() = this
-
     @IntoMap
     @Provides
-    fun archiveCreateStateHolderCreator(
-        assist: ArchiveEditStateHolderCreator
-    ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = CreateRoutePattern,
-        second = assist
+    fun editRouteAdaptiveConfiguration(
+        creator: ArchiveEditStateHolderCreator
+    ) = EditRoutePattern to threePaneListDetailStrategy(
+        paneMapping = { route ->
+            mapOf(
+                ThreePane.Primary to route,
+                ThreePane.Secondary to route.children.first() as? Route,
+            )
+        },
+        render = { route ->
+            val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
+            val viewModel = viewModel<ActualArchiveEditStateHolder> {
+                creator.invoke(
+                    scope = lifecycleCoroutineScope,
+                    route = route,
+                )
+            }
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            ArchiveEditScreen(
+                movableSharedElementScope = movableSharedElementScope(),
+                state = state,
+                actions = viewModel.accept,
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
+            )
+            GlobalUi(
+                state = state,
+                onAction = viewModel.accept,
+            )
+        }
     )
 
     @IntoMap
     @Provides
-    fun archiveEditStateHolderCreator(
-        assist: ArchiveEditStateHolderCreator
-    ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = EditRoutePattern,
-        second = assist
+    fun createRouteAdaptiveConfiguration(
+        creator: ArchiveEditStateHolderCreator
+    ) = CreateRoutePattern to threePaneListDetailStrategy(
+        paneMapping = { route ->
+            mapOf(
+                ThreePane.Primary to route,
+                ThreePane.Secondary to route.children.firstOrNull() as? Route,
+            )
+        },
+        render = { route ->
+            val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
+            val viewModel = viewModel<ActualArchiveEditStateHolder> {
+                creator.invoke(
+                    scope = lifecycleCoroutineScope,
+                    route = route,
+                )
+            }
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            ArchiveEditScreen(
+                movableSharedElementScope = movableSharedElementScope(),
+                state = state,
+                actions = viewModel.accept,
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
+            )
+            GlobalUi(
+                state = state,
+                onAction = viewModel.accept,
+            )
+        }
+    )
+}
+
+@Composable
+private fun PaneScope<ThreePane, *>.GlobalUi(
+    state: State,
+    onAction: (Action) -> Unit,
+) {
+    ScreenUiState(
+        UiState(
+            fabShows = true,
+            fabText = if (state.upsert.id == null) "Create" else "Save",
+            fabIcon = Icons.Default.Done,
+            fabExtended = true,
+            fabEnabled = !state.isSubmitting,
+            fabClickListener = rememberUpdatedState { _: Unit ->
+                onAction(
+                    Action.Load.Submit(
+                        kind = state.kind,
+                        upsert = state.upsert,
+                        headerPhoto = state.toUpload,
+                    )
+                )
+            }.value,
+            snackbarMessages = state.messages,
+            snackbarMessageConsumer = rememberUpdatedState { it: Message ->
+                onAction(Action.MessageConsumed(it))
+            }.value,
+            navVisibility = NavVisibility.GoneIfBottomNav,
+            insetFlags = InsetFlags.NO_BOTTOM,
+            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+        )
     )
 }

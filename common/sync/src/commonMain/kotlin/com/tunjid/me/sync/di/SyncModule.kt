@@ -20,9 +20,12 @@ import com.tunjid.me.common.sync.AppDatabase
 import com.tunjid.me.common.sync.ChangeListItemQueries
 import com.tunjid.me.core.sync.ChangeListKey
 import com.tunjid.me.core.sync.Syncable
+import com.tunjid.me.core.sync.changeListKey
 import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.data.local.databaseDispatcher
+import com.tunjid.me.data.network.ApiUrl
 import com.tunjid.me.data.network.NetworkMonitor
+import com.tunjid.me.data.network.modelEvents
 import com.tunjid.me.data.repository.ArchiveFileRepository
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.sync.ChangeListDao
@@ -31,6 +34,7 @@ import com.tunjid.me.sync.SqlChangeListDao
 import com.tunjid.me.sync.Synchronizer
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -84,4 +88,13 @@ abstract class InjectedSyncComponent(
         @Provides get() = this
 
     abstract val synchronizer: Synchronizer
+}
+
+suspend fun Sync.keepUpToDate() {
+    modelEvents(
+        url = "$ApiUrl/",
+        dispatcher = databaseDispatcher()
+    )
+        .map { it.model.changeListKey() }
+        .collect(::invoke)
 }

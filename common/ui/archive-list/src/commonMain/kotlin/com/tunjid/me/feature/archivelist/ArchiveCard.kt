@@ -16,6 +16,7 @@
 
 package com.tunjid.me.feature.archivelist
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +33,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
@@ -64,7 +65,7 @@ import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
-import com.tunjid.scaffold.adaptive.sharedElementOf
+import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import kotlinx.datetime.Clock.System
 
 @Composable
@@ -120,14 +121,16 @@ fun ProgressBar(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ArchiveCard(
+    movableSharedElementScope: MovableSharedElementScope,
     modifier: Modifier = Modifier,
     query: ArchiveQuery,
     archive: Archive,
     actions: (Action) -> Unit,
 ) {
-    val thumb = sharedElementOf<MediaArgs>(
+    val thumb = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
         key = thumbnailSharedElementKey(archive.thumbnail),
     ) { args, innerModifier ->
         AsyncRasterImage(
@@ -246,7 +249,7 @@ private fun ArchiveDate(
                 Icon(
                     modifier = Modifier
                         .scale(0.8f),
-                    imageVector = Icons.Filled.ExitToApp,
+                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                     contentDescription = "Date"
                 )
             }

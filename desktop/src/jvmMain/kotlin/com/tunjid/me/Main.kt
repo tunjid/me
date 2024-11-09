@@ -16,7 +16,6 @@
 
 package com.tunjid.me
 
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -25,20 +24,15 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import androidx.window.core.layout.WindowSizeClass
 import com.tunjid.me.common.di.MeApp
-import com.tunjid.me.common.ui.adaptiveContentState
 import com.tunjid.me.common.ui.theme.AppTheme
 import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
-import com.tunjid.me.feature.LocalScreenStateHolderCache
+import com.tunjid.me.scaffold.globalui.COMPACT
 import com.tunjid.me.scaffold.globalui.NavMode
-import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
-import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
-import com.tunjid.me.scaffold.scaffold.Scaffold
-import com.tunjid.mutator.mutationOf
+import com.tunjid.me.scaffold.scaffold.MeApp
 import kotlinx.coroutines.flow.distinctUntilChanged
-import java.awt.event.WindowEvent
-import java.awt.event.WindowFocusListener
 
 fun main() {
 
@@ -52,32 +46,13 @@ fun main() {
         ) {
             val density = LocalDensity.current.density
             AppTheme {
-                CompositionLocalProvider(
-                    LocalScreenStateHolderCache provides app.screenStateHolderCache,
-                    LocalLifecycleStateHolder provides app.lifecycleStateHolder,
-                ) {
-                    Scaffold(
-                        modifier = Modifier.rootDragDropModifier(
-                            density = density,
-                            window = window,
-                        ),
-                        adaptiveContentState = app.adaptiveContentState(),
-                        navStateHolder = app.navStateHolder,
-                        globalUiStateHolder = app.globalUiStateHolder,
-                    )
-                }
-            }
-
-            LaunchedEffect(true) {
-                window.addWindowFocusListener(object : WindowFocusListener {
-                    override fun windowGainedFocus(e: WindowEvent?) {
-                        app.lifecycleStateHolder.accept { copy(isInForeground = true) }
-                    }
-
-                    override fun windowLostFocus(e: WindowEvent?) {
-                        app.lifecycleStateHolder.accept { copy(isInForeground = false) }
-                    }
-                })
+                MeApp(
+                    modifier = Modifier.rootDragDropModifier(
+                        density = density,
+                        window = window,
+                    ),
+                    meAppState = app.appState,
+                )
             }
 
             val currentWidth = windowState.size.width
@@ -85,7 +60,7 @@ fun main() {
                 snapshotFlow(currentWidth::toWindowSizeClass)
                     .distinctUntilChanged()
                     .collect { windowSizeClass ->
-                        app.globalUiStateHolder.accept(mutationOf {
+                        app.appState.updateGlobalUi {
                             copy(
                                 windowSizeClass = windowSizeClass,
                                 navMode = when (windowSizeClass) {
@@ -93,7 +68,7 @@ fun main() {
                                     else -> NavMode.NavRail
                                 }
                             )
-                        })
+                        }
                     }
             }
         }

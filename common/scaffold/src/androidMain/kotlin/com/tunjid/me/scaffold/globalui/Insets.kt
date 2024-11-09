@@ -47,9 +47,8 @@ fun FragmentActivity.insetMutations(): Flow<Mutation<UiState>> {
                     WindowInsetsCompat.toWindowInsetsCompat(insets),
                     0
                 )
-                // Consume insets so other views will not see them.
             }
-            insets.consumeSystemWindowInsets()
+            insets
         }
         awaitClose { }
     }

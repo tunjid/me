@@ -31,12 +31,20 @@ fun org.gradle.api.Project.configureUiModule(
                 implementation(project(":common:scaffold"))
                 implementation(project(":common:ui:template"))
 
+                api(libs.findLibrary("androidx-lifecycle-runtime-ktx").get())
+                api(libs.findLibrary("androidx-lifecycle-runtime-compose").get())
+                api(libs.findLibrary("androidx-lifecycle-viewmodel-ktx").get())
+                api(libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())
+                api(libs.findLibrary("androidx-window-core").get())
+                api(libs.findLibrary("androidx-window-window").get())
+
                 implementation(libs.findLibrary("jetbrains-compose-runtime").get())
                 implementation(libs.findLibrary("jetbrains-compose-animation").get())
                 implementation(libs.findLibrary("jetbrains-compose-material3").get())
                 implementation(libs.findLibrary("jetbrains-compose-foundation-layout").get())
 
                 implementation(libs.findLibrary("kotlinx-coroutines-core").get())
+                api(libs.findLibrary("tunjid-treenav-compose-common").get())
                 api(libs.findLibrary("tunjid-treenav-core-common").get())
                 api(libs.findLibrary("tunjid-treenav-strings-common").get())
             }

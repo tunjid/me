@@ -1,95 +1,244 @@
 package com.tunjid.me.scaffold.scaffold
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.splineBasedDecay
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material.SwipeableState
-import androidx.compose.material.swipeable
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.tunjid.me.scaffold.adaptiveSpringSpec
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
+import com.tunjid.composables.splitlayout.SplitLayoutState
 import com.tunjid.me.scaffold.globalui.BackHandler
+import com.tunjid.me.scaffold.globalui.EXPANDED
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.globalui.progress
+import com.tunjid.me.scaffold.navigation.ExpandAll
+import kotlinx.coroutines.launch
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
-internal val LocalPaneAnchorState = staticCompositionLocalOf {
-    PaneAnchorState()
-}
-
-private val PaneSpring = adaptiveSpringSpec(
+private val PaneSpring = spring(
     visibilityThreshold = 0.1f
 )
 
 @Stable
-// TODO: Migrate to AnchoredDraggable when moving to Compose 1.6
-internal class PaneAnchorState {
+internal class PaneAnchorState(
+    private val density: Density
+) {
     var maxWidth by mutableIntStateOf(1000)
         internal set
     val width
         get() = max(
             a = 0,
-            b = swipeableState.offset.value.roundToInt()
+            b = anchoredDraggableState.offset.roundToInt()
         )
 
-    val targetPaneAnchor get() = swipeableState.targetValue
+    val targetPaneAnchor get() = anchoredDraggableState.targetValue
 
-    val currentPaneAnchor get() = swipeableState.currentValue
+    var hasInteractions by mutableStateOf(false)
+        internal set
+
+    val currentPaneAnchor: PaneAnchor
+        get() {
+            val cappedFraction = max(
+                a = min(
+                    a = anchoredDraggableState.requireOffset() / maxWidth,
+                    b = 1f
+                ),
+                b = 0f
+            )
+            return when (cappedFraction) {
+                in 0f..0.01f -> PaneAnchor.Zero
+                in Float.MIN_VALUE..PaneAnchor.OneThirds.fraction -> PaneAnchor.OneThirds
+                in PaneAnchor.OneThirds.fraction..PaneAnchor.TwoThirds.fraction -> PaneAnchor.Half
+                in PaneAnchor.TwoThirds.fraction..0.99f -> PaneAnchor.TwoThirds
+                else -> PaneAnchor.Full
+            }
+        }
 
     private val thumbMutableInteractionSource = MutableInteractionSource()
 
     val thumbInteractionSource: InteractionSource = thumbMutableInteractionSource
 
-    private val swipeableState = SwipeableState(
+    private val anchoredDraggableState = AnchoredDraggableState(
         initialValue = PaneAnchor.OneThirds,
-        animationSpec = tween(),
+        anchors = currentAnchors(),
+        positionalThreshold = { distance: Float -> distance * 0.5f },
+        velocityThreshold = { 100f },
+        snapAnimationSpec = PaneSpring,
+        decayAnimationSpec = splineBasedDecay(density)
     )
 
-    val modifier by derivedStateOf {
-        Modifier
-            .hoverable(thumbMutableInteractionSource)
-            .swipeable(
-                state = swipeableState,
-                anchors = mapOf(
-                    0f to PaneAnchor.Zero,
-                    (maxWidth * (1f / 3)) to PaneAnchor.OneThirds,
-                    (maxWidth * (1f / 2)) to PaneAnchor.Half,
-                    (maxWidth * (2f / 3)) to PaneAnchor.TwoThirds,
-                    maxWidth.toFloat() to PaneAnchor.Full,
-                ),
-                orientation = Orientation.Horizontal,
-                interactionSource = thumbMutableInteractionSource,
-            )
-    }
+    val modifier = Modifier
+        .hoverable(thumbMutableInteractionSource)
+        .anchoredDraggable(
+            state = anchoredDraggableState,
+            orientation = Orientation.Horizontal,
+            interactionSource = thumbMutableInteractionSource,
+        )
 
     fun updateMaxWidth(maxWidth: Int) {
+        if (maxWidth == this.maxWidth) return
         this.maxWidth = maxWidth
+        val newAnchors = currentAnchors()
+        anchoredDraggableState.updateAnchors(
+            newAnchors = newAnchors,
+            newTarget = newAnchors
+                .closestAnchor(anchoredDraggableState.offset)
+                .takeUnless(PaneAnchor.Zero::equals)
+                ?: defaultOpenAnchorPosition(),
+        )
+    }
+
+    suspend fun onClosed() {
+        if (currentPaneAnchor != PaneAnchor.Full) return
+        moveTo(defaultOpenAnchorPosition())
     }
 
     fun dispatch(delta: Float) {
-        swipeableState.performDrag(delta)
+        anchoredDraggableState.dispatchRawDelta(delta)
     }
 
-    suspend fun completeDispatch() = swipeableState.performFling(velocity = 0f)
+    suspend fun completeDispatch() = anchoredDraggableState.settle(velocity = 0f)
 
-    suspend fun moveTo(anchor: PaneAnchor) = swipeableState.animateTo(
+    suspend fun moveTo(anchor: PaneAnchor) = anchoredDraggableState.animateTo(
         targetValue = anchor,
-        anim = PaneSpring
     )
+
+    private fun currentAnchors() = DraggableAnchors {
+        PaneAnchor.entries.forEach { it at maxWidth * it.fraction }
+    }
+
+    private fun defaultOpenAnchorPosition(): PaneAnchor {
+        val layoutSize = with(density) { maxWidth.toDp().value.roundToInt() }
+        val isExpanded = layoutSize >= WindowSizeClass.EXPANDED.minWidthDp
+        return if (isExpanded) PaneAnchor.Half
+        else PaneAnchor.OneThirds
+    }
+
+    companion object {
+
+        internal val MinPaneWidth = 1.dp
+
+        @Composable
+        internal fun DraggableThumb(
+            splitLayoutState: SplitLayoutState,
+            paneAnchorState: PaneAnchorState,
+            offset: Dp,
+        ) {
+            val scope = rememberCoroutineScope()
+            val isHovered by paneAnchorState.thumbInteractionSource.collectIsHoveredAsState()
+            val isPressed by paneAnchorState.thumbInteractionSource.collectIsPressedAsState()
+            val isDragged by paneAnchorState.thumbInteractionSource.collectIsDraggedAsState()
+            val active = isHovered || isPressed || isDragged
+
+            val thumbWidth by animateDpAsState(
+                label = "App Pane Draggable thumb",
+                targetValue =
+                if (active) DraggableDividerSizeDp
+                else when (paneAnchorState.targetPaneAnchor) {
+                    PaneAnchor.Zero -> DraggableDividerSizeDp
+                    PaneAnchor.OneThirds,
+                    PaneAnchor.Half,
+                    PaneAnchor.TwoThirds,
+                    PaneAnchor.Full -> 2.dp
+                }
+            )
+            Box(
+                modifier = Modifier
+                    .offset {
+                        IntOffset(
+                            x = offset.roundToPx() - (DraggableDividerSizeDp / 2).roundToPx(),
+                            y = 0
+                        )
+                    }
+                    .fillMaxHeight()
+                    .width(DraggableDividerSizeDp)
+                    .then(paneAnchorState.modifier)
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .width(thumbWidth)
+                        .height(DraggableDividerSizeDp),
+                    shape = RoundedCornerShape(DraggableDividerSizeDp),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    onClick = {
+                        scope.launch { paneAnchorState.moveTo(PaneAnchor.OneThirds) }
+                    },
+                ) {
+                    Image(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .scale(scale = 0.6f),
+                        imageVector = Icons.Filled.ExpandAll,
+                        contentDescription = "Drag",
+                        colorFilter = ColorFilter.tint(
+                            color = MaterialTheme.colorScheme.surface
+                        )
+                    )
+                }
+            }
+
+            val density = LocalDensity.current
+
+            LaunchedEffect(
+                paneAnchorState.width,
+                splitLayoutState.size,
+                splitLayoutState.weightSum,
+                density
+            ) {
+                val fullWidthPx = with(density) { splitLayoutState.size.roundToPx() }
+                val percentage = paneAnchorState.width.toFloat() / fullWidthPx
+                val minPercentage = with(density) { MinPaneWidth.toPx() / fullWidthPx }
+                val weight = max(percentage, minPercentage) * splitLayoutState.weightSum
+                splitLayoutState.setWeightAt(index = 0, weight = weight)
+            }
+
+            LaunchedEffect(active) {
+                paneAnchorState.hasInteractions = active
+            }
+        }
+    }
 }
 
 /**
@@ -97,46 +246,54 @@ internal class PaneAnchorState {
  */
 @Composable
 fun SecondaryPaneCloseBackHandler(enabled: Boolean) {
-    val paneSplitState = LocalPaneAnchorState.current
+    val paneAnchorState = LocalAppState.current.paneAnchorState
     var started by remember { mutableStateOf(false) }
     var widthAtStart by remember { mutableIntStateOf(0) }
     var desiredPaneWidth by remember { mutableFloatStateOf(0f) }
-    val animatedDesiredPanelWidth by animateFloatAsState(desiredPaneWidth)
+    val animatedDesiredPanelWidth by animateFloatAsState(
+        label = "DesiredAppPanelWidth",
+        targetValue = desiredPaneWidth,
+    )
 
     BackHandler(
         enabled = enabled,
         onStarted = {
-            widthAtStart = paneSplitState.width
+            paneAnchorState.hasInteractions = true
+            widthAtStart = paneAnchorState.width
             started = true
         },
         onProgressed = { backStatus ->
             val backProgress = backStatus.progress
-            val distanceToCover = paneSplitState.maxWidth - widthAtStart
+            val distanceToCover = paneAnchorState.maxWidth - widthAtStart
             desiredPaneWidth = (backProgress * distanceToCover) + widthAtStart
         },
         onCancelled = {
+            paneAnchorState.hasInteractions = false
             started = false
         },
         onBack = {
+            paneAnchorState.hasInteractions = false
             started = false
         }
     )
 
     // Make sure desiredPaneWidth is synced with paneSplitState.width before the back gesture
-    LaunchedEffect(started, paneSplitState.width) {
+    LaunchedEffect(started, paneAnchorState.width) {
         if (started) return@LaunchedEffect
-        desiredPaneWidth = paneSplitState.width.toFloat()
+        desiredPaneWidth = paneAnchorState.width.toFloat()
     }
 
     // Dispatch changes as the user presses back
     LaunchedEffect(started, animatedDesiredPanelWidth) {
         if (!started) return@LaunchedEffect
-        paneSplitState.dispatch(delta = animatedDesiredPanelWidth - paneSplitState.width.toFloat())
+        paneAnchorState.dispatch(delta = animatedDesiredPanelWidth - paneAnchorState.width.toFloat())
     }
 
     // Fling to settle
     LaunchedEffect(started) {
         if (started) return@LaunchedEffect
-        paneSplitState.completeDispatch()
+        paneAnchorState.completeDispatch()
     }
 }
+
+private val DraggableDividerSizeDp = 48.dp

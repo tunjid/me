@@ -16,14 +16,25 @@
 
 package com.tunjid.me.archivedetail
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -32,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
@@ -42,10 +54,10 @@ import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.isInViewport
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
-import com.tunjid.scaffold.adaptive.routeOf
-import com.tunjid.scaffold.adaptive.sharedElementOf
+import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.strings.RouteParams
 
 private const val BODY_KEY = 3
@@ -64,8 +76,10 @@ fun ArchiveDetailRoute(
     )
 )
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun ArchiveDetailScreen(
+    movableSharedElementScope: MovableSharedElementScope,
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
@@ -74,11 +88,6 @@ internal fun ArchiveDetailScreen(
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
     val bodyInViewport = scrollState.isInViewport(BODY_KEY)
 
-    GlobalUi(
-        state = state,
-        actions = actions
-    )
-
     val archive = state.archive
 
     // Close the secondary pane when invoking back since it contains the list view
@@ -86,7 +95,7 @@ internal fun ArchiveDetailScreen(
         enabled = state.isInPrimaryNav && state.hasSecondaryPanel
     )
 
-    val thumbnail = sharedElementOf<MediaArgs>(
+    val thumbnail = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
         key = state.sharedElementKey,
     ) { args, innerModifier ->
         AsyncRasterImage(
@@ -100,6 +109,12 @@ internal fun ArchiveDetailScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         state = scrollState
     ) {
+        stickyHeader {
+            TopAppBar(
+                state = state,
+                actions = actions,
+            )
+        }
         item {
             thumbnail(
                 MediaArgs(
@@ -180,4 +195,64 @@ internal fun ArchiveDetailScreen(
             actions(Action.Navigate.Pop)
         }
     }
+}
+
+
+@Composable
+private fun TopAppBar(
+    state: State,
+    actions: (Action) -> Unit
+) {
+    androidx.compose.material3.TopAppBar(
+        modifier = Modifier
+            .windowInsetsPadding(WindowInsets.statusBars),
+        navigationIcon = {
+            IconButton(
+                modifier = Modifier
+                    .size(56.dp)
+                    .padding(16.dp),
+                onClick = {
+                    actions(Action.Navigate.Pop)
+                },
+                content = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                    )
+                }
+            )
+        },
+        title = {
+            Text(
+                text = state.archive?.title ?: "Detail",
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+            )
+        },
+        actions = {
+            if (state.archive != null) {
+                IconButton(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .padding(16.dp),
+                    onClick = {
+                        actions(
+                            Action.Navigate.Files(
+                                kind = state.kind,
+                                archiveId = state.archive.id,
+                                thumbnail = state.archive.thumbnail,
+                            )
+                        )
+                    },
+                    content = {
+                        Icon(
+                            imageVector = Icons.Default.Email,
+                            contentDescription = "Gallery",
+                        )
+                    }
+                )
+            }
+        },
+    )
 }

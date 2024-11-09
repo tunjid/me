@@ -22,36 +22,27 @@ package com.tunjid.me.scaffold.globalui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import com.tunjid.me.scaffold.scaffold.LocalAppState
 import com.tunjid.mutator.mutationOf
-import com.tunjid.scaffold.adaptive.Adaptive
-import com.tunjid.scaffold.adaptive.LocalAdaptiveContentScope
-
-val currentUiState
-    @ReadOnlyComposable
-    @Composable
-    get() = LocalGlobalUiStateHolder.current.state.value
+import com.tunjid.treenav.compose.PaneScope
+import com.tunjid.treenav.compose.threepane.ThreePane
 
 /**
  * Provides a way of composing the [UiState] on a global level.
  * This allows for coordination of the UI across navigation destinations.
  */
 @Composable
-fun ScreenUiState(state: UiState) {
-    val scope = LocalAdaptiveContentScope.current ?: return
-    val uiStateHolder = LocalGlobalUiStateHolder.current
+fun PaneScope<ThreePane, *>.ScreenUiState(state: UiState) {
+    val appState = LocalAppState.current
     val updatedState by rememberUpdatedState(state)
 
     val fabClickListener = MutableFunction(state.fabClickListener)
-    val toolbarMenuClickListener = MutableFunction(state.toolbarMenuClickListener)
-    val altToolbarMenuClickListener = MutableFunction(state.altToolbarMenuClickListener)
     val snackbarMessageConsumer = MutableFunction(state.snackbarMessageConsumer)
 
-    LaunchedEffect(updatedState, scope.containerState) {
-        if (scope.containerState.container == Adaptive.Container.Primary) uiStateHolder.accept(
+    LaunchedEffect(updatedState, paneState) {
+        if (paneState.pane == ThreePane.Primary && isActive) appState.updateGlobalUi(
             mutationOf {
                 // Preserve things that should not be overwritten
                 updatedState.copy(
@@ -61,8 +52,6 @@ fun ScreenUiState(state: UiState) {
                     backStatus = backStatus,
                     paneAnchor = paneAnchor,
                     fabClickListener = fabClickListener,
-                    toolbarMenuClickListener = toolbarMenuClickListener,
-                    altToolbarMenuClickListener = altToolbarMenuClickListener,
                     snackbarMessageConsumer = snackbarMessageConsumer,
                 )
             })
@@ -71,21 +60,14 @@ fun ScreenUiState(state: UiState) {
     DisposableEffect(true) {
         onDispose {
             fabClickListener.backing = {}
-            toolbarMenuClickListener.backing = {}
-            altToolbarMenuClickListener.backing = {}
             snackbarMessageConsumer.backing = {}
         }
     }
 }
 
-/**
- * Syntactic sugar for [remember] remembering a single argument function
- */
-@Composable
-fun <T> rememberFunction(
-    vararg keys: Any?,
-    implementation: (T) -> Unit
-): (T) -> Unit = remember(*keys) { implementation }
+@Suppress("UnusedReceiverParameter")
+val PaneScope<ThreePane, *>.globalUi
+    @Composable get() = LocalAppState.current.globalUi
 
 /**
  * Generic function that helps override the backing implementation to prevent memory leaks

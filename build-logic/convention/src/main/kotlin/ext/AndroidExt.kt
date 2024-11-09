@@ -16,12 +16,10 @@
 
 import com.android.build.api.dsl.CommonExtension
 import ext.configureKotlinJvm
-import org.gradle.api.Action
 import org.gradle.api.JavaVersion
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.dependencies
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 
 /**
  * Sets common values for Android Applications and Libraries
@@ -29,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 fun org.gradle.api.Project.commonConfiguration(
     extension: CommonExtension<*, *, *, *, *, *>
 ) = extension.apply {
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         // Could have been 21, but I need sqlite 3.24.0 for upserts

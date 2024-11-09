@@ -21,6 +21,7 @@ package com.tunjid.me.archiveedit
 
 
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.archiveedit.di.archiveId
 import com.tunjid.me.archiveedit.di.archiveThumbnail
 import com.tunjid.me.archiveedit.di.kind
@@ -33,15 +34,13 @@ import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.model.singular
 import com.tunjid.me.core.ui.ChipAction
-import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.LocalUri
 import com.tunjid.me.core.utilities.Uri
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.di.downcast
-import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.globalui.navBarSize
 import com.tunjid.me.scaffold.globalui.navBarSizeMutations
@@ -56,7 +55,6 @@ import com.tunjid.mutator.coroutines.mapLatestToManyMutations
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
 import com.tunjid.mutator.mutationOf
-import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -80,14 +78,18 @@ typealias ArchiveEditStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class ArchiveEditStateHolderCreator(
-    creator: (scope: CoroutineScope, savedStae: ByteArray?, route: Route) -> ArchiveEditStateHolder,
-) : ScreenStateHolderCreator by creator.downcast()
+    private val creator: (scope: CoroutineScope, route: Route) -> ActualArchiveEditStateHolder,
+) : ScreenStateHolderCreator {
+    override fun invoke(
+        scope: CoroutineScope,
+        route: Route
+    ): ActualArchiveEditStateHolder = creator.invoke(scope, route)
+}
 
 @Inject
 class ActualArchiveEditStateHolder(
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
-    byteSerializer: ByteSerializer,
     uriConverter: UriConverter,
     uiStateFlow: StateFlow<UiState>,
     permissionsFlow: StateFlow<Permissions>,
@@ -96,11 +98,9 @@ class ActualArchiveEditStateHolder(
     @Assisted
     scope: CoroutineScope,
     @Assisted
-    savedState: ByteArray?,
-    @Assisted
     route: Route,
-) : ArchiveEditStateHolder by scope.actionStateFlowMutator(
-    initialState = byteSerializer.restoreState(savedState) ?: State(
+) : ViewModel(viewModelScope = scope), ArchiveEditStateHolder by scope.actionStateFlowMutator(
+    initialState = State(
         kind = route.routeParams.kind,
         routeThumbnailUrl = route.routeParams.archiveThumbnail,
         upsert = ArchiveUpsert(id = route.routeParams.archiveId),

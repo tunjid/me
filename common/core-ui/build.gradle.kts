@@ -41,6 +41,8 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
 
                 implementation(libs.tunjid.composables)
+                implementation(libs.tunjid.treenav.compose.common)
+
             }
         }
         named("androidMain") {

@@ -19,7 +19,6 @@ package com.tunjid.me
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -28,23 +27,18 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.lifecycleScope
+import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.WindowMetricsCalculator
-import com.tunjid.me.common.ui.adaptiveContentState
 import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.me.core.ui.dragdrop.DragTrigger
-import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
-import com.tunjid.me.feature.LocalScreenStateHolderCache
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
+import com.tunjid.me.scaffold.globalui.COMPACT
+import com.tunjid.me.scaffold.globalui.EXPANDED
+import com.tunjid.me.scaffold.globalui.MEDIUM
 import com.tunjid.me.scaffold.globalui.NavMode
-import com.tunjid.me.scaffold.globalui.WindowSizeClass
+import com.tunjid.me.scaffold.globalui.PredictiveBackEffects
 import com.tunjid.me.scaffold.globalui.insetMutations
-import com.tunjid.me.scaffold.globalui.integrateBackActions
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
-import com.tunjid.me.scaffold.lifecycle.LocalLifecycleStateHolder
-import com.tunjid.me.scaffold.scaffold.Scaffold
-import com.tunjid.mutator.mutationOf
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
+import com.tunjid.me.scaffold.scaffold.MeApp
+import com.tunjid.me.scaffold.scaffold.MeAppState
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -52,56 +46,48 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val app = applicationContext as App
         val meApp = app.meApp
-
-        integrateBackActions(
-            globalUiStateHolder = meApp.globalUiStateHolder,
-            navStateHolder = meApp.navStateHolder,
-        )
+        val appState = meApp.appState
 
         val root = ComposeView(context = this)
 
         root.setContent {
             AppTheme {
-                CompositionLocalProvider(
-                    LocalScreenStateHolderCache provides meApp.screenStateHolderCache,
-                    LocalLifecycleStateHolder provides meApp.lifecycleStateHolder,
-                ) {
-                    Scaffold(
-                        modifier = Modifier.rootDragDropModifier(
-                            dragTriggers = setOf(
-                                DragTrigger.LongPress,
-                                DragTrigger.DoubleTap
-                            ),
-                            view = root
-                        ),
-                        adaptiveContentState = meApp.adaptiveContentState(),
-                        navStateHolder = meApp.navStateHolder,
-                        globalUiStateHolder = meApp.globalUiStateHolder,
-                    )
+                MeApp(
+//                    modifier = Modifier.rootDragDropModifier(
+//                        dragTriggers = setOf(
+//                            DragTrigger.LongPress,
+//                            DragTrigger.DoubleTap
+//                        ),
+//                        view = root
+//                    ),
+                    modifier = Modifier,
+                    meAppState = meApp.appState,
+                )
+                AdaptNavigation(
+                    appState = appState
+                )
+                PredictiveBackEffects(
+                    appState = appState
+                )
+                LaunchedEffect(appState.globalUi.statusBarColor) {
+                    window.statusBarColor = appState.globalUi.statusBarColor
                 }
-                AdaptNavigation(globalUiStateHolder = meApp.globalUiStateHolder)
+                LaunchedEffect(appState.globalUi.navBarColor) {
+                    window.navigationBarColor = appState.globalUi.navBarColor
+                }
             }
         }
 
         setContentView(root)
 
         lifecycleScope.launch {
-            insetMutations().collect(meApp.globalUiStateHolder.accept)
-        }
-        lifecycleScope.launch {
-            meApp.globalUiStateHolder.state
-                .map { it.statusBarColor to it.navBarColor }
-                .distinctUntilChanged()
-                .collect { (statusBarColor, navBarColor) ->
-                    window.statusBarColor = statusBarColor
-                    window.navigationBarColor = navBarColor
-                }
+            insetMutations().collect(appState::updateGlobalUi)
         }
     }
 }
 
 @Composable
-private fun MainActivity.AdaptNavigation(globalUiStateHolder: GlobalUiStateHolder) {
+private fun MainActivity.AdaptNavigation(appState: MeAppState) {
     val configuration = LocalConfiguration.current
     val windowMetrics = remember(configuration) {
         WindowMetricsCalculator.getOrCreate()
@@ -119,15 +105,16 @@ private fun MainActivity.AdaptNavigation(globalUiStateHolder: GlobalUiStateHolde
 //    }
 
     LaunchedEffect(widthWindowSizeClass) {
-        globalUiStateHolder.accept(mutationOf {
+        appState.updateGlobalUi {
             copy(
                 windowSizeClass = widthWindowSizeClass,
                 navMode = when (widthWindowSizeClass) {
                     WindowSizeClass.COMPACT -> NavMode.BottomNav
                     WindowSizeClass.MEDIUM -> NavMode.NavRail
                     WindowSizeClass.EXPANDED -> NavMode.NavRail
+                    else -> NavMode.NavRail
                 }
             )
-        })
+        }
     }
 }

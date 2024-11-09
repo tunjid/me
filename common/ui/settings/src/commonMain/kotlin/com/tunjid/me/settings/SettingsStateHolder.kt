@@ -20,19 +20,17 @@
 package com.tunjid.me.settings
 
 
-import com.tunjid.me.core.utilities.ByteSerializer
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.di.downcast
-import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.consumeNavigationActions
 import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.scaffold.adaptive.routeOf
 import com.tunjid.treenav.strings.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,23 +42,25 @@ typealias SettingsStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class SettingsStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> SettingsStateHolder
-) : ScreenStateHolderCreator by creator.downcast()
+    private val creator: (scope: CoroutineScope, route: Route) -> ActualSettingsStateHolder
+) : ScreenStateHolderCreator {
+    override fun invoke(
+        scope: CoroutineScope,
+        route: Route
+    ): ActualSettingsStateHolder = creator.invoke(scope, route)
+}
 
 @Inject
 class ActualSettingsStateHolder(
     authRepository: AuthRepository,
-    byteSerializer: ByteSerializer,
     navActions: (NavigationMutation) -> Unit,
     @Assisted
     scope: CoroutineScope,
-    @Assisted
-    savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
     @Assisted
     route: Route,
-) : SettingsStateHolder by scope.actionStateFlowMutator(
-    initialState = byteSerializer.restoreState(savedState) ?: State(),
+) : ViewModel(viewModelScope = scope), SettingsStateHolder by scope.actionStateFlowMutator(
+    initialState = State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     inputs = listOf(
         authRepository.isSignedIn.mapToMutation { isSignedIn ->

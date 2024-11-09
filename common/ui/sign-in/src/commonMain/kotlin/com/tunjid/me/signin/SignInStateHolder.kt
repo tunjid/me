@@ -16,35 +16,39 @@
 
 // See YouTrack: KTIJ-18375
 @file:Suppress("INLINE_FROM_HIGHER_PLATFORM")
+
 package com.tunjid.me.signin
 
 
+import androidx.lifecycle.ViewModel
 import com.tunjid.me.core.model.Result
 import com.tunjid.me.core.model.minus
 import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.ui.update
-import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.di.downcast
-import com.tunjid.me.scaffold.di.restoreState
 import com.tunjid.me.scaffold.navigation.NavigationContext
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.canGoUp
+import com.tunjid.me.scaffold.navigation.consumeNavigationActions
 import com.tunjid.mutator.ActionStateMutator
 import com.tunjid.mutator.Mutation
 import com.tunjid.mutator.coroutines.actionStateFlowMutator
 import com.tunjid.mutator.coroutines.mapLatestToManyMutations
 import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.coroutines.toMutationStream
-import com.tunjid.mutator.mutationOf 
+import com.tunjid.mutator.mutationOf
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.pop
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.switch
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -52,23 +56,25 @@ typealias SignInStateHolder = ActionStateMutator<Action, StateFlow<State>>
 
 @Inject
 class SignInStateHolderCreator(
-    creator: (scope: CoroutineScope, savedState: ByteArray?, route: Route) -> SignInStateHolder
-) : ScreenStateHolderCreator by creator.downcast()
+    private val creator: (scope: CoroutineScope, route: Route) -> ActualSignInStateHolder
+) : ScreenStateHolderCreator {
+    override fun invoke(
+        scope: CoroutineScope,
+        route: Route
+    ): ActualSignInStateHolder = creator.invoke(scope, route)
+}
 
 @Inject
 class ActualSignInStateHolder(
     authRepository: AuthRepository,
     navActions: (NavigationMutation) -> Unit,
-    byteSerializer: ByteSerializer,
     @Assisted
     scope: CoroutineScope,
-    @Assisted
-    savedState: ByteArray?,
     @Suppress("UNUSED_PARAMETER")
     @Assisted
     route: Route,
-) : SignInStateHolder by scope.actionStateFlowMutator(
-    initialState = byteSerializer.restoreState(savedState) ?: State(),
+) : ViewModel(viewModelScope = scope), SignInStateHolder by scope.actionStateFlowMutator(
+    initialState = State(),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     inputs = listOf(
         authRepository.isSignedIn.map { mutationOf { copy(isSignedIn = it) } },
@@ -81,6 +87,10 @@ class ActualSignInStateHolder(
                 is Action.Submit -> action.flow.submissionMutations(
                     authRepository = authRepository,
                     navActions = navActions
+                )
+
+                is Action.Navigate -> action.flow.consumeNavigationActions(
+                    navigationMutationConsumer = navActions
                 )
             }
         }

@@ -16,22 +16,29 @@
 
 package com.tunjid.me.settings.di
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tunjid.me.data.di.InjectedDataComponent
-import com.tunjid.me.feature.rememberRetainedStateHolder
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
-import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.lifecycle.collectAsStateWithLifecycle
-import com.tunjid.me.scaffold.scaffold.backPreviewBackgroundModifier
+import com.tunjid.me.scaffold.globalui.InsetFlags
+import com.tunjid.me.scaffold.globalui.NavVisibility
+import com.tunjid.me.scaffold.globalui.ScreenUiState
+import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.me.settings.ActualSettingsStateHolder
 import com.tunjid.me.settings.SettingsRoute
 import com.tunjid.me.settings.SettingsScreen
-import com.tunjid.me.settings.SettingsStateHolder
 import com.tunjid.me.settings.SettingsStateHolderCreator
 import com.tunjid.me.settings.State
-import com.tunjid.scaffold.adaptive.adaptiveRouteConfiguration
+import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
@@ -57,21 +64,6 @@ abstract class SettingsNavigationComponent {
             routePattern = RoutePattern,
             routeMapper = ::SettingsRoute,
         )
-
-    @IntoMap
-    @Provides
-    fun routeAdaptiveConfiguration() = RoutePattern to adaptiveRouteConfiguration(
-        render = { route ->
-            val stateHolder = rememberRetainedStateHolder<SettingsStateHolder>(
-                route = route
-            )
-            SettingsScreen(
-                state = stateHolder.state.collectAsStateWithLifecycle().value,
-                actions = stateHolder.accept,
-                modifier = Modifier.backPreviewBackgroundModifier(),
-            )
-        }
-    )
 }
 
 @Component
@@ -80,15 +72,32 @@ abstract class SettingsScreenHolderComponent(
     @Component val scaffoldComponent: InjectedScaffoldComponent
 ) {
 
-    val ActualSettingsStateHolder.bind: SettingsStateHolder
-        @Provides get() = this
-
     @IntoMap
     @Provides
-    fun settingsStateHolderCreator(
-        assist: SettingsStateHolderCreator
-    ): Pair<String, ScreenStateHolderCreator> = Pair(
-        first = RoutePattern,
-        second = assist
+    fun routeAdaptiveConfiguration(
+        creator: SettingsStateHolderCreator,
+    ) = RoutePattern to threePaneListDetailStrategy(
+        render = { route ->
+            val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
+            val viewModel = viewModel<ActualSettingsStateHolder> {
+                creator.invoke(
+                    scope = lifecycleCoroutineScope,
+                    route = route,
+                )
+            }
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            SettingsScreen(
+                state = state,
+                actions = viewModel.accept,
+                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
+            )
+            ScreenUiState(
+                UiState(
+                    navVisibility = NavVisibility.Visible,
+                    insetFlags = InsetFlags.NO_BOTTOM,
+                    statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
+                )
+            )
+        }
     )
 }

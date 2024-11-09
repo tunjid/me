@@ -16,17 +16,16 @@
 
 package com.tunjid.me.scaffold.globalui.slices
 
+import androidx.window.core.layout.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.Ingress
 import com.tunjid.me.scaffold.globalui.InsetDescriptor
 import com.tunjid.me.scaffold.globalui.KeyboardAware
 import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.WindowSizeClass
 import com.tunjid.me.scaffold.globalui.bottomNavVisible
 import com.tunjid.me.scaffold.globalui.navRailVisible
 
-internal data class RouteContainerPositionalState(
+internal data class UiChromeState(
     val statusBarSize: Int,
-    val toolbarOverlaps: Boolean,
     val navRailVisible: Boolean,
     val bottomNavVisible: Boolean,
     val windowSizeClass: WindowSizeClass,
@@ -35,11 +34,10 @@ internal data class RouteContainerPositionalState(
     override val insetDescriptor: InsetDescriptor
 ) : KeyboardAware
 
-internal val UiState.routeContainerState
-    get() = RouteContainerPositionalState(
+internal val UiState.uiChromeState
+    get() = UiChromeState(
         statusBarSize = systemUI.static.statusBarSize,
         insetDescriptor = insetFlags,
-        toolbarOverlaps = toolbarOverlaps,
         bottomNavVisible = bottomNavVisible,
         navRailVisible = navRailVisible,
         windowSizeClass = windowSizeClass,

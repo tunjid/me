@@ -18,17 +18,30 @@ package com.tunjid.me.signin
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.ui.FormField
-import com.tunjid.scaffold.adaptive.routeOf
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.treenav.strings.RouteParams
 
 fun SignInRoute(
@@ -45,28 +58,55 @@ internal fun SignInScreen(
 ) {
     val scrollState = rememberScrollState()
 
-    GlobalUi(
-        state = state,
-        onAction = actions
-    )
-
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(state = scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        state.fields.forEach { field ->
+        TopAppBar(
+            modifier = Modifier
+                .windowInsetsPadding(WindowInsets.statusBars),
+            navigationIcon = {
+                IconButton(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .padding(16.dp),
+                    onClick = {
+                        actions(Action.Navigate.Pop)
+                    },
+                    content = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
+                )
+            },
+            title = {
+                Text(
+                    text = "SignIn",
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                )
+            },
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(state = scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            state.fields.forEach { field ->
+                Spacer(modifier = Modifier.height(8.dp))
+                FormField(
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f),
+                    field = field,
+                    onValueChange = {
+                        actions(Action.FieldChanged(field = field.copy(value = it)))
+                    }
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
-            FormField(
-                modifier = Modifier
-                    .fillMaxWidth(0.6f),
-                field = field,
-                onValueChange = {
-                    actions(Action.FieldChanged(field = field.copy(value = it)))
-                }
-            )
         }
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }

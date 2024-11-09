@@ -16,21 +16,32 @@
 
 package com.tunjid.me.archiveedit
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -52,6 +63,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,10 +76,11 @@ import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
+import com.tunjid.me.core.ui.icons.Preview
 import com.tunjid.me.core.ui.isInViewport
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.permissions.Permission
-import com.tunjid.scaffold.adaptive.routeOf
-import com.tunjid.scaffold.adaptive.sharedElementOf
+import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.coroutines.launch
@@ -95,8 +108,10 @@ fun ArchiveEditRoute(
     }
 )
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun ArchiveEditScreen(
+    movableSharedElementScope: MovableSharedElementScope,
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
@@ -105,12 +120,8 @@ internal fun ArchiveEditScreen(
     val scrollState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val isBodyInViewPort = scrollState.isInViewport(BODY_INDEX)
-    GlobalUi(
-        state = state,
-        onAction = actions
-    )
 
-    val thumbnail = sharedElementOf<MediaArgs>(
+    val thumbnail = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
         key = state.sharedElementKey,
     ) { args, innerModifier ->
         AsyncRasterImage(
@@ -140,6 +151,12 @@ internal fun ArchiveEditScreen(
             ),
         state = scrollState,
     ) {
+        stickyHeader {
+            TopAppBar(
+                state = state,
+                actions = actions,
+            )
+        }
         dragDropThumbnail(
             thumbnailUrl = state.headerThumbnail,
             thumbnail = thumbnail,
@@ -187,6 +204,93 @@ internal fun ArchiveEditScreen(
             body = upsert.body
         )
     }
+}
+
+@Composable
+private fun TopAppBar(
+    state: State,
+    actions: (Action) -> Unit
+) {
+    androidx.compose.material3.TopAppBar(
+        modifier = Modifier
+            .windowInsetsPadding(WindowInsets.statusBars),
+        navigationIcon = {
+            IconButton(
+                modifier = Modifier
+                    .size(56.dp)
+                    .padding(16.dp),
+                onClick = {
+                    actions(Action.Navigate.Pop)
+                },
+                content = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                    )
+                }
+            )
+        },
+        title = {
+            Text(
+                text = "${if (state.upsert.id == null) "Create" else "Edit"} ${state.kind.name}",
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+            )
+        },
+        actions = {
+            if (state.isEditing) IconButton(
+                modifier = Modifier
+                    .size(56.dp)
+                    .padding(start = 16.dp, end = 8.dp),
+                onClick = {
+                    actions(Action.ToggleEditView)
+                },
+                content = {
+                    Icon(
+                        imageVector = Icons.Default.Preview,
+                        contentDescription = "Preview",
+                    )
+                }
+            )
+            if (!state.isEditing) IconButton(
+                modifier = Modifier
+                    .size(56.dp)
+                    .padding(start = 16.dp, end = 8.dp),
+                onClick = {
+                    actions(Action.ToggleEditView)
+                },
+                content = {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                    )
+                }
+            )
+            IconButton(
+                modifier = Modifier
+                    .size(56.dp)
+                    .padding(end = 16.dp, start = 8.dp),
+                onClick = {
+                    state.upsert.id?.let {
+                        actions(
+                            Action.Navigate.Files(
+                                kind = state.kind,
+                                archiveId = it,
+                                thumbnail = state.headerThumbnail,
+                            )
+                        )
+                    }
+                },
+                content = {
+                    Icon(
+                        imageVector = Icons.Default.Email,
+                        contentDescription = "Gallery",
+                    )
+                }
+            )
+        },
+    )
 }
 
 private fun LazyListScope.dragDropThumbnail(

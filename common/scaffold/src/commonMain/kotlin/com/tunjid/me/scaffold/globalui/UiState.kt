@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tunjid.me.scaffold.globalui.slices.ToolbarItem
+import androidx.window.core.layout.WindowSizeClass
 
 sealed class NavMode {
     data object BottomNav : NavMode()
@@ -36,15 +36,17 @@ sealed class NavVisibility {
     data object GoneIfBottomNav : NavVisibility()
 }
 
-enum class PaneAnchor {
-    Zero, OneThirds, Half, TwoThirds, Full
+enum class PaneAnchor(
+    val fraction: Float
+) {
+    Zero(fraction = 0f),
+    OneThirds(fraction = 1 / 3f),
+    Half(fraction = 1 / 2f),
+    TwoThirds(fraction = 2 / 3f),
+    Full(fraction = 1f),
 }
 
 data class UiState(
-    val toolbarItems: List<ToolbarItem> = listOf(),
-    val toolbarShows: Boolean = false,
-    val toolbarOverlaps: Boolean = false,
-    val toolbarTitle: CharSequence = "",
     val fabIcon: ImageVector = Icons.Default.Done,
     val fabShows: Boolean = false,
     val fabExtended: Boolean = true,
@@ -65,8 +67,6 @@ data class UiState(
     val backStatus: BackStatus = BackStatus.None,
     val paneAnchor: PaneAnchor = PaneAnchor.Zero,
     val fabClickListener: (Unit) -> Unit = emptyCallback(),
-    val toolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),
-    val altToolbarMenuClickListener: (ToolbarItem) -> Unit = emptyCallback(),
     val snackbarMessageConsumer: (com.tunjid.me.core.model.Message) -> Unit = emptyCallback(),
 )
 
