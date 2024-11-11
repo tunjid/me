@@ -20,14 +20,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import androidx.window.core.layout.WindowSizeClass
 import com.tunjid.me.common.di.MeApp
 import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.me.core.ui.dragdrop.rootDragDropModifier
 import com.tunjid.me.scaffold.globalui.COMPACT
 import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
@@ -44,13 +42,9 @@ fun main() {
             state = windowState,
             title = "Me as a composition"
         ) {
-            val density = LocalDensity.current.density
             AppTheme {
                 MeApp(
-                    modifier = Modifier.rootDragDropModifier(
-                        density = density,
-                        window = window,
-                    ),
+                    modifier = Modifier,
                     meAppState = app.appState,
                 )
             }
