@@ -19,6 +19,8 @@ import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.navigation.navItemSelected
 import com.tunjid.me.scaffold.navigation.navItems
 import com.tunjid.me.scaffold.navigation.unknownRoute
+import com.tunjid.me.scaffold.savedstate.SavedState
+import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.me.sync.di.Sync
 import com.tunjid.me.sync.di.keepUpToDate
 import com.tunjid.treenav.MultiStackNav
@@ -42,6 +44,7 @@ import me.tatarka.inject.annotations.Inject
 @Stable
 class MeAppState @Inject constructor(
     private val routeConfigurationMap: Map<String, @JvmSuppressWildcards PaneStrategy<ThreePane, Route>>,
+    private val savedStateRepository: SavedStateRepository,
     private val navigationStateHolder: NavigationStateHolder,
     private val globalUiStateHolder: GlobalUiStateHolder,
     private val sync: Sync,
@@ -105,6 +108,9 @@ class MeAppState @Inject constructor(
             }
             onDispose { job.cancel() }
         }
+        LaunchedEffect(multiStackNavState.value) {
+            savedStateRepository.saveState(multiStackNavState.value.toSavedState())
+        }
         LaunchedEffect(Unit) {
             sync.keepUpToDate()
         }
@@ -130,3 +136,18 @@ class MeAppState @Inject constructor(
 internal val LocalAppState = staticCompositionLocalOf<MeAppState> {
     TODO()
 }
+
+private fun MultiStackNav.toSavedState() = SavedState(
+    isEmpty = false,
+    activeNav = currentIndex,
+    navigation = stacks.fold(listOf()) { listOfLists, stackNav ->
+        listOfLists.plus(
+            element = stackNav.children
+                .filterIsInstance<Route>()
+                .fold(listOf()) { stackList, route ->
+                    stackList + route.routeParams.pathAndQueries
+                }
+        )
+    },
+    routeStates = emptyMap()
+)
