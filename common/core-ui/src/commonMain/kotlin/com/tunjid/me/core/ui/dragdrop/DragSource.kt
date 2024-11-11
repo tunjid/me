@@ -17,105 +17,12 @@
 package com.tunjid.me.core.ui.dragdrop
 
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.modifier.ModifierLocalMap
-import androidx.compose.ui.modifier.ModifierLocalModifierNode
-import androidx.compose.ui.node.DelegatingNode
-import androidx.compose.ui.node.GlobalPositionAwareModifierNode
-import androidx.compose.ui.node.ModifierNodeElement
-import androidx.compose.ui.platform.InspectorInfo
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.toSize
 import com.tunjid.me.core.utilities.Uri
 
-internal sealed interface DragSource : DragOrDrop {
-
-    val size: IntSize
-
-    val dragShadowPainter: Painter?
-
-    fun dragInfo(offset: Offset): DragInfo?
-}
-
-internal data class DragInfo(
-    val size: Size,
-    val uris: List<Uri>,
-    val dragShadowPainter: Painter?,
-)
-
-fun Modifier.dragSource(
-    dragShadowPainter: Painter? = null,
+expect fun Modifier.dragSource(
+    drawDragDecoration: (DrawScope.() -> Unit)?,
     uris: List<Uri>,
-): Modifier = this then DragSourceElement(
-    dragShadowPainter = dragShadowPainter,
-    uris = uris
-)
+): Modifier
 
-private data class DragSourceElement(
-    /**
-     * Optional painter to draw the drag shadow for the UI.
-     * If not provided, the system default will be used.
-     */
-    val dragShadowPainter: Painter? = null,
-    /**
-     * A items to be transferred. If empty, a drag gesture will not be started.
-     */
-    val uris: List<Uri>,
-) : ModifierNodeElement<DragSourceNode>() {
-    override fun create() = DragSourceNode(
-        dragShadowPainter = dragShadowPainter,
-        uris = uris
-    )
-
-    override fun update(node: DragSourceNode) = with(node) {
-        dragShadowPainter = this@DragSourceElement.dragShadowPainter
-        uris = this@DragSourceElement.uris
-    }
-
-    override fun InspectorInfo.inspectableProperties() {
-        name = "dragSource"
-        properties["dragShadowPainter"] = dragShadowPainter
-        properties["dragStatus"] = uris
-    }
-}
-
-private class DragSourceNode(
-    override var dragShadowPainter: Painter?,
-    var uris: List<Uri>,
-) : DelegatingNode(),
-    ModifierLocalModifierNode,
-    GlobalPositionAwareModifierNode,
-    DragSource {
-
-    private val dragDropNode = delegate(
-        DragDropNode { start ->
-            when (start) {
-                is DragOrDropStart.Drop -> null
-                is DragOrDropStart.Drag -> when (uris) {
-                    emptyList<Uri>() -> null
-                    else -> this@DragSourceNode
-                }
-            }
-        }
-    )
-
-    override val providedValues: ModifierLocalMap = dragDropNode.providedValues
-
-    override val size: IntSize get() = dragDropNode.size
-
-    override fun dragInfo(offset: Offset): DragInfo? =
-        when (uris) {
-            emptyList<Uri>() -> null
-            else -> DragInfo(
-                uris = uris,
-                size = size.toSize(),
-                dragShadowPainter = dragShadowPainter
-            )
-        }
-
-    override fun onGloballyPositioned(coordinates: LayoutCoordinates) =
-        dragDropNode.onGloballyPositioned(coordinates)
-}

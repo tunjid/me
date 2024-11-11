@@ -21,6 +21,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -43,16 +44,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.core.model.imageMimetypes
 import com.tunjid.me.core.model.miscMimeTypes
@@ -230,18 +228,34 @@ private fun ImageFile(
     fileItem: FileItem,
     actions: (Action) -> Unit,
 ) {
-    var size by remember { mutableStateOf<IntSize?>(null) }
     val sharedElement = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
         key = thumbnailSharedElementKey(fileItem.url)
     ) { args, sharedElementModifier ->
-        val imageModifier = sharedElementModifier.onSizeChanged { size = it }
-
-        if (fileItem is FileItem.File) AsyncRasterImage(
+        AsyncRasterImage(
             args = args,
-            modifier = when {
-                !dndEnabled -> imageModifier
-                else -> imageModifier.dragSource(
-                    dragShadowPainter = ColorPainter(Color.Green),
+            modifier = sharedElementModifier
+        )
+    }
+
+    if (fileItem is FileItem.File) {
+        val graphicsLayer = rememberGraphicsLayer()
+        val imageModifier = modifier
+            .aspectRatio(1f)
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
+
+        val finalModifier = when {
+            !dndEnabled -> imageModifier
+            else -> imageModifier
+                .drawWithContent {
+                    graphicsLayer.record {
+                        this@drawWithContent.drawContent()
+                    }
+                    drawLayer(graphicsLayer)
+                }
+                .dragSource(
+                    drawDragDecoration = {
+                        drawLayer(graphicsLayer)
+                    },
                     uris = listOf(
                         RemoteUri(
                             path = fileItem.archiveFile.url,
@@ -249,31 +263,26 @@ private fun ImageFile(
                         )
                     )
                 )
-            }
+        }
+        sharedElement(
+            MediaArgs(
+                url = fileItem.url,
+                contentScale = ContentScale.Crop,
+            ),
+            finalModifier
+                .clickable {
+                    val archiveFile = fileItem.archiveFile
+                    actions(
+                        Action.Navigate.Gallery(
+                            archiveId = archiveFile.archiveId,
+                            fileId = archiveFile.id,
+                            thumbnail = archiveFile.url
+                        )
+                    )
+                }
         )
     }
-    sharedElement(
-        MediaArgs(
-            url = fileItem.url,
-            contentScale = ContentScale.Crop,
-        ),
-        modifier
-            .aspectRatio(1f)
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp))
-//            .clickable {
-//                val archiveFile = when (fileItem) {
-//                    is FileItem.File -> fileItem.archiveFile
-//                    is FileItem.PlaceHolder -> return@clickable
-//                }
-//                actions(
-//                    Action.Navigate.Gallery(
-//                        archiveId = archiveFile.archiveId,
-//                        fileId = archiveFile.id,
-//                        thumbnail = archiveFile.url
-//                    )
-//                )
-//            }
-    )
+
 }
 
 @Composable
