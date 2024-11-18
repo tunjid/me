@@ -46,6 +46,7 @@ import com.tunjid.mutator.coroutines.mapToMutation
 import com.tunjid.mutator.mutationOf
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
+import com.tunjid.treenav.compose.moveablesharedelement.updatedMovableSharedElementOf
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.callbackFlow
@@ -103,21 +104,19 @@ internal fun ArchiveGalleryScreen(
         key = { index -> items[index].key }
     ) { index ->
         val file = items[index]
-        val sharedElement = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
-            thumbnailSharedElementKey(file.url)
-        ) { args, modifier ->
-            AsyncRasterImage(
-                args = args,
-                modifier = modifier
-            )
-        }
-
-        sharedElement(
-            MediaArgs(
+        movableSharedElementScope.updatedMovableSharedElementOf(
+            key = thumbnailSharedElementKey(file.url),
+            state = MediaArgs(
                 url = file.url,
                 contentScale = ContentScale.Crop
             ),
-            Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            sharedElement = { state, innerModifier ->
+                AsyncRasterImage(
+                    args = state,
+                    modifier = innerModifier
+                )
+            }
         )
     }
 

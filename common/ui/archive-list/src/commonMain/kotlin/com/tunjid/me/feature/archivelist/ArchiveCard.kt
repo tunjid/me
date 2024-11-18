@@ -66,6 +66,7 @@ import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
+import com.tunjid.treenav.compose.moveablesharedelement.updatedMovableSharedElementOf
 import kotlinx.datetime.Clock.System
 
 @Composable
@@ -130,14 +131,6 @@ fun ArchiveCard(
     archive: Archive,
     actions: (Action) -> Unit,
 ) {
-    val thumb = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
-        key = thumbnailSharedElementKey(archive.thumbnail),
-    ) { args, innerModifier ->
-        AsyncRasterImage(
-            args = args,
-            modifier = innerModifier
-        )
-    }
     ElevatedCard(
         modifier = modifier,
         onClick = {
@@ -145,14 +138,21 @@ fun ArchiveCard(
         },
         content = {
             Column {
-                thumb(
-                    MediaArgs(
+                movableSharedElementScope.updatedMovableSharedElementOf(
+                    key = thumbnailSharedElementKey(archive.thumbnail),
+                    state = MediaArgs(
                         url = archive.thumbnail,
                         contentScale = ContentScale.Crop,
                     ),
-                    Modifier
+                    modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(16f / 9f)
+                        .aspectRatio(16f / 9f),
+                    sharedElement = { state, innerModifier ->
+                        AsyncRasterImage(
+                            args = state,
+                            modifier = innerModifier
+                        )
+                    }
                 )
                 Spacer(Modifier.height(8.dp))
                 ArchiveDate(

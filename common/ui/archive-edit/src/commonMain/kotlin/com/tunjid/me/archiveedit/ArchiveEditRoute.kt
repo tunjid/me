@@ -81,6 +81,7 @@ import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
+import com.tunjid.treenav.compose.moveablesharedelement.updatedMovableSharedElementOf
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.coroutines.launch
@@ -121,15 +122,6 @@ internal fun ArchiveEditScreen(
     val scope = rememberCoroutineScope()
     val isBodyInViewPort = scrollState.isInViewport(BODY_INDEX)
 
-    val thumbnail = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
-        key = state.sharedElementKey,
-    ) { args, innerModifier ->
-        AsyncRasterImage(
-            args = args,
-            modifier = innerModifier
-        )
-    }
-
     LazyColumn(
         modifier = modifier
             .dropTarget(
@@ -159,7 +151,8 @@ internal fun ArchiveEditScreen(
         }
         dragDropThumbnail(
             thumbnailUrl = state.headerThumbnail,
-            thumbnail = thumbnail,
+            sharedElementKey = state.sharedElementKey,
+            movableSharedElementScope = movableSharedElementScope,
             hasStoragePermission = state.hasStoragePermissions,
             dragLocation = state.dragLocation,
             onAction = actions
@@ -293,9 +286,11 @@ private fun TopAppBar(
     )
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 private fun LazyListScope.dragDropThumbnail(
     thumbnailUrl: String?,
-    thumbnail: @Composable (MediaArgs, Modifier) -> Unit,
+    sharedElementKey: String,
+    movableSharedElementScope: MovableSharedElementScope,
     hasStoragePermission: Boolean,
     dragLocation: DragLocation,
     onAction: (Action) -> Unit,
@@ -312,12 +307,13 @@ private fun LazyListScope.dragDropThumbnail(
             .fillParentMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        thumbnail(
-            MediaArgs(
+        movableSharedElementScope.updatedMovableSharedElementOf(
+            key = sharedElementKey,
+            state = MediaArgs(
                 url = thumbnailUrl,
                 contentScale = ContentScale.Crop
             ),
-            Modifier
+            modifier = Modifier
 //                .fillParentMaxWidth()
                 .align(Alignment.Center)
                 .padding(horizontal = 16.dp)
@@ -340,6 +336,12 @@ private fun LazyListScope.dragDropThumbnail(
                     },
                     onEnded = { onAction(Action.Drag.Thumbnail(inside = false)) },
                 ),
+            sharedElement = { state, innerModifier ->
+                AsyncRasterImage(
+                    args = state,
+                    modifier = innerModifier
+                )
+            }
         )
     }
 }

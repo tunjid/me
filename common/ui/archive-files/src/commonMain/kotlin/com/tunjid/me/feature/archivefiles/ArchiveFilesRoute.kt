@@ -64,6 +64,7 @@ import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.tiler.compose.PivotedTilingEffect
 import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
+import com.tunjid.treenav.compose.moveablesharedelement.updatedMovableSharedElementOf
 import com.tunjid.treenav.strings.RouteParams
 
 enum class FileType(
@@ -228,15 +229,6 @@ private fun ImageFile(
     fileItem: FileItem,
     actions: (Action) -> Unit,
 ) {
-    val sharedElement = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
-        key = thumbnailSharedElementKey(fileItem.url)
-    ) { args, sharedElementModifier ->
-        AsyncRasterImage(
-            args = args,
-            modifier = sharedElementModifier
-        )
-    }
-
     if (fileItem is FileItem.File) {
         val graphicsLayer = rememberGraphicsLayer()
         val imageModifier = modifier
@@ -264,12 +256,13 @@ private fun ImageFile(
                     )
                 )
         }
-        sharedElement(
-            MediaArgs(
+        movableSharedElementScope.updatedMovableSharedElementOf(
+            key = thumbnailSharedElementKey(fileItem.url),
+            state = MediaArgs(
                 url = fileItem.url,
                 contentScale = ContentScale.Crop,
             ),
-            finalModifier
+            modifier = finalModifier
                 .clickable {
                     val archiveFile = fileItem.archiveFile
                     actions(
@@ -279,10 +272,15 @@ private fun ImageFile(
                             thumbnail = archiveFile.url
                         )
                     )
-                }
+                },
+            sharedElement = { state, innerModifier ->
+                AsyncRasterImage(
+                    args = state,
+                    modifier = innerModifier
+                )
+            }
         )
     }
-
 }
 
 @Composable
