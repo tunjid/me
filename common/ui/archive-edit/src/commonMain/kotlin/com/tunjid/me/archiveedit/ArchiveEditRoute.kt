@@ -19,8 +19,8 @@ package com.tunjid.me.archiveedit
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
@@ -34,8 +34,10 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
@@ -48,6 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,7 +65,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -74,7 +76,7 @@ import com.tunjid.me.archiveedit.di.kind
 import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.MediaArgs
-import com.tunjid.me.core.ui.NestedScrollTextContainer
+import com.tunjid.me.core.ui.NestedScrollTextContainer2
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.icons.Preview
 import com.tunjid.me.core.ui.isInViewport
@@ -119,8 +121,6 @@ internal fun ArchiveEditScreen(
     val upsert = state.upsert
     val scrollState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val isBodyInViewPort = scrollState.isInViewport(BODY_INDEX)
-
     val thumbnail = movableSharedElementScope.movableSharedElementOf<MediaArgs>(
         key = state.sharedElementKey,
     ) { args, innerModifier ->
@@ -129,80 +129,80 @@ internal fun ArchiveEditScreen(
             modifier = innerModifier
         )
     }
-
-    LazyColumn(
-        modifier = modifier
-            .dropTarget(
-                onStarted = { _, _ ->
-                    val (action, acceptedDrag) = when (state.hasStoragePermissions) {
-                        true -> Action.Drag.Window(inside = true) to true
-                        false -> Action.RequestPermission(Permission.ReadExternalStorage) to false
-                    }
-                    actions(action)
-                    acceptedDrag
-                },
-                onEntered = { actions(Action.Drag.Window(inside = true)) },
-                onExited = { actions(Action.Drag.Window(inside = false)) },
-                onEnded = { actions(Action.Drag.Window(inside = false)) },
-                onDropped = { _, _ ->
-                    actions(Action.Drag.Window(inside = false))
-                    false
-                }
-            ),
-        state = scrollState,
+    Column(
+        modifier = modifier,
     ) {
-        stickyHeader {
-            TopAppBar(
-                state = state,
-                actions = actions,
+        TopAppBar(
+            state = state,
+            actions = actions,
+        )
+        LazyColumn(
+            modifier = Modifier
+                .dropTarget(
+                    onStarted = { _, _ ->
+                        val (action, acceptedDrag) = when (state.hasStoragePermissions) {
+                            true -> Action.Drag.Window(inside = true) to true
+                            false -> Action.RequestPermission(Permission.ReadExternalStorage) to false
+                        }
+                        actions(action)
+                        acceptedDrag
+                    },
+                    onEntered = { actions(Action.Drag.Window(inside = true)) },
+                    onExited = { actions(Action.Drag.Window(inside = false)) },
+                    onEnded = { actions(Action.Drag.Window(inside = false)) },
+                    onDropped = { _, _ ->
+                        actions(Action.Drag.Window(inside = false))
+                        false
+                    }
+                ),
+            state = scrollState,
+        ) {
+            dragDropThumbnail(
+                thumbnailUrl = state.headerThumbnail,
+                thumbnail = thumbnail,
+                hasStoragePermission = state.hasStoragePermissions,
+                dragLocation = state.dragLocation,
+                onAction = actions
+            )
+
+            spacer(8.dp)
+            titleEditor(
+                title = upsert.title,
+                onEdit = actions
+            )
+
+            spacer(8.dp)
+            descriptionEditor(
+                description = upsert.description,
+                onEdit = actions
+            )
+
+            spacer(8.dp)
+            videoUrlEditor(
+                videoUrl = upsert.videoUrl,
+                onEdit = actions
+            )
+
+            spacer(8.dp)
+            chipsEditor(
+                upsert = upsert,
+                chipsState = state.chipsState,
+                onAction = actions
+            )
+
+            spacer(16.dp)
+            if (state.isEditing) bodyEditor(
+                body = state.body,
+                listState = scrollState,
+                onInteractedWith = {
+                    scope.launch { scrollState.animateScrollToItem(BODY_INDEX) }
+                },
+                onEdit = actions
+            )
+            else bodyPreview(
+                body = upsert.body
             )
         }
-        dragDropThumbnail(
-            thumbnailUrl = state.headerThumbnail,
-            thumbnail = thumbnail,
-            hasStoragePermission = state.hasStoragePermissions,
-            dragLocation = state.dragLocation,
-            onAction = actions
-        )
-
-        spacer(8.dp)
-        titleEditor(
-            title = upsert.title,
-            onEdit = actions
-        )
-
-        spacer(8.dp)
-        descriptionEditor(
-            description = upsert.description,
-            onEdit = actions
-        )
-
-        spacer(8.dp)
-        videoUrlEditor(
-            videoUrl = upsert.videoUrl,
-            onEdit = actions
-        )
-
-        spacer(8.dp)
-        chipsEditor(
-            upsert = upsert,
-            chipsState = state.chipsState,
-            onAction = actions
-        )
-
-        spacer(16.dp)
-        if (state.isEditing) bodyEditor(
-            body = state.body,
-            canConsumeScrollEvents = isBodyInViewPort,
-            onScrolled = scrollState::dispatchRawDelta,
-            onInteractedWith = {
-                scope.launch { scrollState.animateScrollToItem(BODY_INDEX) }
-            },
-            onEdit = actions
-        )
-        else bodyPreview(
-            body = upsert.body
-        )
     }
 }
 
@@ -396,23 +396,24 @@ private fun LazyListScope.videoUrlEditor(
 }
 
 private fun LazyListScope.bodyEditor(
-    body: TextFieldValue,
-    canConsumeScrollEvents: Boolean,
-    onScrolled: (Float) -> Float,
+    body: TextFieldState,
+    listState: LazyListState,
     onInteractedWith: () -> Unit,
     onEdit: (Action.TextEdit) -> Unit,
 ) = item(key = BODY_INDEX) {
-    NestedScrollTextContainer(
+    NestedScrollTextContainer2(
         modifier = Modifier
             .fillParentMaxSize()
             .padding(horizontal = 16.dp),
-        canConsumeScrollEvents = canConsumeScrollEvents,
-        onScrolled = onScrolled,
-        onPointerInput = {
-            detectTapGestures { onInteractedWith() }
-        }
+        listState = listState,
+        key = BODY_INDEX,
     ) {
-        var layoutResult: TextLayoutResult? by remember { mutableStateOf(null) }
+        var layoutResultCalculator by remember {
+            mutableStateOf<(() -> TextLayoutResult?)?>(null)
+        }
+        val layoutResult: TextLayoutResult? by remember(layoutResultCalculator) {
+            derivedStateOf { layoutResultCalculator?.invoke() }
+        }
         // TODO: Revert to TextField when b/240975569 and b/235383908 are fixed
         BasicTextField(
             modifier = Modifier
@@ -424,9 +425,7 @@ private fun LazyListScope.bodyEditor(
                         layoutResult
                             ?.getOffsetForPosition(offset)
                             ?.let { cursorIndex ->
-                                onEdit(
-                                    Action.TextEdit.Body.CursorIndex(cursorIndex)
-                                )
+                                body.edit { placeCursorAfterCharAt(cursorIndex) }
                             }
                     },
                     onDropped = { uris, offset ->
@@ -444,10 +443,10 @@ private fun LazyListScope.bodyEditor(
                     },
                 )
                 .onFocusChanged { if (it.hasFocus) onInteractedWith() },
-            value = body,
+            state = body,
 //            colors = Unstyled(),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
-            onTextLayout = { layoutResult = it },
+            onTextLayout = { layoutResultCalculator = it },
             textStyle = LocalTextStyle.current.copy(
                 color = MaterialTheme.colorScheme.onSurface,
                 fontFamily = FontFamily.Monospace,
@@ -455,7 +454,6 @@ private fun LazyListScope.bodyEditor(
                 lineHeight = 24.sp
             ),
 //            label = { Text(text = "Body") },
-            onValueChange = { onEdit(Action.TextEdit.Body.Edit(it)) }
         )
     }
 }

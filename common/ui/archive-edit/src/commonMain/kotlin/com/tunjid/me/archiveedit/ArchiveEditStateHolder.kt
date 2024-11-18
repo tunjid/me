@@ -20,7 +20,7 @@
 package com.tunjid.me.archiveedit
 
 
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.lifecycle.ViewModel
 import com.tunjid.me.archiveedit.di.archiveId
 import com.tunjid.me.archiveedit.di.archiveThumbnail
@@ -388,12 +388,10 @@ private fun ArchiveRepository.textBodyMutations(
 )
     .filterNotNull()
     .mapToMutation { archive ->
+        body.setTextAndPlaceCursorAtEnd(archive.body)
         copy(
             routeThumbnailUrl = thumbnailSharedElementKey(archive.thumbnail),
             thumbnail = archive.thumbnail,
-            body = TextFieldValue(
-                text = archive.body
-            ),
             upsert = upsert.copy(
                 id = archive.id,
                 title = archive.title,

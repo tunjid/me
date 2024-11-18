@@ -53,6 +53,7 @@ import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.core.ui.NestedScrollTextContainer
+import com.tunjid.me.core.ui.NestedScrollTextContainer2
 import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.globalui.PaneAnchor
@@ -143,12 +144,12 @@ internal fun ArchiveDetailScreen(
         }
 
         item(key = BODY_KEY) {
-            NestedScrollTextContainer(
+            NestedScrollTextContainer2(
                 modifier = Modifier
                     .fillParentMaxSize()
                     .padding(horizontal = 16.dp),
-                canConsumeScrollEvents = bodyInViewport,
-                onScrolled = scrollState::dispatchRawDelta,
+                listState = scrollState,
+                key = BODY_KEY,
             ) {
                 val richTextState = rememberRichTextState()
                 RichTextEditor(

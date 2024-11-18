@@ -53,13 +53,6 @@ class MainActivity : AppCompatActivity() {
         root.setContent {
             AppTheme {
                 MeApp(
-//                    modifier = Modifier.rootDragDropModifier(
-//                        dragTriggers = setOf(
-//                            DragTrigger.LongPress,
-//                            DragTrigger.DoubleTap
-//                        ),
-//                        view = root
-//                    ),
                     modifier = Modifier,
                     meAppState = meApp.appState,
                 )

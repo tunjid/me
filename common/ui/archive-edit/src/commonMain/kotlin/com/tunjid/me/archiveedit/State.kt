@@ -18,8 +18,7 @@
 
 package com.tunjid.me.archiveedit
 
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.foundation.text.input.TextFieldState
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveUpsert
@@ -72,7 +71,7 @@ data class State(
     @Transient
     val thumbnail: String? = null,
     @Transient
-    val body: TextFieldValue = TextFieldValue(),
+    val body: TextFieldState = TextFieldState(),
     @Transient
     val upsert: ArchiveUpsert = ArchiveUpsert(),
     @Transient
@@ -104,13 +103,7 @@ sealed class Action(val key: String) {
         ) : TextEdit()
 
         sealed class Body : TextEdit() {
-            data class Edit(
-                val textFieldValue: TextFieldValue,
-            ) : TextEdit()
 
-            data class CursorIndex(
-                val index: Int,
-            ) : TextEdit()
 
             data class ImageDrop(
                 val index: Int,
@@ -123,16 +116,6 @@ sealed class Action(val key: String) {
                 is Title -> mutationOf { copy(upsert = upsert.copy(title = value)) }
                 is Description -> mutationOf { copy(upsert = upsert.copy(description = value)) }
                 is VideoUrl -> mutationOf { copy(upsert = upsert.copy(videoUrl = value)) }
-                is Body.Edit -> mutationOf {
-                    copy(
-                        body = textFieldValue,
-                        upsert = upsert.copy(body = textFieldValue.text)
-                    )
-                }
-
-                is Body.CursorIndex -> mutationOf {
-                    copy(body = body.copy(selection = TextRange(index = index)))
-                }
 
                 is Body.ImageDrop -> mutationOf {
                     val existingText = body.text
@@ -146,11 +129,12 @@ sealed class Action(val key: String) {
                         endIndex = existingText.length
                     )
                     val text = startSubstring + imageMarkDown + endSubstring
+
+                    body.edit {
+                        replace(0, length, text)
+                        placeCursorAfterCharAt(index + imageMarkDown.length)
+                    }
                     copy(
-                        body = TextFieldValue(
-                            text = text,
-                            selection = TextRange(index = index + imageMarkDown.length)
-                        ),
                         upsert = upsert.copy(body = text)
                     )
                 }

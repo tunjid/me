@@ -16,8 +16,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
@@ -48,6 +53,55 @@ fun NestedScrollTextContainer(
                     block = onPointerInput
                 )
         )
+    }
+}
+
+@Composable
+fun NestedScrollTextContainer2(
+    modifier: Modifier = Modifier,
+    listState: LazyListState,
+    key: Any,
+    content: @Composable () -> Unit
+) {
+    val textIsAtTopOfViewport by produceState(
+        initialValue = false,
+        key1 = listState,
+        key2 = key,
+    ) {
+        snapshotFlow {
+            val textFieldInfo = listState.layoutInfo.visibleItemsInfo
+                .firstOrNull { it.key == key }
+                ?: return@snapshotFlow false
+            textFieldInfo.offset <= listState.layoutInfo.viewportStartOffset
+        }
+            .distinctUntilChanged()
+            .collectLatest(::value::set)
+    }
+
+    Box(
+        modifier = modifier
+            .nestedScroll(
+                connection = remember {
+                    object : NestedScrollConnection {
+                        override fun onPreScroll(
+                            available: Offset,
+                            source: NestedScrollSource
+                        ): Offset {
+                            return if (textIsAtTopOfViewport) Offset.Zero
+                            else {
+                                Offset(
+                                    x = 0f,
+                                    y = listState.dispatchRawDelta(-available.y)
+                                )
+                                available
+                            }
+                        }
+                    }
+                }
+            )
+    ) {
+        content()
+
     }
 }
 
