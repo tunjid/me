@@ -31,7 +31,6 @@ import com.tunjid.treenav.compose.configurations.animatePaneBoundsConfiguration
 import com.tunjid.treenav.compose.configurations.paneModifierConfiguration
 import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementHostState
 import com.tunjid.treenav.compose.threepane.ThreePane
-import com.tunjid.treenav.compose.threepane.configurations.canAnimateOnStartingFrames
 import com.tunjid.treenav.compose.threepane.configurations.threePanedMovableSharedElementConfiguration
 import com.tunjid.treenav.compose.threepane.configurations.threePanedNavHostConfiguration
 import com.tunjid.treenav.strings.Route
@@ -73,9 +72,8 @@ fun MeApp(
                 // Root LookaheadScope used to anchor all shared element transitions
                 SharedTransitionScope { sharedElementModifier ->
                     val movableSharedElementHostState = remember {
-                        MovableSharedElementHostState(
+                        MovableSharedElementHostState<ThreePane, Route>(
                             sharedTransitionScope = this@SharedTransitionScope,
-                            canAnimateOnStartingFrames = PaneState<ThreePane, Route>::canAnimateOnStartingFrames
                         )
                     }
                     PanedNavHost(
@@ -136,7 +134,6 @@ fun MeApp(
                             modifier = modifier
                                 .fillMaxSize()
                                 .then(sharedElementModifier)
-                                .then(movableSharedElementHostState.modifier)
                                 .routePanePadding(
                                     state = remember {
                                         derivedStateOf { meAppState.globalUi.uiChromeState }
