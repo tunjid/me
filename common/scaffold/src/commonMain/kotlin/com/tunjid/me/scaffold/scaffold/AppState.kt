@@ -79,8 +79,9 @@ class AppState @Inject constructor(
     internal val paneAnchorState by lazy { PaneAnchorState(density) }
     internal val dragToPopState = DragToPopState()
 
-    internal val isPreviewingBack get() = !backPreviewState.progress.isNaN()
-            || dragToPopState.isDraggingToPop
+    internal val isPreviewingBack
+        get() = !backPreviewState.progress.isNaN()
+                || dragToPopState.isDraggingToPop
 
     fun filteredPaneOrder(
         panedNavHostScope: PanedNavHostScope<ThreePane, Route>

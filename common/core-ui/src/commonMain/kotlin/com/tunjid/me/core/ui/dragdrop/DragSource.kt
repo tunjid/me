@@ -18,7 +18,6 @@ package com.tunjid.me.core.ui.dragdrop
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.painter.Painter
 import com.tunjid.me.core.utilities.Uri
 
 expect fun Modifier.dragSource(

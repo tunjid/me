@@ -37,8 +37,8 @@ import com.tunjid.me.scaffold.globalui.NavMode
 import com.tunjid.me.scaffold.globalui.PredictiveBackEffects
 import com.tunjid.me.scaffold.globalui.insetMutations
 import com.tunjid.me.scaffold.globalui.toWindowSizeClass
-import com.tunjid.me.scaffold.scaffold.MeApp
 import com.tunjid.me.scaffold.scaffold.AppState
+import com.tunjid.me.scaffold.scaffold.MeApp
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
