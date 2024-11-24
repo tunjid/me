@@ -41,8 +41,8 @@ tartakaKotlinInject = "0.7.1"
 tartakaKotlinInjectAnvil = "0.0.5"
 tunjidStateHolder = "1.1.0"
 tunjidTiler = "1.1.0"
-tunjidTreeNav = "0.0.11"
-tunjidComposables = "0.0.10"
+tunjidTreeNav = "0.0.12"
+tunjidComposables = "0.0.11"
 turbine = "0.12.1"
 
 [libraries]

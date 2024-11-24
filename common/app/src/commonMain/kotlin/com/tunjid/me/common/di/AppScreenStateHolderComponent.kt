@@ -27,7 +27,7 @@ import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
-import com.tunjid.me.scaffold.scaffold.MeAppState
+import com.tunjid.me.scaffold.scaffold.AppState
 import com.tunjid.me.settings.di.SettingsScreenHolderComponent
 import com.tunjid.me.signin.di.SignInScreenHolderComponent
 import com.tunjid.me.sync.di.InjectedSyncComponent
@@ -62,7 +62,7 @@ abstract class AppScreenStateHolderComponent(
         globalUiStateHolder: GlobalUiStateHolder,
         savedStateRepository: SavedStateRepository,
         sync: Sync,
-    ): MeAppState = MeAppState(
+    ): AppState = AppState(
         routeConfigurationMap = routeConfigurationMap,
         navigationStateHolder = navigationStateHolder,
         globalUiStateHolder = globalUiStateHolder,

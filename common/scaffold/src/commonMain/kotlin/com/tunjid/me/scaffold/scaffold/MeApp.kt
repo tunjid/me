@@ -16,23 +16,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.tunjid.composables.backpreview.backPreview
+import com.tunjid.composables.constrainedsize.constrainedSizePlacement
 import com.tunjid.composables.splitlayout.SplitLayout
-import com.tunjid.composables.splitlayout.SplitLayoutState
 import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
 import com.tunjid.me.scaffold.globalui.slices.fabState
 import com.tunjid.me.scaffold.globalui.slices.snackbarPositionalState
 import com.tunjid.me.scaffold.globalui.slices.uiChromeState
 import com.tunjid.me.scaffold.scaffold.PaneAnchorState.Companion.DraggableThumb
-import com.tunjid.me.scaffold.scaffold.PaneAnchorState.Companion.MinPaneWidth
-import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackConfiguration
-import com.tunjid.treenav.compose.PaneState
+import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.compose.PanedNavHost
 import com.tunjid.treenav.compose.configurations.animatePaneBoundsConfiguration
 import com.tunjid.treenav.compose.configurations.paneModifierConfiguration
 import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementHostState
 import com.tunjid.treenav.compose.threepane.ThreePane
+import com.tunjid.treenav.compose.threepane.configurations.predictiveBackConfiguration
 import com.tunjid.treenav.compose.threepane.configurations.threePanedMovableSharedElementConfiguration
 import com.tunjid.treenav.compose.threepane.configurations.threePanedNavHostConfiguration
+import com.tunjid.treenav.pop
 import com.tunjid.treenav.strings.Route
 
 /**
@@ -42,28 +43,10 @@ import com.tunjid.treenav.strings.Route
 @Composable
 fun MeApp(
     modifier: Modifier,
-    meAppState: MeAppState,
+    appState: AppState,
 ) {
-    val paneRenderOrder = remember {
-        listOf(
-            ThreePane.Secondary,
-            ThreePane.Primary,
-        )
-    }
-    val splitLayoutState = remember {
-        SplitLayoutState(
-            orientation = Orientation.Horizontal,
-            maxCount = paneRenderOrder.size,
-            minSize = MinPaneWidth,
-            keyAtIndex = { index ->
-                val indexDiff = paneRenderOrder.size - visibleCount
-                paneRenderOrder[index + indexDiff]
-            }
-        )
-    }
-    val density = LocalDensity.current
     CompositionLocalProvider(
-        LocalAppState provides meAppState,
+        LocalAppState provides appState,
     ) {
         Surface {
             Box(
@@ -78,41 +61,49 @@ fun MeApp(
                     }
                     PanedNavHost(
                         modifier = Modifier.fillMaxSize(),
-                        state = meAppState.rememberPanedNavHostState {
+                        state = appState.rememberPanedNavHostState {
                             this
+                                .paneModifierConfiguration {
+                                    Modifier
+                                        .fillMaxSize()
+                                        .constrainedSizePlacement(
+                                            orientation = Orientation.Horizontal,
+                                            minSize = 180.dp,
+                                            atStart = paneState.pane == ThreePane.Secondary,
+                                        )
+                                        .padding(
+                                            horizontal =
+                                            if (appState.splitLayoutState.visibleCount > 1) 16.dp
+                                            else 0.dp
+                                        )
+                                        .run {
+                                            if (paneState.pane == ThreePane.TransientPrimary) backPreview(
+                                                appState.backPreviewState
+                                            )
+                                            else this
+                                        }
+                                }
                                 .threePanedNavHostConfiguration(
                                     windowWidthState = derivedStateOf {
-                                        splitLayoutState.size
+                                        appState.splitLayoutState.size
                                     }
                                 )
                                 .predictiveBackConfiguration(
-                                    windowSizeClassState = derivedStateOf {
-                                        meAppState.globalUi.windowSizeClass
+                                    isPreviewingBack = derivedStateOf {
+                                        appState.isPreviewingBack
                                     },
-                                    backStatusState = derivedStateOf {
-                                        meAppState.globalUi.backStatus
-                                    },
+                                    backPreviewTransform = MultiStackNav::pop,
                                 )
                                 .threePanedMovableSharedElementConfiguration(
                                     movableSharedElementHostState
                                 )
-                                .paneModifierConfiguration {
-                                    Modifier
-                                        .restrictedSizePlacement(
-                                            atStart = paneState.pane == ThreePane.Secondary,
-                                            minWidth = 180.dp,
-                                        )
-                                        .padding(
-                                            horizontal = if (splitLayoutState.visibleCount > 1) 16.dp else 0.dp
-                                        )
-                                }
                                 .animatePaneBoundsConfiguration(
                                     lookaheadScope = this@SharedTransitionScope,
                                     shouldAnimatePane = {
                                         when (paneState.pane) {
                                             ThreePane.Primary,
                                             ThreePane.Secondary,
-                                            ThreePane.Tertiary -> !meAppState.paneAnchorState.hasInteractions
+                                            ThreePane.Tertiary -> !appState.paneAnchorState.hasInteractions
 
                                             ThreePane.TransientPrimary -> true
                                             ThreePane.Overlay,
@@ -122,82 +113,82 @@ fun MeApp(
                                 )
                         },
                     ) {
-                        val filteredOrder by remember {
-                            derivedStateOf { paneRenderOrder.filter { nodeFor(it) != null } }
+                        val filteredPaneOrder by remember {
+                            derivedStateOf { appState.filteredPaneOrder(this) }
                         }
-                        splitLayoutState.visibleCount = filteredOrder.size
-                        meAppState.paneAnchorState.updateMaxWidth(
-                            with(density) { splitLayoutState.size.roundToPx() }
+                        appState.splitLayoutState.visibleCount = filteredPaneOrder.size
+                        appState.paneAnchorState.updateMaxWidth(
+                            with(LocalDensity.current) { appState.splitLayoutState.size.roundToPx() }
                         )
                         SplitLayout(
-                            state = splitLayoutState,
+                            state = appState.splitLayoutState,
                             modifier = modifier
                                 .fillMaxSize()
                                 .then(sharedElementModifier)
                                 .routePanePadding(
                                     state = remember {
-                                        derivedStateOf { meAppState.globalUi.uiChromeState }
+                                        derivedStateOf { appState.globalUi.uiChromeState }
                                     }
                                 ),
                             itemSeparators = { _, offset ->
                                 DraggableThumb(
-                                    splitLayoutState = splitLayoutState,
-                                    paneAnchorState = meAppState.paneAnchorState,
+                                    splitLayoutState = appState.splitLayoutState,
+                                    paneAnchorState = appState.paneAnchorState,
                                     offset = offset
                                 )
                             },
                             itemContent = { index ->
                                 DragToPopLayout(
-                                    state = meAppState,
-                                    pane = filteredOrder[index]
+                                    state = appState,
+                                    pane = filteredPaneOrder[index]
                                 )
                             }
                         )
-                        LaunchedEffect(meAppState.paneAnchorState.currentPaneAnchor) {
-                            meAppState.updateGlobalUi {
-                                copy(paneAnchor = meAppState.paneAnchorState.currentPaneAnchor)
+                        LaunchedEffect(appState.paneAnchorState.currentPaneAnchor) {
+                            appState.updateGlobalUi {
+                                copy(paneAnchor = appState.paneAnchorState.currentPaneAnchor)
                             }
                         }
-                        LaunchedEffect(filteredOrder) {
-                            if (filteredOrder.size != 1) return@LaunchedEffect
-                            meAppState.paneAnchorState.onClosed()
+                        LaunchedEffect(filteredPaneOrder) {
+                            if (filteredPaneOrder.size != 1) return@LaunchedEffect
+                            appState.paneAnchorState.onClosed()
                         }
                     }
                 }
                 AppFab(
                     state = remember {
-                        derivedStateOf { meAppState.globalUi.fabState }
+                        derivedStateOf { appState.globalUi.fabState }
                     }.value,
                     onClicked = {
-                        meAppState.globalUi.fabClickListener(Unit)
+                        appState.globalUi.fabClickListener(Unit)
                     }
                 )
                 AppBottomNav(
-                    navItems = meAppState.navItems,
+                    navItems = appState.navItems,
                     positionalState = remember {
-                        derivedStateOf { meAppState.globalUi.bottomNavPositionalState }
+                        derivedStateOf { appState.globalUi.bottomNavPositionalState }
                     }.value,
-                    onNavItemSelected = meAppState::onNavItemSelected,
+                    onNavItemSelected = appState::onNavItemSelected,
                 )
                 AppNavRail(
-                    navItems = meAppState.navItems,
+                    navItems = appState.navItems,
                     uiChromeState = remember {
-                        derivedStateOf { meAppState.globalUi.uiChromeState }
+                        derivedStateOf { appState.globalUi.uiChromeState }
                     }.value,
-                    onNavItemSelected = meAppState::onNavItemSelected,
+                    onNavItemSelected = appState::onNavItemSelected,
                 )
                 AppSnackBar(
                     state = remember {
-                        derivedStateOf { meAppState.globalUi.snackbarPositionalState }
+                        derivedStateOf { appState.globalUi.snackbarPositionalState }
                     }.value,
                     queue = remember {
-                        derivedStateOf { meAppState.globalUi.snackbarMessages }
+                        derivedStateOf { appState.globalUi.snackbarMessages }
                     }.value,
                     onMessageClicked = { message ->
-                        meAppState.globalUi.snackbarMessageConsumer(message)
+                        appState.globalUi.snackbarMessageConsumer(message)
                     },
                     onSnackbarOffsetChanged = { offset ->
-                        meAppState.updateGlobalUi { copy(snackbarOffset = offset) }
+                        appState.updateGlobalUi { copy(snackbarOffset = offset) }
                     },
                 )
             }

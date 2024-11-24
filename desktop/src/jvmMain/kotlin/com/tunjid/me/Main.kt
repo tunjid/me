@@ -45,7 +45,7 @@ fun main() {
             AppTheme {
                 MeApp(
                     modifier = Modifier,
-                    meAppState = app.appState,
+                    appState = app.appState,
                 )
             }
 

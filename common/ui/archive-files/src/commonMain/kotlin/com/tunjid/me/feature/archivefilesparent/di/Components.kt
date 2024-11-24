@@ -39,7 +39,8 @@ import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
-import com.tunjid.treenav.compose.threepane.configurations.movableSharedElementScope
+import com.tunjid.treenav.compose.threepane.configurations.requireThreePaneMovableSharedElementScope
+
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
@@ -96,7 +97,7 @@ abstract class ArchiveFilesParentScreenHolderComponent(
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
             ArchiveFilesParentScreen(
-                movableSharedElementScope = movableSharedElementScope(),
+                movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
                 modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
                 state = state,
                 actions = viewModel.accept,

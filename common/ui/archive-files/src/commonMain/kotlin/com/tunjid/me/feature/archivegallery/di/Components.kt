@@ -40,7 +40,8 @@ import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.treenav.compose.PaneScope
 import com.tunjid.treenav.compose.threepane.ThreePane
-import com.tunjid.treenav.compose.threepane.configurations.movableSharedElementScope
+import com.tunjid.treenav.compose.threepane.configurations.requireThreePaneMovableSharedElementScope
+
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
@@ -99,7 +100,7 @@ abstract class ArchiveGalleryScreenHolderComponent(
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
             ArchiveGalleryScreen(
-                movableSharedElementScope = movableSharedElementScope(),
+                movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
                 state = state,
                 actions = viewModel.accept,
             )

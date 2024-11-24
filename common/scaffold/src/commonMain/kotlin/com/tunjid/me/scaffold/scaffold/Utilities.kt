@@ -12,7 +12,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -68,30 +67,6 @@ internal fun Modifier.routePanePadding(
         end = paddingValues[2],
         bottom = paddingValues[3]
     )
-}
-
-/**
- * Shifts layouts out of view when the content area is too small instead of resizing them
- */
-internal fun Modifier.restrictedSizePlacement(
-    atStart: Boolean,
-    minWidth: Dp,
-) = layout { measurable, constraints ->
-    val minPanWidth = minWidth.roundToPx()
-    val actualConstraints = when {
-        constraints.maxWidth < minPanWidth -> constraints.copy(maxWidth = minPanWidth)
-        else -> constraints
-    }
-    val placeable = measurable.measure(actualConstraints)
-    layout(width = placeable.width, height = placeable.height) {
-        placeable.placeRelative(
-            x = if (constraints.maxWidth < minPanWidth) when {
-                atStart -> constraints.maxWidth - minPanWidth
-                else -> minPanWidth - constraints.maxWidth
-            } else 0,
-            y = 0,
-        )
-    }
 }
 
 private val PaneSizeSpring = spring(
