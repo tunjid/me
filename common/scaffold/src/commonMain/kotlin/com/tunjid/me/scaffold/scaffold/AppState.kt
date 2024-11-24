@@ -11,7 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
-import com.tunjid.composables.dragtodismiss.DragToDismissState
+import com.tunjid.composables.backpreview.BackPreviewState
 import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.navigation.NavItem
@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @Stable
-class MeAppState @Inject constructor(
+class AppState @Inject constructor(
     private val routeConfigurationMap: Map<String, @JvmSuppressWildcards PaneStrategy<ThreePane, Route>>,
     private val savedStateRepository: SavedStateRepository,
     private val navigationStateHolder: NavigationStateHolder,
@@ -56,10 +56,14 @@ class MeAppState @Inject constructor(
     val navItems by derivedStateOf { multiStackNavState.value.navItems }
     val globalUi by uiState
     val navigation by multiStackNavState
+    val backPreviewState = BackPreviewState()
 
     private var density = Density(1f)
     internal val paneAnchorState by lazy { PaneAnchorState(density) }
-    internal val dragToDismissState = DragToDismissState()
+    internal val dragToPopState = DragToPopState()
+
+    internal val isPreviewingBack get() = !backPreviewState.progress.isNaN()
+            || dragToPopState.isDraggingToPop
 
     private val configurationTrie = RouteTrie<PaneStrategy<ThreePane, Route>>().apply {
         routeConfigurationMap
@@ -133,7 +137,7 @@ class MeAppState @Inject constructor(
         }
 }
 
-internal val LocalAppState = staticCompositionLocalOf<MeAppState> {
+internal val LocalAppState = staticCompositionLocalOf<AppState> {
     TODO()
 }
 

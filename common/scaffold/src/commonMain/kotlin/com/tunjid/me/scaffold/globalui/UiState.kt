@@ -64,7 +64,6 @@ data class UiState(
     val windowSizeClass: WindowSizeClass = WindowSizeClass.COMPACT,
     val isImmersive: Boolean = false,
     val systemUI: SystemUI = NoOpSystemUI,
-    val backStatus: BackStatus = BackStatus.None,
     val paneAnchor: PaneAnchor = PaneAnchor.Zero,
     val fabClickListener: (Unit) -> Unit = emptyCallback(),
     val snackbarMessageConsumer: (com.tunjid.me.core.model.Message) -> Unit = emptyCallback(),

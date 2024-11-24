@@ -48,7 +48,8 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.PaneScope
 import com.tunjid.treenav.compose.threepane.ThreePane
-import com.tunjid.treenav.compose.threepane.configurations.movableSharedElementScope
+import com.tunjid.treenav.compose.threepane.configurations.requireThreePaneMovableSharedElementScope
+
 import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
@@ -127,7 +128,7 @@ abstract class ArchiveEditScreenHolderComponent(
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
             ArchiveEditScreen(
-                movableSharedElementScope = movableSharedElementScope(),
+                movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
                 state = state,
                 actions = viewModel.accept,
                 modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
@@ -160,7 +161,7 @@ abstract class ArchiveEditScreenHolderComponent(
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
             ArchiveEditScreen(
-                movableSharedElementScope = movableSharedElementScope(),
+                movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
                 state = state,
                 actions = viewModel.accept,
                 modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),

@@ -16,10 +16,10 @@
 
 package com.tunjid.me.common.di
 
-import com.tunjid.me.scaffold.scaffold.MeAppState
+import com.tunjid.me.scaffold.scaffold.AppState
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 class PersistedMeApp(
-    override val appState: MeAppState,
+    override val appState: AppState,
 ) : MeApp
