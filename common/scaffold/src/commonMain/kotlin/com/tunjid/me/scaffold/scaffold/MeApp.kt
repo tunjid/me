@@ -19,13 +19,11 @@ import androidx.compose.ui.unit.dp
 import com.tunjid.composables.backpreview.backPreview
 import com.tunjid.composables.constrainedsize.constrainedSizePlacement
 import com.tunjid.composables.splitlayout.SplitLayout
-import com.tunjid.composables.splitlayout.SplitLayoutState
 import com.tunjid.me.scaffold.globalui.slices.bottomNavPositionalState
 import com.tunjid.me.scaffold.globalui.slices.fabState
 import com.tunjid.me.scaffold.globalui.slices.snackbarPositionalState
 import com.tunjid.me.scaffold.globalui.slices.uiChromeState
 import com.tunjid.me.scaffold.scaffold.PaneAnchorState.Companion.DraggableThumb
-import com.tunjid.me.scaffold.scaffold.PaneAnchorState.Companion.MinPaneWidth
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.compose.PanedNavHost
 import com.tunjid.treenav.compose.configurations.animatePaneBoundsConfiguration
@@ -47,23 +45,6 @@ fun MeApp(
     modifier: Modifier,
     appState: AppState,
 ) {
-    val paneRenderOrder = remember {
-        listOf(
-            ThreePane.Secondary,
-            ThreePane.Primary,
-        )
-    }
-    val splitLayoutState = remember {
-        SplitLayoutState(
-            orientation = Orientation.Horizontal,
-            maxCount = paneRenderOrder.size,
-            minSize = MinPaneWidth,
-            keyAtIndex = { index ->
-                val indexDiff = paneRenderOrder.size - visibleCount
-                paneRenderOrder[index + indexDiff]
-            }
-        )
-    }
     val density = LocalDensity.current
     CompositionLocalProvider(
         LocalAppState provides appState,
@@ -92,7 +73,9 @@ fun MeApp(
                                             atStart = paneState.pane == ThreePane.Secondary,
                                         )
                                         .padding(
-                                            horizontal = if (splitLayoutState.visibleCount > 1) 16.dp else 0.dp
+                                            horizontal =
+                                            if (appState.splitLayoutState.visibleCount > 1) 16.dp
+                                            else 0.dp
                                         )
                                         .run {
                                             if (paneState.pane == ThreePane.TransientPrimary) backPreview(
@@ -103,7 +86,7 @@ fun MeApp(
                                 }
                                 .threePanedNavHostConfiguration(
                                     windowWidthState = derivedStateOf {
-                                        splitLayoutState.size
+                                        appState.splitLayoutState.size
                                     }
                                 )
                                 .predictiveBackConfiguration(
@@ -131,15 +114,15 @@ fun MeApp(
                                 )
                         },
                     ) {
-                        val filteredOrder by remember {
-                            derivedStateOf { paneRenderOrder.filter { nodeFor(it) != null } }
+                        val filteredPaneOrder by remember {
+                            derivedStateOf { appState.filteredPaneOrder(this) }
                         }
-                        splitLayoutState.visibleCount = filteredOrder.size
+                        appState.splitLayoutState.visibleCount = filteredPaneOrder.size
                         appState.paneAnchorState.updateMaxWidth(
-                            with(density) { splitLayoutState.size.roundToPx() }
+                            with(density) { appState.splitLayoutState.size.roundToPx() }
                         )
                         SplitLayout(
-                            state = splitLayoutState,
+                            state = appState.splitLayoutState,
                             modifier = modifier
                                 .fillMaxSize()
                                 .then(sharedElementModifier)
@@ -150,7 +133,7 @@ fun MeApp(
                                 ),
                             itemSeparators = { _, offset ->
                                 DraggableThumb(
-                                    splitLayoutState = splitLayoutState,
+                                    splitLayoutState = appState.splitLayoutState,
                                     paneAnchorState = appState.paneAnchorState,
                                     offset = offset
                                 )
@@ -158,7 +141,7 @@ fun MeApp(
                             itemContent = { index ->
                                 DragToPopLayout(
                                     state = appState,
-                                    pane = filteredOrder[index]
+                                    pane = filteredPaneOrder[index]
                                 )
                             }
                         )
@@ -167,8 +150,8 @@ fun MeApp(
                                 copy(paneAnchor = appState.paneAnchorState.currentPaneAnchor)
                             }
                         }
-                        LaunchedEffect(filteredOrder) {
-                            if (filteredOrder.size != 1) return@LaunchedEffect
+                        LaunchedEffect(filteredPaneOrder) {
+                            if (filteredPaneOrder.size != 1) return@LaunchedEffect
                             appState.paneAnchorState.onClosed()
                         }
                     }
