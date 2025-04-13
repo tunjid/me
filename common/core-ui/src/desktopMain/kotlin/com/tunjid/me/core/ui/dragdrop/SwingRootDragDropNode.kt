@@ -49,33 +49,26 @@ actual fun Modifier.dragSource(
     drawDragDecoration = {
         drawDragDecoration?.invoke(this)
     },
-    block = {
-        detectDragGestures(
-            onDragStart = dragStart@{
-                if (uris.isEmpty()) return@dragStart
-                startTransfer(
-                    DragAndDropTransferData(
-                        transferable = DragAndDropTransferable(
-                            transferable = uris.transferable(),
-                        ),
-                        supportedActions = listOf(
-                            DragAndDropTransferAction.Copy,
-                            DragAndDropTransferAction.Move,
-                            DragAndDropTransferAction.Link,
-                        ),
-                        dragDecorationOffset = it,
-                        onTransferCompleted = { action ->
-                            when (action) {
-                                null -> println("Transfer aborted")
-                                DragAndDropTransferAction.Copy -> println("Copied")
-                                DragAndDropTransferAction.Move -> println("Moved")
-                                DragAndDropTransferAction.Link -> println("Linked")
-                            }
-                        }
-                    )
-                )
-            },
-            onDrag = { _, _ -> },
+    transferData = {
+        if (uris.isEmpty()) null
+        else DragAndDropTransferData(
+            transferable = DragAndDropTransferable(
+                transferable = uris.transferable(),
+            ),
+            supportedActions = listOf(
+                DragAndDropTransferAction.Copy,
+                DragAndDropTransferAction.Move,
+                DragAndDropTransferAction.Link,
+            ),
+            dragDecorationOffset = it,
+            onTransferCompleted = { action ->
+                when (action) {
+                    null -> println("Transfer aborted")
+                    DragAndDropTransferAction.Copy -> println("Copied")
+                    DragAndDropTransferAction.Move -> println("Moved")
+                    DragAndDropTransferAction.Link -> println("Linked")
+                }
+            }
         )
     }
 )

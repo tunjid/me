@@ -20,9 +20,10 @@ import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.data.network.models.NetworkErrorCodes
 import com.tunjid.me.data.network.models.NetworkResponse
 import io.ktor.client.HttpClient
+import io.ktor.client.call.HttpClientCall
 import io.ktor.client.plugins.HttpClientPlugin
-import io.ktor.client.plugins.observer.ResponseHandler
-import io.ktor.client.plugins.observer.ResponseObserver
+import io.ktor.client.plugins.HttpSend
+import io.ktor.client.plugins.plugin
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
 import io.ktor.util.AttributeKey
@@ -37,7 +38,7 @@ class ErrorInterceptorConfig {
  */
 internal class SessionCookieInvalidator(
     private val networkErrorConverter: ((String) -> NetworkResponse.Error)?,
-    private val sessionEntityQueries: SessionEntityQueries?
+    private val sessionEntityQueries: SessionEntityQueries?,
 ) {
 
     companion object : HttpClientPlugin<ErrorInterceptorConfig, SessionCookieInvalidator> {
@@ -52,10 +53,12 @@ internal class SessionCookieInvalidator(
             )
         }
 
-        override fun install(feature: SessionCookieInvalidator, scope: HttpClient) {
-            val observer: ResponseHandler = responseHandler@{ response ->
-                val converter = feature.networkErrorConverter ?: return@responseHandler
-                val sessionEntityQueries = feature.sessionEntityQueries ?: return@responseHandler
+        override fun install(plugin: SessionCookieInvalidator, scope: HttpClient) {
+            scope.plugin(HttpSend).intercept { context ->
+                val result: HttpClientCall = execute(context)
+                val response = result.response
+                val converter = plugin.networkErrorConverter ?: return@intercept result
+                val sessionEntityQueries = plugin.sessionEntityQueries ?: return@intercept result
 
                 if (!response.status.isSuccess())
                     try {
@@ -67,9 +70,9 @@ internal class SessionCookieInvalidator(
                         }
                     } catch (_: Throwable) {
                     }
-            }
 
-            ResponseObserver.install(ResponseObserver(observer), scope)
+                result
+            }
         }
     }
 }
