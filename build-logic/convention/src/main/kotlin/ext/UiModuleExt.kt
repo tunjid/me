@@ -22,36 +22,33 @@ fun org.gradle.api.Project.configureUiModule(
     extension: KotlinMultiplatformExtension
 ) = extension.apply {
     sourceSets.apply {
-        val catalogs = extensions.getByType(VersionCatalogsExtension::class.java)
-        val libs = catalogs.named("libs")
-
         named("commonMain") {
             dependencies {
                 implementation(project(":common:data"))
                 implementation(project(":common:scaffold"))
                 implementation(project(":common:ui:template"))
 
-                api(libs.findLibrary("androidx-lifecycle-runtime-ktx").get())
-                api(libs.findLibrary("androidx-lifecycle-runtime-compose").get())
-                api(libs.findLibrary("androidx-lifecycle-viewmodel-ktx").get())
-                api(libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())
-                api(libs.findLibrary("androidx-window-core").get())
-                api(libs.findLibrary("androidx-window-window").get())
+                api(versionCatalog.findLibrary("androidx-lifecycle-runtime-ktx").get())
+                api(versionCatalog.findLibrary("androidx-lifecycle-runtime-compose").get())
+                api(versionCatalog.findLibrary("androidx-lifecycle-viewmodel-ktx").get())
+                api(versionCatalog.findLibrary("androidx-lifecycle-viewmodel-compose").get())
+                api(versionCatalog.findLibrary("androidx-window-core").get())
+                api(versionCatalog.findLibrary("androidx-window-window").get())
 
-                implementation(libs.findLibrary("jetbrains-compose-runtime").get())
-                implementation(libs.findLibrary("jetbrains-compose-animation").get())
-                implementation(libs.findLibrary("jetbrains-compose-material3").get())
-                implementation(libs.findLibrary("jetbrains-compose-foundation-layout").get())
+                implementation(versionCatalog.findLibrary("jetbrains-compose-runtime").get())
+                implementation(versionCatalog.findLibrary("jetbrains-compose-animation").get())
+                implementation(versionCatalog.findLibrary("jetbrains-compose-material3").get())
+                implementation(versionCatalog.findLibrary("jetbrains-compose-foundation-layout").get())
 
-                implementation(libs.findLibrary("kotlinx-coroutines-core").get())
-                api(libs.findLibrary("tunjid-treenav-compose-common").get())
-                api(libs.findLibrary("tunjid-treenav-core-common").get())
-                api(libs.findLibrary("tunjid-treenav-strings-common").get())
+                implementation(versionCatalog.findLibrary("kotlinx-coroutines-core").get())
+                api(versionCatalog.findLibrary("tunjid-treenav-compose-common").get())
+                api(versionCatalog.findLibrary("tunjid-treenav-core-common").get())
+                api(versionCatalog.findLibrary("tunjid-treenav-strings-common").get())
             }
         }
         named("androidMain") {
             dependencies {
-                implementation(libs.findLibrary("androidx-compose-foundation-layout").get())
+                implementation(versionCatalog.findLibrary("androidx-compose-foundation-layout").get())
             }
         }
         named("desktopMain") {

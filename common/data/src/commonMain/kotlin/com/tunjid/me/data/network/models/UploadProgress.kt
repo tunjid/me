@@ -44,7 +44,10 @@ inline fun <reified T> HttpClient.upload(
                     formData = formData,
                 ) {
                     onUpload { bytesSentTotal, contentLength ->
-                        channel.send((TransferStatus.Uploading(bytesSentTotal.toFloat() / contentLength)))
+                        channel.send((TransferStatus.Uploading(
+                            if (contentLength == null) Float.NaN
+                            else bytesSentTotal.toFloat() / contentLength))
+                        )
                     }
                 }.body<T>()
             )
