@@ -38,6 +38,11 @@ kotlin {
                 implementation(libs.richtext.commonmark)
                 implementation(libs.richtext.material3)
 
+                implementation(libs.multiplatform.markdown.renderer)
+                implementation(libs.multiplatform.markdown.renderer.code)
+                implementation(libs.multiplatform.markdown.renderer.coil3)
+                implementation(libs.multiplatform.markdown.renderer.m3)
+
                 implementation(libs.tunjid.mutator.core.common)
                 implementation(libs.tunjid.mutator.coroutines.common)
 

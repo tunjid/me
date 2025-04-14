@@ -42,26 +42,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.mohamedrejeb.richeditor.model.rememberRichTextState
-import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
+import com.tunjid.me.archivedetail.BlogMarkdownScope.Companion.BlogMarkdownScope
 import com.tunjid.me.archivedetail.di.kind
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.MediaArgs
-import com.tunjid.me.core.ui.NestedScrollTextContainer
-import com.tunjid.me.core.ui.isInViewport
 import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.compose.moveablesharedelement.updatedMovableSharedElementOf
 import com.tunjid.treenav.strings.RouteParams
-
-private const val BODY_KEY = 3
 
 fun ArchiveDetailRoute(
     routeParams: RouteParams,
@@ -84,10 +78,9 @@ internal fun ArchiveDetailScreen(
     state: State,
     actions: (Action) -> Unit,
     modifier: Modifier = Modifier,
-) {
+) = BlogMarkdownScope {
     val scrollState = rememberLazyListState()
     val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
-    val bodyInViewport = scrollState.isInViewport(BODY_KEY)
 
     val archive = state.archive
 
@@ -95,6 +88,8 @@ internal fun ArchiveDetailScreen(
     SecondaryPaneCloseBackHandler(
         enabled = state.isInPrimaryNav && state.hasSecondaryPanel
     )
+
+    val markdownState = innerMarkdownState(archive?.body ?: "")
 
     LazyColumn(
         modifier = modifier,
@@ -141,27 +136,10 @@ internal fun ArchiveDetailScreen(
             Spacer(modifier = Modifier.padding(16.dp))
         }
 
-        item(key = BODY_KEY) {
-            NestedScrollTextContainer(
-                modifier = Modifier
-                    .fillParentMaxSize()
-                    .padding(horizontal = 16.dp),
-                canConsumeScrollEvents = bodyInViewport,
-                onScrolled = scrollState::dispatchRawDelta,
-            ) {
-                val richTextState = rememberRichTextState()
-                RichTextEditor(
-                    state = richTextState,
-                    readOnly = true,
-                )
-                LaunchedEffect(archive) {
-                    archive?.let {
-                        richTextState.setMarkdown(it.body)
-                        richTextState.selection = TextRange.Zero
-                    }
-                }
-            }
-        }
+        blogItems(
+            lazyListScope = this,
+            innerMarkdownState = markdownState,
+        )
 
         item {
             Spacer(modifier = Modifier.padding(16.dp))
@@ -196,11 +174,10 @@ internal fun ArchiveDetailScreen(
     }
 }
 
-
 @Composable
 private fun TopAppBar(
     state: State,
-    actions: (Action) -> Unit
+    actions: (Action) -> Unit,
 ) {
     androidx.compose.material3.TopAppBar(
         modifier = Modifier

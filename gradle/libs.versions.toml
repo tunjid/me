@@ -30,11 +30,12 @@ imageIO = "3.9.4"
 ksp = "2.1.20-1.0.32"
 ktor = "3.0.3"
 mockk = "1.12.3"
+multiplatformMarkdownRenderer = "0.33.0-rc01"
 okhttp = "4.12.0"
 okio = "3.10.2"
 retrofit = "2.11.0"
 richtext = "0.16.0"
-richeditor = "1.0.0-rc01"
+richeditor = "1.0.0-rc12"
 socketio = "2.0.0"
 sqldelight = "2.0.0"
 tartakaKotlinInject = "0.7.2"
@@ -127,6 +128,10 @@ ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serializatio
 ktor-io-core = { group = "io.ktor", name = "ktor-io", version.ref = "ktor" }
 ktor-io-jvm = { group = "io.ktor", name = "ktor-io-jvm", version.ref = "ktor" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+multiplatform-markdown-renderer = { group = "com.mikepenz", name = "multiplatform-markdown-renderer", version.ref = "multiplatformMarkdownRenderer" }
+multiplatform-markdown-renderer-code = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-code", version.ref = "multiplatformMarkdownRenderer" }
+multiplatform-markdown-renderer-coil3 = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-coil3", version.ref = "multiplatformMarkdownRenderer" }
+multiplatform-markdown-renderer-m3 = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-m3", version.ref = "multiplatformMarkdownRenderer" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 richeditor = { group = "com.mohamedrejeb.richeditor", name = "richeditor-compose", version.ref = "richeditor" }
