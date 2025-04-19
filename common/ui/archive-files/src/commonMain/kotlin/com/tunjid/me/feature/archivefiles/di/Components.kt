@@ -42,7 +42,7 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.configurations.requireThreePaneMovableSharedElementScope
 
-import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
+import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
@@ -104,7 +104,7 @@ abstract class ArchiveFilesScreenHolderComponent(
     @Provides
     fun filesRouteAdaptiveConfiguration(
         creator: ArchiveFilesStateHolderCreator
-    ) = RoutePattern to threePaneListDetailStrategy(
+    ) = RoutePattern to threePaneEntry(
         render = { route ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
             val viewModel = viewModel<ActualArchiveFilesStateHolder> {

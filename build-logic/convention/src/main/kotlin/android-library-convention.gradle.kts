@@ -31,9 +31,6 @@ android {
             res.srcDirs("src/androidMain/res")
         }
     }
-    configurations.all {
-        coerceComposeVersion(this)
-    }
 }
 
 addDesugarDependencies()

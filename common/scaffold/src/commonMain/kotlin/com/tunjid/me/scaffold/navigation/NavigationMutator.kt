@@ -19,7 +19,13 @@
 
 package com.tunjid.me.scaffold.navigation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Mail
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.ui.graphics.vector.ImageVector
+import me.common.scaffold.generated.resources.Res
 import com.tunjid.me.scaffold.savedstate.SavedState
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.mutator.ActionStateMutator
@@ -39,7 +45,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import me.common.scaffold.generated.resources.articles
+import me.common.scaffold.generated.resources.projects
+import me.common.scaffold.generated.resources.settings
+import me.common.scaffold.generated.resources.talks
 import me.tatarka.inject.annotations.Inject
+import org.jetbrains.compose.resources.StringResource
 
 typealias NavigationStateHolder = ActionStateMutator<NavigationMutation, StateFlow<MultiStackNav>>
 typealias NavigationMutation = NavigationContext.() -> MultiStackNav
@@ -52,8 +63,7 @@ interface NavigationAction {
 }
 
 data class NavItem(
-    val name: String,
-    val icon: ImageVector,
+    val stack: AppStack,
     val index: Int,
     val selected: Boolean
 )
@@ -134,3 +144,30 @@ private fun RouteParser.parseMultiStackNav(savedState: SavedState) =
         .copy(
             currentIndex = savedState.activeNav
         )
+
+enum class AppStack(
+    val stackName: String,
+    val titleRes: StringResource,
+    val icon: ImageVector,
+) {
+    Articles(
+        stackName = "articles-stack",
+        titleRes = Res.string.articles,
+        icon = Icons.Rounded.Home,
+    ),
+    Projects(
+        stackName = "projects-stack",
+        titleRes = Res.string.projects,
+        icon = Icons.Rounded.Search,
+    ),
+    Messages(
+        stackName = "talks-stack",
+        titleRes = Res.string.talks,
+        icon = Icons.Rounded.Mail,
+    ),
+    Settings(
+        stackName = "settings-stack",
+        titleRes = Res.string.settings,
+        icon = Icons.Rounded.Notifications,
+    ),
+}

@@ -76,13 +76,12 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.window)
 
-    implementation(libs.jetbrains.compose.foundation.layout)
-    implementation(libs.jetbrains.compose.material3)
-    implementation(libs.jetbrains.compose.animation)
-    implementation(libs.jetbrains.compose.runtime)
-    implementation(libs.jetbrains.compose.ui.util)
+    implementation(libs.compose.foundation.layout)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.animation)
+    implementation(libs.compose.runtime)
+    implementation(libs.compose.ui.util)
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.datetime)

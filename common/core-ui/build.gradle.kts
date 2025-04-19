@@ -34,11 +34,12 @@ kotlin {
                 implementation(libs.coil.compose)
                 implementation(libs.coil.ktor)
 
-                implementation(libs.jetbrains.compose.runtime)
-                implementation(libs.jetbrains.compose.animation)
-                implementation(libs.jetbrains.compose.material3)
-                implementation(libs.jetbrains.compose.foundation.layout)
-                implementation(libs.jetbrains.compose.ui.util)
+                implementation(libs.compose.runtime)
+                implementation(libs.compose.animation)
+                implementation(libs.compose.material3)
+                implementation(libs.compose.foundation.foundation)
+                implementation(libs.compose.foundation.layout)
+                implementation(libs.compose.ui.util)
 
                 implementation(libs.kotlinx.serialization.cbor)
                 implementation(libs.kotlinx.serialization.json)
@@ -55,7 +56,6 @@ kotlin {
                 implementation(libs.androidx.core.ktx)
                 implementation(libs.accompanist.flowlayout)
                 implementation(libs.androidx.activity.compose)
-                implementation(libs.androidx.compose.foundation.layout)
 
                 implementation(libs.ktor.client.android)
             }

@@ -15,7 +15,6 @@
  */
 
 
-import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 fun org.gradle.api.Project.configureUiModule(
@@ -28,17 +27,15 @@ fun org.gradle.api.Project.configureUiModule(
                 implementation(project(":common:scaffold"))
                 implementation(project(":common:ui:template"))
 
-                api(versionCatalog.findLibrary("androidx-lifecycle-runtime-ktx").get())
-                api(versionCatalog.findLibrary("androidx-lifecycle-runtime-compose").get())
-                api(versionCatalog.findLibrary("androidx-lifecycle-viewmodel-ktx").get())
-                api(versionCatalog.findLibrary("androidx-lifecycle-viewmodel-compose").get())
-                api(versionCatalog.findLibrary("androidx-window-core").get())
-                api(versionCatalog.findLibrary("androidx-window-window").get())
+                api(versionCatalog.findLibrary("lifecycle-runtime").get())
+                api(versionCatalog.findLibrary("lifecycle-runtime-compose").get())
+                api(versionCatalog.findLibrary("lifecycle-viewmodel").get())
+                api(versionCatalog.findLibrary("lifecycle-viewmodel-compose").get())
 
-                implementation(versionCatalog.findLibrary("jetbrains-compose-runtime").get())
-                implementation(versionCatalog.findLibrary("jetbrains-compose-animation").get())
-                implementation(versionCatalog.findLibrary("jetbrains-compose-material3").get())
-                implementation(versionCatalog.findLibrary("jetbrains-compose-foundation-layout").get())
+                implementation(versionCatalog.findLibrary("compose-runtime").get())
+                implementation(versionCatalog.findLibrary("compose-animation").get())
+                implementation(versionCatalog.findLibrary("compose-material3").get())
+                implementation(versionCatalog.findLibrary("compose-foundation-layout").get())
 
                 implementation(versionCatalog.findLibrary("kotlinx-coroutines-core").get())
                 api(versionCatalog.findLibrary("tunjid-treenav-compose-common").get())

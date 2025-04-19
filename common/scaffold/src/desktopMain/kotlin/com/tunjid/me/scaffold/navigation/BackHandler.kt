@@ -14,21 +14,15 @@
  *    limitations under the License.
  */
 
-package com.tunjid.me.scaffold.scaffold
+package com.tunjid.me.scaffold.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-
 
 @Composable
-internal inline fun <T> rememberUpdatedStateIf(
-    value: T,
-    predicate: (T) -> Boolean,
-): State<T> = remember {
-    mutableStateOf(value)
-}.also { if (predicate(value)) it.value = value }
-
-internal val BottomNavSharedElementZIndex = 2f
-internal val FabSharedElementZIndex = 4f
+actual fun BackHandler(
+    enabled: Boolean,
+    onStarted: () -> Unit,
+    onProgressed: (Float) -> Unit,
+    onCancelled: () -> Unit,
+    onBack: () -> Unit,
+) = Unit

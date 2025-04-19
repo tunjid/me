@@ -32,10 +32,10 @@ kotlin {
                 implementation(project(":common:scaffold"))
                 implementation(project(":common:ui:template"))
 
-                implementation(libs.jetbrains.compose.runtime)
-                implementation(libs.jetbrains.compose.animation)
-                implementation(libs.jetbrains.compose.material3)
-                implementation(libs.jetbrains.compose.foundation.layout)
+                implementation(libs.compose.runtime)
+                implementation(libs.compose.animation)
+                implementation(libs.compose.material3)
+                implementation(libs.compose.foundation.layout)
 
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)

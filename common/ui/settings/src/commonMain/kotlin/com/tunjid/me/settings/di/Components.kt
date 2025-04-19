@@ -38,7 +38,7 @@ import com.tunjid.me.settings.SettingsRoute
 import com.tunjid.me.settings.SettingsScreen
 import com.tunjid.me.settings.SettingsStateHolderCreator
 import com.tunjid.me.settings.State
-import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
+import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
@@ -76,7 +76,7 @@ abstract class SettingsScreenHolderComponent(
     @Provides
     fun routeAdaptiveConfiguration(
         creator: SettingsStateHolderCreator,
-    ) = RoutePattern to threePaneListDetailStrategy(
+    ) = RoutePattern to threePaneEntry(
         render = { route ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
             val viewModel = viewModel<ActualSettingsStateHolder> {

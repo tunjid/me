@@ -43,7 +43,7 @@ import com.tunjid.me.signin.SignInStateHolderCreator
 import com.tunjid.me.signin.State
 import com.tunjid.me.signin.sessionRequest
 import com.tunjid.me.signin.submitButtonEnabled
-import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
+import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
@@ -82,7 +82,7 @@ abstract class SignInScreenHolderComponent(
     @Provides
     fun routeAdaptiveConfiguration(
         creator: SignInStateHolderCreator
-    ) = RoutePattern to threePaneListDetailStrategy(
+    ) = RoutePattern to threePaneEntry(
         render = { route ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
             val viewModel = viewModel<ActualSignInStateHolder> {

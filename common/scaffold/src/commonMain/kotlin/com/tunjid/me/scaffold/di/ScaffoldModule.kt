@@ -21,9 +21,6 @@ import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.fromBytes
-import com.tunjid.me.scaffold.globalui.ActualGlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.navigation.PersistedNavigationStateHolder
@@ -32,7 +29,6 @@ import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
 import com.tunjid.me.scaffold.savedstate.DataStoreSavedStateRepository
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
-import com.tunjid.mutator.Mutation
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
@@ -146,23 +142,7 @@ abstract class InjectedScaffoldComponent(
     @Provides
     fun navActions(): (NavigationMutation) -> Unit = navStateHolder.accept
 
-    @SingletonScope
-    @Provides
-    fun globalUiStateStream(
-        globalUiStateHolder: GlobalUiStateHolder
-    ): StateFlow<UiState> = globalUiStateHolder.state
-
-    @SingletonScope
-    @Provides
-    fun globalUiActions(
-        globalUiStateHolder: GlobalUiStateHolder
-    ): (Mutation<UiState>) -> Unit = globalUiStateHolder.accept
-
     val PersistedNavigationStateHolder.bind: NavigationStateHolder
-        @SingletonScope
-        @Provides get() = this
-
-    val ActualGlobalUiStateHolder.bind: GlobalUiStateHolder
         @SingletonScope
         @Provides get() = this
 

@@ -48,8 +48,9 @@ import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundMod
 import com.tunjid.treenav.compose.PaneScope
 import com.tunjid.treenav.compose.threepane.ThreePane
 import com.tunjid.treenav.compose.threepane.configurations.requireThreePaneMovableSharedElementScope
+import com.tunjid.treenav.compose.threepane.threePaneEntry
 
-import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
+import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
@@ -92,7 +93,7 @@ abstract class ArchiveListScreenHolderComponent(
     @Provides
     fun routeAdaptiveConfiguration(
         creator: ArchiveListStateHolderCreator
-    ) = RoutePattern to threePaneListDetailStrategy(
+    ) = RoutePattern to threePaneEntry(
         render = { route ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
             val viewModel = viewModel<ActualArchiveListStateHolder> {

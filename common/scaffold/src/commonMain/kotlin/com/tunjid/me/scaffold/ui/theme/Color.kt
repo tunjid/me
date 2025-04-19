@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.common.ui.theme
+package com.tunjid.me.scaffold.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

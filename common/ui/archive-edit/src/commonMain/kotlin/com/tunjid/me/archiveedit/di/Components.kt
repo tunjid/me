@@ -50,7 +50,7 @@ import com.tunjid.treenav.compose.PaneScope
 import com.tunjid.treenav.compose.threepane.ThreePane
 import com.tunjid.treenav.compose.threepane.configurations.requireThreePaneMovableSharedElementScope
 
-import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
+import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
@@ -111,7 +111,7 @@ abstract class ArchiveEditScreenHolderComponent(
     @Provides
     fun editRouteAdaptiveConfiguration(
         creator: ArchiveEditStateHolderCreator
-    ) = EditRoutePattern to threePaneListDetailStrategy(
+    ) = EditRoutePattern to threePaneEntry(
         paneMapping = { route ->
             mapOf(
                 ThreePane.Primary to route,
@@ -144,7 +144,7 @@ abstract class ArchiveEditScreenHolderComponent(
     @Provides
     fun createRouteAdaptiveConfiguration(
         creator: ArchiveEditStateHolderCreator
-    ) = CreateRoutePattern to threePaneListDetailStrategy(
+    ) = CreateRoutePattern to threePaneEntry(
         paneMapping = { route ->
             mapOf(
                 ThreePane.Primary to route,

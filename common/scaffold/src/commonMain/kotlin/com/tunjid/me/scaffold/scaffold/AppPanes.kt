@@ -1,5 +1,22 @@
+/*
+ *    Copyright 2024 Adetunji Dahunsi
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package com.tunjid.me.scaffold.scaffold
 
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -23,6 +40,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.UnfoldMore
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -35,33 +53,41 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowSizeClass
 import com.tunjid.composables.splitlayout.SplitLayoutState
-import com.tunjid.me.scaffold.globalui.BackHandler
-import com.tunjid.me.scaffold.globalui.EXPANDED
-import com.tunjid.me.scaffold.globalui.PaneAnchor
-import com.tunjid.me.scaffold.navigation.ExpandAll
+import com.tunjid.me.scaffold.navigation.BackHandler
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
 private val PaneSpring = spring(
+    stiffness = Spring.StiffnessMediumLow,
     visibilityThreshold = 0.1f
 )
 
+enum class PaneAnchor(
+    val fraction: Float,
+) {
+    Zero(fraction = 0f),
+    OneThirds(fraction = 1 / 3f),
+    Half(fraction = 1 / 2f),
+    TwoThirds(fraction = 2 / 3f),
+    Full(fraction = 1f),
+}
+
 @Stable
 internal class PaneAnchorState(
-    private val density: Density
+    private val density: Density,
 ) {
     var maxWidth by mutableIntStateOf(1000)
         internal set
@@ -148,8 +174,8 @@ internal class PaneAnchorState(
     }
 
     private fun defaultOpenAnchorPosition(): PaneAnchor {
-        val layoutSize = with(density) { maxWidth.toDp().value.roundToInt() }
-        val isExpanded = layoutSize >= WindowSizeClass.EXPANDED.minWidthDp
+        val layoutSize = with(density) { maxWidth.toDp() }
+        val isExpanded = layoutSize >= SecondaryPaneMinWidthBreakpointDp
         return if (isExpanded) PaneAnchor.Half
         else PaneAnchor.OneThirds
     }
@@ -179,7 +205,8 @@ internal class PaneAnchorState(
                     PaneAnchor.OneThirds,
                     PaneAnchor.Half,
                     PaneAnchor.TwoThirds,
-                    PaneAnchor.Full -> 2.dp
+                    PaneAnchor.Full,
+                        -> 2.dp
                 }
             )
             Box(
@@ -208,8 +235,12 @@ internal class PaneAnchorState(
                     Image(
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .scale(scale = 0.6f),
-                        imageVector = Icons.Filled.ExpandAll,
+                            .graphicsLayer {
+                                scaleX = 0.6f
+                                scaleY = 0.6f
+                                rotationZ = 90f
+                            },
+                        imageVector = Icons.Default.UnfoldMore,
                         contentDescription = "Drag",
                         colorFilter = ColorFilter.tint(
                             color = MaterialTheme.colorScheme.surface
@@ -245,7 +276,9 @@ internal class PaneAnchorState(
  */
 @Composable
 fun SecondaryPaneCloseBackHandler(enabled: Boolean) {
-    val paneAnchorState = LocalAppState.current.paneAnchorState
+    val currentlyEnabled by mutableStateOf(enabled)
+    val appState = LocalAppState.current
+    val paneAnchorState = appState.paneAnchorState
     var started by remember { mutableStateOf(false) }
     var widthAtStart by remember { mutableIntStateOf(0) }
     var desiredPaneWidth by remember { mutableFloatStateOf(0f) }
@@ -255,7 +288,7 @@ fun SecondaryPaneCloseBackHandler(enabled: Boolean) {
     )
 
     BackHandler(
-        enabled = enabled,
+        enabled = currentlyEnabled,
         onStarted = {
             paneAnchorState.hasInteractions = true
             widthAtStart = paneAnchorState.width
@@ -276,22 +309,47 @@ fun SecondaryPaneCloseBackHandler(enabled: Boolean) {
     )
 
     // Make sure desiredPaneWidth is synced with paneSplitState.width before the back gesture
-    LaunchedEffect(started, paneAnchorState.width) {
-        if (started) return@LaunchedEffect
-        desiredPaneWidth = paneAnchorState.width.toFloat()
+    LaunchedEffect(Unit) {
+        snapshotFlow { started to paneAnchorState.width }
+            .collect { (isStarted, paneAnchorStateWidth) ->
+                if (isStarted) return@collect
+                desiredPaneWidth = paneAnchorStateWidth.toFloat()
+            }
     }
 
     // Dispatch changes as the user presses back
     LaunchedEffect(started, animatedDesiredPanelWidth) {
-        if (!started) return@LaunchedEffect
-        paneAnchorState.dispatch(delta = animatedDesiredPanelWidth - paneAnchorState.width.toFloat())
+        snapshotFlow { started to animatedDesiredPanelWidth }
+            .collect { (isStarted, paneWidth) ->
+                if (!isStarted) return@collect
+                paneAnchorState.dispatch(delta = paneWidth - paneAnchorState.width.toFloat())
+            }
     }
 
     // Fling to settle
-    LaunchedEffect(started) {
-        if (started) return@LaunchedEffect
-        paneAnchorState.completeDispatch()
+    LaunchedEffect(Unit) {
+        snapshotFlow { started }
+            .collect { isStarted ->
+                if (isStarted) return@collect
+                paneAnchorState.completeDispatch()
+            }
+    }
+
+    // Pop when fully expanded
+    LaunchedEffect(Unit) {
+        snapshotFlow { appState.paneAnchorState.currentPaneAnchor }
+            .collect { anchor ->
+                if (currentlyEnabled) when (anchor) {
+                    PaneAnchor.Zero -> Unit
+                    PaneAnchor.OneThirds -> Unit
+                    PaneAnchor.Half -> Unit
+                    PaneAnchor.TwoThirds -> Unit
+                    PaneAnchor.Full -> appState.pop()
+                }
+            }
     }
 }
 
 private val DraggableDividerSizeDp = 48.dp
+internal val SecondaryPaneMinWidthBreakpointDp = 600.dp
+internal val TertiaryPaneMinWidthBreakpointDp = 1200.dp

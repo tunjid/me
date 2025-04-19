@@ -16,9 +16,6 @@
 
 package com.tunjid.me.scaffold.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
-import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.StackNav
 import com.tunjid.treenav.canPop
@@ -30,13 +27,12 @@ val MultiStackNav.canGoUp get() = stacks.getOrNull(currentIndex)?.canPop == true
 val MultiStackNav.navItems
     get() = stacks
         .map(StackNav::name)
-        .mapIndexed { index, name ->
-            val kind = ArchiveKind.entries.firstOrNull {
-                name.contains(it.type)
-            }
+        .mapIndexedNotNull { index, name ->
+            val stack = AppStack.entries.firstOrNull {
+                it.stackName == name
+            } ?: return@mapIndexedNotNull null
             NavItem(
-                name = kind?.type ?: name,
-                icon = kind?.icon ?: Icons.Default.Settings,
+                stack = stack,
                 index = index,
                 selected = currentIndex == index,
             )

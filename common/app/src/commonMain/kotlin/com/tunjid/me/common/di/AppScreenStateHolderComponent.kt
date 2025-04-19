@@ -24,7 +24,6 @@ import com.tunjid.me.feature.archivegallery.di.ArchiveGalleryScreenHolderCompone
 import com.tunjid.me.feature.archivelist.di.ArchiveListScreenHolderComponent
 import com.tunjid.me.profile.di.ProfileScreenHolderComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.me.scaffold.scaffold.AppState
@@ -32,7 +31,7 @@ import com.tunjid.me.settings.di.SettingsScreenHolderComponent
 import com.tunjid.me.signin.di.SignInScreenHolderComponent
 import com.tunjid.me.sync.di.InjectedSyncComponent
 import com.tunjid.me.sync.di.Sync
-import com.tunjid.treenav.compose.PaneStrategy
+import com.tunjid.treenav.compose.PaneEntry
 import com.tunjid.treenav.compose.threepane.ThreePane
 import com.tunjid.treenav.strings.Route
 import me.tatarka.inject.annotations.Component
@@ -53,19 +52,17 @@ abstract class AppScreenStateHolderComponent(
     @Component val signInComponent: SignInScreenHolderComponent,
 ) {
 
-    abstract val routeConfigurationMap: Map<String, PaneStrategy<ThreePane, Route>>
+    abstract val routeConfigurationMap: Map<String, PaneEntry<ThreePane, Route>>
 
 
     @Provides
     fun appState(
         navigationStateHolder: NavigationStateHolder,
-        globalUiStateHolder: GlobalUiStateHolder,
         savedStateRepository: SavedStateRepository,
         sync: Sync,
     ): AppState = AppState(
         routeConfigurationMap = routeConfigurationMap,
         navigationStateHolder = navigationStateHolder,
-        globalUiStateHolder = globalUiStateHolder,
         savedStateRepository = savedStateRepository,
         sync = sync,
     )

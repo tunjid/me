@@ -38,7 +38,7 @@ import com.tunjid.me.scaffold.globalui.NavVisibility
 import com.tunjid.me.scaffold.globalui.ScreenUiState
 import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
-import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
+import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
@@ -76,7 +76,7 @@ abstract class ProfileScreenHolderComponent(
     @Provides
     fun routeAdaptiveConfiguration(
         creator: ProfileStateHolderCreator
-    ) = RoutePattern to threePaneListDetailStrategy(
+    ) = RoutePattern to threePaneEntry(
         render = { route ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
             val viewModel = viewModel<ActualProfileStateHolder> {

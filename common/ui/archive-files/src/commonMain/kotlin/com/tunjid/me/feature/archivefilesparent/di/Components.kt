@@ -41,7 +41,7 @@ import com.tunjid.me.scaffold.globalui.UiState
 import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.configurations.requireThreePaneMovableSharedElementScope
 
-import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
+import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
@@ -86,7 +86,7 @@ abstract class ArchiveFilesParentScreenHolderComponent(
     @Provides
     fun filesParentRouteAdaptiveConfiguration(
         creator: ArchiveFilesParentStateHolderCreator
-    ) = RoutePattern to threePaneListDetailStrategy(
+    ) = RoutePattern to threePaneEntry(
         render = { route: Route ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
             val viewModel = viewModel<ActualArchiveFilesParentStateHolder> {
