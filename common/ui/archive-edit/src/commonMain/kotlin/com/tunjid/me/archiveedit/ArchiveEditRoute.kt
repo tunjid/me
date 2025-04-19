@@ -67,8 +67,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.halilibo.richtext.markdown.Markdown
-import com.halilibo.richtext.ui.material3.Material3RichText
+import com.halilibo.richtext.commonmark.Markdown
+import com.halilibo.richtext.ui.material3.RichText
 import com.tunjid.me.archiveedit.di.archiveId
 import com.tunjid.me.archiveedit.di.kind
 import com.tunjid.me.core.model.ArchiveUpsert
@@ -465,7 +465,7 @@ private fun LazyListScope.bodyEditor(
 private fun LazyListScope.bodyPreview(body: String) = item(
     key = BODY_INDEX
 ) {
-    Material3RichText(
+    RichText(
         modifier = Modifier
             .defaultMinSize(minHeight = 500.dp)
             .padding(horizontal = 16.dp)

@@ -48,7 +48,6 @@ fun org.gradle.api.Project.configureUiModule(
         }
         named("androidMain") {
             dependencies {
-                implementation(versionCatalog.findLibrary("androidx-compose-foundation-layout").get())
             }
         }
         named("desktopMain") {
