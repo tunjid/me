@@ -17,11 +17,11 @@
 package com.tunjid.me
 
 import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import com.tunjid.me.scaffold.globalui.PredictiveBackEffects
+import com.tunjid.me.scaffold.navigation.PredictiveBackEffects
 import com.tunjid.me.scaffold.scaffold.App
 import com.tunjid.me.scaffold.ui.theme.AppTheme
 
@@ -33,9 +33,7 @@ class MainActivity : AppCompatActivity() {
         val meApp = app.meApp
         val appState = meApp.appState
 
-        val root = ComposeView(context = this)
-
-        root.setContent {
+        setContent {
             AppTheme {
                 App(
                     modifier = Modifier,
@@ -46,7 +44,5 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         }
-
-        setContentView(root)
     }
 }

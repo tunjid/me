@@ -16,14 +16,28 @@
 
 package com.tunjid.me.archivedetail.di
 
+import androidx.compose.animation.core.animateIntOffsetAsState
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.coroutineScope
@@ -41,16 +55,15 @@ import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.globalui.InsetFlags
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.globalUi
-import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
-import com.tunjid.treenav.compose.PaneScope
+import com.tunjid.me.scaffold.scaffold.PaneBottomAppBar
+import com.tunjid.me.scaffold.scaffold.PaneFab
+import com.tunjid.me.scaffold.scaffold.PaneScaffold
+import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
+import com.tunjid.me.scaffold.scaffold.UiTokens
+import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.ThreePane
-import com.tunjid.treenav.compose.threepane.configurations.requireThreePaneMovableSharedElementScope
 import com.tunjid.treenav.compose.threepane.threePaneEntry
+import com.tunjid.treenav.compose.threepane.transforms.requireThreePaneMovableSharedElementScope
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
@@ -93,14 +106,14 @@ abstract class ArchiveDetailNavigationComponent {
 @Component
 abstract class ArchiveDetailScreenHolderComponent(
     @Component val dataComponent: InjectedDataComponent,
-    @Component val scaffoldComponent: InjectedScaffoldComponent
+    @Component val scaffoldComponent: InjectedScaffoldComponent,
 ) {
 
     @IntoMap
     @Provides
     fun routeAdaptiveConfiguration(
-        creator: ArchiveDetailStateHolderCreator
-    ) = RoutePattern to threePaneEntry(
+        creator: ArchiveDetailStateHolderCreator,
+    ) = RoutePattern to threePaneEntry<Route>(
         paneMapping = { route ->
             mapOf(
                 ThreePane.Primary to route,
@@ -116,15 +129,67 @@ abstract class ArchiveDetailScreenHolderComponent(
                 )
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
-            ArchiveDetailScreen(
-                movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
-                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
-                state = state,
-                actions = viewModel.accept
-            )
-            GlobalUi(
-                state = state,
-                actions = viewModel.accept
+            PaneScaffold(
+                modifier = Modifier
+                    .predictiveBackBackgroundModifier(paneScope = this),
+                showNavigation = true,
+                onSnackBarMessageConsumed = {
+                },
+                topBar = {
+                    TopAppBar(
+                        state = state,
+                        actions = viewModel.accept,
+                    )
+                },
+                content = { paddingValues ->
+                    ArchiveDetailScreen(
+                        movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
+                        modifier = Modifier
+                            .padding(
+                                top = paddingValues.calculateTopPadding(),
+                            )
+                            .predictiveBackBackgroundModifier(paneScope = this),
+                        state = state,
+                        actions = viewModel.accept
+                    )
+                    SecondaryPaneCloseBackHandler(
+                        enabled = paneState.pane == ThreePane.Primary
+                                && route.children.isNotEmpty()
+                                && isMediumScreenWidthOrWider
+                    )
+                },
+                floatingActionButton = {
+                    val density = LocalDensity.current
+                    val fabOffset = animateIntOffsetAsState(
+                        if (state.hasFetchedAuthStatus)
+                            if (state.canEdit) IntOffset.Zero
+                            else IntOffset(
+                                x = 0,
+                                y = with(density) { UiTokens.navigationBarHeight.roundToPx() }
+                            )
+                        else IntOffset.Zero
+                    )
+                    PaneFab(
+                        modifier = Modifier
+                            .offset { fabOffset.value },
+                        text = "Edit",
+                        icon = Icons.Default.Edit,
+                        expanded = true,
+                        onClick = {
+                            val archive = state.archive
+                            if (archive != null) viewModel.accept(
+                                Action.Navigate.Edit(
+                                    kind = state.kind,
+                                    archiveId = archive.id,
+                                    thumbnail = archive.thumbnail,
+                                )
+                            )
+                        },
+                    )
+                },
+                navigationBar = {
+                    PaneBottomAppBar()
+                },
             )
         }
     )
@@ -132,27 +197,60 @@ abstract class ArchiveDetailScreenHolderComponent(
 }
 
 @Composable
-private fun PaneScope<ThreePane, Route>.GlobalUi(state: State, actions: (Action) -> Unit) {
-    ScreenUiState(
-        UiState(
-            navVisibility = NavVisibility.Visible,
-            // Prevents UI from jittering as load starts
-            fabShows = if (state.hasFetchedAuthStatus) state.canEdit else globalUi.fabShows,
-            fabExtended = true,
-            fabText = "Edit",
-            fabIcon = Icons.Default.Edit,
-            fabClickListener = rememberUpdatedState { _: Unit ->
-                val archiveId = state.archive?.id
-                if (archiveId != null) actions(
-                    Action.Navigate.Edit(
-                        kind = state.kind,
-                        archiveId = state.archive.id,
-                        thumbnail = state.archive.thumbnail,
+private fun TopAppBar(
+    state: State,
+    actions: (Action) -> Unit,
+) {
+    androidx.compose.material3.TopAppBar(
+        modifier = Modifier
+            .windowInsetsPadding(WindowInsets.statusBars),
+        navigationIcon = {
+            IconButton(
+                modifier = Modifier
+                    .size(56.dp)
+                    .padding(16.dp),
+                onClick = {
+                    actions(Action.Navigate.Pop)
+                },
+                content = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
                     )
+                }
+            )
+        },
+        title = {
+            Text(
+                text = state.archive?.title ?: "Detail",
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+            )
+        },
+        actions = {
+            if (state.archive != null) {
+                IconButton(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .padding(16.dp),
+                    onClick = {
+                        actions(
+                            Action.Navigate.Files(
+                                kind = state.kind,
+                                archiveId = state.archive.id,
+                                thumbnail = state.archive.thumbnail,
+                            )
+                        )
+                    },
+                    content = {
+                        Icon(
+                            imageVector = Icons.Default.Email,
+                            contentDescription = "Gallery",
+                        )
+                    }
                 )
-            }.value,
-            insetFlags = InsetFlags.NO_BOTTOM,
-            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
-        )
+            }
+        },
     )
 }

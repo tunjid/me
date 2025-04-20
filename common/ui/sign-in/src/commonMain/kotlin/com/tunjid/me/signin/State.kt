@@ -45,7 +45,7 @@ data class State(
         )
     ),
     @Transient
-    val messages: MessageQueue = MessageQueue(),
+    val messages: List<String> = emptyList(),
 ) : ByteSerializable
 
 val State.submitButtonEnabled: Boolean get() = !isSignedIn && !isSubmitting
@@ -63,7 +63,7 @@ sealed class Action(key: String) {
     data class Submit(val request: com.tunjid.me.core.model.SessionRequest) : Action("Submit")
 
     data class MessageConsumed(
-        val message: Message
+        val message: String
     ) : Action("MessageConsumed")
 
     sealed class Navigate : Action(key = "Navigate"), NavigationAction {

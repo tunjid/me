@@ -16,16 +16,16 @@
 
 package com.tunjid.me.feature.archivegallery.di
 
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.data.di.InjectedDataComponent
+import com.tunjid.me.feature.archivegallery.Action
 import com.tunjid.me.feature.archivegallery.ActualArchiveGalleryStateHolder
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryRoute
 import com.tunjid.me.feature.archivegallery.ArchiveGalleryScreen
@@ -34,16 +34,11 @@ import com.tunjid.me.feature.archivegallery.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.globalui.InsetFlags
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.treenav.compose.PaneScope
-import com.tunjid.treenav.compose.threepane.ThreePane
-import com.tunjid.treenav.compose.threepane.configurations.requireThreePaneMovableSharedElementScope
-
+import com.tunjid.me.scaffold.scaffold.PaneScaffold
+import com.tunjid.me.scaffold.scaffold.PoppableDestinationTopAppBar
+import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.threePaneEntry
-import com.tunjid.treenav.strings.Route
+import com.tunjid.treenav.compose.threepane.transforms.requireThreePaneMovableSharedElementScope
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
@@ -99,26 +94,30 @@ abstract class ArchiveGalleryScreenHolderComponent(
                 )
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
-            ArchiveGalleryScreen(
-                movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
-                state = state,
-                actions = viewModel.accept,
+            PaneScaffold(
+                modifier = Modifier
+                    .predictiveBackBackgroundModifier(paneScope = this),
+                showNavigation = true,
+                onSnackBarMessageConsumed = {
+                },
+                topBar = {
+                    PoppableDestinationTopAppBar {
+                        viewModel.accept(Action.Navigate.Pop)
+                    }
+                },
+                content = { paddingValues ->
+                    ArchiveGalleryScreen(
+                        movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
+                        modifier = Modifier
+                            .padding(
+                                top = paddingValues.calculateTopPadding(),
+                            )
+                            .predictiveBackBackgroundModifier(paneScope = this),
+                        state = state,
+                        actions = viewModel.accept
+                    )
+                },
             )
-            GlobalUi()
         }
-    )
-}
-
-@Composable
-private fun PaneScope<ThreePane, Route>.GlobalUi() {
-    ScreenUiState(
-        UiState(
-            fabShows = false,
-            fabExtended = false,
-            navVisibility = NavVisibility.Gone,
-            insetFlags = InsetFlags.NONE,
-            statusBarColor = Color.Transparent.toArgb(),
-            navBarColor = Color.Transparent.toArgb(),
-        )
     )
 }

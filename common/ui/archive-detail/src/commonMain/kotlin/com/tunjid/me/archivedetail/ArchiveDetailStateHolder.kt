@@ -20,7 +20,6 @@
 package com.tunjid.me.archivedetail
 
 import androidx.lifecycle.ViewModel
-import androidx.window.core.layout.WindowSizeClass
 import com.tunjid.me.archivedetail.di.archiveId
 import com.tunjid.me.archivedetail.di.archiveThumbnail
 import com.tunjid.me.archivedetail.di.kind
@@ -29,10 +28,6 @@ import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.feature.FeatureWhileSubscribed
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.globalui.COMPACT
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.navBarSize
-import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.isInPrimaryNavMutations
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.consumeNavigationActions
@@ -47,9 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -69,7 +62,6 @@ class ArchiveDetailStateHolderCreator(
 class ActualArchiveDetailStateHolder(
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
-    uiStateFlow: StateFlow<UiState>,
     navStateFlow: StateFlow<MultiStackNav>,
     navActions: (NavigationMutation) -> Unit,
     @Assisted
@@ -80,12 +72,9 @@ class ActualArchiveDetailStateHolder(
     initialState = State(
         kind = route.routeParams.kind,
         routeThumbnailUrl = route.routeParams.archiveThumbnail,
-        navBarSize = uiStateFlow.value.navBarSize,
     ),
     started = SharingStarted.WhileSubscribed(FeatureWhileSubscribed),
     inputs = listOf(
-        uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
-        uiStateFlow.paneMutations(),
         authRepository.authMutations(),
         archiveRepository.archiveLoadMutations(
             id = route.routeParams.archiveId
@@ -105,16 +94,6 @@ class ActualArchiveDetailStateHolder(
         }
     }
 )
-
-private fun StateFlow<UiState>.paneMutations(): Flow<Mutation<State>> =
-    map { (it.windowSizeClass.minWidthDp > WindowSizeClass.COMPACT.minWidthDp) to it.paneAnchor }
-        .distinctUntilChanged()
-        .mapToMutation { (hasSecondaryPanel, paneSplit) ->
-            copy(
-                hasSecondaryPanel = hasSecondaryPanel,
-                paneAnchor = paneSplit,
-            )
-        }
 
 private fun AuthRepository.authMutations(): Flow<Mutation<State>> =
     signedInUserStream

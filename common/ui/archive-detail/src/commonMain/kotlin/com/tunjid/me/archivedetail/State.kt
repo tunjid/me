@@ -26,7 +26,6 @@ import com.tunjid.me.core.ui.ChipInfo
 import com.tunjid.me.core.ui.ChipKind
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
-import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.navigation.NavigationAction
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.treenav.pop
@@ -87,8 +86,6 @@ data class State(
     val hasFetchedAuthStatus: Boolean = false,
     @ProtoNumber(2)
     val signedInUserId: com.tunjid.me.core.model.UserId? = null,
-    @ProtoNumber(3)
-    val navBarSize: Int,
     @ProtoNumber(4)
     val wasDeleted: Boolean = false,
     @ProtoNumber(5)
@@ -102,8 +99,6 @@ data class State(
     val archive: Archive? = null,
     @Transient
     val hasSecondaryPanel: Boolean = false,
-    @Transient
-    val paneAnchor: PaneAnchor? = null,
 ) : ByteSerializable
 
 val State.canEdit: Boolean

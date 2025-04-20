@@ -97,10 +97,6 @@ internal fun ArchiveListScreen(
     Column(
         modifier = modifier,
     ) {
-        TopAppBar(
-            state = state,
-            actions = actions,
-        )
         ArchiveFilters(
             queryState = state.queryState,
             onChanged = actions
@@ -193,53 +189,6 @@ internal fun ArchiveListScreen(
     GridSizeUpdateEffect(
         infoFlow = visibleItemsFlow,
         onAction = actions
-    )
-}
-
-@Composable
-private fun TopAppBar(
-    state: State,
-    actions: (Action) -> Unit
-) {
-    TopAppBar(
-        modifier = Modifier
-            .windowInsetsPadding(WindowInsets.statusBars),
-        title = {
-            Text(
-                text = state.queryState.currentQuery.kind.name,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 1,
-            )
-        },
-        actions = {
-            IconButton(
-                onClick = {
-                    actions(Action.Fetch.QueryChange.ToggleOrder)
-                },
-                content = {
-                    Icon(
-                        imageVector =
-                        if (state.queryState.currentQuery.desc) Icons.Default.KeyboardArrowUp
-                        else Icons.Default.KeyboardArrowDown,
-                        contentDescription =
-                        if (state.queryState.currentQuery.desc) "Ascending"
-                        else "Descending",
-                    )
-                }
-            )
-            if (!state.isSignedIn) IconButton(
-                onClick = {
-                    actions(Action.Navigate.SignIn)
-                },
-                content = {
-                    Icon(
-                        imageVector = Icons.Default.AccountBox,
-                        contentDescription = "Sign In",
-                    )
-                }
-            )
-        },
     )
 }
 

@@ -18,31 +18,20 @@ package com.tunjid.me.archivedetail
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tunjid.me.archivedetail.di.kind
 import com.tunjid.me.core.model.Descriptor
@@ -50,7 +39,6 @@ import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.Chips
 import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.scaffold.adaptive.routeOf
-import com.tunjid.me.scaffold.globalui.PaneAnchor
 import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.compose.moveablesharedelement.updatedMovableSharedElementOf
@@ -82,7 +70,6 @@ internal fun ArchiveDetailScreen(
     markdown = state.archive?.body ?: "",
     content = { markdownState, components, innerModifier ->
         val scrollState = rememberLazyListState()
-        val navBarSizeDp = with(LocalDensity.current) { state.navBarSize.toDp() }
 
         // Close the secondary pane when invoking back since it contains the list view
         SecondaryPaneCloseBackHandler(
@@ -94,12 +81,6 @@ internal fun ArchiveDetailScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             state = scrollState
         ) {
-            stickyHeader {
-                TopAppBar(
-                    state = state,
-                    actions = actions,
-                )
-            }
             item {
                 movableSharedElementScope.updatedMovableSharedElementOf(
                     key = state.sharedElementKey,
@@ -154,7 +135,11 @@ internal fun ArchiveDetailScreen(
             }
 
             item {
-                Spacer(modifier = Modifier.padding(64.dp + navBarSizeDp))
+                Spacer(
+                    modifier = Modifier
+                        .padding(64.dp)
+                        .navigationBarsPadding()
+                )
             }
         }
 
@@ -163,71 +148,5 @@ internal fun ArchiveDetailScreen(
         LaunchedEffect(wasDeleted) {
             if (wasDeleted) actions(Action.Navigate.Pop)
         }
-
-        // If the user fully expands the secondary pane, pop this destination back to the list
-        LaunchedEffect(state.hasSecondaryPanel, state.paneAnchor) {
-            if (state.hasSecondaryPanel && state.paneAnchor == PaneAnchor.Full) {
-                actions(Action.Navigate.Pop)
-            }
-        }
     }
 )
-
-@Composable
-private fun TopAppBar(
-    state: State,
-    actions: (Action) -> Unit,
-) {
-    androidx.compose.material3.TopAppBar(
-        modifier = Modifier
-            .windowInsetsPadding(WindowInsets.statusBars),
-        navigationIcon = {
-            IconButton(
-                modifier = Modifier
-                    .size(56.dp)
-                    .padding(16.dp),
-                onClick = {
-                    actions(Action.Navigate.Pop)
-                },
-                content = {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                    )
-                }
-            )
-        },
-        title = {
-            Text(
-                text = state.archive?.title ?: "Detail",
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 1,
-            )
-        },
-        actions = {
-            if (state.archive != null) {
-                IconButton(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .padding(16.dp),
-                    onClick = {
-                        actions(
-                            Action.Navigate.Files(
-                                kind = state.kind,
-                                archiveId = state.archive.id,
-                                thumbnail = state.archive.thumbnail,
-                            )
-                        )
-                    },
-                    content = {
-                        Icon(
-                            imageVector = Icons.Default.Email,
-                            contentDescription = "Gallery",
-                        )
-                    }
-                )
-            }
-        },
-    )
-}
