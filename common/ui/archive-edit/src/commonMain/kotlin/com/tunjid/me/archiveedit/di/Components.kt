@@ -149,7 +149,7 @@ abstract class ArchiveEditScreenHolderComponent(
                 },
                 content = { paddingValues ->
                     ArchiveEditScreen(
-                        movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
+                        movableSharedElementScope = this,
                         modifier = Modifier
                             .padding(
                                 top = paddingValues.calculateTopPadding(),
@@ -196,30 +196,7 @@ abstract class ArchiveEditScreenHolderComponent(
     @Provides
     fun createRouteAdaptiveConfiguration(
         creator: ArchiveEditStateHolderCreator,
-    ) = CreateRoutePattern to threePaneEntry(
-        paneMapping = { route ->
-            mapOf(
-                ThreePane.Primary to route,
-                ThreePane.Secondary to route.children.firstOrNull() as? Route,
-            )
-        },
-        render = { route ->
-            val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
-            val viewModel = viewModel<ActualArchiveEditStateHolder> {
-                creator.invoke(
-                    scope = lifecycleCoroutineScope,
-                    route = route,
-                )
-            }
-            val state by viewModel.state.collectAsStateWithLifecycle()
-            ArchiveEditScreen(
-                movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
-                state = state,
-                actions = viewModel.accept,
-                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
-            )
-        }
-    )
+    ) = CreateRoutePattern to editRouteAdaptiveConfiguration(creator).second
 }
 
 @Composable

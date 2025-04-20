@@ -143,7 +143,7 @@ abstract class ArchiveDetailScreenHolderComponent(
                 },
                 content = { paddingValues ->
                     ArchiveDetailScreen(
-                        movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
+                        movableSharedElementScope = this,
                         modifier = Modifier
                             .padding(
                                 top = paddingValues.calculateTopPadding(),

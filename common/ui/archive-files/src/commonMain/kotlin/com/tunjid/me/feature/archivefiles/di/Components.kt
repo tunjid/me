@@ -118,7 +118,7 @@ abstract class ArchiveFilesScreenHolderComponent(
                 },
                 content = { paddingValues ->
                     ArchiveFilesScreen(
-                        movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
+                        movableSharedElementScope = this,
                         modifier = Modifier
                             .padding(paddingValues)
                             .predictiveBackBackgroundModifier(paneScope = this),
@@ -126,12 +126,6 @@ abstract class ArchiveFilesScreenHolderComponent(
                         actions = viewModel.accept
                     )
                 },
-            )
-            ArchiveFilesScreen(
-                movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
-                state = state,
-                actions = viewModel.accept,
-                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
             )
         }
     )

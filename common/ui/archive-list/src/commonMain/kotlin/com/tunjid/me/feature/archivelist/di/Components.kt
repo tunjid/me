@@ -125,7 +125,7 @@ abstract class ArchiveListScreenHolderComponent(
                 },
                 content = { paddingValues ->
                     ArchiveListScreen(
-                        movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
+                        movableSharedElementScope = this,
                         modifier = Modifier
                             .padding(
                                 top = paddingValues.calculateTopPadding(),

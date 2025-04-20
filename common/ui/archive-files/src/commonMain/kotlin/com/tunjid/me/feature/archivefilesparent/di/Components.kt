@@ -110,7 +110,7 @@ abstract class ArchiveFilesParentScreenHolderComponent(
                 },
                 content = { paddingValues ->
                     ArchiveFilesParentScreen(
-                        movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
+                        movableSharedElementScope = this,
                         modifier = Modifier
                             .padding(
                                 top = paddingValues.calculateTopPadding(),

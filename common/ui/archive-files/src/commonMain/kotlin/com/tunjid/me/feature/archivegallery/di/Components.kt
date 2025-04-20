@@ -107,7 +107,7 @@ abstract class ArchiveGalleryScreenHolderComponent(
                 },
                 content = { paddingValues ->
                     ArchiveGalleryScreen(
-                        movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
+                        movableSharedElementScope = this,
                         modifier = Modifier
                             .padding(
                                 top = paddingValues.calculateTopPadding(),
