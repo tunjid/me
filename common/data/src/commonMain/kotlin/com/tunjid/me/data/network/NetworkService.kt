@@ -16,7 +16,6 @@
 
 package com.tunjid.me.data.network
 
-import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.core.model.ArchiveFileId
 import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
@@ -35,6 +34,8 @@ import com.tunjid.me.data.network.models.NetworkUser
 import com.tunjid.me.data.network.models.TransferStatus
 import com.tunjid.me.data.network.models.UpsertResponse
 import com.tunjid.me.data.network.models.upload
+import com.tunjid.me.data.repository.SavedState
+import com.tunjid.me.data.repository.SavedStateRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
@@ -113,7 +114,7 @@ internal interface NetworkService {
 
     suspend fun signIn(
         sessionRequest: SessionRequest,
-    ): NetworkResponse<NetworkUser>
+    ): NetworkResponse<SavedState.AuthTokens>
 
     suspend fun session(): NetworkResponse<NetworkUser>
 
@@ -126,7 +127,7 @@ internal interface NetworkService {
 internal class KtorNetworkService(
     private val json: Json,
     private val baseUrl: BaseUrl,
-    sessionEntityQueries: SessionEntityQueries,
+    savedStateRepository: SavedStateRepository,
     dispatcher: CoroutineDispatcher,
 ) : NetworkService {
 
@@ -140,12 +141,21 @@ internal class KtorNetworkService(
         }
         install(HttpCookies) {
             storage = SessionCookiesStorage(
-                sessionEntityQueries = sessionEntityQueries,
+                readAuth = {
+                    savedStateRepository.savedState.value.auth
+                },
+                saveAuth = { authCookie ->
+                    savedStateRepository.updateState {
+                        copy(auth = auth?.copy(auth = authCookie))
+                    }
+                },
                 dispatcher = dispatcher
             )
         }
         install(SessionCookieInvalidator) {
-            this.sessionEntityQueries = sessionEntityQueries
+            this.saveAuth = { auth ->
+                savedStateRepository.updateState { copy(auth = auth) }
+            }
             this.networkErrorConverter = { json.decodeFromString(it) }
         }
         install(Logging) {
@@ -249,11 +259,17 @@ internal class KtorNetworkService(
 
     override suspend fun signIn(
         sessionRequest: SessionRequest,
-    ): NetworkResponse<NetworkUser> = json.parseServerErrors {
-        client.post("$baseUrl/api/sign-in") {
+    ): NetworkResponse<SavedState.AuthTokens> = json.parseServerErrors {
+        val response = client.post("$baseUrl/api/sign-in") {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             setBody(sessionRequest)
-        }.body()
+        }
+
+        SavedState.AuthTokens(
+            authUserId = response.body<NetworkUser>().id,
+            auth = response.headers[SessionCookieName]
+                ?: throw Exception("No auth token in response")
+        )
     }
 
     override suspend fun session(): NetworkResponse<NetworkUser> = json.parseServerErrors {

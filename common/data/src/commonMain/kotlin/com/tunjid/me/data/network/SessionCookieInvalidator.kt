@@ -16,11 +16,12 @@
 
 package com.tunjid.me.data.network
 
-import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.data.network.models.NetworkErrorCodes
 import com.tunjid.me.data.network.models.NetworkResponse
+import com.tunjid.me.data.repository.SavedState
 import io.ktor.client.HttpClient
 import io.ktor.client.call.HttpClientCall
+import io.ktor.client.call.save
 import io.ktor.client.plugins.HttpClientPlugin
 import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.plugin
@@ -30,7 +31,7 @@ import io.ktor.util.AttributeKey
 
 class ErrorInterceptorConfig {
     internal var networkErrorConverter: ((String) -> NetworkResponse.Error)? = null
-    internal var sessionEntityQueries: SessionEntityQueries? = null
+    internal var saveAuth: (suspend (SavedState.AuthTokens?) -> Unit)? = null
 }
 
 /**
@@ -38,7 +39,7 @@ class ErrorInterceptorConfig {
  */
 internal class SessionCookieInvalidator(
     private val networkErrorConverter: ((String) -> NetworkResponse.Error)?,
-    private val sessionEntityQueries: SessionEntityQueries?,
+    private val saveAuth: (suspend (SavedState.AuthTokens?) -> Unit)?,
 ) {
 
     companion object : HttpClientPlugin<ErrorInterceptorConfig, SessionCookieInvalidator> {
@@ -49,24 +50,26 @@ internal class SessionCookieInvalidator(
             val config = ErrorInterceptorConfig().apply(block)
             return SessionCookieInvalidator(
                 networkErrorConverter = config.networkErrorConverter,
-                sessionEntityQueries = config.sessionEntityQueries
+                saveAuth = config.saveAuth,
             )
         }
 
         override fun install(plugin: SessionCookieInvalidator, scope: HttpClient) {
             scope.plugin(HttpSend).intercept { context ->
-                val result: HttpClientCall = execute(context)
+                var result: HttpClientCall = execute(context)
                 val response = result.response
-                val converter = plugin.networkErrorConverter ?: return@intercept result
-                val sessionEntityQueries = plugin.sessionEntityQueries ?: return@intercept result
+                if (response.status.isSuccess()) return@intercept result
 
-                if (!response.status.isSuccess())
+                // Cache the response in memory since we will need to decode it potentially more than once.
+                result = result.save()
+
+                val converter = plugin.networkErrorConverter ?: return@intercept result
                     try {
                         val responseText = response.bodyAsText()
                         val error = converter(responseText)
 
                         if (error.errorCode == NetworkErrorCodes.NotLoggedIn) {
-                            sessionEntityQueries.updateCookie(cookie = null)
+                            plugin.saveAuth?.invoke(null)
                         }
                     } catch (_: Throwable) {
                     }

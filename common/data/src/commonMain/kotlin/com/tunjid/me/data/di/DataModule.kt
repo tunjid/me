@@ -23,7 +23,7 @@ import com.tunjid.me.common.data.ArchiveFileEntityQueries
 import com.tunjid.me.common.data.ArchiveTagEntityQueries
 import com.tunjid.me.common.data.SessionEntityQueries
 import com.tunjid.me.common.data.UserEntityQueries
-import com.tunjid.me.core.di.SingletonScope
+ import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.UriConverter
 import com.tunjid.me.data.local.databaseDispatcher
 import com.tunjid.me.data.network.ApiUrl
@@ -33,17 +33,29 @@ import com.tunjid.me.data.network.NetworkService
 import com.tunjid.me.data.repository.ArchiveFileRepository
 import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
+import com.tunjid.me.data.repository.DataStoreSavedStateRepository
 import com.tunjid.me.data.repository.OfflineFirstArchiveFileRepository
 import com.tunjid.me.data.repository.OfflineFirstArchiveRepository
+import com.tunjid.me.data.repository.SavedStateRepository
 import com.tunjid.me.data.repository.SessionCookieAuthRepository
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
+import me.tatarka.inject.annotations.Scope
+import okio.Path
+
+@Scope
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER)
+annotation class DataScope
 
 class DataModule(
     internal val database: AppDatabase,
-    internal val uriConverter: UriConverter
+    internal val uriConverter: UriConverter,
+    val savedStatePath: Path,
+    val appScope: CoroutineScope,
+    val byteSerializer: ByteSerializer,
 )
 
 /**
@@ -51,10 +63,10 @@ class DataModule(
  */
 class UriConverterWrapper(uriConverter: UriConverter) : UriConverter by uriConverter
 
-@SingletonScope
+@DataScope
 @Component
 abstract class InjectedDataComponent(
-    private val module: DataModule
+    private val module: DataModule,
 ) {
 
     @Provides
@@ -66,55 +78,71 @@ abstract class InjectedDataComponent(
         ignoreUnknownKeys = true
     }
 
-    @SingletonScope
+    @DataScope
+    @Provides
+    fun appScope(): CoroutineScope = module.appScope
+
+    @DataScope
+    @Provides
+    fun savedStatePath(): Path = module.savedStatePath
+
+    @DataScope
+    @Provides
+    fun byteSerializer(): ByteSerializer = module.byteSerializer
+
+    @DataScope
     @Provides
     fun uriConverter(): UriConverter = module.uriConverter
 
-    @SingletonScope
+    @DataScope
     @Provides
     internal fun coroutineDispatcher(): CoroutineDispatcher = databaseDispatcher()
 
-    @SingletonScope
+    @DataScope
     @Provides
     internal fun sessionEntityQueries(): SessionEntityQueries = module.database.sessionEntityQueries
 
-    @SingletonScope
+    @DataScope
     @Provides
     internal fun userEntityQueries(): UserEntityQueries = module.database.userEntityQueries
 
-    @SingletonScope
+    @DataScope
     @Provides
     internal fun archiveEntityQueries(): ArchiveEntityQueries = module.database.archiveEntityQueries
 
-    @SingletonScope
+    @DataScope
     @Provides
     internal fun archiveTagEntityQueries(): ArchiveTagEntityQueries =
         module.database.archiveTagEntityQueries
 
-    @SingletonScope
+    @DataScope
     @Provides
     internal fun archiveCategoryEntityQueries(): ArchiveCategoryEntityQueries =
         module.database.archiveCategoryEntityQueries
 
-    @SingletonScope
+    @DataScope
     @Provides
     internal fun archiveFileEntityQueries(): ArchiveFileEntityQueries =
         module.database.archiveFileEntityQueries
 
     internal val KtorNetworkService.bind: NetworkService
-        @SingletonScope
+        @DataScope
         @Provides get() = this
 
     internal val OfflineFirstArchiveRepository.bind: ArchiveRepository
-        @SingletonScope
+        @DataScope
         @Provides get() = this
 
     internal val OfflineFirstArchiveFileRepository.bind: ArchiveFileRepository
-        @SingletonScope
+        @DataScope
         @Provides get() = this
 
     internal val SessionCookieAuthRepository.bind: AuthRepository
-        @SingletonScope
+        @DataScope
+        @Provides get() = this
+
+    val DataStoreSavedStateRepository.bind: SavedStateRepository
+        @DataScope
         @Provides get() = this
 
     abstract val archiveRepository: ArchiveRepository

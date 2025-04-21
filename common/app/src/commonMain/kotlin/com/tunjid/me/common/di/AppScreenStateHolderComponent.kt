@@ -25,7 +25,6 @@ import com.tunjid.me.feature.archivelist.di.ArchiveListScreenHolderComponent
 import com.tunjid.me.profile.di.ProfileScreenHolderComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
-import com.tunjid.me.scaffold.savedstate.SavedStateRepository
 import com.tunjid.me.scaffold.scaffold.AppState
 import com.tunjid.me.settings.di.SettingsScreenHolderComponent
 import com.tunjid.me.signin.di.SignInScreenHolderComponent
@@ -58,12 +57,10 @@ abstract class AppScreenStateHolderComponent(
     @Provides
     fun appState(
         navigationStateHolder: NavigationStateHolder,
-        savedStateRepository: SavedStateRepository,
         sync: Sync,
     ): AppState = AppState(
         routeConfigurationMap = routeConfigurationMap,
         navigationStateHolder = navigationStateHolder,
-        savedStateRepository = savedStateRepository,
         sync = sync,
     )
 
