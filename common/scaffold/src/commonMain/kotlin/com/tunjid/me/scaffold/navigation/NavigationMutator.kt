@@ -24,7 +24,6 @@ import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.tunjid.me.core.model.ArchiveKind
-import com.tunjid.me.core.model.singular
 import com.tunjid.me.data.repository.EmptySavedState
 import com.tunjid.me.data.repository.InitialSavedState
 import com.tunjid.me.data.repository.SavedState
@@ -82,7 +81,7 @@ class PersistedNavigationStateHolder(
     initialState = InitialNavigationState,
     started = SharingStarted.Eagerly,
     inputs = listOf(
-        savedStateRepository.forceSignOutMutations()
+//        savedStateRepository.forceSignOutMutations()
     ),
     actionTransform = { navActions ->
         flow {
@@ -194,7 +193,7 @@ private val InitialNavigationState = MultiStackNav(
     stacks = listOf(
         StackNav(
             name = AppStack.Articles.stackName,
-            children = listOf(routeOf("/archives/${ArchiveKind.Articles.singular}"))
+            children = listOf(routeOf("/archives/${ArchiveKind.Articles.type}"))
         ),
     )
 )
@@ -204,15 +203,15 @@ private val SignedInNavigationState = MultiStackNav(
     stacks = listOf(
         StackNav(
             name = AppStack.Articles.stackName,
-            children = listOf(routeOf("/archives/${ArchiveKind.Articles.singular}"))
+            children = listOf(routeOf("/archives/${ArchiveKind.Articles.type}"))
         ),
         StackNav(
             name = AppStack.Projects.stackName,
-            children = listOf(routeOf("/archives/${ArchiveKind.Projects.singular}"))
+            children = listOf(routeOf("/archives/${ArchiveKind.Projects.type}"))
         ),
         StackNav(
             name = AppStack.Talks.stackName,
-            children = listOf(routeOf("/archives/${ArchiveKind.Talks.singular}"))
+            children = listOf(routeOf("/archives/${ArchiveKind.Talks.type}"))
         ),
         StackNav(
             name = AppStack.Settings.stackName,
