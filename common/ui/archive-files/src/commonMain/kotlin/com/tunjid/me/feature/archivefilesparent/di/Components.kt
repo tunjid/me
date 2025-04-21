@@ -17,8 +17,11 @@
 package com.tunjid.me.feature.archivefilesparent.di
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.coroutineScope
@@ -104,9 +107,19 @@ abstract class ArchiveFilesParentScreenHolderComponent(
                 onSnackBarMessageConsumed = {
                 },
                 topBar = {
-                    PoppableDestinationTopAppBar {
-                        viewModel.accept(Action.Navigate.Pop)
-                    }
+                    PoppableDestinationTopAppBar(
+                        title = {
+                            Text(
+                                text = "Files",
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.titleLarge,
+                                maxLines = 1,
+                            )
+                        },
+                        onBackPressed = {
+                            viewModel.accept(Action.Navigate.Pop)
+                        },
+                    )
                 },
                 content = { paddingValues ->
                     ArchiveFilesParentScreen(

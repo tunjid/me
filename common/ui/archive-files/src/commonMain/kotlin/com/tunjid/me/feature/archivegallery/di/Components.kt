@@ -105,14 +105,9 @@ abstract class ArchiveGalleryScreenHolderComponent(
                         viewModel.accept(Action.Navigate.Pop)
                     }
                 },
-                content = { paddingValues ->
+                content = {
                     ArchiveGalleryScreen(
                         movableSharedElementScope = this,
-                        modifier = Modifier
-                            .padding(
-                                top = paddingValues.calculateTopPadding(),
-                            )
-                            .predictiveBackBackgroundModifier(paneScope = this),
                         state = state,
                         actions = viewModel.accept
                     )

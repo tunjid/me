@@ -22,25 +22,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,7 +38,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -85,6 +74,7 @@ internal fun ArchiveFilesParentScreen(
     movableSharedElementScope: MovableSharedElementScope,
     modifier: Modifier = Modifier,
     state: State,
+    @Suppress("UNUSED_PARAMETER")
     actions: (Action) -> Unit,
 ) {
     val pagerState = rememberPagerState { state.children.size }
@@ -92,34 +82,6 @@ internal fun ArchiveFilesParentScreen(
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        TopAppBar(
-            modifier = Modifier
-                .windowInsetsPadding(WindowInsets.statusBars),
-            navigationIcon = {
-                IconButton(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .padding(16.dp),
-                    onClick = {
-                        actions(Action.Navigate.Pop)
-                    },
-                    content = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                        )
-                    }
-                )
-            },
-            title = {
-                Text(
-                    text = "Files",
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1,
-                )
-            },
-        )
         Tabs(
             currentTabIndex = pagerState.currentPage,
             titles = state.children.map { it.routeParams.fileType.name },
