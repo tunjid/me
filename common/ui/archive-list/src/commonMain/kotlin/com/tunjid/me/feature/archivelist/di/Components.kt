@@ -55,6 +55,7 @@ import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.scaffold.PaneBottomAppBar
 import com.tunjid.me.scaffold.scaffold.PaneFab
+import com.tunjid.me.scaffold.scaffold.PaneNavigationRail
 import com.tunjid.me.scaffold.scaffold.PaneScaffold
 import com.tunjid.me.scaffold.scaffold.UiTokens
 import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
@@ -135,19 +136,8 @@ abstract class ArchiveListScreenHolderComponent(
                     )
                 },
                 floatingActionButton = {
-                    val density = LocalDensity.current
-                    val fabOffset = animateIntOffsetAsState(
-                        if (state.hasFetchedAuthStatus)
-                            if (state.isSignedIn) IntOffset.Zero
-                            else IntOffset(
-                                x = 0,
-                                y = with(density) { UiTokens.navigationBarHeight.roundToPx() }
-                            )
-                        else IntOffset.Zero
-                    )
-                    PaneFab(
-                        modifier = Modifier
-                            .offset { fabOffset.value },
+                    if (!state.hasFetchedAuthStatus || state.isSignedIn) PaneFab(
+                        modifier = Modifier,
                         text = "Create",
                         icon = Icons.Default.Add,
                         expanded = true,
@@ -158,6 +148,9 @@ abstract class ArchiveListScreenHolderComponent(
                 },
                 navigationBar = {
                     PaneBottomAppBar()
+                },
+                navigationRail = {
+                    PaneNavigationRail()
                 },
             )
         }

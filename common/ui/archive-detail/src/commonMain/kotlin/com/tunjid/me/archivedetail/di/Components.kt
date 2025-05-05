@@ -16,9 +16,7 @@
 
 package com.tunjid.me.archivedetail.di
 
-import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -34,9 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,9 +53,9 @@ import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.scaffold.PaneBottomAppBar
 import com.tunjid.me.scaffold.scaffold.PaneFab
+import com.tunjid.me.scaffold.scaffold.PaneNavigationRail
 import com.tunjid.me.scaffold.scaffold.PaneScaffold
 import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
-import com.tunjid.me.scaffold.scaffold.UiTokens
 import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.ThreePane
 import com.tunjid.treenav.compose.threepane.threePaneEntry
@@ -158,19 +154,8 @@ abstract class ArchiveDetailScreenHolderComponent(
                     )
                 },
                 floatingActionButton = {
-                    val density = LocalDensity.current
-                    val fabOffset = animateIntOffsetAsState(
-                        if (state.hasFetchedAuthStatus)
-                            if (state.canEdit) IntOffset.Zero
-                            else IntOffset(
-                                x = 0,
-                                y = with(density) { UiTokens.navigationBarHeight.roundToPx() }
-                            )
-                        else IntOffset.Zero
-                    )
-                    PaneFab(
-                        modifier = Modifier
-                            .offset { fabOffset.value },
+                    if (!state.hasFetchedAuthStatus || state.canEdit) PaneFab(
+                        modifier = Modifier,
                         text = "Edit",
                         icon = Icons.Default.Edit,
                         expanded = true,
@@ -188,6 +173,9 @@ abstract class ArchiveDetailScreenHolderComponent(
                 },
                 navigationBar = {
                     PaneBottomAppBar()
+                },
+                navigationRail = {
+                    PaneNavigationRail()
                 },
             )
         }
