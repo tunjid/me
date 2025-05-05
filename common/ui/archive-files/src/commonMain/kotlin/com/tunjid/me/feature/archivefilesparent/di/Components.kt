@@ -45,7 +45,6 @@ import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
 import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.ThreePane
 import com.tunjid.treenav.compose.threepane.threePaneEntry
-import com.tunjid.treenav.compose.threepane.transforms.requireThreePaneMovableSharedElementScope
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams

@@ -38,7 +38,6 @@ import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.scaffold.PaneScaffold
 import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
 import com.tunjid.treenav.compose.threepane.threePaneEntry
-import com.tunjid.treenav.compose.threepane.transforms.requireThreePaneMovableSharedElementScope
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass

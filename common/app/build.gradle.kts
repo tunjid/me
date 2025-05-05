@@ -54,7 +54,7 @@ kotlin {
                 implementation(libs.squareup.okio)
 
                 api(libs.tunjid.mutator.core.common)
-                api(libs.tunjid.treenav.core.common)
+                api(libs.tunjid.treenav.core)
             }
         }
         named("androidMain") {

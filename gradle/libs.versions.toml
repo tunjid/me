@@ -2,31 +2,31 @@
 accompanist = "0.28.0"
 apacheCommonsImaging = "1.0-alpha3"
 androidDesugarJdkLibs = "2.1.5"
-androidGradlePlugin = "8.9.1"
+androidGradlePlugin = "8.9.2"
 androidxActivity = "1.10.1"
 androidxAppCompat = "1.7.0"
 androidxCore = "1.16.0"
 coil = "3.1.0"
-androidxDataStore = "1.1.4"
+androidxDataStore = "1.1.5"
 androidxEspresso = "3.6.1"
 androidxTest = "1.6.1"
 androidxTestExt = "1.2.1"
-androidxWork = "2.10.0"
+androidxWork = "2.10.1"
 compose-material-icons = "1.7.3"
 googleMaterial = "1.12.0"
 gradleKotlinDsl = "5.2.0"
 jakeWhartonRetrofit = "1.0.0"
-compose-multiplatform = "1.8.0-beta02"
-compose-multiplatform-material3 = "1.8.0-alpha03"
+compose-multiplatform = "1.8.0-rc01"
+compose-multiplatform-material3 = "1.8.0-rc01"
 junit4 = "4.13.2"
 kinject = "2.0.0"
 kotlin = "2.1.20"
 kotlinxCoroutines = "1.10.2"
 kotlinxDatetime = "0.6.2"
-kotlinxSerialization = "1.7.3"
+kotlinxSerialization = "1.8.0"
 imageIO = "3.9.4"
 ksp = "2.1.20-1.0.32"
-ktor = "3.0.3"
+ktor = "3.1.2"
 lifecycle = "2.8.4"
 mockk = "1.12.3"
 multiplatformMarkdownRenderer = "0.33.0"
@@ -40,8 +40,8 @@ sqldelight = "2.0.0"
 tartakaKotlinInject = "0.7.2"
 tartakaKotlinInjectAnvil = "0.0.5"
 tunjidStateHolder = "1.1.0"
-tunjidTiler = "1.2.0-beta01"
-tunjidTreeNav = "0.0.21"
+tunjidTiler = "1.2.0-rc01"
+tunjidTreeNav = "0.0.23"
 tunjidComposables = "0.0.16"
 turbine = "1.1.0"
 
@@ -137,14 +137,10 @@ tunjid-mutator-coroutines-common = { group = "com.tunjid.mutator", name = "corou
 tunjid-mutator-coroutines-jvm = { group = "com.tunjid.mutator", name = "coroutines-jvm", version.ref = "tunjidStateHolder" }
 tunjid-tiler-compose = { group = "com.tunjid.tiler", name = "compose", version.ref = "tunjidTiler" }
 tunjid-tiler-tiler = { group = "com.tunjid.tiler", name = "tiler", version.ref = "tunjidTiler" }
-tunjid-treenav-compose-common = { group = "com.tunjid.treenav", name = "compose", version.ref = "tunjidTreeNav" }
-tunjid-treenav-compose-jvm = { group = "com.tunjid.treenav", name = "compose-jvm", version.ref = "tunjidTreeNav" }
-tunjid-treenav-core-common = { group = "com.tunjid.treenav", name = "treenav", version.ref = "tunjidTreeNav" }
-tunjid-treenav-core-jvm = { group = "com.tunjid.treenav", name = "treenav-jvm", version.ref = "tunjidTreeNav" }
-tunjid-treenav-strings-common = { group = "com.tunjid.treenav", name = "strings", version.ref = "tunjidTreeNav" }
-tunjid-treenav-strings-jvm = { group = "com.tunjid.treenav", name = "strings-jvm", version.ref = "tunjidTreeNav" }
-wokdsem-kinject-core = { group = "com.wokdsem.kinject", name = "kinject", version.ref = "kinject" }
-wokdsem-kinject-compiler = { group = "com.wokdsem.kinject", name = "compiler", version.ref = "kinject" }
+tunjid-treenav-compose = { group = "com.tunjid.treenav", name = "compose", version.ref = "tunjidTreeNav" }
+tunjid-treenav-compose-threepane = { group = "com.tunjid.treenav", name = "compose-threepane", version.ref = "tunjidTreeNav" }
+tunjid-treenav-core = { group = "com.tunjid.treenav", name = "treenav", version.ref = "tunjidTreeNav" }
+tunjid-treenav-strings = { group = "com.tunjid.treenav", name = "strings", version.ref = "tunjidTreeNav" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

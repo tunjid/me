@@ -45,7 +45,8 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
 
                 implementation(libs.tunjid.composables)
-                implementation(libs.tunjid.treenav.compose.common)
+                implementation(libs.tunjid.treenav.compose)
+                implementation(libs.tunjid.treenav.compose.threepane)
 
             }
         }

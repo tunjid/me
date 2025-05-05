@@ -36,11 +36,13 @@ fun org.gradle.api.Project.configureUiModule(
                 implementation(versionCatalog.findLibrary("compose-animation").get())
                 implementation(versionCatalog.findLibrary("compose-material3").get())
                 implementation(versionCatalog.findLibrary("compose-foundation-layout").get())
+                implementation(versionCatalog.findLibrary("compose-material-icons-extended").get())
 
                 implementation(versionCatalog.findLibrary("kotlinx-coroutines-core").get())
-                api(versionCatalog.findLibrary("tunjid-treenav-compose-common").get())
-                api(versionCatalog.findLibrary("tunjid-treenav-core-common").get())
-                api(versionCatalog.findLibrary("tunjid-treenav-strings-common").get())
+                api(versionCatalog.findLibrary("tunjid-treenav-compose").get())
+                api(versionCatalog.findLibrary("tunjid-treenav-compose-threepane").get())
+                api(versionCatalog.findLibrary("tunjid-treenav-core").get())
+                api(versionCatalog.findLibrary("tunjid-treenav-strings").get())
             }
         }
         named("androidMain") {
