@@ -35,20 +35,19 @@ import com.tunjid.me.scaffold.navigation.NavItem
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.navigation.navItemSelected
 import com.tunjid.me.scaffold.navigation.navItems
-import com.tunjid.me.scaffold.navigation.unknownRoute
 import com.tunjid.me.scaffold.scaffold.PaneAnchorState.Companion.MinPaneWidth
 import com.tunjid.me.sync.di.Sync
 import com.tunjid.me.sync.di.keepUpToDate
 import com.tunjid.treenav.MultiStackNav
-import com.tunjid.treenav.backStack
 import com.tunjid.treenav.compose.MultiPaneDisplayScope
 import com.tunjid.treenav.compose.MultiPaneDisplayState
 import com.tunjid.treenav.compose.PaneEntry
+import com.tunjid.treenav.compose.multiPaneDisplayBackstack
 import com.tunjid.treenav.compose.threepane.ThreePane
 import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.compose.transforms.Transform
-import com.tunjid.treenav.current
 import com.tunjid.treenav.pop
+import com.tunjid.treenav.requireCurrent
 import com.tunjid.treenav.strings.PathPattern
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteTrie
@@ -118,17 +117,8 @@ class AppState @Inject constructor(
             MultiPaneDisplayState(
                 panes = ThreePane.entries.toList(),
                 navigationState = multiStackNavState,
-                backStackTransform = { multiStackNav ->
-                    multiStackNav.backStack(
-                        includeCurrentDestinationChildren = true,
-                        placeChildrenBeforeParent = true,
-                    )
-                        .filterIsInstance<Route>()
-                        .toList()
-                },
-                destinationTransform = { multiStackNav ->
-                    multiStackNav.current as? Route ?: unknownRoute("")
-                },
+                backStackTransform = MultiStackNav::multiPaneDisplayBackstack,
+                destinationTransform = MultiStackNav::requireCurrent,
                 entryProvider = { node ->
                     configurationTrie[node] ?: threePaneEntry(
                         render = { },

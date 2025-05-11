@@ -36,7 +36,7 @@ fun org.gradle.api.Project.configureUiModule(
                 implementation(versionCatalog.findLibrary("compose-animation").get())
                 implementation(versionCatalog.findLibrary("compose-material3").get())
                 implementation(versionCatalog.findLibrary("compose-foundation-layout").get())
-                implementation(versionCatalog.findLibrary("compose-material-icons-extended").get())
+                api(versionCatalog.findLibrary("compose-material-icons-extended").get())
 
                 implementation(versionCatalog.findLibrary("kotlinx-coroutines-core").get())
                 api(versionCatalog.findLibrary("tunjid-treenav-compose").get())
