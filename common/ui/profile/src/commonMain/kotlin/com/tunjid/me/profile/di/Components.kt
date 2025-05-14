@@ -39,6 +39,7 @@ import com.tunjid.me.scaffold.di.routeAndMatcher
 import com.tunjid.me.scaffold.scaffold.PaneScaffold
 import com.tunjid.me.scaffold.scaffold.PoppableDestinationTopAppBar
 import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
+import com.tunjid.me.scaffold.scaffold.rememberPaneScaffoldState
 import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
@@ -87,7 +88,7 @@ abstract class ProfileScreenHolderComponent(
                 )
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
-            PaneScaffold(
+            rememberPaneScaffoldState().PaneScaffold(
                 modifier = Modifier
                     .predictiveBackBackgroundModifier(paneScope = this),
                 showNavigation = true,

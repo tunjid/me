@@ -16,14 +16,11 @@
 
 package com.tunjid.me.scaffold.scaffold
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateBounds
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -65,11 +62,13 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlin.math.abs
 
 class PaneScaffoldState internal constructor(
-    internal val density: Density,
-    private val appState: AppState,
+    density: Density,
+    internal val appState: AppState,
     paneMovableElementSharedTransitionScope: PaneMovableElementSharedTransitionScope<Route>,
 ) : PaneMovableElementSharedTransitionScope<Route> by paneMovableElementSharedTransitionScope {
     val isMediumScreenWidthOrWider get() = appState.isMediumScreenWidthOrWider
+
+    internal var density by mutableStateOf(density)
 
     internal val canShowBottomNavigation get() = !appState.isMediumScreenWidthOrWider
 
@@ -95,9 +94,24 @@ class PaneScaffoldState internal constructor(
                 && abs(scaffoldCurrentSize.height - scaffoldTargetSize.height) <= 2
 }
 
+@Composable
+fun PaneScope<ThreePane, Route>.rememberPaneScaffoldState(): PaneScaffoldState {
+    val density = LocalDensity.current
+    val appState = LocalAppState.current
+    val paneMovableElementSharedTransitionScope = rememberPaneMovableElementSharedTransitionScope()
+    return remember(appState) {
+        PaneScaffoldState(
+            appState = appState,
+            paneMovableElementSharedTransitionScope = paneMovableElementSharedTransitionScope,
+            density = density,
+        )
+    }
+        .also { it.density = density }
+}
+
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun PaneScope<ThreePane, Route>.PaneScaffold(
+fun PaneScaffoldState.PaneScaffold(
     modifier: Modifier = Modifier,
     showNavigation: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.background,
@@ -109,37 +123,21 @@ fun PaneScope<ThreePane, Route>.PaneScaffold(
     navigationRail: @Composable PaneScaffoldState.() -> Unit = {},
     content: @Composable PaneScaffoldState.(PaddingValues) -> Unit,
 ) {
-    val density = LocalDensity.current
-    val appState = LocalAppState.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val paneMovableElementSharedTransitionScope = rememberPaneMovableElementSharedTransitionScope()
-    val paneScaffoldState = remember(appState, density) {
-        PaneScaffoldState(
-            appState = appState,
-            paneMovableElementSharedTransitionScope = paneMovableElementSharedTransitionScope,
-            density = density,
-        )
-    }
-
-    PaneScaffold(
+    PaneNavigationRailScaffold(
         modifier = modifier,
         navigationRail = {
-            if (paneScaffoldState.canShowNavRail) Box(
-                modifier = Modifier
-                    .zIndex(2f),
-            ) {
-                paneScaffoldState.navigationRail()
-            }
+            navigationRail()
         },
         content = {
             Scaffold(
                 modifier = Modifier
                     .animateBounds(
-                        lookaheadScope = paneScaffoldState,
+                        lookaheadScope = this,
                         boundsTransform = remember {
                             scaffoldBoundsTransform(
                                 appState = appState,
-                                paneScaffoldState = paneScaffoldState,
+                                paneScaffoldState = this,
                             )
                         }
                     )
@@ -147,37 +145,23 @@ fun PaneScope<ThreePane, Route>.PaneScaffold(
                         horizontal = if (appState.filteredPaneOrder.size > 1) 8.dp else 0.dp
                     )
                     .onSizeChanged {
-                        paneScaffoldState.scaffoldCurrentSize = it
+                        scaffoldCurrentSize = it
                     },
                 containerColor = containerColor,
                 topBar = {
-                    paneScaffoldState.topBar()
+                    topBar()
                 },
                 floatingActionButton = {
-                    AnimatedVisibility(
-                        visible = paneScaffoldState.canShowFab,
-                        enter = slideInVertically(initialOffsetY = { it }),
-                        exit = slideOutVertically(targetOffsetY = { it }),
-                        content = {
-                            paneScaffoldState.floatingActionButton()
-                        },
-                    )
+                    floatingActionButton()
                 },
                 bottomBar = {
-                    AnimatedVisibility(
-                        visible = paneScaffoldState.canShowBottomNavigation,
-                        enter = slideInVertically(initialOffsetY = { it }),
-                        exit = slideOutVertically(targetOffsetY = { it }),
-                        content = {
-                            paneScaffoldState.navigationBar()
-                        },
-                    )
+                    navigationBar()
                 },
                 snackbarHost = {
                     SnackbarHost(snackbarHostState)
                 },
                 content = { paddingValues ->
-                    paneScaffoldState.content(paddingValues)
+                    content(paddingValues)
                 },
             )
         }
@@ -203,7 +187,7 @@ fun PaneScope<ThreePane, Route>.PaneScaffold(
 }
 
 @Composable
-private inline fun PaneScaffold(
+private inline fun PaneNavigationRailScaffold(
     modifier: Modifier = Modifier,
     navigationRail: @Composable () -> Unit,
     content: @Composable () -> Unit,
@@ -214,9 +198,11 @@ private inline fun PaneScaffold(
             Box(
                 modifier = Modifier
                     .widthIn(max = 80.dp)
-            ) {
-                navigationRail()
-            }
+                    .zIndex(2f),
+                content = {
+                    navigationRail()
+                },
+            )
             Box(
                 modifier = Modifier
                     .fillMaxSize()

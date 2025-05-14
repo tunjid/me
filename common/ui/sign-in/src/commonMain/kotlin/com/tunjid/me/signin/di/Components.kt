@@ -36,6 +36,7 @@ import com.tunjid.me.scaffold.scaffold.PaneFab
 import com.tunjid.me.scaffold.scaffold.PaneScaffold
 import com.tunjid.me.scaffold.scaffold.PoppableDestinationTopAppBar
 import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
+import com.tunjid.me.scaffold.scaffold.rememberPaneScaffoldState
 import com.tunjid.me.signin.Action
 import com.tunjid.me.signin.ActualSignInStateHolder
 import com.tunjid.me.signin.SignInRoute
@@ -92,7 +93,7 @@ abstract class SignInScreenHolderComponent(
                 )
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
-            PaneScaffold(
+            rememberPaneScaffoldState().PaneScaffold(
                 modifier = Modifier
                     .predictiveBackBackgroundModifier(paneScope = this),
                 showNavigation = true,

@@ -16,7 +16,14 @@
 
 package com.tunjid.me.scaffold.scaffold
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -33,78 +40,92 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun PaneScaffoldState.PaneBottomAppBar(
     modifier: Modifier = Modifier,
+    enterTransition: EnterTransition = slideInVertically(initialOffsetY = { it }),
+    exitTransition: ExitTransition = slideOutVertically(targetOffsetY = { it }),
     onNavItemReselected: () -> Boolean = { false },
     badge: @Composable (AppStack) -> Unit = {},
 ) {
     val appState = LocalAppState.current
-    val sharedContentState = rememberSharedContentState(BottomNavSharedElementKey)
-    NavigationBar(
+    AnimatedVisibility(
         modifier = modifier
             .sharedElement(
-                sharedContentState = sharedContentState,
+                sharedContentState = rememberSharedContentState(BottomNavSharedElementKey),
                 animatedVisibilityScope = this,
                 zIndexInOverlay = BottomNavSharedElementZIndex,
             ),
-    ) {
-        appState.navItems.forEach { item ->
-            NavigationBarItem(
-                icon = {
-                    BadgedBox(
-                        badge = {
-                            badge(item.stack)
-                        },
-                        content = {
-                            Icon(
-                                imageVector = item.stack.icon,
-                                contentDescription = stringResource(item.stack.titleRes),
+        visible = canShowBottomNavigation,
+        enter = enterTransition,
+        exit = exitTransition,
+        content = {
+            NavigationBar {
+                appState.navItems.forEach { item ->
+                    NavigationBarItem(
+                        icon = {
+                            BadgedBox(
+                                badge = {
+                                    badge(item.stack)
+                                },
+                                content = {
+                                    Icon(
+                                        imageVector = item.stack.icon,
+                                        contentDescription = stringResource(item.stack.titleRes),
+                                    )
+                                },
                             )
                         },
+                        selected = item.selected,
+                        onClick = {
+                            if (item.selected && onNavItemReselected()) return@NavigationBarItem
+                            appState.onNavItemSelected(item)
+                        }
                     )
-                },
-                selected = item.selected,
-                onClick = {
-                    if (item.selected && onNavItemReselected()) return@NavigationBarItem
-                    appState.onNavItemSelected(item)
                 }
-            )
-        }
-    }
+            }
+        },
+    )
 }
 
-@Suppress("UnusedReceiverParameter")
 @Composable
 fun PaneScaffoldState.PaneNavigationRail(
     modifier: Modifier = Modifier,
+    enterTransition: EnterTransition = slideInHorizontally(initialOffsetX = { -it }),
+    exitTransition: ExitTransition = slideOutHorizontally(targetOffsetX = { -it }),
     onNavItemReselected: () -> Boolean = { false },
     badge: @Composable (AppStack) -> Unit = {},
 ) {
     val appState = LocalAppState.current
-    NavigationRail(
+    AnimatedVisibility(
         modifier = modifier,
-    ) {
-        appState.navItems.forEach { item ->
-            NavigationRailItem(
-                selected = item.selected,
-                icon = {
-                    BadgedBox(
-                        badge = {
-                            badge(item.stack)
-                        },
-                        content = {
-                            Icon(
-                                imageVector = item.stack.icon,
-                                contentDescription = stringResource(item.stack.titleRes),
+        visible = canShowNavRail,
+        enter = enterTransition,
+        exit = exitTransition,
+        content = {
+            NavigationRail {
+                appState.navItems.forEach { item ->
+                    NavigationRailItem(
+                        selected = item.selected,
+                        icon = {
+                            BadgedBox(
+                                badge = {
+                                    badge(item.stack)
+                                },
+                                content = {
+                                    Icon(
+                                        imageVector = item.stack.icon,
+                                        contentDescription = stringResource(item.stack.titleRes),
+                                    )
+                                },
                             )
                         },
+                        onClick = {
+                            if (item.selected && onNavItemReselected()) return@NavigationRailItem
+                            appState.onNavItemSelected(item)
+                        }
                     )
-                },
-                onClick = {
-                    if (item.selected && onNavItemReselected()) return@NavigationRailItem
-                    appState.onNavItemSelected(item)
                 }
-            )
+            }
         }
-    }
+    )
 }
 
 private data object BottomNavSharedElementKey

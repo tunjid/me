@@ -59,6 +59,7 @@ import com.tunjid.me.scaffold.scaffold.PaneNavigationRail
 import com.tunjid.me.scaffold.scaffold.PaneScaffold
 import com.tunjid.me.scaffold.scaffold.UiTokens
 import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
+import com.tunjid.me.scaffold.scaffold.rememberPaneScaffoldState
 import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
@@ -111,7 +112,7 @@ abstract class ArchiveListScreenHolderComponent(
                 )
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
-            PaneScaffold(
+            rememberPaneScaffoldState().PaneScaffold(
                 modifier = Modifier
                     .predictiveBackBackgroundModifier(paneScope = this),
                 showNavigation = true,
