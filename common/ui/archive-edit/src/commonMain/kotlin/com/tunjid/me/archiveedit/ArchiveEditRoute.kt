@@ -58,46 +58,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.halilibo.richtext.commonmark.Markdown
 import com.halilibo.richtext.ui.material3.RichText
-import com.tunjid.me.archiveedit.di.archiveId
-import com.tunjid.me.archiveedit.di.kind
 import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.ui.AsyncRasterImage
 import com.tunjid.me.core.ui.MediaArgs
 import com.tunjid.me.core.ui.NestedScrollTextContainer
 import com.tunjid.me.core.ui.dragdrop.dropTarget
 import com.tunjid.me.core.ui.isInViewport
-import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.treenav.compose.moveablesharedelement.MovableSharedElementScope
 import com.tunjid.treenav.compose.moveablesharedelement.updatedMovableSharedElementOf
-import com.tunjid.treenav.strings.Route
-import com.tunjid.treenav.strings.RouteParams
 import kotlinx.coroutines.launch
 
 private const val BODY_INDEX = 11
 
-fun ArchiveEditRoute(
-    routeParams: RouteParams,
-): Route = routeOf(
-    params = routeParams,
-    children = when (val archiveId = routeParams.archiveId) {
-        null -> emptyList()
-        else -> listOf(
-            routeOf(
-                path = "/archives/${routeParams.kind.type}/${archiveId.value}/files/image",
-                pathArgs = mapOf(
-                    "id" to archiveId.value,
-                    "type" to "image",
-                ),
-                queryParams = mapOf(
-                    "dndEnabled" to listOf("true")
-                )
-            )
-        )
-    }
-)
-
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun ArchiveEditScreen(
     movableSharedElementScope: MovableSharedElementScope,

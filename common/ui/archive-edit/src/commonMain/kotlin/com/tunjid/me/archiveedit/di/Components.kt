@@ -41,7 +41,6 @@ import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tunjid.me.archiveedit.Action
 import com.tunjid.me.archiveedit.ActualArchiveEditStateHolder
-import com.tunjid.me.archiveedit.ArchiveEditRoute
 import com.tunjid.me.archiveedit.ArchiveEditScreen
 import com.tunjid.me.archiveedit.ArchiveEditStateHolderCreator
 import com.tunjid.me.archiveedit.State
@@ -50,6 +49,7 @@ import com.tunjid.me.core.model.ArchiveId
 import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.ui.icons.Preview
 import com.tunjid.me.data.di.InjectedDataComponent
+import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
@@ -84,6 +84,27 @@ internal val RouteParams.kind: ArchiveKind
 
 internal val RouteParams.archiveThumbnail: String?
     get() = queryParams["thumbnail"]?.firstOrNull()
+
+private fun ArchiveEditRoute(
+    routeParams: RouteParams,
+): Route = routeOf(
+    params = routeParams,
+    children = when (val archiveId = routeParams.archiveId) {
+        null -> emptyList()
+        else -> listOf(
+            routeOf(
+                path = "/archives/${routeParams.kind.type}/${archiveId.value}/files/image",
+                pathArgs = mapOf(
+                    "id" to archiveId.value,
+                    "type" to "image",
+                ),
+                queryParams = mapOf(
+                    "dndEnabled" to listOf("true")
+                )
+            )
+        )
+    }
+)
 
 @Component
 abstract class ArchiveEditNavigationComponent {
@@ -125,7 +146,7 @@ abstract class ArchiveEditScreenHolderComponent(
         paneMapping = { route ->
             mapOf(
                 ThreePane.Primary to route,
-                ThreePane.Secondary to route.children.first() as? Route,
+                ThreePane.Secondary to route.children.firstOrNull() as? Route,
             )
         },
         render = { route ->
