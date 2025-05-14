@@ -39,7 +39,7 @@ internal class SessionCookiesStorage(
     ): List<Cookie> = withContext(dispatcher) {
         listOfNotNull(
             readAuth()
-                ?.auth
+                ?.token
                 ?.let(::parseServerSetCookieHeader)
         )
     }

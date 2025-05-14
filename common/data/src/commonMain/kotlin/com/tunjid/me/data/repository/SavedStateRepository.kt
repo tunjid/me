@@ -45,8 +45,8 @@ data class SavedState(
 
     @Serializable
     data class AuthTokens(
-        val authUserId: UserId,
-        val auth: String,
+        val authUserId: UserId?,
+        val token: String?,
     )
 
     @Serializable

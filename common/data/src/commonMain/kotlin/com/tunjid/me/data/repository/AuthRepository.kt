@@ -26,6 +26,8 @@ import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.model.map
 import com.tunjid.me.data.local.models.toExternalModel
 import com.tunjid.me.data.network.NetworkService
+import com.tunjid.me.data.network.models.NetworkUser
+import com.tunjid.me.data.network.models.toEntity
 import com.tunjid.me.data.network.models.toResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -56,6 +58,7 @@ internal class SessionCookieAuthRepository(
             .distinctUntilChangedBy { it.auth?.authUserId }
             .flatMapLatest { savedState ->
                 savedState.auth
+                    ?.takeIf { it.token != null }
                     ?.authUserId
                     ?.value
                     ?.let(userEntityQueries::find)
@@ -66,18 +69,29 @@ internal class SessionCookieAuthRepository(
             }
 
     override val isSignedIn: Flow<Boolean> =
-        savedStateRepository.savedState.map { it.auth != null }
+        savedStateRepository.savedState.map { savedState ->
+            savedState.auth?.takeIf { it.token != null } != null
+        }
 
     override suspend fun createSession(request: SessionRequest): Result<UserId> =
         networkService.signIn(request)
             .toResult()
-            .also { authTokensResult ->
-                if (authTokensResult !is Result.Success) return@also
+            .also { networkUserResult ->
+                if (networkUserResult !is Result.Success) return@also
+
+                userEntityQueries.upsert(networkUserResult.item.toEntity())
                 savedStateRepository.updateState {
-                    copy(auth = authTokensResult.item)
+                    copy(
+                        auth = auth?.copy(authUserId = networkUserResult.item.id)
+                            ?: SavedState.AuthTokens(
+                                authUserId = networkUserResult.item.id,
+                                token = null,
+                            )
+                    )
                 }
+
                 // Suspend till auth token has been saved and is readable
                 savedStateRepository.savedState.first { it.auth != null }
             }
-            .map(SavedState.AuthTokens::authUserId)
+            .map(NetworkUser::id)
 }

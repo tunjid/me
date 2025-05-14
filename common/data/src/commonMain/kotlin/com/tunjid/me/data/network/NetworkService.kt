@@ -114,7 +114,7 @@ internal interface NetworkService {
 
     suspend fun signIn(
         sessionRequest: SessionRequest,
-    ): NetworkResponse<SavedState.AuthTokens>
+    ): NetworkResponse<NetworkUser>
 
     suspend fun session(): NetworkResponse<NetworkUser>
 
@@ -146,7 +146,13 @@ internal class KtorNetworkService(
                 },
                 saveAuth = { authCookie ->
                     savedStateRepository.updateState {
-                        copy(auth = auth?.copy(auth = authCookie))
+                        copy(
+                            auth = auth?.copy(token = authCookie)
+                                ?: SavedState.AuthTokens(
+                                    authUserId = null,
+                                    token = authCookie
+                                )
+                        )
                     }
                 },
                 dispatcher = dispatcher
@@ -259,17 +265,11 @@ internal class KtorNetworkService(
 
     override suspend fun signIn(
         sessionRequest: SessionRequest,
-    ): NetworkResponse<SavedState.AuthTokens> = json.parseServerErrors {
-        val response = client.post("$baseUrl/api/sign-in") {
+    ): NetworkResponse<NetworkUser> = json.parseServerErrors {
+        client.post("$baseUrl/api/sign-in") {
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             setBody(sessionRequest)
-        }
-
-        SavedState.AuthTokens(
-            authUserId = response.body<NetworkUser>().id,
-            auth = response.headers[SessionCookieName]
-                ?: throw Exception("No auth token in response")
-        )
+        }.body()
     }
 
     override suspend fun session(): NetworkResponse<NetworkUser> = json.parseServerErrors {
