@@ -16,9 +16,7 @@
 
 package com.tunjid.me.feature.archivelist.di
 
-import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -35,9 +33,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.coroutineScope
@@ -53,11 +49,10 @@ import com.tunjid.me.feature.archivelist.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.scaffold.PaneBottomAppBar
+import com.tunjid.me.scaffold.scaffold.PaneNavigationBar
 import com.tunjid.me.scaffold.scaffold.PaneFab
 import com.tunjid.me.scaffold.scaffold.PaneNavigationRail
 import com.tunjid.me.scaffold.scaffold.PaneScaffold
-import com.tunjid.me.scaffold.scaffold.UiTokens
 import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
 import com.tunjid.me.scaffold.scaffold.rememberPaneScaffoldState
 import com.tunjid.treenav.compose.threepane.threePaneEntry
@@ -148,7 +143,7 @@ abstract class ArchiveListScreenHolderComponent(
                     )
                 },
                 navigationBar = {
-                    PaneBottomAppBar()
+                    PaneNavigationBar()
                 },
                 navigationRail = {
                     PaneNavigationRail()

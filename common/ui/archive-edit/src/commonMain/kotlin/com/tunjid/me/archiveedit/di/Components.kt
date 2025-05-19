@@ -53,7 +53,7 @@ import com.tunjid.me.scaffold.adaptive.routeOf
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.scaffold.PaneBottomAppBar
+import com.tunjid.me.scaffold.scaffold.PaneNavigationBar
 import com.tunjid.me.scaffold.scaffold.PaneFab
 import com.tunjid.me.scaffold.scaffold.PaneScaffold
 import com.tunjid.me.scaffold.scaffold.SecondaryPaneCloseBackHandler
@@ -207,7 +207,7 @@ abstract class ArchiveEditScreenHolderComponent(
                     )
                 },
                 navigationBar = {
-                    PaneBottomAppBar()
+                    PaneNavigationBar()
                 },
             )
         }

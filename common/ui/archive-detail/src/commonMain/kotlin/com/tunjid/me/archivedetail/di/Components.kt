@@ -51,7 +51,7 @@ import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.scaffold.PaneBottomAppBar
+import com.tunjid.me.scaffold.scaffold.PaneNavigationBar
 import com.tunjid.me.scaffold.scaffold.PaneFab
 import com.tunjid.me.scaffold.scaffold.PaneNavigationRail
 import com.tunjid.me.scaffold.scaffold.PaneScaffold
@@ -173,7 +173,7 @@ abstract class ArchiveDetailScreenHolderComponent(
                     )
                 },
                 navigationBar = {
-                    PaneBottomAppBar()
+                    PaneNavigationBar()
                 },
                 navigationRail = {
                     PaneNavigationRail()
