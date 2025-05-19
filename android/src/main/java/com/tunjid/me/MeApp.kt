@@ -98,20 +98,22 @@ fun createMeApp(context: Context): MeApp {
                 context = context,
                 dispatcher = databaseDispatcher()
             ),
+            savedStatePath = context.savedStatePath(),
+            appScope = appScope,
+            byteSerializer = appRouteComponent.byteSerializer,
         )
     )
 
     val injectedScaffoldComponent = InjectedScaffoldComponent::class.create(
         ScaffoldModule(
             appScope = appScope,
-            savedStatePath = context.savedStatePath(),
             permissionsProvider = PlatformPermissionsProvider(
                 appScope = appScope,
                 context = context
             ),
             routeMatchers = appRouteComponent.allRouteMatchers.toList(),
-            byteSerializer = appRouteComponent.byteSerializer,
-        )
+        ),
+        dataComponent = injectedDataComponent,
     )
 
     val appScreenStateHolderComponent = AppScreenStateHolderComponent::class.create(

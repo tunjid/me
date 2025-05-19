@@ -1,83 +1,34 @@
+/*
+ *    Copyright 2024 Adetunji Dahunsi
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package com.tunjid.me.scaffold.scaffold
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
-import com.tunjid.me.scaffold.countIf
-import com.tunjid.me.scaffold.globalui.bottomNavSize
-import com.tunjid.me.scaffold.globalui.keyboardSize
-import com.tunjid.me.scaffold.globalui.navRailWidth
-import com.tunjid.me.scaffold.globalui.slices.UiChromeState
 
-
-@Composable
-internal fun Modifier.routePanePadding(
-    state: State<UiChromeState>,
-): Modifier {
-    val paddingValues = remember {
-        mutableStateListOf(0.dp, 0.dp, 0.dp, 0.dp)
-    }
-    val uiChromeState by state
-
-    val bottomNavHeight = uiChromeState.windowSizeClass
-        .bottomNavSize() countIf uiChromeState.bottomNavVisible
-
-    val insetClearance = max(
-        a = bottomNavHeight,
-        b = with(LocalDensity.current) { uiChromeState.keyboardSize.toDp() }
-    )
-    val navBarClearance = with(LocalDensity.current) {
-        uiChromeState.navBarSize.toDp()
-    } countIf uiChromeState.insetDescriptor.hasBottomInset
-
-    val bottomClearance by animateDpAsState(
-        label = "Bottom clearance animation",
-        targetValue = insetClearance + navBarClearance,
-        animationSpec = PaneSizeSpring
-    )
-
-    val navRailSize =
-        uiChromeState.windowSizeClass.navRailWidth() countIf uiChromeState.navRailVisible
-
-    val startClearance by animateDpAsState(
-        label = "Start clearance animation",
-        targetValue = navRailSize,
-        animationSpec = PaneSizeSpring
-    )
-
-    paddingValues[0] = startClearance
-    paddingValues[3] = bottomClearance
-
-    return padding(
-        start = paddingValues[0],
-        top = paddingValues[1],
-        end = paddingValues[2],
-        bottom = paddingValues[3]
-    )
-}
-
-private val PaneSizeSpring = spring(
-    stiffness = Spring.StiffnessMediumLow,
-    visibilityThreshold = Dp.VisibilityThreshold
-)
 
 @Composable
 internal inline fun <T> rememberUpdatedStateIf(
     value: T,
-    predicate: (T) -> Boolean
+    predicate: (T) -> Boolean,
 ): State<T> = remember {
     mutableStateOf(value)
 }.also { if (predicate(value)) it.value = value }
+
+internal val BottomNavSharedElementZIndex = 2f
+internal val FabSharedElementZIndex = 4f

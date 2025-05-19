@@ -61,8 +61,6 @@ data class State(
     val isSubmitting: Boolean = false,
     @Transient
     val hasStoragePermissions: Boolean = false,
-    @ProtoNumber(6)
-    val navBarSize: Int,
     @ProtoNumber(7)
     val kind: ArchiveKind,
     @ProtoNumber(10)
@@ -80,7 +78,7 @@ data class State(
     @Transient
     val dragLocation: DragLocation = DragLocation.None,
     @Transient
-    val messages: MessageQueue = MessageQueue(),
+    val messages: List<String> = emptyList(),
 ) : ByteSerializable
 
 val State.headerThumbnail
@@ -160,7 +158,7 @@ sealed class Action(val key: String) {
     object ToggleEditView : Action("ToggleEditView")
 
     data class MessageConsumed(
-        val message: Message
+        val message: String
     ) : Action("MessageConsumed")
 
     data class ChipEdit(

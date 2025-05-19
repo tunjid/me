@@ -16,10 +16,12 @@
 
 package com.tunjid.me.settings.di
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.coroutineScope
@@ -28,17 +30,17 @@ import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.globalui.InsetFlags
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
+import com.tunjid.me.scaffold.scaffold.PaneScaffold
+import com.tunjid.me.scaffold.scaffold.PoppableDestinationTopAppBar
+import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
+import com.tunjid.me.scaffold.scaffold.rememberPaneScaffoldState
+import com.tunjid.me.settings.Action
 import com.tunjid.me.settings.ActualSettingsStateHolder
 import com.tunjid.me.settings.SettingsRoute
 import com.tunjid.me.settings.SettingsScreen
 import com.tunjid.me.settings.SettingsStateHolderCreator
 import com.tunjid.me.settings.State
-import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
+import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.strings.RouteMatcher
 import kotlinx.serialization.modules.subclass
 import me.tatarka.inject.annotations.Component
@@ -76,7 +78,7 @@ abstract class SettingsScreenHolderComponent(
     @Provides
     fun routeAdaptiveConfiguration(
         creator: SettingsStateHolderCreator,
-    ) = RoutePattern to threePaneListDetailStrategy(
+    ) = RoutePattern to threePaneEntry(
         render = { route ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
             val viewModel = viewModel<ActualSettingsStateHolder> {
@@ -86,17 +88,35 @@ abstract class SettingsScreenHolderComponent(
                 )
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
-            SettingsScreen(
-                state = state,
-                actions = viewModel.accept,
-                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
-            )
-            ScreenUiState(
-                UiState(
-                    navVisibility = NavVisibility.Visible,
-                    insetFlags = InsetFlags.NO_BOTTOM,
-                    statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
-                )
+            rememberPaneScaffoldState().PaneScaffold(
+                modifier = Modifier
+                    .predictiveBackBackgroundModifier(paneScope = this),
+                showNavigation = true,
+                onSnackBarMessageConsumed = {
+                },
+                topBar = {
+                    PoppableDestinationTopAppBar(
+                        title = {
+                            Text(
+                                text = "Settings",
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.titleLarge,
+                                maxLines = 1,
+                            )
+                        }
+                    ) {
+                        viewModel.accept(Action.Navigate.Pop)
+                    }
+                },
+                content = { paddingValues ->
+                    SettingsScreen(
+                        modifier = Modifier
+                            .padding(paddingValues)
+                            .predictiveBackBackgroundModifier(paneScope = this),
+                        state = state,
+                        actions = viewModel.accept
+                    )
+                },
             )
         }
     )

@@ -31,28 +31,28 @@ kotlin {
         named("commonMain") {
             dependencies {
                 api(project(":common:core"))
+                api(project(":common:core-ui"))
                 api(project(":common:sync"))
 
                 implementation(libs.androidx.datastore.core.okio)
 
-                implementation(libs.androidx.lifecycle.runtime.ktx)
-                implementation(libs.androidx.lifecycle.runtime.compose)
-                implementation(libs.androidx.lifecycle.viewmodel.ktx)
-                implementation(libs.androidx.lifecycle.viewmodel.compose)
+                implementation(libs.lifecycle.runtime)
+                implementation(libs.lifecycle.runtime.compose)
+                implementation(libs.lifecycle.viewmodel)
+                implementation(libs.lifecycle.viewmodel.compose)
 
-                implementation(libs.androidx.window.core)
-                implementation(libs.androidx.window.window)
+                implementation(libs.compose.components.resources)
 
-                implementation(libs.jetbrains.compose.ui.tooling)
-                implementation(libs.jetbrains.compose.ui.util)
-                implementation(libs.jetbrains.compose.ui.ui)
+                implementation(libs.compose.ui.tooling.preview)
+                implementation(libs.compose.ui.util)
+                implementation(libs.compose.ui.ui)
 
-                implementation(libs.jetbrains.compose.runtime)
-                implementation(libs.jetbrains.compose.animation)
-                implementation(libs.jetbrains.compose.material)
-                implementation(libs.jetbrains.compose.material3)
-                implementation(libs.jetbrains.compose.foundation.foundation)
-                implementation(libs.jetbrains.compose.foundation.layout)
+                implementation(libs.compose.runtime)
+                implementation(libs.compose.animation)
+                implementation(libs.compose.material.icons.extended)
+                implementation(libs.compose.material3)
+                implementation(libs.compose.foundation.foundation)
+                implementation(libs.compose.foundation.layout)
 
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.cbor)
@@ -62,9 +62,10 @@ kotlin {
                 implementation(libs.squareup.okio)
 
                 implementation(libs.tunjid.composables)
-                implementation(libs.tunjid.treenav.compose.common)
-                implementation(libs.tunjid.treenav.core.common)
-                implementation(libs.tunjid.treenav.strings.common)
+                implementation(libs.tunjid.treenav.compose)
+                implementation(libs.tunjid.treenav.compose.threepane)
+                implementation(libs.tunjid.treenav.core)
+                implementation(libs.tunjid.treenav.strings)
 
                 implementation(libs.tunjid.mutator.core.common)
                 implementation(libs.tunjid.mutator.coroutines.common)

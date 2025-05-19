@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.tunjid.me.scaffold.savedstate
+package com.tunjid.me.data.repository
 
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioSerializer
 import androidx.datastore.core.okio.OkioStorage
-import com.tunjid.me.core.model.ArchiveKind
+import com.tunjid.me.core.model.UserId
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.fromBytes
@@ -39,24 +39,36 @@ import okio.Path
 
 @Serializable
 data class SavedState(
-    val isEmpty: Boolean,
-    val activeNav: Int = 0,
-    val navigation: List<List<String>>,
-    val routeStates: Map<String, ByteArray>
-) : ByteSerializable
+    val auth: AuthTokens?,
+    val navigation: Navigation,
+) : ByteSerializable {
 
-private val defaultSavedState = SavedState(
-    isEmpty = true,
-    navigation = ArchiveKind.values()
-        .map { "/archives/${it.type}" }
-        .plus("/settings")
-        .map(::listOf),
-    routeStates = emptyMap()
+    @Serializable
+    data class AuthTokens(
+        val authUserId: UserId?,
+        val token: String?,
+    )
+
+    @Serializable
+    data class Navigation(
+        val activeNav: Int = 0,
+        val backStacks: List<List<String>> = emptyList(),
+    )
+}
+
+val InitialSavedState = SavedState(
+    auth = null,
+    navigation = SavedState.Navigation(activeNav = -1),
+)
+
+val EmptySavedState = SavedState(
+    auth = null,
+    navigation = SavedState.Navigation(activeNav = 0),
 )
 
 interface SavedStateRepository {
     val savedState: StateFlow<SavedState>
-    suspend fun saveState(savedState: SavedState)
+    suspend fun updateState(update: SavedState.() -> SavedState)
 }
 
 @Inject
@@ -78,18 +90,18 @@ class DataStoreSavedStateRepository(
     override val savedState = dataStore.data.stateIn(
         scope = appScope,
         started = SharingStarted.Eagerly,
-        initialValue = defaultSavedState
+        initialValue = InitialSavedState,
     )
 
-    override suspend fun saveState(savedState: SavedState) {
-        dataStore.updateData { savedState }
+    override suspend fun updateState(update: SavedState.() -> SavedState) {
+        dataStore.updateData(update)
     }
 }
 
 private class SavedStateOkioSerializer(
     private val byteSerializer: ByteSerializer
 ) : OkioSerializer<SavedState> {
-    override val defaultValue: SavedState = defaultSavedState.copy(isEmpty = false)
+    override val defaultValue: SavedState = EmptySavedState
 
     override suspend fun readFrom(source: BufferedSource): SavedState =
         byteSerializer.fromBytes(source.readByteArray())

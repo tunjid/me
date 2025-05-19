@@ -16,10 +16,9 @@
 
 package com.tunjid.me.feature.archivefiles.di
 
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.coroutineScope
@@ -36,13 +35,10 @@ import com.tunjid.me.feature.archivefiles.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
-import com.tunjid.treenav.compose.threepane.configurations.requireThreePaneMovableSharedElementScope
-
-import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
+import com.tunjid.me.scaffold.scaffold.PaneScaffold
+import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
+import com.tunjid.me.scaffold.scaffold.rememberPaneScaffoldState
+import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
@@ -104,7 +100,7 @@ abstract class ArchiveFilesScreenHolderComponent(
     @Provides
     fun filesRouteAdaptiveConfiguration(
         creator: ArchiveFilesStateHolderCreator
-    ) = RoutePattern to threePaneListDetailStrategy(
+    ) = RoutePattern to threePaneEntry(
         render = { route ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
             val viewModel = viewModel<ActualArchiveFilesStateHolder> {
@@ -114,19 +110,22 @@ abstract class ArchiveFilesScreenHolderComponent(
                 )
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
-            ArchiveFilesScreen(
-                movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
-                state = state,
-                actions = viewModel.accept,
-                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
-            )
-            ScreenUiState(
-                UiState(
-                    fabShows = false,
-                    fabExtended = true,
-                    navVisibility = NavVisibility.Visible,
-                    statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
-                )
+            rememberPaneScaffoldState().PaneScaffold(
+                modifier = Modifier
+                    .predictiveBackBackgroundModifier(paneScope = this),
+                showNavigation = true,
+                onSnackBarMessageConsumed = {
+                },
+                content = { paddingValues ->
+                    ArchiveFilesScreen(
+                        movableSharedElementScope = this,
+                        modifier = Modifier
+                            .padding(paddingValues)
+                            .predictiveBackBackgroundModifier(paneScope = this),
+                        state = state,
+                        actions = viewModel.accept
+                    )
+                },
             )
         }
     )

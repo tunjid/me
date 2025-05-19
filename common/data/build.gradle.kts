@@ -34,6 +34,8 @@ kotlin {
             dependencies {
                 api(project(":common:core"))
 
+                implementation(libs.androidx.datastore.core.okio)
+
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.cbor)
                 implementation(libs.kotlinx.serialization.json)

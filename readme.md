@@ -109,7 +109,7 @@ future and its screen. There are two main types here:
 
 * `NavStateHolder`: Manages the app navigation state and interacts with the `SavedStateRepository`.
   It provides Navigation as state.
-* `GlobalUiStateHolder`: Manages configuration for the app and adapts it over different form factors
+* ` GlobalUiStateHolder`: Manages configuration for the app and adapts it over different form factors
   and screen sizes. It provides app level UI as state.
 
 ### UI Layer

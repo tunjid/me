@@ -26,7 +26,7 @@ java {
 }
 
 dependencies {
-    implementation(libs.jetbrains.compose.gradlePlugin)
+    implementation(libs.compose.gradlePlugin)
     implementation(libs.android.gradlePlugin)
     implementation(libs.compose.compiler.plugin)
     implementation(libs.kotlin.gradlePlugin)

@@ -16,14 +16,24 @@
 
 package com.tunjid.me.feature.archivelist.di
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.coroutineScope
@@ -39,18 +49,13 @@ import com.tunjid.me.feature.archivelist.State
 import com.tunjid.me.scaffold.di.InjectedScaffoldComponent
 import com.tunjid.me.scaffold.di.SavedStateType
 import com.tunjid.me.scaffold.di.routeAndMatcher
-import com.tunjid.me.scaffold.globalui.InsetFlags
-import com.tunjid.me.scaffold.globalui.NavVisibility
-import com.tunjid.me.scaffold.globalui.ScreenUiState
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.globalUi
-import com.tunjid.me.scaffold.scaffold.configuration.predictiveBackBackgroundModifier
-import com.tunjid.treenav.compose.PaneScope
-import com.tunjid.treenav.compose.threepane.ThreePane
-import com.tunjid.treenav.compose.threepane.configurations.requireThreePaneMovableSharedElementScope
-
-import com.tunjid.treenav.compose.threepane.threePaneListDetailStrategy
-import com.tunjid.treenav.strings.Route
+import com.tunjid.me.scaffold.scaffold.PaneNavigationBar
+import com.tunjid.me.scaffold.scaffold.PaneFab
+import com.tunjid.me.scaffold.scaffold.PaneNavigationRail
+import com.tunjid.me.scaffold.scaffold.PaneScaffold
+import com.tunjid.me.scaffold.scaffold.predictiveBackBackgroundModifier
+import com.tunjid.me.scaffold.scaffold.rememberPaneScaffoldState
+import com.tunjid.treenav.compose.threepane.threePaneEntry
 import com.tunjid.treenav.strings.RouteMatcher
 import com.tunjid.treenav.strings.RouteParams
 import kotlinx.serialization.modules.subclass
@@ -85,14 +90,14 @@ abstract class ArchiveListNavigationComponent {
 @Component
 abstract class ArchiveListScreenHolderComponent(
     @Component val dataComponent: InjectedDataComponent,
-    @Component val scaffoldComponent: InjectedScaffoldComponent
+    @Component val scaffoldComponent: InjectedScaffoldComponent,
 ) {
 
     @IntoMap
     @Provides
     fun routeAdaptiveConfiguration(
-        creator: ArchiveListStateHolderCreator
-    ) = RoutePattern to threePaneListDetailStrategy(
+        creator: ArchiveListStateHolderCreator,
+    ) = RoutePattern to threePaneEntry(
         render = { route ->
             val lifecycleCoroutineScope = LocalLifecycleOwner.current.lifecycle.coroutineScope
             val viewModel = viewModel<ActualArchiveListStateHolder> {
@@ -102,37 +107,96 @@ abstract class ArchiveListScreenHolderComponent(
                 )
             }
             val state by viewModel.state.collectAsStateWithLifecycle()
-            ArchiveListScreen(
-                movableSharedElementScope = requireThreePaneMovableSharedElementScope(),
-                modifier = Modifier.predictiveBackBackgroundModifier(paneScope = this),
-                state = state,
-                actions = viewModel.accept
-            )
-            GlobalUi(
-                state = state,
-                onAction = viewModel.accept,
+            rememberPaneScaffoldState().PaneScaffold(
+                modifier = Modifier
+                    .predictiveBackBackgroundModifier(paneScope = this),
+                showNavigation = true,
+                onSnackBarMessageConsumed = {
+                },
+                topBar = {
+                    ScreenTopAppBar(
+                        state = state,
+                        actions = viewModel.accept,
+                    )
+                },
+                content = { paddingValues ->
+                    ArchiveListScreen(
+                        movableSharedElementScope = this,
+                        modifier = Modifier
+                            .padding(
+                                top = paddingValues.calculateTopPadding(),
+                            )
+                            .predictiveBackBackgroundModifier(paneScope = this),
+                        state = state,
+                        actions = viewModel.accept
+                    )
+                },
+                floatingActionButton = {
+                    if (!state.hasFetchedAuthStatus || state.isSignedIn) PaneFab(
+                        modifier = Modifier,
+                        text = "Create",
+                        icon = Icons.Default.Add,
+                        expanded = true,
+                        onClick = {
+                            viewModel.accept(Action.Navigate.Create(kind = state.queryState.currentQuery.kind))
+                        },
+                    )
+                },
+                navigationBar = {
+                    PaneNavigationBar()
+                },
+                navigationRail = {
+                    PaneNavigationRail()
+                },
             )
         }
     )
 }
 
+
 @Composable
-private fun PaneScope<ThreePane, Route>.GlobalUi(
+private fun ScreenTopAppBar(
     state: State,
-    onAction: (Action) -> Unit
+    actions: (Action) -> Unit,
 ) {
-    ScreenUiState(
-        UiState(
-            fabShows = if (state.hasFetchedAuthStatus) state.isSignedIn else globalUi.fabShows,
-            fabExtended = true,
-            fabText = "Create",
-            fabIcon = Icons.Default.Add,
-            fabClickListener = rememberUpdatedState { _: Unit ->
-                onAction(Action.Navigate.Create(kind = state.queryState.currentQuery.kind))
-            }.value,
-            insetFlags = InsetFlags.NO_BOTTOM,
-            navVisibility = NavVisibility.Visible,
-            statusBarColor = MaterialTheme.colorScheme.surface.toArgb(),
-        )
+    TopAppBar(
+        modifier = Modifier
+            .windowInsetsPadding(WindowInsets.statusBars),
+        title = {
+            Text(
+                text = state.queryState.currentQuery.kind.name,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+            )
+        },
+        actions = {
+            IconButton(
+                onClick = {
+                    actions(Action.Fetch.QueryChange.ToggleOrder)
+                },
+                content = {
+                    Icon(
+                        imageVector =
+                            if (state.queryState.currentQuery.desc) Icons.Default.KeyboardArrowUp
+                            else Icons.Default.KeyboardArrowDown,
+                        contentDescription =
+                            if (state.queryState.currentQuery.desc) "Ascending"
+                            else "Descending",
+                    )
+                }
+            )
+            if (!state.isSignedIn) IconButton(
+                onClick = {
+                    actions(Action.Navigate.SignIn)
+                },
+                content = {
+                    Icon(
+                        imageVector = Icons.Default.AccountBox,
+                        contentDescription = "Sign In",
+                    )
+                }
+            )
+        },
     )
 }

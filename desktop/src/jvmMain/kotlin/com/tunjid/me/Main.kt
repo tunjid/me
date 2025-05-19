@@ -16,21 +16,14 @@
 
 package com.tunjid.me
 
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import androidx.window.core.layout.WindowSizeClass
 import com.tunjid.me.common.di.MeApp
-import com.tunjid.me.common.ui.theme.AppTheme
-import com.tunjid.me.scaffold.globalui.COMPACT
-import com.tunjid.me.scaffold.globalui.NavMode
-import com.tunjid.me.scaffold.globalui.toWindowSizeClass
-import com.tunjid.me.scaffold.scaffold.MeApp
-import kotlinx.coroutines.flow.distinctUntilChanged
+import com.tunjid.me.scaffold.scaffold.App
+import com.tunjid.me.scaffold.ui.theme.AppTheme
 
 fun main() {
 
@@ -43,27 +36,10 @@ fun main() {
             title = "Me as a composition"
         ) {
             AppTheme {
-                MeApp(
+                App(
                     modifier = Modifier,
                     appState = app.appState,
                 )
-            }
-
-            val currentWidth = windowState.size.width
-            LaunchedEffect(currentWidth) {
-                snapshotFlow(currentWidth::toWindowSizeClass)
-                    .distinctUntilChanged()
-                    .collect { windowSizeClass ->
-                        app.appState.updateGlobalUi {
-                            copy(
-                                windowSizeClass = windowSizeClass,
-                                navMode = when (windowSizeClass) {
-                                    WindowSizeClass.COMPACT -> NavMode.BottomNav
-                                    else -> NavMode.NavRail
-                                }
-                            )
-                        }
-                    }
             }
         }
     }

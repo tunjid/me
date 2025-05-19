@@ -16,7 +16,7 @@
 
 package com.tunjid.me.data.network
 
-import com.tunjid.me.common.data.SessionEntityQueries
+import com.tunjid.me.data.repository.SavedState
 import io.ktor.client.plugins.cookies.CookiesStorage
 import io.ktor.http.Cookie
 import io.ktor.http.Url
@@ -26,29 +26,26 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 
-private const val SessionCookieName = "linesman.id"
+internal const val SessionCookieName = "linesman.id"
 
 internal class SessionCookiesStorage(
-    private val sessionEntityQueries: SessionEntityQueries,
+    private val readAuth: suspend () -> SavedState.AuthTokens?,
+    private val saveAuth: suspend (String) -> Unit,
     private val dispatcher: CoroutineDispatcher,
 ) : CookiesStorage {
 
     override suspend fun get(
-        requestUrl: Url
+        requestUrl: Url,
     ): List<Cookie> = withContext(dispatcher) {
         listOfNotNull(
-            sessionEntityQueries.session()
-                .executeAsOneOrNull()
-                ?.cookie
+            readAuth()
+                ?.token
                 ?.let(::parseServerSetCookieHeader)
         )
     }
 
     override suspend fun addCookie(requestUrl: Url, cookie: Cookie) {
-        if (cookie.name == SessionCookieName) sessionEntityQueries.updateCookie(
-            cookie = renderSetCookieHeader(cookie)
-        )
-
+        if (cookie.name == SessionCookieName) saveAuth(renderSetCookieHeader(cookie))
         println("Session cookie: $cookie")
     }
 

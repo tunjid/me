@@ -44,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.tunjid.composables.scrollbars.Scrollbar
 import com.tunjid.composables.scrollbars.ScrollbarState
@@ -69,7 +70,9 @@ fun FastScrollbar(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Scrollbar(
-        modifier = modifier,
+        modifier = modifier.pointerInput(Unit) {
+
+        },
         orientation = orientation,
         interactionSource = interactionSource,
         state = state,

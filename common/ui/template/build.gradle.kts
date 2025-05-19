@@ -32,13 +32,13 @@ kotlin {
                 implementation(project(":common:data"))
                 implementation(project(":common:scaffold"))
 
-                implementation(libs.jetbrains.compose.runtime)
+                implementation(libs.compose.runtime)
                 implementation(libs.kotlinx.coroutines.core)
 
                 api(libs.kotlinx.serialization.protobuf)
 
-                api(libs.tunjid.treenav.core.common)
-                api(libs.tunjid.treenav.strings.common)
+                api(libs.tunjid.treenav.core)
+                api(libs.tunjid.treenav.strings)
             }
         }
         named("androidMain") {

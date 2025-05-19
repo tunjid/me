@@ -48,7 +48,7 @@ fun Project.configureKotlinMultiplatform(
 //                kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
                 dependencies {
                     api(versionCatalog.findLibrary("tartaka-kotlin-inject-runtime").get())
-                    implementation(versionCatalog.findLibrary("jetbrains-compose-runtime").get())
+                    implementation(versionCatalog.findLibrary("compose-runtime").get())
                 }
             }
         }
@@ -59,10 +59,6 @@ fun Project.configureKotlinMultiplatform(
 //            }
 //            kotlinOptions.freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
 //        }
-
-        configurations.all {
-            coerceComposeVersion(this)
-        }
         targets.configureEach {
             configureKsp(project = project)
         }

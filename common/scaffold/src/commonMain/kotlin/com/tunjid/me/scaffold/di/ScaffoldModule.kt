@@ -17,22 +17,16 @@
 package com.tunjid.me.scaffold.di
 
 import androidx.lifecycle.ViewModel
-import com.tunjid.me.core.di.SingletonScope
 import com.tunjid.me.core.utilities.ByteSerializable
 import com.tunjid.me.core.utilities.ByteSerializer
 import com.tunjid.me.core.utilities.fromBytes
-import com.tunjid.me.scaffold.globalui.ActualGlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.GlobalUiStateHolder
-import com.tunjid.me.scaffold.globalui.UiState
+import com.tunjid.me.data.di.InjectedDataComponent
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.NavigationStateHolder
 import com.tunjid.me.scaffold.navigation.PersistedNavigationStateHolder
 import com.tunjid.me.scaffold.permissions.Permission
 import com.tunjid.me.scaffold.permissions.Permissions
 import com.tunjid.me.scaffold.permissions.PermissionsProvider
-import com.tunjid.me.scaffold.savedstate.DataStoreSavedStateRepository
-import com.tunjid.me.scaffold.savedstate.SavedStateRepository
-import com.tunjid.mutator.Mutation
 import com.tunjid.treenav.MultiStackNav
 import com.tunjid.treenav.strings.Route
 import com.tunjid.treenav.strings.RouteMatcher
@@ -45,7 +39,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
-import okio.Path
+import me.tatarka.inject.annotations.Scope
+
+@Scope
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER)
+annotation class ScaffoldScope
 
 interface ScreenStateHolderCreator : (CoroutineScope, Route) -> ViewModel
 
@@ -63,7 +61,7 @@ fun ((CoroutineScope, Route) -> ViewModel).downcast(): ScreenStateHolderCreator 
 
 fun <T : Route> routeAndMatcher(
     routePattern: String,
-    routeMapper: (RouteParams) -> T
+    routeMapper: (RouteParams) -> T,
 ) = routePattern to urlRouteMatcher(
     routePattern = routePattern,
     routeMapper = routeMapper
@@ -75,15 +73,13 @@ fun <T : Route> routeAndMatcher(
 class ByteSerializerWrapper(byteSerializer: ByteSerializer) : ByteSerializer by byteSerializer
 
 data class SavedStateType(
-    val apply: PolymorphicModuleBuilder<ByteSerializable>.() -> Unit
+    val apply: PolymorphicModuleBuilder<ByteSerializable>.() -> Unit,
 )
 
 class ScaffoldModule(
     val appScope: CoroutineScope,
-    val savedStatePath: Path,
     val routeMatchers: List<RouteMatcher>,
     val permissionsProvider: PermissionsProvider,
-    val byteSerializer: ByteSerializer,
 )
 
 inline fun <reified T : ByteSerializable> ByteSerializer.restoreState(savedState: ByteArray?): T? {
@@ -97,77 +93,43 @@ inline fun <reified T : ByteSerializable> ByteSerializer.restoreState(savedState
     }
 }
 
-@SingletonScope
+@ScaffoldScope
 @Component
 abstract class InjectedScaffoldComponent(
-    private val module: ScaffoldModule
+    private val module: ScaffoldModule,
+    @Component
+    val dataComponent: InjectedDataComponent,
 ) {
-    @SingletonScope
+    @ScaffoldScope
     @Provides
     fun appScope(): CoroutineScope = module.appScope
 
-    @SingletonScope
-    @Provides
-    fun savedStatePath(): Path = module.savedStatePath
-
-    @SingletonScope
-    @Provides
-    fun byteSerializer(): ByteSerializer = module.byteSerializer
-
-    @SingletonScope
+    @ScaffoldScope
     @Provides
     fun routeParser(): RouteParser =
         routeParserFrom(*(module.routeMatchers).toTypedArray())
 
-    @SingletonScope
-    @Provides
-    fun savedStateCache(
-        savedStateRepository: SavedStateRepository
-    ): SavedStateCache = { route ->
-        savedStateRepository.savedState.value.routeStates[route.id]
-    }
-
-    @SingletonScope
+    @ScaffoldScope
     @Provides
     fun permissionsStateStream(
     ): StateFlow<Permissions> = module.permissionsProvider.stateHolder.state
 
-    @SingletonScope
+    @ScaffoldScope
     @Provides
     fun permissionsActions(
     ): (Permission) -> Unit = module.permissionsProvider.stateHolder.accept
 
-    @SingletonScope
+    @ScaffoldScope
     @Provides
     fun navStateStream(
-        navStateHolder: NavigationStateHolder
+        navStateHolder: NavigationStateHolder,
     ): StateFlow<MultiStackNav> = navStateHolder.state
 
     @Provides
     fun navActions(): (NavigationMutation) -> Unit = navStateHolder.accept
 
-    @SingletonScope
-    @Provides
-    fun globalUiStateStream(
-        globalUiStateHolder: GlobalUiStateHolder
-    ): StateFlow<UiState> = globalUiStateHolder.state
-
-    @SingletonScope
-    @Provides
-    fun globalUiActions(
-        globalUiStateHolder: GlobalUiStateHolder
-    ): (Mutation<UiState>) -> Unit = globalUiStateHolder.accept
-
     val PersistedNavigationStateHolder.bind: NavigationStateHolder
-        @SingletonScope
-        @Provides get() = this
-
-    val ActualGlobalUiStateHolder.bind: GlobalUiStateHolder
-        @SingletonScope
-        @Provides get() = this
-
-    val DataStoreSavedStateRepository.bind: SavedStateRepository
-        @SingletonScope
+        @ScaffoldScope
         @Provides get() = this
 
     abstract val navStateHolder: NavigationStateHolder

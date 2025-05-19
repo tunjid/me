@@ -25,7 +25,7 @@ import com.tunjid.me.core.utilities.toBytes
 import com.tunjid.me.feature.archivelist.ArchiveListRoute
 import com.tunjid.me.scaffold.navigation.ByteSerializableRoute
 import com.tunjid.me.scaffold.navigation.toByteSerializable
-import com.tunjid.me.scaffold.savedstate.SavedState
+import com.tunjid.me.data.repository.SavedState
 import com.tunjid.treenav.MultiStackNav
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic

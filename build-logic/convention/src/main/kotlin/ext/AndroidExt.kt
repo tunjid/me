@@ -27,7 +27,7 @@ import org.gradle.kotlin.dsl.dependencies
 fun org.gradle.api.Project.commonConfiguration(
     extension: CommonExtension<*, *, *, *, *, *>
 ) = extension.apply {
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         // Could have been 21, but I need sqlite 3.24.0 for upserts
@@ -43,16 +43,6 @@ fun org.gradle.api.Project.commonConfiguration(
         targetCompatibility = JavaVersion.VERSION_11
     }
     configureKotlinJvm()
-}
-
-fun org.gradle.api.Project.coerceComposeVersion(configuration: Configuration) {
-    val independentGroups = setOf("compiler", "material3")
-    configuration.resolutionStrategy.eachDependency {
-        if (requested.group.startsWith("androidx.compose") && independentGroups.none(requested.group::contains)) {
-            useVersion(versionCatalog.findVersion("androidxCompose").get().requiredVersion)
-            because("I need the changes in lazyGrid")
-        }
-    }
 }
 
 fun org.gradle.api.Project.addDesugarDependencies() {

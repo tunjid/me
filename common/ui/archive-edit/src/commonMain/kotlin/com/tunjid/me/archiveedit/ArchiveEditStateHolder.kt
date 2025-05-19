@@ -30,8 +30,6 @@ import com.tunjid.me.core.model.ArchiveKind
 import com.tunjid.me.core.model.ArchiveUpsert
 import com.tunjid.me.core.model.Descriptor
 import com.tunjid.me.core.model.Result
-import com.tunjid.me.core.model.minus
-import com.tunjid.me.core.model.plus
 import com.tunjid.me.core.model.singular
 import com.tunjid.me.core.ui.ChipAction
 import com.tunjid.me.core.utilities.LocalUri
@@ -41,9 +39,6 @@ import com.tunjid.me.data.repository.ArchiveRepository
 import com.tunjid.me.data.repository.AuthRepository
 import com.tunjid.me.scaffold.adaptive.thumbnailSharedElementKey
 import com.tunjid.me.scaffold.di.ScreenStateHolderCreator
-import com.tunjid.me.scaffold.globalui.UiState
-import com.tunjid.me.scaffold.globalui.navBarSize
-import com.tunjid.me.scaffold.globalui.navBarSizeMutations
 import com.tunjid.me.scaffold.navigation.NavigationMutation
 import com.tunjid.me.scaffold.navigation.consumeNavigationActions
 import com.tunjid.me.scaffold.permissions.Permission
@@ -91,7 +86,6 @@ class ActualArchiveEditStateHolder(
     archiveRepository: ArchiveRepository,
     authRepository: AuthRepository,
     uriConverter: UriConverter,
-    uiStateFlow: StateFlow<UiState>,
     permissionsFlow: StateFlow<Permissions>,
     onPermissionRequested: (Permission) -> Unit,
     navActions: (NavigationMutation) -> Unit,
@@ -104,12 +98,10 @@ class ActualArchiveEditStateHolder(
         kind = route.routeParams.kind,
         routeThumbnailUrl = route.routeParams.archiveThumbnail,
         upsert = ArchiveUpsert(id = route.routeParams.archiveId),
-        navBarSize = uiStateFlow.value.navBarSize,
         hasStoragePermissions = permissionsFlow.value.isGranted(Permission.ReadExternalStorage)
     ),
     started = SharingStarted.WhileSubscribed(),
     inputs = listOf(
-        uiStateFlow.navBarSizeMutations { copy(navBarSize = it) },
         permissionsFlow.storagePermissionMutations(),
         authRepository.authMutations(),
     ),
